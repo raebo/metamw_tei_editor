@@ -9,7 +9,10 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <div className="App">
+      <h1>React Lexical Editor</h1>
+        <App />
+    </div>
   </React.StrictMode>
 );
 
