@@ -3,15 +3,33 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Provider, useDispatch } from "react-redux";
+import { store } from "./redux/redux.store";
+import { loginState } from "./redux/slices/user.slice";
+import { getMe } from "./services/user.service";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
+// const refreshStore = () => {
+//   const savedState = localStorage.getItem('reduxState');
+//   if (savedState) {
+//     const parsedState = JSON.parse(savedState);
+//     // Dispatch actions to restore the state
+//     if (parsedState.user) {
+//       store.dispatch(loginState(parsedState.user));
+//     }
+//   }
+// };
+// refreshStore();
+
 root.render(
   <React.StrictMode>
     <div className="App">
-      <h1>React Lexical Editor</h1>
+      <Provider store={store}>
         <App />
+      </Provider>
     </div>
   </React.StrictMode>
 );
