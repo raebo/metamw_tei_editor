@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import logo from './logo.svg';
 // import './App.css';
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
@@ -13,6 +12,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { getMe } from "./services/user.service";
 import { loginState } from "./redux/slices/user.slice";
 import { RootState } from "./redux/redux.store";
+import Container from "@mui/material/Container";
+import AutoAnnoLayout from "./components/layout/AutoAnnoLayout";
+import AutoAnnoList from "./components/auto_anno/AutoAnnoList";
+import Guard from "./components/auth/Guard";
 import AaIndex from "./components/pages/aa_annotations/AaIndex";
 
 const lightTheme = createTheme({
@@ -66,23 +69,29 @@ const App = () => {
   // }, [state]);
 
   return (
-    // <ApolloProvider client={client}>
-      <ThemeProvider theme={lightTheme}>
-        <CssBaseline />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<HomePage />} />
-              <Route path="about" element={<AboutPage />} />
-              <Route path="login" element={<Login />} />
-              <Route path="automatic_annotations" element={<AaIndex/>} />
-            </Route>
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-          <Snackbar />
-        </BrowserRouter>
-      </ThemeProvider>
-    // </ApolloProvider>
+    <ThemeProvider theme={lightTheme}>
+      <CssBaseline />
+      <Container>
+        <Guard>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/">
+                <Route element={<Layout />}>
+                  <Route index element={<HomePage />} />
+                  <Route path="about" element={<AboutPage />} />
+                  <Route path="login" element={<Login />} />
+                </Route>
+                <Route element={<AutoAnnoLayout/>}>
+                  <Route path={"/automatic_annotations"} element={<AutoAnnoList />} />
+                </Route>
+              </Route>
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </BrowserRouter>
+        </Guard>
+      </Container>
+      <Snackbar />
+    </ThemeProvider>
   );
 }
 

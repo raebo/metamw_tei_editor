@@ -1,4 +1,4 @@
-import router from "../components/Routes";
+import router from "../components/Routes.delete";
 export const onLogout = async () => {
   try {
     // authenticatedVar.set(false);

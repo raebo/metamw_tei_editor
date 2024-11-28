@@ -1,11 +1,9 @@
 import Typography from "@mui/material/Typography";
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import * as React from "react";
-import router from "../Routes";
 import { useNavigate } from "react-router-dom";
 import useReactiveVar from "../../utils/makeReactiveVar";
 import { authenticatedVar } from "../../constants/authenticated";
-import { useAuthToken } from "../../services/authentication.service";
 
 const Branding = () => {
 
