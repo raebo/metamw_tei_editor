@@ -83,6 +83,7 @@ const App = () => {
                 </Route>
                 <Route element={<AutoAnnoLayout/>}>
                   <Route path={"/automatic_annotations"} element={<AutoAnnoList />} />
+                  {/*<GuardedRoute path="/dashboard" component={Dashboard} auth={isAuthenticated} />*/}
                 </Route>
               </Route>
               <Route path="*" element={<NotFoundPage />} />

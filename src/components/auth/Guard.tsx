@@ -22,7 +22,6 @@ const Guard = ( { children }: GuardProps) => {
 
   return <>{content}</>;
 
-
 }
 
 export default Guard;
