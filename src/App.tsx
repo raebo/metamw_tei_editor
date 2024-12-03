@@ -19,6 +19,7 @@ import Guard from "./components/auth/Guard";
 import AaIndex from "./components/pages/aa_annotations/AaIndex";
 import React from "react";
 import CircularIndeterminate from "./components/support/CircularIndeterminate";
+import AutoAnnoLetters from "./components/auto_anno/AutoAnnoLetters";
 
 const lightTheme = createTheme({
   palette: {
@@ -73,30 +74,31 @@ const App = () => {
   //   };
   // }, [state]);
 
+  console.log("App component rendered: Is Loading: ", isLoading)
+
   return (
     <ThemeProvider theme={lightTheme}>
       <CssBaseline />
-      <Container>
-        <Guard>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/">
-                <Route element={<Layout />}>
-                  <Route index element={<HomePage />} />
-                  <Route path="about" element={<AboutPage />} />
-                  <Route path="login" element={<Login />} />
-                </Route>
-                <Route element={<AutoAnnoLayout/>}>
-                  <Route path={"/automatic_annotations"} element={<AutoAnnoList />} />
-                  {/*<GuardedRoute path="/dashboard" component={Dashboard} auth={isAuthenticated} />*/}
-                </Route>
+      <Guard>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/">
+              <Route element={<Layout />}>
+                <Route index element={<HomePage />} />
+                <Route path="about" element={<AboutPage />} />
+                <Route path="login" element={<Login />} />
+                <Route path={"/automatic_annotations"} element={<AutoAnnoList />} />
+                <Route path={"/automatic_annotations/:id"} element={<AutoAnnoLetters />} />
               </Route>
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </BrowserRouter>
-        </Guard>
-        { isLoading && <CircularIndeterminate />}
-      </Container>
+              <Route element={<AutoAnnoLayout/>}>
+                {/*<GuardedRoute path="/dashboard" component={Dashboard} auth={isAuthenticated} />*/}
+              </Route>
+            </Route>
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </BrowserRouter>
+      </Guard>
+      { isLoading && <CircularIndeterminate />}
       <Snackbar />
     </ThemeProvider>
   );

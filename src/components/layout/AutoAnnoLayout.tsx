@@ -8,13 +8,15 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
+import Grid from '@mui/material/Grid2';
 import Header from "../header/Header";
 import { useAuthToken } from "../../services/authentication.service";
 import { authenticatedVar } from "../../constants/authenticated";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/redux.store";
+import Container from "@mui/material/Container";
 
-const drawerWidth = 240;
+const drawerWidth = 480;
 
 
 const AutoAnnoLayout = () => {
@@ -22,24 +24,31 @@ const AutoAnnoLayout = () => {
   const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <>
       <CssBaseline />
-      {/* AppBar */}
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Header isAuthenticated={_authenticatedVar} />
       </AppBar>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: `${drawerWidth}px`,
-          mt: "64px", // Adjust based on AppBar height
-        }}
-      >
+      <Grid container spacing={2}>
         <Outlet /> {/* Render child routes here */}
-      </Box>
-    </Box>
+      </Grid>
+      {/*<Container fixed style={{ border: "2px solid RED"}}>*/}
+      {/*</Container>*/}
+    </>
+    // <Box sx={{ display: "flex" }}>
+    //   {/* AppBar */}
+    //   <Box
+    //     component="main"
+    //     sx={{
+    //       flexGrow: 1,
+    //       p: 3,
+    //       ml: `${drawerWidth}px`,
+    //       mt: "15%", // Adjust based on AppBar height
+    //     }}
+    //   >
+    //     <Outlet /> {/* Render child routes here */}
+    //   </Box>
+    // </Box>
   );
 };
 

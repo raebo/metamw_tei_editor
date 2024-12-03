@@ -8,8 +8,8 @@ import { authenticatedVar } from "../../constants/authenticated";
 const Branding = () => {
 
   const isAuthenticated = useReactiveVar(authenticatedVar).get()
-
   const navigate = useNavigate()
+
   return (
     <>
       <QuestionAnswerIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
