@@ -23,9 +23,10 @@ const useLogin = () => {
   }
   const dispatch = useDispatch();
 
-  const handleStateLogin = (data = { last_name: new String, first_name: new String }) => {
+  const handleStateLogin = ({data = {last_name: String(), first_name: String()}}: {
+    data?: { last_name: String; first_name: String }
+  }) => {
     if (!data.first_name || !data.last_name) {
-      console.error("Invalid data provided");
       return;
     }
 
@@ -37,7 +38,7 @@ const useLogin = () => {
     getMe()
       .then( (data)  => {
         if (data !== null) {
-          handleStateLogin(data)
+          handleStateLogin({data: data})
         }
       })
       .catch(err => {
@@ -56,10 +57,9 @@ const useLogin = () => {
       });
     if (!response.ok) {
       if (response.status === 401) {
-        enqueueSnackbar("Invalid credentials", { variant: "error" });
         enqueueSnack("Invalid credentials", "error" );
       } else {
-        setError(UNKNOWN_ERROR_MESSAGE)
+        enqueueSnack(UNKNOWN_ERROR_MESSAGE, "error" );
       }
       return
     }

@@ -18,7 +18,7 @@ interface HeaderProps {
 
 
 const pages: Page[] = [
-  { title: 'Home', path: '/' }
+  { title: 'Annotationen', path: '/automatic_annotations' }
 ];
 
 const unauthenticatedPages: Page[] = [

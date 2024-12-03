@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getMe } from "./services/user.service";
 import { loginState } from "./redux/slices/user.slice";
 import { RootState } from "./redux/redux.store";
+import AaIndex from "./components/pages/aa_annotations/AaIndex";
 
 const lightTheme = createTheme({
   palette: {
@@ -21,11 +22,12 @@ const lightTheme = createTheme({
 })
 
 const App = () => {
-  const state = useSelector((state) => state);
+  // const state = useSelector((state) => state);
 
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.user);
-  const handleStateLogin = (data = { last_name: new String, first_name: new String }) => {
+  // eslint-disable-next-line no-new-wrappers
+  const handleStateLogin = (data = { last_name: new String(), first_name: new String() }) => {
     if (!data.first_name || !data.last_name) {
       console.error("Invalid data provided");
       return;
@@ -73,6 +75,7 @@ const App = () => {
               <Route index element={<HomePage />} />
               <Route path="about" element={<AboutPage />} />
               <Route path="login" element={<Login />} />
+              <Route path="automatic_annotations" element={<AaIndex/>} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

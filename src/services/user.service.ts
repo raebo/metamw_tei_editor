@@ -5,7 +5,7 @@ const getMe = async () : Promise< { last_name:String, first_name: String } | und
   let response = null
   try {
     // response = await apiRequest('/jwt_auth/me', {}, {})
-    response = await initApi.initApi().get('/jwt_auth/me.json')
+    response = await initApi.initApi().get('/jwt_auth/me')
     // console.log(response.data);
     return response.data;
   } catch (err) {
