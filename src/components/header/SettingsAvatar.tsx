@@ -23,8 +23,6 @@ function stringToColor(string: String) {
 }
 
 function stringAvatar(name: String) {
-  // console.log("+ + + + + + + + ++ + + + + + + name", name)
-
   return {
     sx: {
       bgcolor: stringToColor(name),
@@ -41,7 +39,6 @@ interface SettingsAvatarProps {
 }
 
 const SettingsAvatar = ( { nameUser }: SettingsAvatarProps) => {
-  console.log("Settings Avatar: nameUser", nameUser)
   const _nameUser = nameUser !== null ? nameUser : { first_name: new String(), last_name: new String() }
   return (
     <>

@@ -1,6 +1,8 @@
 import { getToken } from "./authentication.service";
 import { API_URL } from "../constants/url";
 import axios, { AxiosInstance } from "axios";
+import { store } from "../redux/redux.store";
+import { startLoading, stopLoading } from "../redux/slices/spinner.loading.slice";
 
 const apiRequest = async (
   endpoint: string,
@@ -25,14 +27,6 @@ const apiRequest = async (
 
   const response = await fetch(`${baseURL}${endpoint}${queryString}`, { headers: { ...headers, ...options.headers } });
 
-  // const response = await fetch(`${baseURL}${endpoint}${queryString}`, {
-  //   ...options,
-  //   headers: {
-  //     ...headers,
-  //     ...options.headers,
-  //   },
-  // });
-
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -41,6 +35,7 @@ const apiRequest = async (
 };
 
 const initApi = (): AxiosInstance =>{
+  const _dispatch = store.dispatch
   const _axios = axios.create({
     baseURL: API_URL,
   });
@@ -53,15 +48,29 @@ const initApi = (): AxiosInstance =>{
     return config;
   })
 
+  _axios.interceptors.request.use(
+    (config) => {
+      _dispatch(startLoading());
+      return config;
+    },
+    (error) => {
+      _dispatch(stopLoading());
+      return Promise.reject(error);
+    }
+  );
+
+  _axios.interceptors.response.use(
+    (response) => {
+      _dispatch(stopLoading());
+      return response;
+    },
+    (error) => {
+      _dispatch(stopLoading());
+      return Promise.reject(error);
+    }
+  );
+
   return _axios;
 }
-
-// initApi().interceptors.request.use((config) => {
-//   const token = getToken();
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
 
 export default { initApi, apiRequest };

@@ -5,8 +5,6 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider, useDispatch } from "react-redux";
 import { store } from "./redux/redux.store";
-import { loginState } from "./redux/slices/user.slice";
-import { getMe } from "./services/user.service";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

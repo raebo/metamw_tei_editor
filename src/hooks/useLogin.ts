@@ -7,6 +7,7 @@ import { setToken } from "../services/authentication.service";
 import { loginState } from "../redux/slices/user.slice";
 import { useDispatch } from "react-redux";
 import { getMe } from "../services/user.service";
+import { AppDispatch } from "../redux/redux.store";
 
 interface LoginRequest {
   email: string;
@@ -42,7 +43,7 @@ const useLogin = () => {
         }
       })
       .catch(err => {
-        console.error('Error:', err);
+        enqueueSnack(UNKNOWN_ERROR_MESSAGE, "error" );
       });
   }
 

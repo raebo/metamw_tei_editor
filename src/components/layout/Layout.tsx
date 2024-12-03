@@ -16,7 +16,6 @@ import { RootState } from "../../redux/redux.store";
 
 const drawerWidth = 240;
 
-
 const Layout = () => {
   const _authenticatedVar = authenticatedVar.get()
   const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);

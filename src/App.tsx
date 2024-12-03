@@ -17,6 +17,8 @@ import AutoAnnoLayout from "./components/layout/AutoAnnoLayout";
 import AutoAnnoList from "./components/auto_anno/AutoAnnoList";
 import Guard from "./components/auth/Guard";
 import AaIndex from "./components/pages/aa_annotations/AaIndex";
+import React from "react";
+import CircularIndeterminate from "./components/support/CircularIndeterminate";
 
 const lightTheme = createTheme({
   palette: {
@@ -55,6 +57,9 @@ const App = () => {
   }
   refreshUserState()
 
+
+  const isLoading = useSelector((state: RootState) => state.spinnerLoading.isLoading);
+
   // useEffect(() => {
   //   const handleBeforeUnload = () => {
   //     localStorage.setItem('reduxState', JSON.stringify(state));
@@ -90,6 +95,7 @@ const App = () => {
             </Routes>
           </BrowserRouter>
         </Guard>
+        { isLoading && <CircularIndeterminate />}
       </Container>
       <Snackbar />
     </ThemeProvider>

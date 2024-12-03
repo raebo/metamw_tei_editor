@@ -1,17 +1,16 @@
 import apiRequest from "./apiRequest.service";
 import initApi from "./apiRequest.service";
+import { enqueueSnackbar } from "notistack";
 
-const getMe = async () : Promise< { last_name:String, first_name: String } | undefined>  => {
+const getMe = async () : Promise< { last_name: String, first_name: String } | undefined>  => {
   let response = null
   try {
-    // response = await apiRequest('/jwt_auth/me', {}, {})
     response = await initApi.initApi().get('/jwt_auth/me')
-    // console.log(response.data);
+
     return response.data;
   } catch (err) {
-    console.error(err);
+    enqueueSnackbar("An error occurred while fetching user data", { variant: 'error' });
   }
-
 }
 
 const handlePost = async () => {
