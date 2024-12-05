@@ -20,6 +20,7 @@ import AaIndex from "./components/pages/aa_annotations/AaIndex";
 import React from "react";
 import CircularIndeterminate from "./components/support/CircularIndeterminate";
 import AutoAnnoLetters from "./components/auto_anno/AutoAnnoLetters";
+import LoadCSSFile from "./components/support/LoadCssFile";
 
 const lightTheme = createTheme({
   palette: {
@@ -73,12 +74,12 @@ const App = () => {
   //     window.removeEventListener('beforeunload', handleBeforeUnload);
   //   };
   // }, [state]);
-
-  console.log("App component rendered: Is Loading: ", isLoading)
+  // console.log("App component rendered: Is Loading: ", isLoading)
 
   return (
     <ThemeProvider theme={lightTheme}>
-      <CssBaseline />
+      {/*<CssBaseline />*/}
+      {/*<LoadCSSFile href={"./css/tei_weblayout.css"} />*/}
       <Guard>
         <BrowserRouter>
           <Routes>

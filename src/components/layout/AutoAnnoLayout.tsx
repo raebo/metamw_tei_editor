@@ -25,7 +25,6 @@ const AutoAnnoLayout = () => {
 
   return (
     <>
-      <CssBaseline />
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Header isAuthenticated={_authenticatedVar} />
       </AppBar>

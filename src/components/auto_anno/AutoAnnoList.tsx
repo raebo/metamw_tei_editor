@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLogin } from "../../hooks/useLogin";
 import React, { useEffect, useState } from "react";
-import { AutoAnnoType, AutoAnnoJobLetter, fetchAutoAnnoJobData, fetchAutoAnnoListData } from "../../services/autoAnno.service";
+import { AutoAnnoType, AutoAnnoJobLetter, fetchAutoAnnoJobLetters, fetchAutoAnnoListData } from "../../services/autoAnno.service";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import { IconButton } from "@mui/material";
@@ -45,7 +45,7 @@ const AutoAnnoList: React.FC = () => {
       renderCell: (params) => {
         const handleIconClick = async () => {
           try {
-            const result = await fetchAutoAnnoJobData(params.row.id.toString());
+            const result = await fetchAutoAnnoJobLetters(params.row.id.toString());
             setLetterRows(result);
           } catch (err) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred');

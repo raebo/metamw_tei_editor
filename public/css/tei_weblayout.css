@@ -1,0 +1,3752 @@
+/* =============================================================
+    CSS2 specification for TEI in oXygen.
+ derived from stylesheet by
+    Author: Adrian Edwards (adrian_edwards@yahoo.com)
+    Date:   2000-04-19
+ edited by Sebastian Rahtz (sebastian.rahtz@oucs.ox.ac.uk)
+            2001-05-06
+ 2003-08-29 start of new parent div resets child auto-count. kl
+ 2003-11-06 list attr list-style-type was none, now disc. kl
+ 2007-06  reworking for TEI P5 and oxygen
+
+$LastChangedDate$, $LastChangedRevision$, $LastChangedBy$
+============================================================= */
+/* Use Times New Roman for default font */
+
+
+
+
+TEI {
+}
+
+text body div {
+  font-size : 1.15em ;
+}
+
+
+
+abbr {
+  display: inline;
+}
+
+expan {
+  display: inline;
+  font-size : 70% ;
+  background-color : rgb(208 , 208 , 208) ;
+  color : black ;
+}
+
+
+expan[style="hidden"]{
+  display: none;
+}
+
+
+
+physDesc accMat::before {
+  content: "Beilagen: ";
+  font-weight:bold;
+  display: block;
+  margin-top: 0.5em;
+
+}
+
+add {
+  display: inline;
+  color: #B22222;
+}
+
+
+add[type="editors_addition"] {
+  display : inline ;
+  color : rgb(178 , 34 , 34) ;
+  background-color : inherit ;
+}
+
+add[place="above"] {
+  display: inline;
+  vertical-align: super;
+  font-size: 0.9em;
+}
+
+/*  add[place="above"]::before {
+content: "[";
+vertical-align: super;
+font-size: 0.8em;
+}
+
+add[place="above"]::after {
+ content: "]";
+vertical-align: super;
+font-size: 0.8em;
+} */
+
+
+add[place="below"] {
+  display: inline;
+  vertical-align: sub;
+  font-size: 0.9em;
+}
+
+/* add[place="below"]::before {
+ content: "[";
+vertical-align: sub;
+font-size: 0.8em;
+}
+
+add[place="below"]::after {
+ content: "]";
+vertical-align: sub;
+font-size: 0.8em;
+} */
+
+
+
+address {
+  display: block;
+  margin-top: 0em;
+  margin-left: 0em;
+  margin-right: 0em;
+  margin-bottom: 0.1em;
+}
+
+address street::after {
+  content: ", ";
+}
+
+addrLine {
+  display: block;
+  white-space: nowrap;
+  font-size : 0.9em
+}
+
+altIdentifier {
+  display: block;
+  margin-top: 0.5em;
+}
+
+/* anchor {
+  display: none;
+}
+*/
+
+
+anchor {
+}
+
+anchor[type="cross-reference"]{
+  display: none !important;
+  background-color: inherit;
+  color: red;
+  content:attr(type) " ";
+}
+
+
+
+argument {
+  display: block;
+  margin-bottom: 0.5em;
+}
+att {
+  display: inline;
+  font-family: sans-serif;
+  color: #0000CD;
+  background-color: inherit;
+}
+att:before {
+  content: "@";
+}
+author {
+  display: inline;
+}
+
+back {
+  display: block;
+  border: thin black solid;
+  margin-top: 1em;
+  padding-top: 0.5em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+
+sourceDesc additional listBibl bibl::before {
+  display: inline !important;
+  /*  margin-top: 0.5em;  */
+  font-weight: bold;
+  content: "Quelle (" attr(type) "): ";
+}
+
+
+
+argument > bibl, body > bibl, cit > bibl, div > bibl, div0 > bibl, div1 > bibl, div2 > bibl, div3 > bibl, div4 > bibl, div5 > bibl, div6 > bibl, div7 > bibl, epigraph > bibl, listBibl > bibl > bibl, taxonomy > bibl {
+  display: block;
+  margin-bottom: 0.5em;
+}
+biblFull {
+  display: inline;
+}
+
+argument > biblFull, body > biblFull, cit > biblFull, div > biblFull, div0 > biblFull, div1 > biblFull, div2 > biblFull, div3 > biblFull, div4 > biblFull, div5 > biblFull, div6 > biblFull, div7 > biblFull, epigraph > biblFull, listBibl > biblFull > biblFull, taxonomy > biblFull {
+  display: block;
+  margin-bottom: 0.5em;
+}
+biblScope {
+  display: inline;
+}
+
+imprint > biblScope {
+  display: block;
+}
+
+text_body {
+  margin-top: 5px;
+  margin-left: 10px;
+  display: block;
+  counter-reset: div1;
+
+
+}
+byline {
+  display: block;
+  font-style: italic;
+  margin-bottom: 0.5em;
+}
+@media oxygen AND (platform:"eclipse") {
+  byline {
+    font-style: normal;
+  }
+}
+
+category {
+  display: block;
+  margin-bottom: 1em;
+}
+catRef {
+  display: none;
+}
+
+
+cb {
+  display: inline;
+}
+
+
+
+cb[type="column_break"]{
+  display: inline;
+  font-size: 80%;
+  content: attr(n)!important;
+  text-align: center;
+}
+
+cb[type="column_break"]::before {
+  content: "  |" ;
+  font-weight:bold;
+  font-size: 100%;
+}
+
+cb[type="column_break"]::after {
+  content: "|  " !important;
+  font-weight:bold;
+  font-size: 100%;
+}
+
+
+
+
+cell {
+  display: table-cell;
+  border: 1px solid #EEEFEE;
+  padding: 3px;
+  color: inherit;
+  background-color:inherit;
+  text-align: left;
+  text-indent: 0em;
+}
+cell[role='label'] {
+  color: inherit;
+  background-color: inherit; /* #BBBBBB;  */
+}
+
+
+change {
+  display: block;
+  margin-bottom: 1em;
+  /*  margin-left: 2em; */
+}
+
+
+choice[resp="writer"] sic {
+  display: none;
+  color: #B22222;
+  background-color: inherit;
+}
+
+
+choice[resp="writer"] corr {
+  display: inline;
+  color: #B22222;
+  background-color: inherit;
+}
+
+
+cit {
+  display: inline;
+}
+
+argument > cit, body > cit, div > cit, div0 > cit, div1 > cit, div2 > cit, div3 > cit, div4 > cit, div5 > cit, div6 > cit, div7 > cit, epigraph > cit {
+  display: block;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+}
+classCode {
+  display: block;
+}
+elementSpec, macroSpec, classSpec {
+  display: block;
+  margin-bottom: 1em;
+}
+closer[rend="left"] {
+  display: block;
+  text-align: left;
+  margin-bottom : 0.4em ;
+  margin-top: 0em;
+  text-indent : 1em ;
+}
+
+closer[rend="left"][n="1"] {
+  display: block;
+  text-align: left;
+  text-indent: 1em;
+  margin-bottom: 0em;
+  margin-top: 0em;
+}
+
+
+closer[rend="right"] {
+  display: block;
+  text-align: right;
+  margin-bottom: 0.5em;
+}
+
+closer[rend="center"] {
+  display: block;
+  text-align: center;
+  margin-bottom: 0.5em;
+}
+
+text body div closer[rend="inline"] {
+  display: inline-block !important;
+  float: right;
+}
+
+
+
+closer title {
+  color : rgb(0 , 0 , 205) ;
+  display : inline ;
+}
+
+
+
+
+code {
+  display: inline;
+  font-family: monospace;
+}
+
+
+collection {
+  margin-bottom: 0em;
+  display: inline !important;
+}
+
+
+collection::after {
+  content: ", ";
+}
+
+msIdentifier collection::before {
+  content: "Sammlung: ";
+  font-weight: bold;
+}
+
+altIdentifier collection::before {
+  content: "Sammlung: ";
+  font-weight: bold;
+}
+
+
+
+country {
+  display: inline;
+  margin-bottom: 0em;
+}
+
+placeName country::after {
+  content: "."
+}
+
+msIdentifier country::before {
+  content: "Standort: ";
+  font-weight: bold;
+}
+
+msIdentifier country::after {
+  content: ", ";
+}
+
+
+msIdentifier country{
+  display: inline;
+}
+
+
+altIdentifier country::before {
+  content: "Weiterer Standort: " !important;
+  font-weight: bold;
+}
+
+
+altIdentifier country::after {
+  content: ", ";
+}
+
+
+altIdentifier settlement::after {
+  content: ", ";
+}
+
+
+msIdentifier{
+  margin-top: 0.5em !important;
+  font-weight: normal;
+}
+
+
+altIdentifier{
+  margin-top: 0.5em !important;
+  font-weight: normal;
+
+}
+
+
+
+corr {
+  display: none;
+  background-color: inherit;
+}
+creation {
+  display: block;
+}
+date {
+  display: inline;
+  padding-bottom: 0.5em !important;
+
+}
+
+creation date {
+  /*    font-weight: bold; */
+  display:inline;
+}
+
+
+profileDesc creation::before{
+  content:"Schreibedatum: ";
+  font-weight:bold;
+  margin-bottom: 0.5em !important;
+}
+
+
+change > date, publicationStmt > date {
+  display: block;
+  font-weight: bold;
+}
+
+dateline {
+  display: block;
+}
+
+dateline[type="inline"] {
+  display: inline;
+}
+
+
+dateline[rend="right"] {
+  text-align: right;
+  display: block;
+  clear: left;
+}
+
+
+dateline[rend="left"] {
+  text-align: left;
+  clear: left;
+}
+
+dateline[rend="center"] {
+  text-align: center;
+  clear: left;
+}
+
+
+
+text body div opener{
+  margin-top: 0em !important;
+  margin-bottom: 0em !important;
+
+}
+
+
+/*  text body div opener dateline {
+  display: block;
+  text-align: right !important;
+}*/
+
+
+
+text body div opener dateline[rend="left"] {
+  display: block;
+  text-align: left !important;
+}
+
+text body div opener dateline[rend="right"] {
+  display: block;
+  text-align: right !important;
+}
+
+text body div opener dateline[rend="center"] {
+  display: block;
+  text-align: center !important;
+}
+
+
+text body div[type="sender_address"] p[style="paragraph_right"] {
+  text-indent: 0em;
+}
+
+text body div[type="sender_address"] p[style="paragraph_left"] {
+  text-indent: 0em;
+  text-align: left;
+}
+
+
+text body div[type="sender_address"] p[style="paragraph centered"] {
+  text-indent: 0em;
+}
+
+
+
+
+
+text body div p {
+  text-indent: 1em;
+  margin-top: 0.4em;
+  margin-bottom: 0.4em;
+}
+
+
+p[class="highlight_text"],
+div[class="highlight_text"],
+seg[class="highlight_text"],
+author[class="highlight_text"],
+signed[class="highlight_text"],
+persName[class="mark"],
+placeName[class="mark"],
+title[class="mark"],
+add[class="highlight_text"]  {
+  background-color: yellow !important;
+}
+
+
+
+text body div p[style="paragraph_without_indent"] {
+  text-indent: 0em;
+}
+
+text body div p[style="paragraph_without_indent_indented"] {
+  text-indent: 0em;
+  padding-left: 2.5em;
+}
+
+text body div p[style="paragraph_hanging"] {
+  padding-left: 1em; text-indent: -1em;
+}
+
+
+text body div p[style="paragraph centered"] {
+  text-align: center;
+}
+
+
+text body div p[style="paragraph_right"] {
+  text-align: right;
+}
+
+
+text body div p persName {
+  color: #0000CD ;
+}
+
+closer persName {
+  color: #0000CD;
+}
+
+
+text body div p name {
+  font-size:70%;
+  background-color : rgb(208 , 208 , 208) ;
+  color: black;
+}
+
+text body div p name[type="these_comment_keyword"]::before {
+  content: "Themenkommentar-Schlagwort: ";
+  font-weight:bold;
+}
+
+text body div p settlement {
+  font-size:70%;
+  background-color : rgb(208 , 208 , 208) ;
+  color: black;
+}
+
+text body div p country {
+  font-size:70%;
+  background-color : rgb(208 , 208 , 208) ;
+  color: black;
+}
+
+text body div p title {
+  color: #0000CD ;
+  display:inline;
+}
+
+text body div p placeName {
+  color: #0000CD ;
+}
+
+
+
+placeName [style="hidden"]{
+  display: none;
+}
+
+
+
+del {
+  display: inline;
+  background-color: inherit;
+  text-decoration: line-through;
+  color: #B22222;
+}
+
+
+
+del[rend="overwritten"] {
+  display: none;
+}
+
+del[rend="overtyped"] {
+  display: none;
+}
+
+
+distributor {
+  display: block;
+  margin-bottom: 0.5em;
+}
+body > div {
+  display: block;
+  margin-bottom: 1em;
+  counter-increment: div1;
+  counter-reset: div2;
+}
+
+
+body > div > div {
+  display: block;
+  margin-bottom: 1em;
+  counter-increment: div2;
+  counter-reset: div3;
+}
+body > div > div > div {
+  display: block;
+  margin-bottom: 1em;
+  counter-increment: div3;
+}
+div1 {
+  display: block;
+  margin-bottom: 1em;
+  counter-increment: div1;
+  counter-reset: div2;
+}
+div2 {
+  display: block;
+  margin-bottom: 1em;
+  counter-increment: div2;
+  counter-reset: div3;
+}
+div3 {
+  display: block;
+  margin-bottom: 1em;
+  counter-increment: div3;
+  counter-reset: div4;
+}
+div4 {
+  display: block;
+  margin-bottom: 1em;
+  counter-increment: div4;
+  counter-reset: div5;
+}
+div5 {
+  display: block;
+  margin-bottom: 1em;
+  counter-increment: div5;
+  counter-reset: div6;
+}
+div6 {
+  display: block;
+  margin-bottom: 1em;
+  counter-increment: div6;
+  counter-reset: div7;
+}
+div7 {
+  display: block;
+  margin-bottom: 1em;
+  counter-increment: div7;
+}
+divGen {
+  display: none;
+}
+
+
+
+body > div[type="footnotes_area"] {
+  display: block;
+  margin-bottom: 1em;
+}
+
+
+docAuthor {
+  display: block;
+  margin-bottom: 0em;
+}
+
+byline docAuthor {
+  display: inline;
+}
+
+titlePage docAuthor {
+
+}
+
+titlePage docTitle {
+
+}
+
+edition {
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+bibl edition {
+  display: inline;
+}
+
+editionStmt {
+  display: block;
+  margin-bottom: 1em;
+}
+editor {
+  display: none;
+  /* display: block; */
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+  /*  content: "Herausgeber: " ; */
+}
+
+editor::before {
+  content: "Herausgeber: " ;
+  font-weight:bold;
+}
+
+bibl editor {
+  display: inline;
+}
+
+eg {
+  font-family: monospace;
+  padding-top: 3mm;
+  padding-left: 4pt;
+  padding-bottom: 2pt;
+  display: block;
+  margin-top: 12pt;
+  margin-bottom: 12pt;
+  white-space: pre;
+  color: inherit;
+  background-color: #FFCC99;
+}
+
+argument > eg, body > eg, div > eg, div0 > eg, div1 > eg, div2 > eg, div3 > eg, div4 > eg, div5 > eg, div6 > eg, div7 > eg, epigraph > eg {
+  display: block;
+  margin-bottom: 1em;
+}
+emph {
+  display: inline;
+  font-style: italic;
+}
+
+
+text body div epigraph p {
+  display: block;
+  margin-top: 0.5em;
+  text-indent : 0em ;
+}
+
+text body div epigraph[rend="right"] p {
+  text-align: right;
+}
+
+text body div epigraph[rend="left"] p {
+  text-align: left;
+}
+
+text body div epigraph[rend="center"] p {
+  text-align: center;
+}
+
+
+
+extent {
+  display: block;
+  margin-bottom: 1em;
+}
+
+bibl extent {
+  display: inline;
+}
+
+
+
+gap {
+  display: inline !important;
+  content: "[...]";
+  font-style: normal !important;
+  text-decoration: none;
+  color: #B22222;
+}
+
+gap[reason="deletion"] {
+  display: inline;
+  text-decoration: line-through;
+}
+
+
+gap[reason="crossed_out"] {
+  display: inline;
+  text-decoration: line-through;
+}
+
+
+
+
+
+/* -------------------  BEGINN - GRAPHISCHE DARSTELLUNGEN -------------------------- */
+
+graphic {
+  color: #D3D3D3;
+  background-color: transparent;
+  content: "{" attr(url) "}";
+  content : attr(url , url) ;
+  display : inline-block ;
+}
+
+figure > graphic {
+  counter-increment : figure ;
+}
+
+figure {
+  /*  display: block!important;  */
+  margin-top: 1em ;
+  margin-bottom: 1em ;
+}
+
+figure[rend="inline"] > graphic {
+  height: 55px !important;
+}
+
+figure[rend="inline"] {
+  display: inline !important;
+  line-height: 3.5em;
+  vertical-align: sub;
+  position: relative!important ;
+  text-align: inherit;
+  margin: auto;
+  padding-top: 0.6em;
+  position: relative!important;
+  text-align : inherit ;
+  /*  height: 55px !important;  */
+}
+
+
+figure[rend="inline_big_size"] > graphic {
+  display: block!important;
+}
+figure[rend="below"] > graphic {
+  display: block!important;
+}
+figure[rend="above"] > graphic {
+  display: block!important;
+}
+figure[rend="bottom"] > graphic {
+  display: block!important;
+}
+figure[rend="top"] > graphic {
+  display: block!important;
+}
+figure[rend="margin"] > graphic {
+  display: block!important;
+}
+figure[rend="overleaf"] > graphic {
+  display: block!important;
+}
+figure[rend="inspace"] > graphic {
+  display: block!important;
+}
+
+
+/* Taschow 2023-04-20 */
+
+figure[rend="inline_big_size"] > img {
+  /* width: 7em!important;  */
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0.4em;
+  margin-bottom: 0.4em;
+  text-align:center;
+}
+
+
+figure [style="center"] > img {
+  text-align:center!important;
+}
+
+figure [style="left"] > img {
+  text-align:left!important;
+  float: left!important;
+}
+
+figure [style="right"] > img {
+  text-align:right!important;
+  float: right!important;
+}
+
+
+signed[rend="right"] > figure > img {
+  margin-left: auto;
+  float: right!important;
+
+}
+
+
+
+div [type="act_of_writing"] {
+  margin-top: 2.3em;
+}
+
+
+
+/* Raeschler 2023-04-19 */
+figure[subtype="eighth_page"] > img {
+  width: 12.5%;
+}
+
+figure[subtype="quarter_page"] > img {
+  width: 25%;
+}
+
+figure[subtype="half_page"] > img {
+  width: 50%;
+}
+
+figure[subtype="three-quarter_page"] > img {
+  width: 75%;
+}
+
+figure[subtype="full_page"] > img {
+  max-width: 100%;
+  margin: auto;
+}
+
+
+figure[subtype="eighth_page"] > graphic {
+  width: 12.5%;
+}
+
+figure[subtype="quarter_page"] > graphic {
+  width: 25%;
+}
+
+figure[subtype="half_page"] > graphic {
+  width: 50%;
+}
+
+figure[subtype="three-quarter_page"] > graphic {
+  width: 75%;
+}
+
+figure[subtype="full_page"] > graphic {
+  max-width: 100%;
+  margin: auto;
+}
+
+
+figure[style="center"] > graphic {
+  /* text-align:center!important;  */
+  /* top: -9999px;  */
+  /* bottom: -9999px;  */
+  left: -9999px!important;
+  right: -9999px!important;
+  margin: auto!important;
+  text-align:center;
+}
+
+figure[style="center"] > figDesc[style="display_none"] {
+  text-align:center;
+}
+figure[style="center"] > head[style="display_none"] {
+  text-align:center;
+}
+figure[style="center"] > figDesc[style="display_yes"] {
+  text-align:center;
+}
+figure[style="center"] > head[style="display_yes"] {
+  text-align:center;
+}
+
+
+figure[style="left"] > graphic {
+  float: left!important;
+  margin-right: 1px;
+}
+figure[style="right"] > graphic {
+  position:relative !important;
+  float: right!important;
+  margin-left:1px !important;
+}
+
+
+
+
+figure head[style="display_yes"] {
+  font-size: 0.8em;
+  text-align: inherit;
+  float: inherit;
+  margin-top: 0.1em;
+  line-height: 1.2em;
+}
+
+figure figDesc[style="display_yes"] {
+  font-size: 0.7em;
+  text-align: inherit;
+  float: inherit;
+  line-height: 1.2em;
+
+}
+figure head[style="display_none"]{
+  display: none ;
+  float: inherit;
+  text-align: inherit;
+  font-size : 80% ;
+  margin-top : 2em ;
+  margin-bottom : 2em ;
+  background-color : rgb(208 , 208 , 208) ;
+  line-height: 1.2em;
+}
+
+figure figDesc[style="display_none"] {
+  display: none ;
+  float: inherit;
+  text-align: inherit;
+  font-size : 80% ;
+  margin-top : 2em ;
+  margin-bottom : 2em ;
+  background-color : rgb(208 , 208 , 208) ;
+  line-height: 1.2em;
+}
+
+
+/* ------------------- ENDE - GRAPHISCHE DARSTELLUNGEN -------------------------- */
+
+
+
+
+
+foreign {
+  display: inline;
+  /* font-style: italic; */
+}
+formula {
+  display: inline;
+  /*   font-style: italic;  */
+}
+@media oxygen AND (platform:"eclipse") {
+  formula {
+    font-style: normal;
+  }
+}
+front {
+  display: block;
+  margin-bottom: 1em;
+  padding-top: 0.5em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  padding-bottom: 0.5em;
+}
+funder {
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+gi,tag {
+  display: inline;
+  font-family: sans-serif;
+  color: #0000CD;
+  background-color: inherit;
+}
+
+tag:before,gi:before {
+  content: "<";
+}
+
+tag:after,gi:after {
+  content: ">";
+}
+
+gloss {
+  display: inline;
+}
+group {
+  display: block;
+  margin-bottom: 1em;
+}
+body > div > head {
+  display: block;
+  font-size: 1em;
+  padding-top: 14px;
+  padding-left: 10px;
+  padding-bottom: 10px;
+  color: inherit;
+  /*  background-color: #BBBBBB; */
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+  font-weight: normal;
+}
+body > div > div > head {
+  display: block;
+  padding-top: 14px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  color: inherit;
+  background-color: #BBBBBB;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+}
+body > div > div > div > head {
+  display: block;
+  padding-top: 14px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  color: inherit;
+  background-color: #BBBBBB;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+}
+
+
+body > div > head[rend="right"] {
+  text-align: right;
+  padding-top : 0.5em ;
+  padding-left : 0px ;
+  padding-bottom : 0px ;
+  margin-bottom : 0px ;
+  margin-top: 0px;
+}
+
+body > div > head[rend="left"] {
+  text-align: left;
+  padding-top : 0.5em ;
+  padding-left : 0px ;
+  padding-bottom : 0px ;
+  margin-bottom : 0px ;
+  margin-top: 0px;
+}
+
+body > div > head[rend="center"] {
+  text-align: center;
+  padding-top : 0.5em ;
+  padding-left : 0px ;
+  padding-bottom : 0px ;
+  margin-bottom : 0px ;
+  margin-top: 0px;
+}
+
+
+text body div head title {
+  color : rgb(0 , 0 , 205) ;
+  display : inline ;
+}
+
+
+head persName {
+  color : rgb(0 , 0 , 205) ;
+  display : inline
+}
+
+
+div1 > head:before {
+  content: counter(div1) ". ";
+  color: black;
+  background-color: inherit;
+}
+div2 > head:before {
+  content: counter(div1) "." counter(div2) ". ";
+  color: black;
+  background-color: inherit;
+}
+div3 > head:before {
+  content: counter(div1) "." counter(div2) "." counter(div3) ". ";
+  color: black;
+  background-color: inherit;
+}
+body > div > head:before {
+  /* content: counter(div1) ". ";
+    color: black;
+    background-color: inherit; */
+}
+body > div > div > head:before {
+  content: counter(div1) "." counter(div2) ". ";
+  color: black;
+  background-color: inherit;
+}
+body > div > div > div > head:before {
+  content: counter(div1) "." counter(div2) "." counter(div3) ". ";
+  color: black;
+  background-color: inherit;
+}
+
+
+
+
+div[type="act_of_writing"] docAuthor[style="hidden"] {
+  visibility: hidden;
+  display: none;
+}
+
+/* Fractions with horizontal bar */
+
+formula[rend="fraction_bar"] {
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  letter-spacing: 0.001em;
+  padding-left: 0em;
+  padding-right: 0em;
+}
+
+hi[rend="supbar"]  {
+  font-size: 0.5em;
+  vertical-align: super;
+  text-align: center;
+}
+hi[rend="subbar"]  {
+  font-size: 0.5em;
+}
+
+hi[rend="subbar"] {border-top: thin solid black;
+  vertical-align: sub;
+}
+hi[rend="barbar"] {
+  display: none;
+}
+
+
+
+/* Fractions with diagonal slash */
+
+formula[rend="fraction_slash"] {
+  display: math;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  letter-spacing: 0.001em;
+  padding: 0em;
+}
+
+hi[rend="supslash"]  {
+  font-size: 0.5em !important;
+  vertical-align: super;
+}
+hi[rend="subslash"]  {
+  font-size: 0.5em !important;
+}
+
+hi[rend="subslash"]::before {
+  content: '\2044' !important;
+  font-size: 2em !important;
+}
+
+hi[rend="barslash"] {
+  display: none !important;
+}
+/*  hi[rend="barslash"] {
+ font-size: 1.2em !important;
+} */
+
+
+
+
+/* Fractions diagonal without slash */
+
+formula[rend="fraction_noslash"] {
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  letter-spacing: 0.001em;
+  padding: 0em;
+}
+
+hi[rend="supnoslash"]  {
+  font-size: 0.5em !important;
+  vertical-align: super !important;
+
+}
+hi[rend="subnoslash"]  {
+  font-size: 0.5em !important;
+}
+
+hi[rend="subnoslash"]::before {
+  content: '' !important;
+  font-size: 2em !important;
+}
+
+hi[rend="barnoslash"] {
+  display: none !important;
+}
+
+
+/* Fraction with horizontal bar - Table variant */
+
+table[rend="fraction"] {
+  display: table-cell;
+  text-align: center;
+  margin-left: 1em;
+  border-bottom:0px;
+  width: 1em;
+  font-size: 0.5em;
+  table-layout:auto;
+  border-collapse:collapse;
+  empty-cells:show;
+}
+
+
+cell[rend="bottom"] {
+  min-width:0.1em;
+  height:2.4ex;
+  text-align:center;
+  vertical-align:middle;
+  border-style:solid none none;
+  border-width:1px;
+  border-top-color:black;
+}
+
+cell[rend="top"]  {
+  min-width:0.1em;
+  height:2.4ex;
+  text-align:center;
+  vertical-align:middle;
+  border-style:none;
+}
+
+
+hi[rend="superscript"] {
+  display: inline;
+  vertical-align: super;
+  font-size: 0.6em;
+}
+
+
+hi[rend="subscript"] {
+  display: inline;
+  vertical-align: sub;
+  font-size: 0.8em;
+}
+
+hi[rend="groundline"] {
+  display: inline;
+  vertical-align: 13% !important;
+  text-decoration-line: underline;
+  /*    text-underline-offset: 4px;*/
+
+}
+
+
+
+hi[rend="latintype"] {
+  font-family: "Trebuchet MS";
+  font-size: 1.05em;
+  font-weight: bold;
+
+}
+
+
+
+hi[rend="spaced-out"] {
+  letter-spacing: 0.1em!important;
+  word-spacing: 0.5em!important;
+  /*   text-transform: uppercase!important;*/
+}
+
+
+
+
+
+
+hi {
+  display: inline;
+  background-color:yellow;
+  color: black;
+}
+
+hi[rend] {
+  background-color: inherit;
+  color: inherit;
+}
+
+hi[rend="Antiqua"] {
+  display: inline;
+  font-family: "Arial";
+  font-size: 0.8em;
+
+}
+
+
+
+hi[rend="bold"] {
+  display: inline;
+  font-weight: bold;
+}
+hi[rend="italic"] {
+  display: inline;
+  font-style: italic;
+}
+hi[rend="underline"] {
+  display: inline;
+  text-decoration:underline;
+}
+hi[rend="italic"] {
+  display: inline;
+  font-style: italic;
+}
+hi[rend="small-caps"] {
+  display: inline;
+  font-variant: small-caps !important;
+}
+hi[rend="sup"] {
+  display: inline;
+  vertical-align: super;
+  font-size: smaller;
+}
+hi[rend="sub"] {
+  display: inline;
+  vertical-align: sub;
+  font-size: smaller;
+}
+
+hi[rend="underline"] {
+  display: inline;
+  text-decoration: underline;
+}
+
+
+hi[n="2"] {
+  text-decoration-style: double;
+}
+
+
+
+history {
+  display:block;
+  margin-bottom: 1em;
+  font-weight: normal;
+}
+
+
+
+
+ident {
+  display: inline;
+  font-family: monospace;
+}
+
+idno {
+  display:block;
+  margin-bottom: 1em;
+}
+
+
+idno[type] {
+  /*   display: block;  */
+  margin-bottom: 0em;
+}
+
+
+idno[type="op"] {
+  display: inline;
+}
+
+idno[type="MWV"] {
+  display: inline;
+}
+
+
+msIdentifier idno {
+  display: inline;
+}
+
+altIdentifier idno {
+  display: inline;
+}
+
+
+
+msIdentifier idno[type="signatur"]::before {
+  content: "Signatur: ";
+  font-weight: bold;
+}
+
+
+altIdentifier idno[type="signatur"]::before {
+  content: "Signatur: ";
+  font-weight: bold;
+}
+
+
+msIdentifier institution[key="RISM"]::before {
+  content: "RISM-Sigel: ";
+  font-weight: bold;
+  display: inline !important;
+}
+
+
+
+altIdentifier idno[key="RISM"]::before {
+  content: "RISM-Sigel: ";
+  font-weight: bold;
+  display: inline !important;
+}
+
+
+altIdentifier idno [type]::before {
+  content: "Signatur: ";
+  font-weight: bold;
+}
+
+
+publicationStmt idno[type="URI"]::before {
+  content: "Online-Ressource: ";
+  font-weight:bold;
+}
+
+
+publicationStmt idno[type="MSB"]::before {
+  content: "MSB-Briefnummer: ";
+  font-weight:bold;
+}
+
+
+msItem idno{
+  display: block;
+  margin-bottom: 1em;
+  margin-top:0.5em;
+  font-weight: normal;
+}
+
+msItem idno::before{
+  content: "Handschriftentyp: ";
+  font-weight:bold;
+}
+
+history {
+  display: block;
+}
+
+
+/* history provenance {
+  counter-reset: provenance; }                      /* Setzt den Abschnittszähler auf 0 */
+
+
+history provenance {
+  counter-increment: provenance;                  /* Erhöht den Abschnittszähler */
+  content: "Provenienz " counter(provenance) "): "; /* Zeigt den Zähler an */
+  font-weight:bold;
+}
+
+provenance {
+  display: block;
+  /*  display: block; */
+  margin-bottom: 0em;
+}
+
+history provenance p::before {
+  content: "Provenienz: ";
+  font-weight: bold;
+}
+history provenance p {
+  font-weight: normal;
+  display: block;
+  /*  display: inline; */
+}
+
+
+
+
+bibl idno {
+  display: inline;
+}
+
+imprint {
+  display: inline;
+}
+index {
+  display: none;
+}
+
+msItem incipit {
+  margin-top: 0.5em;
+  margin-bottom: 1em;
+  display:block;
+  font-weight: normal;
+}
+
+msItem incipit::before{
+  content: "Incipit: ";
+  font-weight:bold;
+}
+
+msItem incipit lb {
+  display: inline;
+}
+
+msItem incipit lb::before {
+  content:" / ";
+}
+
+
+
+interp {
+  display: none;
+}
+interpGrp {
+  display: none;
+}
+list[type = "gloss"] item {
+  display: block;
+  margin-left: 1em;
+}
+
+list[style="hidden"] {
+  display: none;
+}
+
+
+
+list item {
+  display: list-item;
+  margin-left: 0.1em;
+}
+
+item {
+  display: list-item;
+  margin-left: 0.1em;
+  text-indent: -0.1em;
+}
+
+item[n]:before {
+  content: attr(n) ". " ;
+  list-style: none;
+} /* should there be space after the content?
+     And should default marker be suppressed
+     when there is an @n attribute? --DRS */
+
+change item {
+  display: block;
+  margin-bottom: 0.5em;
+  margin-left: 1em;
+  margin-top: 0.5em;
+}
+keywords {
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+
+textClass keywords::before {
+  content: "Schlagworte: ";
+  font-weight:bold;
+}
+
+textClass keywords term {
+  display: block;
+  margin-bottom: 0em;
+  display: list-item;
+  margin-left: 1em;
+  padding-left: 0.6em;
+  margin-top: 0em;
+  margin-bottom: 0em;
+  list-style-position:inherit;
+}
+
+
+
+kw {
+  display: inline;
+  font-style: italic;
+}
+l {
+  display: block;
+  white-space: nowrap;
+  margin-top: 0em;
+  margin-bottom: 0em;
+}
+
+l[rend="indentation"] {
+  display: block;
+  white-space: nowrap;
+  margin-top: 0em;
+  margin-bottom: 0em;
+  text-indent : 1em ;
+}
+
+
+l[n="1"] {
+  text-indent: 1em;
+}
+
+l[rend="center"] {
+  text-align: center;
+  margin-top: 0em;
+  margin-bottom: 0em;
+}
+
+l[rend="right"] {
+  text-align: right;
+}
+
+l[rend="left"] {
+  text-align: left;
+}
+
+
+
+label {
+  display: inline;
+  font-weight: bold;
+}
+Label {
+  display: inline;
+  font-weight : bold;
+  color : #2F4F4F;
+  background-color: inherit;
+}
+
+argument > label, body > label, div > label, div0 > label, div1 > label, div2 > label, div3 > label, div4 > label, div5 > label, div6 > label, div7 > label, epigraph > label {
+  display: block;
+  font-weight: bold;
+}
+
+
+lacunaStart {
+  display : none ;
+}
+
+lacunaEnd {
+  display : none ;
+}
+
+
+
+langUsage {
+  display: block;
+  margin-bottom: 1em;
+}
+
+
+profileDesc langUsage::before {
+  counter-reset: language;                      /* Setzt den Abschnittszähler auf 0 */
+}
+
+profileDesc langUsage::before {
+  content: "Verwendete Sprachen: ";
+  font-weight:bold;
+}
+
+
+profileDesc langUsage language::before {
+  font-weight:normal;
+  counter-increment: language;                  /* Erhöht den Abschnittszähler */
+  content: "" counter(language) ") "; /* Zeigt den Zähler an */;
+
+}
+
+
+
+
+
+
+
+
+lb {
+  display: block;
+}
+
+
+title[type="precursor"]
+lb {
+  display: inline;
+}
+
+
+title[type="successor"]
+lb {
+  display: inline;
+}
+
+
+
+lg {
+  display: block;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+}
+
+lg[rend="center"] {
+  text-align: center;
+  margin-top: 0em;
+  margin-bottom: 0em;
+}
+
+lg[rend="right"] {
+  text-align: right;
+}
+
+lg[rend="left"] {
+  text-align: left;
+}
+
+
+
+
+
+
+list {
+  display: block;
+  list-style-type: disc;
+  list-style-position: outside;
+  margin-bottom: 1em;
+  margin-left: 2em;
+  margin-top: 1em;
+}
+
+list[rend="runon"] {
+  display: inline;
+}
+
+list[type="bulleted"] {
+  list-style-type: disc;
+  list-style-position: outside;
+}
+list[type="unordered"] {
+  list-style-type: disc;
+  list-style-position: outside;
+}
+list[type="ordered"] {
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+
+list[type="numbered"] {
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+list[type="none"] {
+  list-style-type: none;
+}
+
+listBibl {
+  display: block;
+  margin-bottom: 0.5em;
+}
+mentioned {
+  display: inline;
+  font-style: italic;
+}
+milestone {
+  display: none;
+}
+
+msDesc {
+  display:block;
+  /*    margin-bottom: 1em;  */
+}
+
+msDesc additional::before {
+  content: "Weitere Quellen: ";
+  font-weight:bold;
+}
+
+msDesc additional listBibl bibl {
+  display: list-item;
+  margin-left: 1em;
+  padding-left: 0.6em;
+  margin-top: 0em;
+  margin-bottom: 0em;
+  list-style-position:inherit;
+}
+
+
+name {
+  display: inline;
+}
+
+
+name[style="hidden"] {
+  display: none;
+}
+
+surname {
+  font-size : 80% ;
+  background-color : rgb(208 , 208 , 208) ;
+}
+
+forename {
+  font-size : 80% ;
+  background-color : rgb(208 , 208 , 208) ;
+}
+
+
+settlement[style="hidden"] {
+  display: inline;
+  font-size : 70% ;
+  background-color : rgb(208 , 208 , 208) ;
+  color : black ;
+  display: none;
+}
+
+
+country[style="hidden"] {
+  display: inline;
+  font-size : 70% ;
+  background-color : rgb(208 , 208 , 208) ;
+  color : black ;
+  display: none;
+}
+
+
+
+
+
+
+
+/* note {
+  display: block;
+  font-size: smaller;
+} */
+
+
+
+
+
+
+text > body > div[type="annotation"] > note {
+  display : block;
+  float : left ;
+  font-size : 100% ;
+  text-align: left;
+  margin-top : 0em ;
+  margin-right : 0em ;
+  margin-left : 0em ;
+  margin-bottom : 1em ;
+  background-color : transparent;
+  counter-increment : note ;
+}
+
+text > body > div[type="annotation"] > note[type="publisher-annotation"]::before  {
+  font-weight:bold;
+  content: "Vermerke (Verlagsvermerk): ";
+}
+
+text > body > div[type="annotation"] > note[type="author-annotation"]::before  {
+  font-weight:bold;
+  content: "Vermerke (Autorenvermerk): ";
+}
+
+
+text > body > div[type="annotation"] > note[type="other-third-party-annotation"]::before  {
+  font-weight:bold;
+  content: "Vermerke (sonstige Vermerke Dritter): ";
+}
+
+
+
+/* auskommentiert UT 16.05.2023
+
+note  {
+display : block ;
+white-space: normal;
+float : right ;
+text-align: left;
+font-size : 80% ;
+margin-top : 2em ;
+margin-right : 2em ;
+margin-left : 2em ;
+margin-bottom : 2em ;
+background-color : rgb(208 , 208 , 208) ;
+counter-increment : note ;
+}
+*/
+
+
+/* auskommentiert UT 16.05.2023
+note::before {
+content: "Kommentar: ";
+font-weight:bold;
+}
+*/
+
+
+/* eingefügt UT 16.05.2023 */
+note [type="asynchronous_authors"] {
+  display:none !important;
+}
+
+
+/* eingefügt UT 16.05.2023 */
+note [type="asynchronous_authors"] measure [type="number_of_authors"]
+display:none !important;
+}
+
+/* eingefügt UT 16.05.2023 */
+note [type="asynchronous_authors"]::before {
+  display: none !important;
+}
+
+
+
+
+note[style="hidden"]  {
+  display : none ;
+}
+
+note[type="note"] {
+  display:inline;
+  background-color : rgb(255 , 253 , 185) ;
+}
+
+
+note persName {
+  color : rgb(0 , 0 , 205) ;
+}
+
+
+note[type="footnote"] {
+  display : block !important;
+  float: left !important;
+  font-size : 90% !important;
+  margin-top : 1800px !important;
+  margin-right : 0em !important;
+  margin-left : 0em !important;
+  margin-bottom : 2em !important;
+  background-color : transparent !important;
+  cursor: pointer;
+}
+
+note[type="footnote"] > title {
+  color : rgb(0 , 0 , 205) ;
+}
+
+note[type="these_comment"]::before {
+  content: "Themenkommentar: ";
+  font-weight:bold;
+}
+
+note[type="single_place_comment"]::before {
+  content: "Einzelstellenkommentar: ";
+  font-weight:bold;
+}
+
+note[type="text_constitution"]::before {
+  content: "Kommentar Textkonstitution: ";
+  font-weight:bold;
+}
+
+note[type="word_description"]::before {
+  content: "Worterklärung: ";
+  font-weight:bold;
+}
+
+
+note[type="note"][subtype="name"]::after {
+  content: " "; /* Da Anmerkungen normalerweise durchnummeriert werden, steht im Frontend statt "Anmerkung" die Nummer der Anmerkung, gekennzeichnet durch das TEI-Attribut n="1" */
+  font-weight:normal;
+}
+
+note[type="note"][subtype="editor"]::after {
+  content: " (Anmerkung des Herausgebers der Druckausgabe)"; /* Da Anmerkungen normalerweise durchnummeriert werden, steht im Frontend statt "Anmerkung" die Nummer der Anmerkung, gekennzeichnet durch das TEI-Attribut n="1" */
+  font-weight:normal;
+}
+
+note[type="note"][subtype="anonymus"]::after {
+  content: " (Anmerkung eines unbekannten Schreibers)"; /* Da Anmerkungen normalerweise durchnummeriert werden, steht im Frontend statt "Anmerkung" die Nummer der Anmerkung, gekennzeichnet durch das TEI-Attribut n="1" */
+  font-weight:normal;
+}
+
+note[type="note"][subtype="library"]::after {
+  content: " (bibliothekarische Anmerkung)"; /* Da Anmerkungen normalerweise durchnummeriert werden, steht im Frontend statt "Anmerkung" die Nummer der Anmerkung, gekennzeichnet durch das TEI-Attribut n="1" */
+  font-weight:normal;
+}
+
+note[type="note"][subtype="receiver"]::after {
+  content: " (Vermerk des Empfängers)"; /* Da Anmerkungen normalerweise durchnummeriert werden, steht im Frontend statt "Anmerkung" die Nummer der Anmerkung, gekennzeichnet durch das TEI-Attribut n="1" */
+  font-weight:normal;
+}
+
+
+note[type="translation"]::before {
+  content: "Übersetzung: ";
+  font-weight:bold;
+}
+
+
+
+
+altIdentifier note {
+  /* display : block ; */
+  display: none;
+
+  float : left ;
+  font-size : 100% ;
+  margin-top : 0.5em ;
+  margin-right : 0em ;
+  margin-left : 0em ;
+  margin-bottom : 0em ;
+  background-color : transparent;
+}
+
+
+note[n]:before {
+  content: attr(n)" ";
+  vertical-align: super;
+}
+
+note[place="left"] {
+  float: left;
+}
+
+note[place="right"] {
+  float: right;
+}
+
+note[place="inline"], note[place="unspecified"] {
+  display: inline;
+}
+notesStmt {
+  display: block;
+  margin-bottom: 1em;
+}
+num {
+  display: inline;
+}
+opener {
+  display: block;
+  margin-bottom: 0em;
+}
+orig {
+  display: none;
+}
+p {
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+
+pb {
+  display: none;
+}
+
+pb:after {
+  content: attr(n);
+  font-weight: bold;
+  margin-bottom: 1em;
+  margin-top: 1em;
+  text-align: center;
+}
+
+
+pb[type="page_break"]{
+  display: inline;
+  font-size: 80%;
+  content: attr(n);
+  text-align: center;
+}
+
+pb[type="page_break"]::before {
+  content: "  |" ;
+  font-weight:bold;
+  font-size: 100%;
+}
+
+pb[type="page_break"]::after {
+  content: "|  " !important;
+  font-weight:bold;
+  font-size: 100%;
+}
+
+
+
+
+physDesc {
+  display: block;
+  /*   margin-bottom: 1em;  */
+  font-weight: normal;
+
+}
+
+
+
+physDesc title {
+  display : inline ;
+  font-weight: normal;
+}
+
+
+physDesc::before {
+  content: "Physische Beschreibung, Datierung und allgemeiner Kommentar: ";
+  font-weight:bold;
+
+}
+
+
+physDesc p {
+  display: inline;
+  font-weight: normal;
+}
+
+physDesc accMat {
+  display: inline;
+  font-weight: normal;
+  margin-top: 0.5em;
+}
+
+
+/* UT 10.05.2023
+physDesc accMat[type="Keine"] {
+  display: none;
+}
+*/
+
+handDesc {
+  display: block;
+  font-weight: normal;
+
+}
+handDesc title {
+  display : inline ;
+  font-weight: normal;
+}
+handDesc::before {
+  content: "Schreiberhandschrift: ";
+  font-weight:bold;
+}
+handDesc p {
+  display: inline;
+  font-weight: normal;
+}
+handDesc accMat {
+  display: inline;
+  font-weight: normal;
+  margin-top: 0.5em;
+}
+handDesc accMat[type="Keine"] {
+  display: none;
+}
+
+
+
+/*
+physDesc handDesc {
+   display: none;
+  margin-bottom: 0.5em;
+}
+
+physDesc handDesc p {
+   display: none;
+  font-weight: normal;
+}
+
+
+physDesc handDesc::before {
+        content: "Schreiber: ";
+        font-weight:bold;
+}
+*/
+
+physDesc scriptDesc::before {
+  content: "Anmerkungen zur Handschrift: ";
+  font-weight:bold;
+}
+
+physDesc scriptDesc p {
+  font-weight:normal;
+}
+
+physDesc scriptDesc {
+  display: block;
+}
+
+
+
+principal {
+  display: block;
+  margin-bottom: 0.5em;
+}
+ptr {
+  color: navy;
+  text-decoration: underline;
+  background-color: inherit;
+}
+ptr:before{
+  background-color: inherit;
+  color: red;
+  content:"[" attr(target) "]";
+}
+
+publicationStmt {
+  display: none;
+  margin-bottom: 1em;
+}
+
+publisher {
+  display: inline;
+}
+
+imprint > publisher, publicationStmt > publisher {
+  /*   display: block; */
+  display: none;
+  margin-bottom: 0.1em;
+  margin-top: 0.1em;
+}
+
+imprint > publisher, publicationStmt > publisher::after {
+  content: ". ";
+}
+
+
+imprint > publisher, publicationStmt > publisher::before {
+  content: "Herausgebende Institution: " ;
+  font-weight:bold;
+}
+
+
+imprint > publisher, publicationStmt > address::before {
+  content: "Anschrift: " ;
+  font-weight:bold;
+}
+
+
+
+imprint > publisher, publicationStmt > address {
+  /* display: inline !important; */
+  display: none !important;
+}
+
+
+pubPlace {
+  display: inline;
+}
+
+imprint > pubPlace, publicationStmt > pubPlace {
+  display: block;
+  margin-bottom: 0.5em;
+}
+q {
+  display: inline;
+  quotes: '"' '"' "'" "'";
+  margin-top: 0em;
+  margin-left: 0em;
+  margin-right: 0em;
+  margin-bottom: 0em;
+}
+
+q[rend="display"], argument > q, body > q, cit > q, div > q, div0 > q, div1 > q, div2 > q, div3 > q, div4 > q, div5 > q, div6 > q, div7 > q, epigraph > q {
+  display: block;
+  margin-bottom: 0.5em;
+  margin-left: 3em;
+  margin-right: 3em;
+  quotes: none;
+}
+
+q:before {
+  content: open-quote;
+}
+
+q:after {
+  content: close-quote;
+}
+
+ref {
+  display: inline;
+  color: #0000CD;
+  background-color: inherit;
+  cursor: pointer;
+}
+
+ref[type="Footnotes_reference"] {
+  vertical-align: 20%!important;
+}
+
+ref:before{
+  color: gray;
+  background-color: inherit;
+  text-decoration: underline;
+  content:'{' attr(target) '}';
+  display:none;
+}
+
+reg {
+  display: inline;
+  color: #B22222;
+}
+@media oxygen AND (platform:"eclipse") {
+  reg {
+    font-style: normal;
+  }
+}
+rendition {
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+
+altIdentifier repository {
+  display: inline;
+  margin-bottom: 0em;
+}
+
+repository::after {
+  content: ", ";
+}
+
+resp {
+  /*  display: inline; */
+  display: none;
+  font-weight:bold;
+}
+
+
+respStmt {
+  /*  display: block; */
+  display: none;
+  margin-bottom: 0.3em;
+}
+
+
+respStmt > name {
+  counter-increment: name;                  /* Erhöht den Abschnittszähler */
+  content: "" counter(name) ") "; /* Zeigt den Zähler an */;
+
+}
+
+respStmt name {
+  /*  display: inline; */
+  display: none;
+}
+
+
+respStmt name::after {
+  content: " "
+}
+
+
+
+
+
+bibl respStmt {
+  display: inline;
+}
+
+rdg:before {
+  background-color: inherit;
+  content: "[" attr(wit) "] ";
+  color: red;
+}
+row {
+  display: table-row;
+}
+row[role='label'] {
+  color: inherit;
+  background-color: transparent; /*  #BBBBBB; */
+}
+
+rs {
+  display: inline;
+}
+s {
+  display: inline;
+}
+salute {
+  display: block;
+  margin-bottom: 0em;
+  margin-top: 0.8em;
+}
+
+salute[rend="right"] {
+  text-align: right;
+}
+
+salute[rend="left"] {
+  text-align: left;
+}
+
+
+salute[rend="center"] {
+  text-align: center;
+}
+
+salute[rend="inline"] {
+  display: inline !important;
+}
+
+
+text body div salute title {
+  color : rgb(0 , 0 , 205) ;
+  display : inline ;
+}
+
+
+text body div salute persName {
+  color : rgb(0 , 0 , 205) ;
+}
+
+
+
+samplingDecl {
+  display: block;
+  margin-bottom: 1em;
+}
+seg {
+  display: inline;
+}
+
+seg[type="page_break"] {
+  font-size: 80%;
+}
+
+seg[type="page_break"]::before {
+  content: "  |" ;
+  font-weight:bold;
+  font-size: 100%;
+}
+
+seg[type="page_break"]::after {
+  content: "|  " !important;
+  font-weight:bold;
+  font-size: 100%;
+}
+
+seg[type="column_break"] {
+  font-size: 80%;
+}
+
+seg[type="column_break"]::before {
+  content: "  |" ;
+  font-weight:bold;
+  font-size: 100%;
+}
+
+seg[type="column_break"]::after {
+  content: "|  " !important;
+  font-weight:bold;
+  font-size: 100%;
+}
+
+
+
+
+
+
+seg[type="closer"] {
+  display: inline;
+}
+
+
+seriesStmt {
+  /*  display: block; */
+  display: none;
+  margin-bottom: 1em;
+}
+
+seriesStmt::before {
+  content: "Publikationsreihe: " ;
+  font-weight:bold;
+}
+
+seriesStmt p {
+  /*  display: inline; */
+  display: none;
+  margin-bottom: 0em;
+}
+
+
+settlement {
+  display: inline;
+  margin-bottom: 0em;
+}
+
+msIdentifier settlement::after {
+  content: ", ";
+}
+
+
+placeName settlement::after {
+  content: ", ";
+}
+
+
+
+
+sic {
+  display: inline;
+  color: #B22222;
+  background-color: inherit;
+}
+
+
+signed {
+  display: block;
+  margin-top: 0em;
+}
+
+signed[type="inline"] {
+  display: inline;
+}
+
+signed[rend="left"] {
+  text-align: left;
+}
+signed[rend="right"] {
+  text-align: right;
+}
+signed[rend="center"] {
+  text-align: center;
+}
+
+/* signed[rend="right"] > figure > img {
+  margin-left: auto
+}
+
+signed[rend="right"] > figure > graphic {
+  margin-left: auto
+}
+
+ */
+
+
+signed closer persName {
+  color: #0000CD;
+}
+
+signed placeName {
+  color: #0000CD ;
+}
+
+soCalled {
+  display: inline;
+  font-style: italic;
+  quotes: "'" "'";
+}
+@media oxygen AND (platform:"eclipse") {
+  soCalled {
+    font-style: normal;
+  }
+}
+
+soCalled:before {
+  content: open-quote;
+}
+
+soCalled:after {
+  content: close-quote;
+}
+
+sp {
+  display: block;
+  margin-bottom: 0.5em;
+  margin-left: 2em;
+}
+speaker {
+  display: inline;
+  font-weight: bold;
+}
+sponsor {
+  display: block;
+  margin-bottom: 0.5em;
+}
+stage {
+  display: inline;
+  font-style: italic;
+}
+@media oxygen AND (platform:"eclipse") {
+  stage {
+    font-style: normal;
+  }
+}
+
+
+supplied {
+  display: inline;
+  color: #B22222;
+}
+
+supplied[reason="deletion"] {
+  display: inline;
+  text-decoration: line-through;
+}
+
+
+supplied::before {
+  content:"[";
+  text-decoration: none;
+}
+supplied::after {
+  content:"]";
+  text-decoration: none;
+}
+
+
+
+
+
+table {
+  text-align: center;
+  display: table;
+  margin: 1em
+}
+table > head{
+  display:table-caption;
+  /*     font-style: italic;  */
+  margin-bottom: 6pt;
+}
+
+@media oxygen AND (platform:"eclipse") {
+  table > head{
+    font-style: normal;
+  }
+}
+
+tagUsage {
+  display: block;
+  margin-bottom: 0.5em;
+}
+taxonomy {
+  display: block;
+  margin-bottom: 0.5em;
+}
+term {
+  /* font-family: sans-serif;
+    color: #0000CD;
+    background-color: inherit; */
+  display: inline;
+}
+textClass {
+  display: block;
+  margin-bottom: 0.5em;
+}
+time {
+  display: inline;
+}
+title[type="letter"] {
+  display: none;
+  /* display: inline; */
+  margin-bottom: 0.5em;
+}
+
+msContents msItem title::before {
+  content: "Kopfzeile: ";
+  font-weight:bold;
+}
+
+msItem title lb {
+  display: inline;
+}
+
+msItem title lb::before {
+  content: ", ";
+}
+
+
+
+title[type=precursor]::before {
+  content: "Vorgängerbrief: ";
+  font-weight:bold;
+  font-style: normal;
+  margin-bottom: 0.5em;
+}
+
+
+title[type=precursor]::after {
+  content: " - Brief: " attr(key) ". ";
+  font-weight:normal;
+}
+
+
+title[type=precursor][key="not_yet_determined"]::after {
+  content: "noch nicht ermittelt" ;
+  display: none;
+}
+
+
+title[type=precursor][key="unknown"]::after {
+  content: "unbekannt" ;
+  display: none;
+}
+
+
+
+
+
+title[type=successor]::before {
+  content: "Folgebrief: ";
+  font-weight:bold;
+  font-style: normal;
+  margin-bottom: 0.5em;
+}
+
+
+
+title[type=successor]::after {
+  content: " - Brief: " attr(key) ". ";
+  font-weight:normal;
+}
+
+title[type=successor][key=unknown]::after {
+  display: none;
+}
+
+
+title[type=successor][key="not_yet_determined"]::after {
+  content: "noch nicht ermittelt" ;
+  display: none;
+}
+
+
+
+
+
+
+
+seriesStmt > title, titleStmt > title {
+}
+titlePage {
+  display: block;
+  border: thin black solid;
+  margin-bottom: 2em;
+  text-align: center;
+  padding-top: 1em;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-bottom: 1em;
+}
+titlePart {
+  display: block;
+}
+titleStmt {
+  /*  font-size: large;
+    font-weight: bold;
+    margin-bottom: 2em; */
+  text-align: left;
+}
+
+
+
+trailer {
+  display: block;
+  margin-bottom: 1em;
+}
+unclear {
+  display: inline;
+  color: #B22222;
+}
+
+unclear[reason="deletion"] {
+  display: inline;
+  text-decoration: line-through;
+}
+
+unclear::before {
+  content:"[";
+  text-decoration: none;
+}
+unclear::after {
+  content:"]";
+  text-decoration: none;
+}
+
+
+
+/* header-related material */
+teiHeader {
+  display: block;
+  color: black;
+  background-color: transparent;
+  /*  border: none 0pt;  */
+
+  border: thin silver solid;
+  border-top:0px;
+  border-left:0px;
+  border-right:0px;
+
+
+
+  margin-bottom: 2em;
+  padding-top: 1em;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-bottom: 1em;
+}
+
+
+titleStmt author {
+  /*  display: block; */
+  display: none;
+  margin-top: 0em;
+}
+
+
+titleStmt > author {
+  counter-increment: author;                  /* Erhöht den Abschnittszähler */
+}
+
+titleStmt > author::before {
+  content: "Autor: " counter(author) "): "; /* Zeigt den Zähler an */;
+  font-weight:bold;
+}
+
+
+
+
+/* Eingefuegt UT 15.06.2023*/
+
+respStmt persName {
+  counter-increment: persName;                  /* Erhöht den Abschnittszähler */
+}
+
+respStmt persName::before  {
+  content: "Schreiber " counter(persName)"): "; /* Zeigt den Zähler an */;
+  font-weight:bold;
+}
+
+
+respStmt resp[resp="writer"] {
+  display: none !important;
+}
+
+
+
+
+/* Ende: Eingefuegt UT 15.06.2023*/
+
+
+
+
+
+
+
+
+titleStmt title {
+  font-size: 1.5em;
+  font-weight: bold;
+  display: block;
+  padding-bottom: 1.3em !important;
+}
+
+titleStmt title[type]{
+  font-size: medium;
+  font-weight: normal ;
+  font-style:normal;
+  padding-bottom: 1em !important;
+}
+
+title[level="s"][type="incipit"]{
+  display: none;
+}
+
+
+
+
+
+
+
+
+titleStmt title[type="sub"]{
+  font-size: medium;
+  font-weight: normal ;
+  font-style:italic;
+}
+
+
+title[type="sub"]{
+  display: none;
+}
+
+titleStmt title[type="sub"]::before{
+  content: "Digitale Onlineausgabe: ";
+  font-weight:bold !important;
+}
+
+titleStmt title[type="incipit"]::before{
+  content: "Incipit: ";
+  font-weight:bold !important;
+}
+
+
+
+
+
+
+titleStmt title[type="incipit"]::before{
+  content: "Incipit: ";
+  font-weight:bold !important;
+  display: none;
+}
+
+authority {
+  display: block;
+  margin-bottom: 0.5em;
+}
+availability {
+  /* display: block; */
+  display: none;
+  margin-bottom: 0.5em;
+}
+availability::before {
+  content: "Lizenzbedingungen: ";
+  font-weight:bold;
+}
+
+fileDesc {
+  display: block;
+  /*   margin-bottom: 1em;  */
+  font-weight: normal;
+}
+
+
+
+/*QUELLENBESCHREIBUNGEN BEGINN  */
+
+
+fileDesc {counter-reset:sourceDesc}
+
+
+/*QUELLENBESCHREIBUNG HANDSCHRIFT  */
+
+sourceDesc[source="edition_template_manuscript"] {
+  /*   padding-top: 1em;  */
+  padding-left: 0em;
+  padding-right: 1em;
+  padding-bottom: 0em;
+}
+
+sourceDesc[source="edition_template_manuscript"]::before {
+  counter-increment: sourceDesc;                  /* Erhöht den Abschnittszähler */
+  content: "Quellenbeschreibung der Handschrift (Quelle Nr. " counter(sourceDesc) "): "; /* Zeigt den Zähler an */;
+  font-weight: bold;
+  font-size: medium;
+  display: block;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+}
+
+
+/*QUELLENBESCHREIBUNG DRUCK  */
+
+sourceDesc[source="edition_template_printout"] {
+  display: block;
+  /*   padding-top: 1em;  */
+  padding-left: 0em;
+  padding-right: 1em;
+  padding-bottom: 0em;
+  font-weight: normal;
+}
+
+sourceDesc[source="edition_template_printout"]::before {
+  counter-increment: sourceDesc;                  /* Erhöht den Abschnittszähler */
+  content: "Quellenbeschreibung des Drucks (Quelle Nr. " counter(sourceDesc) "): "; /* Zeigt den Zähler an */;
+  font-weight: bold;
+  font-size: medium;
+  display: block;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+}
+
+sourceDesc[source="edition_template_printout"] msDesc::before {
+  content: "Handschriftliche Vorlage des Drucks: ";
+  font-weight:bold;
+  display: block;
+  margin-top: 0.5em;
+}
+
+sourceDesc[source="edition_template_printout"] incipit {
+  margin-top: 0em;
+  font-weight: normal;
+}
+
+
+/*QUELLENBESCHREIBUNG REKONSTRUKTION  */
+
+sourceDesc[source="edition_template_reconstruction"] {
+  display: block;
+  /* padding-top : 1em ;  */
+  padding-left : 0em ;
+  padding-right : 1em ;
+  padding-bottom : 0em ;
+}
+
+sourceDesc[source="edition_template_reconstruction"]::before {
+  counter-increment: sourceDesc;                  /* Erhöht den Abschnittszähler */
+  content: "Quelle der Rekonstruktion (Quelle Nr. " counter(sourceDesc) "): "; /* Zeigt den Zähler an */;
+  font-weight: bold;
+  font-size: medium;
+  display: block;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+}
+
+
+sourceDesc[source="edition_template_reconstruction"] msDesc::before {
+  /*  content: "Handschriftliche Vorlage der Rekonstruktion: "; */
+  font-weight:bold;
+  display: block;
+  margin-top: 0.5em;
+}
+
+
+bibl[type="auction_catalogue"]::before {
+  content: "Auktionskatalog: ";
+  font-weight: bold;
+}
+
+bibl[type="FMB-C-letters_stock"]::before {
+  content: "FMB-C-Briefbestand: ";
+  font-weight: bold;
+}
+
+bibl[type="third_party_letters"]::before {
+  content: "Briefe Dritter: ";
+  font-weight: bold;
+}
+
+bibl[type="letter_index"]::before {
+  content: "Briefverzeichnis: ";
+  font-weight: bold;
+}
+
+bibl[type="notebook"]::before {
+  content: "Notizbuch: ";
+  font-weight: bold;
+}
+
+bibl[type="diary_entry"]::before {
+  content: "Tagebucheinträge: ";
+  font-weight: bold;
+}
+
+bibl[type="copy_book"]::before {
+  content: "Kopierbuch: ";
+  font-weight: bold;
+}
+
+bibl[type="other"]::before {
+  content: "Sonstiges: ";
+  font-weight: bold;
+}
+
+
+bibl[type="printed_letter"]::before {
+  content: "Briefabdruck: ";
+  font-weight: bold;
+}
+
+
+bibl[type="digital_publication"]::before {
+  content: "Digitale Publikation: ";
+  font-weight: bold;
+}
+
+
+
+bibl[type="autograph"]::before {
+  content: "Autograph: ";
+  font-weight: bold;
+}
+
+
+
+bibl[type="autograph_reproduction"]::before {
+  content: "Reproduktion des Autographs: ";
+  font-weight: bold;
+}
+
+
+
+
+
+bibl[type="autographic_concept"]::before {
+  content: "autographes Konzept: ";
+  font-weight: bold;
+}
+bibl[type="autograph_copy"]::before {
+  content: "eigenhändige Abschrift: ";
+  font-weight: bold;
+}
+bibl[type="authorized_dictation"]::before {
+  content: "autorisiertes Diktat: ";
+  font-weight: bold;
+}
+bibl[type="letter_from_foreign_hand_with_own_signature"]::before {
+  content: "Brief fremder Hand mit eigenhändiger Unterschrift: ";
+  font-weight: bold;
+}
+bibl[type="copy_from_foreign_hand"]::before {
+  content: "Abschrift fremder Hand: ";
+  font-weight: bold;
+}
+bibl[type="concept_of_foreign_hand_with_own_hand_corrections"]::before {
+  content: "Konzept fremder Hand mit eigenhändigen Korrekturen: ";
+  font-weight: bold;
+}
+bibl[type="concept_of_foreign_hand"]::before {
+  content: "Konzept fremder Hand: ";
+  font-weight: bold;
+}
+bibl[type="manuscript_fragment"]::before {
+  content: "Manuskriptfragment: ";
+  font-weight: bold;
+}
+bibl[type="unauthorized_dictation"]::before {
+  content: "Nichtautorisiertes Diktat: ";
+  font-weight: bold;
+}
+
+bibl[type="letter_without_surviving_text"]::before {
+  content: "Brief ohne überlieferten Text: ";
+  font-weight: bold;
+}
+
+bibl[type="revealed_letter"]::before {
+  content: "Erschlossener Brief': ";
+  font-weight: bold;
+}
+bibl[type="auction_catalogue"]::before {
+  content: "Auktionskatalog: ";
+  font-weight: bold;
+}
+
+bibl[type="translation"]::before {
+  content: "Übersetzung: ";
+  font-weight: bold;
+}
+
+
+
+
+/*QUELLENBESCHREIBUNGEN ENDE  */
+
+
+
+
+
+sourceDesc[source="edition_template_reconstruction"] msIdentifier{
+  display: none;
+}
+
+sourceDesc[source="edition_template_reconstruction"] physDesc::before {
+  content: none;
+  font-weight:bold;
+}
+
+sourceDesc[source="edition_template_reconstruction"] msIdentifier{
+  display: none;
+}
+
+
+sourceDesc[source="edition_template_reconstruction"] physDesc::before {
+  content: none;
+  font-weight:bold;
+}
+
+
+sourceDesc[source="edition_template_reconstruction"] msContents {
+  display:none;
+}
+
+
+sourceDesc[source="edition_template_reconstruction"] history {
+  display:none;
+}
+
+sourceDesc[source="edition_template_reconstruction"] additional {
+  display:block !important;
+}
+
+
+
+sourceDesc[source="edition_template_reconstruction"] physDesc accMat{
+  display: block !important;
+}
+
+sourceDesc[source="edition_template_reconstruction"] physDesc{
+  display: block !important;
+}
+
+
+
+
+sourceDesc listBibl bibl {
+  display: list-item;
+  margin-left: 1em;
+  padding-left: 0.6em;
+  margin-top: 0em;
+  margin-bottom: 0em;
+  list-style-position:inherit;
+}
+
+
+
+accMat listBibl bibl[type="none"]::before {
+  content: "Keine Beilage ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="certificate"]::before {
+  content: "Quelle (Zeugnis): ";
+  font-weight: bold;
+
+}
+
+accMat listBibl bibl[type="letter"]::before {
+  content: "Quelle (Brief): ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="letter_of_recommendation"]::before {
+  content: "Quelle (Empfehlungsschreiben): ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="notatedMusic"]::before {
+  content: "Quelle (Noten): ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="textTemplate"]::before {
+  content: "Quelle (Textvorlage): ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="drawing"]::before {
+  content: "Quelle (Zeichnung): ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="bill"]::before {
+  content: "Quelle (Rechnung): ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="print"]::before {
+  content: "Quelle (Druckerzeugnis): ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="diploma"]::before {
+  content: "Quelle (Diplom): ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="medal"]::before {
+  content: "Quelle (Orden): ";
+  font-weight: bold;
+}
+
+
+accMat listBibl bibl[type="other"]::before {
+  content: "Quelle (Sonstiges): ";
+  font-weight: bold;
+}
+
+
+accMat listBibl bibl[type="keine"] {
+  display: none;
+  font-weight: bold;
+}
+
+
+accMat listBibl bibl[type="auction_catalogue"]::before {
+  content: "Auktionskatalog: ";
+  font-weight: bold;
+}
+
+
+accMat listBibl bibl [type="FMB-C-letters_stock"]::before {
+  content: "FMB-C-Briefbestand: ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="third_party_letters"]::before {
+  content: "Briefe Dritter: ";
+  font-weight: bold;
+}
+
+
+accMat listBibl bibl[type="letter_index"]::before {
+  content: "Briefverzeichnis: ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="notebook"]::before {
+  content: "Notizbuch: ";
+  font-weight: bold;
+}
+
+
+accMat listBibl bibl[type="diary_entry"]::before {
+  content: "Tagebucheinträge: ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="copy_book"]::before {
+  content: "Kopierbuch: ";
+  font-weight: bold;
+}
+
+accMat listBibl bibl[type="other"]::before {
+  content: "Sonstiges: ";
+  font-weight: bold;
+}
+
+
+
+
+
+
+
+revisionDesc {
+  display: none;
+  /*  display: block; */
+  margin-bottom: 1em;
+}
+
+
+revisionDesc[status="Entwurf"]::before {
+  content: "Veröffentlichungsstatus (Entwurf): ";
+  font-weight:bold;
+}
+
+revisionDesc[status="Freigegeben"]::before {
+  content: "Veröffentlichungsstatus (Freigegeben): "; /* Der Content "Freigegeben" kann weggelassen werden!*/
+  font-weight:bold;
+}
+
+revisionDesc change {
+  display: none;
+  /*  display: inline; */
+  margin-bottom: 0em;
+}
+
+catDesc {
+  display: block;
+  margin-bottom: 0.5em;
+}
+encodingDesc {
+  display: none;
+  /*  display: block; */
+  margin-bottom: 1em;
+}
+
+encodingDesc::before {
+  content: "Digitales Editorial: ";
+  font-weight: bold;
+}
+
+encodingDesc projectDesc {
+  display: block;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+}
+
+encodingDesc projectDesc p {
+  display: inline;
+  margin-bottom: 0.5em;
+  margin-top: 0em;
+}
+
+encodingDesc projectDesc::before {
+  content: "Projekt: ";
+  font-weight: bold;
+}
+
+editorialDecl {
+  display: block;
+  margin-bottom: 1em;
+}
+
+encodingDesc editorialDecl::before {
+  content: "Editionsrichtlinien: ";
+  font-weight: bold;
+}
+
+encodingDesc editorialDecl p {
+  display: inline;
+  margin-bottom: 0em;
+}
+
+
+profileDesc {
+  display: block;
+  /*  display: none; */
+  margin-bottom: 1em;
+}
+
+correspDesc {
+  display: block;
+  /*  display: none; */
+  margin-bottom: 1em;
+  font-weight: normal;
+}
+
+
+profileDesc correspDesc correspAction[type="sent"] {
+  display: block;
+  /*  display: none; */
+  margin-bottom: 0.5em;
+}
+
+
+profileDesc correspDesc correspAction[type="sent"] {
+  display: block;
+  /*  display: none; */
+  margin-bottom: 0.5em;
+  counter-reset: persName;
+  counter-reset: writerName;
+
+}
+
+
+
+
+profileDesc correspDesc correspAction[type="sent"] note {
+  display: none;
+}
+
+profileDesc correspDesc correspAction[type="sent"] persName[resp="author"] {
+  counter-increment: persName;                  /* Erhöht den Abschnittszähler */
+}
+
+profileDesc correspDesc correspAction[type="sent"] persName[resp="writer"] {
+  counter-increment: writerName;                  /* Erhöht den Abschnittszähler */
+}
+
+profileDesc correspDesc correspAction[type="sent"] persName[resp="writer"]::before {
+  content: "Schreiber " counter(writerName) ") : "; /* Zeigt den Zähler an */;
+  font-weight:bold;
+}
+
+profileDesc correspDesc correspAction[type="sent"] persName[resp="author"]::before {
+  content: "Autor " counter(persName) ") : "; /* Zeigt den Zähler an */;
+  font-weight:bold;
+}
+
+
+/* Ende: Eingefuegt UT am 15-06-2023 */
+
+
+
+
+
+
+profileDesc correspDesc correspAction[type="received"] persName {
+  counter-increment: persName;                  /* Erhöht den Abschnittszähler */
+}
+profileDesc correspDesc correspAction[type="received"] persName::before {
+  content: "Empfänger " counter(persName) ") : "; /* Zeigt den Zähler an */;
+  font-weight:bold;
+}
+
+profileDesc correspDesc correspAction persName {
+  display: block;
+  /*  display: none; */
+}
+
+
+
+
+profileDesc correspDesc correspAction[type="sent"] placeName {
+  display: block;
+  /*  display: none; */
+}
+
+profileDesc correspDesc correspAction[type="sent"] placeName::before {
+  content: "Schreibeort: ";
+  font-weight:bold;
+  content: "Schreibeort " counter(placeName) ") : "; /* Zeigt den Zähler an */;
+  margin-top: 0.5em;
+}
+
+profileDesc correspDesc correspAction[type="sent"] placeName {
+  counter-increment: placeName;                  /* Erhöht den Abschnittszähler */
+
+}
+
+
+
+
+profileDesc correspDesc correspAction[type="received"] placeName {
+  display: block;
+}
+
+profileDesc correspDesc correspAction[type="received"] placeName::before {
+  content: "Empfangsort: ";
+  font-weight:bold;
+  content: "Empfangsort " counter(placeName) ") : "; /* Zeigt den Zähler an */;
+}
+
+profileDesc correspDesc correspAction[type="received"] placeName {
+  counter-increment: placeName;                  /* Erhöht den Abschnittszähler */
+}
+
+
+
+projectDesc {
+  display: block;
+  margin-bottom: 1em;
+}
+
+docDate {
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+docImprint docDate {
+  display: inline;
+}
+
+docEdition {
+  display: block;
+  margin-bottom: 0.5em;
+}
+docImprint {
+  display: block;
+  margin-bottom: 0.5em;
+}
+docTitle {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+/* OUCS additions */
+Button {
+  font-family: monospace;
+  color: red;
+  font-weight: bold;
+  background-color: rgb(75%,75%,75%)
+}
+Value {
+  font-family: monospace;
+  color: rgb(255, 102, 0);
+  background-color: inherit;
+}
+Code {
+  font-family: monospace;
+  color: red;
+  background-color: inherit;
+}
+Field {
+  font-family: monospace;
+  color: red;
+  background-color: inherit;
+}
+Filespec {
+  font-family: monospace;
+  color: red;
+  background-color: inherit;
+}
+Input {
+  font-family: monospace;
+  color: green;
+  background-color: inherit;
+}
+Key {
+  font-family: monospace;
+  text-decoration: underline;
+  color: green;
+  background-color: inherit;
+}
+Link {
+  font-family: monospace;
+  color: green;
+  background-color: inherit;
+  text-decoration: underline;
+}
+Menu {
+  font-family: monospace;
+  color: red;
+  background-color: inherit;
+}
+Output {
+  font-family: monospace;
+  color: red;
+  background-color: inherit;
+}
+Icon {
+  color: inherit;
+  background-color : #B0E0E6;
+  font-weight : bold;
+}
+Screen {
+  font-family: monospace;
+  padding-top: 3mm;
+  padding-left: 4pt;
+  padding-bottom: 2pt;
+  display: block;
+  margin-top: 12pt;
+  margin-bottom: 12pt;
+  white-space: pre;
+  color: inherit;
+  background-color: #FFCC99;
+}
+
+
+.logo-image {
+  height: 115px !important;
+  padding-left: 0px !important;
+}
+
