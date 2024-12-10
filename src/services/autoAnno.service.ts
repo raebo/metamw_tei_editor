@@ -25,6 +25,11 @@ export interface AutoAnnoSnippet {
   reference_name_final: string
 }
 
+export interface SnippetEntity {
+  entityId: number
+  entityKey: string
+  entityName: string
+}
 
 
 export const fetchAutoAnnoListData = async (): Promise<AutoAnnoType[] | undefined> => {
@@ -51,7 +56,6 @@ export const fetchAutoAnnoLetter = async (id: string | undefined): Promise<AutoA
   try {
     const response = await initApi.initApi().get(`/jwt/automatic_annotation_letters/${id}`);
 
-    console.log(response.data)
     return response.data;
   } catch (err) {
     console.error(err);
@@ -65,6 +69,17 @@ export const fetchAutoAnnoLetterSnippets = async (id: number | undefined): Promi
 
     console.log(response.data)
     return response.data;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+export const searchAutoAnnoSnippetEntities = async (annoLetterId: number, searchString: string, entityType: string): Promise<SnippetEntity[]| undefined> => {
+  try {
+    const response = await initApi.initApi().get(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/search_entity/${searchString}/${entityType.toLowerCase()}?per_page=20`);
+
+    const snippetEntities = response?.data?.person?.entries;
+    return snippetEntities || undefined;
   } catch (err) {
     console.error(err);
   }

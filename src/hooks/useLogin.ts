@@ -8,6 +8,7 @@ import { loginState } from "../redux/slices/user.slice";
 import { useDispatch } from "react-redux";
 import { getMe } from "../services/user.service";
 import { AppDispatch } from "../redux/redux.store";
+import { clearSnippetState } from "../redux/slices/auto.letter.snippet.slice";
 
 interface LoginRequest {
   email: string;
@@ -32,6 +33,7 @@ const useLogin = () => {
     }
 
     dispatch(loginState(data));
+    dispatch(clearSnippetState());
   };
 
 

@@ -1,5 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useLogin } from "../../hooks/useLogin";
+import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { AutoAnnoType, AutoAnnoJobLetter, fetchAutoAnnoJobLetters, fetchAutoAnnoListData } from "../../services/autoAnno.service";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
@@ -83,7 +82,6 @@ const AutoAnnoList: React.FC = () => {
       }
     }
   ];
-
 
   const paginationModel = {page: 0, pageSize: 5};
 

@@ -1,22 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { RootState } from "../../redux/redux.store";
 import { setCurrentSnippet } from "../../redux/slices/auto.letter.snippet.slice";
 import { AutoAnnoSnippet, fetchAutoAnnoLetterSnippets } from "../../services/autoAnno.service";
 
 interface AutoAnnoSnippetListProps {
-  letterId: number
+  autoJobLetterId: number
+}
+
+interface SnippetUpdateParams {
+  snippetId: string;
+  xmlId: string;
+  referenceName: string;
+  [key: string]: any; // Optional: Allows additional dynamic fields
 }
 
 
-const AutoAnnoSnippetList = ( { letterId }: AutoAnnoSnippetListProps) => {
+const AutoAnnoSnippetList = ( { autoJobLetterId}: AutoAnnoSnippetListProps) => {
   const dispatch = useDispatch();
 
   const [autoAnnoSnippetData, setAutoAnnoSnippetData] = useState<AutoAnnoSnippet[] | undefined>();
 
   useEffect(() => {
     const getAutoAnnoSnippetData = async () => {
-      const result = await fetchAutoAnnoLetterSnippets(letterId);
+      const result = await fetchAutoAnnoLetterSnippets(autoJobLetterId);
       setAutoAnnoSnippetData(result);
     }
 
@@ -24,8 +30,20 @@ const AutoAnnoSnippetList = ( { letterId }: AutoAnnoSnippetListProps) => {
   }, []);
 
 
-  const handleSnippetUpdate = (snippetId: string, snippetXmlId: string, referenceName: string) => {
-    dispatch(setCurrentSnippet({ snippet: { id: snippetId, xmlId: snippetXmlId, referenceName: referenceName }, job: { id: "value" } }))
+  const handleSnippetUpdate = (params: SnippetUpdateParams) => {
+    const { snippetId, xmlId, referenceName, referenceKey, ...rest } = params;
+
+    dispatch(
+      setCurrentSnippet({
+        snippet: {
+          id: snippetId,
+          xmlId: xmlId,
+          referenceName: referenceName,
+          referenceKey: referenceKey,
+          ...rest
+        }
+      })
+    );
   };
 
   return (
@@ -55,7 +73,15 @@ const AutoAnnoSnippetList = ( { letterId }: AutoAnnoSnippetListProps) => {
                 <td>{snippet.reference_key_final}</td>
                 <td>{snippet.reference_type_final}</td>
                 <td>
-                  <button onClick={() => handleSnippetUpdate(String(snippet.id), snippet.xml_id, snippet.reference_name_orig)}>Action</button>
+                  <button onClick={() => handleSnippetUpdate({
+                    snippetId: String(snippet?.id),
+                    xmlId: snippet?.xml_id,
+                    referenceName: snippet?.reference_name_orig,
+                    referenceKey: snippet.reference_key_orig,
+                    referenceType: snippet.reference_type_orig
+                  })
+                  }>
+                    Action</button>
                 </td>
               </tr>
             ))

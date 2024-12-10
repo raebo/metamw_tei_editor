@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, styled } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import { styled } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { AutoAnnoJobLetter, fetchAutoAnnoLetter } from "../../services/autoAnno.service";
 import { enqueueSnackbar } from "notistack";
-import XMLDisplay from "../support/XmlDisplay";
 import XMLDisplayParser from "../support/XmlDisplayParser";
 import { RootState } from "../../redux/redux.store";
 import { useSelector } from "react-redux";
 import AutoAnnoSnippetForm from "./AutoAnnoSnippetForm";
 import AutoAnnoSnippetList from "./AutoAnnoSnippetList";
+import AutoAnnoLetterHandle from "./AutoAnnoLetterHandle";
+import { domReplaceNodeWithMarkedSpan } from "../../utils/domHandling";
 
 const AutoAnnoLetters: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,14 +53,13 @@ const AutoAnnoLetters: React.FC = () => {
             behavior: 'smooth', // Smooth scrolling
             block: 'start',     // Scroll to the top of the element
           });
+
+          domReplaceNodeWithMarkedSpan(targetElement);
         }
       }
     };
     scrollToId();
   }, [sharedSnippet]);
-
-
-
 
   const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: '#fff',
@@ -106,10 +105,15 @@ const AutoAnnoLetters: React.FC = () => {
         </div>
         <div className="box-2">
           <div className="sub-box">
-            <AutoAnnoSnippetForm />
-          </div>
-          <div className="sub-box">
-            <AutoAnnoSnippetList letterId={autoAnnoLetterId} />
+            <div className="sub-box-element sub-box-top">
+              <AutoAnnoSnippetForm autoJobLetterId={autoAnnoLetterId}/>
+            </div>
+            <div className="sub-box-element sub-box-center">
+              <AutoAnnoSnippetList autoJobLetterId={autoAnnoLetterId}/>
+            </div>
+            <div className="sub-box-element sub-box-bottom">
+              <AutoAnnoLetterHandle autoJobLetterId={autoAnnoLetterId}/>
+            </div>
           </div>
         </div>
       </div>
@@ -119,9 +123,9 @@ const AutoAnnoLetters: React.FC = () => {
     // <Grid container spacing={2}>
     //   <Grid size={{xs: 6, md: 6, lg: 6, xl: 6}} height="40%">
     //     {transformedData?.xmlContent ? (
-  //             <div className="letter-xml" id="letterXml">
-  //               {/*<div dangerouslySetInnerHTML={{ __html: xmlContent}} />*/}
-  //               <XMLDisplayParser xmlString={transformedData.xmlContent} />;
+    //             <div className="letter-xml" id="letterXml">
+    //               {/*<div dangerouslySetInnerHTML={{ __html: xmlContent}} />*/}
+    //               <XMLDisplayParser xmlString={transformedData.xmlContent} />;
   //                   {/*<XMLDisplayParser xmlString={transformedData.xmlContent} />*/}
   //                   {/*<XMLDisplayParser xmlString={xmlContent} />*/}
   //                     {/*<div>*/}
