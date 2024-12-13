@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
-import { searchAutoAnnoSnippetEntities, SnippetEntity } from "../../../services/autoAnno.service";
+import { searchAutoAnnoSnippetEntities } from "../../../services/autoAnno.service";
+import { isDisabled } from "@testing-library/user-event/dist/utils";
+import { SnippetEntity } from "../../../services/mappings/autoAnnoMappings";
 
 interface SnippetFormAutocompleteProps {
   autoJobLetterId: number
   entityType: string
   entityKey:string
+  isDisabled: boolean
   setFormEntityKey: (entityKey: string) => void
   setFormEntityType: (entityType: string) => void
 }
@@ -15,7 +18,6 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
 
   const [options, setOptions] = useState<SnippetEntity[]>([]);
   const [inputValue, setInputValue] = useState("");
-  // const [selectedKey, setSelectedKey] = useState("");
   const [loading, setLoading] = useState(false);
 
 
@@ -49,15 +51,14 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
     <>
       <Autocomplete
         freeSolo={false}
+        disabled={props.isDisabled}
         options={options} // Dynamic options
         loading={loading} // Display loading indicator
         onInputChange={(event, value) => setInputValue(value)} // Update input value
         onChange={(event, value) => {
           if (value && typeof value !== 'string') {
-            console.log('Selected ID:', value); // Access the ID of the selected entry
             props.setFormEntityKey(value.entityKey); // Store the ID in state or pass it to a parent component
           } else {
-            console.log('No valid selection made');
             props.setFormEntityKey(""); // Handle the case where no valid selection is made
           }
         }}

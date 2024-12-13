@@ -13,7 +13,6 @@ const Statuses = {
   }
 }
 
-// Create a type from the Statuses object for additional type safety.
-type StatusesType = typeof Statuses;
+type StatusesType = typeof Statuses; // Create a type from the Statuses object for additional type safety.
 
 export { Statuses };

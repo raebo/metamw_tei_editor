@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 interface AutoLetterSnippetState {
   snippet: {
-    id: string,
+    id: number,
     xmlId: string,
     referenceName: string
     referenceKey: string
@@ -11,10 +11,11 @@ interface AutoLetterSnippetState {
   letter: {
     id: string | null,
     reloadStatus?: boolean
+    reloadSnippetsStatus?: boolean
   } | null
   job: {
     id:string | null,
-    reloadStatus?: boolean
+    reloadStatus: boolean
   } | null;
 }
 
@@ -22,16 +23,20 @@ const initialState: AutoLetterSnippetState = {
   snippet: null,
   letter: {
     id: null,
-    reloadStatus: false
+    reloadStatus: false,
+    reloadSnippetsStatus: true
   },
-  job: null
+  job: {
+    id: null,
+    reloadStatus: true
+  }
 };
 
 const autoLetterSnippetSlice = createSlice({
   name: 'autoLetterSnippet',
   initialState,
   reducers: {
-    setCurrentSnippet(state, action) {
+    setAutoAnnoSnippet(state, action) {
       if (!state.snippet) {
         state.snippet = { ...action.payload.snippet };
       } else {
@@ -48,17 +53,16 @@ const autoLetterSnippetSlice = createSlice({
       state.job = null
     },
 
-    setReloadStatus(state, action) {
+    setAutoAnnoLetter(state, action) {
       if (!state.letter) {
         state.letter = { ...action.payload.letter}
       } else {
         state.letter = { ...state.letter, ...action.payload.letter};
-        console.log("setReloadStatus: ", state.letter)
       }
-    }
+    },
   },
 });
 
-export const { setCurrentSnippet, clearSnippetState, setReloadStatus} = autoLetterSnippetSlice.actions;
+export const { setAutoAnnoSnippet, clearSnippetState, setAutoAnnoLetter} = autoLetterSnippetSlice.actions;
 
 export default autoLetterSnippetSlice.reducer;

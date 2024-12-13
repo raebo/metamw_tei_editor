@@ -5,32 +5,37 @@ import { fetchAutoAnnoLetter, fetchAutoAnnoLetterSnippets } from "../../services
 import { Statuses } from "../../utils/entityStatuses";
 import { AppDispatch, RootState } from "../../redux/redux.store";
 import { useDispatch, useSelector } from "react-redux";
-import { setReloadStatus } from "../../redux/slices/auto.letter.snippet.slice";
+import { setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
 
 interface AutoAnnoLetterHandleProps {
   autoJobLetterId: number
 }
 
-
 const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
 
-
   const dispatch = useDispatch<AppDispatch>();
-  const reloadLetterStatus: boolean | null | undefined = useSelector((state: RootState) => state.autoLetterSnippet.letter?.reloadStatus ?? false);
   const [finalSaveDisabled, setFinalSaveDisabled] = useState(true);
+
+  const reloadLetterStatus= useSelector((state: RootState) =>
+    state.autoLetterSnippet.letter?.reloadStatus?? false
+  );
 
   useEffect(() => {
     const getAutoAnnoLetterData = async () => {
-      const result = await fetchAutoAnnoLetter(String(props.autoJobLetterId));
+      if (reloadLetterStatus) {
+        const result = await fetchAutoAnnoLetter(String(props.autoJobLetterId));
 
-      if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) {
-        setFinalSaveDisabled(true)
+        console.log("+ + + + + + + + + + + + +  + + reload letter status", result)
+
+        if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) {
+          setFinalSaveDisabled(false)
+        }
+        dispatch(setAutoAnnoLetter({letter: {id: props.autoJobLetterId, reloadStatus: false} }))
       }
-      dispatch(setReloadStatus({letter: {id: props.autoJobLetterId, reloadStatus: false} }))
     }
     getAutoAnnoLetterData()
 
-  }, [reloadLetterStatus, dispatch]);
+  }, [reloadLetterStatus]);
 
 
   return (

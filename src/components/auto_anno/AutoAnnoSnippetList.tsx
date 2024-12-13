@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { setCurrentSnippet } from "../../redux/slices/auto.letter.snippet.slice";
-import { AutoAnnoSnippet, fetchAutoAnnoLetterSnippets } from "../../services/autoAnno.service";
+import { useDispatch, useSelector } from "react-redux";
+import { setAutoAnnoSnippet, setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
+import { fetchAutoAnnoLetterSnippets } from "../../services/autoAnno.service";
+import {
+  AutoAnnoSnippet,
+  getStatusDetails,
+} from "../../services/mappings/autoAnnoMappings";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Icon, IconButton } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
+import { enqueueSnackbar } from "notistack";
+import Paper from "@mui/material/Paper";
+import { Edit } from "@mui/icons-material";
+import { RootState } from "../../redux/redux.store";
 
 interface AutoAnnoSnippetListProps {
   autoJobLetterId: number
@@ -14,27 +25,31 @@ interface SnippetUpdateParams {
   [key: string]: any; // Optional: Allows additional dynamic fields
 }
 
-
 const AutoAnnoSnippetList = ( { autoJobLetterId}: AutoAnnoSnippetListProps) => {
   const dispatch = useDispatch();
 
   const [autoAnnoSnippetData, setAutoAnnoSnippetData] = useState<AutoAnnoSnippet[] | undefined>();
 
+  const reloadStatusSnippets = useSelector((state: RootState) =>
+    state.autoLetterSnippet.letter?.reloadSnippetsStatus?? false
+  );
+
   useEffect(() => {
     const getAutoAnnoSnippetData = async () => {
-      const result = await fetchAutoAnnoLetterSnippets(autoJobLetterId);
-      setAutoAnnoSnippetData(result);
+      if (autoJobLetterId && reloadStatusSnippets) {
+        const result = await fetchAutoAnnoLetterSnippets(autoJobLetterId);
+        setAutoAnnoSnippetData(result);
+        dispatch(setAutoAnnoLetter({letter: {id: autoJobLetterId, reloadSnippetsStatus: false} }))
+      }
     }
-
     getAutoAnnoSnippetData()
-  }, []);
-
+  }, [autoJobLetterId, reloadStatusSnippets]);
 
   const handleSnippetUpdate = (params: SnippetUpdateParams) => {
     const { snippetId, xmlId, referenceName, referenceKey, ...rest } = params;
 
     dispatch(
-      setCurrentSnippet({
+      setAutoAnnoSnippet({
         snippet: {
           id: snippetId,
           xmlId: xmlId,
@@ -46,60 +61,77 @@ const AutoAnnoSnippetList = ( { autoJobLetterId}: AutoAnnoSnippetListProps) => {
     );
   };
 
-  return (
-    <div>
-      <h2>Snippet Liste</h2>
-      <div>
-        <table>
-          <thead>
-          <tr>
-            <th>XML-ID</th>
-            <th>Status</th>
-            <th>Wert (Sempria)</th>
-            <th>Typ (Sempria)</th>
-            <th>Wert (Final)</th>
-            <th>Typ (Final)</th>
-            <th>Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-          {autoAnnoSnippetData && autoAnnoSnippetData.length > 0 ? (
-            autoAnnoSnippetData.map((snippet) => (
-              <tr key={snippet.id}>
-                <td>{snippet.xml_id}</td>
-                <td>{snippet.status}</td>
-                <td>{snippet.reference_key_orig}</td>
-                <td>{snippet.reference_type_orig}</td>
-                <td>{snippet.reference_key_final}</td>
-                <td>{snippet.reference_type_final}</td>
-                <td>
-                  <button onClick={() => handleSnippetUpdate({
-                    snippetId: String(snippet?.id),
-                    xmlId: snippet?.xml_id,
-                    referenceName: snippet?.reference_name_orig,
-                    referenceKey: snippet.reference_key_orig,
-                    referenceType: snippet.reference_type_orig
-                  })
-                  }>
-                    Action</button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={7}>No data available</td>
-            </tr>
-          )}
-          </tbody>
-        </table>
+  const snippetColumns: GridColDef[] = [
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 100,
+      sortable: false,
+      renderCell: (params) => {
+        const { label, backgroundColor, foregroundColor } = getStatusDetails(params.row.status);
 
-      </div>
-      {/*<input*/}
-      {/*  type="text"*/}
-      {/*  placeholder="Type to update"*/}
-      {/*  onChange={(e) => handleSnippetUpdate(e.target.value as string, "value")}*/}
-      {/*/>*/}
-    </div>
+        return (
+          <div
+            style={{
+              backgroundColor,
+              padding: '0',
+              borderRadius: '4px',
+              textAlign: 'center',
+              color: foregroundColor
+            }}
+          >
+            { label }
+          </div>
+        );
+      }
+    },
+    {field: 'reference_key_orig', headerName: 'Wert (Sempria)', width: 150},
+    {field: 'reference_name_orig', headerName: 'Wert (Sempria)', width: 450},
+    {field: 'reference_key_final', headerName: 'Wert (Übernommen)', width: 150},
+    {field: 'reference_name_final', headerName: 'Wert (Übernommen)', width: 150},
+    {
+      field: 'actions',
+      headerName: '',
+      width: 100,
+      sortable: false,
+      renderCell: (params) => {
+        const handleIconClick = async () => {
+          try {
+           handleSnippetUpdate({
+              snippetId: String(params.row.id),
+              xmlId: params.row.xml_id,
+              referenceName: params.row.reference_name_orig,
+              referenceKey: params.row.reference_key_orig,
+              referenceType: params.row.reference_type_orig
+           })
+          } catch (err) {
+            enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
+          }
+        };
+
+        return (
+          <IconButton onClick={handleIconClick} aria-label="info">
+            <Edit color="primary"/>
+          </IconButton>
+        );
+      }
+    }
+  ]
+
+  const paginationModel = {page: 0, pageSize: 5};
+
+  return (
+    <>
+      <Paper>
+        <DataGrid
+          columns={snippetColumns}
+          rows={autoAnnoSnippetData}
+          initialState={{pagination: { paginationModel }}}
+          pageSizeOptions={[5, 10]}
+          sx={{border: 0}}
+        />
+      </Paper>
+    </>
   );
 };
 

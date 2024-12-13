@@ -1,10 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { AutoAnnoType, AutoAnnoJobLetter, fetchAutoAnnoJobLetters, fetchAutoAnnoListData } from "../../services/autoAnno.service";
+import { fetchAutoAnnoJobLetters, fetchAutoAnnoListData } from "../../services/autoAnno.service";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import { IconButton } from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
+import {
+  AutoAnnoJobLetter,
+  AutoAnnoType, getStatusDetails,
+} from "../../services/mappings/autoAnnoMappings";
 
 
 const AutoAnnoList: React.FC = () => {
@@ -34,7 +38,28 @@ const AutoAnnoList: React.FC = () => {
   const jobColumns: GridColDef[] = [
     {field: 'id', headerName: 'ID', width: 90},
     {field: 'service_identifier', headerName: 'Service Identifier', width: 150},
-    {field: 'status', headerName: 'Status', width: 150},
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 150,
+      renderCell: (params) => {
+        const { label, backgroundColor, foregroundColor } = getStatusDetails(params.row.status);
+
+        return (
+          <div
+            style={{
+              backgroundColor,
+              padding: '0',
+              borderRadius: '4px',
+              textAlign: 'center',
+              color: foregroundColor
+            }}
+          >
+            { label }
+          </div>
+        );
+      }
+    },
     {field: 'search_string', headerName: 'Search String', width: 200},
     {
       field: 'actions',
@@ -62,8 +87,29 @@ const AutoAnnoList: React.FC = () => {
 
   const letterColumns: GridColDef[] = [
     {field: 'id', headerName: 'ID', width: 90},
-    {field: 'letter', headerName: 'Brief', width: 150},
-    {field: 'status', headerName: 'Status', width: 150},
+    {field: 'letter_name', headerName: 'Brief', width: 150},
+    {field: 'status',
+      headerName: 'Status',
+      width: 150,
+      renderCell: (params) => {
+
+        const { label, backgroundColor, foregroundColor } = getStatusDetails(params.row.status);
+
+        return (
+          <div
+            style={{
+              backgroundColor,
+              padding: '0',
+              borderRadius: '4px',
+              textAlign: 'center',
+              color: foregroundColor
+            }}
+          >
+            { label }
+          </div>
+        );
+      }
+    },
     {
       field: 'actions',
       headerName: '',
