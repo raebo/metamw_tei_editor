@@ -1,24 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { styled } from "@mui/material";
-import Paper from "@mui/material/Paper";
 import { fetchAutoAnnoLetter } from "../../services/autoAnno.service";
 import { enqueueSnackbar } from "notistack";
 import XMLDisplayParser from "../support/XmlDisplayParser";
 import { RootState } from "../../redux/redux.store";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import AutoAnnoSnippetForm from "./AutoAnnoSnippetForm";
 import AutoAnnoSnippetList from "./AutoAnnoSnippetList";
 import AutoAnnoLetterHandle from "./AutoAnnoLetterHandle";
 import { domReplaceNodeWithMarkedSpan } from "../../utils/auto_anno/domHandling";
-import { AutoAnnoJobLetter } from "../../services/mappings/autoAnnoMappings";
+import { setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
+import { Box, Typography } from "@mui/material";
 
 const AutoAnnoLetters: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { job_id } = useParams<{ job_id: string }>();
 
+  const dispatch = useDispatch();
   const autoAnnoLetterId = Number(id);
+  const autoAnnoJobId = Number(job_id);
 
-  const [autoLetterData, setAutoLetterData] = useState<AutoAnnoJobLetter| undefined>();
+  const reloadLetter = useSelector((state: RootState) =>
+    state.autoLetterSnippet.letter?.reloadStatus?? false
+  );
+
+  useEffect(() => {
+    // Set reloadLetter to true after the component is mounted
+    dispatch(setAutoAnnoLetter({ letter: { id: autoAnnoLetterId, reloadStatus: true } }));
+  }, [dispatch, autoAnnoLetterId]);
+
+  const [transformedData, setTransformedData] = useState<any>({xmlContent: null, letterName: null});
 
   const sharedSnippet = useSelector((state: RootState) => state.autoLetterSnippet.snippet);
   const sharedJob = useSelector((state: RootState) => state.autoLetterSnippet.job);
@@ -26,25 +37,35 @@ const AutoAnnoLetters: React.FC = () => {
 
   useEffect(() => {
     const getData = async () => {
-      try {
-        const result = await fetchAutoAnnoLetter(id);
-        setAutoLetterData(result);
-      } catch (err) {
-        enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
-      } finally {
-        // setLoading(false);
+      if (autoAnnoLetterId && reloadLetter) {
+        try {
+          const result = await fetchAutoAnnoLetter(id);
+
+          if (result && result.xml_content_updated) {
+            setTransformedData({xmlContent: result.xml_content_updated, letterName: result.letter_name});
+          } else if (result && result.xml_content) {
+            setTransformedData({xmlContent: result.xml_content, letterName: result.letter_name});
+          } else {
+            setTransformedData({xmlContent: null, letterName: result?.letter_name ? result.letter_name : null});
+          }
+
+          dispatch(setAutoAnnoLetter({letter: {id: autoAnnoLetterId, reloadStatus: false} }))
+        } catch (err) {
+          enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
+        } finally {
+          // setLoading(false);
+        }
       }
     };
 
     getData();
-  }, []);
+  }, [reloadLetter, dispatch]);
 
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const scrollToId = () => {
       if (sharedSnippet) {
-        // const targetElement = document.getElementById(sharedSnippet.id);
         const targetElement= document.querySelector('[xml\\:id="' + sharedSnippet.xmlId + '"]');
 
         if (targetElement && containerRef.current) {
@@ -60,14 +81,17 @@ const AutoAnnoLetters: React.FC = () => {
     scrollToId();
   }, [sharedSnippet]);
 
-  const transformedData = autoLetterData
-    ? {
-      xmlContent: autoLetterData.xml_content,
-    }
-    : null;
-
   return (
     <>
+      <div>
+        <Box>
+          {transformedData?.letterName? (
+            <Typography variant="h3">{transformedData.letterName}</Typography>
+          ) : (
+            <Typography variant="h3">No data available</Typography>
+          )}
+        </Box>
+      </div>
       <div className="container-fmbc-letter">
         <div className="box-1">
           {transformedData?.xmlContent ? (
@@ -89,7 +113,7 @@ const AutoAnnoLetters: React.FC = () => {
               <AutoAnnoSnippetList autoJobLetterId={autoAnnoLetterId}/>
             </div>
             <div className="sub-box-element sub-box-bottom">
-              <AutoAnnoLetterHandle autoJobLetterId={autoAnnoLetterId}/>
+              <AutoAnnoLetterHandle autoJobId={autoAnnoJobId} autoJobLetterId={autoAnnoLetterId} />
             </div>
           </div>
         </div>

@@ -29,8 +29,6 @@ const lightTheme = createTheme({
 })
 
 const App = () => {
-  // const state = useSelector((state) => state);
-
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.user);
   // eslint-disable-next-line no-new-wrappers
@@ -62,20 +60,6 @@ const App = () => {
 
   const isLoading = useSelector((state: RootState) => state.spinnerLoading.isLoading);
 
-  // useEffect(() => {
-  //   const handleBeforeUnload = () => {
-  //     localStorage.setItem('reduxState', JSON.stringify(state));
-  //   };
-  //
-  //   window.addEventListener('beforeunload', handleBeforeUnload);
-  //
-  //   // Cleanup on component unmount
-  //   return () => {
-  //     window.removeEventListener('beforeunload', handleBeforeUnload);
-  //   };
-  // }, [state]);
-  // console.log("App component rendered: Is Loading: ", isLoading)
-
   return (
     <ThemeProvider theme={lightTheme}>
       {/*<CssBaseline />*/}
@@ -88,8 +72,8 @@ const App = () => {
                 <Route index element={<HomePage />} />
                 <Route path="about" element={<AboutPage />} />
                 <Route path="login" element={<Login />} />
-                <Route path={"/automatic_annotations"} element={<AutoAnnoList />} />
-                <Route path={"/automatic_annotations/:id"} element={<AutoAnnoLetters />} />
+                <Route path={"/automatic_annotations/:id?"} element={<AutoAnnoList />} />
+                <Route path={"/automatic_annotations/:job_id/letters/:id"} element={<AutoAnnoLetters />} />
               </Route>
               <Route element={<AutoAnnoLayout/>}>
                 {/*<GuardedRoute path="/dashboard" component={Dashboard} auth={isAuthenticated} />*/}

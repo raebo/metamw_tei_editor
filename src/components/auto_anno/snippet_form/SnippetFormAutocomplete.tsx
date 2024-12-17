@@ -7,11 +7,11 @@ import { SnippetEntity } from "../../../services/mappings/autoAnnoMappings";
 
 interface SnippetFormAutocompleteProps {
   autoJobLetterId: number
-  entityType: string
-  entityKey:string
+  entityType: string | null | undefined
+  entityKey:string | null | undefined
   isDisabled: boolean
   setFormEntityKey: (entityKey: string) => void
-  setFormEntityType: (entityType: string) => void
+  setSaveButtonDisabled: (isDisabled: boolean) => void
 }
 
 const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
@@ -19,7 +19,6 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
   const [options, setOptions] = useState<SnippetEntity[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
-
 
   useEffect(() => {
     if (inputValue.trim() === "") {
@@ -29,17 +28,20 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
 
     const fetchData = async () => {
       setLoading(true);
-      try {
-        const response = await searchAutoAnnoSnippetEntities(props.autoJobLetterId, inputValue, props.entityType);
 
-        if (response) {
-          setOptions(response || []);
+      if (props.entityType !== null && props.entityType !== undefined && props.autoJobLetterId !== null) {
+        try {
+          const response = await searchAutoAnnoSnippetEntities(props.autoJobLetterId, inputValue, props.entityType);
+
+          if (response) {
+            setOptions(response || []);
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          setOptions([]);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setOptions([]);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -58,6 +60,7 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
         onChange={(event, value) => {
           if (value && typeof value !== 'string') {
             props.setFormEntityKey(value.entityKey); // Store the ID in state or pass it to a parent component
+            props.setSaveButtonDisabled(false);
           } else {
             props.setFormEntityKey(""); // Handle the case where no valid selection is made
           }

@@ -6,9 +6,11 @@ export interface AutoAnnoType {
 
 export interface AutoAnnoJobLetter {
   id: number;
-  letter: string;
+  letter_name: string;
   status: string;
   xml_content: string
+  xml_content_updated: string
+  content_changed: boolean
 }
 
 export interface AutoAnnoSnippet {
@@ -32,6 +34,7 @@ export interface SnippetEntity {
   entitySettlementKind?: string
   entityParentName?: string
   entityPlaceCountryName?: string
+  entityKind?: string
 }
 
 export interface SnippetApiEntity {
@@ -43,15 +46,16 @@ export interface SnippetApiEntity {
   entity_settlement_kind?: string;
   entity_parent_name?: string;
   entity_place_country_name?: string;
+  entity_kind?: string;
 }
 
-
-export type SnippetDialogType = "REJECT" | "ACCEPT";
+export type SnippetDialogType = "REJECT" | "ACCEPT" | "RESET_LETTER" | "WRITE_LETTER"
 
 
 export const getStatusDetails = (status: string): { label: string; backgroundColor: string, foregroundColor: string } => {
   const statusDetails: { [key: string]: { label: string; backgroundColor: string, foregroundColor: string } } = {
     closed_success: { label: 'Akzeptiert', backgroundColor: '#d4edda', foregroundColor: '#000000' },
+    checked_with_success: { label: 'Abgeschlossen', backgroundColor: '#d4edda', foregroundColor: '#000000' },
     closed_change: { label: 'Geändert', backgroundColor: '#d4edda', foregroundColor: '#000000' },
     closed_remove: { label: 'Entfernt', backgroundColor: '#f8d7da', foregroundColor: '#000000' },
     error: { label: 'Error', backgroundColor: '#f8d7da', foregroundColor: '#000000' },

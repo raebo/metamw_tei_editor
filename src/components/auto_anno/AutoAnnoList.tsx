@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { fetchAutoAnnoJobLetters, fetchAutoAnnoListData } from "../../services/autoAnno.service";
+import { fetchAutoAnnoJobLetters, fetchAutoAnnoLetter, fetchAutoAnnoListData } from "../../services/autoAnno.service";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import { IconButton } from "@mui/material";
@@ -9,9 +9,13 @@ import {
   AutoAnnoJobLetter,
   AutoAnnoType, getStatusDetails,
 } from "../../services/mappings/autoAnnoMappings";
+import { enqueueSnackbar } from "notistack";
 
 
 const AutoAnnoList: React.FC = () => {
+
+  const { id } = useParams<{ id: string }>();
+  const [autoAnnoJobId, setAutoAnnoJobId] = useState<number | undefined>();
 
   const [autoAnnoData, setJobRows] = useState<AutoAnnoType[] | undefined>();
   const [autoAnnoLetters, setLetterRows] = useState<AutoAnnoJobLetter[] | undefined>();
@@ -33,6 +37,23 @@ const AutoAnnoList: React.FC = () => {
 
     getData();
   }, []);
+
+  useEffect(() => {
+    if (id) {
+      const parsedId = parseInt(id, 10);
+      if (!isNaN(parsedId)) {
+        fetchAutoAnnoJobLetters(parsedId).then((result) => {
+          setLetterRows(result);
+          setAutoAnnoJobId(parsedId);
+        }).catch((err) => {
+          enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
+        })
+      } else {
+        console.error(`Invalid id: ${id}`);
+      }
+    }
+
+  }, [id]);
 
 
   const jobColumns: GridColDef[] = [
@@ -69,8 +90,9 @@ const AutoAnnoList: React.FC = () => {
       renderCell: (params) => {
         const handleIconClick = async () => {
           try {
-            const result = await fetchAutoAnnoJobLetters(params.row.id.toString());
+            const result = await fetchAutoAnnoJobLetters(params.row.id);
             setLetterRows(result);
+            setAutoAnnoJobId(params.row.id);
           } catch (err) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred');
           }
@@ -117,9 +139,8 @@ const AutoAnnoList: React.FC = () => {
       sortable: false,
       renderCell: (params) => {
         const handleIconDetailClick = () => {
-          _navigate(`/automatic_annotations/${params.row.id}`);
+          _navigate(`/automatic_annotations/${autoAnnoJobId}/letters/${params.row.id}`);
         }
-
         return (
           <IconButton onClick={handleIconDetailClick} aria-label="info">
             <InfoIcon color="primary"/>

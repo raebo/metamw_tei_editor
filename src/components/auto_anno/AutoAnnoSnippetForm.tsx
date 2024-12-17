@@ -1,19 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/redux.store";
 import Button from "@mui/material/Button";
-import { setAutoAnnoSnippet, setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
+import { setAutoAnnoSnippet, setAutoAnnoLetter, clearSnippetState } from "../../redux/slices/auto.letter.snippet.slice";
 import { Box, ButtonGroup, FormControl, InputLabel, MenuItem, Select, styled, TextField } from "@mui/material";
-import Grid from "@mui/material/Grid2";
 import Paper from "@mui/material/Paper";
 import SnippetFormAutocomplete from "./snippet_form/SnippetFormAutocomplete";
 import {
-  fetchAutoAnnoSnippetEntityData,
+  fetchAutoAnnoSnippetEntityData, setAnnoSnippetEntity,
   setAutoAnnoSnippetStatus,
   updateAnnoLetterContent
 } from "../../services/autoAnno.service";
 import {
-  autoAnnoReplaceDomNodeContent,
+  autoAnnoReplaceDomNodeContent, removeMarkedSpans,
   removeSnippetEntityFromDom,
   transformLetterXmlForExport
 } from "../../utils/auto_anno/domHandling";
@@ -27,75 +26,95 @@ interface AutoAnnoSnippetFormProps {
 
 const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
   const dispatch = useDispatch();
+
+  let menuTypeItems = []
   const sharedSnippet = useSelector((state: RootState) => state.autoLetterSnippet.snippet);
-
-
-  const formSubmit = () => {
-    dispatch(setAutoAnnoLetter({ letter: { id: props.autoJobLetterId, reloadStatus: true } } ))
-  }
+  const sharedSnippetShow = useSelector((state: RootState) => state.autoLetterSnippet.snippetShow);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<SnippetDialogType>("ACCEPT");
   const [dialogSubmitFunction, setDialogSubmitFunction] = useState<() => void>(() => {});
-  const [formEntityType, setFormEntityType] = useState(sharedSnippet?.referenceType ? sharedSnippet?.referenceType : "");
-  const[formEntityKey, setFormEntityKey] = useState(sharedSnippet?.referenceKey ? sharedSnippet?.referenceKey : "");
-  const[formFieldReferenceName, setFormFieldReferenceName] = useState(sharedSnippet?.referenceName ? sharedSnippet?.referenceName : "");
   const[hideFormButtons, setHideFormButtons] = useState(true);
-  const[formElementsDisabled, setFormElementsDisabled] = useState(false);
+  const[formElementsDisabled, setFormElementsDisabled] = useState(true);
+  const[autoCompleteSaveDisabled, setAutocompleteSaveDisabled] = useState(true);
 
-  let childReferenceKey = formEntityKey
-  let childReferenceType = formEntityType
-  let menuTypeItems = []
 
   if (sharedSnippet && formElementsDisabled) { setFormElementsDisabled(false) }
   if (!sharedSnippet && !formElementsDisabled) { setFormElementsDisabled(true) }
 
   const activateEditMode = () => {
     setHideFormButtons(false);
-    setFormEntityType(sharedSnippet?.referenceType ? sharedSnippet?.referenceType : "");
-    setFormEntityKey("")
-  }
-  const cancelEditMode = () => {
-    setHideFormButtons(true);
-    setFormEntityKey(sharedSnippet?.referenceKey ? sharedSnippet?.referenceKey : "");
-    setFormEntityType(sharedSnippet?.referenceType ? sharedSnippet?.referenceType : "");
   }
 
+  // Cancel the edit mode and reset the form to the original values
+  const cancelEditMode = () => {
+    dispatch(setAutoAnnoSnippet(
+      {snippet:
+          { referenceTypeChanged: sharedSnippet?.referenceType, referenceKeyChanged: sharedSnippet?.referenceKey, referenceNameChanged: sharedSnippet?.referenceName }
+      }
+     ))
+    setHideFormButtons(true);
+    setAutocompleteSaveDisabled(true)
+  }
+
+  // Save the snippet data - user has choosen a new autocomplete value
   const saveSnippet = () => {
     setFormElementsDisabled(true)
 
     const xmlLetterNode: Element|null = document.querySelector("#letterXml")
+    let xmlContent: string = ""
+    let hasError = false
 
     try {
       if (!sharedSnippet?.id) { throw new Error("no snippet id given") }
       if (xmlLetterNode === null) { throw new Error("xmlNodeContent is null") }
 
-      fetchAutoAnnoSnippetEntityData(props.autoJobLetterId, sharedSnippet?.id, childReferenceKey, childReferenceType).then((data) => {
-        autoAnnoReplaceDomNodeContent(sharedSnippet?.xmlId, childReferenceKey, childReferenceType, data)
+      fetchAutoAnnoSnippetEntityData(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceKeyChanged, sharedSnippet?.referenceTypeChanged).then((data) => {
+        autoAnnoReplaceDomNodeContent(sharedSnippet?.xmlId, sharedSnippet?.referenceTypeChanged, data)
 
-        setFormEntityType(data.entityType)
-        setFormEntityKey(data.entityKey)
-        setFormFieldReferenceName(data.entityDisplayName)
+        // needed this extra line call because otherwise it would not recognize the updated xml
+        xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML)
+
+        updateAnnoLetterContent(
+          props.autoJobLetterId,
+          xmlContent
+        ).catch((error) => {
+          enqueueSnackbar("error during updating of letter content: " + error, { variant: "error" })
+          hasError = true
+        })
+
+
       }).then(() => {
         setFormElementsDisabled(false)
       }).catch((error) => {
-          enqueueSnackbar("error during setting data: " + error, { variant: "error" })
-          setFormElementsDisabled(false)
+        enqueueSnackbar("error during setting data: " + error, { variant: "error" })
+        setFormElementsDisabled(false)
+        hasError = true
       });
 
-      updateAnnoLetterContent(
-        props.autoJobLetterId,
-        transformLetterXmlForExport(xmlLetterNode.innerHTML)
-      ).then(() => {
+      if (hasError) { throw new Error("fetching Snippet Data") }
 
+      setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged).then((response) => {
       }).catch((error) => {
-        enqueueSnackbar("error during updating of letter content: " + error, { variant: "error" })
+        enqueueSnackbar("error during setting data: " + error, { variant: "error" })
+        setFormElementsDisabled(false)
+        hasError = true
+      })
+
+      if (hasError) { throw new Error("updating Snippet Data") }
+
+      setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "ACCEPTED").then((response) => {
+        dispatch(setAutoAnnoLetter({letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
+        dispatch(clearSnippetState())
+      }).catch((error) => {
+        enqueueSnackbar("error during setting status of snippet: " + error, { variant: "error" })
         setFormElementsDisabled(false)
       })
 
     } catch (error) {
       enqueueSnackbar("error during saving of data " + error, { variant: "error" })
     }
+    setAutocompleteSaveDisabled(true)
     setHideFormButtons(true)
   }
 
@@ -106,30 +125,34 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
       if (!sharedSnippet?.id) { throw new Error("no snippet id given") }
       if (xmlLetterNode === null) { throw new Error("xmlNodeContent is null") }
 
+      removeSnippetEntityFromDom(sharedSnippet?.xmlId)
+      updateAnnoLetterContent(
+        props.autoJobLetterId,
+        transformLetterXmlForExport(
+          removeMarkedSpans(
+            xmlLetterNode
+          ).innerHTML
+        )
+      ).then(() => {
+        setHideFormButtons(true)
+        enqueueSnackbar("Die Auszeichnung wurde entfernt", { variant: "success" })
+
+      }).catch((error) => {
+        enqueueSnackbar("error during setting data: " + error, {variant: "error"})
+        setFormElementsDisabled(false)
+      });
+
       setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "REJECTED").then((response) => {
         if (response) {
-          dispatch(setAutoAnnoSnippet({ snippet: { ...sharedSnippet, status: "REJECTED" } }))
+          dispatch(setAutoAnnoLetter(
+            { letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: true } }
+          ))
+          dispatch(clearSnippetState())
         }
-        removeSnippetEntityFromDom(sharedSnippet?.xmlId)
-
       }).catch((error) => {
         enqueueSnackbar("error during setting data: " + error, {variant: "error"})
       })
 
-      updateAnnoLetterContent(
-        props.autoJobLetterId,
-        transformLetterXmlForExport(xmlLetterNode.innerHTML)
-      ).then(() => {
-        dispatch(setAutoAnnoLetter({letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
-        enqueueSnackbar("Die Auszeichnung wurde entfernt", { variant: "success" })
-      }).then(() => {
-
-        })
-        .catch((error) => {
-          enqueueSnackbar("error during setting data: " + error, {variant: "error"})
-          setFormElementsDisabled(false)
-
-        });
     } catch (error) {
       enqueueSnackbar("error during setting data: " + error, {variant: "error"})
     }
@@ -137,21 +160,50 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
   }
 
   const handleAcceptSnippet = () => {
+    const xmlLetterNode: Element|null = document.querySelector("#letterXml")
+    let hasError: boolean = false
+    let xmlContent: string = ""
+
     try {
       if (!sharedSnippet?.id) { throw new Error("no snippet id given") }
 
-      setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "ACCEPTED").then((response) => {
-        if (response) {
-          dispatch(setAutoAnnoSnippet({ snippet: { ...sharedSnippet, status: "ACCEPTED" } }))
-        }
-      }).then(() => {
-        dispatch(setAutoAnnoLetter({letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
-        enqueueSnackbar("Die Auszeichnung wurde akzeptiert", { variant: "success" })
+      if (xmlLetterNode === null) { throw new Error("xmlNodeContent is null") }
+
+      fetchAutoAnnoSnippetEntityData(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceKey, sharedSnippet?.referenceType).then((data) => {
+        autoAnnoReplaceDomNodeContent(sharedSnippet?.xmlId, sharedSnippet?.referenceType, data)
+
+        // needed this extra line call because otherwise it would not recognize the updated xml
+        xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML)
+
+        updateAnnoLetterContent(
+          props.autoJobLetterId,
+          xmlContent
+        ).catch((error) => {
+          enqueueSnackbar("error during updating of letter content: " + error, { variant: "error" })
+          hasError = true
+        })
 
       }).catch((error) => {
         enqueueSnackbar("error during setting data: " + error, { variant: "error" })
+        hasError = true
+      })
+
+      if (hasError) { throw new Error("Updating of xml content failed") }
+
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      sleep(2000);
+
+      setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "ACCEPTED").then((response) => {
+        dispatch(setAutoAnnoLetter({letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
+        dispatch(clearSnippetState())
+        enqueueSnackbar("Die Auszeichnung wurde akzeptiert", { variant: "success" })
+      }).catch((error) => {
+
+        enqueueSnackbar("error during setting data: " + error, { variant: "error" })
+        hasError = true
         setFormElementsDisabled(false)
       })
+      if (hasError) { throw new Error("setting dom Snippet Data") }
 
     } catch (error) {
       enqueueSnackbar("error during setting data: " + error, { variant: "error" })
@@ -166,24 +218,22 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
     setDialogOpen(true);
   };
 
-  if (childReferenceKey.length === 0 && sharedSnippet?.referenceKey) {
-    childReferenceKey = sharedSnippet?.referenceKey
-  } else if (!childReferenceKey) {
-    childReferenceKey = ""
+  // click handler for the autocomplete
+  const setAutocompleteResult = (entityKey: string) => {
+    dispatch(setAutoAnnoSnippet({snippet: { referenceKeyChanged: entityKey}}))
   }
 
-  if (childReferenceType.length === 0 && sharedSnippet?.referenceType) {
-    childReferenceType = sharedSnippet?.referenceType
-  } else if (!childReferenceType) {
-    childReferenceType = ""
+  // from select box
+  const setFormEntityType = (entityType: string) => {
+    dispatch(setAutoAnnoSnippet({snippet: { referenceTypeChanged: entityType}}))
   }
 
-  if (childReferenceType === "Person") {
+  if (sharedSnippet?.referenceType=== "Person") {
     menuTypeItems.push({value: "Person", label: "Person"})
-  } else {
+  } else if (sharedSnippet) {
     menuTypeItems.push({value: "Institution", label: "Institution"})
     menuTypeItems.push({value: "Settlement", label: "Ort"})
-    menuTypeItems.push({value: "sight", label: "Sehenswürdigkeit"})
+    menuTypeItems.push({value: "Sight", label: "Sehenswürdigkeit"})
   }
 
 
@@ -191,53 +241,65 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
     <>
       <Paper>
         <div className="autoSnippetFormBox">
-          <div className="autoSnippetFormRow">
-            <div className="form-item form-item--key">
-              <TextField
-                disabled
-                id="outlined-disabled"
-                label=""
-                value={!formEntityKey ? sharedSnippet?.referenceKey : formEntityKey}
-                sx={{m: 1, width: '100%'}}
-              />
-            </div>
             {hideFormButtons ? (
-              <div className="form-item form-item--type">
-                <TextField
-                  disabled
-                  id="outlined-disabled"
-                  label=""
-                  value={!formEntityType ? sharedSnippet?.referenceType : formEntityType}
-                  sx={{m: 1, width: '100%'}}
-                />
-              </div>
-              ) : (
+                <div className="autoSnippetFormRow">
+                    <div className="form-item form-item--key">
+                      <TextField
+                        disabled
+                        id="outlined-disabled"
+                        label=""
+                        value={sharedSnippetShow ? sharedSnippetShow.referenceKey : ""}
+                        sx={{m: 1, width: '100%'}}
+                      />
+                    </div>
+                    <div className="form-item form-item--type">
+                      <TextField
+                        disabled
+                        id="outlined-disabled"
+                        label=""
+                        value={sharedSnippetShow ? sharedSnippetShow?.referenceType : sharedSnippet?.referenceType}
+                        sx={{m: 1, width: '100%'}}
+                      />
+                    </div>
+                </div>
+                  ) : (
+              <div className="autoSnippetFormRow">
+                <div className="form-item form-item--key">
+                  <TextField
+                    disabled
+                    id="outlined-disabled"
+                    label=""
+                    value={sharedSnippet? sharedSnippet.referenceKeyChanged : ""}
+                    sx={{m: 1, width: '100%'}}
+                  />
+                </div>
                 <div className="form-item form-item--type">
                   <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
                     <InputLabel id="auto-anno-snippet-reference-type">Referenz Type</InputLabel>
-                  <Select
-                    defaultValue={childReferenceType}
-                    disabled={formElementsDisabled}
-                    labelId="demo-simple-select-filled-label"
-                          id="demo-simple-select-filled"
-                          onChange={(event) => setFormEntityType(event.target.value)}
-                        >
-                        {menuTypeItems.map((item) => (
-                          <MenuItem value={item.value}>{item.label}</MenuItem>
-                        ))}
-                        </Select>
-                      </FormControl>
-                    </div>
-              )}
-          </div>
-        { hideFormButtons ? (
-          <div className="autoSnippetFormRow">
-            <div className="form-item form-item--name">
-              <TextField
-                disabled
-                id="outlined-disabled"
-                label=""
-                value={!formFieldReferenceName ? sharedSnippet?.referenceName : formFieldReferenceName}
+                    <Select
+                      defaultValue={sharedSnippet?.referenceTypeChanged}
+                      disabled={formElementsDisabled}
+                      labelId="demo-simple-select-filled-label"
+                      id="demo-simple-select-filled"
+                      onChange={(event) => setFormEntityType(event.target.value)}
+                    >
+                      {menuTypeItems.map((item) => (
+                        <MenuItem value={item.value}>{item.label}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
+              </div>
+            )}
+          {
+            hideFormButtons ? (
+              <div className="autoSnippetFormRow">
+                <div className="form-item form-item--name">
+                  <TextField
+                    disabled
+                    id="outlined-disabled"
+                    label=""
+                    value={sharedSnippetShow ? sharedSnippetShow.referenceName : ""}
                 sx={{m: 1, width: '100%'}}
               />
             </div>
@@ -246,11 +308,12 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
           <>
             <SnippetFormAutocomplete
               isDisabled={formElementsDisabled}
-              entityType={childReferenceType}
-              entityKey={childReferenceKey}
+              entityType={sharedSnippet?.referenceTypeChanged}
+              entityKey={sharedSnippet?.referenceKeyChanged}
               autoJobLetterId={props.autoJobLetterId}
-              setFormEntityKey={setFormEntityKey}
-              setFormEntityType={setFormEntityType}/>
+              setFormEntityKey={setAutocompleteResult}
+              setSaveButtonDisabled={setAutocompleteSaveDisabled}
+            />
           </>
         )}
 
@@ -273,7 +336,7 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
             ) : (
               <div className="form-item form-item--buttons" hidden={hideFormButtons}>
                 <ButtonGroup size="small" variant="contained" aria-label="Basic button group">
-                  <Button disabled={formElementsDisabled} onClick={() => saveSnippet()}>Speichern</Button>
+                  <Button disabled={autoCompleteSaveDisabled} onClick={() => saveSnippet()}>Speichern</Button>
                   <Button disabled={formElementsDisabled} onClick={() => cancelEditMode()}>Abbruch</Button>
                 </ButtonGroup>
               </div>

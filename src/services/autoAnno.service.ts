@@ -6,6 +6,7 @@ import {
   SnippetApiEntity,
   SnippetEntity
 } from "./mappings/autoAnnoMappings";
+import axios from "axios";
 
 
 export const fetchAutoAnnoListData = async (): Promise<AutoAnnoType[] | undefined> => {
@@ -18,7 +19,7 @@ export const fetchAutoAnnoListData = async (): Promise<AutoAnnoType[] | undefine
   }
 };
 
-export const fetchAutoAnnoJobLetters = async (id: string): Promise<AutoAnnoJobLetter[]| undefined> => {
+export const fetchAutoAnnoJobLetters = async (id: number): Promise<AutoAnnoJobLetter[]| undefined> => {
   try {
     const response = await initApi.initApi().get(`/jwt/automatic_annotations/${id}/letters`);
 
@@ -87,7 +88,8 @@ const mapApiToSnippetEntity = (apiEntity: SnippetApiEntity): SnippetEntity => {
     entityDisplayName: apiEntity.entity_display_name,
     entitySettlementKind: apiEntity.entity_settlement_kind,
     entityParentName: apiEntity.entity_parent_name,
-    entityPlaceCountryName: apiEntity.entity_place_country_name
+    entityPlaceCountryName: apiEntity.entity_place_country_name,
+    entityKind: apiEntity.entity_kind
   }
 }
 
@@ -102,6 +104,7 @@ export const fetchAutoAnnoSnippetEntityData = async (annoLetterId: number, snipp
   return mapApiToSnippetEntity(response.data);
 }
 
+//TODO: Why cant we move this to autoAnnoMappings.ts?
 type SnippetStatus = "REJECTED" | "ACCEPTED" | "UPDATED";
 
 export const setAutoAnnoSnippetStatus = async (annoLetterId: number, snippetId: number, status: SnippetStatus): Promise<boolean> => {
@@ -116,11 +119,54 @@ export const setAutoAnnoSnippetStatus = async (annoLetterId: number, snippetId: 
 
 export const updateAnnoLetterContent = async (id: number, xmlContent: String): Promise<boolean> => {
   try {
-    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/patch_xml_content`, { xmlContent });
+    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/set_xml_content`, { xmlContent });
 
   } catch (err) {
     // @ts-ignore
     throw new Error("Error updating anno letter content: " + err.message?.toString());
   }
   return true
+}
+
+export const setAnnoSnippetEntity= async (annoLetterId: number, snippetId: number, entityType: string, entityKey: string): Promise<boolean> => {
+  try {
+    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_entity`, { entityType, entityKey });
+
+  } catch (err) {
+    // @ts-ignore
+    throw new Error("Error updating snippet entity: " + err.message?.toString());
+  }
+
+  return true;
+}
+
+export const writeAnnoLetter = async (id: number): Promise<boolean> => {
+  try {
+    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/write_letter_to_file`);
+
+    return true
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      throw new Error(`Error writing anno letter: ${err.response?.data?.status || err.message}`);
+    } else {
+      throw new Error('An unknown error occurred');
+    }
+  }
+}
+
+export const resetAnnoLetter = async (id: number): Promise<boolean> => {
+  try {
+    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/reset_letter`);
+
+    return true
+
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      // Handle Axios-specific error
+      throw new Error(`Error resetting anno letter: ${err.response?.data?.status || err.message}`);
+    } else {
+      // Handle unknown errors
+      throw new Error('An unknown error occurred');
+    }
+  }
 }

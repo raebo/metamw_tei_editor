@@ -7,11 +7,20 @@ interface AutoLetterSnippetState {
     referenceName: string
     referenceKey: string
     referenceType: string
+    referenceNameChanged: string
+    referenceKeyChanged: string
+    referenceTypeChanged: string
+  } | null
+  snippetShow: {
+    referenceName: string
+    referenceKey: string
+    referenceType: string
   } | null
   letter: {
     id: string | null,
     reloadStatus?: boolean
     reloadSnippetsStatus?: boolean
+    contentChanged?: boolean
   } | null
   job: {
     id:string | null,
@@ -21,10 +30,12 @@ interface AutoLetterSnippetState {
 
 const initialState: AutoLetterSnippetState = {
   snippet: null,
+  snippetShow: null,
   letter: {
     id: null,
-    reloadStatus: false,
-    reloadSnippetsStatus: true
+    reloadStatus: true,
+    reloadSnippetsStatus: true,
+    contentChanged: false
   },
   job: {
     id: null,
@@ -48,9 +59,16 @@ const autoLetterSnippetSlice = createSlice({
         state.letter = { id: "", reloadStatus: false };
       }
     },
+    setAutoAnnoSnippetShow(state, action) {
+      if (!state.snippetShow) {
+        state.snippetShow = { ...action.payload.snippetShow };
+      } else {
+        state.snippetShow = { ...state.snippetShow, ...action.payload.snippetShow };
+      }
+    },
     clearSnippetState(state) {
       state.snippet= null
-      state.job = null
+      state.snippetShow= null
     },
 
     setAutoAnnoLetter(state, action) {
@@ -63,6 +81,6 @@ const autoLetterSnippetSlice = createSlice({
   },
 });
 
-export const { setAutoAnnoSnippet, clearSnippetState, setAutoAnnoLetter} = autoLetterSnippetSlice.actions;
+export const { setAutoAnnoSnippet, setAutoAnnoSnippetShow, clearSnippetState, setAutoAnnoLetter} = autoLetterSnippetSlice.actions;
 
 export default autoLetterSnippetSlice.reducer;

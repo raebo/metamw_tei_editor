@@ -23,7 +23,6 @@ export const domReplaceNodeWithMarkedSpan = (element: Element): void => {
 
 export const autoAnnoReplaceDomNodeContent = (
   xmlId: string,
-  referenceKey: string,
   referenceType: string,
   snippetEntity: SnippetEntity
 ): void => {
@@ -31,10 +30,18 @@ export const autoAnnoReplaceDomNodeContent = (
 
   if (!domNode) { throw new Error(`No element found with xml:id="${xmlId}"`); }
 
+  domNode.setAttribute("checked", "true");
+
   if (referenceType === "Person") {
     replacePersonDomNode(domNode, snippetEntity);
+  } else if (referenceType === "Settlement") {
+    replacePlaceDomNodeSettlement(domNode, snippetEntity);
+  } else if (referenceType === "Institution") {
+    replacePlaceDomNodeInstiSight(domNode, 'institution', snippetEntity);
+  } else if (referenceType === "Sight") {
+    replacePlaceDomNodeInstiSight(domNode, 'sight', snippetEntity);
   } else {
-    replacePlaceDomNode(domNode, snippetEntity);
+    throw new Error(`Unsupported reference type: ${referenceType}`);
   }
 }
 
@@ -50,17 +57,67 @@ const replacePersonDomNode = (
   nameNode.textContent = snippetEntity.entityName;
 }
 
-const replacePlaceDomNode = (
-  domNode: Element,
+const replacePlaceDomNodeSettlement = (
+  placeNameNode: Element,
   snippetEntity: SnippetEntity
 ): void => {
-  const placeNameNode = domNode.querySelector("placeName");
-  if (!placeNameNode) {
-    return;
-  }
-  placeNameNode.setAttribute("key", snippetEntity.entityKey);
+  if (placeNameNode.tagName !== 'PLACENAME') { throw new Error(`Invalid element provided for ${placeNameNode.tagName}`); }
 
-  placeNameNode.textContent = snippetEntity.entityName;
+  const settlementNode = document.createElement("settlement");
+
+  if (snippetEntity.entityKind) { settlementNode.setAttribute("type", snippetEntity.entityKind); }
+
+  settlementNode.setAttribute("style", "hidden")
+  settlementNode.textContent = snippetEntity.entityName
+  placeNameNode.appendChild(settlementNode);
+
+  if (snippetEntity.entityPlaceCountryName) {
+    const countryNode = document.createElement("country");
+    countryNode.textContent = snippetEntity.entityPlaceCountryName
+    countryNode.setAttribute("style", "hidden")
+    placeNameNode.appendChild(countryNode);
+  }
+}
+
+const replacePlaceDomNodeInstiSight = (
+  placeNameNode: Element,
+  typeOfPlace: string,
+  snippetEntity: SnippetEntity
+): void => {
+  if (placeNameNode.tagName !== 'PLACENAME') { throw new Error(`Invalid element provided for ${placeNameNode.tagName}`); }
+
+  const nameNOde = document.createElement("name")
+  nameNOde.setAttribute("key", snippetEntity.entityKey)
+  nameNOde.setAttribute("type", typeOfPlace)
+  nameNOde.setAttribute("sub_type", '')
+  nameNOde.setAttribute("style", 'hidden')
+  nameNOde.textContent = snippetEntity.entityName
+
+  placeNameNode.appendChild(nameNOde)
+
+  const settlementNode = document.createElement("settlement");
+  settlementNode.setAttribute("type", 'locality');
+  settlementNode.setAttribute("style", "hidden")
+
+  if (snippetEntity.entitySettlementKind) { settlementNode.textContent = snippetEntity.entitySettlementKind}
+  placeNameNode.appendChild(settlementNode);
+
+  if (snippetEntity.entityPlaceCountryName) {
+    const countryNode = document.createElement("country");
+    countryNode.textContent = snippetEntity.entityPlaceCountryName
+    countryNode.setAttribute("style", "hidden")
+    placeNameNode.appendChild(countryNode);
+  }
+
+}
+
+
+const replacePlaceDomNodeSight= (
+  placeNameNode: Element,
+  snippetEntity: SnippetEntity
+): void => {
+  if (placeNameNode.tagName !== 'PLACENAME') { throw new Error(`Invalid element provided for ${placeNameNode.tagName}`); }
+
 }
 
 export const removeSnippetEntityFromDom = (
@@ -95,5 +152,21 @@ export const transformLetterXmlForExport = (
   transformedHTML = transformedHTML.replace(/<\/?persname/gi, (match) => match.replace(/persname/gi, 'persName'));
   transformedHTML = transformedHTML.replace(/<\/?placename/gi, (match) => match.replace(/placename/gi, 'placeName'));
 
-  return transformedHTML;
+  return transformedHTML.endsWith(';') ? transformedHTML.slice(0, -1) : transformedHTML;
+}
+
+
+export const removeMarkedSpans = (
+  root: Element)
+  : Element =>{
+  const markedSpans = root.querySelectorAll('span.marked');
+
+  markedSpans.forEach((span) => {
+    while (span.firstChild) {
+      span.parentNode?.insertBefore(span.firstChild, span);
+    }
+    span.parentNode?.removeChild(span);
+  });
+
+  return root
 }

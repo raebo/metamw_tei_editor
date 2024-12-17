@@ -18,6 +18,8 @@ interface SnippetFormDialogProps {
 export default function SnippetFormDialog(props: SnippetFormDialogProps) {
   const { dialogType } = props;
 
+  const [submitDisabled, setSubmitDisabled] = React.useState(false);
+
   let dialogTitle = ""; let dialogContent = ""; let dialogSubmit = "";
 
   if (dialogType === "REJECT") {
@@ -30,6 +32,23 @@ export default function SnippetFormDialog(props: SnippetFormDialogProps) {
     dialogTitle = "Auszeichnung Übernehmen";
     dialogContent = "Sind Sie sicher, dass Sie diese Auszeichnung speichern möchten?";
     dialogSubmit = "Speichern";
+  }
+
+  if (dialogType === "RESET_LETTER") {
+    dialogTitle = "Alle Anpassungen verwerfen";
+    dialogContent = "Sind Sie sicher, dass Sie alle gemachten Anpassungen verwerfen möchten?";
+    dialogSubmit = "Zurücksetzen";
+  }
+
+  if (dialogType === "WRITE_LETTER") {
+    dialogTitle = "Brief in Datei Speichern";
+    dialogContent = "Sind Sie sicher, dass Sie den angepassten Inhalt in einer Datei speichern möchten?";
+    dialogSubmit = "Speichern/Schreiben";
+  }
+
+  const componentClickSubmit = () => {
+    setSubmitDisabled(true);
+    props.handleClickSubmit();
   }
 
   return (
@@ -49,7 +68,7 @@ export default function SnippetFormDialog(props: SnippetFormDialogProps) {
         </DialogContent>
         <DialogActions>
           <Button onClick={props.handleClose}>Zurück</Button>
-          <Button onClick={props.handleClickSubmit} autoFocus>
+          <Button disabled={submitDisabled} onClick={() => componentClickSubmit()} autoFocus>
             { dialogSubmit }
           </Button>
         </DialogActions>

@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setAutoAnnoSnippet, setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
+import {
+  setAutoAnnoSnippet,
+  setAutoAnnoLetter,
+  setAutoAnnoSnippetShow
+} from "../../redux/slices/auto.letter.snippet.slice";
 import { fetchAutoAnnoLetterSnippets } from "../../services/autoAnno.service";
 import {
   AutoAnnoSnippet,
   getStatusDetails,
 } from "../../services/mappings/autoAnnoMappings";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Icon, IconButton } from "@mui/material";
-import InfoIcon from "@mui/icons-material/Info";
+import { IconButton } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 import Paper from "@mui/material/Paper";
 import { Edit } from "@mui/icons-material";
@@ -25,7 +28,7 @@ interface SnippetUpdateParams {
   [key: string]: any; // Optional: Allows additional dynamic fields
 }
 
-const AutoAnnoSnippetList = ( { autoJobLetterId}: AutoAnnoSnippetListProps) => {
+const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => {
   const dispatch = useDispatch();
 
   const [autoAnnoSnippetData, setAutoAnnoSnippetData] = useState<AutoAnnoSnippet[] | undefined>();
@@ -33,6 +36,12 @@ const AutoAnnoSnippetList = ( { autoJobLetterId}: AutoAnnoSnippetListProps) => {
   const reloadStatusSnippets = useSelector((state: RootState) =>
     state.autoLetterSnippet.letter?.reloadSnippetsStatus?? false
   );
+
+  useEffect(() => {
+    // reload Snippets after the component is mounted
+    dispatch(setAutoAnnoLetter({ letter: { id: autoJobLetterId, reloadSnippetsStatus: true } }));
+  }, [dispatch, autoJobLetterId]);
+
 
   useEffect(() => {
     const getAutoAnnoSnippetData = async () => {
@@ -46,7 +55,7 @@ const AutoAnnoSnippetList = ( { autoJobLetterId}: AutoAnnoSnippetListProps) => {
   }, [autoJobLetterId, reloadStatusSnippets]);
 
   const handleSnippetUpdate = (params: SnippetUpdateParams) => {
-    const { snippetId, xmlId, referenceName, referenceKey, ...rest } = params;
+    const { snippetId, xmlId, referenceName, referenceKey, referenceType, ...rest } = params;
 
     dispatch(
       setAutoAnnoSnippet({
@@ -55,10 +64,24 @@ const AutoAnnoSnippetList = ( { autoJobLetterId}: AutoAnnoSnippetListProps) => {
           xmlId: xmlId,
           referenceName: referenceName,
           referenceKey: referenceKey,
+          referenceType: referenceType,
+          referenceNameChanged: referenceName,
+          referenceKeyChanged: referenceKey,
+          referenceTypeChanged: referenceType,
           ...rest
         }
       })
     );
+    dispatch(
+      setAutoAnnoSnippetShow({
+        snippetShow: {
+          referenceName: referenceName,
+          referenceKey: referenceKey,
+          referenceType: referenceType
+        }
+      }
+      )
+    )
   };
 
   const snippetColumns: GridColDef[] = [
@@ -95,6 +118,10 @@ const AutoAnnoSnippetList = ( { autoJobLetterId}: AutoAnnoSnippetListProps) => {
       width: 100,
       sortable: false,
       renderCell: (params) => {
+        let isEditable = true
+
+        if (params.row.status !== 'open') { isEditable = false; }
+
         const handleIconClick = async () => {
           try {
            handleSnippetUpdate({
@@ -109,11 +136,15 @@ const AutoAnnoSnippetList = ( { autoJobLetterId}: AutoAnnoSnippetListProps) => {
           }
         };
 
-        return (
-          <IconButton onClick={handleIconClick} aria-label="info">
-            <Edit color="primary"/>
-          </IconButton>
-        );
+        if (isEditable) {
+          return (
+            <IconButton onClick={handleIconClick} disabled={!isEditable} aria-label="info">
+              <Edit color="primary"/>
+            </IconButton>
+          );
+        } else {
+          return ("")
+        }
       }
     }
   ]
