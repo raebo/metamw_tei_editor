@@ -57,7 +57,6 @@ const App = () => {
   }
   refreshUserState()
 
-
   const isLoading = useSelector((state: RootState) => state.spinnerLoading.isLoading);
 
   return (

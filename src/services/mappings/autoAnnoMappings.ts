@@ -1,7 +1,13 @@
-export interface AutoAnnoType {
+export interface AutoAnnoJob {
   id: number;
   name: string;
   status: string;
+  letters_count: number,
+  snippets_count: number,
+  letters_open: number;
+  letters_closed: number;
+  snippets_open: number;
+  snippets_closed: number;
 }
 
 export interface AutoAnnoJobLetter {
@@ -11,6 +17,9 @@ export interface AutoAnnoJobLetter {
   xml_content: string
   xml_content_updated: string
   content_changed: boolean
+  snippets_count: number
+  snippets_open: number
+  snippets_closed: number
 }
 
 export interface AutoAnnoSnippet {

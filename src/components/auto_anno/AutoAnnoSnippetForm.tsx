@@ -114,7 +114,6 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
     } catch (error) {
       enqueueSnackbar("error during saving of data " + error, { variant: "error" })
     }
-    setAutocompleteSaveDisabled(true)
     setHideFormButtons(true)
   }
 
@@ -190,8 +189,8 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
 
       if (hasError) { throw new Error("Updating of xml content failed") }
 
-      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-      sleep(2000);
+      // const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      // sleep(2000);
 
       setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "ACCEPTED").then((response) => {
         dispatch(setAutoAnnoLetter({letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
@@ -216,6 +215,7 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
     setDialogType(type);
     setDialogSubmitFunction(() => handleClickSubmit);
     setDialogOpen(true);
+    setAutocompleteSaveDisabled(false)
   };
 
   // click handler for the autocomplete

@@ -1,13 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { fetchAutoAnnoJobLetters, fetchAutoAnnoLetter, fetchAutoAnnoListData } from "../../services/autoAnno.service";
+import { fetchAutoAnnoJobLetters, fetchAutoAnnoLetter, fetchAutoAnnoJobs } from "../../services/autoAnno.service";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
-import { IconButton } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
 import {
   AutoAnnoJobLetter,
-  AutoAnnoType, getStatusDetails,
+  AutoAnnoJob, getStatusDetails,
 } from "../../services/mappings/autoAnnoMappings";
 import { enqueueSnackbar } from "notistack";
 
@@ -17,7 +17,7 @@ const AutoAnnoList: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [autoAnnoJobId, setAutoAnnoJobId] = useState<number | undefined>();
 
-  const [autoAnnoData, setJobRows] = useState<AutoAnnoType[] | undefined>();
+  const [autoAnnoData, setJobRows] = useState<AutoAnnoJob[] | undefined>();
   const [autoAnnoLetters, setLetterRows] = useState<AutoAnnoJobLetter[] | undefined>();
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +26,7 @@ const AutoAnnoList: React.FC = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const result = await fetchAutoAnnoListData();
+        const result = await fetchAutoAnnoJobs();
         setJobRows(result);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -34,7 +34,6 @@ const AutoAnnoList: React.FC = () => {
         // setLoading(false);
       }
     };
-
     getData();
   }, []);
 
@@ -52,13 +51,10 @@ const AutoAnnoList: React.FC = () => {
         console.error(`Invalid id: ${id}`);
       }
     }
-
   }, [id]);
 
 
   const jobColumns: GridColDef[] = [
-    {field: 'id', headerName: 'ID', width: 90},
-    {field: 'service_identifier', headerName: 'Service Identifier', width: 150},
     {
       field: 'status',
       headerName: 'Status',
@@ -81,7 +77,27 @@ const AutoAnnoList: React.FC = () => {
         );
       }
     },
-    {field: 'search_string', headerName: 'Search String', width: 200},
+    {field: 'id', headerName: 'ID', width: 90},
+    {field: 'service_identifier', headerName: 'Service Identifier', width: 150},
+    {field: 'search_string', headerName: 'Suchbegriff', width: 200},
+    {
+      field: 'letters_open',
+      headerName: 'Briefe',
+      width: 100,
+      sortable: false,
+      renderCell: (params) => {
+        return `${params.row.letters_open}/${params.row.letters_count}`;
+      }
+    },
+    {
+      field: 'snippets_open',
+      headerName: 'Auszeichnungen',
+      width: 150,
+      sortable: false,
+      renderCell: (params) => {
+        return `${params.row.snippets_open}/${params.row.snippets_count}`;
+      }
+    },
     {
       field: 'actions',
       headerName: '',
@@ -108,8 +124,6 @@ const AutoAnnoList: React.FC = () => {
   ];
 
   const letterColumns: GridColDef[] = [
-    {field: 'id', headerName: 'ID', width: 90},
-    {field: 'letter_name', headerName: 'Brief', width: 150},
     {field: 'status',
       headerName: 'Status',
       width: 150,
@@ -130,6 +144,16 @@ const AutoAnnoList: React.FC = () => {
             { label }
           </div>
         );
+      }
+    },
+    {field: 'letter_name', headerName: 'Brief', width: 150},
+    {
+      field: 'snippets_count',
+      headerName: 'Auszeichnungen',
+      width: 150,
+      sortable: false,
+      renderCell: (params) => {
+        return `${params.row.snippets_closed}/${params.row.snippets_count}`;
       }
     },
     {
@@ -175,13 +199,16 @@ const AutoAnnoList: React.FC = () => {
             />
           </Paper>
         </div>
-          ) : (
-          <div style={{marginTop: '40px', width: '100%'}}>
-            <h2>Bitte einen Eintrag auswählen</h2>
-          </div>
-          )}
-        </>
-        )
-      }
+        ) : (
+        <div style={{marginTop: '40px', width: '100%'}}>
+          <Box>
+            <Typography variant="h4">Bitte wählen Sie einen Eintrag in der oberen Tabelle aus.</Typography>
+          </Box>
+        </div>
+        )}
+    </>
 
-      export default AutoAnnoList
+  )
+}
+
+export default AutoAnnoList

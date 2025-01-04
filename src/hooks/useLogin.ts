@@ -36,7 +36,6 @@ const useLogin = () => {
     dispatch(clearSnippetState());
   };
 
-
   const getMeData = () => {
     getMe()
       .then( (data)  => {

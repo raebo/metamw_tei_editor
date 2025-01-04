@@ -49,6 +49,7 @@ export default function SnippetFormDialog(props: SnippetFormDialogProps) {
   const componentClickSubmit = () => {
     setSubmitDisabled(true);
     props.handleClickSubmit();
+    setSubmitDisabled(false)
   }
 
   return (

@@ -1,0 +1,4 @@
+{
+  "greeting": "Hallo, {name}!",
+  "welcomeMessage": "Willkommen in unserer Anwendung."
+}

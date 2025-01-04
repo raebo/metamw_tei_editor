@@ -2,14 +2,14 @@ import initApi from './apiRequest.service';
 import {
   AutoAnnoJobLetter,
   AutoAnnoSnippet,
-  AutoAnnoType,
+  AutoAnnoJob,
   SnippetApiEntity,
   SnippetEntity
 } from "./mappings/autoAnnoMappings";
 import axios from "axios";
 
 
-export const fetchAutoAnnoListData = async (): Promise<AutoAnnoType[] | undefined> => {
+export const fetchAutoAnnoJobs = async (): Promise<AutoAnnoJob[] | undefined> => {
   try {
   const response = await initApi.initApi().get('/jwt/automatic_annotations')
 
