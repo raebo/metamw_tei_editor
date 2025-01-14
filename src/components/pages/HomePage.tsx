@@ -1,5 +1,5 @@
 import Grid from "@mui/material/Grid2";
-import { Box, InputAdornment, styled, TextField } from "@mui/material";
+import { Box, styled } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import React, { useEffect, useState } from "react";
 import { fetchLastUsedLettersByUser, fetchSearchLetters } from "../../services/editor/apiLettersRequest.service";
