@@ -16,6 +16,12 @@
    height: 80%;
 }
 
+div [type="act_of_writing"] {
+   docauthor {
+      display: none;
+   }
+}
+
 /*.hidden {*/
 /*    display: none;*/
 /*}*/

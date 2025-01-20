@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/redux.store";
 import Button from "@mui/material/Button";
 import { setAutoAnnoSnippet, setAutoAnnoLetter, clearSnippetState } from "../../redux/slices/auto.letter.snippet.slice";
-import { Box, ButtonGroup, FormControl, InputLabel, MenuItem, Select, styled, TextField } from "@mui/material";
+import { ButtonGroup, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import SnippetFormAutocomplete from "./snippet_form/SnippetFormAutocomplete";
 import {

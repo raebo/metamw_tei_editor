@@ -1,4 +1,4 @@
-import { Avatar, Box, IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
 import state from "react";
 import { useState } from "react";
 import { snackVar } from "../../constants/snack";
@@ -6,14 +6,11 @@ import { UNKNOWN_SNACK_ERROR_MESSAGE } from "../../constants/errors";
 import { removeToken } from "../../services/authentication.service";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { loginState, logoutState } from "../../redux/slices/user.slice";
-import { getMe } from "../../services/user.service";
+import { logoutState } from "../../redux/slices/authentication.slice";
 import SettingsAvatar from "./SettingsAvatar";
 import { RootState } from "../../redux/redux.store";
-import { userVar } from "../../constants/authenticated";
 
 const Settings = () => {
-  const navigate = useNavigate()
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const handleOpenUserMenu = (event: state.MouseEvent<HTMLElement>) => {
@@ -25,7 +22,7 @@ const Settings = () => {
     dispatch(logoutState());
   };
 
-  const user = useSelector((state: RootState) => state.user.user);
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);

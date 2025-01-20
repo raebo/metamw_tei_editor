@@ -1,0 +1,55 @@
+import { RootState } from "../redux/redux.store";
+import { getMe } from "../services/user.service";
+
+
+export const awaitRefreshUserState = async (rootState: RootState): Promise<{ last_name: string; first_name: string; id: number }> => {
+  const authState = rootState.auth;
+
+  const token = localStorage.getItem('authToken');
+
+  if (authState?.isAuthenticated && authState.user) {
+    return authState.user
+  }
+
+  try {
+    const data = await getMe();
+    if (!data) {
+      throw new Error('Failed to fetch user data');
+    }
+    return data;
+  } catch (err) {
+    console.error('Error fetching user data:', err);
+    throw new Error('Error fetching user data');
+  }
+};
+
+
+export const refreshUserData = (rootState: RootState): { last_name: string; first_name: string; id: number } | undefined => {
+  const authState = rootState.auth
+
+  const token = localStorage.getItem('authToken')
+
+  try {
+    if (authState?.isAuthenticated && authState.user) {
+      return authState.user
+    }
+
+    if (token && authState !== null && authState.isAuthenticated === false && authState.user === null) {
+      getMe()
+        .then((data) => {
+          if (data !== null) {
+            return data
+          } else {
+            throw new Error('Failed to fetch user data')
+          }
+        })
+
+
+    } else {
+      throw new Error('No token found');
+    }
+  } catch (err) {
+    console.error('Error fetching user data:', err);
+    throw new Error('Error fetching user data');
+  }
+}

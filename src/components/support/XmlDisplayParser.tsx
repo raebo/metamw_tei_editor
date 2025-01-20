@@ -1,12 +1,13 @@
 import React from "react";
 
 const XMLDisplayParser: React.FC<{ xmlString: string }> = ({ xmlString }) => {
+
   const parseXml = (xmlString: string) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xmlString, "application/xml");
+
     return doc;
   };
-
 
   const renderNode = (node: ChildNode): React.ReactNode => {
     if (node.nodeType === Node.TEXT_NODE) {

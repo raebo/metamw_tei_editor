@@ -21,7 +21,7 @@ const drawerWidth = 480;
 
 const AutoAnnoLayout = () => {
   const _authenticatedVar = authenticatedVar.get()
-  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   return (
     <>

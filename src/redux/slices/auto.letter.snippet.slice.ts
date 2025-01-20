@@ -83,4 +83,4 @@ const autoLetterSnippetSlice = createSlice({
 
 export const { setAutoAnnoSnippet, setAutoAnnoSnippetShow, clearSnippetState, setAutoAnnoLetter} = autoLetterSnippetSlice.actions;
 
-export default autoLetterSnippetSlice.reducer;
+export default autoLetterSnippetSlice.reducer

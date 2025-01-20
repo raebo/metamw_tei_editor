@@ -4,7 +4,7 @@ import { enqueueSnackbar } from "notistack";
 import { UNKNOWN_ERROR_MESSAGE } from "../constants/errors";
 import { authenticatedVar } from "../constants/authenticated";
 import { setToken } from "../services/authentication.service";
-import { loginState } from "../redux/slices/user.slice";
+import { loginState } from "../redux/slices/authentication.slice";
 import { useDispatch } from "react-redux";
 import { getMe } from "../services/user.service";
 import { AppDispatch } from "../redux/redux.store";
@@ -74,7 +74,7 @@ const useLogin = () => {
     setAuthenticated()
     getMeData()
   };
-  
+
   return { login, error };
 }
 

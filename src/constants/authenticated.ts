@@ -5,4 +5,4 @@ import { getMe } from "../services/user.service";
 
 export const authenticatedVar = makeReactiveVar(typeof getToken() === 'string');
 
-export const userVar = makeReactiveVar(typeof getToken() === 'string' ? getMe() : null);
+// export const userVar = makeReactiveVar(typeof getToken() === 'string' ? getMe() : null);

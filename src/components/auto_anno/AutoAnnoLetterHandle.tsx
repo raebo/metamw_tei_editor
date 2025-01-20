@@ -12,9 +12,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearSnippetState, setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
 import { SnippetDialogType } from "../../services/mappings/autoAnnoMappings";
 import SnippetFormDialog from "./snippet_form/SnippetFormDialog";
-import { Simulate } from "react-dom/test-utils";
 import { enqueueSnackbar } from "notistack";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface AutoAnnoLetterHandleProps {
   autoJobId: number
@@ -23,7 +22,6 @@ interface AutoAnnoLetterHandleProps {
 
 const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
 
-  const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<SnippetDialogType>("RESET_LETTER");
   const [dialogSubmitFunction, setDialogSubmitFunction] = useState<() => void>(() => {});
@@ -44,7 +42,7 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
   }
 
   const handleResetLetter = () => {
-    resetAnnoLetter(props.autoJobLetterId).then((data) => {
+    resetAnnoLetter(props.autoJobLetterId).then(() => {
       dispatch(
         setAutoAnnoLetter(
           { letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: false} }
@@ -57,14 +55,14 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
       enqueueSnackbar("Der Brief wurde erfolgreich zurückgesetzt", {variant: "success"})
     }).catch((err) => {
 
-      enqueueSnackbar("error during resetting Letter: " + err, {variant: "error"})
+      enqueueSnackbar("error during resetting ShowLetter: " + err, {variant: "error"})
     })
     setDialogOpen(false)
   }
 
   const handleWriteLetter = () => {
     setDialogOpen(false)
-    writeAnnoLetter(props.autoJobLetterId).then((data) => {
+    writeAnnoLetter(props.autoJobLetterId).then(() => {
       dispatch(
         setAutoAnnoLetter(
           {letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: false}}
@@ -75,31 +73,25 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
       enqueueSnackbar("Der Brief wurde erfolgreich geschrieben", {variant: "success"})
 
     }).catch((err) => {
-      enqueueSnackbar("error during writing Letter: " + err, {variant: "error"})
+      enqueueSnackbar("error during writing ShowLetter: " + err, {variant: "error"})
     })
 
     setDialogOpen(false)
   }
 
+
   useEffect(() => {
-    const getAutoAnnoLetterData = async () => {
+    (async () => {
       if (reloadLetterStatus) {
         const result = await fetchAutoAnnoLetter(String(props.autoJobLetterId));
 
-        if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) {
-          setFinalSaveDisabled(false)
-        }
+        if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) { setFinalSaveDisabled(false); }
+        if (result?.content_changed) { setDisableResetButton(false); }
 
-        if (result?.content_changed) {
-          setDisableResetButton(false)
-        }
-
-        dispatch(setAutoAnnoLetter({letter: {id: props.autoJobLetterId, reloadStatus: false} }))
+        dispatch(setAutoAnnoLetter({ letter: { id: props.autoJobLetterId, reloadStatus: false } }));
       }
-    }
-    getAutoAnnoLetterData()
-
-  }, [reloadLetterStatus]);
+    })();
+  }, [dispatch, reloadLetterStatus, props.autoJobLetterId]);
 
 
   return (

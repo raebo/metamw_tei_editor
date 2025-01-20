@@ -18,7 +18,6 @@ const drawerWidth = 240;
 
 const Layout = () => {
   const _authenticatedVar = authenticatedVar.get()
-  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
 
   return (
     <Box sx={{ display: "flex" }}>
