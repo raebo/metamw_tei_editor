@@ -24,21 +24,9 @@ const LetterTabs = (props: letterTabProps) => {
        letters.unshift({id: props.letterId, name: props.letterName});
         setTabLetters(letters)
       })
-      // const currentDoc = tabLetters[activeTab];
-      // if (!currentDoc.xmlContent) {
-      //   const content = await fetchDocumentContent(currentDoc.id);
-      //   setTabLetters((prevDocs) =>
-      //     prevDocs.map((doc, index) =>
-      //       index === activeTab ? { ...doc, xmlContent: content } : doc
-      //     )
-      //   );
-      // }
     };
     loadPinnedLetters();
-  // }, [activeTab, tabLetters]);
   }, []);
-
-  console.log("activeTab: ", activeTab);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     dispatch(setEditorTabLetter({ tabLetter: { id: tabLetters[newValue].id, name: tabLetters[newValue].name }, tabNumber: newValue }));
@@ -48,7 +36,6 @@ const LetterTabs = (props: letterTabProps) => {
   const handleCloseTab = (index: number) => {
     setTabLetters((prevDocs) => prevDocs.filter((_, i) => i !== index));
 
-    // Adjust the active tab index if needed
     if (activeTab === index && index > 0) {
       setActiveTab(index - 1);
     } else if (activeTab === index && index === 0 && tabLetters.length > 1) {
@@ -56,8 +43,7 @@ const LetterTabs = (props: letterTabProps) => {
     } else if (activeTab > index) {
       setActiveTab(activeTab - 1);
     }
-  };
-
+  }
 
   return (
     <>

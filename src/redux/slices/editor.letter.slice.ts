@@ -10,6 +10,7 @@ interface EditorLetterSlice {
     name: string | null
   }
   tabNumber: number
+  searchValue: string | null
 }
 
 const initialState: EditorLetterSlice = {
@@ -21,7 +22,8 @@ const initialState: EditorLetterSlice = {
     id: null,
     name: null
   },
-  tabNumber: 0
+  tabNumber: 0,
+  searchValue: null
 }
 
 const EditorLetterSlice = createSlice({
@@ -48,9 +50,12 @@ const EditorLetterSlice = createSlice({
       console.log("setEditorTabNumber: ", action.payload.tabNumber);
       state.tabNumber = action.payload.tabNumber
     },
+    setEditorSearchValue(state, action) {
+      state.searchValue = action.payload.searchValue
+    }
   }
 })
 
-export const { setEditorLetter, setEditorTabLetter, setEditorTabNumber } = EditorLetterSlice.actions
+export const { setEditorLetter, setEditorTabLetter, setEditorTabNumber, setEditorSearchValue } = EditorLetterSlice.actions
 
 export default EditorLetterSlice.reducer

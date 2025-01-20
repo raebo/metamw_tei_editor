@@ -64,11 +64,11 @@ const ShowLetter = () => {
       letterName = stateLetter.name.toString()
       dispatch(setEditorTabNumber({ tabNumber: 0 }))
       setLetterChanged(true)
+      setShowLeftContainer(false)
       navigate(`/editor/letters/${stateLetter.id}/${stateLetter.name}`, { replace: true });
     }
   }, [stateLetter]);
 
-  console.log("stateActiveTab: ", stateActiveTab);
 
 
   useEffect(() => {
