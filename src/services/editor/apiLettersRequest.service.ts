@@ -7,9 +7,9 @@ import {
 } from "../mappings/editorMappings";
 
 
-export const fetchLastUsedLettersByUser = async (userId: number): Promise<EditorLetter[]| undefined> => {
+export const fetchLastUsedLettersByUser = async (): Promise<EditorLetter[]| undefined> => {
   try {
-    const response = await initApi.initApi().get(`/jwt/editor/letters/${userId}/last_used_by_user`);
+    const response = await initApi.initApi().get(`/jwt/editor/letters/last_used_by_user`);
 
     return response.data.map(mapApiToEditorLetter);
 

@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { PinnedLetter } from "../../services/mappings/editorMappings";
 
 interface EditorLetterSlice {
   letter: {
@@ -10,6 +11,7 @@ interface EditorLetterSlice {
     name: string | null
   }
   tabNumber: number
+  pinnedLetters: PinnedLetter[]
   searchValue: string | null
 }
 
@@ -23,6 +25,7 @@ const initialState: EditorLetterSlice = {
     name: null
   },
   tabNumber: 0,
+  pinnedLetters: [],
   searchValue: null
 }
 
@@ -47,15 +50,31 @@ const EditorLetterSlice = createSlice({
       }
     },
     setEditorTabNumber(state, action) {
-      console.log("setEditorTabNumber: ", action.payload.tabNumber);
       state.tabNumber = action.payload.tabNumber
     },
     setEditorSearchValue(state, action) {
       state.searchValue = action.payload.searchValue
+    },
+    setEditorPinnedLetters(state, action) {
+      state.pinnedLetters = [...action.payload.pinnedLetters]
+    },
+    addLetterToPinned(state, action) {
+      if (!state.pinnedLetters.includes(action.payload.pinnedLetter)) {
+        let pinnedLetters = [...state.pinnedLetters]
+        pinnedLetters.push(action.payload.pinnedLetter)
+
+        state.pinnedLetters = pinnedLetters
+      }
+    },
+    removeLetterFromPinned(state, action) {
+      if (action.payload.pinnedLetter) {
+        state.pinnedLetters = state.pinnedLetters.filter((pinnedLetter: PinnedLetter) => pinnedLetter.id !== action.payload.pinnedLetter.id)
+      }
     }
   }
 })
 
-export const { setEditorLetter, setEditorTabLetter, setEditorTabNumber, setEditorSearchValue } = EditorLetterSlice.actions
+export const
+  { setEditorLetter, setEditorTabLetter, setEditorTabNumber, addLetterToPinned, removeLetterFromPinned, setEditorSearchValue, setEditorPinnedLetters } = EditorLetterSlice.actions
 
 export default EditorLetterSlice.reducer

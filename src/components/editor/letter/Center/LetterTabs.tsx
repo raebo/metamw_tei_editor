@@ -3,8 +3,12 @@ import { Tabs, Tab, Box, Typography, IconButton } from '@mui/material';
 import CloseIcon from "@mui/icons-material/Close";
 import { PinnedLetter } from "../../../../services/mappings/editorMappings";
 import { fetchPinnedLetters } from "../../../../services/editor/apiPinnedLettersRequest.service";
-import { useDispatch } from "react-redux";
-import { setEditorTabLetter, setEditorTabNumber } from "../../../../redux/slices/editor.letter.slice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setEditorPinnedLetters,
+  setEditorTabLetter,
+} from "../../../../redux/slices/editor.letter.slice";
+import { RootState } from "../../../../redux/redux.store";
 
 interface letterTabProps {
   letterId: number,
@@ -14,19 +18,28 @@ interface letterTabProps {
 
 const LetterTabs = (props: letterTabProps) => {
   const dispatch = useDispatch();
+  const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
   const [tabLetters, setTabLetters] = useState<PinnedLetter[]>([]);
   const [activeTab, setActiveTab] = useState<number>(props.activeTab);
 
   useEffect(() => {
     const loadPinnedLetters = async () => {
       fetchPinnedLetters().then((letters) => {
-
-       letters.unshift({id: props.letterId, name: props.letterName});
+        dispatch(setEditorPinnedLetters({ pinnedLetters: letters }));
+        letters.unshift({id: props.letterId, name: props.letterName});
         setTabLetters(letters)
       })
-    };
-    loadPinnedLetters();
-  }, []);
+    }
+
+    if (statePinnedLetters.length === 0) {
+      loadPinnedLetters();
+    } else {
+      let pinnedLetters = [...statePinnedLetters]
+
+      pinnedLetters.unshift({id: props.letterId, name: props.letterName});
+      setTabLetters(pinnedLetters);
+    }
+  }, [])
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     dispatch(setEditorTabLetter({ tabLetter: { id: tabLetters[newValue].id, name: tabLetters[newValue].name }, tabNumber: newValue }));

@@ -31,9 +31,7 @@ const IndexLetters = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        if (user === null) { throw new Error("User is not set! Please login") }
-
-        const lastUserLetters = await fetchLastUsedLettersByUser(user.id);
+        const lastUserLetters = await fetchLastUsedLettersByUser();
 
         if (lastUserLetters) { setLettersByAuthor(lastUserLetters) }
 
