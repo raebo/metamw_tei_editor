@@ -39,8 +39,59 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
+## DEPLOYMENT INSTRUCTIONS
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Install PM2 Globally
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+sudo npm install -g pm2
+```
+
+### Serve Static Files with a HTTP Server
+
+```bash
+sudo npm install -g serve
+```
+
+### Create Build Output
+
+```bash
+rm -rf build # Remove the existing build directory
+
+yarn build
+```
+
+### Start Your React App with PM2
+    
+```bash
+pm2 start "serve -s build -l 3000" --name tei_editor
+``` 
+
+* serve -s build: Serves the static files from the build directory.
+* -l 3000: Specifies the port (you can change it if needed).
+* --name react-app: Gives a friendly name to the PM2 process.
+
+
+### Set PM2 to Restart on Server Reboot
+
+```bash 
+pm2 startup
+```
+
+#### Save the PM2 Process List
+
+```bash
+pm2 save
+```
+
+### Monitor Your Application
+    
+```bash
+pm2 monit
+```
+
+### Restarting Application
+    
+```bash
+pm2 restart tei_editor
+```

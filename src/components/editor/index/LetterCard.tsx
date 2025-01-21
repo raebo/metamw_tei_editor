@@ -20,7 +20,7 @@ interface LetterCardProps {
 
 const LetterCard = ( props: LetterCardProps) => {
   return (
-    <Card sx={{ height: '15vh', minWidth: 275 }}>
+    <Card sx={{ height: '17vh', minWidth: 200 }}>
       <CardContent>
         {/*<Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>*/}
         {/*  { props.letter.name }*/}
@@ -28,14 +28,14 @@ const LetterCard = ( props: LetterCardProps) => {
         <Typography variant="h6" component="div">
           { props.letter.name}
         </Typography>
-        <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>{ props.letter.title }</Typography>
-        <Typography variant="body2">
+        <Typography sx={{ color: 'text.secondary', mb: 1.5, fontSize: "80%" }}>{ props.letter.title }</Typography>
+        <Typography variant="body2" sx={{fontSize: '80%'}}>
           Last Letter Update by User...
           {/*<br />*/}
-          {'"a benevolent smile"'}
+          {'"a user"'}
         </Typography>
       </CardContent>
-      <CardActions sx={ {pl: '85%'}}>
+      <CardActions sx={ {pl: '70%'}}>
         <Button component={Link} to={`/editor/letters/${props.letter.id}/${props.letter.name}`} size="small" startIcon={<EditNote />} />
       </CardActions>
     </Card>

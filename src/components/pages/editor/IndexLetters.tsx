@@ -47,7 +47,7 @@ const IndexLetters = () => {
 
   const handleSearch = async (searchValue: string) => {
     const searchResult = await fetchSearchLetters(searchValue);
-    if (searchResult?.any) {
+    if (searchResult) {
       setLetterSearchResults(searchResult)
       setTextfieldSearchValue(searchValue)
     }
