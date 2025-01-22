@@ -95,3 +95,17 @@ pm2 monit
 ```bash
 pm2 restart tei_editor
 ```
+
+### Pm2 logrotate
+
+* To enable log rotation, you can use the following command:
+
+```bash
+pm2 install pm2-logrotate
+```
+
+```bash
+ pm2 set pm2-logrotate:dateFormat YYYY-MM-DD
+pm2 set pm2-logrotate:rotateInterval '0 0 * * *'
+```
+* the logs can be found in the /home/user/.pm2/logs

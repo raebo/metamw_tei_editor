@@ -22,7 +22,7 @@ import CircularIndeterminate from "./components/support/CircularIndeterminate";
 import AutoAnnoLetters from "./components/auto_anno/AutoAnnoLetters";
 import LoadCSSFile from "./components/support/LoadCssFile";
 import IndexLetters from "./components/pages/editor/IndexLetters";
-import ShowLetter from "./components/pages/editor/ShowLetter";
+import ShowEditor from "./components/pages/editor/ShowEditor";
 import { AuthProvider } from "./components/auth/AuthContext";
 
 const lightTheme = createTheme({
@@ -78,7 +78,8 @@ const App = () => {
                   <Route path={"/automatic_annotations/:id?"} element={<AutoAnnoList />} />
                   <Route path={"/automatic_annotations/:job_id/letters/:id"} element={<AutoAnnoLetters />} />
                   <Route path={"/editor/letters"} element={<IndexLetters />} />
-                  <Route path={"/editor/letters/:letterId/:letterName"} element={<ShowLetter />} />
+                  <Route path={"/editor/"} element={<ShowEditor />} />
+                  <Route path={"/editor/letters/:letterId/:letterName"} element={<ShowEditor />} />
                 </Route>
                 <Route element={<AutoAnnoLayout/>}>
                   {/*<GuardedRoute path="/dashboard" component={Dashboard} auth={isAuthenticated} />*/}

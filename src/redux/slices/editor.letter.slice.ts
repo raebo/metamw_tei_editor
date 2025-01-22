@@ -9,6 +9,7 @@ interface EditorLetterSlice {
   tabLetter: {
     id: number | null
     name: string | null
+    isPinned: boolean | null // remote pinned letters are pinned
   }
   tabNumber: number
   pinnedLetters: PinnedLetter[]
@@ -22,7 +23,8 @@ const initialState: EditorLetterSlice = {
   },
   tabLetter: {
     id: null,
-    name: null
+    name: null,
+    isPinned: null
   },
   tabNumber: 0,
   pinnedLetters: [],

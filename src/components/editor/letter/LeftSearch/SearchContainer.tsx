@@ -1,19 +1,22 @@
 import SearchLetters from "../../index/SearchLetters";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { fetchSearchLetters } from "../../../../services/editor/apiLettersRequest.service";
 import { EditorLetter } from "../../../../services/mappings/editorMappings";
 import Grid from "@mui/material/Grid2";
-import LetterCard from "../../index/LetterCard";
 import SearchResultEntry from "./SearchResultEntry";
-import { setAutoAnnoSnippet } from "../../../../redux/slices/auto.letter.snippet.slice";
 import { useDispatch, useSelector } from "react-redux";
-import { setEditorLetter, setEditorSearchValue } from "../../../../redux/slices/editor.letter.slice";
+import {
+  setEditorPinnedLetters,
+  setEditorSearchValue
+} from "../../../../redux/slices/editor.letter.slice";
 import { RootState } from "../../../../redux/redux.store";
 
 const SearchContainer = () => {
 
   const dispatch = useDispatch();
   const stateEditorSearchValue = useSelector((state: RootState) => state.editorLetter.searchValue)
+  const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
+
   const [textfieldSearchValue, setTextfieldSearchValue] = useState("");
   const [letterSearchResults, setLetterSearchResults] = useState<EditorLetter[] | undefined>();
 
@@ -29,26 +32,50 @@ const SearchContainer = () => {
         })
       }
     }
-
     checkForExistingSearch()
-  }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSearch = async (searchValue: string) => {
     const searchResult = await fetchSearchLetters(searchValue);
     setLetterSearchResults(searchResult)
     dispatch(setEditorSearchValue({ searchValue: searchValue }))
-    // setTextfieldSearchValue(searchValue)
   }
 
   const handleClick = useCallback((letterId: number, letterName: string) => {
-    dispatch(setEditorLetter( { letter: { id: letterId, name: letterName } } ))
+    if (statePinnedLetters.length > 0) {
+      let firstLetter = statePinnedLetters[0]
+
+      if (firstLetter.isPinned) {
+        dispatch(setEditorPinnedLetters(
+          {
+            pinnedLetters: [
+              { id: letterId, name: letterName, isPinned: false },
+              ...statePinnedLetters,
+            ]
+          }
+        ))
+      } else {
+        dispatch(setEditorPinnedLetters(
+          {
+            pinnedLetters:
+              [
+                { id: letterId, name: letterName, isPinned: false },
+                ...statePinnedLetters.slice(1), // Add the rest of the array after the first element
+              ]
+          }
+        ))
+      }
+    }
   }, [dispatch]);
 
   return (
     <>
       <div className={"editor-search-letters"}>
-        <SearchLetters handleSearch={handleSearch} defaultSearchValue={textfieldSearchValue}/>
+        <SearchLetters
+          handleSearch={handleSearch}
+          defaultSearchValue={textfieldSearchValue}/>
       </div>
       <div>
         { letterSearchResults ? (

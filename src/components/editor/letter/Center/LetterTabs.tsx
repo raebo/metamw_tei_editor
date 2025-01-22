@@ -1,67 +1,54 @@
 import React, { useEffect, useState } from "react";
-import { Tabs, Tab, Box, Typography, IconButton } from '@mui/material';
+import { Tabs, Tab, Box, IconButton } from '@mui/material';
 import CloseIcon from "@mui/icons-material/Close";
-import { PinnedLetter } from "../../../../services/mappings/editorMappings";
 import { fetchPinnedLetters } from "../../../../services/editor/apiPinnedLettersRequest.service";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  setEditorLetter,
   setEditorPinnedLetters,
-  setEditorTabLetter,
 } from "../../../../redux/slices/editor.letter.slice";
 import { RootState } from "../../../../redux/redux.store";
 
-interface letterTabProps {
-  letterId: number,
-  letterName: string,
-  activeTab: number,
-}
-
-const LetterTabs = (props: letterTabProps) => {
+const LetterTabs = () => {
   const dispatch = useDispatch();
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
-  const [tabLetters, setTabLetters] = useState<PinnedLetter[]>([]);
-  const [activeTab, setActiveTab] = useState<number>(props.activeTab);
+  const [activeTab, setActiveTab] = useState<number>(0);
 
   useEffect(() => {
-    const loadPinnedLetters = async () => {
-      fetchPinnedLetters().then((letters) => {
-        dispatch(setEditorPinnedLetters({ pinnedLetters: letters }));
-        letters.unshift({id: props.letterId, name: props.letterName});
-        setTabLetters(letters)
+    if (statePinnedLetters.length === 0) {
+      fetchPinnedLetters().then((pinnedLetters) => {
+        dispatch(setEditorPinnedLetters({ pinnedLetters }))
       })
     }
+  }, []);
 
-    if (statePinnedLetters.length === 0) {
-      loadPinnedLetters();
-    } else {
-      let pinnedLetters = [...statePinnedLetters]
 
-      pinnedLetters.unshift({id: props.letterId, name: props.letterName});
-      setTabLetters(pinnedLetters);
+  useEffect(() => {
+    if (statePinnedLetters.length > 0) {
+      dispatch(setEditorLetter({ letter: { id: statePinnedLetters[0].id, name: statePinnedLetters[0].name }}))
+      setActiveTab(0);
     }
-  }, [])
+  }, [statePinnedLetters]);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    dispatch(setEditorTabLetter({ tabLetter: { id: tabLetters[newValue].id, name: tabLetters[newValue].name }, tabNumber: newValue }));
+    dispatch(setEditorLetter({ letter: { id: statePinnedLetters[newValue].id, name: statePinnedLetters[newValue].name }}))
     setActiveTab(newValue);
-  };
+  }
 
   const handleCloseTab = (index: number) => {
-    setTabLetters((prevDocs) => prevDocs.filter((_, i) => i !== index));
-
-    if (activeTab === index && index > 0) {
-      setActiveTab(index - 1);
-    } else if (activeTab === index && index === 0 && tabLetters.length > 1) {
-      setActiveTab(0);
-    } else if (activeTab > index) {
-      setActiveTab(activeTab - 1);
-    }
+  //   if (activeTab === index && index > 0) {
+  //     setActiveTab(index - 1);
+  //   } else if (activeTab === index && index === 0 && tabLetters.length > 1) {
+  //     setActiveTab(0);
+  //   } else if (activeTab > index) {
+  //     setActiveTab(activeTab - 1);
+  //   }
   }
 
   return (
     <>
       <Tabs value={activeTab} onChange={handleTabChange}>
-        {tabLetters.map((doc, index) => (
+        {statePinnedLetters.map((doc, index) => (
           <Tab
             key={doc.id}
             label={
@@ -82,22 +69,6 @@ const LetterTabs = (props: letterTabProps) => {
           />
         ))}
       </Tabs>
-      {/*<Box sx={{ p: 2 }}>*/}
-      {/*  <div className="letter-view-container">*/}
-      {/*    <div className="container-fmbc-letter">*/}
-      {/*      <div className="box-1">*/}
-      {/*        {tabLetters[activeTab]?.xmlContent ? (*/}
-      {/*          <Typography>*/}
-      {/*            <pre>{tabLetters[activeTab].xmlContent}</pre>*/}
-      {/*          </Typography>*/}
-      {/*        ) : (*/}
-      {/*          <Typography>Loading...</Typography>*/}
-      {/*        )}*/}
-      {/*      </div>*/}
-      {/*    </div>*/}
-      {/*  </div>*/}
-
-      {/*</Box>*/}
     </>
   );
 

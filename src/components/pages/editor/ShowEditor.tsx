@@ -1,99 +1,75 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Box, List, ListItemButton, ListItemIcon, Tab, Tabs } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
-import SettingsIcon from "@mui/icons-material/Settings";
-import InfoIcon from "@mui/icons-material/Info";
 import SearchContainer from "../../editor/letter/LeftSearch/SearchContainer";
 import FavouritesContainer from "../../editor/letter/LeftFavourites/FavouritesContainer";
 import AssignedContainer from "../../editor/letter/RightAssigned/AssignedContainer";
-import FavouriteContainer from "../../editor/letter/RightFavourite/FavouriteContainer";
 import { ComponentMappingItem } from "../../../services/mappings/editorMappings";
 import { handleFavouriteClick } from "../../editor/letter/RightFavourite/LetterFavouriteHandling";
 import LetterViewContainer from "../../editor/letter/Center/LetterViewContainer";
 import { letterExists } from "../../../services/editor/apiLetterRequest.service";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../redux/redux.store";
 import LetterTabs from "../../editor/letter/Center/LetterTabs";
-import { setEditorTabNumber } from "../../../redux/slices/editor.letter.slice";
+import { setEditorLetter, setEditorPinnedLetters, setEditorTabNumber } from "../../../redux/slices/editor.letter.slice";
+import { fetchPinnedLetters } from "../../../services/editor/apiPinnedLettersRequest.service";
 
 
-const ShowLetter = () => {
+const ShowEditor = () => {
   let { letterId } = useParams<{ letterId: string }>();
   let { letterName } = useParams<{ letterName: string }>();
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const stateLetter = useSelector((state: RootState) => state.editorLetter.letter)
-  const stateTabLetter = useSelector((state: RootState) => state.editorLetter.tabLetter)
-  const [contentLetterId, setContentLetterId] = useState<number | null>(null)
-  const stateActiveTab = useSelector((state: RootState) => state.editorLetter.tabNumber)
   const [showLeftContainer, setShowLeftContainer] = useState<boolean>(false)
   const [showRightContainer, setShowRightContainer] = useState<boolean>(false)
   const [selectedItemLeft, setSelectedItemLeft] = useState<false|string>(false)
   const [selectedItemRight, setSelectedItemRight] = useState<false|string>(false)
   const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem| null>(null)
   const [selectedComponentRight, setSelectedComponentRight] = useState<ComponentMappingItem | null>(null)
-  const [letterChanged, setLetterChanged] = useState<boolean>(false)
+
+  const isMounted = useRef(false)
 
   useEffect(() => {
-    const setContentLetter = () => {
-      if (stateTabLetter === null && letterId && letterName) {
-        setContentLetterId(parseInt(letterId))
-      } else if (stateTabLetter !== null) {
-        setContentLetterId(stateTabLetter.id)
+    if (!isMounted.current) {
+
+      fetchPinnedLetters().then((pinnedLetters) => {
+        if (letterId && letterName) {
+          pinnedLetters.unshift({ id: parseInt(letterId), name: letterName, isPinned: false })
+        }
+
+        dispatch(
+          setEditorPinnedLetters({ pinnedLetters })
+        );
+      })
+
+      if (letterId !== undefined && letterId !== null && !isNaN(parseInt(letterId))) {
+        dispatch(setEditorLetter({ letter: { id: parseInt(letterId), name: letterName } }))
       }
+
+      isMounted.current = true
     }
-    setContentLetter()
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
-    const setContentLetter = () => {
-      if (stateTabLetter && stateTabLetter.id && stateTabLetter.name) {
-        setContentLetterId(stateTabLetter.id)
-      }
-    }
-
-    setContentLetter()
-  }, [stateTabLetter]);
-
-  useEffect(() => {
-    if (stateLetter && stateLetter.id && stateLetter.name) {
-      letterId = stateLetter.id.toString()
-      letterName = stateLetter.name.toString()
-      dispatch(setEditorTabNumber({ tabNumber: 0 }))
-      setLetterChanged(true)
-      setShowLeftContainer(false)
-      navigate(`/editor/letters/${stateLetter.id}/${stateLetter.name}`, { replace: true });
-    }
-  }, [stateLetter]);
-
-
-
-  useEffect(() => {
-    if (letterChanged) {
-      const timeout = setTimeout(() => setLetterChanged(false), 0)
-      return () => clearTimeout(timeout)
-    }
-  }, [letterChanged]);
-
-  useEffect(() => {
     const validateLetterId = async () => {
-      if (!letterId || isNaN(Number(letterId))) {
+      if (letterId === undefined) { return }
+
+      if (letterId && isNaN(Number(letterId))) {
         navigate('/not-found', { state: { messageKey: 'missingLetterId' } }); // Redirect if `letterId` is missing
         return;
       }
 
       try {
-        // Simulate an API call to check if the ID exists
         const isValid = await letterExists(letterId);
 
         if (!isValid) {
           navigate('/not-found', { state: { messageKey: 'invalidLetterId' } }); // Redirect if `letterId` is invalid
         }
       } catch (error) {
-        console.error('Error validating letterId:', error);
         navigate('/error'); // Redirect to an error page if the validation fails
       }
     };
@@ -204,12 +180,10 @@ const ShowLetter = () => {
           width: showLeftContainer && showRightContainer ? "60%" : showLeftContainer || showRightContainer ? "80%" : "90%",
         }}
       >
-        { (letterId === undefined || isNaN(parseInt(letterId) ) || letterChanged || letterName === undefined) ? <div>Letter ID is not a number</div> :
-          <>
-            <LetterTabs activeTab={stateActiveTab === null ? 0 : stateActiveTab} letterId={parseInt(letterId)} letterName={letterName} />
-            <LetterViewContainer letterId={contentLetterId !== null ? contentLetterId : parseInt(letterId)} />
-          </>
-        }
+        <>
+          <LetterTabs />
+          <LetterViewContainer />
+        </>
       </Box>
 
       {showRightContainer && (
@@ -258,4 +232,4 @@ const ShowLetter = () => {
   );
 };
 
-export default ShowLetter;
+export default ShowEditor;

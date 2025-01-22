@@ -16,7 +16,8 @@ export interface EditorLetter {
 }
 export interface PinnedLetter {
   id: number,
-  name: string
+  name: string,
+  isPinned: boolean
 }
 
 export interface EditorLetterData {
@@ -50,5 +51,6 @@ export const mapApiToPinnedLetter = (resultAr: string[]): PinnedLetter => {
   return {
     id: parseInt(resultAr[0]),
     name: resultAr[1],
+    isPinned: true
   }
 }
