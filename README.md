@@ -64,7 +64,7 @@ yarn build
 ### Start Your React App with PM2
     
 ```bash
-pm2 start "serve -s build -l 3000" --name tei_editor
+pm2 start "serve -s build -l 3000" --name FMBC_TEI_EDITOR
 ``` 
 
 * serve -s build: Serves the static files from the build directory.

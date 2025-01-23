@@ -68,6 +68,12 @@ const SearchContainer = () => {
           }
         ))
       }
+    } else {
+      dispatch(setEditorPinnedLetters(
+        {
+          pinnedLetters: [{ id: letterId, name: letterName, isPinned: false }]
+        }
+      ))
     }
   }, [dispatch, statePinnedLetters]);
 
