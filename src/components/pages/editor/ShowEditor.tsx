@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { Box, List, ListItemButton, ListItemIcon, Tab, Tabs } from "@mui/material";
+import { Box, List, ListItemButton, ListItemIcon } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
 import SearchContainer from "../../editor/letter/LeftSearch/SearchContainer";
@@ -10,17 +10,17 @@ import { ComponentMappingItem } from "../../../services/mappings/editorMappings"
 import { handleFavouriteClick } from "../../editor/letter/RightFavourite/LetterFavouriteHandling";
 import LetterViewContainer from "../../editor/letter/Center/LetterViewContainer";
 import { letterExists } from "../../../services/editor/apiLetterRequest.service";
-import { useDispatch, useSelector } from "react-redux";
 import LetterTabs from "../../editor/letter/Center/LetterTabs";
-import { setEditorLetter, setEditorPinnedLetters, setEditorTabNumber } from "../../../redux/slices/editor.letter.slice";
+import { setEditorLetter, setEditorPinnedLetters } from "../../../redux/slices/editor.letter.slice";
 import { fetchPinnedLetters } from "../../../services/editor/apiPinnedLettersRequest.service";
+import { useAppDispatch } from "../../../redux/hooks";
 
 
 const ShowEditor = () => {
   let { letterId } = useParams<{ letterId: string }>();
   let { letterName } = useParams<{ letterName: string }>();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [showLeftContainer, setShowLeftContainer] = useState<boolean>(false)
   const [showRightContainer, setShowRightContainer] = useState<boolean>(false)
@@ -143,7 +143,7 @@ const ShowEditor = () => {
         <List component="nav" aria-label="handle edit labels">
           <ListItemButton
             selected={!(selectedItemLeft === false || selectedItemLeft !== "SEARCH") }
-            onClick={(event) => handleTabChangeLeft("SEARCH")}
+            onClick={() => handleTabChangeLeft("SEARCH")}
           >
             <ListItemIcon>
               <SearchIcon/>
@@ -151,7 +151,7 @@ const ShowEditor = () => {
           </ListItemButton>
           <ListItemButton
             selected={!(selectedItemLeft === false || selectedItemLeft !== "FAVOURITES") }
-            onClick={(event) => handleTabChangeLeft("FAVOURITES")}
+            onClick={() => handleTabChangeLeft("FAVOURITES")}
           >
             <ListItemIcon>
               <HomeIcon/>
@@ -220,7 +220,7 @@ const ShowEditor = () => {
           </ListItemButton>
           <ListItemButton
             selected={!(selectedItemRight === false || selectedItemRight !== "SET_FAVOURITE") }
-            onClick={(event) => handleTabChangeRight("SET_FAVOURITE")}
+            onClick={() => handleTabChangeRight("SET_FAVOURITE")}
           >
             <ListItemIcon>
               <HomeIcon/>

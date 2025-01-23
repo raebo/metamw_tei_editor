@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import {
   setAutoAnnoSnippet,
   setAutoAnnoLetter,
@@ -16,6 +16,7 @@ import { enqueueSnackbar } from "notistack";
 import Paper from "@mui/material/Paper";
 import { Edit } from "@mui/icons-material";
 import { RootState } from "../../redux/redux.store";
+import { useAppDispatch } from "../../redux/hooks";
 
 interface AutoAnnoSnippetListProps {
   autoJobLetterId: number
@@ -29,7 +30,7 @@ interface SnippetUpdateParams {
 }
 
 const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [autoAnnoSnippetData, setAutoAnnoSnippetData] = useState<AutoAnnoSnippet[] | undefined>();
 
@@ -52,6 +53,8 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
       }
     }
     getAutoAnnoSnippetData()
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoJobLetterId, reloadStatusSnippets]);
 
   const handleSnippetUpdate = (params: SnippetUpdateParams) => {

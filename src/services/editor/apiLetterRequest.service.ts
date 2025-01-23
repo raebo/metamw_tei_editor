@@ -1,4 +1,5 @@
 import initApi from "../apiRequest.service";
+import { PinnedLetter } from "../mappings/editorMappings";
 
 export const setLetterFavourite= async (letterId: number, isFavourite: boolean): Promise<boolean> => {
   try {
@@ -33,5 +34,15 @@ export const letterContent = async (letterId: number): Promise<string> => {
   } catch (err) {
     console.error(err);
     return "";
+  }
+}
+
+export const setLetterPinStatus = async (pinnedLetter: PinnedLetter, isPinned: boolean): Promise<boolean> => {
+  const response = await initApi.initApi().patch(`/jwt/editor/letters/${pinnedLetter.id}/pinned`, { isPinned: isPinned });
+
+  if (response.status === 200) {
+    return true
+  } else {
+    throw new Error("Failed to set pin status: " + response.data.error)
   }
 }

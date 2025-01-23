@@ -4,19 +4,20 @@ import { fetchAutoAnnoLetter } from "../../services/autoAnno.service";
 import { enqueueSnackbar } from "notistack";
 import XMLDisplayParser from "../support/XmlDisplayParser";
 import { RootState } from "../../redux/redux.store";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import AutoAnnoSnippetForm from "./AutoAnnoSnippetForm";
 import AutoAnnoSnippetList from "./AutoAnnoSnippetList";
 import AutoAnnoLetterHandle from "./AutoAnnoLetterHandle";
 import { domReplaceNodeWithMarkedSpan } from "../../utils/auto_anno/domHandling";
 import { setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
 import { Box, Typography } from "@mui/material";
+import { useAppDispatch } from "../../redux/hooks";
 
 const AutoAnnoLetters: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { job_id } = useParams<{ job_id: string }>();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const autoAnnoLetterId = Number(id);
   const autoAnnoJobId = Number(job_id);
 
@@ -32,8 +33,6 @@ const AutoAnnoLetters: React.FC = () => {
   const [transformedData, setTransformedData] = useState<any>({xmlContent: null, letterName: null});
 
   const sharedSnippet = useSelector((state: RootState) => state.autoLetterSnippet.snippet);
-  const sharedJob = useSelector((state: RootState) => state.autoLetterSnippet.job);
-
 
   useEffect(() => {
     const getData = async () => {
@@ -59,6 +58,8 @@ const AutoAnnoLetters: React.FC = () => {
     };
 
     getData();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reloadLetter, dispatch]);
 
   const containerRef = React.useRef<HTMLDivElement>(null);

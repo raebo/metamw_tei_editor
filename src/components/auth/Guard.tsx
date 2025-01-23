@@ -1,8 +1,5 @@
 import excludedRoutes from "../../constants/excluded-routes";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../redux/redux.store";
 import { useAuth } from "./AuthContext";
-import { useEffect } from "react";
 
 interface GuardProps {
   children: React.ReactNode

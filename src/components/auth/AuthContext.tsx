@@ -1,16 +1,15 @@
 import React, { createContext, useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../redux/redux.store";
+import {  useSelector } from "react-redux";
+import { RootState } from "../../redux/redux.store";
 import { refreshUserData } from "./authActions";
 import { AuthContextType } from "../../services/mappings/authMappings";
-import { setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
-import login from "./Login";
 import { loginState } from "../../redux/slices/authentication.slice";
+import { useAppDispatch } from "../../redux/hooks";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch()
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const user = useSelector((state: RootState) => state.auth.user);
 

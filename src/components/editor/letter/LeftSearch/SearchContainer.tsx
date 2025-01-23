@@ -1,19 +1,20 @@
 import SearchLetters from "../../index/SearchLetters";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { fetchSearchLetters } from "../../../../services/editor/apiLettersRequest.service";
 import { EditorLetter } from "../../../../services/mappings/editorMappings";
 import Grid from "@mui/material/Grid2";
 import SearchResultEntry from "./SearchResultEntry";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import {
   setEditorPinnedLetters,
   setEditorSearchValue
 } from "../../../../redux/slices/editor.letter.slice";
 import { RootState } from "../../../../redux/redux.store";
+import { useAppDispatch } from "../../../../redux/hooks";
 
 const SearchContainer = () => {
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const stateEditorSearchValue = useSelector((state: RootState) => state.editorLetter.searchValue)
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
 
@@ -68,7 +69,7 @@ const SearchContainer = () => {
         ))
       }
     }
-  }, [dispatch]);
+  }, [dispatch, statePinnedLetters]);
 
   return (
     <>

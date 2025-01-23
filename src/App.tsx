@@ -1,6 +1,5 @@
-import logo from './logo.svg';
 // import './App.css';
-import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material";
 import Snackbar from "./components/snackbar/Snackbar";
 import Layout from "./components/layout/Layout";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -8,19 +7,14 @@ import NotFoundPage from "./components/pages/NotFoundPage";
 import HomePage from "./components/pages/HomePage";
 import AboutPage from "./components/pages/AboutPage";
 import Login from "./components/auth/Login";
-import { useDispatch, useSelector } from "react-redux";
-import { getMe } from "./services/user.service";
-import { loginState } from "./redux/slices/authentication.slice";
+import { useSelector } from "react-redux";
 import { RootState } from "./redux/redux.store";
-import Container from "@mui/material/Container";
 import AutoAnnoLayout from "./components/layout/AutoAnnoLayout";
 import AutoAnnoList from "./components/auto_anno/AutoAnnoList";
 import Guard from "./components/auth/Guard";
-import AaIndex from "./components/pages/aa_annotations/AaIndex";
 import React from "react";
 import CircularIndeterminate from "./components/support/CircularIndeterminate";
 import AutoAnnoLetters from "./components/auto_anno/AutoAnnoLetters";
-import LoadCSSFile from "./components/support/LoadCssFile";
 import IndexLetters from "./components/pages/editor/IndexLetters";
 import ShowEditor from "./components/pages/editor/ShowEditor";
 import { AuthProvider } from "./components/auth/AuthContext";
@@ -32,7 +26,7 @@ const lightTheme = createTheme({
 })
 
 const App = () => {
-  // const dispatch = useDispatch();
+  // const dispatch =useAppDispatch();
   // const user = useSelector((state: RootState) => state.auth.user);
   // // eslint-disable-next-line no-new-wrappers
   // const handleStateLogin = (data = { last_name: new String(), first_name: new String() }) => {

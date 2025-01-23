@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import { RootState } from "../../redux/redux.store";
 import Button from "@mui/material/Button";
 import { setAutoAnnoSnippet, setAutoAnnoLetter, clearSnippetState } from "../../redux/slices/auto.letter.snippet.slice";
@@ -19,13 +19,14 @@ import {
 import { enqueueSnackbar } from "notistack";
 import SnippetFormDialog from "./snippet_form/SnippetFormDialog";
 import { SnippetDialogType } from "../../services/mappings/autoAnnoMappings";
+import { useAppDispatch } from "../../redux/hooks";
 
 interface AutoAnnoSnippetFormProps {
   autoJobLetterId: number
 }
 
 const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   let menuTypeItems = []
   const sharedSnippet = useSelector((state: RootState) => state.autoLetterSnippet.snippet);
@@ -66,8 +67,12 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
     let hasError = false
 
     try {
-      if (!sharedSnippet?.id) { throw new Error("no snippet id given") }
-      if (xmlLetterNode === null) { throw new Error("xmlNodeContent is null") }
+      if (!sharedSnippet?.id) {
+        enqueueSnackbar("no snippet id given", { variant: "error" })
+        return }
+      if (xmlLetterNode === null) {
+        enqueueSnackbar("xmlNodeContent is null", {variant: "error"})
+        return }
 
       fetchAutoAnnoSnippetEntityData(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceKeyChanged, sharedSnippet?.referenceTypeChanged).then((data) => {
         autoAnnoReplaceDomNodeContent(sharedSnippet?.xmlId, sharedSnippet?.referenceTypeChanged, data)
@@ -92,7 +97,10 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
         hasError = true
       });
 
-      if (hasError) { throw new Error("fetching Snippet Data") }
+      if (hasError) {
+        enqueueSnackbar("error during setting data: ",  { variant: "error" })
+        return }
+
 
       setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged).then((response) => {
       }).catch((error) => {
@@ -101,9 +109,11 @@ const AutoAnnoSnippetForm = (props: AutoAnnoSnippetFormProps) => {
         hasError = true
       })
 
-      if (hasError) { throw new Error("updating Snippet Data") }
+      if (hasError) {
+        enqueueSnackbar("error during setting data: ",  { variant: "error" })
+        return }
 
-      setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "ACCEPTED").then((response) => {
+      setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "ACCEPTED").then(() => {
         dispatch(setAutoAnnoLetter({letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
         dispatch(clearSnippetState())
       }).catch((error) => {

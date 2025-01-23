@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { getMe } from "../services/user.service";
 import { AppDispatch } from "../redux/redux.store";
 import { clearSnippetState } from "../redux/slices/auto.letter.snippet.slice";
+import { useAppDispatch } from "../redux/hooks";
 
 interface LoginRequest {
   email: string;
@@ -23,7 +24,7 @@ const useLogin = () => {
   const enqueueSnack = (message: string, type: "error" | "success") => {
     enqueueSnackbar(message, { variant: type });
   }
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch()
 
   const handleStateLogin = ({data = {last_name: String(), first_name: String()}}: {
     data?: { last_name: String; first_name: String }

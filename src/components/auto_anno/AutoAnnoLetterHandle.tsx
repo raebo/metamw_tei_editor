@@ -7,13 +7,14 @@ import {
   writeAnnoLetter
 } from "../../services/autoAnno.service";
 import { Statuses } from "../../utils/entityStatuses";
-import { AppDispatch, RootState } from "../../redux/redux.store";
-import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../redux/redux.store";
+import {  useSelector } from "react-redux";
 import { clearSnippetState, setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
 import { SnippetDialogType } from "../../services/mappings/autoAnnoMappings";
 import SnippetFormDialog from "./snippet_form/SnippetFormDialog";
 import { enqueueSnackbar } from "notistack";
 import { Link } from "react-router-dom";
+import { useAppDispatch } from "../../redux/hooks";
 
 interface AutoAnnoLetterHandleProps {
   autoJobId: number
@@ -26,7 +27,7 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
   const [dialogType, setDialogType] = useState<SnippetDialogType>("RESET_LETTER");
   const [dialogSubmitFunction, setDialogSubmitFunction] = useState<() => void>(() => {});
 
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch()
   const [finalSaveDisabled, setFinalSaveDisabled] = useState(true);
 
   const reloadLetterStatus= useSelector((state: RootState) =>

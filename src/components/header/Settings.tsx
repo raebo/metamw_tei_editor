@@ -4,11 +4,11 @@ import { useState } from "react";
 import { snackVar } from "../../constants/snack";
 import { UNKNOWN_SNACK_ERROR_MESSAGE } from "../../constants/errors";
 import { removeToken } from "../../services/authentication.service";
-import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { logoutState } from "../../redux/slices/authentication.slice";
 import SettingsAvatar from "./SettingsAvatar";
 import { RootState } from "../../redux/redux.store";
+import { useAppDispatch } from "../../redux/hooks";
 
 const Settings = () => {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
@@ -17,7 +17,7 @@ const Settings = () => {
     setAnchorElUser(event.currentTarget);
   };
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const handleStateLogout = () => {
     dispatch(logoutState());
   };
