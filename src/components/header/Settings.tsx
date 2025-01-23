@@ -68,6 +68,10 @@ const Settings = () => {
           }>
             <Typography sx={{ textAlign: 'center' }}>Logout</Typography>
           </MenuItem>
+          <MenuItem key={'profile'} onClick={() => {
+          }}>
+            <Typography sx={{ textAlign: 'center' }}>VERSION_STATUS</Typography>
+          </MenuItem>
         </Menu>
       </Box>
     </>
