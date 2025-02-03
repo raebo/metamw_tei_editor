@@ -50,7 +50,6 @@ const ShowEditor = () => {
 
       isMounted.current = true
     }
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -118,8 +117,8 @@ const ShowEditor = () => {
   }
 
   const componentMappingRight: Record<string, ComponentMappingItem> = {
-    "ASSIGNED": { showContainer: true , component: <AssignedContainer />, action: () => true},
-    "SET_FAVOURITE": { showContainer: false, action: () => handleFavouriteClick(letterId, true)}, // Example with a function
+    "ASSIGNED": { showContainer: true , component: <AssignedContainer />, action: () => true },
+    "SET_FAVOURITE": { showContainer: false, action: () => handleFavouriteClick(letterId, true) }, // Example with a function
   };
 
   return (

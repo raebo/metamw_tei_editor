@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { fetchAutoAnnoJobLetters, fetchAutoAnnoLetter, fetchAutoAnnoJobs } from "../../services/autoAnno.service";
+import { fetchAutoAnnoJobLetters, fetchAutoAnnoLetter, fetchAutoAnnoJobs } from "../../services/auto_anno/apiAutoAnno.service";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import { Box, IconButton, Typography } from "@mui/material";
@@ -10,6 +10,9 @@ import {
   AutoAnnoJob, getStatusDetails,
 } from "../../services/mappings/autoAnnoMappings";
 import { enqueueSnackbar } from "notistack";
+import { ComponentMappingItem } from "../../services/mappings/editorMappings";
+import { format, parse } from "date-fns";
+import { dateFnsFormat, dateFnsParseFormat } from "../../constants/snack";
 
 
 const AutoAnnoList: React.FC = () => {
@@ -78,7 +81,14 @@ const AutoAnnoList: React.FC = () => {
       }
     },
     {field: 'id', headerName: 'ID', width: 90},
-    {field: 'service_identifier', headerName: 'Service Identifier', width: 150},
+    {
+      field: 'job_updated_at', headerName: 'Service Identifier', width: 180,
+      renderCell: (params) => {
+        return format(
+          parse(params.row.updated_at, dateFnsParseFormat, new Date()),
+          dateFnsFormat)
+      }
+    },
     {field: 'search_string', headerName: 'Suchbegriff', width: 200},
     {
       field: 'letters_open',
@@ -95,7 +105,7 @@ const AutoAnnoList: React.FC = () => {
       width: 150,
       sortable: false,
       renderCell: (params) => {
-        return `${params.row.snippets_open}/${params.row.snippets_count}`;
+        return `${params.row.snippets_closed}/${params.row.snippets_count}`;
       }
     },
     {

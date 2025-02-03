@@ -1,17 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchAutoAnnoLetter } from "../../services/autoAnno.service";
+import { fetchAutoAnnoLetter } from "../../services/auto_anno/apiAutoAnno.service";
 import { enqueueSnackbar } from "notistack";
 import XMLDisplayParser from "../support/XmlDisplayParser";
 import { RootState } from "../../redux/redux.store";
 import {  useSelector } from "react-redux";
-import AutoAnnoSnippetForm from "./AutoAnnoSnippetForm";
 import AutoAnnoSnippetList from "./AutoAnnoSnippetList";
 import AutoAnnoLetterHandle from "./AutoAnnoLetterHandle";
-import { domReplaceNodeWithMarkedSpan } from "../../utils/auto_anno/domHandling";
+import { domReplaceNodeWithMarkedSpan, markSpanAndScrollToId } from "../../utils/auto_anno/domHandling";
 import { setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
 import { Box, Typography } from "@mui/material";
 import { useAppDispatch } from "../../redux/hooks";
+import { ComponentMappingItem } from "../../services/mappings/editorMappings";
+import SnippetReferencesList from "./snippet_form/SnippetReferencesList";
+import SnippetFormContainer from "./snippet_form/SnippetFormContainer";
 
 const AutoAnnoLetters: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,10 +22,29 @@ const AutoAnnoLetters: React.FC = () => {
   const dispatch = useAppDispatch();
   const autoAnnoLetterId = Number(id);
   const autoAnnoJobId = Number(job_id);
+  const [selectedComponentList, setSelectedComponentList] = useState<ComponentMappingItem| null>(null)
 
   const reloadLetter = useSelector((state: RootState) =>
     state.autoLetterSnippet.letter?.reloadStatus?? false
-  );
+  )
+  const snippetReferences = useSelector((state: RootState) =>
+    state.autoLetterSnippet.snippetReferences
+  )
+
+  // useMemo ensures that componentMappingList is not recreated on every render.
+  const componentMappingList = useMemo(() => ({
+    "SNIPPET_LIST": {
+      showContainer: true,
+      component: <AutoAnnoSnippetList autoJobLetterId={autoAnnoLetterId} />,
+      action: () => true,
+    },
+    "REFERENCE_LIST": {
+      showContainer: true,
+      component: <SnippetReferencesList autoAnnoLetterId={autoAnnoLetterId} references={snippetReferences.items} />,
+      action: () => true,
+    },
+  }), [autoAnnoLetterId, snippetReferences.items]);
+
 
   useEffect(() => {
     // Set reloadLetter to true after the component is mounted
@@ -49,6 +70,7 @@ const AutoAnnoLetters: React.FC = () => {
           }
 
           dispatch(setAutoAnnoLetter({letter: {id: autoAnnoLetterId, reloadStatus: false} }))
+          setSelectedComponentList(componentMappingList["SNIPPET_LIST"])
         } catch (err) {
           enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
         } finally {
@@ -62,24 +84,25 @@ const AutoAnnoLetters: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reloadLetter, dispatch]);
 
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // This ensures that setSelectedComponentList always gets the latest componentMappingList and triggers a re-render when necessary.
+    setSelectedComponentList(prevState => {
+      return snippetReferences.showReferences
+        ? componentMappingList["REFERENCE_LIST"]
+        : componentMappingList["SNIPPET_LIST"];
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snippetReferences.showReferences, componentMappingList]);
+
+  const containerRef = React.useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const scrollToId = () => {
+    const snippetScrollToId = () => {
       if (sharedSnippet) {
-        const targetElement= document.querySelector('[xml\\:id="' + sharedSnippet.xmlId + '"]');
-
-        if (targetElement && containerRef.current) {
-          targetElement.scrollIntoView({
-            behavior: 'smooth', // Smooth scrolling
-            block: 'start',     // Scroll to the top of the element
-          });
-
-          domReplaceNodeWithMarkedSpan(targetElement);
-        }
+        markSpanAndScrollToId(sharedSnippet.xmlId);
       }
     };
-    scrollToId();
+    snippetScrollToId();
   }, [sharedSnippet]);
 
   return (
@@ -108,10 +131,12 @@ const AutoAnnoLetters: React.FC = () => {
         <div className="box-2">
           <div className="sub-box">
             <div className="sub-box-element sub-box-top">
-              <AutoAnnoSnippetForm autoJobLetterId={autoAnnoLetterId}/>
+              <SnippetFormContainer autoAnnoLetterId={autoAnnoLetterId} />
+              {/*<AutoAnnoSnippetForm autoJobLetterId={autoAnnoLetterId}/>*/}
             </div>
-            <div className="sub-box-element sub-box-center">
-              <AutoAnnoSnippetList autoJobLetterId={autoAnnoLetterId}/>
+            <div className="sub-box-element sub-box-center" style={{marginTop: "2%"}}>
+              { selectedComponentList?.component }
+              {/*<AutoAnnoSnippetList autoJobLetterId={autoAnnoLetterId}/>*/}
             </div>
             <div className="sub-box-element sub-box-bottom">
               <AutoAnnoLetterHandle autoJobId={autoAnnoJobId} autoJobLetterId={autoAnnoLetterId} />

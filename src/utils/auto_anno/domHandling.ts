@@ -1,4 +1,20 @@
 import { SnippetEntity } from "../../services/mappings/autoAnnoMappings";
+import { RefObject } from "react";
+
+
+export const markSpanAndScrollToId = (xmlId: String) => {
+  const targetElement= document.querySelector('[xml\\:id="' + xmlId + '"]');
+
+  if (targetElement) {
+    // if (targetElement && containerRef.current) {
+    targetElement.scrollIntoView({
+      behavior: 'smooth', // Smooth scrolling
+      block: 'start',     // Scroll to the top of the element
+    });
+
+    domReplaceNodeWithMarkedSpan(targetElement);
+  }
+}
 
 /**
  * Replaces a DOM element with a surrounding span element with the class "marked".
@@ -30,7 +46,6 @@ export const autoAnnoReplaceDomNodeContent = (
 
   if (!domNode) { throw new Error(`No element found with xml:id="${xmlId}"`); }
 
-  domNode.setAttribute("checked", "true");
 
   if (referenceType === "Person") {
     replacePersonDomNode(domNode, snippetEntity);
@@ -47,14 +62,19 @@ export const autoAnnoReplaceDomNodeContent = (
 
 const replacePersonDomNode = (
   domNode: Element,
-  snippetEntity: SnippetEntity
+  { entityKey, entityName }: { entityKey: string; entityName: string }
 ): void => {
 
-  const nameNode = domNode.querySelector("name");
-  if (!nameNode) { throw new Error("No name element found in DOM node."); }
-
-  nameNode.setAttribute("key", snippetEntity.entityKey);
-  nameNode.textContent = snippetEntity.entityName;
+  let nameNode = domNode.querySelector("name");
+  if (!nameNode) {
+    nameNode = document.createElement("name")
+    nameNode.setAttribute("key", entityKey);
+    nameNode.textContent = entityName;
+    domNode.appendChild(nameNode);
+  } else {
+    nameNode.setAttribute("key", entityKey);
+    nameNode.textContent = entityName;
+  }
 }
 
 const replacePlaceDomNodeSettlement = (

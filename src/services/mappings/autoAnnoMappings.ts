@@ -11,26 +11,32 @@ export interface AutoAnnoJob {
 }
 
 export interface AutoAnnoJobLetter {
-  id: number;
-  letter_name: string;
-  status: string;
+  id: number
+  letter_name: string
+  status: string
   xml_content: string
   xml_content_updated: string
   content_changed: boolean
   snippets_count: number
   snippets_open: number
   snippets_closed: number
+  updated_at: string
+}
+
+export interface SnippetReference {
+  id: number
+  key: string
+  name: string
+  type: string
 }
 
 export interface AutoAnnoSnippet {
   id: number
   xml_id: string
   status: string
-  reference_key_orig: string
-  reference_type_orig: string
+  references: SnippetReference[]
   reference_key_final: string
   reference_type_final: string
-  reference_name_orig: string
   reference_name_final: string
 }
 

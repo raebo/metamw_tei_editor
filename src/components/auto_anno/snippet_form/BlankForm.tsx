@@ -1,0 +1,43 @@
+import { TextField } from "@mui/material";
+import React from "react";
+
+const BlankForm = () => {
+
+    return (
+      <>
+        <div className="autoSnippetFormRow">
+          <div className="form-item form-item--key">
+            <TextField
+              disabled
+              id="outlined-disabled"
+              label=""
+              value={""}
+              sx={{m: 1, width: '100%'}}
+            />
+          </div>
+          <div className="form-item form-item--type">
+            <TextField
+              disabled
+              id="outlined-disabled"
+              label=""
+              value={""}
+              sx={{m: 1, width: '100%'}}
+            />
+          </div>
+        </div>
+        <div className="autoSnippetFormRow">
+          <div className="form-item form-item--key">
+            <TextField
+              disabled
+              id="outlined-disabled"
+              label=""
+              value=""
+              sx={{m: 1, width: '100%'}}
+            />
+          </div>
+        </div>
+      </>
+    )
+}
+
+export default BlankForm

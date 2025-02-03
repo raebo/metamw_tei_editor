@@ -1,4 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit'
+import { SnippetReference } from "../../services/mappings/autoAnnoMappings";
 
 interface AutoLetterSnippetState {
   snippet: {
@@ -11,11 +12,15 @@ interface AutoLetterSnippetState {
     referenceKeyChanged: string
     referenceTypeChanged: string
   } | null
-  snippetShow: {
-    referenceName: string
-    referenceKey: string
-    referenceType: string
-  } | null
+  snippetFormContainer: {
+    form: string
+    buttons: string
+    actionButtonDisabled?: boolean
+  }
+  snippetReferences: {
+    items: SnippetReference[] | []
+    showReferences: boolean
+  }
   letter: {
     id: string | null,
     reloadStatus?: boolean
@@ -25,12 +30,20 @@ interface AutoLetterSnippetState {
   job: {
     id:string | null,
     reloadStatus: boolean
-  } | null;
+  } | null
 }
 
 const initialState: AutoLetterSnippetState = {
   snippet: null,
-  snippetShow: null,
+  snippetFormContainer: {
+    form: "BLANK_FORM",
+    buttons: "BLANK_BUTTONS",
+    actionButtonDisabled: true
+  },
+  snippetReferences: {
+    items: [],
+    showReferences: false
+  },
   letter: {
     id: null,
     reloadStatus: true,
@@ -41,7 +54,7 @@ const initialState: AutoLetterSnippetState = {
     id: null,
     reloadStatus: true
   }
-};
+}
 
 const autoLetterSnippetSlice = createSlice({
   name: 'autoLetterSnippet',
@@ -49,38 +62,41 @@ const autoLetterSnippetSlice = createSlice({
   reducers: {
     setAutoAnnoSnippet(state, action) {
       if (!state.snippet) {
-        state.snippet = { ...action.payload.snippet };
+        state.snippet = { ...action.payload.snippet }
       } else {
-        state.snippet = { ...state.snippet, ...action.payload.snippet };
+        state.snippet = { ...state.snippet, ...action.payload.snippet }
       }
 
       if (state.snippet?.id) {
-        state.job = { id: "", reloadStatus: false };
-        state.letter = { id: "", reloadStatus: false };
+        state.job = { id: "", reloadStatus: false }
+        state.letter = { id: "", reloadStatus: false }
       }
     },
-    setAutoAnnoSnippetShow(state, action) {
-      if (!state.snippetShow) {
-        state.snippetShow = { ...action.payload.snippetShow };
+    setAutoSnippetFormContainer(state, action) {
+      if (!state.snippetFormContainer) {
+        state.snippetFormContainer = { ...action.payload.snippetFormContainer }
       } else {
-        state.snippetShow = { ...state.snippetShow, ...action.payload.snippetShow };
+        state.snippetFormContainer = { ...state.snippetFormContainer, ...action.payload.snippetFormContainer}
       }
     },
     clearSnippetState(state) {
       state.snippet= null
-      state.snippetShow= null
+      state.snippetFormContainer= { form: "BLANK_FORM", buttons: "BLANK_BUTTONS" }
     },
 
     setAutoAnnoLetter(state, action) {
       if (!state.letter) {
         state.letter = { ...action.payload.letter}
       } else {
-        state.letter = { ...state.letter, ...action.payload.letter};
+        state.letter = { ...state.letter, ...action.payload.letter}
       }
     },
+    setSnippetReferences(state, action) {
+      state.snippetReferences= action.payload.references
+    }
   },
-});
+})
 
-export const { setAutoAnnoSnippet, setAutoAnnoSnippetShow, clearSnippetState, setAutoAnnoLetter} = autoLetterSnippetSlice.actions;
+export const { setAutoAnnoSnippet, setAutoSnippetFormContainer, clearSnippetState, setAutoAnnoLetter, setSnippetReferences } = autoLetterSnippetSlice.actions
 
 export default autoLetterSnippetSlice.reducer

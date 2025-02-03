@@ -5,7 +5,7 @@ import {
   fetchAutoAnnoLetter,
   resetAnnoLetter,
   writeAnnoLetter
-} from "../../services/autoAnno.service";
+} from "../../services/auto_anno/apiAutoAnno.service";
 import { Statuses } from "../../utils/entityStatuses";
 import { RootState } from "../../redux/redux.store";
 import {  useSelector } from "react-redux";

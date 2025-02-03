@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {  useSelector } from "react-redux";
 import {
-  setAutoAnnoSnippet,
   setAutoAnnoLetter,
-  setAutoAnnoSnippetShow
 } from "../../redux/slices/auto.letter.snippet.slice";
-import { fetchAutoAnnoLetterSnippets } from "../../services/autoAnno.service";
+import { fetchAutoAnnoLetterSnippets } from "../../services/auto_anno/apiAutoAnno.service";
 import {
   AutoAnnoSnippet,
-  getStatusDetails,
+  getStatusDetails, SnippetReference,
 } from "../../services/mappings/autoAnnoMappings";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { IconButton } from "@mui/material";
@@ -17,16 +15,17 @@ import Paper from "@mui/material/Paper";
 import { Edit } from "@mui/icons-material";
 import { RootState } from "../../redux/redux.store";
 import { useAppDispatch } from "../../redux/hooks";
+import { setAutoAnnoSnippetAndShow, setAutoSnippetAndSnippetReferences } from "../../redux/thunks/auto.snippet.thunks";
+import { markSpanAndScrollToId } from "../../utils/auto_anno/domHandling";
 
 interface AutoAnnoSnippetListProps {
   autoJobLetterId: number
 }
 
-interface SnippetUpdateParams {
-  snippetId: string;
-  xmlId: string;
-  referenceName: string;
-  [key: string]: any; // Optional: Allows additional dynamic fields
+export interface SnippetUpdateParams {
+  snippetId: string
+  xmlId: string
+  [key: string]: any // Optional: Allows additional dynamic fields
 }
 
 const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => {
@@ -57,35 +56,21 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoJobLetterId, reloadStatusSnippets]);
 
-  const handleSnippetUpdate = (params: SnippetUpdateParams) => {
-    const { snippetId, xmlId, referenceName, referenceKey, referenceType, ...rest } = params;
 
+  const showSnippetReferences = (snippetParams: SnippetUpdateParams, snippetReferences: SnippetReference[] ) => {
     dispatch(
-      setAutoAnnoSnippet({
-        snippet: {
-          id: snippetId,
-          xmlId: xmlId,
-          referenceName: referenceName,
-          referenceKey: referenceKey,
-          referenceType: referenceType,
-          referenceNameChanged: referenceName,
-          referenceKeyChanged: referenceKey,
-          referenceTypeChanged: referenceType,
-          ...rest
-        }
+      setAutoSnippetAndSnippetReferences({
+        snippetUpdateParams: snippetParams,
+        references: snippetReferences,
+        showSnippetReferences: snippetReferences.length > 1 ? true : false
       })
-    );
-    dispatch(
-      setAutoAnnoSnippetShow({
-        snippetShow: {
-          referenceName: referenceName,
-          referenceKey: referenceKey,
-          referenceType: referenceType
-        }
-      }
-      )
     )
-  };
+    markSpanAndScrollToId(snippetParams.xmlId)
+  }
+
+  const handleSnippetUpdate = (params: SnippetUpdateParams) => {
+    dispatch(setAutoAnnoSnippetAndShow({ snippetUpdateParams: params }));
+  }
 
   const snippetColumns: GridColDef[] = [
     {
@@ -111,8 +96,15 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
         );
       }
     },
-    {field: 'reference_key_orig', headerName: 'Wert (Sempria)', width: 150},
-    {field: 'reference_name_orig', headerName: 'Wert (Sempria)', width: 450},
+    { field: 'references',
+      headerName: 'Zuordnungen (Sempria)',
+      width: 150,
+      sortable: false,
+      renderCell: (params) => {
+        return `${params.row.references.length}`
+      }
+    },
+    // {field: 'reference_name_orig', headerName: 'Wert (Sempria)', width: 450},
     {field: 'reference_key_final', headerName: 'Wert (Übernommen)', width: 150},
     {field: 'reference_name_final', headerName: 'Wert (Übernommen)', width: 150},
     {
@@ -126,14 +118,41 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
         if (params.row.status !== 'open') { isEditable = false; }
 
         const handleIconClick = async () => {
+          const snippetParams =  {
+            snippetId: String(params.row.id),
+            xmlId: params.row.xml_id,
+          }
+
+          const references = params.row.references
+
           try {
-           handleSnippetUpdate({
-              snippetId: String(params.row.id),
-              xmlId: params.row.xml_id,
-              referenceName: params.row.reference_name_orig,
-              referenceKey: params.row.reference_key_orig,
-              referenceType: params.row.reference_type_orig
-           })
+            const actions = {
+              moreThanOne: () =>
+                showSnippetReferences(
+                  { referenceType: references[0].type, ...snippetParams }, references
+                ),
+              exactlyOne: () =>
+                handleSnippetUpdate({
+                  referenceName: references[0].name,
+                  referenceKey: references[0].key,
+                  referenceType: references[0].type,
+                  snippetFormContainer: { form: "SHOW_FORM", buttons: "SHOW_BUTTONS" },
+                  ...snippetParams
+                }),
+              none: () =>
+                handleSnippetUpdate({
+                  referenceName: null,
+                  referenceKey: null,
+                  referenceType: null,
+                  snippetFormContainer: { form: "SHOW_FORM", buttons: "SHOW_BUTTONS" },
+                  ...snippetParams
+                })
+            };
+
+            (references.length > 1 && actions.moreThanOne()) ||
+            (references.length === 1 && actions.exactlyOne()) || (
+              references.length === 0 && actions.none()
+            )
           } catch (err) {
             enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
           }

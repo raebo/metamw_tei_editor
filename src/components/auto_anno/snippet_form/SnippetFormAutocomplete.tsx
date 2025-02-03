@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
-import { searchAutoAnnoSnippetEntities } from "../../../services/autoAnno.service";
+import { searchAutoAnnoSnippetEntities } from "../../../services/auto_anno/apiAutoAnno.service";
 import { isDisabled } from "@testing-library/user-event/dist/utils";
 import { SnippetEntity } from "../../../services/mappings/autoAnnoMappings";
 

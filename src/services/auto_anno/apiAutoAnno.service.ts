@@ -1,11 +1,11 @@
-import initApi from './apiRequest.service';
+import initApi from '../apiRequest.service';
 import {
   AutoAnnoJobLetter,
   AutoAnnoSnippet,
   AutoAnnoJob,
   SnippetApiEntity,
   SnippetEntity
-} from "./mappings/autoAnnoMappings";
+} from "../mappings/autoAnnoMappings";
 import axios from "axios";
 
 
