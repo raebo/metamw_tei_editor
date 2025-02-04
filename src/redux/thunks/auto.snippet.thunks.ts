@@ -51,6 +51,24 @@ export const setAutoSnippetAndSnippetReferences = createAsyncThunk(
     const { snippetId, xmlId, referenceName, referenceKey, referenceType, ...rest } = snippetUpdateParams
 
     dispatch(
+      setSnippetReferences({
+        references: {
+          items: references,
+          showReferences: showSnippetReferences,
+          referenceFormActive: true
+        }
+      })
+    )
+    dispatch(
+      setAutoSnippetFormContainer({
+        snippetFormContainer: {
+          form: "BLANK_FORM",
+          buttons: "BLANK_BUTTONS",
+          actionButtonDisabled: true
+        }
+      })
+    )
+    dispatch(
       setAutoAnnoSnippet({
         snippet: {
           id: snippetId,
@@ -62,23 +80,6 @@ export const setAutoSnippetAndSnippetReferences = createAsyncThunk(
           referenceKeyChanged: referenceKey,
           referenceTypeChanged: referenceType,
           ...rest
-        }
-      })
-    )
-    dispatch(
-      setSnippetReferences({
-        references: {
-          items: references,
-          showReferences: showSnippetReferences
-        }
-      })
-    )
-    dispatch(
-      setAutoSnippetFormContainer({
-        snippetFormContainer: {
-          form: "BLANK_FORM",
-          buttons: "BLANK_BUTTONS",
-          actionButtonDisabled: true
         }
       })
     )

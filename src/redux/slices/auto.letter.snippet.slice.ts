@@ -20,6 +20,7 @@ interface AutoLetterSnippetState {
   snippetReferences: {
     items: SnippetReference[] | []
     showReferences: boolean
+    referenceFormActive: boolean
   }
   letter: {
     id: string | null,
@@ -42,7 +43,8 @@ const initialState: AutoLetterSnippetState = {
   },
   snippetReferences: {
     items: [],
-    showReferences: false
+    showReferences: false,
+    referenceFormActive: true
   },
   letter: {
     id: null,
@@ -93,10 +95,13 @@ const autoLetterSnippetSlice = createSlice({
     },
     setSnippetReferences(state, action) {
       state.snippetReferences= action.payload.references
+    },
+    setSnippetReferenceFormActive(state, action) {
+      state.snippetReferences.referenceFormActive = action.payload.referenceFormActive
     }
   },
 })
 
-export const { setAutoAnnoSnippet, setAutoSnippetFormContainer, clearSnippetState, setAutoAnnoLetter, setSnippetReferences } = autoLetterSnippetSlice.actions
+export const { setAutoAnnoSnippet, setAutoSnippetFormContainer, setSnippetReferenceFormActive, clearSnippetState, setAutoAnnoLetter, setSnippetReferences } = autoLetterSnippetSlice.actions
 
 export default autoLetterSnippetSlice.reducer

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Box, ButtonGroup } from "@mui/material";
 import Button from "@mui/material/Button";
 import {
@@ -13,7 +13,7 @@ import { clearSnippetState, setAutoAnnoLetter } from "../../redux/slices/auto.le
 import { SnippetDialogType } from "../../services/mappings/autoAnnoMappings";
 import SnippetFormDialog from "./snippet_form/SnippetFormDialog";
 import { enqueueSnackbar } from "notistack";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../redux/hooks";
 
 interface AutoAnnoLetterHandleProps {
@@ -22,12 +22,13 @@ interface AutoAnnoLetterHandleProps {
 }
 
 const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<SnippetDialogType>("RESET_LETTER");
   const [dialogSubmitFunction, setDialogSubmitFunction] = useState<() => void>(() => {});
 
-  const dispatch = useAppDispatch()
   const [finalSaveDisabled, setFinalSaveDisabled] = useState(true);
 
   const reloadLetterStatus= useSelector((state: RootState) =>
@@ -41,6 +42,19 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
     setDialogSubmitFunction(() => handleClickSubmit)
     setDialogOpen(true);
   }
+
+  const isMounted = useRef(false);
+  useEffect(() => {
+    (async () => {
+      if (!isMounted.current) {
+        const result = await fetchAutoAnnoLetter(String(props.autoJobLetterId));
+
+        if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) { setFinalSaveDisabled(false); }
+
+        isMounted.current = true;
+      }
+    })();
+  }, [props.autoJobLetterId]);
 
   const handleResetLetter = () => {
     resetAnnoLetter(props.autoJobLetterId).then(() => {
@@ -66,12 +80,14 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
     writeAnnoLetter(props.autoJobLetterId).then(() => {
       dispatch(
         setAutoAnnoLetter(
-          {letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: false}}
+          { letter: { id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: false } }
         )
       )
 
       setFinalSaveDisabled(true)
       enqueueSnackbar("Der Brief wurde erfolgreich geschrieben", {variant: "success"})
+
+      navigate(`/automatic_annotations/${props.autoJobId}`)
 
     }).catch((err) => {
       enqueueSnackbar("error during writing ShowLetter: " + err, {variant: "error"})

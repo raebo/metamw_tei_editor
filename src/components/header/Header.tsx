@@ -16,7 +16,7 @@ const pages: Page[] = [
   { title: 'Editor', path: '/editor/' },
   { title: 'Editor (Suche)', path: '/editor/letters' },
   // { title: 'Editor (EDIT)', path: '/editor/letters/13253/gb-1835-04-17-01' },
-  { title: 'Annos (Letter)', path: '/automatic_annotations/5/letters/5' },
+  //{ title: 'Annos (Letter)', path: '/automatic_annotations/6/letters/6' },
 ];
 
 const unauthenticatedPages: Page[] = [

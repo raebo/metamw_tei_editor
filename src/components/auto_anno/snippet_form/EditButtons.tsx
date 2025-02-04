@@ -21,7 +21,8 @@ import {
 } from "../../../utils/auto_anno/domHandling";
 
 interface Props {
-  autoJobLetterId: number
+  autoJobLetterId: number,
+  cancelClickedCallback: () => void
 }
 
 const EditButtons = (props: Props) => {
@@ -41,13 +42,7 @@ const EditButtons = (props: Props) => {
     setButtonDisabled()
   }, [snippetFormContainer]);
 
-
-
-  const activateShowMode = () => {
-    dispatch(setAutoSnippetFormContainer({ snippetFormContainer: { form: "SHOW_FORM", buttons: "SHOW_BUTTONS"} }))
-  }
-
-  const saveSnippet = () => {
+  const saveSnippetReference = () => {
     setSaveDisabled(true)
     const xmlLetterNode: Element|null = document.querySelector("#letterXml")
     let xmlContent: string = ""
@@ -76,7 +71,6 @@ const EditButtons = (props: Props) => {
         })
 
 
-      }).then(() => {
       }).catch((error) => {
         enqueueSnackbar("error during setting data: " + error, { variant: "error" })
         hasError = true
@@ -85,7 +79,6 @@ const EditButtons = (props: Props) => {
       if (hasError) {
         enqueueSnackbar("error during setting data: ",  { variant: "error" })
         return }
-
 
       setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged).then((response) => {
       }).catch((error) => {
@@ -118,8 +111,8 @@ const EditButtons = (props: Props) => {
 
         <div className="form-item form-item--buttons">
           <ButtonGroup size="small" variant="contained" aria-label="Basic button group">
-            <Button disabled={false} onClick={() => activateShowMode() }>Abbruch</Button>
-            <Button disabled={saveDisabled} onClick={() => saveSnippet()}>Speichern</Button>
+            <Button disabled={false} onClick={() => props.cancelClickedCallback() }>Abbruch</Button>
+            <Button disabled={saveDisabled} onClick={() => saveSnippetReference()}>Speichern</Button>
           </ButtonGroup>
         </div>
       </div>

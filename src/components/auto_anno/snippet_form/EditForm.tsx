@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/redux.store";
 import { FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
-import React, { useState } from "react";
+import React from "react";
 import { setAutoAnnoSnippet, setAutoSnippetFormContainer } from "../../../redux/slices/auto.letter.snippet.slice";
 import SnippetFormAutocomplete from "./SnippetFormAutocomplete";
 
@@ -37,7 +37,6 @@ const EditForm = (props: Props) => {
   }
 
   const editButtonEnableSave = () => {
-    console.log("editButtonEnableSave")
     dispatch(setAutoSnippetFormContainer({ snippetFormContainer: { actionButtonDisabled: false } }))
   }
 

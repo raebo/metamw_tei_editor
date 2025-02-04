@@ -1,14 +1,12 @@
 import { SnippetEntity } from "../../services/mappings/autoAnnoMappings";
-import { RefObject } from "react";
-
 
 export const markSpanAndScrollToId = (xmlId: String) => {
   const targetElement= document.querySelector('[xml\\:id="' + xmlId + '"]');
 
   if (targetElement) {
-    // if (targetElement && containerRef.current) {
+    // if (targetElement && containerRef.current) { // do we need this? containerRef is not defined
     targetElement.scrollIntoView({
-      behavior: 'smooth', // Smooth scrolling
+      behavior: 'smooth',
       block: 'start',     // Scroll to the top of the element
     });
 
@@ -44,19 +42,40 @@ export const autoAnnoReplaceDomNodeContent = (
 ): void => {
   const domNode = document.querySelector(`[xml\\:id="${xmlId}"]`);
 
-  if (!domNode) { throw new Error(`No element found with xml:id="${xmlId}"`); }
+  if (!domNode) {
+    throw new Error(`No DOM element found with xml:id="${xmlId}".`);
+  }
 
+  type ReferenceHandler = (domNode: Element, snippetEntity: any) => void;
+  const referenceHandlers: Record<string, ReferenceHandler> = {
+    Person: (domNode, snippetEntity) => replacePersonDomNode(domNode, snippetEntity),
+    Settlement: (domNode, snippetEntity) => replacePlaceDomNodeSettlement(domNode, snippetEntity),
+    Institution: (domNode, snippetEntity) => replacePlaceDomNodeInstiSight(domNode, 'institution', snippetEntity),
+    Sight: (domNode, snippetEntity) => replacePlaceDomNodeInstiSight(domNode, 'sight', snippetEntity),
+  };
 
-  if (referenceType === "Person") {
-    replacePersonDomNode(domNode, snippetEntity);
-  } else if (referenceType === "Settlement") {
-    replacePlaceDomNodeSettlement(domNode, snippetEntity);
-  } else if (referenceType === "Institution") {
-    replacePlaceDomNodeInstiSight(domNode, 'institution', snippetEntity);
-  } else if (referenceType === "Sight") {
-    replacePlaceDomNodeInstiSight(domNode, 'sight', snippetEntity);
+  if (referenceHandlers.hasOwnProperty(referenceType)) {
+    referenceHandlers[referenceType](domNode, snippetEntity);
   } else {
-    throw new Error(`Unsupported reference type: ${referenceType}`);
+    throw new Error(`Unsupported reference type: "${referenceType}". Supported types are: ${Object.keys(referenceHandlers).join(', ')}`);
+  }
+}
+
+export const referenceTypeForXmlId = (xmlId: string): string => {
+  const domNode = document.querySelector(`[xml\\:id="${xmlId}"]`)
+
+  if (!domNode) {
+    throw new Error(`No DOM element found with xml:id="${xmlId}".`);
+  }
+  const referenceTypeMapping: Record<string, string> = {
+    PERSNAME: "Person",
+    PLACENAME: "Settlement",
+  }
+
+  if (referenceTypeMapping.hasOwnProperty(domNode.tagName)) {
+    return referenceTypeMapping[domNode.tagName]
+  } else {
+    throw new Error(`Unsupported reference type: "${domNode.tagName}". Supported types are: ${Object.keys(referenceTypeMapping).join(', ')}`);
   }
 }
 

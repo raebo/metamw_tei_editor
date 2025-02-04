@@ -16,7 +16,7 @@ import { Edit } from "@mui/icons-material";
 import { RootState } from "../../redux/redux.store";
 import { useAppDispatch } from "../../redux/hooks";
 import { setAutoAnnoSnippetAndShow, setAutoSnippetAndSnippetReferences } from "../../redux/thunks/auto.snippet.thunks";
-import { markSpanAndScrollToId } from "../../utils/auto_anno/domHandling";
+import { referenceTypeForXmlId } from "../../utils/auto_anno/domHandling";
 
 interface AutoAnnoSnippetListProps {
   autoJobLetterId: number
@@ -62,10 +62,9 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
       setAutoSnippetAndSnippetReferences({
         snippetUpdateParams: snippetParams,
         references: snippetReferences,
-        showSnippetReferences: snippetReferences.length > 1 ? true : false
+        showSnippetReferences: snippetReferences.length > 1
       })
     )
-    markSpanAndScrollToId(snippetParams.xmlId)
   }
 
   const handleSnippetUpdate = (params: SnippetUpdateParams) => {
@@ -113,9 +112,7 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
       width: 100,
       sortable: false,
       renderCell: (params) => {
-        let isEditable = true
-
-        if (params.row.status !== 'open') { isEditable = false; }
+        const editableStatuses = new Set(['open', 'open_no_recommendation']);
 
         const handleIconClick = async () => {
           const snippetParams =  {
@@ -143,7 +140,7 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
                 handleSnippetUpdate({
                   referenceName: null,
                   referenceKey: null,
-                  referenceType: null,
+                  referenceType: referenceTypeForXmlId(snippetParams.xmlId),
                   snippetFormContainer: { form: "SHOW_FORM", buttons: "SHOW_BUTTONS" },
                   ...snippetParams
                 })
@@ -158,9 +155,9 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
           }
         };
 
-        if (isEditable) {
+        if (editableStatuses.has(params.row.status)) {
           return (
-            <IconButton onClick={handleIconClick} disabled={!isEditable} aria-label="info">
+            <IconButton onClick={handleIconClick} aria-label="info">
               <Edit color="primary"/>
             </IconButton>
           );

@@ -76,6 +76,7 @@ export const getStatusDetails = (status: string): { label: string; backgroundCol
     error: { label: 'Error', backgroundColor: '#f8d7da', foregroundColor: '#000000' },
     open: { label: 'Offen', backgroundColor: '#fff3cd', foregroundColor: '#000000' },
     ready_to_check: { label: 'Offen', backgroundColor: '#fff3cd', foregroundColor: '#000000' },
+    open_no_recommendation: { label: 'Offen', backgroundColor: '#fff3cd', foregroundColor: '#000000' },
   };
 
   return statusDetails[status] || { label: 'Unknown', backgroundColor: '#ffffff', foregroundColor: '#000000' }; // Default values

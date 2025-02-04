@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchAutoAnnoLetter } from "../../services/auto_anno/apiAutoAnno.service";
 import { enqueueSnackbar } from "notistack";
@@ -7,7 +7,7 @@ import { RootState } from "../../redux/redux.store";
 import {  useSelector } from "react-redux";
 import AutoAnnoSnippetList from "./AutoAnnoSnippetList";
 import AutoAnnoLetterHandle from "./AutoAnnoLetterHandle";
-import { domReplaceNodeWithMarkedSpan, markSpanAndScrollToId } from "../../utils/auto_anno/domHandling";
+import { markSpanAndScrollToId } from "../../utils/auto_anno/domHandling";
 import { setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
 import { Box, Typography } from "@mui/material";
 import { useAppDispatch } from "../../redux/hooks";
@@ -46,9 +46,13 @@ const AutoAnnoLetters: React.FC = () => {
   }), [autoAnnoLetterId, snippetReferences.items]);
 
 
+  const isMounted = useRef(false);
   useEffect(() => {
+    if (!isMounted.current) {
+      dispatch(setAutoAnnoLetter({ letter: { id: autoAnnoLetterId, reloadStatus: true } }));
+      isMounted.current = true;
+    }
     // Set reloadLetter to true after the component is mounted
-    dispatch(setAutoAnnoLetter({ letter: { id: autoAnnoLetterId, reloadStatus: true } }));
   }, [dispatch, autoAnnoLetterId]);
 
   const [transformedData, setTransformedData] = useState<any>({xmlContent: null, letterName: null});
@@ -103,7 +107,7 @@ const AutoAnnoLetters: React.FC = () => {
       }
     };
     snippetScrollToId();
-  }, [sharedSnippet]);
+  }, [sharedSnippet])
 
   return (
     <>

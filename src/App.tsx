@@ -18,6 +18,7 @@ import AutoAnnoLetters from "./components/auto_anno/AutoAnnoLetters";
 import IndexLetters from "./components/pages/editor/IndexLetters";
 import ShowEditor from "./components/pages/editor/ShowEditor";
 import { AuthProvider } from "./components/auth/AuthContext";
+import GitInfo from "./components/misc/GitInfo";
 
 const lightTheme = createTheme({
   palette: {
@@ -86,6 +87,7 @@ const App = () => {
       </AuthProvider>
       { isLoading && <CircularIndeterminate />}
       <Snackbar />
+      <GitInfo />
     </ThemeProvider>
   );
 }

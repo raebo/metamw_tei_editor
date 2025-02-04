@@ -1,11 +1,11 @@
-import { SnippetDialogType, SnippetReference } from "../../../services/mappings/autoAnnoMappings"
-import React, { useState } from "react"
+import { SnippetDialogType} from "../../../services/mappings/autoAnnoMappings"
+import React, { useEffect, useRef, useState } from "react"
 import { Box, ButtonGroup, Divider, FormControl, FormControlLabel, Radio, RadioGroup, Typography } from "@mui/material"
 import Button from "@mui/material/Button"
 import Paper from "@mui/material/Paper"
 import {
   clearSnippetState,
-  setAutoAnnoLetter,
+  setAutoAnnoLetter, setSnippetReferenceFormActive,
   setSnippetReferences
 } from "../../../redux/slices/auto.letter.snippet.slice";
 import { useAppDispatch } from "../../../redux/hooks";
@@ -14,23 +14,21 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/redux.store";
 import { enqueueSnackbar } from "notistack";
 import {
-  fetchAutoAnnoSnippetEntityData, setAutoAnnoSnippetStatus,
+  fetchAutoAnnoSnippetEntityData, setAnnoSnippetEntity, setAutoAnnoSnippetStatus,
   updateAnnoLetterContent
 } from "../../../services/auto_anno/apiAutoAnno.service";
 import {
-  autoAnnoReplaceDomNodeContent,
+  autoAnnoReplaceDomNodeContent, markSpanAndScrollToId, referenceTypeForXmlId,
   removeMarkedSpans, removeSnippetEntityFromDom,
   transformLetterXmlForExport
 } from "../../../utils/auto_anno/domHandling";
+import { AnnoSnippetStatus } from "../../../constants/snack";
+import { setAutoAnnoSnippetAndShow } from "../../../redux/thunks/auto.snippet.thunks";
 
 interface Reference {
   key: string
   name: string
 }
-
-// onConfirm: () => void
-// onCancel: () => void
-// onDelete: () => void
 
 interface SnippetReferenceListProps {
   autoAnnoLetterId: number
@@ -39,9 +37,11 @@ interface SnippetReferenceListProps {
 
 const SnippetReferencesList= (props: SnippetReferenceListProps) => {
   const sharedSnippet = useSelector((state: RootState) => state.autoLetterSnippet.snippet);
-  const [selectedValue, setSelectedValue] = useState<string | null>(null)
+  const referenceFormActive = useSelector((state: RootState) => state.autoLetterSnippet.snippetReferences.referenceFormActive);
 
+  const [selectedValue, setSelectedValue] = useState<string | null>(null)
   const [selectedReferenceKey, setSelectedReferenceKey] = useState<string| null>(null)
+  const [buttonsDisabled, setButtonsDisabled] = useState(true)
 
   const [dialogType, setDialogType] = useState<SnippetDialogType>("ACCEPT")
   const [dialogSubmitFunction, setDialogSubmitFunction] = useState<() => void>(() => {})
@@ -53,6 +53,23 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
   const handleSelectionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedValue(event.target.value)
   }
+
+  const isMounted = useRef(false);
+  useEffect(() => {
+    if(!isMounted.current && sharedSnippet) {
+      markSpanAndScrollToId(sharedSnippet?.xmlId)
+      isMounted.current = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (referenceFormActive) {
+      setButtonsDisabled(false)
+    } else {
+      setButtonsDisabled(true)
+    }
+  }, [referenceFormActive]);
 
   const handleCancel = () => {
     setDisabled(true)
@@ -72,12 +89,9 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
     setDialogOpen(true);
   };
 
-
   const handleConfirmElement = () => {
     const xmlLetterNode: Element|null = document.querySelector("#letterXml")
     let xmlContent: string = ""
-    let hasError = false
-
 
     if (!sharedSnippet?.id) {
       enqueueSnackbar("no snippet id given", { variant: "error" })
@@ -89,7 +103,6 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
       enqueueSnackbar("no reference key selected", {variant: "error"})
       return }
 
-
     fetchAutoAnnoSnippetEntityData(props.autoAnnoLetterId, sharedSnippet.id, selectedReferenceKey, sharedSnippet.referenceType).then((data) => {
       autoAnnoReplaceDomNodeContent(sharedSnippet.xmlId, sharedSnippet.referenceType, data)
 
@@ -100,17 +113,27 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
         xmlContent
       ).catch((error) => {
         enqueueSnackbar("error during updating of letter content: " + error, {variant: "error"})
-        hasError = true
+      })
+
+      setAnnoSnippetEntity(props.autoAnnoLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, selectedReferenceKey).then((response) => {
+      }).catch((error) => {
+        enqueueSnackbar("error during setting data: " + error, { variant: "error" })
+      })
+
+      setAutoAnnoSnippetStatus(props.autoAnnoLetterId, sharedSnippet?.id, AnnoSnippetStatus.ACCEPTED).then(() => {
+        dispatch(setAutoAnnoLetter({letter: {id: props.autoAnnoLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
+        dispatch(clearSnippetState())
+        dispatch(setSnippetReferences( { references: { showReferences: false } } ))
+      }).catch((error) => {
+        enqueueSnackbar("error during setting status of snippet: " + error, { variant: "error" })
       })
 
     }).then(() => {
       setDisabled(true)
-      console.log("Selected Reference Key: ", sharedSnippet?.xmlId, selectedReferenceKey)
       setDialogOpen(false)
     }).catch((err) => {
       enqueueSnackbar("error during writing ShowLetter: " + err, {variant: "error"})
     })
-
   }
 
   const handleRejectSnippet = () => {
@@ -136,7 +159,7 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
         enqueueSnackbar("error during setting data: " + error, {variant: "error"})
       });
 
-      setAutoAnnoSnippetStatus(props.autoAnnoLetterId, sharedSnippet?.id, "REJECTED").then((response) => {
+      setAutoAnnoSnippetStatus(props.autoAnnoLetterId, sharedSnippet?.id, AnnoSnippetStatus.REJECTED).then((response) => {
         if (response) {
           dispatch(setAutoAnnoLetter(
             { letter: {id: props.autoAnnoLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: true } }
@@ -160,6 +183,27 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
     }
   }
 
+  const handleAddEntry = () => {
+    if (!sharedSnippet) {
+      enqueueSnackbar("no shared snippet found", { variant: "error" })
+      return
+    }
+    dispatch(setSnippetReferenceFormActive({ referenceFormActive: false }))
+
+    dispatch(setAutoAnnoSnippetAndShow({
+      snippetUpdateParams: {
+        snippetId: sharedSnippet.id.toString(),
+        xmlId: sharedSnippet.xmlId,
+        referenceName: null,
+        referenceKey: null,
+        referenceType: referenceTypeForXmlId(sharedSnippet.xmlId),
+        snippetFormContainer: {form: "EDIT_FORM", buttons: "EDIT_BUTTONS_REFERENCE_LIST"}
+      }
+    })
+    )
+  }
+
+
   return (
     <Paper sx={{ width: 'auto', border: "1px solid #ccc", borderRadius: 2, p: 2 }}>
       <Typography variant="h6" sx={{ textAlign: 'left' }}>
@@ -168,7 +212,7 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
       <Divider sx={{ my: 2 }} />
       <Box sx={{ maxHeight: 200, overflowY: "auto", borderBottom: "1px solid #ddd", pb: 1 }}>
         <FormControl
-          disabled={disabled}
+          disabled={ disabled || buttonsDisabled}
           component="fieldset"
           sx={{
             minWidth: '60%', // Set minimum width for the FormControl
@@ -196,13 +240,17 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
 
       <Box sx={{ display: "flex", justifyContent: "right", marginTop: "1%" }}>
         <ButtonGroup size="small" variant="contained">
-          <Button color="info" onClick={() => handleCancel()}>
+          <Button color="info" onClick={() => handleCancel()} disabled={ buttonsDisabled }>
             Abbruch
           </Button>
-          <Button color="info" onClick={() => handleOpenDialog("REJECT", handleRejectSnippet)} disabled={false}>
+          <Button color="info" onClick={() => handleOpenDialog("REJECT", handleRejectSnippet)} disabled={ buttonsDisabled }>
             Löschen
           </Button>
-          <Button color="primary" onClick={() =>  handleOpenDialog("ACCEPT", handleConfirmElement) } disabled={!selectedValue}>
+          <Button color="info" onClick={() => handleAddEntry()} disabled={ buttonsDisabled }>
+            Eigener Eintrag
+          </Button>
+
+          <Button color="primary" onClick={() =>  handleConfirmElement() } disabled={ !selectedValue || buttonsDisabled }>
             Bestätigen
           </Button>
         </ButtonGroup>
