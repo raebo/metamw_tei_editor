@@ -10,7 +10,7 @@ import {
   transformLetterXmlForExport
 } from "../../../utils/auto_anno/domHandling";
 import {
-  fetchAutoAnnoSnippetEntityData,
+  fetchAutoAnnoSnippetEntityData, setAnnoSnippetEntity,
   setAutoAnnoSnippetStatus,
   updateAnnoLetterContent
 } from "../../../services/auto_anno/apiAutoAnno.service";
@@ -90,7 +90,14 @@ const ShowButtons = (props: Props) => {
 
       if (xmlLetterNode === null) { throw new Error("xmlNodeContent is null") }
 
+      setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceType, sharedSnippet?.referenceKey).then((response) => {
+
+      }).catch(() => {
+        throw new Error("error during setAnnoSnippetEntity")
+      })
       fetchAutoAnnoSnippetEntityData(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceKey, sharedSnippet?.referenceType).then((data) => {
+
+
         autoAnnoReplaceDomNodeContent(sharedSnippet?.xmlId, sharedSnippet?.referenceType, data)
 
         // needed this extra line call because otherwise it would not recognize the updated xml

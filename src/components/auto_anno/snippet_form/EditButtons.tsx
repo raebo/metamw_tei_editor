@@ -56,10 +56,13 @@ const EditButtons = (props: Props) => {
         enqueueSnackbar("xmlNodeContent is null", {variant: "error"})
         return }
 
+      setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged).then((response) => {
+
+      }).catch(() => {
+        throw new Error("error during setAnnoSnippetEntity")
+      })
       fetchAutoAnnoSnippetEntityData(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceKeyChanged, sharedSnippet?.referenceTypeChanged).then((data) => {
         autoAnnoReplaceDomNodeContent(sharedSnippet?.xmlId, sharedSnippet?.referenceTypeChanged, data)
-
-        // needed this extra line call because otherwise it would not recognize the updated xml
         xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML)
 
         updateAnnoLetterContent(
@@ -74,7 +77,7 @@ const EditButtons = (props: Props) => {
       }).catch((error) => {
         enqueueSnackbar("error during setting data: " + error, { variant: "error" })
         hasError = true
-      });
+      })
 
       if (hasError) {
         enqueueSnackbar("error during setting data: ",  { variant: "error" })
