@@ -96,7 +96,7 @@ const AutoAnnoList: React.FC = () => {
       width: 100,
       sortable: false,
       renderCell: (params) => {
-        return `${params.row.letters_open}/${params.row.letters_count}`;
+        return `${params.row.letters_closed}/${params.row.letters_count}`;
       }
     },
     {
