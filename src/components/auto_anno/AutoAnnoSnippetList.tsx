@@ -16,7 +16,7 @@ import { Edit } from "@mui/icons-material";
 import { RootState } from "../../redux/redux.store";
 import { useAppDispatch } from "../../redux/hooks";
 import { setAutoAnnoSnippetAndShow, setAutoSnippetAndSnippetReferences } from "../../redux/thunks/auto.snippet.thunks";
-import { referenceTypeForXmlId } from "../../utils/auto_anno/domHandling";
+import { markSpanAndScrollToId, referenceTypeForXmlId } from "../../utils/auto_anno/domHandling";
 
 interface AutoAnnoSnippetListProps {
   autoJobLetterId: number
@@ -179,6 +179,34 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
           initialState={{pagination: { paginationModel }}}
           pageSizeOptions={[5, 10]}
           sx={{border: 0}}
+          getRowId={(row) => row.id}
+          slotProps={{
+            row: {
+              onMouseOver: (event: React.MouseEvent<HTMLDivElement>) => {
+                const rowElement = event.currentTarget;
+                const rowId = rowElement.dataset.id;
+
+                if (rowId && autoAnnoSnippetData) {
+                  const rowData = autoAnnoSnippetData.find((row) => row.id === parseInt(rowId)); // Find full row data
+                  if (rowData && rowData.xml_id) {
+                    markSpanAndScrollToId(rowData?.xml_id)
+                  }
+                }
+              },
+              onMouseOut: (event: React.MouseEvent<HTMLDivElement>) => {
+                const rowElement = event.currentTarget;
+                const rowId = rowElement.dataset.id;
+
+                if (rowId && autoAnnoSnippetData) {
+                  const rowData = autoAnnoSnippetData.find((row) => row.id === parseInt(rowId)); // Find full row data
+                  if (rowData && rowData.xml_id) {
+                    const existingMarkedSpans = document.querySelectorAll("span.marked");
+                    existingMarkedSpans.forEach((span) => span.replaceWith(...span.childNodes));
+                  }
+                }
+              }
+            },
+          }}
         />
       </Paper>
     </>
