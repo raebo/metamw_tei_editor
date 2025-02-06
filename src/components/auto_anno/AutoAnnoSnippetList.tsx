@@ -105,7 +105,7 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
     },
     // {field: 'reference_name_orig', headerName: 'Wert (Sempria)', width: 450},
     {field: 'reference_key_final', headerName: 'Wert (Übernommen)', width: 150},
-    {field: 'reference_name_final', headerName: 'Wert (Übernommen)', width: 150},
+    {field: 'reference_name_final', headerName: 'Wert (Übernommen)', width: 350},
     {
       field: 'actions',
       headerName: '',
