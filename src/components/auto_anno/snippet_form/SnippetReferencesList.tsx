@@ -1,11 +1,21 @@
 import { SnippetDialogType} from "../../../services/mappings/autoAnnoMappings"
 import React, { useEffect, useRef, useState } from "react"
-import { Box, ButtonGroup, Divider, FormControl, FormControlLabel, Radio, RadioGroup, Typography } from "@mui/material"
+import {
+  Box,
+  ButtonGroup,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  IconButton,
+  Radio,
+  RadioGroup,
+  Typography
+} from "@mui/material"
 import Button from "@mui/material/Button"
 import Paper from "@mui/material/Paper"
 import {
   clearSnippetState,
-  setAutoAnnoLetter, setSnippetReferenceFormActive,
+  setAutoAnnoLetter, setSnippetEntityInfo, setSnippetReferenceFormActive,
   setSnippetReferences
 } from "../../../redux/slices/auto.letter.snippet.slice";
 import { useAppDispatch } from "../../../redux/hooks";
@@ -24,6 +34,7 @@ import {
 } from "../../../utils/auto_anno/domHandling";
 import { AnnoSnippetStatus } from "../../../constants/snack";
 import { setAutoAnnoSnippetAndShow } from "../../../redux/thunks/auto.snippet.thunks";
+import InfoIcon from "@mui/icons-material/Info";
 
 interface Reference {
   key: string
@@ -46,6 +57,7 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
   const [dialogType, setDialogType] = useState<SnippetDialogType>("ACCEPT")
   const [dialogSubmitFunction, setDialogSubmitFunction] = useState<() => void>(() => {})
   const [dialogOpen, setDialogOpen] = useState(false);
+
 
   const dispatch = useAppDispatch()
   const [disabled, setDisabled] = useState(false)
@@ -115,7 +127,7 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
         enqueueSnackbar("error during updating of letter content: " + error, {variant: "error"})
       })
 
-      setAnnoSnippetEntity(props.autoAnnoLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, selectedReferenceKey).then((response) => {
+      setAnnoSnippetEntity(props.autoAnnoLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, selectedReferenceKey).then(() => {
       }).catch((error) => {
         enqueueSnackbar("error during setting data: " + error, { variant: "error" })
       })
@@ -203,6 +215,10 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
     )
   }
 
+  const handleInfoIconClick = (referenceKey: string) => {
+    dispatch(setSnippetEntityInfo({ key: referenceKey }))
+  }
+
 
   return (
     <Paper sx={{ width: 'auto', border: "1px solid #ccc", borderRadius: 2, p: 2 }}>
@@ -224,14 +240,18 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
           <RadioGroup value={selectedValue} onChange={handleSelectionChange}>
             <Box sx={{ display: 'flex', flexDirection: 'column', flexWrap: 'wrap', maxHeight: 200 }}>
               {props.references.map((reference) => (
-                <FormControlLabel
-                  key={reference.key}
-                  value={reference.key}
-                  control={<Radio />}
-                  label={`(${reference.key}) ${reference.name}`}
-                  onClick={() => setSelectedReferenceKey(reference.key)}
-                  sx={{ width: { xs: '100%', sm: '70%' } }}
-                />
+                <Box key={reference.key} sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: '70%' } }}>
+                  <IconButton onClick={(event) => handleInfoIconClick(reference.key)} aria-label="info">
+                    <InfoIcon color="primary" />
+                  </IconButton>
+                  <FormControlLabel
+                    value={reference.key}
+                    control={<Radio />}
+                    label={`(${reference.key}) ${reference.name}`}
+                    onClick={() => setSelectedReferenceKey(reference.key)}
+                    sx={{ flex: 1 }} // Ensures FormControlLabel takes available space
+                  />
+                </Box>
               ))}
             </Box>
           </RadioGroup>

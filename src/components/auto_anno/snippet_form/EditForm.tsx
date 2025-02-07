@@ -1,9 +1,22 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/redux.store";
-import { FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import {
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select,
+} from "@mui/material";
 import React from "react";
-import { setAutoAnnoSnippet, setAutoSnippetFormContainer } from "../../../redux/slices/auto.letter.snippet.slice";
+import {
+  setAutoAnnoSnippet,
+  setAutoSnippetFormContainer,
+  setSnippetEntityInfo
+} from "../../../redux/slices/auto.letter.snippet.slice";
 import SnippetFormAutocomplete from "./SnippetFormAutocomplete";
+import { InfoOutlined, InfoSharp } from "@mui/icons-material";
 
 interface Props {
   autoAnnoLetterId: number
@@ -40,16 +53,34 @@ const EditForm = (props: Props) => {
     dispatch(setAutoSnippetFormContainer({ snippetFormContainer: { actionButtonDisabled: false } }))
   }
 
+  const handleInfoIconClick = (referenceKey: string | null) => {
+    if (!referenceKey) { return }
+    dispatch(setSnippetEntityInfo({ key: referenceKey }))
+  }
+
   return (
     <>
        <div className="autoSnippetFormRow">
         <div className="form-item form-item--key">
-          <TextField
+          <OutlinedInput
             disabled
             id="outlined-disabled"
             label=""
             value={ sharedSnippet ? sharedSnippet.referenceKeyChanged : ""}
             sx={{m: 1, width: '100%'}}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() => {
+                    handleInfoIconClick(sharedSnippet?.referenceKeyChanged ? sharedSnippet.referenceKeyChanged : null)
+                  }
+                  }
+                  edge="end"
+                >
+                  { sharedSnippet?.referenceKeyChanged ? <InfoSharp /> : <InfoOutlined />}
+                </IconButton>
+              </InputAdornment>
+            }
           />
         </div>
         <div className="form-item form-item--type">

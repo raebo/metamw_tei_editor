@@ -8,12 +8,13 @@ import {  useSelector } from "react-redux";
 import AutoAnnoSnippetList from "./AutoAnnoSnippetList";
 import AutoAnnoLetterHandle from "./AutoAnnoLetterHandle";
 import { markSpanAndScrollToId } from "../../utils/auto_anno/domHandling";
-import { setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
+import { setAutoAnnoLetter, setSnippetEntityInfo } from "../../redux/slices/auto.letter.snippet.slice";
 import { Box, Typography } from "@mui/material";
 import { useAppDispatch } from "../../redux/hooks";
 import { ComponentMappingItem } from "../../services/mappings/editorMappings";
 import SnippetReferencesList from "./snippet_form/SnippetReferencesList";
 import SnippetFormContainer from "./snippet_form/SnippetFormContainer";
+import SnippetEntityInfoDialog from "./snippet_form/SnippetEntityInfoDialog";
 
 const AutoAnnoLetters: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +46,28 @@ const AutoAnnoLetters: React.FC = () => {
     },
   }), [autoAnnoLetterId, snippetReferences.items]);
 
+
+  // handling the dialog for the snippet references
+  const [refInfoDialogOpen, setRefInfoDialogOpen] = useState(false)
+  const [refInfoDialogKey, setRefInfoDialogKey] = useState<string | null>(null)
+  const stateEntityInfo = useSelector((state: RootState) => state.autoLetterSnippet.entityInfo)
+
+  useEffect(() => {
+    const handleStateEntityInfo = () => {
+      if (stateEntityInfo && stateEntityInfo.key) {
+        setRefInfoDialogKey(stateEntityInfo.key)
+        setRefInfoDialogOpen(true)
+      } else if (stateEntityInfo && stateEntityInfo.key === null) {
+        setRefInfoDialogOpen(false)
+      }
+    }
+    console.log("stateEntityInfo", stateEntityInfo)
+    handleStateEntityInfo()
+  }, [stateEntityInfo]);
+  const handleInfoDialogClose = () => {
+    dispatch(setSnippetEntityInfo({key: null}))
+  }
+  /////////
 
   const isMounted = useRef(false);
   useEffect(() => {
@@ -148,6 +171,11 @@ const AutoAnnoLetters: React.FC = () => {
           </div>
         </div>
       </div>
+      <SnippetEntityInfoDialog
+        open={refInfoDialogOpen}
+        referenceKey={refInfoDialogKey}
+        handleClose={handleInfoDialogClose}
+      />
     </>
   )
 }

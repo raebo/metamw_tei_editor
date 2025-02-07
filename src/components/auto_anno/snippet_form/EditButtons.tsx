@@ -34,7 +34,6 @@ const EditButtons = (props: Props) => {
 
   useEffect(() => {
     const setButtonDisabled = () => {
-      console.log("snippetFormContainer", snippetFormContainer)
       if (snippetFormContainer && snippetFormContainer.actionButtonDisabled !== undefined) {
         setSaveDisabled(snippetFormContainer.actionButtonDisabled)
       }
@@ -56,7 +55,7 @@ const EditButtons = (props: Props) => {
         enqueueSnackbar("xmlNodeContent is null", {variant: "error"})
         return }
 
-      setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged).then((response) => {
+      setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged).then(() => {
 
       }).catch(() => {
         throw new Error("error during setAnnoSnippetEntity")
@@ -83,7 +82,7 @@ const EditButtons = (props: Props) => {
         enqueueSnackbar("error during setting data: ",  { variant: "error" })
         return }
 
-      setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged).then((response) => {
+      setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged).then(() => {
       }).catch((error) => {
         enqueueSnackbar("error during setting data: " + error, { variant: "error" })
         hasError = true

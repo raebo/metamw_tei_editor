@@ -32,6 +32,9 @@ interface AutoLetterSnippetState {
     id:string | null,
     reloadStatus: boolean
   } | null
+  entityInfo: {
+    key: string | null
+  }
 }
 
 const initialState: AutoLetterSnippetState = {
@@ -55,6 +58,9 @@ const initialState: AutoLetterSnippetState = {
   job: {
     id: null,
     reloadStatus: true
+  },
+  entityInfo: {
+    key: null
   }
 }
 
@@ -98,10 +104,13 @@ const autoLetterSnippetSlice = createSlice({
     },
     setSnippetReferenceFormActive(state, action) {
       state.snippetReferences.referenceFormActive = action.payload.referenceFormActive
+    },
+    setSnippetEntityInfo(state, action) {
+      state.entityInfo.key = action.payload.key
     }
   },
 })
 
-export const { setAutoAnnoSnippet, setAutoSnippetFormContainer, setSnippetReferenceFormActive, clearSnippetState, setAutoAnnoLetter, setSnippetReferences } = autoLetterSnippetSlice.actions
+export const { setSnippetEntityInfo, setAutoAnnoSnippet, setAutoSnippetFormContainer, setSnippetReferenceFormActive, clearSnippetState, setAutoAnnoLetter, setSnippetReferences } = autoLetterSnippetSlice.actions
 
 export default autoLetterSnippetSlice.reducer

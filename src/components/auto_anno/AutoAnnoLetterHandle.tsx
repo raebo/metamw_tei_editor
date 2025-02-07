@@ -6,7 +6,7 @@ import {
   resetAnnoLetter,
   writeAnnoLetter
 } from "../../services/auto_anno/apiAutoAnno.service";
-import { Statuses } from "../../utils/entityStatuses";
+import { Statuses } from "../../utils/entityMappings";
 import { RootState } from "../../redux/redux.store";
 import {  useSelector } from "react-redux";
 import { clearSnippetState, setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";

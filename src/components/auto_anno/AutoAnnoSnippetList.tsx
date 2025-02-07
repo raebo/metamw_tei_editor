@@ -35,7 +35,7 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
 
   const reloadStatusSnippets = useSelector((state: RootState) =>
     state.autoLetterSnippet.letter?.reloadSnippetsStatus?? false
-  );
+  )
 
   useEffect(() => {
     // reload Snippets after the component is mounted
@@ -54,8 +54,7 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
     getAutoAnnoSnippetData()
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoJobLetterId, reloadStatusSnippets]);
-
+  }, [autoJobLetterId, reloadStatusSnippets])
 
   const showSnippetReferences = (snippetParams: SnippetUpdateParams, snippetReferences: SnippetReference[] ) => {
     dispatch(
