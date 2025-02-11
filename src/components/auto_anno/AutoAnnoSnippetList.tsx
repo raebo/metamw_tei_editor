@@ -74,7 +74,7 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
     {
       field: 'status',
       headerName: 'Status',
-      width: 100,
+      flex: 1,
       sortable: false,
       renderCell: (params) => {
         const { label, backgroundColor, foregroundColor } = getStatusDetails(params.row.status);
@@ -96,19 +96,18 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
     },
     { field: 'references',
       headerName: 'Zuordnungen (Sempria)',
-      width: 150,
+      flex: 1,
       sortable: false,
       renderCell: (params) => {
         return `${params.row.references.length}`
       }
     },
-    // {field: 'reference_name_orig', headerName: 'Wert (Sempria)', width: 450},
-    {field: 'reference_key_final', headerName: 'Wert (Übernommen)', width: 150},
-    {field: 'reference_name_final', headerName: 'Wert (Übernommen)', width: 350},
+    {field: 'reference_key_final', headerName: 'Wert (Übernommen)', },
+    {field: 'reference_name_final', headerName: 'Wert (Übernommen)',},
     {
       field: 'actions',
       headerName: '',
-      width: 100,
+      flex: 1,
       sortable: false,
       renderCell: (params) => {
         const editableStatuses = new Set(['open', 'open_no_recommendation']);
@@ -167,7 +166,7 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
     }
   ]
 
-  const paginationModel = {page: 0, pageSize: 5};
+  const paginationModel = { page: 0, pageSize: 5 };
 
   return (
     <>
@@ -177,7 +176,7 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
           rows={autoAnnoSnippetData}
           initialState={{pagination: { paginationModel }}}
           pageSizeOptions={[5, 10]}
-          sx={{border: 0}}
+          sx={{ maxWidth: "auto" , flex: 1, border: 0 }}
           getRowId={(row) => row.id}
           slotProps={{
             row: {

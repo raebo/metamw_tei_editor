@@ -12,7 +12,7 @@ body {
 }
 
 .box-1 {
-    flex: 0.75; /* Takes 50% of the width */
+    flex: 1; /* Takes 50% of the width */
     height: 100%; /* Full height of the container */
     background-color: #f5f5f5;
     border: 1px solid #ddd;
@@ -25,7 +25,7 @@ body {
 
 /* Second box split vertically */
 .box-2 {
-    flex: 1.25; /* Takes 50% of the width */
+    flex: 0.75; /* Takes 50% of the width */
 }
 
 .box-2 .sub-box {
