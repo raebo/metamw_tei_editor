@@ -1,5 +1,5 @@
 import { enqueueSnackbar } from "notistack";
-import { setLetterFavourite } from "../../../../services/editor/apiLetterRequest.service";
+import { setLetterFavourite } from "../../../../../services/editor/apiLetterRequest.service";
 
 const handleFavouriteClick = (letterId: string | undefined, isFavourite: boolean) => {
   (async () => {

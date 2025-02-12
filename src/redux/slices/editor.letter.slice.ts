@@ -13,7 +13,14 @@ interface EditorLetterSlice {
   }
   tabNumber: number
   pinnedLetters: PinnedLetter[]
-  searchValue: string | null
+  searchValue: string | null,
+  content: {
+    textIsMarked: boolean
+  },
+  selectedItem: {
+    left: string | null,
+    right: string | null,
+  }
 }
 
 const initialState: EditorLetterSlice = {
@@ -28,7 +35,14 @@ const initialState: EditorLetterSlice = {
   },
   tabNumber: 0,
   pinnedLetters: [],
-  searchValue: null
+  searchValue: null,
+  content: {
+    textIsMarked: false
+  },
+  selectedItem: {
+    left: null,
+    right: null
+  }
 }
 
 const EditorLetterSlice = createSlice({
@@ -72,11 +86,17 @@ const EditorLetterSlice = createSlice({
       if (action.payload.pinnedLetter) {
         state.pinnedLetters = state.pinnedLetters.filter((pinnedLetter: PinnedLetter) => pinnedLetter.id !== action.payload.pinnedLetter.id)
       }
+    },
+    setContentTextIsMarked(state, action) {
+      state.content.textIsMarked = action.payload.textIsMarked
+    },
+    setEditorSelectedItem(state, action) {
+      state.selectedItem = {...action.payload.selectedItem}
     }
   }
 })
 
 export const
-  { setEditorLetter, setEditorTabLetter, setEditorTabNumber, addLetterToPinned, removeLetterFromPinned, setEditorSearchValue, setEditorPinnedLetters } = EditorLetterSlice.actions
+  { setEditorLetter, setContentTextIsMarked, setEditorTabLetter, setEditorSelectedItem, setEditorTabNumber, addLetterToPinned, removeLetterFromPinned, setEditorSearchValue, setEditorPinnedLetters } = EditorLetterSlice.actions
 
 export default EditorLetterSlice.reducer

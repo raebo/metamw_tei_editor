@@ -1,16 +1,16 @@
-import SearchLetters from "../../index/SearchLetters";
+import SearchLetters from "../../../index/SearchLetters";
 import React, { useCallback, useEffect, useState } from "react";
-import { fetchSearchLetters } from "../../../../services/editor/apiLettersRequest.service";
-import { EditorLetter } from "../../../../services/mappings/editorMappings";
+import { fetchSearchLetters } from "../../../../../services/editor/apiLettersRequest.service";
+import { EditorLetter } from "../../../../../services/mappings/editorMappings";
 import Grid from "@mui/material/Grid2";
 import SearchResultEntry from "./SearchResultEntry";
 import {  useSelector } from "react-redux";
 import {
   setEditorPinnedLetters,
   setEditorSearchValue
-} from "../../../../redux/slices/editor.letter.slice";
-import { RootState } from "../../../../redux/redux.store";
-import { useAppDispatch } from "../../../../redux/hooks";
+} from "../../../../../redux/slices/editor.letter.slice";
+import { RootState } from "../../../../../redux/redux.store";
+import { useAppDispatch } from "../../../../../redux/hooks";
 
 const SearchContainer = () => {
 

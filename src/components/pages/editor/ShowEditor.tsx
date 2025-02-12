@@ -3,17 +3,25 @@ import { useEffect, useRef, useState } from "react";
 import { Box, List, ListItemButton, ListItemIcon } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
-import SearchContainer from "../../editor/letter/LeftSearch/SearchContainer";
-import FavouritesContainer from "../../editor/letter/LeftFavourites/FavouritesContainer";
-import AssignedContainer from "../../editor/letter/RightAssigned/AssignedContainer";
+import SearchContainer from "../../editor/letter/Left/Search/SearchContainer";
+import FavouritesContainer from "../../editor/letter/Left/Favourites/FavouritesContainer";
+import AssignedContainer from "../../editor/letter/Right/Assigned/AssignedContainer";
 import { ComponentMappingItem } from "../../../services/mappings/editorMappings";
-import { handleFavouriteClick } from "../../editor/letter/RightFavourite/LetterFavouriteHandling";
+import { handleFavouriteClick } from "../../editor/letter/Right/Favourite/LetterFavouriteHandling";
 import LetterViewContainer from "../../editor/letter/Center/LetterViewContainer";
 import { letterExists } from "../../../services/editor/apiLetterRequest.service";
 import LetterTabs from "../../editor/letter/Center/LetterTabs";
-import { setEditorLetter, setEditorPinnedLetters } from "../../../redux/slices/editor.letter.slice";
+import {
+  setEditorLetter,
+  setEditorPinnedLetters,
+  setEditorSelectedItem
+} from "../../../redux/slices/editor.letter.slice";
 import { fetchPinnedLetters } from "../../../services/editor/apiPinnedLettersRequest.service";
 import { useAppDispatch } from "../../../redux/hooks";
+import { EditorConstants } from "../../../constants/editor";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/redux.store";
+import EntityPersonContainer from "../../editor/letter/Right/EntityPerson/EntityPersonContainer";
 
 
 const ShowEditor = () => {
@@ -24,6 +32,7 @@ const ShowEditor = () => {
   const navigate = useNavigate();
   const [showLeftContainer, setShowLeftContainer] = useState<boolean>(false)
   const [showRightContainer, setShowRightContainer] = useState<boolean>(false)
+  const selectedItem = useSelector((state: RootState) => state.editorLetter.selectedItem);
   const [selectedItemLeft, setSelectedItemLeft] = useState<false|string>(false)
   const [selectedItemRight, setSelectedItemRight] = useState<false|string>(false)
   const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem| null>(null)
@@ -76,6 +85,27 @@ const ShowEditor = () => {
     validateLetterId();
   }, [letterId, navigate]);
 
+  useEffect(() => {
+    const handleSelectedItem = () => {
+      if (selectedItem.left !== null) {
+        handleTabChangeLeft(selectedItem.left)
+      } else {
+        setShowLeftContainer(false)
+      }
+
+      if (selectedItem.right !== null) {
+        handleTabChangeRight(selectedItem.right)
+      } else {
+        setShowRightContainer(false)
+      }
+    }
+
+    if (selectedItem !== null) {
+      handleSelectedItem();
+    }
+
+  }, [selectedItem]);
+
 
   const handleTabChangeLeft= (newValue: string) => {
     const selectedComponent = componentMappingLeft[newValue];
@@ -112,14 +142,20 @@ const ShowEditor = () => {
   };
 
   const componentMappingLeft: Record<string, ComponentMappingItem> = {
-    "SEARCH": { showContainer: true, component: <SearchContainer />, action: () => true },
-    "FAVOURITES": { showContainer: true, component: <FavouritesContainer />, action: () => true },
+    [EditorConstants.compMappingLeft.SEARCH]: { showContainer: true, component: <SearchContainer />, action: () => true },
+    [EditorConstants.compMappingLeft.FAVOURITES]: { showContainer: true, component: <FavouritesContainer />, action: () => true },
   }
 
   const componentMappingRight: Record<string, ComponentMappingItem> = {
-    "ASSIGNED": { showContainer: true , component: <AssignedContainer />, action: () => true },
-    "SET_FAVOURITE": { showContainer: false, action: () => handleFavouriteClick(letterId, true) }, // Example with a function
+    [EditorConstants.compMappingRight.ASSIGNED]: { showContainer: true , component: <AssignedContainer />, action: () => true },
+    [EditorConstants.compMappingRight.SET_FAVOURITE]: { showContainer: false, action: () => handleFavouriteClick(letterId, true) }, // Example with a function
+    [EditorConstants.compMappingRight.ENT_PERSON]: { showContainer: true , component: <EntityPersonContainer/>, action: () => true },
   };
+
+  const setSelectedItem = (newValueLeft: string| null, newValueRight: string| null) => {
+      dispatch(setEditorSelectedItem({ selectedItem: { left: newValueLeft, right: newValueRight } }))
+  }
+
 
   return (
     <Box
@@ -141,16 +177,16 @@ const ShowEditor = () => {
       >
         <List component="nav" aria-label="handle edit labels">
           <ListItemButton
-            selected={!(selectedItemLeft === false || selectedItemLeft !== "SEARCH") }
-            onClick={() => handleTabChangeLeft("SEARCH")}
+            selected={!(selectedItemLeft === false || selectedItemLeft !== EditorConstants.compMappingLeft.SEARCH) }
+            onClick={() => setSelectedItem(EditorConstants.compMappingLeft.SEARCH, null)}
           >
             <ListItemIcon>
               <SearchIcon/>
             </ListItemIcon>
           </ListItemButton>
           <ListItemButton
-            selected={!(selectedItemLeft === false || selectedItemLeft !== "FAVOURITES") }
-            onClick={() => handleTabChangeLeft("FAVOURITES")}
+            selected={!(selectedItemLeft === false || selectedItemLeft !== EditorConstants.compMappingLeft.FAVOURITES) }
+            onClick={() => setSelectedItem(EditorConstants.compMappingLeft.FAVOURITES, null)}
           >
             <ListItemIcon>
               <HomeIcon/>
@@ -210,16 +246,16 @@ const ShowEditor = () => {
       >
         <List component="nav" aria-label="handle edit labels">
           <ListItemButton
-            selected={!(selectedItemRight === false || selectedItemRight !== "ASSIGNED") }
-            onClick={() => handleTabChangeRight("ASSIGNED")}
+            selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.ASSIGNED) }
+            onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
           >
             <ListItemIcon>
               <SearchIcon/>
             </ListItemIcon>
           </ListItemButton>
           <ListItemButton
-            selected={!(selectedItemRight === false || selectedItemRight !== "SET_FAVOURITE") }
-            onClick={() => handleTabChangeRight("SET_FAVOURITE")}
+            selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.SET_FAVOURITE) }
+            onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
           >
             <ListItemIcon>
               <HomeIcon/>
