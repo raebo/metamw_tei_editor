@@ -3,7 +3,7 @@ import { fetchLetterData } from "../../../../services/editor/apiLettersRequest.s
 import XMLDisplayParser from "../../../support/XmlDisplayParser";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/redux.store";
-import { Menu, MenuItem } from "@mui/material";
+import { Divider, Menu, MenuItem, Typography } from "@mui/material";
 import { EditorUtils } from "../../../../utils/editor";
 import { enqueueSnackbar } from "notistack";
 import { useAppDispatch } from "../../../../redux/hooks";
@@ -139,7 +139,26 @@ const LetterViewContainer = () => {
                   anchorReference="anchorPosition"
                   anchorPosition={anchorPosition ? { top: anchorPosition.top, left: anchorPosition.left } : undefined}
                 >
-                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PERSON) }>Person Hinzufügen</MenuItem>
+                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PERSON) }>
+                    <Typography variant="body2">Person Hinzufügen</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PLACE) }>
+                    <Typography variant="body2">Ort Hinzufügen</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_CREATION) }>
+                    <Typography variant="body2">Werk Hinzufügen</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_FMBC_CREATION) }>
+                    <Typography variant="body2">FMBC Werk Hinzufügen</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_LETTER) }>
+                    <Typography variant="body2">Brief Hinzufügen</Typography>
+                  </MenuItem>
+                  <Divider />
+
+                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_LETTER) }>
+                    <Typography variant="body2">Brief Hinzufügen</Typography>
+                  </MenuItem>
                 </Menu>
               </div>
             </div>

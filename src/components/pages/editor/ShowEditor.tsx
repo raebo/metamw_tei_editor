@@ -22,6 +22,10 @@ import { EditorConstants } from "../../../constants/editor";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/redux.store";
 import EntityPersonContainer from "../../editor/letter/Right/EntityPerson/EntityPersonContainer";
+import EntityCreationContainer from "../../editor/letter/Right/EntityCreation/EntityCreationContainer";
+import EntityPlaceContainer from "../../editor/letter/Right/EntityPlace/EntityPlaceContainer";
+import EntityFmbcCreationContainer from "../../editor/letter/Right/EntityFmbcCreation/EntityFmbcCreationContainer";
+import EntityLetterContainer from "../../editor/letter/Right/EntityLetter/EntityLetterContainer";
 
 
 const ShowEditor = () => {
@@ -150,6 +154,10 @@ const ShowEditor = () => {
     [EditorConstants.compMappingRight.ASSIGNED]: { showContainer: true , component: <AssignedContainer />, action: () => true },
     [EditorConstants.compMappingRight.SET_FAVOURITE]: { showContainer: false, action: () => handleFavouriteClick(letterId, true) }, // Example with a function
     [EditorConstants.compMappingRight.ENT_PERSON]: { showContainer: true , component: <EntityPersonContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_PLACE]: { showContainer: true , component: <EntityPlaceContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_CREATION]: { showContainer: true , component: <EntityCreationContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_FMBC_CREATION]: { showContainer: true , component: <EntityFmbcCreationContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_LETTER]: { showContainer: true , component: <EntityLetterContainer/>, action: () => true },
   };
 
   const setSelectedItem = (newValueLeft: string| null, newValueRight: string| null) => {
