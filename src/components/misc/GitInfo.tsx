@@ -41,7 +41,7 @@ const GitInfo: React.FC = () => {
         sx={{
           position: 'fixed',
           bottom: 16,
-          right: 16,
+          left: 16,
           backgroundColor: 'background.paper',
           padding: 1,
           borderRadius: 1,
@@ -64,14 +64,14 @@ const GitInfo: React.FC = () => {
       sx={{
         position: 'fixed',
         bottom: 16,
-        right: 16,
+        left: 16,
         backgroundColor: 'background.paper',
         padding: 1,
         borderRadius: 1,
         boxShadow: 1,
       }}
     >
-      <Typography variant="body2" color="textSecondary">
+      <Typography variant="body2" color="textSecondary" sx={{fontSize: '0.4rem'}}>
         Last commit: {gitInfo.commitHash} on {new Date(gitInfo.commitDate).toLocaleString()}
       </Typography>
     </Box>

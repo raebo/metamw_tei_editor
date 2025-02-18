@@ -1,0 +1,9 @@
+:root {
+    /* Define variables */
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --editor-entity-color: #6c757d;
+    --icon-size-small: 12px;
+    --icon-size-medium: 16px;
+    --icon-size-large: 24px;
+}

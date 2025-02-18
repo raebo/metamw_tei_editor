@@ -20,6 +20,31 @@ div [type="act_of_writing"] {
    docauthor {
       display: none;
    }
+
+   date {
+      color: var(--editor-entity-color);
+      font-weight: bolder;
+   }
+   date::before {
+      font-family: "Font Awesome 6 Free";
+      color: var(--secondary-color);
+      content: "\f054";
+      display: inline;
+      padding-right: 2px;
+      vertical-align: middle;
+      font-weight: 900;
+      font-size: 70%;
+   }
+   date::after {
+      font-family: "Font Awesome 6 Free";
+      color: var(--secondary-color);
+      content: "\f053";
+      display: inline;
+      padding-left: 2px;
+      vertical-align: middle;
+      font-weight: 900;
+      font-size: 70%;
+   }
 }
 
 /*.hidden {*/
