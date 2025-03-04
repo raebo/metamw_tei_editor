@@ -5,9 +5,14 @@ export const markSpanAndScrollToId = (xmlId: String) => {
 
   if (targetElement) {
     // if (targetElement && containerRef.current) { // do we need this? containerRef is not defined
+    const elementRect = targetElement.getBoundingClientRect();
+    const absoluteElementTop = elementRect.top + window.scrollY;
+    const middle = absoluteElementTop - (window.innerHeight / 2);
+
+    // window.scrollTo(0, middle);
     targetElement.scrollIntoView({
       behavior: 'smooth',
-      block: 'start',     // Scroll to the top of the element
+      block: 'center',     // Scroll to the top of the element
     });
 
     domReplaceNodeWithMarkedSpan(targetElement);
@@ -190,6 +195,8 @@ export const transformLetterXmlForExport = (
 
   transformedHTML = transformedHTML.replace(/<\/?persname/gi, (match) => match.replace(/persname/gi, 'persName'));
   transformedHTML = transformedHTML.replace(/<\/?placename/gi, (match) => match.replace(/placename/gi, 'placeName'));
+  transformedHTML = transformedHTML.replace(/schemalocation/gi, (match) => match.replace(/schemalocation/gi, 'schemaLocation'));
+  transformedHTML = transformedHTML.replace(/\&nbsp\;/gi, (match) => match.replace(/\&nbsp\;/gi, ' '));
 
   return transformedHTML.endsWith(';') ? transformedHTML.slice(0, -1) : transformedHTML;
 }
