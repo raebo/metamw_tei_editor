@@ -37,12 +37,3 @@ export const letterContent = async (letterId: number): Promise<string> => {
   }
 }
 
-export const setLetterPinStatus = async (pinnedLetter: PinnedLetter, isPinned: boolean): Promise<boolean> => {
-  const response = await initApi.initApi().patch(`/jwt/editor/letters/${pinnedLetter.id}/pinned`, { isPinned: isPinned });
-
-  if (response.status === 200) {
-    return true
-  } else {
-    throw new Error("Failed to set pin status: " + response.data.error)
-  }
-}

@@ -15,7 +15,11 @@ export const EditorConstants = {
     ENT_LETTER: "ENT_LETTER",
     ENT_CREATION: "ENT_CREATION",
     ENT_FMBC_CREATION: "ENT_FMBC_CREATION",
+    ENT_NOTE: "ENT_NOTE",
     ADD_SPECIL_ANNOTATION: "ADD_SPECIL_ANNOTATION",
+  },
+  editorDialogTypes: {
+    NOTE: "NOTE",
   }
 }
 

@@ -34,7 +34,7 @@ const apiRequest = async (
   return response.json();
 };
 
-const initApi = (): AxiosInstance =>{
+export const initApi = (): AxiosInstance =>{
   const _dispatch = store.dispatch
   const _axios = axios.create({
     baseURL: API_URL,

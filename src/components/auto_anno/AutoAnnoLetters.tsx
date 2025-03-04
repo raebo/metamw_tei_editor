@@ -61,9 +61,8 @@ const AutoAnnoLetters: React.FC = () => {
         setRefInfoDialogOpen(false)
       }
     }
-    console.log("stateEntityInfo", stateEntityInfo)
     handleStateEntityInfo()
-  }, [stateEntityInfo]);
+  }, [stateEntityInfo])
   const handleInfoDialogClose = () => {
     dispatch(setSnippetEntityInfo({key: null}))
   }

@@ -7,9 +7,14 @@ import { Divider, Menu, MenuItem, Typography } from "@mui/material";
 import { EditorUtils } from "../../../../utils/editor";
 import { enqueueSnackbar } from "notistack";
 import { useAppDispatch } from "../../../../redux/hooks";
-import { setEditorSelectedItem } from "../../../../redux/slices/editor.letter.slice";
+import {
+  setEditorLetter,
+  setEditorSelectedItem,
+  setReloadLetterContent
+} from "../../../../redux/slices/editor.letter.slice";
 import { EditorConstants } from "../../../../constants/editor";
 import { setEditorMarkedAndContentLeftRightThunk } from "../../../../redux/thunks/editor.letter.thunk";
+import { fetchPinnedLetterData } from "../../../../services/editor/apiPinnedLettersRequest.service";
 
 const LetterViewContainer = () => {
 
@@ -18,28 +23,57 @@ const LetterViewContainer = () => {
   const [letterXmlContent, setLetterXmlContent] = useState<string>("");
   const containerRef = React.useRef<HTMLDivElement>(null);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
+  const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters)
+  const reloadLetterContent = useSelector((state: RootState) => state.editorLetter.reloadLetterContent);
   const [anchorPosition, setAnchorPosition] = useState<null | { top: number; left: number }>(null);
 
+
+  const returnLetterData = (letterId: number) => {
+    fetchLetterData(letterId)
+      .then((result) => {
+        if (result) {
+          setLetterXmlContent(result.xmlContent);
+        } else {
+          setLetterXmlContent("ERROR: Letter content not found");
+        }
+      })
+      .catch(() => {
+        setLetterXmlContent("ERROR: Failed to fetch letter content");
+      });
+  }
+  const returnPinnedLetterData = (letterId: number) => {
+    fetchPinnedLetterData(letterId)
+      .then((result) => {
+        if (result) {
+          setLetterXmlContent(result.xmlContent);
+        } else {
+          setLetterXmlContent("ERROR: Letter content not found");
+        }
+      })
+      .catch(() => {
+        setLetterXmlContent("ERROR: Failed to fetch letter content");
+      });
+  }
+
   useEffect(() => {
-    const returnLetterData = (letterId: number) => {
-      fetchLetterData(letterId)
-        .then((result) => {
-          if (result) {
-            setLetterXmlContent(result.xmlContent);
-          } else {
-            setLetterXmlContent("ERROR: Letter content not found");
-          }
-        })
-        .catch(() => {
-          setLetterXmlContent("ERROR: Failed to fetch letter content");
-        });
-    }
 
-    if (stateEditorLetter.id) {
+    if (stateEditorLetter.id && statePinnedLetters.some((letter) => (letter.id === stateEditorLetter.id && letter.isPinned))) {
+      returnPinnedLetterData(stateEditorLetter.id)
+    } else if (stateEditorLetter.id) {
       returnLetterData(stateEditorLetter.id)
+    } else {
+      setLetterXmlContent("ERROR: Letter content not found")
     }
-
   }, [stateEditorLetter]);
+
+
+  useEffect(() => {
+    if (reloadLetterContent && stateEditorLetter?.id !== null) {
+      console.log("reloadLetterContent: ", reloadLetterContent)
+      returnPinnedLetterData(stateEditorLetter.id);
+      dispatch(setReloadLetterContent({ reloadLetterContent: false }))
+    }
+  }, [reloadLetterContent]);
 
 
   useEffect(() => {
@@ -156,8 +190,8 @@ const LetterViewContainer = () => {
                   </MenuItem>
                   <Divider />
 
-                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_LETTER) }>
-                    <Typography variant="body2">Brief Hinzufügen</Typography>
+                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_NOTE) }>
+                    <Typography variant="body2">Kommentar Hinzufügen</Typography>
                   </MenuItem>
                 </Menu>
               </div>

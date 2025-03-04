@@ -1,5 +1,13 @@
 export const xmlCheck = {
+  letterXml: () : string | null => {
+    const baseNode = document.getElementById('letterXmlContextMenu')
 
+    if (baseNode === null) {
+      return null
+    } else {
+      return baseNode.innerHTML
+    }
+  },
   getSelectionOffsets(rootElement: HTMLElement, range: Range): { start: number; end: number } | null {
     let walker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT, null);
     let currentNode: Node | null = walker.nextNode();

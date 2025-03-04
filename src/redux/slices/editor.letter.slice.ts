@@ -9,8 +9,10 @@ interface EditorLetterSlice {
   tabLetter: {
     id: number | null
     name: string | null
+    contentChanged: boolean | null
     isPinned: boolean | null // remote pinned letters are pinned
-  }
+  },
+  reloadLetterContent: boolean
   tabNumber: number
   pinnedLetters: PinnedLetter[]
   searchValue: string | null,
@@ -31,8 +33,10 @@ const initialState: EditorLetterSlice = {
   tabLetter: {
     id: null,
     name: null,
+    contentChanged: null,
     isPinned: null
   },
+  reloadLetterContent: false,
   tabNumber: 0,
   pinnedLetters: [],
   searchValue: null,
@@ -64,6 +68,9 @@ const EditorLetterSlice = createSlice({
         state.tabLetter = {...state.tabLetter, ...action.payload.tabLetter}
         state.tabNumber = { ...action.payload.tabNumber }
       }
+    },
+    setReloadLetterContent(state, action) {
+      state.reloadLetterContent = action.payload.reloadLetterContent
     },
     setEditorTabNumber(state, action) {
       state.tabNumber = action.payload.tabNumber
@@ -97,6 +104,6 @@ const EditorLetterSlice = createSlice({
 })
 
 export const
-  { setEditorLetter, setContentTextIsMarked, setEditorTabLetter, setEditorSelectedItem, setEditorTabNumber, addLetterToPinned, removeLetterFromPinned, setEditorSearchValue, setEditorPinnedLetters } = EditorLetterSlice.actions
+  { setEditorLetter, setContentTextIsMarked, setEditorSelectedItem, setEditorTabNumber, setEditorSearchValue, setEditorPinnedLetters, setReloadLetterContent } = EditorLetterSlice.actions
 
 export default EditorLetterSlice.reducer

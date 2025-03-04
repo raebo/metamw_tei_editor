@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Tabs, Tab, Box, IconButton } from '@mui/material';
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from '@mui/icons-material/Add';
-import { fetchPinnedLetters } from "../../../../services/editor/apiPinnedLettersRequest.service";
+import { fetchPinnedLetters, setLetterPinStatus } from "../../../../services/editor/apiPinnedLettersRequest.service";
 import { useSelector } from "react-redux";
 import {
   setEditorLetter,
   setEditorPinnedLetters,
 } from "../../../../redux/slices/editor.letter.slice";
 import { RootState } from "../../../../redux/redux.store";
-import { setLetterPinStatus } from "../../../../services/editor/apiLetterRequest.service";
 import { enqueueSnackbar } from "notistack";
 import { PinnedLetter } from "../../../../services/mappings/editorMappings";
 import { setEditorTabAndPinnedLettersThunk } from "../../../../redux/thunks/editor.letter.thunk";
@@ -49,7 +48,6 @@ const LetterTabs = () => {
         dispatch(setEditorPinnedLetters({ pinnedLetters }))
       })
     }
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

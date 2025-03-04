@@ -17,7 +17,14 @@ export interface EditorLetter {
 export interface PinnedLetter {
   id: number,
   name: string,
+  contentChanged: boolean,
   isPinned: boolean
+}
+
+export interface ApiPinnedLetter {
+  id: number,
+  name: string,
+  content_changed: boolean
 }
 
 export interface EditorLetterData {
@@ -47,10 +54,12 @@ export const mapApiToEditorLetterData = (apiLetter: any): EditorLetterData => {
   }
 }
 
-export const mapApiToPinnedLetter = (resultAr: string[]): PinnedLetter => {
+export const mapApiToPinnedLetter = (apiPinnedLetter: ApiPinnedLetter): PinnedLetter => {
+
   return {
-    id: parseInt(resultAr[0]),
-    name: resultAr[1],
+    id: apiPinnedLetter.id,
+    name: apiPinnedLetter.name,
+    contentChanged: apiPinnedLetter.content_changed,
     isPinned: true
   }
 }

@@ -14,7 +14,7 @@ import LetterTabs from "../../editor/letter/Center/LetterTabs";
 import {
   setEditorLetter,
   setEditorPinnedLetters,
-  setEditorSelectedItem
+  setEditorSelectedItem, setReloadLetterContent
 } from "../../../redux/slices/editor.letter.slice";
 import { fetchPinnedLetters } from "../../../services/editor/apiPinnedLettersRequest.service";
 import { useAppDispatch } from "../../../redux/hooks";
@@ -26,6 +26,7 @@ import EntityCreationContainer from "../../editor/letter/Right/EntityCreation/En
 import EntityPlaceContainer from "../../editor/letter/Right/EntityPlace/EntityPlaceContainer";
 import EntityFmbcCreationContainer from "../../editor/letter/Right/EntityFmbcCreation/EntityFmbcCreationContainer";
 import EntityLetterContainer from "../../editor/letter/Right/EntityLetter/EntityLetterContainer";
+import EditorFormDialog from "../../editor/letter/Dialog/EditorFormDialog";
 
 
 const ShowEditor = () => {
@@ -49,7 +50,7 @@ const ShowEditor = () => {
 
       fetchPinnedLetters().then((pinnedLetters) => {
         if (letterId && letterName) {
-          pinnedLetters.unshift({ id: parseInt(letterId), name: letterName, isPinned: false })
+          pinnedLetters.unshift({ id: parseInt(letterId), name: letterName, contentChanged: false, isPinned: false })
         }
 
         dispatch(
@@ -158,6 +159,7 @@ const ShowEditor = () => {
     [EditorConstants.compMappingRight.ENT_CREATION]: { showContainer: true , component: <EntityCreationContainer/>, action: () => true },
     [EditorConstants.compMappingRight.ENT_FMBC_CREATION]: { showContainer: true , component: <EntityFmbcCreationContainer/>, action: () => true },
     [EditorConstants.compMappingRight.ENT_LETTER]: { showContainer: true , component: <EntityLetterContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_NOTE]: { showContainer: true , component: <EditorFormDialog open={true} dialogType={EditorConstants.compMappingRight.ENT_NOTE}/>, action: () => true },
   };
 
   const setSelectedItem = (newValueLeft: string| null, newValueRight: string| null) => {

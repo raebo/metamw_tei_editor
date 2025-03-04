@@ -137,7 +137,6 @@ const AutoAnnoLettersResizable: React.FC = () => {
   const [boxResizing, setBoxIsResizing] = useState(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    console.log("handleMouseDown");
     isResizing.current = true;
     setBoxIsResizing(true);
 
