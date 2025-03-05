@@ -154,7 +154,7 @@ const ShowButtons = (props: Props) => {
         <div className="form-item form-item--buttons">
           <ButtonGroup size="small" variant="contained" aria-label="Basic button group">
             <Button color="info" onClick={() => activateEditMode()}>Anpassen</Button>
-            <Button color="info" onClick={() => handleRejectSnippet()}>Löschen</Button>
+            <Button color="info" onClick={() => handleRejectSnippet()}>Verwerfen</Button>
             <Button color="primary" disabled={sharedSnippet?.referenceKeyChanged ? false : true} onClick={() => handleAcceptSnippet()}>Übernehmen</Button>
           </ButtonGroup>
         </div>

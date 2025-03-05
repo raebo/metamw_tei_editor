@@ -264,7 +264,7 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
             Abbruch
           </Button>
           <Button color="info" onClick={() => handleOpenDialog("REJECT", handleRejectSnippet)} disabled={ buttonsDisabled }>
-            Löschen
+            Verwerfen
           </Button>
           <Button color="info" onClick={() => handleAddEntry()} disabled={ buttonsDisabled }>
             Eigener Eintrag
