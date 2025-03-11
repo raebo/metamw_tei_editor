@@ -3,11 +3,12 @@ import { fetchLetterData } from "../../../../services/editor/apiLettersRequest.s
 import XMLDisplayParser from "../../../support/XmlDisplayParser";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/redux.store";
-import { Divider, Menu, MenuItem, Typography } from "@mui/material";
+import { Alert, Divider, Menu, MenuItem, Typography } from "@mui/material";
 import { EditorUtils } from "../../../../utils/editor";
 import { enqueueSnackbar } from "notistack";
 import { useAppDispatch } from "../../../../redux/hooks";
 import {
+  setDialogType,
   setEditorLetter,
   setEditorSelectedItem,
   setReloadLetterContent
@@ -20,7 +21,7 @@ const LetterViewContainer = () => {
 
   const dispatch = useAppDispatch();
   const contentTextIsMarked = useSelector((state: RootState) => state.editorLetter.content.textIsMarked);
-  const [letterXmlContent, setLetterXmlContent] = useState<string>("");
+  const [letterXmlContent, setLetterXmlContent] = useState<string | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters)
@@ -33,8 +34,6 @@ const LetterViewContainer = () => {
       .then((result) => {
         if (result) {
           setLetterXmlContent(result.xmlContent);
-        } else {
-          setLetterXmlContent("ERROR: Letter content not found");
         }
       })
       .catch(() => {
@@ -46,8 +45,6 @@ const LetterViewContainer = () => {
       .then((result) => {
         if (result) {
           setLetterXmlContent(result.xmlContent);
-        } else {
-          setLetterXmlContent("ERROR: Letter content not found");
         }
       })
       .catch(() => {
@@ -56,20 +53,17 @@ const LetterViewContainer = () => {
   }
 
   useEffect(() => {
-
     if (stateEditorLetter.id && statePinnedLetters.some((letter) => (letter.id === stateEditorLetter.id && letter.isPinned))) {
       returnPinnedLetterData(stateEditorLetter.id)
-    } else if (stateEditorLetter.id) {
+    } else if (stateEditorLetter.id !== null) {
       returnLetterData(stateEditorLetter.id)
-    } else {
-      setLetterXmlContent("ERROR: Letter content not found")
+    } else if (stateEditorLetter.id === null) {
+      setLetterXmlContent(null)
     }
   }, [stateEditorLetter]);
 
-
   useEffect(() => {
     if (reloadLetterContent && stateEditorLetter?.id !== null) {
-      console.log("reloadLetterContent: ", reloadLetterContent)
       returnPinnedLetterData(stateEditorLetter.id);
       dispatch(setReloadLetterContent({ reloadLetterContent: false }))
     }
@@ -158,6 +152,11 @@ const LetterViewContainer = () => {
     dispatch(setEditorSelectedItem({ selectedItem: { left: selectedItemLeft, right: selectedItemRight } }))
   }
 
+  const handleMenuItemDialogClick = (dialogType: string ) => {
+    setAnchorPosition(null)
+    dispatch(setDialogType({ dialogType: dialogType } ));
+  }
+
   return (
     <div className="letter-view-container">
       <div className="container-fmbc-letter">
@@ -166,7 +165,8 @@ const LetterViewContainer = () => {
             <div className="letter-xml" id="letterXml" ref={containerRef}>
               <div id="letterXmlContextMenu" style={{ padding: 20 }}>
 
-                {letterXmlContent && <XMLDisplayParser xmlString={letterXmlContent} />} {/* Conditionally render */}
+                {letterXmlContent && <XMLDisplayParser xmlString={letterXmlContent} />}
+
                 <Menu
                   open={Boolean(anchorPosition)}
                   onClose={() => setAnchorPosition(null)}
@@ -190,7 +190,7 @@ const LetterViewContainer = () => {
                   </MenuItem>
                   <Divider />
 
-                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_NOTE) }>
+                  <MenuItem onClick={() => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_NOTE) }>
                     <Typography variant="body2">Kommentar Hinzufügen</Typography>
                   </MenuItem>
                 </Menu>
@@ -198,7 +198,9 @@ const LetterViewContainer = () => {
             </div>
           ) : (
             <p>
-              No data available
+              <Alert severity="warning">
+                Kein Brief zur Anzeige vorhanden, bitte wählen Sie einen Brief über die Suche aus.
+              </Alert>
             </p>
           )}
         </div>

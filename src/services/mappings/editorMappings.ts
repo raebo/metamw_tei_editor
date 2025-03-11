@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 
 export type ComponentMappingItem = {
+  name: string,
   showContainer: boolean
   component?: ReactNode
   action: (() => void)

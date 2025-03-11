@@ -2,7 +2,7 @@ import apiRequest from "./apiRequest.service";
 import initApi from "./apiRequest.service";
 import { enqueueSnackbar } from "notistack";
 
-const getMe = async () : Promise< { last_name: string, first_name: string, id: number } | undefined>  => {
+const getMe = async () : Promise< { last_name: string, first_name: string, id: number, login: string } | undefined>  => {
   let response = null
   try {
    response = await initApi.initApi().get('/jwt_auth/me')

@@ -68,8 +68,8 @@ export default function SnippetFormDialog(props: SnippetFormDialogProps) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={props.handleClose}>Zurück</Button>
-          <Button disabled={submitDisabled} onClick={() => componentClickSubmit()} autoFocus>
+          <Button variant="outlined" onClick={props.handleClose}>Abbrechen</Button>
+          <Button variant="contained" disabled={submitDisabled} onClick={() => componentClickSubmit()} autoFocus>
             { dialogSubmit }
           </Button>
         </DialogActions>

@@ -1,9 +1,9 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
-  setContentTextIsMarked,
+  setContentTextIsMarked, setDialogType, setEditorLetter,
   setEditorPinnedLetters,
   setEditorSelectedItem,
-  setEditorTabNumber
+  setEditorTabNumber, setLetterReference
 } from "../slices/editor.letter.slice";
 import { PinnedLetter } from "../../services/mappings/editorMappings";
 
@@ -15,6 +15,9 @@ export const setEditorTabAndPinnedLettersThunk = createAsyncThunk(
   ) => {
     dispatch(setEditorPinnedLetters({ pinnedLetters }));
     dispatch(setEditorTabNumber({ tabNumber }));
+    if (tabNumber === -1) {
+      dispatch(setEditorLetter({ letter: { id: null, name: null } }));
+    }
   }
 );
 
@@ -28,4 +31,23 @@ export const setEditorMarkedAndContentLeftRightThunk = createAsyncThunk(
     dispatch(setContentTextIsMarked({ textIsMarked: textIsMarked }));
     dispatch(setEditorSelectedItem({ selectedItem: { left: contentLeft, right: contentRight } }))
   }
-  )
+)
+
+export const setEditorDialogAndReferenceThunk = createAsyncThunk(
+  'editor/setEditorDialogAndReference',
+  async (
+    { dialogType, elementType, elementXmlId, elementKey }: { dialogType: string ; elementType: string ;elementXmlId: string; elementKey: string | null },
+    { dispatch }
+  ) => {
+
+    console.log("dialogType", dialogType)
+    dispatch(setDialogType({ dialogType: dialogType }))
+    dispatch(setLetterReference({
+      letterReference: {
+        elementType: elementType,
+        elementXmlId: elementXmlId,
+        elementKey: elementKey
+      }
+    }))
+  }
+)

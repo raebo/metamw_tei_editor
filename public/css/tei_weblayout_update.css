@@ -7,7 +7,7 @@
    text-align: left !important;
 
    span.marked {
-      background: yellow !important;
+      background: var(--marked-color) !important;
    }
 }
 

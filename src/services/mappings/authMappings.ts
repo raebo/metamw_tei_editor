@@ -1,7 +1,8 @@
 export interface AuthUser {
-  id: number;
-  first_name: string;
-  last_name: string;
+  id: number
+  login: string
+  first_name: string
+  last_name: string
 }
 
 export type AuthContextType = {

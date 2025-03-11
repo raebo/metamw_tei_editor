@@ -7,45 +7,64 @@ import { Divider, Typography } from "@mui/material";
 import DialogActions from "@mui/material/DialogActions";
 import { EditorConstants } from "../../../../constants/editor";
 import { ComponentMappingItem } from "../../../../services/mappings/editorMappings";
-import NoteDialog from "./Components/NoteDialog";
+import AddNoteDialog from "./Components/AddNoteDialog";
+import { setDialogType, setEditorSelectedItem } from "../../../../redux/slices/editor.letter.slice";
+import { useAppDispatch } from "../../../../redux/hooks";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../redux/redux.store";
+import ResetLetterDialog from "./Components/ResetLetterDialog";
+import EditNoteDialog from "./Components/EditNoteDialog";
 
 interface EditorFormDialogProps {
   open: boolean
-  dialogType: string
+  // dialogType: string
   // handleClickSubmit: () => void;
   // handleClose: () => void;
 }
 
 
 const EditorFormDialog = (props: EditorFormDialogProps) => {
+ const dispatch = useAppDispatch()
 
+  const dialogType = useSelector((state: RootState) => state.editorLetter.dialogType)
   const [isOpen, setIsOpen] = React.useState(props.open)
   const [dialogTitle, setDialogTitle] = React.useState("")
   const [dialogContent, setDialogContent] = React.useState("")
-  const [selectedComponentRight, setSelectedComponentRight] = useState<ReactNode| null>(null)
+  const [selectedDialogComp, setSelectedDialogComp] = useState<ReactNode| null>(null)
 
   const isMounted = useRef(false);
 
   useEffect(() => {
-    if(!isMounted.current) {
-      setDialogTitle(DialogTitles[props.dialogType])
-      setSelectedComponentRight(DialogContentComponents[props.dialogType])
-      isMounted.current = true;
+    const initDialog = () => {
+      if (dialogType !== null) {
+        setDialogTitle(DialogTitles[dialogType])
+        setSelectedDialogComp(DialogContentComponents[dialogType])
+        setIsOpen(true)
+      }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    initDialog()
+
+    //eslint-disable-next-line
+  }, [dialogType]);
 
 
   const handleClose = () => {
     setIsOpen(false)
+    dispatch(setDialogType({ dialogType: null }))
+    dispatch(setEditorSelectedItem({ selectedItem: { left: null, right: null } }))
   }
 
   const DialogTitles : Record<string, string> = {
-    [EditorConstants.compMappingRight.ENT_NOTE]: "Kommentar Hinzufügen"
+    [EditorConstants.dialogTypes.ADD_NOTE]: "Kommentar Hinzufügen",
+    [EditorConstants.dialogTypes.EDIT_NOTE]: "Kommentar Bearbeiten",
+    [EditorConstants.dialogTypes.RESET_LETTER]: "Brief Zurücksetzen"
   }
 
   const DialogContentComponents : Record<string, React.ReactNode> = {
-    [EditorConstants.compMappingRight.ENT_NOTE]: <NoteDialog onClose={handleClose} />
+    [EditorConstants.dialogTypes.ADD_NOTE]: <AddNoteDialog onClose={handleClose} />,
+    [EditorConstants.dialogTypes.EDIT_NOTE]: <EditNoteDialog onClose={handleClose} />,
+    [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog onClose={handleClose} />
   }
 
   return (
@@ -58,9 +77,10 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
       >
         <DialogTitle id="alert-dialog-title">
           { dialogTitle }
+          <hr />
         </DialogTitle>
         <DialogContent sx={{ p: 2 }}>
-          { selectedComponentRight }
+          { selectedDialogComp }
         </DialogContent>
         <DialogActions>
           <Divider sx={{ my: 2 }} />

@@ -5,6 +5,7 @@ import { AuthUser } from "../../services/mappings/authMappings";
 interface AuthState {
   user: {
     id: number,
+    login: string
     last_name: string,
     first_name: string,
   } | null

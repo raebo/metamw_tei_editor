@@ -35,11 +35,13 @@ const AutoAnnoLettersResizable: React.FC = () => {
   // useMemo ensures that componentMappingList is not recreated on every render.
   const componentMappingList = useMemo(() => ({
     "SNIPPET_LIST": {
+      name: "SNIPPET_LIST",
       showContainer: true,
       component: <AutoAnnoSnippetList autoJobLetterId={autoAnnoLetterId} />,
       action: () => true,
     },
     "REFERENCE_LIST": {
+      name: "REFERENCE_LIST",
       showContainer: true,
       component: <SnippetReferencesList autoAnnoLetterId={autoAnnoLetterId} references={snippetReferences.items} />,
       action: () => true,

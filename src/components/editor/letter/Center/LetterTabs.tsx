@@ -35,7 +35,6 @@ const newTabNumber = (tabNumber: number): number => {
   return tabNumber - 1;
 }
 
-
 const LetterTabs = () => {
   const dispatch = useAppDispatch();
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Box, List, ListItemButton, ListItemIcon } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SearchContainer from "../../editor/letter/Left/Search/SearchContainer";
 import FavouritesContainer from "../../editor/letter/Left/Favourites/FavouritesContainer";
 import AssignedContainer from "../../editor/letter/Right/Assigned/AssignedContainer";
@@ -12,9 +13,10 @@ import LetterViewContainer from "../../editor/letter/Center/LetterViewContainer"
 import { letterExists } from "../../../services/editor/apiLetterRequest.service";
 import LetterTabs from "../../editor/letter/Center/LetterTabs";
 import {
+  setDialogType,
   setEditorLetter,
   setEditorPinnedLetters,
-  setEditorSelectedItem, setReloadLetterContent
+  setEditorSelectedItem, setLetterReference, setReloadLetterContent
 } from "../../../redux/slices/editor.letter.slice";
 import { fetchPinnedLetters } from "../../../services/editor/apiPinnedLettersRequest.service";
 import { useAppDispatch } from "../../../redux/hooks";
@@ -27,6 +29,9 @@ import EntityPlaceContainer from "../../editor/letter/Right/EntityPlace/EntityPl
 import EntityFmbcCreationContainer from "../../editor/letter/Right/EntityFmbcCreation/EntityFmbcCreationContainer";
 import EntityLetterContainer from "../../editor/letter/Right/EntityLetter/EntityLetterContainer";
 import EditorFormDialog from "../../editor/letter/Dialog/EditorFormDialog";
+import useNoteClickHandler from "../../editor/letter/Center/hooks/useNoteClickHandler";
+import { setEditorDialogAndReferenceThunk } from "../../../redux/thunks/editor.letter.thunk";
+import { enqueueSnackbar } from "notistack";
 
 
 const ShowEditor = () => {
@@ -139,6 +144,8 @@ const ShowEditor = () => {
 
     } else if (!showRightContainer && selectedComponent?.showContainer) {
       setShowRightContainer(true)
+    } else if (!showRightContainer && !selectedComponent?.showContainer) {
+      setShowRightContainer(false)
     }
 
     selectedComponent?.action();
@@ -147,133 +154,175 @@ const ShowEditor = () => {
   };
 
   const componentMappingLeft: Record<string, ComponentMappingItem> = {
-    [EditorConstants.compMappingLeft.SEARCH]: { showContainer: true, component: <SearchContainer />, action: () => true },
-    [EditorConstants.compMappingLeft.FAVOURITES]: { showContainer: true, component: <FavouritesContainer />, action: () => true },
+    [EditorConstants.compMappingLeft.SEARCH]: { name: EditorConstants.compMappingLeft.SEARCH, showContainer: true, component: <SearchContainer />, action: () => true },
+    [EditorConstants.compMappingLeft.FAVOURITES]: { name: EditorConstants.compMappingLeft.FAVOURITES, showContainer: true, component: <FavouritesContainer />, action: () => true },
   }
 
   const componentMappingRight: Record<string, ComponentMappingItem> = {
-    [EditorConstants.compMappingRight.ASSIGNED]: { showContainer: true , component: <AssignedContainer />, action: () => true },
-    [EditorConstants.compMappingRight.SET_FAVOURITE]: { showContainer: false, action: () => handleFavouriteClick(letterId, true) }, // Example with a function
-    [EditorConstants.compMappingRight.ENT_PERSON]: { showContainer: true , component: <EntityPersonContainer/>, action: () => true },
-    [EditorConstants.compMappingRight.ENT_PLACE]: { showContainer: true , component: <EntityPlaceContainer/>, action: () => true },
-    [EditorConstants.compMappingRight.ENT_CREATION]: { showContainer: true , component: <EntityCreationContainer/>, action: () => true },
-    [EditorConstants.compMappingRight.ENT_FMBC_CREATION]: { showContainer: true , component: <EntityFmbcCreationContainer/>, action: () => true },
-    [EditorConstants.compMappingRight.ENT_LETTER]: { showContainer: true , component: <EntityLetterContainer/>, action: () => true },
-    [EditorConstants.compMappingRight.ENT_NOTE]: { showContainer: true , component: <EditorFormDialog open={true} dialogType={EditorConstants.compMappingRight.ENT_NOTE}/>, action: () => true },
+    [EditorConstants.compMappingRight.ASSIGNED]: { name: EditorConstants.compMappingRight.ASSIGNED, showContainer: true , component: <AssignedContainer />, action: () => true },
+    [EditorConstants.compMappingRight.SET_FAVOURITE]: { name: EditorConstants.compMappingRight.SET_FAVOURITE, showContainer: false, action: () => handleFavouriteClick(letterId, true) }, // Example with a function
+    [EditorConstants.compMappingRight.ENT_PERSON]: { name: EditorConstants.compMappingRight.ENT_PERSON, showContainer: true , component: <EntityPersonContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_PLACE]: { name: EditorConstants.compMappingRight.ENT_PLACE, showContainer: true , component: <EntityPlaceContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_CREATION]: { name: EditorConstants.compMappingRight.ENT_CREATION, showContainer: true , component: <EntityCreationContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_FMBC_CREATION]: { name: EditorConstants.compMappingRight.ENT_FMBC_CREATION,  showContainer: true , component: <EntityFmbcCreationContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_LETTER]: { name: EditorConstants.compMappingRight.ENT_LETTER, showContainer: true , component: <EntityLetterContainer/>, action: () => true },
+    [EditorConstants.dialogTypes.RESET_LETTER]: { name: EditorConstants.dialogTypes.RESET_LETTER, showContainer: false, component: null, action: () => setModalDialog(EditorConstants.dialogTypes.RESET_LETTER) },
   };
 
-  const setSelectedItem = (newValueLeft: string| null, newValueRight: string| null) => {
-      dispatch(setEditorSelectedItem({ selectedItem: { left: newValueLeft, right: newValueRight } }))
+  const setModalDialog = (dialogType: string) => {
+    dispatch(setDialogType({ dialogType: dialogType }))
   }
+
+  const valueForLeft = (newValueLeft: string|null): string|null => {
+    if (newValueLeft === null) {
+      return null
+    } else if (selectedComponentLeft !== null && selectedComponentLeft.name === newValueLeft) { // double click on the same tab
+      return null
+    } else {
+      return newValueLeft
+    }
+  }
+
+  const setSelectedItem = (newValueLeft: string| null, newValueRight: string| null) => {
+      dispatch(setEditorSelectedItem({ selectedItem: { left: valueForLeft(newValueLeft), right: newValueRight } }))
+  }
+
+  useNoteClickHandler((noteElement) => {
+    const xmlId = noteElement.getAttribute("xml:id");
+
+    if (xmlId) {
+      console.log("xmlId", xmlId)
+      dispatch(
+        setEditorDialogAndReferenceThunk({
+          dialogType: EditorConstants.dialogTypes.EDIT_NOTE,
+          elementType: "note",
+          elementXmlId: xmlId,
+          elementKey: null
+        })
+      )
+    } else {
+      enqueueSnackbar("Kommentar kann nicht aktualisiert werden", { variant: "error" })
+    }
+  });
 
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        width: "100%",
-        height: "100vh",
-        backgroundColor: "#f0f0f0",
-      }}
-    >
+    <>
       <Box
         sx={{
-          width: "5%",
-          backgroundColor: "#ddd",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          width: "100%",
+          height: "100vh",
+          backgroundColor: "#f0f0f0",
         }}
       >
-        <List component="nav" aria-label="handle edit labels">
-          <ListItemButton
-            selected={!(selectedItemLeft === false || selectedItemLeft !== EditorConstants.compMappingLeft.SEARCH) }
-            onClick={() => setSelectedItem(EditorConstants.compMappingLeft.SEARCH, null)}
-          >
-            <ListItemIcon>
-              <SearchIcon/>
-            </ListItemIcon>
-          </ListItemButton>
-          <ListItemButton
-            selected={!(selectedItemLeft === false || selectedItemLeft !== EditorConstants.compMappingLeft.FAVOURITES) }
-            onClick={() => setSelectedItem(EditorConstants.compMappingLeft.FAVOURITES, null)}
-          >
-            <ListItemIcon>
-              <HomeIcon/>
-            </ListItemIcon>
-          </ListItemButton>
-        </List>
-      </Box>
-
-      {showLeftContainer && (
         <Box
           sx={{
-            width: "20%",
-            backgroundColor: "#cce5ff",
-            transition: "width 0.3s",
+            width: "5%",
+            backgroundColor: "#ddd",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          {selectedComponentLeft?.component}
+          <List component="nav" aria-label="handle edit labels">
+            <ListItemButton
+              selected={!(selectedItemLeft === false || selectedItemLeft !== EditorConstants.compMappingLeft.SEARCH) }
+              onClick={() => setSelectedItem(EditorConstants.compMappingLeft.SEARCH, null)}
+            >
+              <ListItemIcon>
+                <SearchIcon/>
+              </ListItemIcon>
+            </ListItemButton>
+            <ListItemButton
+              selected={!(selectedItemLeft === false || selectedItemLeft !== EditorConstants.compMappingLeft.FAVOURITES) }
+              onClick={() => setSelectedItem(EditorConstants.compMappingLeft.FAVOURITES, null)}
+            >
+              <ListItemIcon>
+                <HomeIcon/>
+              </ListItemIcon>
+            </ListItemButton>
+          </List>
         </Box>
-      )}
 
-      <Box
-        sx={{
-          flexGrow: 1,
-          backgroundColor: "#ffffff",
-          transition: "width 0.3s",
-          width: showLeftContainer && showRightContainer ? "60%" : showLeftContainer || showRightContainer ? "80%" : "90%",
-        }}
-      >
-        <>
-          <LetterTabs />
-          <LetterViewContainer />
-        </>
-      </Box>
+        {showLeftContainer && (
+          <Box
+            sx={{
+              width: "20%",
+              backgroundColor: "#cce5ff",
+              transition: "width 0.3s",
+            }}
+          >
+            {selectedComponentLeft?.component}
+          </Box>
+        )}
 
-      {showRightContainer && (
         <Box
           sx={{
-            width: "20%",
-            backgroundColor: "#cce5ff",
+            flexGrow: 1,
+            backgroundColor: "#ffffff",
             transition: "width 0.3s",
+            width: showLeftContainer && showRightContainer ? "60%" : showLeftContainer || showRightContainer ? "80%" : "90%",
           }}
         >
+          <>
+            <LetterTabs />
+            <LetterViewContainer />
+          </>
+        </Box>
 
-          {selectedComponentRight?.component}
-         </Box>
-      )}
+        {showRightContainer && (
+          <Box
+            sx={{
+              width: "20%",
+              backgroundColor: "#cce5ff",
+              transition: "width 0.3s",
+            }}
+          >
+            {selectedComponentRight?.component}
+           </Box>
+        )}
 
-      <Box
-        sx={{
-          width: "5%",
-          backgroundColor: "#ddd",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-        // onClick={() => setShowRightContainer(!showRightContainer)}
-      >
-        <List component="nav" aria-label="handle edit labels">
-          <ListItemButton
-            selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.ASSIGNED) }
-            onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
-          >
-            <ListItemIcon>
-              <SearchIcon/>
-            </ListItemIcon>
-          </ListItemButton>
-          <ListItemButton
-            selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.SET_FAVOURITE) }
-            onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
-          >
-            <ListItemIcon>
-              <HomeIcon/>
-            </ListItemIcon>
-          </ListItemButton>
-        </List>
+        <Box
+          sx={{
+            width: "5%",
+            backgroundColor: "#ddd",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          // onClick={() => setShowRightContainer(!showRightContainer)}
+        >
+          <List component="nav" aria-label="handle edit labels">
+            <ListItemButton
+              selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.ASSIGNED) }
+              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
+            >
+              <ListItemIcon>
+                <SearchIcon/>
+              </ListItemIcon>
+            </ListItemButton>
+            <ListItemButton
+              selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.SET_FAVOURITE) }
+              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
+            >
+              <ListItemIcon>
+                <HomeIcon/>
+              </ListItemIcon>
+            </ListItemButton>
+            <ListItemButton
+              selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.dialogTypes.RESET_LETTER) }
+              onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
+            >
+              <ListItemIcon>
+                <RestartAltIcon />
+              </ListItemIcon>
+            </ListItemButton>
+          </List>
+        </Box>
       </Box>
-    </Box>
+    <EditorFormDialog open={false} />i
+    </>
   );
 };
 

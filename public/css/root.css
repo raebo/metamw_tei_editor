@@ -3,7 +3,9 @@
     --primary-color: #007bff;
     --secondary-color: #6c757d;
     --editor-entity-color: #6c757d;
+    --marked-color: yellow;
     --icon-size-small: 12px;
     --icon-size-medium: 16px;
     --icon-size-large: 24px;
+    --font-size-small: 80%;
 }

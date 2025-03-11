@@ -15,12 +15,28 @@ export const EditorConstants = {
     ENT_LETTER: "ENT_LETTER",
     ENT_CREATION: "ENT_CREATION",
     ENT_FMBC_CREATION: "ENT_FMBC_CREATION",
-    ENT_NOTE: "ENT_NOTE",
     ADD_SPECIL_ANNOTATION: "ADD_SPECIL_ANNOTATION",
   },
-  editorDialogTypes: {
-    NOTE: "NOTE",
-  }
+  dialogTypes: {
+    RESET_LETTER: "RESET_LETTER",
+    ADD_NOTE: "ADD_NOTE",
+    EDIT_NOTE: "EDIT_NOTE",
+  },
+
+  changeTypes: {
+    note: {
+      ADDED: "NOTE_ADDED",
+      REMOVED: "NOTE_REMOVED",
+      CONTENT_CHANGED: "NOTE_CONTENT_CHANGED",
+      TYPE_CHANGED: "NOTE_TYPE_CHANGED",
+    }
+  },
+  noteTypeItems: [
+    { value: "these_comment", label: "Themenkommentar" },
+    { value: "single_place_comment", label: "Einzelstellenkommentar" },
+    { value: "text_constitution", label: "Kommentar Textkonstitution" },
+    { value: "word_description", label: "Worterklärung" },
+  ]
 }
 
 

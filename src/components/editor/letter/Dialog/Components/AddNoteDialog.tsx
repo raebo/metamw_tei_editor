@@ -1,4 +1,3 @@
-import Paper from "@mui/material/Paper";
 import { FormControl, InputLabel, MenuItem, Select, TextareaAutosize } from "@mui/material";
 import Button from "@mui/material/Button";
 import React, { useState } from "react";
@@ -6,30 +5,27 @@ import { EditorUtils } from "../../../../../utils/editor";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/redux.store";
 import { MiscUtils } from "../../../../../utils/misc";
-import { setEditorLetter, setReloadLetterContent } from "../../../../../redux/slices/editor.letter.slice";
+import { setReloadLetterContent } from "../../../../../redux/slices/editor.letter.slice";
 import { useAppDispatch } from "../../../../../redux/hooks";
 import { enqueueSnackbar } from "notistack";
-import { Simulate } from "react-dom/test-utils";
-import error = Simulate.error;
+import { EditorConstants } from "../../../../../constants/editor";
 
 interface NoteDialogProps {
   onClose: () => void; // Function to close the dialog
 }
 
-const NoteDialog = (props: NoteDialogProps) => {
+const AddNoteDialog = (props: NoteDialogProps) => {
   const [comment, setComment] = useState("");
   const [noteType, setNoteType] = useState("");
+  const markedSpan = EditorUtils.textMarking.markedSpanEntry();
+  const markedSection =
+    markedSpan?.parentElement?.innerHTML || "<p>No marked section found</p>";
+
+
   const dispatch = useAppDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
   const stateActiveTab = useSelector((state: RootState) => state.editorLetter.tabNumber);
-
-  const noteTypeItems = [
-    { value: "these_comment", label: "Themenkommentar" },
-    { value: "single_place_comment", label: "Einzelstellenkommentar" },
-    { value: "text_constitution", label: "Kommentar Textkonstitution" },
-    { value: "word_description", label: "Worterklärung" },
-  ];
 
   const handleSubmit = () => {
     const xmlContent = EditorUtils.xmlCheck.letterXml();
@@ -38,12 +34,11 @@ const NoteDialog = (props: NoteDialogProps) => {
     );
 
     if (xmlContent !== null) {
-      const htmlString = EditorUtils.markupGeneration.noteMarkup(xmlContent, userNameShort, comment, noteType);
+      const noteMarkup = EditorUtils.markupGeneration.noteMarkup(xmlContent, userNameShort, comment, noteType);
       const pinnedLetter = statePinnedLetters[stateActiveTab]
-      let hasError = false
 
       EditorUtils.backendService.patchContent(
-        htmlString, pinnedLetter.id
+        noteMarkup.xmlString, pinnedLetter.id, EditorConstants.changeTypes.note.ADDED, noteMarkup.xmlId
       ).then(
         (result) => {
           if (result) {
@@ -51,12 +46,10 @@ const NoteDialog = (props: NoteDialogProps) => {
             enqueueSnackbar("Note added", { variant: "success" })
           } else {
             enqueueSnackbar("Data could not be updated on backend side", { variant: "error" })
-            hasError = true
           }
         }
       ).catch((error) => {
         enqueueSnackbar("Data could not be updated on backend side: " +  error.toString(), { variant: "error" })
-        hasError = true
       })
     } else {
       enqueueSnackbar("No xml content found", { variant: "error" })
@@ -66,8 +59,11 @@ const NoteDialog = (props: NoteDialogProps) => {
   };
 
   return (
-    <>
+    <div style={{padding: 5}}>
       <div style={{padding: 5}}>
+        <div id="noteReferencedXmlWrapper" style={{padding: 5}}>
+          <div id="noteReferencedXml" dangerouslySetInnerHTML={{ __html: markedSection }} />
+        </div>
         <div className="form-item form-item--key">
           <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
             <InputLabel id="auto-anno-snippet-reference-type">Kommentar (Typ)</InputLabel>
@@ -78,11 +74,11 @@ const NoteDialog = (props: NoteDialogProps) => {
               id="demo-simple-select-filled"
               onChange={(event) => setNoteType(event.target.value)}
             >
-              {noteTypeItems.map((item) => (
+              { EditorConstants.noteTypeItems.map((item) => (
                 <MenuItem key={item.value} value={item.value}>
                   {item.label}
                 </MenuItem>
-              ))}
+              )) }
             </Select>
           </FormControl>
         </div>
@@ -109,9 +105,8 @@ const NoteDialog = (props: NoteDialogProps) => {
           </div>
         </div>
       </div>
-    </>
-  );
-
+    </div>
+  )
 }
 
-export default NoteDialog
+export default AddNoteDialog

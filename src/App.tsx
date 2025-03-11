@@ -20,6 +20,8 @@ import ShowEditor from "./components/pages/editor/ShowEditor";
 import { AuthProvider } from "./components/auth/AuthContext";
 import GitInfo from "./components/misc/GitInfo";
 
+import './extensions'
+
 const lightTheme = createTheme({
   palette: {
     mode: 'light'

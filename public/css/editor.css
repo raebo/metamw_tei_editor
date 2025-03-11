@@ -6,3 +6,19 @@
     opacity: 0.3;
 }
 
+#noteReferencedXmlWrapper {
+    padding: 5px;
+    border: 1px solid var(--secondary-color);
+
+    #noteReferencedXml {
+        font-size: var(--font-size-small);
+        span.marked {
+            background-color: var(--marked-color);
+        }
+    }
+}
+
+note {
+    cursor: pointer;
+}
+

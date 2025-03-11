@@ -22,6 +22,12 @@ interface EditorLetterSlice {
   selectedItem: {
     left: string | null,
     right: string | null,
+  },
+  dialogType: string | null,
+  letterReference: {
+    elementType: string | null,
+    elementXmlId: string | null,
+    elementKey: string | null
   }
 }
 
@@ -46,6 +52,12 @@ const initialState: EditorLetterSlice = {
   selectedItem: {
     left: null,
     right: null
+  },
+  dialogType: null,
+  letterReference: {
+    elementType: null,
+    elementXmlId: null,
+    elementKey: null
   }
 }
 
@@ -99,11 +111,17 @@ const EditorLetterSlice = createSlice({
     },
     setEditorSelectedItem(state, action) {
       state.selectedItem = {...action.payload.selectedItem}
+    },
+    setDialogType(state, action) {
+      state.dialogType = action.payload.dialogType
+    },
+    setLetterReference(state, action) {
+      state.letterReference = { ...action.payload.letterReference }
     }
   }
 })
 
 export const
-  { setEditorLetter, setContentTextIsMarked, setEditorSelectedItem, setEditorTabNumber, setEditorSearchValue, setEditorPinnedLetters, setReloadLetterContent } = EditorLetterSlice.actions
+  { setEditorLetter, setContentTextIsMarked, setEditorSelectedItem, setEditorTabNumber, setEditorSearchValue, setEditorPinnedLetters, setReloadLetterContent, setDialogType, setLetterReference } = EditorLetterSlice.actions
 
 export default EditorLetterSlice.reducer

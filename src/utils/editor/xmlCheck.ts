@@ -1,4 +1,13 @@
 export const xmlCheck = {
+
+  elementByXmlTypeAndId: (xmlId: string, nodeType: string, doc: Document = document): Element | null => {
+    const baseNode = doc ? doc : document.getElementById("letterXml");
+
+    if (!baseNode) return null;
+
+    return Array.from(baseNode.querySelectorAll(nodeType))
+      .find((node) => node.getAttribute("xml:id") === xmlId) || null;
+  },
   letterXml: () : string | null => {
     const baseNode = document.getElementById('letterXmlContextMenu')
 
