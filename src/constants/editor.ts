@@ -36,7 +36,12 @@ export const EditorConstants = {
     { value: "single_place_comment", label: "Einzelstellenkommentar" },
     { value: "text_constitution", label: "Kommentar Textkonstitution" },
     { value: "word_description", label: "Worterklärung" },
-  ]
-}
+  ],
+  styles: {
+    panel: {
+      buttonSize: "small",
+    }
+  }
+} as const
 
 

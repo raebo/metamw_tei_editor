@@ -1,12 +1,10 @@
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { Divider, Typography } from "@mui/material";
 import DialogActions from "@mui/material/DialogActions";
 import { EditorConstants } from "../../../../constants/editor";
-import { ComponentMappingItem } from "../../../../services/mappings/editorMappings";
 import AddNoteDialog from "./Components/AddNoteDialog";
 import { setDialogType, setEditorSelectedItem } from "../../../../redux/slices/editor.letter.slice";
 import { useAppDispatch } from "../../../../redux/hooks";
@@ -17,9 +15,6 @@ import EditNoteDialog from "./Components/EditNoteDialog";
 
 interface EditorFormDialogProps {
   open: boolean
-  // dialogType: string
-  // handleClickSubmit: () => void;
-  // handleClose: () => void;
 }
 
 
@@ -29,10 +24,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
   const dialogType = useSelector((state: RootState) => state.editorLetter.dialogType)
   const [isOpen, setIsOpen] = React.useState(props.open)
   const [dialogTitle, setDialogTitle] = React.useState("")
-  const [dialogContent, setDialogContent] = React.useState("")
   const [selectedDialogComp, setSelectedDialogComp] = useState<ReactNode| null>(null)
-
-  const isMounted = useRef(false);
 
   useEffect(() => {
     const initDialog = () => {
@@ -42,12 +34,10 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
         setIsOpen(true)
       }
     }
-
     initDialog()
 
     //eslint-disable-next-line
   }, [dialogType]);
-
 
   const handleClose = () => {
     setIsOpen(false)
@@ -57,7 +47,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
 
   const DialogTitles : Record<string, string> = {
     [EditorConstants.dialogTypes.ADD_NOTE]: "Kommentar Hinzufügen",
-    [EditorConstants.dialogTypes.EDIT_NOTE]: "Kommentar Bearbeiten",
+    [EditorConstants.dialogTypes.EDIT_NOTE]: "Kommentar Bearbeiten/Löschen",
     [EditorConstants.dialogTypes.RESET_LETTER]: "Brief Zurücksetzen"
   }
 

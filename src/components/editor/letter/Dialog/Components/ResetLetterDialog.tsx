@@ -1,5 +1,4 @@
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import { useSelector } from "react-redux";
@@ -8,6 +7,7 @@ import { useAppDispatch } from "../../../../../redux/hooks";
 import { EditorUtils } from "../../../../../utils/editor";
 import { setReloadLetterContent } from "../../../../../redux/slices/editor.letter.slice";
 import { enqueueSnackbar } from "notistack";
+import { EditorConstants } from "../../../../../constants/editor";
 
 interface ResetLetterDialogProps {
   onClose: () => void; // Function to close the dialog
@@ -43,10 +43,19 @@ const ResetLetterDialog = (props: ResetLetterDialogProps) => {
         Sind Sie sicher, dass Sie alle bisherigen Anpassungen verwerfen möchten?
       </DialogContent>
       <DialogActions>
-        <Button variant="outlined" onClick={props.onClose} color="primary">
+        <Button
+          size={EditorConstants.styles.panel.buttonSize}
+          variant="outlined"
+          onClick={props.onClose}
+          color="primary">
           Abbrechen
         </Button>
-        <Button variant="contained" onClick={ () => resetLetter() } color="primary" autoFocus>
+        <Button
+          size={EditorConstants.styles.panel.buttonSize}
+          variant="contained"
+          onClick={ () => resetLetter() }
+          color="primary"
+          autoFocus>
           Zurücksetzen
         </Button>
       </DialogActions>

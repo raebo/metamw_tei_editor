@@ -6,9 +6,10 @@ import Button from "@mui/material/Button";
 import { FormControl, InputLabel, MenuItem, Select, TextareaAutosize } from "@mui/material";
 import { EditorConstants } from "../../../../../constants/editor";
 import React, { useEffect, useState } from "react";
-import { MiscUtils } from "../../../../../utils/misc";
 import { setReloadLetterContent } from "../../../../../redux/slices/editor.letter.slice";
 import { enqueueSnackbar } from "notistack";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
 
 
 interface EditLetterDialogProps {
@@ -25,6 +26,7 @@ const EditNoteDialog = (props: EditLetterDialogProps) => {
   const noteTypeItems = EditorConstants.noteTypeItems;
   const [noteParentContent, setNoteParentContent] = useState("")
   const [noteXmlId, setNoteXmlId] = useState("")
+  const [deleteButtonsVisible, setDeleteButtonsVisible] = useState(false)
 
   useEffect(() => {
     const initNoteContent = (xmlId: string) => {
@@ -52,9 +54,30 @@ const EditNoteDialog = (props: EditLetterDialogProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stateLetterReference]);
 
+  const handleDeleteNote= () => {
+    try {
+      const noteMarkup = EditorUtils.markupGeneration.deleteNoteMarkup(noteXmlId)
+
+      EditorUtils.backendService.patchContent(
+        noteMarkup.xmlString, stateEditorLetter.id, EditorConstants.changeTypes.note.REMOVED, noteXmlId
+      ).then((result) => {
+        if (result) {
+          dispatch(setReloadLetterContent({reloadLetterContent: true}))
+          enqueueSnackbar("Note deleted", {variant: "success"})
+        } else {
+          enqueueSnackbar("Data could not be updated on backend side", {variant: "error"})
+        }
+      }).catch(error => {
+        enqueueSnackbar("Data could not be updated on backend side: " + error.toString(), {variant: "error"})
+      })
+    } catch (error) {
+      enqueueSnackbar("No xml content found", {variant: "error"})
+    }
+
+    props.onClose()
+  }
+
   const handleUpdateNote= () => {
-
-
     try {
       const noteMarkup =
         EditorUtils.markupGeneration.updateNoteMarkup(
@@ -80,55 +103,87 @@ const EditNoteDialog = (props: EditLetterDialogProps) => {
     } catch {
       enqueueSnackbar("No xml content found", { variant: "error" })
     }
-
     props.onClose()
   }
 
   return(
     <div style={{padding: 5}}>
-      <div id="noteReferencedXmlWrapper" style={{padding: 5}}>
-        <div id="noteReferencedXml" dangerouslySetInnerHTML={{ __html: noteParentContent }} />
-      </div>
-      <div className="form-item form-item--key">
-        <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
-          <InputLabel id="auto-anno-snippet-reference-type">Kommentar (Typ)</InputLabel>
-          <Select
-            value={noteType}
-            disabled={false}
-            labelId="demo-simple-select-filled-label"
-            id="demo-simple-select-filled"
-            onChange={(event) => setNoteType(event.target.value)}
+      <DialogContent>
+        <div id="noteReferencedXmlWrapper" style={{padding: 5}}>
+          <div id="noteReferencedXml" dangerouslySetInnerHTML={{ __html: noteParentContent }} />
+        </div>
+        <div className="form-item form-item--key">
+          <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
+            <InputLabel id="auto-anno-snippet-reference-type">Kommentar (Typ)</InputLabel>
+            <Select
+              value={noteType}
+              disabled={deleteButtonsVisible}
+              labelId="demo-simple-select-filled-label"
+              id="demo-simple-select-filled"
+              onChange={(event) => setNoteType(event.target.value)}
+            >
+              { noteTypeItems.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.label}
+                </MenuItem>
+              )) }
+            </Select>
+          </FormControl>
+        </div>
+        <div className="form-item form-item--key" style={{margin: 5}}>
+          <TextareaAutosize
+            aria-label="comment"
+            minRows={10}
+            maxRows={20}
+            disabled={deleteButtonsVisible}
+            placeholder="Kommentar"
+            style={{ width: "100%", padding: 8 }}
+            value={noteContent}
+            onChange={(e) => setNoteContent(e.target.value)}
+          />
+        </div>
+        </DialogContent>
+        <DialogActions>
+          { !deleteButtonsVisible && <Button
+              variant="contained"
+              color="primary"
+              size={EditorConstants.styles.panel.buttonSize}
+              onClick={() => { setDeleteButtonsVisible(true) }}
+              style={{ marginTop: 8 }}
           >
-            { noteTypeItems.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
-                {item.label}
-              </MenuItem>
-            )) }
-          </Select>
-        </FormControl>
-      </div>
-      <div className="form-item form-item--key" style={{margin: 5}}>
-        <TextareaAutosize
-          aria-label="comment"
-          minRows={10}
-          maxRows={20}
-          placeholder="Kommentar"
-          style={{ width: "100%", padding: 8 }}
-          value={noteContent}
-          onChange={(e) => setNoteContent(e.target.value)}
-        />
-        <div style={{ textAlign: "right" }}>
-          <Button
+              Löschen
+          </Button> }
+          { !deleteButtonsVisible && <Button
             variant="contained"
             color="primary"
+            size={EditorConstants.styles.panel.buttonSize}
             onClick={ handleUpdateNote }
             style={{ marginTop: 8 }}
             disabled={!noteContent.trim() || noteType === ""}
           >
             Aktualisieren
-          </Button>
-        </div>
-      </div>
+          </Button> }
+
+          { deleteButtonsVisible && <Button
+              variant="outlined"
+              size={EditorConstants.styles.panel.buttonSize}
+              color="primary"
+              onClick={() => { setDeleteButtonsVisible(false) }}
+              style={{ marginTop: 8 }}
+          >
+              Abbrechen
+          </Button> }
+
+          { deleteButtonsVisible && <Button
+              variant="contained"
+              size={EditorConstants.styles.panel.buttonSize}
+              color="primary"
+              onClick={ handleDeleteNote }
+              style={{ marginTop: 8 }}
+          >
+              Löschen
+          </Button> }
+        </DialogActions>
     </div>
   )
 }

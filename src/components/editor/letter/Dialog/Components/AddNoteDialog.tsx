@@ -94,6 +94,7 @@ const AddNoteDialog = (props: NoteDialogProps) => {
           />
           <div style={{ textAlign: "right" }}>
             <Button
+              size={EditorConstants.styles.panel.buttonSize}
               variant="contained"
               color="primary"
               onClick={handleSubmit}

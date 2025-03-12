@@ -39,18 +39,12 @@ export const markupGeneration = {
     const serializer = new XMLSerializer()
     const xmlString = EditorUtils.xmlCheck.letterXml()
 
-    if (!xmlString) {
-      throw new Error("No xml content found")
-    }
+    if (!xmlString) { throw new Error("No xml content found") }
     const doc = parser.parseFromString(xmlString, 'application/xml')
-
-    // const doc = parser.parseFromString(xmlString, "application/xml");
 
     const noteElement = EditorUtils.xmlCheck.elementByXmlTypeAndId(xmlId, 'note', doc)
 
-    if (!noteElement) {
-      throw new Error(`Note with xml:id ${xmlId} not found`)
-    }
+    if (!noteElement) { throw new Error(`Note with xml:id ${xmlId} not found`) }
 
     const oldNoteContent = noteElement.textContent
     const oldNoteType = noteElement.getAttribute("type")
@@ -63,5 +57,23 @@ export const markupGeneration = {
       oldNoteType: oldNoteType,
       oldNoteContent: oldNoteContent
     }
-  }
+  },
+  deleteNoteMarkup: (xmlId: string) : { xmlString: string } => {
+    const parser = new DOMParser()
+    const serializer = new XMLSerializer()
+    const xmlString = EditorUtils.xmlCheck.letterXml()
+
+    if (!xmlString) { throw new Error("No xml content found") }
+    const doc = parser.parseFromString(xmlString, 'application/xml')
+
+    const noteElement = EditorUtils.xmlCheck.elementByXmlTypeAndId(xmlId, 'note', doc)
+
+    if (!noteElement) { throw new Error(`Note with xml:id ${xmlId} not found`) }
+
+    noteElement.remove()
+
+    return {
+      xmlString: serializer.serializeToString(doc)
+    }
+  },
 }
