@@ -16,7 +16,7 @@ import {
   setDialogType,
   setEditorLetter,
   setEditorPinnedLetters,
-  setEditorSelectedItem, setLetterReference, setReloadLetterContent
+  setEditorSelectedItem
 } from "../../../redux/slices/editor.letter.slice";
 import { fetchPinnedLetters } from "../../../services/editor/apiPinnedLettersRequest.service";
 import { useAppDispatch } from "../../../redux/hooks";
@@ -93,6 +93,7 @@ const ShowEditor = () => {
     };
 
     validateLetterId();
+
   }, [letterId, navigate]);
 
   useEffect(() => {
@@ -100,6 +101,7 @@ const ShowEditor = () => {
       if (selectedItem.left !== null) {
         handleTabChangeLeft(selectedItem.left)
       } else {
+        setSelectedComponentLeft(null);
         setShowLeftContainer(false)
       }
 
@@ -107,6 +109,7 @@ const ShowEditor = () => {
         handleTabChangeRight(selectedItem.right)
       } else {
         setShowRightContainer(false)
+        setSelectedComponentRight(null)
       }
     }
 
@@ -173,19 +176,22 @@ const ShowEditor = () => {
     dispatch(setDialogType({ dialogType: dialogType }))
   }
 
-  const valueForLeft = (newValueLeft: string|null): string|null => {
-    if (newValueLeft === null) {
-      return null
-    } else if (selectedComponentLeft !== null && selectedComponentLeft.name === newValueLeft) { // double click on the same tab
-      return null
-    } else {
-      return newValueLeft
+  const valueForSide = (newValue: string | null, selectedComponent: { name: string } | null): string | null => {
+    if (newValue === null || (selectedComponent !== null && selectedComponent.name === newValue)) {
+      return null;
     }
-  }
+    return newValue;
+  };
 
-  const setSelectedItem = (newValueLeft: string| null, newValueRight: string| null) => {
-      dispatch(setEditorSelectedItem({ selectedItem: { left: valueForLeft(newValueLeft), right: newValueRight } }))
-  }
+  const setSelectedItem = (newValueLeft: string | null, newValueRight: string | null) => {
+    dispatch(setEditorSelectedItem({
+      selectedItem: {
+        left: valueForSide(newValueLeft, selectedComponentLeft),
+        right: valueForSide(newValueRight, selectedComponentRight)
+      }
+    }));
+  };
+
 
   useNoteClickHandler((noteElement) => {
     const xmlId = noteElement.getAttribute("xml:id");
