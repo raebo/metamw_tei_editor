@@ -29,34 +29,6 @@ const lightTheme = createTheme({
 })
 
 const App = () => {
-  // const dispatch =useAppDispatch();
-  // const user = useSelector((state: RootState) => state.auth.user);
-  // // eslint-disable-next-line no-new-wrappers
-  // const handleStateLogin = (data = { last_name: new String(), first_name: new String() }) => {
-  //   if (!data.first_name || !data.last_name) {
-  //     console.error("Invalid data provided");
-  //     return;
-  //   }
-  //   dispatch(loginState(data));
-  // };
-  //
-  // const refreshUserState = () => {
-  //   const token = localStorage.getItem('authToken');
-  //   if (token && user === null) {
-  //     getMe()
-  //       .then( (data)  => {
-  //         if (data !== null) {
-  //           // handleUserLoginState(data)
-  //           handleStateLogin(data)
-  //         }
-  //       })
-  //       .catch(err => {
-  //         console.error('Error:', err);
-  //       });
-  //   }
-  // }
-  // refreshUserState()
-
   const isLoading = useSelector((state: RootState) => state.spinnerLoading.isLoading);
 
   return (

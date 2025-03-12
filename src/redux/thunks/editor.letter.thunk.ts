@@ -40,7 +40,6 @@ export const setEditorDialogAndReferenceThunk = createAsyncThunk(
     { dispatch }
   ) => {
 
-    console.log("dialogType", dialogType)
     dispatch(setDialogType({ dialogType: dialogType }))
     dispatch(setLetterReference({
       letterReference: {

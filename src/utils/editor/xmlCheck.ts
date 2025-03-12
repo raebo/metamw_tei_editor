@@ -64,11 +64,9 @@ export const xmlCheck = {
           const fullyInside = selectionStart >= currentOffset && selectionEnd <= currentOffset + textLength;
 
           if (startInRestricted || endInRestricted || fullyInside) {
-            console.log("parentTag", parentTag)
             return false;
           }
         }
-
         currentOffset += textLength;
       }
       currentNode = walker.nextNode();

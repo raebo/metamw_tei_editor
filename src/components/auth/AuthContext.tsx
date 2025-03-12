@@ -17,12 +17,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshUser = () => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      const refresData = refreshUserData();
+      const refreshData = refreshUserData();
 
-      // console.log('AuthProvider: Refreshing user data', refresData);
-
-      dispatch(loginState({ user: { ...refresData }, isAuthenticated: true }));
-      dispatch(refresData)
+      dispatch(loginState({ user: { ...refreshData }, isAuthenticated: true, token: token } ) );
+      dispatch(refreshData)
         .catch((error) => {
           console.error('Failed to refresh user data:', error);
         });
