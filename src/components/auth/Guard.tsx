@@ -11,20 +11,6 @@ interface GuardProps {
   children: React.ReactNode
 }
 
-const checkUser = () : boolean => {
-  return true
-}
-
-const useGuardAuth = (): { isAuthenticated: boolean } => {
-  const token = localStorage.getItem('authToken');
-
-  if (!token && !checkUser()) {
-    return { isAuthenticated: false }
-  }
-
-  return { isAuthenticated: true }
-}
-
 export const Guard: React.FC<GuardProps> = ({ children } : GuardProps) => {
   const dispatch = useDispatch();
   const { isAuthenticated } = useAuth();
