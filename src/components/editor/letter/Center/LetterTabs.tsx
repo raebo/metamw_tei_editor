@@ -11,7 +11,10 @@ import {
 import { RootState } from "../../../../redux/redux.store";
 import { enqueueSnackbar } from "notistack";
 import { PinnedLetter } from "../../../../services/mappings/editorMappings";
-import { setEditorTabAndPinnedLettersThunk } from "../../../../redux/thunks/editor.letter.thunk";
+import {
+  setEditorTabAndPinnedLettersThunk,
+  setEditorTabAndPinnedLetterThunk
+} from "../../../../redux/thunks/editor.letter.thunk";
 import { useAppDispatch } from "../../../../redux/hooks";
 
 const updatePinnedLetterStatus = (
@@ -60,9 +63,14 @@ const LetterTabs = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statePinnedLetters]);
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    dispatch(setEditorLetter({ letter: { id: statePinnedLetters[newValue].id, name: statePinnedLetters[newValue].name }}))
-    setActiveTab(newValue);
+  const handleTabChange = (_: React.SyntheticEvent, newTabValue: number) => {
+    dispatch(
+      setEditorTabAndPinnedLetterThunk({
+        pinnedLetter: { id: statePinnedLetters[newTabValue].id, name: statePinnedLetters[newTabValue].name },
+        tabNumber: newTabValue,
+      })
+    )
+    setActiveTab(newTabValue);
   }
 
   const handleCloseTab = async (pinnedLetter: PinnedLetter, tabIndex: number) => {

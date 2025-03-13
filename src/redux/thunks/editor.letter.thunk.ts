@@ -21,6 +21,20 @@ export const setEditorTabAndPinnedLettersThunk = createAsyncThunk(
   }
 );
 
+export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
+  'editor/setEditorTabAndPinnedLetter',
+  async (
+    { pinnedLetter, tabNumber }: { pinnedLetter: { id: number, name: string}; tabNumber: number },
+    { dispatch }
+  ) => {
+    dispatch(setEditorLetter({ letter: pinnedLetter}));
+    dispatch(setEditorTabNumber({ tabNumber }));
+    if (tabNumber === -1) {
+      dispatch(setEditorLetter({ letter: { id: null, name: null } }));
+    }
+  }
+);
+
 export const setEditorMarkedAndContentLeftRightThunk = createAsyncThunk(
   'editor/setEditorMarkedAndContentLeftRight',
   async (

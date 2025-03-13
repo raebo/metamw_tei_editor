@@ -24,8 +24,7 @@ const AddNoteDialog = (props: NoteDialogProps) => {
 
   const dispatch = useAppDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
-  const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
-  const stateActiveTab = useSelector((state: RootState) => state.editorLetter.tabNumber);
+  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
 
   const handleSubmit = () => {
     const xmlContent = EditorUtils.xmlCheck.letterXml();
@@ -35,10 +34,9 @@ const AddNoteDialog = (props: NoteDialogProps) => {
 
     if (xmlContent !== null) {
       const noteMarkup = EditorUtils.markupGeneration.noteMarkup(xmlContent, userNameShort, comment, noteType);
-      const pinnedLetter = statePinnedLetters[stateActiveTab]
 
       EditorUtils.backendService.patchContent(
-        noteMarkup.xmlString, pinnedLetter.id, EditorConstants.changeTypes.note.ADDED, noteMarkup.xmlId
+        noteMarkup.xmlString, stateEditorLetter.id, EditorConstants.changeTypes.note.ADDED, noteMarkup.xmlId
       ).then(
         (result) => {
           if (result) {
