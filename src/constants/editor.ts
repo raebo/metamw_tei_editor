@@ -10,6 +10,7 @@ export const EditorConstants = {
   compMappingRight: {
     ASSIGNED: "ASSIGNED",
     SET_FAVOURITE: "SET_FAVOURITE",
+    PUBLISH_LETTER: "PUBLISH_LETTER",
     ENT_PERSON: "ENT_PERSON",
     ENT_PLACE: "ENT_PLACE",
     ENT_LETTER: "ENT_LETTER",

@@ -32,6 +32,11 @@ import EditorFormDialog from "../../editor/letter/Dialog/EditorFormDialog";
 import useNoteClickHandler from "../../editor/letter/Center/hooks/useNoteClickHandler";
 import { setEditorDialogAndReferenceThunk } from "../../../redux/thunks/editor.letter.thunk";
 import { enqueueSnackbar } from "notistack";
+import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
+import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import { handlePublishingClick } from "../../editor/letter/Right/Publishing/LetterPublishingHandling";
 
 
 const ShowEditor = () => {
@@ -164,6 +169,7 @@ const ShowEditor = () => {
   const componentMappingRight: Record<string, ComponentMappingItem> = {
     [EditorConstants.compMappingRight.ASSIGNED]: { name: EditorConstants.compMappingRight.ASSIGNED, showContainer: true , component: <AssignedContainer />, action: () => true },
     [EditorConstants.compMappingRight.SET_FAVOURITE]: { name: EditorConstants.compMappingRight.SET_FAVOURITE, showContainer: false, action: () => handleFavouriteClick(letterId, true) }, // Example with a function
+    [EditorConstants.compMappingRight.PUBLISH_LETTER]: { name: EditorConstants.compMappingRight.PUBLISH_LETTER,  showContainer: false, action: () => handlePublishingClick(letterId, true) },
     [EditorConstants.compMappingRight.ENT_PERSON]: { name: EditorConstants.compMappingRight.ENT_PERSON, showContainer: true , component: <EntityPersonContainer/>, action: () => true },
     [EditorConstants.compMappingRight.ENT_PLACE]: { name: EditorConstants.compMappingRight.ENT_PLACE, showContainer: true , component: <EntityPlaceContainer/>, action: () => true },
     [EditorConstants.compMappingRight.ENT_CREATION]: { name: EditorConstants.compMappingRight.ENT_CREATION, showContainer: true , component: <EntityCreationContainer/>, action: () => true },
@@ -245,7 +251,7 @@ const ShowEditor = () => {
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.FAVOURITES, null)}
             >
               <ListItemIcon>
-                <HomeIcon/>
+                <AutoAwesomeIcon/>
               </ListItemIcon>
             </ListItemButton>
           </List>
@@ -305,7 +311,7 @@ const ShowEditor = () => {
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
             >
               <ListItemIcon>
-                <SearchIcon/>
+                <AssignmentIcon />
               </ListItemIcon>
             </ListItemButton>
             <ListItemButton
@@ -313,7 +319,16 @@ const ShowEditor = () => {
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
             >
               <ListItemIcon>
-                <HomeIcon/>
+                <StarOutlineIcon />
+              </ListItemIcon>
+            </ListItemButton>
+
+            <ListItemButton
+              selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.PUBLISH_LETTER) }
+              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
+            >
+              <ListItemIcon>
+                <CloudUploadOutlinedIcon />
               </ListItemIcon>
             </ListItemButton>
             <ListItemButton
