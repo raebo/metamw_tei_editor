@@ -122,7 +122,7 @@ const LetterViewContainer = () => {
             setLetterXmlContent(document.getElementById("letterXmlContextMenu")?.innerHTML ?? "");
 
             dispatch(setEditorMarkedAndContentLeftRightThunk({
-              textIsMarked: true,
+              textIsMarked: false,
               contentLeft: null,
               contentRight: null
             }))

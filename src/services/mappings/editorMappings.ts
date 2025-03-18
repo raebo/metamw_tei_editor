@@ -7,6 +7,13 @@ export type ComponentMappingItem = {
   action: (() => void)
 };
 
+export type EditorKeyHandleItem = {
+  description: string,
+  key: string,
+  component: ReactNode | null,
+  action: ((letterId: number) => Promise<string|null>)
+}
+
 export interface EditorLetter {
   id: number
   name: string

@@ -36,7 +36,10 @@ import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { handlePublishingClick } from "../../editor/letter/Right/Publishing/LetterPublishingHandling";
+import UserActionMenu from "../../editor/letter/Center/UserActionMenu";
+import EditorKeyHandle from "../../editor/letter/Center/EditorKeyHandle";
 
 
 const ShowEditor = () => {
@@ -45,15 +48,16 @@ const ShowEditor = () => {
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const isMounted = useRef(false)
+  const selectedItem = useSelector((state: RootState) => state.editorLetter.selectedItem);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showLeftContainer, setShowLeftContainer] = useState<boolean>(false)
   const [showRightContainer, setShowRightContainer] = useState<boolean>(false)
-  const selectedItem = useSelector((state: RootState) => state.editorLetter.selectedItem);
+
   const [selectedItemLeft, setSelectedItemLeft] = useState<false|string>(false)
   const [selectedItemRight, setSelectedItemRight] = useState<false|string>(false)
   const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem| null>(null)
   const [selectedComponentRight, setSelectedComponentRight] = useState<ComponentMappingItem | null>(null)
-
-  const isMounted = useRef(false)
 
   useEffect(() => {
     if (!isMounted.current) {
@@ -198,12 +202,19 @@ const ShowEditor = () => {
     }));
   };
 
+  const handleButtonMenuClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, newValueLeft: string | null, newValueRight: string | null) => {
+    setAnchorEl(event.currentTarget);
+  }
+
+  const userActionMenudHandleClose = () => {
+    setAnchorEl(null);
+  }
+
 
   useNoteClickHandler((noteElement) => {
     const xmlId = noteElement.getAttribute("xml:id");
 
     if (xmlId) {
-      console.log("xmlId", xmlId)
       dispatch(
         setEditorDialogAndReferenceThunk({
           dialogType: EditorConstants.dialogTypes.EDIT_NOTE,
@@ -307,6 +318,14 @@ const ShowEditor = () => {
         >
           <List component="nav" aria-label="handle edit labels">
             <ListItemButton
+              selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.USER_ACTIONS) }
+              onClick={(event) => handleButtonMenuClick(event, null, EditorConstants.compMappingRight.USER_ACTIONS)}
+            >
+              <ListItemIcon>
+                <MoreHorizIcon />
+              </ListItemIcon>
+            </ListItemButton>
+            <ListItemButton
               selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.ASSIGNED) }
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
             >
@@ -342,7 +361,9 @@ const ShowEditor = () => {
           </List>
         </Box>
       </Box>
-    <EditorFormDialog open={false} />i
+      <EditorFormDialog open={false} />i
+      <UserActionMenu anchorEl={anchorEl} open={anchorEl !== null} handleClose={userActionMenudHandleClose} />
+      <EditorKeyHandle />
     </>
   );
 };

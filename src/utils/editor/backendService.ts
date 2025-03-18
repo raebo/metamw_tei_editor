@@ -1,7 +1,7 @@
 import { initApi } from '../../services/apiRequest.service'
 
 export const backendService = {
-  patchContent: async (content: string, letterId: number | null, changeType: string, xmlId: string): Promise<boolean> => {
+  patchContent: async (content: string, letterId: number | null, changeType: string, xmlId: string | null): Promise<boolean> => {
     if (!letterId) {
       throw new Error("No letter id provided");
     }
@@ -12,9 +12,9 @@ export const backendService = {
       const response = err.response;
 
       if (response !== undefined) {
-        throw new Error("Error updating letter content: " + response.data.error);
+        throw new Error(response.data.error);
       } else {
-        throw new Error("Error updating letter content: " + err);
+        throw new Error(err);
       }
     }
     return true

@@ -8,6 +8,7 @@ export const EditorConstants = {
     FAVOURITES: "FAVOURITES",
   },
   compMappingRight: {
+    USER_ACTIONS: "USER_ACTIONS",
     ASSIGNED: "ASSIGNED",
     SET_FAVOURITE: "SET_FAVOURITE",
     PUBLISH_LETTER: "PUBLISH_LETTER",
