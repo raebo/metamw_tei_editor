@@ -34,7 +34,7 @@ export const markupGeneration = {
       xmlId: xmlId
     }
   },
-  updateNoteMarkup: (xmlId: string, noteType: string, noteContent: string) : { xmlString: string, oldNoteType: string | null, oldNoteContent: string | null } => {
+  updateNoteMarkup: (xmlId: string, noteType: string, noteLanguage: string, noteContent: string) : { xmlString: string, oldNoteType: string | null, oldNoteContent: string | null } => {
     const parser = new DOMParser()
     const serializer = new XMLSerializer()
     const xmlString = EditorUtils.xmlCheck.letterXml()
@@ -50,6 +50,7 @@ export const markupGeneration = {
     const oldNoteType = noteElement.getAttribute("type")
 
     noteElement.setAttribute("type", noteType);
+    noteElement.setAttribute("xml:lang", noteLanguage);
     noteElement.innerHTML = noteContent
 
     return {

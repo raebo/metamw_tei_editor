@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { AppDispatch } from "../../redux/redux.store";
 
 export type ComponentMappingItem = {
   name: string,
@@ -11,7 +12,8 @@ export type EditorKeyHandleItem = {
   description: string,
   key: string,
   component: ReactNode | null,
-  action: ((letterId: number) => Promise<string|null>)
+  action: (() => Promise<string|null>) | null,
+  openDialogAction?: ((dispatch: AppDispatch) => void)
 }
 
 export interface EditorLetter {

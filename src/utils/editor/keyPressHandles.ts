@@ -1,10 +1,12 @@
 import { EditorUtils } from "./index";
-import editorKeyHandle from "../../components/editor/letter/Center/EditorKeyHandle";
+import { AppDispatch } from "../../redux/redux.store";
+import { setDialogType } from "../../redux/slices/editor.letter.slice";
 
 export const keyPressHandles = {
+  openDialog(dispatch: AppDispatch, dialogType: string) : void {
+    dispatch(setDialogType({ dialogType: dialogType }));
+  },
   async baseHandling(
-    stateEditorLetter: { letterId: number } ,
-    changeType: string,
     keyFunction: (xmlContent: string) => string,
   ) : Promise<string> {
     const xmlContent = EditorUtils.xmlCheck.letterXml()
@@ -14,7 +16,6 @@ export const keyPressHandles = {
     const updatedXmlContent = await keyFunction(xmlContent)
 
     return updatedXmlContent
-
   },
   markContentBold(xmlContent: string): string {
     console.log("markContentBold")
@@ -22,5 +23,8 @@ export const keyPressHandles = {
   },
   markContentItalic(xmlContent: string) : string{
     return xmlContent.replace(/<span class="marked">(.*?)<\/span>/g, '<hi rend="italic">$1</hi>');
+  },
+  markContentUnderline(xmlContent: string) : string{
+    return xmlContent.replace(/<span class="marked">(.*?)<\/span>/g, '<hi rend="underline" n="1">$1</hi>');
   }
 }

@@ -38,8 +38,9 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { handlePublishingClick } from "../../editor/letter/Right/Publishing/LetterPublishingHandling";
-import UserActionMenu from "../../editor/letter/Center/UserActionMenu";
+import UserActionMenu from "../../editor/letter/Right/UserActionMenu";
 import EditorKeyHandle from "../../editor/letter/Center/EditorKeyHandle";
+import QuickContentFormatter from "../../editor/letter/Right/QuickContentFormatter";
 
 
 const ShowEditor = () => {
@@ -283,6 +284,7 @@ const ShowEditor = () => {
         <Box
           sx={{
             flexGrow: 1,
+            maxWidth: "40vw",
             backgroundColor: "#ffffff",
             transition: "width 0.3s",
             width: showLeftContainer && showRightContainer ? "60%" : showLeftContainer || showRightContainer ? "80%" : "90%",
@@ -317,6 +319,7 @@ const ShowEditor = () => {
           // onClick={() => setShowRightContainer(!showRightContainer)}
         >
           <List component="nav" aria-label="handle edit labels">
+            <QuickContentFormatter />
             <ListItemButton
               selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.USER_ACTIONS) }
               onClick={(event) => handleButtonMenuClick(event, null, EditorConstants.compMappingRight.USER_ACTIONS)}

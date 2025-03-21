@@ -23,7 +23,9 @@ const EditNoteDialog = (props: EditLetterDialogProps) => {
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
   const [noteContent, setNoteContent] = useState("");
   const [noteType, setNoteType] = useState("");
+  const [noteLanguage, setNoteLanguage] = useState("");
   const noteTypeItems = EditorConstants.noteTypeItems;
+  const noteLanguages = EditorConstants.noteTypeLanguages;
   const [noteParentContent, setNoteParentContent] = useState("")
   const [noteXmlId, setNoteXmlId] = useState("")
   const [deleteButtonsVisible, setDeleteButtonsVisible] = useState(false)
@@ -40,10 +42,10 @@ const EditNoteDialog = (props: EditLetterDialogProps) => {
         setNoteXmlId(xmlId)
 
         const currentNoteTypes = noteTypeItems.filter((item) => item.value === note.getAttribute('type'))
+        if (currentNoteTypes.any()) { setNoteType(currentNoteTypes[0].value) }
 
-        if (currentNoteTypes.any()) {
-          setNoteType(currentNoteTypes[0].value)
-        }
+        const currentNoteLangs = noteLanguages.filter((item) => item.value === note.getAttribute('xml:lang'))
+        if (currentNoteLangs.any()) { setNoteLanguage(currentNoteLangs[0].value) }
       }
     }
 
@@ -83,6 +85,7 @@ const EditNoteDialog = (props: EditLetterDialogProps) => {
         EditorUtils.markupGeneration.updateNoteMarkup(
           noteXmlId,
           noteType,
+          noteLanguage,
           noteContent
         )
 
@@ -130,6 +133,24 @@ const EditNoteDialog = (props: EditLetterDialogProps) => {
             </Select>
           </FormControl>
         </div>
+        <div className="form-item form-item--key">
+          <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
+            <InputLabel id="auto-anno-snippet-reference-type">Kommentar (Sprache)</InputLabel>
+            <Select
+              value={noteLanguage}
+              disabled={deleteButtonsVisible}
+              labelId="demo-simple-select-filled-label"
+              id="demo-simple-select-filled"
+              onChange={(event) => setNoteLanguage(event.target.value)}
+            >
+              { noteLanguages.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.label}
+                </MenuItem>
+              )) }
+            </Select>
+          </FormControl>
+        </div>
         <div className="form-item form-item--key" style={{margin: 5}}>
           <TextareaAutosize
             aria-label="comment"
@@ -159,7 +180,7 @@ const EditNoteDialog = (props: EditLetterDialogProps) => {
             size={EditorConstants.styles.panel.buttonSize}
             onClick={ handleUpdateNote }
             style={{ marginTop: 8 }}
-            disabled={!noteContent.trim() || noteType === ""}
+            disabled={!noteContent.trim() || noteType === "" || noteLanguage === ""}
           >
             Aktualisieren
           </Button> }

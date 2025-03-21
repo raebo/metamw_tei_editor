@@ -17,6 +17,7 @@ interface NoteDialogProps {
 const AddNoteDialog = (props: NoteDialogProps) => {
   const [comment, setComment] = useState("");
   const [noteType, setNoteType] = useState("");
+  const [noteLanguage, setNoteLanguage] = useState("");
   const markedSpan = EditorUtils.textMarking.markedSpanEntry();
   const markedSection =
     markedSpan?.parentElement?.innerHTML || "<p>No marked section found</p>";
@@ -80,6 +81,25 @@ const AddNoteDialog = (props: NoteDialogProps) => {
             </Select>
           </FormControl>
         </div>
+
+        <div className="form-item form-item--key">
+          <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
+            <InputLabel id="auto-anno-snippet-reference-type">Kommentar (Sprache)</InputLabel>
+            <Select
+              defaultValue={""}
+              disabled={false}
+              labelId="demo-simple-select-filled-label"
+              id="demo-simple-select-filled"
+              onChange={(event) => setNoteLanguage(event.target.value)}
+            >
+              { EditorConstants.noteTypeLanguages.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.label}
+                </MenuItem>
+              )) }
+            </Select>
+          </FormControl>
+        </div>
         <div className="form-item form-item--key" style={{margin: 5}}>
           <TextareaAutosize
             aria-label="comment"
@@ -97,7 +117,7 @@ const AddNoteDialog = (props: NoteDialogProps) => {
               color="primary"
               onClick={handleSubmit}
               style={{ marginTop: 8 }}
-              disabled={!comment.trim() || noteType === ""} // Disable if empty
+              disabled={!comment.trim() || noteType === "" || noteLanguage === ""} // Disable if empty
             >
              Einfügen
             </Button>

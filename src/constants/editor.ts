@@ -39,6 +39,16 @@ export const EditorConstants = {
     { value: "text_constitution", label: "Kommentar Textkonstitution" },
     { value: "word_description", label: "Worterklärung" },
   ],
+  noteTypeLanguages: [
+    { value: "de", label: "Deutsch" },
+    { value: "en", label: "Englisch" },
+    { value: "fr", label: "Französisch" },
+    { value: "it", label: "Italienisch" },
+    { value: "span", label: "Spanisch" },
+    { value: "la", label: "Latein" },
+    { value: "grc", label: "Altgriechisch" },
+    { value: "yi", label: "Jiddisch" },
+  ],
   styles: {
     panel: {
       buttonSize: "small",
