@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { Box, List, ListItemButton, ListItemIcon } from "@mui/material";
-import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SearchContainer from "../../editor/letter/Left/Search/SearchContainer";
@@ -126,7 +125,7 @@ const ShowEditor = () => {
     if (selectedItem !== null) {
       handleSelectedItem();
     }
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
 
@@ -203,7 +202,7 @@ const ShowEditor = () => {
     }));
   };
 
-  const handleButtonMenuClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, newValueLeft: string | null, newValueRight: string | null) => {
+  const handleButtonMenuClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     setAnchorEl(event.currentTarget);
   }
 
@@ -322,7 +321,7 @@ const ShowEditor = () => {
             <QuickContentFormatter />
             <ListItemButton
               selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.USER_ACTIONS) }
-              onClick={(event) => handleButtonMenuClick(event, null, EditorConstants.compMappingRight.USER_ACTIONS)}
+              onClick={(event) => handleButtonMenuClick(event)}
             >
               <ListItemIcon>
                 <MoreHorizIcon />

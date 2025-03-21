@@ -13,9 +13,7 @@ export const keyPressHandles = {
 
     if (!xmlContent) { throw new Error("No xml content found") }
 
-    const updatedXmlContent = await keyFunction(xmlContent)
-
-    return updatedXmlContent
+    return await keyFunction(xmlContent)
   },
   markContentBold(xmlContent: string): string {
     console.log("markContentBold")

@@ -49,13 +49,15 @@ const EditorKeyHandle = () => {
               })
             }
           }).catch((error) => {
-            enqueueSnackbar(`Error during calling keybinding: '${definition.description}'`, { variant: "error" });
+            enqueueSnackbar(`Error during calling keybinding: '${definition.description} ${error.toString()}'`, { variant: "error" });
           })
         } else if (definition.openDialogAction) {
           definition.openDialogAction(dispatch);
         }
       }
     }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stateEditorLetter]);
 
   useEffect(() => {
@@ -68,13 +70,14 @@ const EditorKeyHandle = () => {
     }
 
     return () => {
-      for (const [key, definition] of Object.entries(contentMarkedKeyHandleDefinitions)) {
+      for (const definition of Object.values(contentMarkedKeyHandleDefinitions)) {
         if (definition.action !== null) {
           document.removeEventListener("keydown", handleFunction, false);
           console.log("Removed key event listener")
         }
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stateLetterContent]);
 
   return (

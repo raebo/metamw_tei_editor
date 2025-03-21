@@ -1,4 +1,4 @@
-import { ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { ListItemButton, ListItemIcon } from "@mui/material";
 import FormatBoldIcon from "@mui/icons-material/FormatBold";
 import FormatItalicIcon from "@mui/icons-material/FormatItalic";
 import FormatUnderlinedIcon from "@mui/icons-material/FormatUnderlined";
@@ -11,7 +11,7 @@ import { EditorUtils } from "../../../../utils/editor";
 import { setReloadLetterContent } from "../../../../redux/slices/editor.letter.slice";
 import { useAppDispatch } from "../../../../redux/hooks";
 
-const QuickContentFormatter = (props: any) => {
+const QuickContentFormatter = () => {
 
   const dispatch = useAppDispatch();
   const contentTextIsMarked = useSelector((state: RootState) => state.editorLetter.content.textIsMarked);
@@ -45,7 +45,7 @@ const QuickContentFormatter = (props: any) => {
           })
         }
       }).catch((error) => {
-        enqueueSnackbar(`Error during calling keybinding: '${handleDef.description}'`, {variant: "error"});
+        enqueueSnackbar(`Error during calling keybinding: '${handleDef.description}' ${error.toString()}`, {variant: "error"});
       })
     }
   }
