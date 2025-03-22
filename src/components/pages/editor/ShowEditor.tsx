@@ -128,7 +128,6 @@ const ShowEditor = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-
   const handleTabChangeLeft= (newValue: string) => {
     const selectedComponent = componentMappingLeft[newValue];
 

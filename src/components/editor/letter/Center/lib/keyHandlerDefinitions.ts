@@ -28,5 +28,19 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_NOTE) }
-  }
+  },
+  "alt+shift+1": {
+    key: "alt+shift+1",
+    description: "date when marking content",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_ADD) }
+  },
+  "alt+shift+!": {
+    key: "alt+shift+!",
+    description: "date when marking content",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_ADD) }
+  },
 }

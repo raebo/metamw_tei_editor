@@ -17,12 +17,13 @@ export const EditorConstants = {
     ENT_LETTER: "ENT_LETTER",
     ENT_CREATION: "ENT_CREATION",
     ENT_FMBC_CREATION: "ENT_FMBC_CREATION",
-    ADD_SPECIL_ANNOTATION: "ADD_SPECIL_ANNOTATION",
+    ADD_SPECIAL_ANNOTATION: "ADD_SPECIAL_ANNOTATION",
   },
   dialogTypes: {
     RESET_LETTER: "RESET_LETTER",
     ADD_NOTE: "ADD_NOTE",
     EDIT_NOTE: "EDIT_NOTE",
+    DATE_WHEN_ADD: "DATE_WHEN_ADD",
   },
 
   changeTypes: {
@@ -31,6 +32,10 @@ export const EditorConstants = {
       REMOVED: "NOTE_REMOVED",
       CONTENT_CHANGED: "NOTE_CONTENT_CHANGED",
       TYPE_CHANGED: "NOTE_TYPE_CHANGED",
+    },
+    date : {
+      WHEN_ADDED: "DATE_WHEN_ADDED",
+      WHEN_MODIFIED: "DATE_WHEN_MODIFIED",
     }
   },
   noteTypeItems: [

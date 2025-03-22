@@ -12,6 +12,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/redux.store";
 import ResetLetterDialog from "./Components/ResetLetterDialog";
 import EditNoteDialog from "./Components/EditNoteDialog";
+import DateWhenAddDialog from "./Components/Date/DateWhenAddDialog";
 
 interface EditorFormDialogProps {
   open: boolean
@@ -48,13 +49,15 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
   const DialogTitles : Record<string, string> = {
     [EditorConstants.dialogTypes.ADD_NOTE]: "Kommentar Hinzufügen",
     [EditorConstants.dialogTypes.EDIT_NOTE]: "Kommentar Bearbeiten/Löschen",
-    [EditorConstants.dialogTypes.RESET_LETTER]: "Brief Zurücksetzen"
+    [EditorConstants.dialogTypes.RESET_LETTER]: "Brief Zurücksetzen",
+    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: "Datum 'WHEN' auszeichnen"
   }
 
   const DialogContentComponents : Record<string, React.ReactNode> = {
     [EditorConstants.dialogTypes.ADD_NOTE]: <AddNoteDialog onClose={handleClose} />,
     [EditorConstants.dialogTypes.EDIT_NOTE]: <EditNoteDialog onClose={handleClose} />,
-    [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog onClose={handleClose} />
+    [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog onClose={handleClose} />,
+    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: <DateWhenAddDialog onClose={handleClose} />
   }
 
   return (
