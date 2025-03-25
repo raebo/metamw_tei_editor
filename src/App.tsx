@@ -21,6 +21,7 @@ import { AuthProvider } from "./components/auth/AuthContext";
 import GitInfo from "./components/misc/GitInfo";
 
 import './extensions'
+import StateMessages from "./components/snackbar/StateMessages";
 
 const lightTheme = createTheme({
   palette: {
@@ -58,6 +59,7 @@ const App = () => {
         </BrowserRouter>
       </AuthProvider>
       { isLoading && <CircularIndeterminate />}
+      <StateMessages />
       <Snackbar />
       <GitInfo />
     </ThemeProvider>

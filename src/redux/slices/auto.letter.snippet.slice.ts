@@ -34,7 +34,11 @@ interface AutoLetterSnippetState {
   } | null
   entityInfo: {
     key: string | null
-  }
+  },
+  stateMessage: {
+    message: string,
+    variant: "default" | "error" | "success" | "warning" | "info"
+  } | null
 }
 
 const initialState: AutoLetterSnippetState = {
@@ -61,7 +65,8 @@ const initialState: AutoLetterSnippetState = {
   },
   entityInfo: {
     key: null
-  }
+  },
+  stateMessage: null
 }
 
 const autoLetterSnippetSlice = createSlice({
@@ -107,10 +112,17 @@ const autoLetterSnippetSlice = createSlice({
     },
     setSnippetEntityInfo(state, action) {
       state.entityInfo.key = action.payload.key
+    },
+    setStateMessage(state, action) {
+      if (action.payload === null) {
+        state.stateMessage = null
+      } else {
+        state.stateMessage = action.payload.stateMessage
+      }
     }
   },
 })
 
-export const { setSnippetEntityInfo, setAutoAnnoSnippet, setAutoSnippetFormContainer, setSnippetReferenceFormActive, clearSnippetState, setAutoAnnoLetter, setSnippetReferences } = autoLetterSnippetSlice.actions
+export const { setSnippetEntityInfo, setAutoAnnoSnippet, setAutoSnippetFormContainer, setSnippetReferenceFormActive, clearSnippetState, setAutoAnnoLetter, setSnippetReferences, setStateMessage } = autoLetterSnippetSlice.actions
 
 export default autoLetterSnippetSlice.reducer
