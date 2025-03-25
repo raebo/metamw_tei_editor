@@ -1,11 +1,10 @@
 import excludedRoutes from "../../constants/excluded-routes";
 import { useAuth } from "./AuthContext";
-import { AUTH_TOKEN_NAME, isTokenValid } from "../../utils/auth";
-import { loginSetToken, loginState, logoutState } from "../../redux/slices/authentication.slice";
+import { AUTH_TOKEN_NAME } from "../../utils/auth";
+import { loginState, logoutState } from "../../redux/slices/authentication.slice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/redux.store";
 import { getMe } from "../../services/user.service";
-import { enqueueSnackbar } from "notistack";
 import { useEffect } from "react";
 
 interface GuardProps {
