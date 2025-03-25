@@ -14,7 +14,6 @@ import { useAppDispatch } from "../../redux/hooks";
 import { ComponentMappingItem } from "../../services/mappings/editorMappings";
 import SnippetReferencesList from "./snippet_form/SnippetReferencesList";
 import SnippetFormContainer from "./snippet_form/SnippetFormContainer";
-import SnippetEntityInfoDialog from "./snippet_form/SnippetEntityInfoDialog";
 
 const AutoAnnoLettersResizable: React.FC = () => {
   const { id } = useParams<{ id: string }>();

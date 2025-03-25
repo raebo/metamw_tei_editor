@@ -13,7 +13,7 @@ import { clearSnippetState, setAutoAnnoLetter } from "../../redux/slices/auto.le
 import { SnippetDialogType } from "../../services/mappings/autoAnnoMappings";
 import SnippetFormDialog from "./snippet_form/SnippetFormDialog";
 import { enqueueSnackbar } from "notistack";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../redux/hooks";
 
 interface AutoAnnoLetterHandleProps {

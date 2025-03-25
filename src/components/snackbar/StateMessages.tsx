@@ -19,6 +19,8 @@ const StateMessages = () => {
       enqueueSnackbar(stateMessage.message, { variant: stateMessage.variant });
       clearStateMessage(); // Call the memoized function
     }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stateMessage, clearStateMessage]);
 
   return null;
