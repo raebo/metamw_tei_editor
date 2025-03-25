@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { fetchAutoAnnoLetter } from "../../services/auto_anno/apiAutoAnno.service";
+import { useNavigate, useParams } from "react-router-dom";
+import { fetchAutoAnnoLetter, patchAutoAnnoLetterLockingUser } from "../../services/auto_anno/apiAutoAnno.service";
 import { enqueueSnackbar } from "notistack";
 import XMLDisplayParser from "../support/XmlDisplayParser";
 import { RootState } from "../../redux/redux.store";
@@ -8,7 +8,11 @@ import {  useSelector } from "react-redux";
 import AutoAnnoSnippetList from "./AutoAnnoSnippetList";
 import AutoAnnoLetterHandle from "./AutoAnnoLetterHandle";
 import { markSpanAndScrollToId } from "../../utils/auto_anno/domHandling";
-import { setAutoAnnoLetter, setSnippetEntityInfo } from "../../redux/slices/auto.letter.snippet.slice";
+import {
+  setAutoAnnoLetter,
+  setSnippetEntityInfo,
+  setStateMessage,
+} from "../../redux/slices/auto.letter.snippet.slice";
 import { Box, Typography } from "@mui/material";
 import { useAppDispatch } from "../../redux/hooks";
 import { ComponentMappingItem } from "../../services/mappings/editorMappings";
@@ -21,9 +25,11 @@ const AutoAnnoLetters: React.FC = () => {
   const { job_id } = useParams<{ job_id: string }>();
 
   const dispatch = useAppDispatch();
-  const autoAnnoLetterId = Number(id);
+  const navigate = useNavigate();
+  const autoAnnoLetterId = Number(id)
   const autoAnnoJobId = Number(job_id);
   const [selectedComponentList, setSelectedComponentList] = useState<ComponentMappingItem| null>(null)
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const reloadLetter = useSelector((state: RootState) =>
     state.autoLetterSnippet.letter?.reloadStatus?? false
@@ -70,14 +76,34 @@ const AutoAnnoLetters: React.FC = () => {
   }
   /////////
 
-  const isMounted = useRef(false);
+  const hasChecked = useRef(false);
   useEffect(() => {
-    if (!isMounted.current) {
+    const checkAndLockLetter = async () => {
+      if (!autoAnnoLetterId || !user || hasChecked.current) return; // Ensure required data is present
+
+      hasChecked.current = true;
+      const autoAnnoLetter = await fetchAutoAnnoLetter(autoAnnoLetterId);
+
+      // If another user is locking, show an error
+      if (autoAnnoLetter?.locking_user?.id && autoAnnoLetter.locking_user.id !== user.id) {
+        throw new Error(`Der Brief wird von einem anderen Benutzer (${autoAnnoLetter.locking_user.login}) bearbeitet`);
+      }
+      // Lock the letter for the current user
+      await patchAutoAnnoLetterLockingUser(autoAnnoLetterId, user.id);
+
+      // Update Redux store
       dispatch(setAutoAnnoLetter({ letter: { id: autoAnnoLetterId, reloadStatus: true } }));
-      isMounted.current = true;
-    }
-    // Set reloadLetter to true after the component is mounted
-  }, [dispatch, autoAnnoLetterId]);
+    };
+
+    checkAndLockLetter()
+      .catch((error) => {
+        const errorMessage = error instanceof Error ? error.message : "Ein unbekannter Fehler ist aufgetreten";
+
+        dispatch(setStateMessage( { stateMessage: { message: errorMessage, variant: "error" } } ));
+        navigate(`/automatic_annotations/${autoAnnoJobId}`);
+    });
+  }, [dispatch, autoAnnoLetterId, user, navigate, autoAnnoJobId]); // Include all dependencies
+
 
   const [transformedData, setTransformedData] = useState<any>({xmlContent: null, letterName: null});
 
@@ -87,7 +113,7 @@ const AutoAnnoLetters: React.FC = () => {
     const getData = async () => {
       if (autoAnnoLetterId && reloadLetter) {
         try {
-          const result = await fetchAutoAnnoLetter(id);
+          const result = await fetchAutoAnnoLetter(autoAnnoLetterId);
 
           if (result && result.xml_content_updated) {
             setTransformedData({xmlContent: result.xml_content_updated, letterName: result.letter_name});

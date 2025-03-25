@@ -29,13 +29,23 @@ export const fetchAutoAnnoJobLetters = async (id: number): Promise<AutoAnnoJobLe
   }
 }
 
-export const fetchAutoAnnoLetter = async (id: string | undefined): Promise<AutoAnnoJobLetter | undefined> => {
+export const fetchAutoAnnoLetter = async (annoLetterId: number): Promise<AutoAnnoJobLetter | undefined> => {
   try {
-    const response = await initApi.initApi().get(`/jwt/automatic_annotation_letters/${id}`);
+    const response = await initApi.initApi().get(`/jwt/automatic_annotation_letters/${annoLetterId}`);
 
     return response.data;
   } catch (err) {
     console.error(err);
+  }
+}
+
+export const patchAutoAnnoLetterLockingUser = async (annoLetterId: number, userId: number | null): Promise<boolean> => {
+  try {
+    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/set_locking_user`, { userId: userId });
+
+    return true;
+  } catch (err) {
+    throw new Error("patchAutoAnnoLetterLockingUser failed with error: " + err);
   }
 }
 

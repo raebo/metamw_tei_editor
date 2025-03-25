@@ -87,7 +87,7 @@ const AutoAnnoLettersResizable: React.FC = () => {
     const getData = async () => {
       if (autoAnnoLetterId && reloadLetter) {
         try {
-          const result = await fetchAutoAnnoLetter(id);
+          const result = await fetchAutoAnnoLetter(autoAnnoLetterId);
 
           if (result && result.xml_content_updated) {
             setTransformedData({xmlContent: result.xml_content_updated, letterName: result.letter_name});

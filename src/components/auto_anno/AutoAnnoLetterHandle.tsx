@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Box, ButtonGroup } from "@mui/material";
 import Button from "@mui/material/Button";
 import {
-  fetchAutoAnnoLetter,
+  fetchAutoAnnoLetter, patchAutoAnnoLetterLockingUser,
   resetAnnoLetter,
   writeAnnoLetter
 } from "../../services/auto_anno/apiAutoAnno.service";
@@ -47,7 +47,7 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
   useEffect(() => {
     (async () => {
       if (!isMounted.current) {
-        const result = await fetchAutoAnnoLetter(String(props.autoJobLetterId));
+        const result = await fetchAutoAnnoLetter(props.autoJobLetterId);
 
         if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) { setFinalSaveDisabled(false); }
 
@@ -96,11 +96,10 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
     setDialogOpen(false)
   }
 
-
   useEffect(() => {
     (async () => {
       if (reloadLetterStatus) {
-        const result = await fetchAutoAnnoLetter(String(props.autoJobLetterId));
+        const result = await fetchAutoAnnoLetter(props.autoJobLetterId);
 
         if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) { setFinalSaveDisabled(false); }
         if (result?.content_changed) { setDisableResetButton(false); }
@@ -110,6 +109,9 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
     })();
   }, [dispatch, reloadLetterStatus, props.autoJobLetterId]);
 
+  const saveAndLeaveLetterView = async () => {
+    await patchAutoAnnoLetterLockingUser(props.autoJobLetterId, null)
+  }
 
   return (
     <>
@@ -127,12 +129,15 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
           <Button variant={"contained"} disabled={finalSaveDisabled} color={"success"} onClick={() => handleOpenDialog("WRITE_LETTER", handleWriteLetter)}>Brief in Datei schreiben</Button>
           <Button variant={"contained"} disabled={resetButtonDisabled} color={"warning"} onClick={() => handleOpenDialog("RESET_LETTER", handleResetLetter)}>Zurücksetzen</Button>
           <Button
-            component={Link}
-            to={"/automatic_annotations/" + props.autoJobId} // Replace '/target-page' with your desired path
+            onClick={async (event) => {
+              event.preventDefault();
+              await saveAndLeaveLetterView();
+              navigate(`/automatic_annotations/${props.autoJobId}`);
+            }}
             variant="contained"
             color="primary"
           >
-            Stand Speichern
+          Stand Speichern
           </Button>
         </ButtonGroup>
         <SnippetFormDialog

@@ -20,6 +20,10 @@ export interface AutoAnnoJobLetter {
   snippets_count: number
   snippets_open: number
   snippets_closed: number
+  locking_user: {
+    id: number,
+    login: string
+  } | null
   updated_at: string
 }
 

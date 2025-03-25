@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { fetchAutoAnnoJobLetters, fetchAutoAnnoLetter, fetchAutoAnnoJobs } from "../../services/auto_anno/apiAutoAnno.service";
+import { fetchAutoAnnoJobLetters, fetchAutoAnnoJobs } from "../../services/auto_anno/apiAutoAnno.service";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import { Box, IconButton, Typography } from "@mui/material";
@@ -10,15 +10,16 @@ import {
   AutoAnnoJob, getStatusDetails,
 } from "../../services/mappings/autoAnnoMappings";
 import { enqueueSnackbar } from "notistack";
-import { ComponentMappingItem } from "../../services/mappings/editorMappings";
 import { format, parse } from "date-fns";
 import { dateFnsFormat, dateFnsParseFormat } from "../../constants/snack";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/redux.store";
 
 
 const AutoAnnoList: React.FC = () => {
-
   const { id } = useParams<{ id: string }>();
   const [autoAnnoJobId, setAutoAnnoJobId] = useState<number | undefined>();
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const [autoAnnoData, setJobRows] = useState<AutoAnnoJob[] | undefined>();
   const [autoAnnoLetters, setLetterRows] = useState<AutoAnnoJobLetter[] | undefined>();
@@ -167,19 +168,46 @@ const AutoAnnoList: React.FC = () => {
       }
     },
     {
+      field: 'user_id',
+      headerName: 'Bearbeiter',
+      width: 120,
+      sortable: false,
+      renderCell: (params) => {
+        const locking_user = params.row.locking_user
+
+        return locking_user !== null ? locking_user.login : '';
+      }
+    },
+    {
       field: 'actions',
       headerName: '',
       width: 100,
       sortable: false,
       renderCell: (params) => {
+        const letter = params.row
+        const locking_user = letter.locking_user
         const handleIconDetailClick = () => {
-          _navigate(`/automatic_annotations/${autoAnnoJobId}/letters/${params.row.id}`);
+          _navigate(`/automatic_annotations/${autoAnnoJobId}/letters/${letter.id}`);
         }
-        return (
-          <IconButton onClick={handleIconDetailClick} aria-label="info">
-            <InfoIcon color="primary"/>
-          </IconButton>
-        );
+
+        if (locking_user === null || (user !== null && locking_user.id === user.id) ) {
+          return (
+            <>
+              <IconButton onClick={handleIconDetailClick} aria-label="info">
+                <InfoIcon color="primary"/>
+              </IconButton>
+            </>
+          )
+        } else {
+          return (
+            <>
+              <IconButton aria-label="info">
+                <InfoIcon color="disabled"/>
+              </IconButton>
+            </>
+          )
+        }
+
       }
     }
   ];
