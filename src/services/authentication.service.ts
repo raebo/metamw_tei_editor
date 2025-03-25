@@ -1,25 +1,21 @@
-import axios from 'axios';
-import { authenticatedVar } from "../constants/authenticated";
 import { useEffect, useState } from "react";
-import useReactiveVar from "../utils/makeReactiveVar";
+import { AUTH_TOKEN_NAME } from "../utils/auth";
 
-const API_URL = 'https://your-api-url.com'; // Replace with your API endpoint
-
-export const getToken = () => localStorage.getItem('authToken');
+export const getToken = () => localStorage.getItem(AUTH_TOKEN_NAME);
 
 export const setToken = (token: string) => {
-  localStorage.setItem('authToken', token);
+  localStorage.setItem(AUTH_TOKEN_NAME, token);
 }
 
 export const removeToken = () => {
-  localStorage.removeItem('authToken');
+  localStorage.removeItem(AUTH_TOKEN_NAME);
 }
 
 export const useAuthToken = () => {
   const [isTokenAvailable, setIsTokenAvailable] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem(AUTH_TOKEN_NAME);
     if (token) {
       setIsTokenAvailable(true);
 
@@ -30,18 +26,3 @@ export const useAuthToken = () => {
 
   return isTokenAvailable;
 };
-
-// Axios instance with Authorization header
-
-
-// export const login = async (username: string, password: string) => {
-//   const response = await api.post('/auth/login', { username, password });
-//   setToken(response.data.token);
-//   return response.data;
-// };
-
-// export const logout = () => {
-//   authenticatedVar.set(false);
-// };
-
-// export default api;

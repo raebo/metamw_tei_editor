@@ -33,11 +33,9 @@ const App = () => {
 
   return (
     <ThemeProvider theme={lightTheme}>
-      {/*<CssBaseline />*/}
-      {/*<LoadCSSFile href={"./css/tei_weblayout.css"} />*/}
       <AuthProvider>
-        <Guard>
-          <BrowserRouter>
+        <BrowserRouter>
+          <Guard>
             <Routes>
               <Route path="/">
                 <Route element={<Layout />}>
@@ -56,8 +54,8 @@ const App = () => {
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
-          </BrowserRouter>
-        </Guard>
+          </Guard>
+        </BrowserRouter>
       </AuthProvider>
       { isLoading && <CircularIndeterminate />}
       <Snackbar />

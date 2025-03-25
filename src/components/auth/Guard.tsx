@@ -1,11 +1,12 @@
 import excludedRoutes from "../../constants/excluded-routes";
 import { useAuth } from "./AuthContext";
-import { isTokenValid } from "../../utils/auth";
+import { AUTH_TOKEN_NAME, isTokenValid } from "../../utils/auth";
 import { loginSetToken, loginState, logoutState } from "../../redux/slices/authentication.slice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/redux.store";
 import { getMe } from "../../services/user.service";
 import { enqueueSnackbar } from "notistack";
+import { useEffect } from "react";
 
 interface GuardProps {
   children: React.ReactNode
@@ -14,32 +15,28 @@ interface GuardProps {
 export const Guard: React.FC<GuardProps> = ({ children } : GuardProps) => {
   const dispatch = useDispatch();
   const { isAuthenticated } = useAuth();
-
   const user = useSelector((state: RootState) => state.auth.user);
-  let token = localStorage.getItem('authToken');
+  let token = localStorage.getItem(AUTH_TOKEN_NAME);
 
-  if (token && isTokenValid(token)) {
-    dispatch(loginSetToken({token: token}));
-  } else if (token && !isTokenValid(token)) {
-    token = null
-    dispatch(logoutState());
-  } else {
-    dispatch(logoutState());
-  }
-
-  if (token !== null && user === null) {
-    try{
-      getMe().then((result) => {
-        if (result) {
-          dispatch(loginState({ user: result, isAuthenticated: true, token: token }))
-        }
-      }).catch(error => {
-        enqueueSnackbar("Could not get user data: " + error.toString(), { variant: "error" })
-      })
-    } catch (e) {
-      enqueueSnackbar("Could not get user data: " + e, { variant: "error" })
+  useEffect(() => {
+    if (!token) {
+      dispatch(logoutState());
+      return;
     }
-  }
+
+    if (user === null) {
+      getMe()
+        .then((result) => {
+          if (result) {
+            dispatch(loginState({ user: result, isAuthenticated: true, token }));
+          }
+        })
+        .catch((error) => {
+          console.log("Guard getMe() error:", error);
+          dispatch(logoutState());
+        });
+    }
+  }, [dispatch, token, user]);
 
   if (!excludedRoutes.includes(window.location.pathname) && (!isAuthenticated && token === null)) {
     window.location.href = "/login"

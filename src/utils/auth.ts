@@ -8,3 +8,5 @@ export const isTokenValid = (token: string) => {
     return false;
   }
 };
+
+export const AUTH_TOKEN_NAME = 'authToken';

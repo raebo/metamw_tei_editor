@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { AUTH_TOKEN_NAME } from "../../utils/auth";
 
 interface AuthState {
   user: {
@@ -14,7 +15,7 @@ interface AuthState {
 const initialState: AuthState = {
   isAuthenticated: false,
   user: null,
-  token: localStorage.getItem("token") ?? null,
+  token: localStorage.getItem(AUTH_TOKEN_NAME) ?? null,
 };
 
 const authSlice = createSlice({
@@ -25,17 +26,17 @@ const authSlice = createSlice({
       state.user = {...state.user, ...action.payload.user}
       state.isAuthenticated = true;
       state.token = action.payload.token;
-      localStorage.setItem('token', action.payload.token)
+      localStorage.setItem(AUTH_TOKEN_NAME, action.payload.token)
     },
     logoutState(state) {
       state.user = null
       state.isAuthenticated = false;
       state.token = null;
-      localStorage.removeItem('token');
+      localStorage.removeItem(AUTH_TOKEN_NAME);
     },
     loginSetToken(state, action) {
       state.token = action.payload.token;
-      localStorage.setItem('token', action.payload.token);
+      localStorage.setItem(AUTH_TOKEN_NAME, action.payload.token);
     }
   },
 });

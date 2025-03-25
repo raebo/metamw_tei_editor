@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { getMe } from "../../services/user.service";
 import { AuthUser } from "../../services/mappings/authMappings";
+import { AUTH_TOKEN_NAME } from "../../utils/auth";
 
 export const refreshUserData = createAsyncThunk<
   AuthUser, // The return type of the async action (User data)
@@ -9,7 +10,7 @@ export const refreshUserData = createAsyncThunk<
 >(
   'auth/refreshUserData', // Action type
   async (_, { rejectWithValue }) => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem(AUTH_TOKEN_NAME);
     if (!token) {
       return rejectWithValue('No token found');
     }
