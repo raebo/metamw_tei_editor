@@ -110,7 +110,6 @@ export const fetchAutoAnnoSnippetEntityData = async (annoLetterId: number, snipp
       `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/entity_data/${entityType.toLowerCase()}/${entityKey}`
     );
 
-  // return response.data.map((apiEntity: SnippetApiEntity) => mapApiToSnippetEntity(apiEntity));
   return mapApiToSnippetEntity(response.data);
 }
 

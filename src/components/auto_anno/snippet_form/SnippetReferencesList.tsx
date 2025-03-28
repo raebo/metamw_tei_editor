@@ -101,7 +101,7 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
     setDialogOpen(true);
   };
 
-  const handleConfirmElement = () => {
+  const handleConfirmElement = async () => {
     const xmlLetterNode: Element|null = document.querySelector("#letterXml")
     let xmlContent: string = ""
 
@@ -115,82 +115,54 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
       enqueueSnackbar("no reference key selected", {variant: "error"})
       return }
 
-    fetchAutoAnnoSnippetEntityData(props.autoAnnoLetterId, sharedSnippet.id, selectedReferenceKey, sharedSnippet.referenceType).then((data) => {
-      autoAnnoReplaceDomNodeContent(sharedSnippet.xmlId, sharedSnippet.referenceType, data)
+    try {
+      const snippetData = await fetchAutoAnnoSnippetEntityData(props.autoAnnoLetterId, sharedSnippet.id, selectedReferenceKey, sharedSnippet.referenceType)
+
+      autoAnnoReplaceDomNodeContent(sharedSnippet.xmlId, sharedSnippet.referenceType, snippetData)
 
       xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML)
 
-      updateAnnoLetterContent(
-        props.autoAnnoLetterId,
-        xmlContent
-      ).catch((error) => {
-        enqueueSnackbar("error during updating of letter content: " + error, {variant: "error"})
-      })
+      await updateAnnoLetterContent(props.autoAnnoLetterId, xmlContent)
 
-      setAnnoSnippetEntity(props.autoAnnoLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, selectedReferenceKey).then(() => {
-      }).catch((error) => {
-        enqueueSnackbar("error during setting data: " + error, { variant: "error" })
-      })
+      await setAnnoSnippetEntity(props.autoAnnoLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, selectedReferenceKey)
 
-      setAutoAnnoSnippetStatus(props.autoAnnoLetterId, sharedSnippet?.id, AnnoSnippetStatus.ACCEPTED).then(() => {
-        dispatch(setAutoAnnoLetter({letter: {id: props.autoAnnoLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
-        dispatch(clearSnippetState())
-        dispatch(setSnippetReferences( { references: { showReferences: false } } ))
-      }).catch((error) => {
-        enqueueSnackbar("error during setting status of snippet: " + error, { variant: "error" })
-      })
+      await setAutoAnnoSnippetStatus(props.autoAnnoLetterId, sharedSnippet?.id, AnnoSnippetStatus.ACCEPTED)
 
-    }).then(() => {
-      setDisabled(true)
-      setDialogOpen(false)
-    }).catch((err) => {
+      enqueueSnackbar("Die Auszeichnung wurde akzeptiert", { variant: "success" })
+
+      dispatch(setAutoAnnoLetter({letter: {id: props.autoAnnoLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
+      dispatch(clearSnippetState())
+      dispatch(setSnippetReferences( { references: { showReferences: false } } ))
+
+    } catch(err) {
       enqueueSnackbar("error during writing ShowLetter: " + err, {variant: "error"})
-    })
+    }
   }
 
-  const handleRejectSnippet = () => {
+  const handleRejectSnippet = async () => {
     setDisabled(true)
-    const xmlLetterNode: Element|null = document.querySelector("#letterXml")
+    const xmlLetterNode: Element | null = document.querySelector("#letterXml")
 
     try {
       if (!sharedSnippet?.id) { throw new Error("no snippet id given") }
       if (xmlLetterNode === null) { throw new Error("xmlNodeContent is null") }
 
       removeSnippetEntityFromDom(sharedSnippet?.xmlId)
-      updateAnnoLetterContent(
-        props.autoAnnoLetterId,
-        transformLetterXmlForExport(
-          removeMarkedSpans(
-            xmlLetterNode
-          ).innerHTML
-        )
-      ).then(() => {
-        enqueueSnackbar("Die Auszeichnung wurde entfernt", { variant: "success" })
 
-      }).catch((error) => {
-        enqueueSnackbar("error during setting data: " + error, {variant: "error"})
-      });
+      const xmlContent = transformLetterXmlForExport( removeMarkedSpans(xmlLetterNode).innerHTML )
+      await updateAnnoLetterContent(props.autoAnnoLetterId, xmlContent)
 
-      setAutoAnnoSnippetStatus(props.autoAnnoLetterId, sharedSnippet?.id, AnnoSnippetStatus.REJECTED).then((response) => {
-        if (response) {
-          dispatch(setAutoAnnoLetter(
-            { letter: {id: props.autoAnnoLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: true } }
-          ))
-          dispatch(clearSnippetState())
-          dispatch(
-            setSnippetReferences({
-              references: {
-                items: [],
-                showReferences: false
-              }
-            })
-          )
-        }
-      }).catch((error) => {
-        enqueueSnackbar("error during setting data: " + error, {variant: "error"})
-      })
+      enqueueSnackbar("Die Auszeichnung wurde entfernt", { variant: "success" })
 
-    } catch (error) {
+      await setAutoAnnoSnippetStatus(props.autoAnnoLetterId, sharedSnippet?.id, AnnoSnippetStatus.REJECTED)
+
+      dispatch(setAutoAnnoLetter(
+          { letter: {id: props.autoAnnoLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: true } }
+        ))
+      dispatch(clearSnippetState())
+      dispatch(setSnippetReferences( { references: { items: [], showReferences: false } }))
+
+    } catch(error) {
       enqueueSnackbar("error during setting data: " + error, {variant: "error"})
     }
   }
@@ -218,7 +190,6 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
   const handleInfoIconClick = (referenceKey: string) => {
     dispatch(setSnippetEntityInfo({ key: referenceKey }))
   }
-
 
   return (
     <Paper sx={{ width: 'auto', border: "1px solid #ccc", borderRadius: 2, p: 2 }}>

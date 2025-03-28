@@ -41,102 +41,70 @@ const ShowButtons = (props: Props) => {
     dispatch(setAutoSnippetFormContainer({ snippetFormContainer: { form: "EDIT_FORM", buttons: "EDIT_BUTTONS", actionButtonDisabled: true} }))
   }
 
-  const handleRejectSnippet = () => {
-    const xmlLetterNode: Element|null = document.querySelector("#letterXml")
+  const handleRejectSnippet = async  () => {
+    const xmlLetterNode: Element | null = document.querySelector("#letterXml")
 
     try {
       if (!sharedSnippet?.id) { throw new Error("no snippet id given") }
       if (xmlLetterNode === null) { throw new Error("xmlNodeContent is null") }
 
       removeSnippetEntityFromDom(sharedSnippet?.xmlId)
-      updateAnnoLetterContent(
-        props.autoJobLetterId,
-        transformLetterXmlForExport(
-          removeMarkedSpans(
-            xmlLetterNode
-          ).innerHTML
-        )
-      ).then(() => {
-        enqueueSnackbar("Die Auszeichnung wurde entfernt", { variant: "success" })
 
-      }).catch((error) => {
-        enqueueSnackbar("error during setting data: " + error, {variant: "error"})
-      });
+      const xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML);
 
-      setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "REJECTED").then((response) => {
-        if (response) {
-          dispatch(setAutoAnnoLetter(
-            { letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: true } }
-          ))
-          dispatch(clearSnippetState())
-        }
-      }).catch((error) => {
-        enqueueSnackbar("error during setting data: " + error, {variant: "error"})
-      })
+      await updateAnnoLetterContent(props.autoJobLetterId, xmlContent)
+
+      await setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "REJECTED")
+
+      dispatch(setAutoAnnoLetter( { letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: true } } ))
+      dispatch(clearSnippetState())
 
     } catch (error) {
       enqueueSnackbar("error during setting data: " + error, {variant: "error"})
+    } finally {
+      setDialogOpen(false)
     }
-    setDialogOpen(false)
   }
 
-  const handleAcceptSnippet = () => {
-    const xmlLetterNode: Element|null = document.querySelector("#letterXml")
-    let hasError: boolean = false
-    let xmlContent: string = ""
+  const handleAcceptSnippet = async () => {
+    const xmlLetterNode: Element | null = document.querySelector("#letterXml");
 
     try {
       if (!sharedSnippet?.id) { throw new Error("no snippet id given") }
 
       if (xmlLetterNode === null) { throw new Error("xmlNodeContent is null") }
 
-      setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceType, sharedSnippet?.referenceKey).then((response) => {
+      await setAnnoSnippetEntity(
+        props.autoJobLetterId,
+        sharedSnippet.id,
+        sharedSnippet.referenceType,
+        sharedSnippet.referenceKey
+      );
 
-      }).catch(() => {
-        throw new Error("error during setAnnoSnippetEntity")
-      })
-      fetchAutoAnnoSnippetEntityData(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceKey, sharedSnippet?.referenceType).then((data) => {
+      const data = await fetchAutoAnnoSnippetEntityData(
+        props.autoJobLetterId,
+        sharedSnippet.id,
+        sharedSnippet.referenceKey,
+        sharedSnippet.referenceType
+      );
 
+      autoAnnoReplaceDomNodeContent(sharedSnippet.xmlId, sharedSnippet.referenceType, data);
 
-        autoAnnoReplaceDomNodeContent(sharedSnippet?.xmlId, sharedSnippet?.referenceType, data)
+      const xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML);
 
-        // needed this extra line call because otherwise it would not recognize the updated xml
-        xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML)
+      await updateAnnoLetterContent(props.autoJobLetterId, xmlContent);
 
-        updateAnnoLetterContent(
-          props.autoJobLetterId,
-          xmlContent
-        ).catch((error) => {
-          enqueueSnackbar("error during updating of letter content: " + error, { variant: "error" })
-          hasError = true
-        })
+      await setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet.id, "ACCEPTED");
 
-      }).catch((error) => {
-        enqueueSnackbar("error during setting data: " + error, { variant: "error" })
-        hasError = true
-      })
+      dispatch(setAutoAnnoLetter({ letter: { id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true } }));
+      dispatch(clearSnippetState());
 
-      if (hasError) { throw new Error("Updating of xml content failed") }
-
-      // const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-      // sleep(2000);
-
-      setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "ACCEPTED").then((response) => {
-        dispatch(setAutoAnnoLetter({letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
-        dispatch(clearSnippetState())
-
-        enqueueSnackbar("Die Auszeichnung wurde akzeptiert", { variant: "success" })
-      }).catch((error) => {
-
-        enqueueSnackbar("error during setting data: " + error, { variant: "error" })
-        hasError = true
-      })
-      if (hasError) { throw new Error("setting dom Snippet Data") }
-
+      enqueueSnackbar("Die Auszeichnung wurde akzeptiert", { variant: "success" });
     } catch (error) {
-      enqueueSnackbar("error during setting data: " + error, { variant: "error" })
+      enqueueSnackbar("Fehler: " + error, { variant: "error" });
+    } finally {
+      setDialogOpen(false);
     }
-    setDialogOpen(false);
   }
 
 

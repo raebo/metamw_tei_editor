@@ -186,11 +186,9 @@ const AutoAnnoLetters: React.FC = () => {
           <div className="sub-box">
             <div className="sub-box-element sub-box-top">
               <SnippetFormContainer autoAnnoLetterId={autoAnnoLetterId} />
-              {/*<AutoAnnoSnippetForm autoJobLetterId={autoAnnoLetterId}/>*/}
             </div>
             <div className="sub-box-element sub-box-center" style={{marginTop: "2%"}}>
               { selectedComponentList?.component }
-              {/*<AutoAnnoSnippetList autoJobLetterId={autoAnnoLetterId}/>*/}
             </div>
             <div className="sub-box-element sub-box-bottom">
               <AutoAnnoLetterHandle autoJobId={autoAnnoJobId} autoJobLetterId={autoAnnoLetterId} />

@@ -41,11 +41,9 @@ const EditButtons = (props: Props) => {
     setButtonDisabled()
   }, [snippetFormContainer]);
 
-  const saveSnippetReference = () => {
+  const saveSnippetReference = async () => {
     setSaveDisabled(true)
     const xmlLetterNode: Element|null = document.querySelector("#letterXml")
-    let xmlContent: string = ""
-    let hasError = false
 
     try {
       if (!sharedSnippet?.id) {
@@ -55,55 +53,26 @@ const EditButtons = (props: Props) => {
         enqueueSnackbar("xmlNodeContent is null", {variant: "error"})
         return }
 
-      setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged).then(() => {
+      await setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged)
 
-      }).catch(() => {
-        throw new Error("error during setAnnoSnippetEntity")
-      })
-      fetchAutoAnnoSnippetEntityData(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceKeyChanged, sharedSnippet?.referenceTypeChanged).then((data) => {
-        autoAnnoReplaceDomNodeContent(sharedSnippet?.xmlId, sharedSnippet?.referenceTypeChanged, data)
-        xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML)
+      const snippetData = await fetchAutoAnnoSnippetEntityData(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceKeyChanged, sharedSnippet?.referenceTypeChanged)
 
-        updateAnnoLetterContent(
-          props.autoJobLetterId,
-          xmlContent
-        ).catch((error) => {
-          enqueueSnackbar("error during updating of letter content: " + error, { variant: "error" })
-          hasError = true
-        })
+      autoAnnoReplaceDomNodeContent(sharedSnippet?.xmlId, sharedSnippet?.referenceTypeChanged, snippetData)
+      const xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML)
 
+      await updateAnnoLetterContent(props.autoJobLetterId, xmlContent)
 
-      }).catch((error) => {
-        enqueueSnackbar("error during setting data: " + error, { variant: "error" })
-        hasError = true
-      })
+      await setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged)
 
-      if (hasError) {
-        enqueueSnackbar("error during setting data: ",  { variant: "error" })
-        return }
+      await setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "ACCEPTED")
 
-      setAnnoSnippetEntity(props.autoJobLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, sharedSnippet?.referenceKeyChanged).then(() => {
-      }).catch((error) => {
-        enqueueSnackbar("error during setting data: " + error, { variant: "error" })
-        hasError = true
-      })
-
-      if (hasError) {
-        enqueueSnackbar("error during setting data: ",  { variant: "error" })
-        return }
-
-      setAutoAnnoSnippetStatus(props.autoJobLetterId, sharedSnippet?.id, "ACCEPTED").then(() => {
-        dispatch(setAutoAnnoLetter({letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
-        dispatch(clearSnippetState())
-      }).catch((error) => {
-        enqueueSnackbar("error during setting status of snippet: " + error, { variant: "error" })
-      })
+      dispatch(setAutoAnnoLetter({letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
+      dispatch(clearSnippetState())
+      dispatch(setAutoSnippetFormContainer({ snippetFormContainer: { form: "BLANK_FORM", buttons: "BLANK_BUTTONS", actionButtonDisabled: true} }))
 
     } catch (error) {
       enqueueSnackbar("error during saving of data " + error, { variant: "error" })
     }
-
-    dispatch(setAutoSnippetFormContainer({ snippetFormContainer: { form: "BLANK_FORM", buttons: "BLANK_BUTTONS", actionButtonDisabled: true} }))
   }
 
   return (

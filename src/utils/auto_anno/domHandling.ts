@@ -112,6 +112,8 @@ const replacePlaceDomNodeSettlement = (
   if (snippetEntity.entityKind) { settlementNode.setAttribute("type", snippetEntity.entityKind); }
 
   settlementNode.setAttribute("style", "hidden")
+  settlementNode.setAttribute("type", "locality")
+  settlementNode.setAttribute("key", snippetEntity.entityKey)
   settlementNode.textContent = snippetEntity.entityName
   placeNameNode.appendChild(settlementNode);
 
@@ -130,17 +132,20 @@ const replacePlaceDomNodeInstiSight = (
 ): void => {
   if (placeNameNode.tagName !== 'PLACENAME') { throw new Error(`Invalid element provided for ${placeNameNode.tagName}`); }
 
-  const nameNOde = document.createElement("name")
-  nameNOde.setAttribute("key", snippetEntity.entityKey)
-  nameNOde.setAttribute("type", typeOfPlace)
-  nameNOde.setAttribute("sub_type", '')
-  nameNOde.setAttribute("style", 'hidden')
-  nameNOde.textContent = snippetEntity.entityName
+  const nameNode = document.createElement("name")
+  nameNode.setAttribute("key", snippetEntity.entityKey)
+  nameNode.setAttribute("type", typeOfPlace)
+  nameNode.setAttribute("sub_type", '')
+  nameNode.setAttribute("style", 'hidden')
+  nameNode.textContent = snippetEntity.entityName
 
-  placeNameNode.appendChild(nameNOde)
+  placeNameNode.appendChild(nameNode)
+
+  console.log("snippetEntity: ", snippetEntity)
 
   const settlementNode = document.createElement("settlement");
   settlementNode.setAttribute("type", 'locality');
+  settlementNode.setAttribute(("key"), snippetEntity.entityKey)
   settlementNode.setAttribute("style", "hidden")
 
   if (snippetEntity.entitySettlementKind) { settlementNode.textContent = snippetEntity.entitySettlementKind}

@@ -50,6 +50,7 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
         const result = await fetchAutoAnnoLetter(props.autoJobLetterId);
 
         if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) { setFinalSaveDisabled(false); }
+        if (result && result.xml_content_updated !== null && result.xml_content_updated !== undefined ) { setFinalSaveDisabled(false); }
 
         isMounted.current = true;
       }
@@ -102,7 +103,10 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
         const result = await fetchAutoAnnoLetter(props.autoJobLetterId);
 
         if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) { setFinalSaveDisabled(false); }
-        if (result?.content_changed) { setDisableResetButton(false); }
+        if (result?.content_changed) {
+          setDisableResetButton(false);
+          setFinalSaveDisabled(false)
+        }
 
         dispatch(setAutoAnnoLetter({ letter: { id: props.autoJobLetterId, reloadStatus: false } }));
       }
