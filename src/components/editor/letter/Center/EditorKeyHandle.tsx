@@ -2,10 +2,11 @@ import { useCallback, useEffect } from "react";
 import { useAppDispatch } from "../../../../redux/hooks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/redux.store";
-import { contentMarkedKeyHandleDefinitions } from "./lib/keyHandlerDefinitions";
+import { allTimesAvailableKeyHandleDefinitions, contentMarkedKeyHandleDefinitions } from "./lib/keyHandlerDefinitions";
 import { setReloadLetterContent } from "../../../../redux/slices/editor.letter.slice";
 import { enqueueSnackbar } from "notistack";
 import { EditorUtils } from "../../../../utils/editor";
+import { EditorKeyHandleItem } from "../../../../services/mappings/editorMappings";
 
 const EditorKeyHandle = () => {
 
@@ -13,8 +14,8 @@ const EditorKeyHandle = () => {
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
   const stateLetterContent= useSelector((state: RootState) => state.editorLetter.content);
 
-  const handleFunction = useCallback((event: any) => {
-    for (const [keyCombo, definition] of Object.entries(contentMarkedKeyHandleDefinitions)) {
+  const handleFunction = useCallback((event: KeyboardEvent, keyDefinitions: Record<string, EditorKeyHandleItem>) => {
+    for (const [keyCombo, definition] of Object.entries(keyDefinitions)) {
       const keys = keyCombo.split("+"); // Split "ctrl+b" into ["ctrl", "b"]
       const requiredModifiers = keys.slice(0, -1); // ["ctrl", "alt"]
       const mainKey = keys[keys.length - 1]; // "k"
@@ -28,13 +29,14 @@ const EditorKeyHandle = () => {
         );
       });
 
+
       if (
         isModifiersPressed && event.key.toLowerCase() === mainKey
       ) {
         event.preventDefault(); // Prevent system default behavior
         event.stopPropagation(); // Prevent bubbling
 
-        if ((!definition?.action && !definition.openDialogAction) || stateEditorLetter.id === null) return;
+        //if ((!definition?.action && !definition.openDialogAction) || stateEditorLetter.id === null) return;
 
         if (definition.action) {
           definition.action().then((xmlContent) => {
@@ -61,20 +63,22 @@ const EditorKeyHandle = () => {
   }, [stateEditorLetter]);
 
   useEffect(() => {
-    const initContentMarkedKeyFunction= () => {
-      document.addEventListener("keydown", handleFunction, false);
-    }
+    const globalKeyListener = (event: KeyboardEvent) => {
+      handleFunction(event, allTimesAvailableKeyHandleDefinitions); }
+    document.addEventListener("keydown", globalKeyListener, false);
 
+    let markedKeyListener: (event: KeyboardEvent) => void;
     if (stateLetterContent.textIsMarked) {
-      initContentMarkedKeyFunction()
+      markedKeyListener = (event: KeyboardEvent) => {
+        handleFunction(event, contentMarkedKeyHandleDefinitions); }
+      document.addEventListener("keydown", markedKeyListener, false);
     }
 
     return () => {
-      for (const definition of Object.values(contentMarkedKeyHandleDefinitions)) {
-        if (definition.action !== null) {
-          document.removeEventListener("keydown", handleFunction, false);
-          console.log("Removed key event listener")
-        }
+      document.removeEventListener("keydown", globalKeyListener, false);
+      if (stateLetterContent.textIsMarked && markedKeyListener) {
+        document.removeEventListener("keydown", markedKeyListener, false);
+        console.log("Removed marked content key event listener");
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,32 +1,55 @@
-import { v4 as uuidv4 } from "uuid";
-import { EditorUtils } from "./index";
+import { v4 as uuidv4 } from "uuid"
+import { EditorUtils } from "./index"
 
 export const markupGeneration = {
-  noteMarkup: (xmlContent: string, userLogin: string, noteContent: string, commentType: string) : { xmlString: string, xmlId: string } => {
-    const parser = new DOMParser();
-    const xmlId = `note-${uuidv4()}`;
-    const serializer = new XMLSerializer();
-    const doc = parser.parseFromString(xmlContent, "application/xml");
+  addAttachmentMarkup: (xmlContent: string, attachmentType: string, attachmentName: string) : { xmlString: string, contentChanged: boolean } => {
+    const parser = new DOMParser()
+    const serializer = new XMLSerializer()
+    const xmlDoc = parser.parseFromString(xmlContent, "application/xml")
 
-    const markedSpan = doc.querySelector('span.marked');
+    const listBibl = xmlDoc.querySelector("msdesc accmat listbibl")
+    if (!listBibl) return { xmlString: xmlContent, contentChanged: false }
+
+    const existingBiblEntries = listBibl.querySelectorAll("bibl")
+
+    if (existingBiblEntries.length === 1 && existingBiblEntries[0].getAttribute("type") === "none") {
+      existingBiblEntries[0].setAttribute("type", attachmentType)
+      existingBiblEntries[0].textContent = attachmentName
+
+    } else {
+      const newBibl = xmlDoc.createElement("bibl")
+      newBibl.setAttribute("type", attachmentType)
+      newBibl.textContent = attachmentName
+      listBibl.appendChild(newBibl)
+    }
+
+    return { xmlString: serializer.serializeToString(xmlDoc), contentChanged: true }
+  },
+  noteMarkup: (xmlContent: string, userLogin: string, noteContent: string, commentType: string) : { xmlString: string, xmlId: string } => {
+    const parser = new DOMParser()
+    const xmlId = `note-${uuidv4()}`
+    const serializer = new XMLSerializer()
+    const doc = parser.parseFromString(xmlContent, "application/xml")
+
+    const markedSpan = doc.querySelector('span.marked')
 
     if (markedSpan && markedSpan.parentNode) {
-      const content = markedSpan.textContent || "";
+      const content = markedSpan.textContent || ""
 
       // Create <note> element
-      const noteElement = doc.createElement("note");
-      noteElement.setAttribute("resp", userLogin);
-      noteElement.setAttribute("type", commentType);
-      noteElement.setAttribute("xml:id", xmlId);
-      noteElement.setAttribute("xml:lang", "de");
-      noteElement.textContent = `${content} - ${noteContent}`; // Prefix comment with span content
+      const noteElement = doc.createElement("note")
+      noteElement.setAttribute("resp", userLogin)
+      noteElement.setAttribute("type", commentType)
+      noteElement.setAttribute("xml:id", xmlId)
+      noteElement.setAttribute("xml:lang", "de")
+      noteElement.textContent = `${content} - ${noteContent}` // Prefix comment with span content
 
       // Replace <span> with its inner text
-      const textNode = document.createTextNode(content);
-      markedSpan.parentNode.replaceChild(textNode, markedSpan);
+      const textNode = document.createTextNode(content)
+      markedSpan.parentNode.replaceChild(textNode, markedSpan)
 
       // Insert <note> after the text
-      textNode.after(noteElement);
+      textNode.after(noteElement)
     }
 
     return {
@@ -49,8 +72,8 @@ export const markupGeneration = {
     const oldNoteContent = noteElement.textContent
     const oldNoteType = noteElement.getAttribute("type")
 
-    noteElement.setAttribute("type", noteType);
-    noteElement.setAttribute("xml:lang", noteLanguage);
+    noteElement.setAttribute("type", noteType)
+    noteElement.setAttribute("xml:lang", noteLanguage)
     noteElement.innerHTML = noteContent
 
     return {

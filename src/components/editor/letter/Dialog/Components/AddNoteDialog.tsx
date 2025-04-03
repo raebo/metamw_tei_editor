@@ -29,9 +29,7 @@ const AddNoteDialog = (props: NoteDialogProps) => {
 
   const handleSubmit = () => {
     const xmlContent = EditorUtils.xmlCheck.letterXml();
-    const userNameShort = MiscUtils.userHandling.nameShortCut(
-      MiscUtils.userHandling.stateUserToAuthUser(user)
-    );
+    const userNameShort = MiscUtils.userHandling.nameShortCut( MiscUtils.userHandling.stateUserToAuthUser(user) );
 
     if (xmlContent !== null) {
       const noteMarkup = EditorUtils.markupGeneration.noteMarkup(xmlContent, userNameShort, comment, noteType);
@@ -65,12 +63,12 @@ const AddNoteDialog = (props: NoteDialogProps) => {
         </div>
         <div className="form-item form-item--key">
           <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
-            <InputLabel id="auto-anno-snippet-reference-type">Kommentar (Typ)</InputLabel>
+            <InputLabel id="add-note-dialog-comment-type">Kommentar (Typ)</InputLabel>
             <Select
               defaultValue={""}
               disabled={false}
-              labelId="demo-simple-select-filled-label"
-              id="demo-simple-select-filled"
+              labelId="simple-select-filled-label"
+              id="simple-select-filled"
               onChange={(event) => setNoteType(event.target.value)}
             >
               { EditorConstants.noteTypeItems.map((item) => (

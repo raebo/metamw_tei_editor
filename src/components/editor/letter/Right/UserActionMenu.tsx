@@ -1,6 +1,17 @@
 import { Box, Menu, MenuItem } from "@mui/material";
 import React, { useState } from "react";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import {
+  allTimesAvailableKeyHandleDefinitions,
+  filterForKeyHandleDefinitions
+} from "../Center/lib/keyHandlerDefinitions";
+import { EditorKeyHandleItem } from "../../../../services/mappings/editorMappings";
+import { enqueueSnackbar } from "notistack";
+import { EditorUtils } from "../../../../utils/editor";
+import { setReloadLetterContent } from "../../../../redux/slices/editor.letter.slice";
+import { useAppDispatch } from "../../../../redux/hooks";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../redux/redux.store";
 
 interface UserActionMenuProps {
   anchorEl: HTMLElement | null
@@ -8,8 +19,66 @@ interface UserActionMenuProps {
   handleClose: () => void
 }
 
+type MenuItem = {
+  label: string;
+  keyHandleItem: EditorKeyHandleItem | null;
+  active: boolean;
+  hasSubMenu?: boolean;
+  subMenu?: {
+    label: string;
+    keyHandleItem: EditorKeyHandleItem | null
+    active: boolean;
+  }[];
+};
+
+
+const filterKeyCombination = (key: string) : EditorKeyHandleItem | null => {
+  try {
+    const entry = filterForKeyHandleDefinitions(allTimesAvailableKeyHandleDefinitions, key)
+
+    return entry;
+  } catch (error) {
+    enqueueSnackbar("Error while filtering key combination: " + key, { variant: "error" });
+  }
+
+  return null
+}
+
+
+const menuItems: MenuItem[] = [
+  { label: "Brief Header Erstellung", keyHandleItem: null, active: false },
+  { label: "Brief Header Bearbeitung", keyHandleItem: null, active: true, hasSubMenu: true,
+    subMenu: [
+      { label: "Beilage Hinzufügen", keyHandleItem: filterKeyCombination("ctrl+alt+6"), active: true },
+    ]
+  },
+  { label: "Brief Text Erstellung", keyHandleItem: null, active: false },
+  {
+    label: "Text Kritik",
+    active: true,
+    hasSubMenu: true,
+    keyHandleItem: null,
+    subMenu: [
+      { label: "Schreibakt Erstellen", keyHandleItem: null, active: false },
+      { label: "Vermerk Hinzufügen", keyHandleItem: null, active: false },
+    ],
+  },
+  {
+    label: "Datum Einfügen",
+    active: true,
+    hasSubMenu: true,
+    keyHandleItem: null,
+    subMenu: [
+      { label: "Datum when", keyHandleItem: null, active: false }, // "ctrl+alt+shift+1"
+      { label: "Datum when-custom", keyHandleItem: null, active: false }, // "ctrl+alt+shift+2"
+    ]
+  },
+];
+
+
 const UserActionMenu= (props: UserActionMenuProps) => {
-  const [menuIsActive, setMenuIsActive] = useState<boolean>(false);
+  const dispatch = useAppDispatch();
+  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
 
   const [subMenuAnchorEl, setSubMenuAnchorEl] = useState<{ [key: string]: HTMLElement | null }>({});
 
@@ -17,8 +86,36 @@ const UserActionMenu= (props: UserActionMenuProps) => {
     setSubMenuAnchorEl((prev) => ({ ...prev, [menuKey]: event.currentTarget }));
   };
 
-  const handleSubMenuClose = (menuKey: string) => {
-    setSubMenuAnchorEl((prev) => ({ ...prev, [menuKey]: null }));
+  const handleSubMenuClick = (menuKey: string, editorKeyHandleItem:  EditorKeyHandleItem | null) => {
+
+    if (!editorKeyHandleItem) {
+      //enqueueSnackbar("No key handle item found", { variant: "error" });
+      setSubMenuAnchorEl((prev) => ({ ...prev, [menuKey]: null }));
+      return;
+    }
+
+    if (editorKeyHandleItem.action) {
+      editorKeyHandleItem.action().then((xmlContent) => {
+        if (xmlContent) {
+          EditorUtils.backendService.patchContent(
+            xmlContent,
+            stateEditorLetter.id,
+            "CONTENT_FORMAT_CHANGED",
+            null
+          ).then(() => {
+            dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+          })
+        }
+      }).catch((error) => {
+        enqueueSnackbar(`Error during calling keybinding: '${editorKeyHandleItem.description} ${error.toString()}'`, { variant: "error" });
+      })
+    } else if (editorKeyHandleItem.openDialogAction) {
+      editorKeyHandleItem.openDialogAction(dispatch);
+    }
+
+    props.handleClose()
+    setSubMenuAnchorEl({})
+    // setSubMenuAnchorEl((prev) => ({ ...prev, [menuKey]: null }));
   };
 
   const getMenuItemStyles = (active: boolean) => ({
@@ -26,12 +123,14 @@ const UserActionMenu= (props: UserActionMenuProps) => {
     padding: "4px 12px",
     minHeight: "32px",
     color: active ? "black" : "gray",
+    cursor: 'pointer'
   });
   const getSndMenuItemStyles = (active: boolean) => ({
     fontSize: "0.575rem",
     padding: "2px 12px",
     minHeight: "15px",
     color: active ? "black" : "grey",
+    cursor: 'pointer',
   });
 
   const SndMenuItemStylesSpan = {
@@ -39,32 +138,8 @@ const UserActionMenu= (props: UserActionMenuProps) => {
     padding: "0px 12px",
     minHeight: "15px",
     color: "grey",
+    cursor: 'pointer',
   };
-
-  const menuItems = [
-    { label: "Brief Header Erstellung", secondaryText: null, active: false },
-    { label: "Brief Text Erstellung", secondaryText: null, active: false },
-    {
-      label: "Text Kritik",
-      active: true,
-      hasSubMenu: true,
-      secondaryText: null,
-      subMenu: [
-        { label: "Schreibakt Erstellen", secondaryText: null, active: false },
-        { label: "Vermerk Hinzufügen", secondaryText: null, active: false },
-      ],
-    },
-    {
-      label: "Datum Einfügen",
-      active: true,
-      hasSubMenu: true,
-      secondaryText: null,
-      subMenu: [
-        { label: "Datum when", secondaryText: "ctrl+alt+shift+1", active: false },
-        { label: "Datum when-custom", secondaryText: "ctrl+alt+shift+2", active: false },
-      ]
-    },
-  ];
 
   return (
     <>
@@ -88,9 +163,9 @@ const UserActionMenu= (props: UserActionMenuProps) => {
             >
               <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                 <span>{item.label}</span>
-                {item.secondaryText && (
-                  <span style={SndMenuItemStylesSpan}>{item.secondaryText}</span>
-                )}
+                {item.keyHandleItem && "key" in item.keyHandleItem ? (
+                  <span style={SndMenuItemStylesSpan}>{item.keyHandleItem.key}</span>
+                ) : null}
               </Box>
               <ArrowRightIcon fontSize="small" />
             </MenuItem>
@@ -103,9 +178,9 @@ const UserActionMenu= (props: UserActionMenuProps) => {
             >
               <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                 <span>{item.label}</span>
-                {item.secondaryText && (
-                  <span style={SndMenuItemStylesSpan}>{item.secondaryText}</span>
-                )}
+                {item.keyHandleItem && "key" in item.keyHandleItem ? (
+                  <span style={SndMenuItemStylesSpan}>{item.keyHandleItem.key}</span>
+                ) : null}
               </Box>
             </MenuItem>
           )
@@ -119,21 +194,21 @@ const UserActionMenu= (props: UserActionMenuProps) => {
             key={item.label}
             anchorEl={subMenuAnchorEl[item.label]} // Use the correct anchor element for this submenu
             open={Boolean(subMenuAnchorEl[item.label])} // Only open if the anchor element is set
-            onClose={() => handleSubMenuClose(item.label)} // Close this specific submenu
+            onClose={() => handleSubMenuClick(item.label, null)} // Close this specific submenu
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
           >
             {item.subMenu?.map((subItem, subIndex) => (
               <MenuItem
                 key={subIndex}
-                onClick={() => handleSubMenuClose(item.label)} // Close the submenu when an item is clicked
+                onClick={() => handleSubMenuClick(item.label, subItem.keyHandleItem)} // Close the submenu when an item is clicked
                 className="custom-tool-menu-item"
                 sx={getSndMenuItemStyles(subItem.active)}
               >
                 <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                   <span>{subItem.label}</span>
-                  {subItem.secondaryText && (
-                    <span style={SndMenuItemStylesSpan}>{subItem.secondaryText}</span>
-                  )}
+                  {subItem.keyHandleItem && "key" in subItem.keyHandleItem ? (
+                    <span style={SndMenuItemStylesSpan}>{subItem.keyHandleItem.key}</span>
+                  ) : null}
                 </Box>
               </MenuItem>
             ))}

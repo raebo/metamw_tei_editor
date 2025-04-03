@@ -13,6 +13,7 @@ import { RootState } from "../../../../redux/redux.store";
 import ResetLetterDialog from "./Components/ResetLetterDialog";
 import EditNoteDialog from "./Components/EditNoteDialog";
 import DateWhenAddDialog from "./Components/Date/DateWhenAddDialog";
+import AttachmentAddDialog from "./Components/Misc/AttachmentAddDialog";
 
 interface EditorFormDialogProps {
   open: boolean
@@ -50,14 +51,16 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.ADD_NOTE]: "Kommentar Hinzufügen",
     [EditorConstants.dialogTypes.EDIT_NOTE]: "Kommentar Bearbeiten/Löschen",
     [EditorConstants.dialogTypes.RESET_LETTER]: "Brief Zurücksetzen",
-    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: "Datum 'WHEN' auszeichnen"
+    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: "Datum 'WHEN' Auszeichnen",
+    [EditorConstants.dialogTypes.ATTACHMENT_ADD]: "Beilage Hinzufügen",
   }
 
   const DialogContentComponents : Record<string, React.ReactNode> = {
     [EditorConstants.dialogTypes.ADD_NOTE]: <AddNoteDialog onClose={handleClose} />,
     [EditorConstants.dialogTypes.EDIT_NOTE]: <EditNoteDialog onClose={handleClose} />,
     [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog onClose={handleClose} />,
-    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: <DateWhenAddDialog onClose={handleClose} />
+    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: <DateWhenAddDialog onClose={handleClose} />,
+    [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog onClose={handleClose} />
   }
 
   return (

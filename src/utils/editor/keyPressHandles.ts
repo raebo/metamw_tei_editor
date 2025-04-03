@@ -13,10 +13,9 @@ export const keyPressHandles = {
 
     if (!xmlContent) { throw new Error("No xml content found") }
 
-    return await keyFunction(xmlContent)
+    return keyFunction(xmlContent)
   },
   markContentBold(xmlContent: string): string {
-    console.log("markContentBold")
     return xmlContent.replace(/<span class="marked">(.*?)<\/span>/g, '<hi rend="bold">$1</hi>');
   },
   markContentItalic(xmlContent: string) : string{

@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Box, List, ListItemButton, ListItemIcon } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
@@ -40,6 +40,7 @@ import { handlePublishingClick } from "../../editor/letter/Right/Publishing/Lett
 import UserActionMenu from "../../editor/letter/Right/UserActionMenu";
 import EditorKeyHandle from "../../editor/letter/Center/EditorKeyHandle";
 import QuickContentFormatter from "../../editor/letter/Right/QuickContentFormatter";
+import LetterFontSizeHandle from "../../auto_anno/misc/LetterFontSizeHandle";
 
 
 const ShowEditor = () => {
@@ -365,6 +366,7 @@ const ShowEditor = () => {
       <EditorFormDialog open={false} />i
       <UserActionMenu anchorEl={anchorEl} open={anchorEl !== null} handleClose={userActionMenudHandleClose} />
       <EditorKeyHandle />
+      <LetterFontSizeHandle />
     </>
   );
 };

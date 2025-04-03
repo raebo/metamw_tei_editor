@@ -9,7 +9,6 @@ import { enqueueSnackbar } from "notistack";
 import { useAppDispatch } from "../../../../redux/hooks";
 import {
   setDialogType,
-  setEditorLetter,
   setEditorSelectedItem,
   setReloadLetterContent
 } from "../../../../redux/slices/editor.letter.slice";
@@ -21,6 +20,7 @@ const LetterViewContainer = () => {
 
   const dispatch = useAppDispatch();
   const contentTextIsMarked = useSelector((state: RootState) => state.editorLetter.content.textIsMarked);
+  const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize)
   const [letterXmlContent, setLetterXmlContent] = useState<string | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
@@ -162,7 +162,7 @@ const LetterViewContainer = () => {
       <div className="container-fmbc-letter">
         <div className="box-1">
           {letterXmlContent ? (
-            <div className="letter-xml" id="letterXml" ref={containerRef}>
+            <div className="letter-xml" id="letterXml" ref={containerRef} style={ { fontSize: `${stateLetterFontSize}%` } }>
               <div id="letterXmlContextMenu" style={{ padding: 20 }}>
 
                 {letterXmlContent && <XMLDisplayParser xmlString={letterXmlContent} />}

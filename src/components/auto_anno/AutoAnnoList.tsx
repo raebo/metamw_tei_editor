@@ -212,11 +212,11 @@ const AutoAnnoList: React.FC = () => {
     }
   ];
 
-  const paginationModel = {page: 0, pageSize: 5};
+  const paginationModel = { page: 0, pageSize: 10 };
 
   return (
     <>
-      <Paper sx={{height: 400, width: '100%'}}>
+      <Paper sx={{height: 600, width: '100%'}}>
         <DataGrid
           rows={autoAnnoData}
           columns={jobColumns}

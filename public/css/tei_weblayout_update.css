@@ -47,6 +47,25 @@ div [type="act_of_writing"] {
    }
 }
 
+teiheader {
+   filedesc {
+      sourcedesc {
+         msdesc {
+            physdesc {
+               accmat {
+                  listbibl {
+                     bibl {
+                        cursor: pointer;
+                     }
+                  }
+
+               }
+            }
+         }
+      }
+   }
+}
+
 /*.hidden {*/
 /*    display: none;*/
 /*}*/

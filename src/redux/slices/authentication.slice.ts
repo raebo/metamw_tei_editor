@@ -11,7 +11,7 @@ interface AuthState {
   isAuthenticated: boolean;
   token: string | null
   settings?: {
-    letterFontSize: number | null
+    letterFontSize: number
   }
 }
 
@@ -20,7 +20,7 @@ const initialState: AuthState = {
   user: null,
   token: localStorage.getItem(AUTH_TOKEN_NAME) ?? null,
   settings: {
-    letterFontSize: null
+    letterFontSize: 100
   }
 };
 

@@ -24,20 +24,39 @@ export const EditorConstants = {
     ADD_NOTE: "ADD_NOTE",
     EDIT_NOTE: "EDIT_NOTE",
     DATE_WHEN_ADD: "DATE_WHEN_ADD",
+    ATTACHMENT_ADD: "ATTACHMENT_ADD",
+    ADD_FOOTNOTE_AUTHOR: "ADD_FOOTNOTE_AUTHOR",
+    SOURCE_DESC_HANDWRITING: "SOURCE_DESC_HANDWRITING",
   },
 
   changeTypes: {
     note: {
       ADDED: "NOTE_ADDED",
-      REMOVED: "NOTE_REMOVED",
       CONTENT_CHANGED: "NOTE_CONTENT_CHANGED",
+      REMOVED: "NOTE_REMOVED",
       TYPE_CHANGED: "NOTE_TYPE_CHANGED",
     },
     date : {
       WHEN_ADDED: "DATE_WHEN_ADDED",
       WHEN_MODIFIED: "DATE_WHEN_MODIFIED",
+    },
+    misc: {
+      ATTACHMENT_ADDED: "ATTACHMENT_ADDED",
     }
   },
+  attachmentTypeItems: [
+    { value: "certificate", label: "Zeugnis" },
+    { value: "letter", label: "Brief" },
+    { value: "letter_of_recommentadion", label: "Empfehlungsschreiben" },
+    { value: "notatedMusic", label: "Noten" },
+    { value: "textTemplate", label: "Textvorlage" },
+    { value: "drawing", label: "Zeichnung" },
+    { value: "bill", label: "Rechnung" },
+    { value: "print", label: "Druckerzeugnis" },
+    { value: "diploma", label: "Diplom" },
+    { value: "medal", label: "Orden" },
+    { value: "other", label: "Sonstiges" },
+  ],
   noteTypeItems: [
     { value: "these_comment", label: "Themenkommentar" },
     { value: "single_place_comment", label: "Einzelstellenkommentar" },
