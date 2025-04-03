@@ -17,12 +17,12 @@ TEI {font-family: Calibri !important;
 }
 
 
-body {    
+body {
 font-family: Calibri !important;
     }
 
 
-text body div {    
+text body div {
 font-size : 1.05em ;
     }
 
@@ -72,39 +72,39 @@ background-color : inherit ;
 
 add[place="above"] {
   display: inline;
-  vertical-align: super; 
-  font-size: 0.9em; 
+  vertical-align: super;
+  font-size: 0.9em;
 }
 
 /*  add[place="above"]::before {
 content: "[";
-vertical-align: super; 
-font-size: 0.8em; 
-} 
+vertical-align: super;
+font-size: 0.8em;
+}
 
 add[place="above"]::after {
  content: "]";
-vertical-align: super; 
-font-size: 0.8em; 
+vertical-align: super;
+font-size: 0.8em;
 } */
 
 
 add[place="below"] {
   display: inline;
-  vertical-align: sub; 
-  font-size: 0.9em; 
+  vertical-align: sub;
+  font-size: 0.9em;
 }
 
 /* add[place="below"]::before {
  content: "[";
-vertical-align: sub; 
-font-size: 0.8em; 
+vertical-align: sub;
+font-size: 0.8em;
 }
 
 add[place="below"]::after {
- content: "]"; 
-vertical-align: sub; 
-font-size: 0.8em; 
+ content: "]";
+vertical-align: sub;
+font-size: 0.8em;
 } */
 
 
@@ -167,7 +167,7 @@ att:before {
 author {
   display: inline;
 }
-    
+
 back {
   display: block;
   border: thin black solid;
@@ -181,13 +181,13 @@ back {
 
 sourceDesc additional listBibl bibl::before {
   display: inline !important;
-/*  margin-top: 0.5em;  */ 
+/*  margin-top: 0.5em;  */
   font-weight: bold;
   content: "Quelle (" attr(type) "): ";
 }
-  
- 
-  
+
+
+
 argument > bibl, body > bibl, cit > bibl, div > bibl, div0 > bibl, div1 > bibl, div2 > bibl, div3 > bibl, div4 > bibl, div5 > bibl, div6 > bibl, div7 > bibl, epigraph > bibl, listBibl > bibl > bibl, taxonomy > bibl {
   display: block;
   margin-bottom: 0.5em;
@@ -195,7 +195,7 @@ argument > bibl, body > bibl, cit > bibl, div > bibl, div0 > bibl, div1 > bibl, 
 biblFull {
   display: inline;
 }
-    
+
 argument > biblFull, body > biblFull, cit > biblFull, div > biblFull, div0 > biblFull, div1 > biblFull, div2 > biblFull, div3 > biblFull, div4 > biblFull, div5 > biblFull, div6 > biblFull, div7 > biblFull, epigraph > biblFull, listBibl > biblFull > biblFull, taxonomy > biblFull {
   display: block;
   margin-bottom: 0.5em;
@@ -203,11 +203,11 @@ argument > biblFull, body > biblFull, cit > biblFull, div > biblFull, div0 > bib
 biblScope {
   display: inline;
 }
-    
+
 imprint > biblScope {
   display: block;
 }
-    
+
 text_body {
   margin-top: 5px;
   margin-left: 10px;
@@ -250,7 +250,7 @@ cb[type="column_break"]{
 
 cb[type="column_break"]::before {
   content: "  |" ;
-  font-weight:bold; 
+  font-weight:bold;
   font-size: 100%;
 }
 
@@ -304,7 +304,7 @@ choice[resp="writer"] corr {
 cit {
   display: inline;
 }
-    
+
 argument > cit, body > cit, div > cit, div0 > cit, div1 > cit, div2 > cit, div3 > cit, div4 > cit, div5 > cit, div6 > cit, div7 > cit, epigraph > cit {
   display: block;
   margin-bottom: 0.5em;
@@ -376,13 +376,13 @@ collection {
 
 msIdentifier collection::before {
   content: "Sammlung: ";
-  font-weight: bold;  
+  font-weight: bold;
 }
 
 
 altIdentifier collection::before {
   content: "Sammlung: ";
-  font-weight: bold;  
+  font-weight: bold;
 }
 
 
@@ -417,7 +417,7 @@ display: inline;
 
 altIdentifier country::before {
   content: "Weiterer Standort: " !important;
-  font-weight: bold;  
+  font-weight: bold;
 }
 
 
@@ -435,14 +435,14 @@ altIdentifier settlement::after {
 msIdentifier{
     margin-top: 0.5em !important;
       font-weight: normal;
-      
+
 }
 
 
 altIdentifier{
     margin-top: 0.5em !important;
       font-weight: normal;
-      
+
 }
 
 
@@ -469,8 +469,8 @@ creation date {
      content:"Schreibedatum: ";
      font-weight:bold;
  }
- 
- 
+
+
 change > date, publicationStmt > date {
   display: block;
   font-weight: bold;
@@ -505,13 +505,13 @@ dateline[rend="center"] {
 text body div opener{
   margin-top: 0em !important;
   margin-bottom: 0em !important;
-    
+
 }
 
 
 /*  text body div opener dateline {
   display: block;
-  text-align: right !important; 
+  text-align: right !important;
 }*/
 
 
@@ -577,7 +577,7 @@ padding-left: 2.5em;
 
 
 text body div p[style="paragraph_hanging"] {
-padding-left: 1em; text-indent: -1em; 
+padding-left: 1em; text-indent: -1em;
 }
 
 
@@ -607,7 +607,7 @@ color: black;
 
 text body div p name[type="these_comment_keyword"]::before {
 content: "Themenkommentar-Schlagwort: ";
-  font-weight:bold; 
+  font-weight:bold;
 }
 
 text body div p settlement {
@@ -721,28 +721,28 @@ docAuthor {
   display: block;
   margin-bottom: 0em;
 }
-    
+
 byline docAuthor {
   display: inline;
 }
-    
+
 titlePage docAuthor {
 
 }
-    
+
 titlePage docTitle {
 
 }
-    
+
 edition {
   display: block;
   margin-bottom: 0.5em;
 }
-    
+
 bibl edition {
   display: inline;
 }
-    
+
 editionStmt {
   display: block;
   margin-bottom: 1em;
@@ -756,13 +756,13 @@ editor {
 
 editor::before {
   content: "Herausgeber: " ;
-  font-weight:bold; 
+  font-weight:bold;
 }
 
 bibl editor {
   display: inline;
 }
-    
+
 eg {
   font-family: monospace;
   padding-top: 3mm;
@@ -775,7 +775,7 @@ eg {
   color: inherit;
   background-color: #FFCC99;
 }
-    
+
 argument > eg, body > eg, div > eg, div0 > eg, div1 > eg, div2 > eg, div3 > eg, div4 > eg, div5 > eg, div6 > eg, div7 > eg, epigraph > eg {
   display: block;
   margin-bottom: 1em;
@@ -790,7 +790,7 @@ text body div epigraph p {
   margin-top: 0.5em;
 text-indent : 0em ;
 }
- 
+
 text body div epigraph[rend="right"] p {
   text-align: right;
 }
@@ -800,21 +800,21 @@ text body div epigraph[rend="left"] p {
 }
 
 text body div epigraph[rend="center"] p {
-  text-align: center; 
+  text-align: center;
 }
- 
- 
- 
- 
+
+
+
+
 extent {
   display: block;
   margin-bottom: 1em;
 }
-    
+
 bibl extent {
   display: inline;
 }
- 
+
 
 
 gap {
@@ -839,12 +839,12 @@ gap[reason="crossed_out"] {
 
 
 
-/* -------------------  BEGINN - GRAPHISCHE DARSTELLUNGEN -------------------------- */ 
+/* -------------------  BEGINN - GRAPHISCHE DARSTELLUNGEN -------------------------- */
 
 graphic {
   color: #D3D3D3;
   background-color: transparent;
-  content: "{" attr(url) "}";    
+  content: "{" attr(url) "}";
   content : attr(url , url) ;
   display : inline-block ;
 }
@@ -854,9 +854,9 @@ counter-increment : figure ;
 }
 
 figure {
-/*  display: block!important;  */ 
+/*  display: block!important;  */
   margin-top: 1em ;
-  margin-bottom: 1em ;  
+  margin-bottom: 1em ;
  }
 
 figure[rend="inline"] > graphic {
@@ -865,7 +865,7 @@ figure[rend="inline"] > graphic {
 
 figure[rend="inline"] {
  display: inline !important;
- line-height: 3.5em;  
+ line-height: 3.5em;
  vertical-align: sub;
  position: relative!important ;
  text-align: inherit;
@@ -913,14 +913,14 @@ figure[rend="inspace"] > graphic {
 /* UT 2023-04-20 */
 
 figure[rend="inline_big_size"] > graphic {
-/* width: 7em!important;  */ 
+/* width: 7em!important;  */
      margin: auto;
 }
 
 
 figure [style="center"] > graphic {
     text-align:center!important;
-    
+
 }
 
 figure [style="left"] > graphic {
@@ -935,7 +935,7 @@ figure [style="right"] > graphic {
 
 
 signed[rend="right"] > figure > graphic {
-  margin-left: auto; 
+  margin-left: auto;
 }
 
 div [type="act_of_writing"] {
@@ -967,14 +967,14 @@ figure[subtype="three-quarter_page"] > graphic {
 
 figure[subtype="full_page"] > graphic {
  max-width: 100%;
- margin: auto; 
+ margin: auto;
 }
 
 
 figure[style="center"] > graphic {
 /* text-align:center!important;  */
-/* top: -9999px;  */ 
-/* bottom: -9999px;  */ 
+/* top: -9999px;  */
+/* bottom: -9999px;  */
     left: -9999px!important;
     right: -9999px!important;
     margin: auto!important;
@@ -1009,18 +1009,18 @@ margin-left:1px !important;
 
 
 figure head[style="display_yes"] {
-  font-size: 0.8em;  
+  font-size: 0.8em;
   text-align: inherit;
-  float: inherit;  
+  float: inherit;
   margin-top: 0.1em;
-  line-height: 1.2em;  
+  line-height: 1.2em;
 }
 
 figure figDesc[style="display_yes"] {
-  font-size: 0.7em;  
+  font-size: 0.7em;
   text-align: inherit;
   float: inherit;
-  line-height: 1.2em;  
+  line-height: 1.2em;
 
 }
 figure head[style="display_none"]{
@@ -1031,7 +1031,7 @@ figure head[style="display_none"]{
    margin-top : 2em ;
    margin-bottom : 2em ;
    background-color : rgb(208 , 208 , 208) ;
-   line-height: 1.2em;  
+   line-height: 1.2em;
 }
 
 figure figDesc[style="display_none"] {
@@ -1042,11 +1042,11 @@ figure figDesc[style="display_none"] {
    margin-top : 2em ;
    margin-bottom : 2em ;
    background-color : rgb(208 , 208 , 208) ;
-   line-height: 1.2em;  
+   line-height: 1.2em;
 }
 
 
-/* ------------------- ENDE - GRAPHISCHE DARSTELLUNGEN -------------------------- */ 
+/* ------------------- ENDE - GRAPHISCHE DARSTELLUNGEN -------------------------- */
 
 
 
@@ -1083,15 +1083,15 @@ gi,tag {
   color: #0000CD;
   background-color: inherit;
 }
-    
+
 tag:before,gi:before {
   content: "<";
 }
-    
+
 tag:after,gi:after {
   content: ">";
 }
-    
+
 gloss {
   display: inline;
 }
@@ -1156,7 +1156,7 @@ margin-top: 0px;
 }
 
 body > div > head[rend="center"] {
-  text-align: center; 
+  text-align: center;
 padding-top : 0.5em ;
 padding-left : 0px ;
 padding-bottom : 0px ;
@@ -1178,7 +1178,7 @@ display : inline ;
 
 head persName {
 color : rgb(0 , 0 , 205) ;
-display : inline 
+display : inline
 }
 
 
@@ -1233,12 +1233,12 @@ div[type="act_of_writing"] docAuthor[style="hidden"] {
 formula[rend="fraction_bar"] {
   display: inline-block;
   text-align: center;
-  vertical-align: middle; 
+  vertical-align: middle;
   position: relative;
   letter-spacing: 0.001em;
   padding-left: 0em;
    padding-right: 0em;
-  }  
+  }
 
 hi[rend="supbar"]  {
  font-size: 0.5em;
@@ -1263,11 +1263,11 @@ display: none;
 formula[rend="fraction_slash"] {
   display: inline-block;
   text-align: center;
-  vertical-align: middle; 
+  vertical-align: middle;
   position: relative;
   letter-spacing: 0.001em;
   padding: 0em;
-  }  
+  }
 
 hi[rend="supslash"]  {
  font-size: 0.5em !important;
@@ -1280,11 +1280,11 @@ hi[rend="subslash"]  {
 hi[rend="subslash"]::before {
     content: '\2044' !important;
     font-size: 2em !important;
-}  
+}
 
  hi[rend="barslash"] {
 display: none !important;
-} 
+}
 /*  hi[rend="barslash"] {
  font-size: 1.2em !important;
 } */
@@ -1297,11 +1297,11 @@ display: none !important;
 formula[rend="fraction_noslash"] {
   display: inline-block;
   text-align: center;
-  vertical-align: middle; 
+  vertical-align: middle;
   position: relative;
   letter-spacing: 0.001em;
   padding: 0em;
-  }  
+  }
 
 hi[rend="supnoslash"]  {
  font-size: 0.5em !important;
@@ -1315,7 +1315,7 @@ hi[rend="subnoslash"]  {
 hi[rend="subnoslash"]::before {
     content: '' !important;
     font-size: 2em !important;
-}  
+}
 
 hi[rend="barnoslash"] {
 display: none !important;
@@ -1323,7 +1323,7 @@ display: none !important;
 
 
  /* Fraction with horizontal bar - Table variant */
- 
+
 table[rend="fraction"] {
   display: table-cell;
   text-align: center;
@@ -1371,10 +1371,10 @@ hi[rend="subscript"] {
 
 hi[rend="groundline"] {
   display: inline;
-  vertical-align: 13% !important; 
+  vertical-align: 13% !important;
    text-decoration-line: underline;
-/*    text-underline-offset: 4px;*/ 
-  
+/*    text-underline-offset: 4px;*/
+
 }
 
 
@@ -1385,7 +1385,7 @@ font-weight: bold;
 
 }
 
-hi[rend="spaced-out"] { 
+hi[rend="spaced-out"] {
    letter-spacing: 0.1em!important;
    word-spacing: 0.5em!important;
 /*   text-transform: uppercase!important;*/
@@ -1400,7 +1400,7 @@ hi {
 
 hi[rend] {
   background-color: inherit;
-  color: inherit; 
+  color: inherit;
 }
 
 hi[rend="Antiqua"] {
@@ -1456,12 +1456,24 @@ text-decoration-style: double;
 
 
 history {
-display:block;
+  display:block;
   margin-bottom: 1em;
-    font-weight: normal !important;
+  font-weight: normal !important;
+
+  provenance {
+    counter-increment: provenance; /* Erhöht den Abschnittszähler */
+
+    p {
+      font-weight: normal;
+      display: inline;
+    }
+  }
+
+  provenance::before {
+    content: "Provenienz " counter(provenance) "): "; /* Zeigt den Zähler an */
+    font-weight: bold;
+  }
 }
-
-
 
 ident {
   display: inline;
@@ -1480,7 +1492,7 @@ idno[type] {
   margin-bottom: 0em;
 }
 
-/* 
+/*
 idno[type="autograph_third_party_copy"] {
   margin-bottom: 0em;
   content: " (" attr(type) ")";
@@ -1513,19 +1525,19 @@ altIdentifier idno {
 
 msIdentifier idno[type="signatur"]::before {
   content: "Signatur: ";
-  font-weight: bold;  
+  font-weight: bold;
 }
 
 
 altIdentifier idno[type="signatur"]::before {
   content: "Signatur: ";
-  font-weight: bold;  
+  font-weight: bold;
 }
 
 
 msIdentifier institution[key="RISM"]::before {
   content: "RISM-Sigel: ";
-  font-weight: bold;  
+  font-weight: bold;
   display: inline !important;
 }
 
@@ -1533,14 +1545,14 @@ msIdentifier institution[key="RISM"]::before {
 
 altIdentifier institution[key="RISM"]::before {
   content: "RISM-Sigel: ";
-  font-weight: bold;  
+  font-weight: bold;
   display: inline !important;
 }
 
 
 altIdentifier idno [type]::before {
   content: "Signatur: ";
-  font-weight: bold;  
+  font-weight: bold;
 }
 
 
@@ -1565,33 +1577,23 @@ msItem idno{
 }
 
 msItem idno::before{
-  content: "Handschriftentyp: "; 
+  content: "Handschriftentyp: ";
   font-weight:bold;
 }
-    
 
-    
+
+
 /* history provenance {
   counter-reset: provenance; }                      /* Setzt den Abschnittszähler auf 0 */
 
 
-history provenance {
-  content: "Provenienz " counter(provenance) "): "; /* Zeigt den Zähler an */
-  counter-increment: provenance;                  /* Erhöht den Abschnittszähler */
-  font-weight:bold;
-}
-
-history provenance p {
-    font-weight: normal;
-    display: inline;
-}
 
 
-    
+
 bibl idno {
   display: inline;
 }
-        
+
 imprint {
   display: inline;
 }
@@ -1635,28 +1637,28 @@ list item {
   display: list-item;
   margin-left: 0.1em;
 }
-    
-   
+
+
 list[style="hidden"] {
   display: none;
 }
 
 
 
-   
+
 item {
   display: list-item;
   margin-left: 0.1em;
   text-indent: -0.1em;
 }
-    
+
 item[n]:before {
   content: attr(n) ". " ;
   list-style: none;
 } /* should there be space after the content?
      And should default marker be suppressed
      when there is an @n attribute? --DRS */
-    
+
 change item {
   display: block;
   margin-bottom: 0.5em;
@@ -1678,7 +1680,7 @@ textClass keywords term {
     display: block;
     margin-bottom: 0em;
     display: list-item;
-    margin-left: 1em; 
+    margin-left: 1em;
     padding-left: 0.6em;
     margin-top: 0em;
     margin-bottom: 0em;
@@ -1697,8 +1699,8 @@ l {
   margin-top: 0em;
   margin-bottom: 0em;
 }
-  
-  
+
+
 l[rend="indentation"] {
   display: block;
   white-space: nowrap;
@@ -1711,23 +1713,23 @@ l[rend="indentation"] {
 
 
 l[n="1"] {
- text-indent: 1em; 
+ text-indent: 1em;
   margin-top: 1em;
 
 }
 
 l[rend="center"] {
- text-align: center; 
+ text-align: center;
  margin-top: 0em;
  margin-bottom: 0em;
 }
 
 l[rend="right"] {
- text-align: right; 
+ text-align: right;
 }
 
 l[rend="left"] {
- text-align: left; 
+ text-align: left;
 }
 
 
@@ -1742,7 +1744,7 @@ Label {
 	color : #2F4F4F;
            background-color: inherit;
 }
-    
+
 argument > label, body > label, div > label, div0 > label, div1 > label, div2 > label, div3 > label, div4 > label, div5 > label, div6 > label, div7 > label, epigraph > label {
   display: block;
   font-weight: bold;
@@ -1764,7 +1766,7 @@ langUsage {
   margin-bottom: 1em;
 }
 
-profileDesc langUsage::before {  
+profileDesc langUsage::before {
 counter-reset: language;                      /* Setzt den Abschnittszähler auf 0 */
 }
 
@@ -1775,7 +1777,7 @@ font-weight:bold;
 
 
 profileDesc langUsage language::before {
-font-weight:normal;    
+font-weight:normal;
 counter-increment: language;                  /* Erhöht den Abschnittszähler */
 content: "" counter(language) ") "; /* Zeigt den Zähler an */;
 
@@ -1812,17 +1814,17 @@ lg {
 }
 
 lg[rend="center"] {
- text-align: center; 
+ text-align: center;
  margin-top: 0em;
  margin-bottom: 0em;
 }
 
 lg[rend="right"] {
- text-align: right; 
+ text-align: right;
 }
 
 lg[rend="left"] {
- text-align: left; 
+ text-align: left;
 }
 
 
@@ -1838,11 +1840,11 @@ list {
   margin-left: 2em;
   margin-top: 1em;
 }
-    
+
 list[rend="runon"] {
   display: inline;
 }
-    
+
 list[type="bulleted"] {
   list-style-type: disc;
   list-style-position: outside;
@@ -1855,7 +1857,7 @@ list[type="ordered"] {
   list-style-type: decimal;
   list-style-position: outside;
 }
-    
+
 list[type="numbered"] {
   list-style-type: decimal;
   list-style-position: outside;
@@ -1863,7 +1865,7 @@ list[type="numbered"] {
 list[type="none"] {
   list-style-type: none;
 }
-    
+
 listBibl {
   display: block;
   margin-bottom: 0.5em;
@@ -1888,7 +1890,7 @@ msDesc additional::before {
 
 msDesc additional listBibl bibl {
     display: list-item;
-    margin-left: 1em; 
+    margin-left: 1em;
     padding-left: 0.6em;
     margin-top: 0em;
     margin-bottom: 0em;
@@ -1953,7 +1955,7 @@ background-color : rgb(208 , 208 , 208) ;
   display: block;
   font-size: smaller;
 } */
-    
+
 
 
 
@@ -1968,29 +1970,29 @@ margin-left : 0em ;
 margin-bottom : 1em ;
 background-color : transparent;
 counter-increment : note ;
-}    
+}
 
 text > body > div[type="annotation"] > note[type="publisher-annotation"]::before  {
-font-weight:bold; 
-content: "Vermerke (Verlagsvermerk): ";     
-}     
-      
+font-weight:bold;
+content: "Vermerke (Verlagsvermerk): ";
+}
+
 
 text > body > div[type="annotation"] > note[type="receiver-annotation"]::before  {
-font-weight:bold; 
-content: "Vermerke (Empfängervermerk): ";     
-}     
+font-weight:bold;
+content: "Vermerke (Empfängervermerk): ";
+}
 
 text > body > div[type="annotation"] > note[type="author-annotation"]::before  {
-font-weight:bold; 
-content: "Vermerke (Autorenvermerk): ";     
-}     
-     
+font-weight:bold;
+content: "Vermerke (Autorenvermerk): ";
+}
+
 
 text > body > div[type="annotation"] > note[type="other-third-party-annotation"]::before  {
-font-weight:bold; 
-content: "Vermerke (sonstige Vermerke Dritter): ";     
-}     
+font-weight:bold;
+content: "Vermerke (sonstige Vermerke Dritter): ";
+}
 
 
 
@@ -2006,7 +2008,7 @@ margin-left : 2em ;
 margin-bottom : 2em ;
 background-color : rgb(208 , 208 , 208) ;
 counter-increment : note ;
-}    
+}
 
 
 note[type="asynchronous_authors"] {
@@ -2023,7 +2025,7 @@ note[type="note"] {
 
 note::before {
 content: "Kommentar: ";
-font-weight:bold;    
+font-weight:bold;
 }
 
 
@@ -2052,60 +2054,60 @@ background-color : transparent !important;
 
 note[type="these_comment"]::before {
 content: "Themenkommentar: ";
-font-weight:bold;    
+font-weight:bold;
 }
 
 note[type="single_place_comment"]::before {
 content: "Einzelstellenkommentar: ";
-font-weight:bold;   
+font-weight:bold;
 }
 
 note[type="text_constitution"]::before {
 content: "Kommentar Textkonstitution: ";
-font-weight:bold;    
+font-weight:bold;
 }
- 
+
 note[type="word_description"]::before {
 content: "Worterklärung: ";
-font-weight:bold;    
+font-weight:bold;
 }
 
 
 note[type="note"][subtype="name"]::after {
 content: " "; /* Da Anmerkungen normalerweise durchnummeriert werden, steht im Frontend statt "Anmerkung" die Nummer der Anmerkung, gekennzeichnet durch das TEI-Attribut n="1" */
-font-weight:normal;    
+font-weight:normal;
 }
 
 note[type="note"][subtype="editor"]::after {
 content: " (Anmerkung des Herausgebers der Druckausgabe)"; /* Da Anmerkungen normalerweise durchnummeriert werden, steht im Frontend statt "Anmerkung" die Nummer der Anmerkung, gekennzeichnet durch das TEI-Attribut n="1" */
-font-weight:normal;    
+font-weight:normal;
 }
 
 note[type="note"][subtype="anonymus"]::after {
 content: " (Anmerkung eines unbekannten Schreibers)"; /* Da Anmerkungen normalerweise durchnummeriert werden, steht im Frontend statt "Anmerkung" die Nummer der Anmerkung, gekennzeichnet durch das TEI-Attribut n="1" */
-font-weight:normal;    
+font-weight:normal;
 }
 
 note[type="note"][subtype="library"]::after {
 content: " (bibliothekarische Anmerkung)"; /* Da Anmerkungen normalerweise durchnummeriert werden, steht im Frontend statt "Anmerkung" die Nummer der Anmerkung, gekennzeichnet durch das TEI-Attribut n="1" */
-font-weight:normal;    
+font-weight:normal;
 }
 
 note[type="note"][subtype="receiver"]::after {
 content: " (Vermerk des Empfängers)"; /* Da Anmerkungen normalerweise durchnummeriert werden, steht im Frontend statt "Anmerkung" die Nummer der Anmerkung, gekennzeichnet durch das TEI-Attribut n="1" */
-font-weight:normal;    
+font-weight:normal;
 }
 
 
 note[type="translation"]::before {
 content: "Übersetzung: ";
-font-weight:bold;   
+font-weight:bold;
 }
 
 
 
 
-altIdentifier note {     
+altIdentifier note {
 display : block ;
 float : left ;
 font-size : 100% ;
@@ -2121,15 +2123,15 @@ note[n]:before {
   content: attr(n);
   vertical-align: super;
 }
-    
+
 note[place="left"] {
   float: left;
 }
-    
+
 note[place="right"] {
   float: right;
 }
-    
+
 note[place="inline"], note[place="unspecified"] {
   display: inline;
 }
@@ -2154,7 +2156,7 @@ p {
 pb {
   display: none;
 }
-    
+
 pb:after {
   content: attr(n);
 /* font-weight: bold; */
@@ -2168,13 +2170,13 @@ pb:after {
 pb[type="page_break"]{
 /*     display: none; */
    font-size: 80%;
-   content: attr(n); 
+   content: attr(n);
    text-align: center;
 }
 
 pb[type="page_break"]::before {
   content: "  |" ;
-  font-weight:bold; 
+  font-weight:bold;
   font-size: 100%;
 }
 
@@ -2199,7 +2201,7 @@ physDesc {
 physDesc::before {
         content: "Physische Beschreibung, Datierung und allgemeiner Kommentar: ";
         font-weight:bold;
-} 
+}
 
 
 physDesc title {
@@ -2245,20 +2247,20 @@ physDesc handDesc p {
 physDesc handDesc::before {
         content: "Schreiberhandschrift: ";
         font-weight:bold;
-} 
+}
 
 physDesc scriptDesc::before {
         content: "Anmerkungen zur Handschrift: ";
         font-weight:bold;
-} 
+}
 
 physDesc scriptDesc p {
         font-weight:normal;
-} 
+}
 
 physDesc scriptDesc {
      display: block;
-} 
+}
 
 
 principal {
@@ -2286,7 +2288,7 @@ publicationStmt {
 publisher {
   display: inline;
 }
-    
+
 imprint > publisher, publicationStmt > publisher {
   display: block;
   margin-bottom: 0.1em;
@@ -2302,7 +2304,7 @@ imprint > publisher, publicationStmt > publisher::after {
 
 imprint > publisher, publicationStmt > publisher::before {
   content: "Herausgebende Institution: " ;
-  font-weight:bold; 
+  font-weight:bold;
 }
 
 
@@ -2321,7 +2323,7 @@ imprint > publisher, publicationStmt > address {
 pubPlace {
   display: inline;
 }
-    
+
 imprint > pubPlace, publicationStmt > pubPlace {
   display: block;
   margin-bottom: 0.5em;
@@ -2334,7 +2336,7 @@ q {
   margin-right: 0em;
   margin-bottom: 0em;
 }
-    
+
 q[rend="display"], argument > q, body > q, cit > q, div > q, div0 > q, div1 > q, div2 > q, div3 > q, div4 > q, div5 > q, div6 > q, div7 > q, epigraph > q {
   display: block;
   margin-bottom: 0.5em;
@@ -2342,15 +2344,15 @@ q[rend="display"], argument > q, body > q, cit > q, div > q, div0 > q, div1 > q,
   margin-right: 3em;
   quotes: none;
 }
-    
+
 q:before {
   content: open-quote;
 }
-    
+
 q:after {
   content: close-quote;
 }
-    
+
 ref {
   display: inline;
   color: #0000CD;
@@ -2424,11 +2426,11 @@ respStmt name::after {
 
 
 
-    
+
 bibl respStmt {
   display: inline;
  }
-    
+
 rdg:before {
   background-color: inherit;
   content: "[" attr(wit) "] ";
@@ -2492,7 +2494,7 @@ seg[type="page_break"] {
 
 seg[type="page_break"]::before {
   content: "  |" ;
-  font-weight:bold; 
+  font-weight:bold;
   font-size: 100%;
 }
 
@@ -2510,7 +2512,7 @@ seg[type="column_break"] {
 
 seg[type="column_break"]::before {
   content: "  |" ;
-  font-weight:bold; 
+  font-weight:bold;
   font-size: 100%;
 }
 
@@ -2539,7 +2541,7 @@ seriesStmt {
 
 seriesStmt::before {
   content: "Publikationsreihe: " ;
-  font-weight:bold; 
+  font-weight:bold;
 }
 
 seriesStmt p {
@@ -2586,7 +2588,7 @@ signed[type="inline"] {
 
 signed[rend="left"] {
   text-align: left;
-  margin-right: auto; 
+  margin-right: auto;
 }
 signed[rend="right"] {
   text-align: right;
@@ -2598,7 +2600,7 @@ signed[rend="center"] {
 
 
 
-/*  
+/*
 signed[rend="right"] > figure > img {
   margin-left: auto
 }
@@ -2637,15 +2639,15 @@ soCalled {
     font-style: normal;
   }
 }
-    
+
 soCalled:before {
   content: open-quote;
 }
-    
+
 soCalled:after {
   content: close-quote;
 }
-    
+
 sp {
   display: block;
   margin-bottom: 0.5em;
@@ -2682,11 +2684,11 @@ supplied[reason="deletion"] {
 
 
 supplied::before {
-  content:"["; 
+  content:"[";
   text-decoration: none;
 }
 supplied::after {
-  content:"]"; 
+  content:"]";
   text-decoration: none;
 }
 
@@ -2870,11 +2872,11 @@ unclear[reason="deletion"] {
 }
 
 unclear::before {
-  content:"["; 
+  content:"[";
   text-decoration: none;
 }
 unclear::after {
-  content:"]"; 
+  content:"]";
   text-decoration: none;
 }
 
@@ -2891,8 +2893,8 @@ teiHeader {
   padding-left: 1em;
   padding-right: 1em;
   padding-bottom: 1em;
-  
-  border: silver;  
+
+  border: silver;
   border-top:0px;
 border-left:0px;
 border-right:0px;
@@ -2916,7 +2918,7 @@ counter-increment: author;                  /* Erhöht den Abschnittszähler */
 
 titleStmt > author::before {
 content: "Autor " counter(author) "): "; /* Zeigt den Zähler an */;
-font-weight:bold; 
+font-weight:bold;
 }
 
 
@@ -2939,7 +2941,7 @@ counter-increment: persName;                  /* Erhöht den Abschnittszähler *
 
 titleStmt respStmt persName[resp="writer"]::before  {
 content: "Schreiber " counter(persName) "): "; /* Zeigt den Zähler an */;
-font-weight:bold; 
+font-weight:bold;
 }
 
 
@@ -2956,13 +2958,13 @@ titleStmt title {
   display: block;
 font-size: 120%;
    font-weight: bold;
-  margin-bottom: 0.5em !important; 
+  margin-bottom: 0.5em !important;
 }
 
 titleStmt title:before {
   content:attr(key) ": ";
     font-weight: bold;
-    position: relative; 
+    position: relative;
 color: red;
 }
 
@@ -2970,7 +2972,7 @@ color: red;
 titleStmt title[type]{
   font-size: medium;
   font-weight: normal ;
-  padding-bottom: 1em !important; 
+  padding-bottom: 1em !important;
   font-style:normal;
   margin-top: 0em;
 }
@@ -2979,7 +2981,7 @@ titleStmt title[type]{
 titleStmt title[type="sub"]{
   font-size: medium;
   font-weight: normal !important ;
-  padding-bottom: 1em !important; 
+  padding-bottom: 1em !important;
   font-style:italic;
   display: none; /* Temoprär ausgeblendet !!! */
 
@@ -2990,14 +2992,14 @@ titleStmt title[type="sub"]::before{
   content: "Digitale Onlineausgabe: ";
   font-weight:bold !important;
 color: black;
-} 
- 
+}
+
 titleStmt title[type="incipit"]::before{
   content: "Incipit: ";
   font-weight:bold !important;
 color: black;
 
-} 
+}
 
 authority {
   display: block;
@@ -3006,11 +3008,11 @@ authority {
 availability {
   display: block;
   margin-bottom: 0.5em;
-}  
+}
 availability::before {
   content: "Lizenzbedingungen: ";
   font-weight:bold;
-} 
+}
 
 fileDesc {
   display: block;
@@ -3029,7 +3031,7 @@ fileDesc {counter-reset:sourceDesc}
 /*QUELLENBESCHREIBUNG HANDSCHRIFT  */
 
 sourceDesc[source="edition_template_manuscript"] {
-/*   padding-top: 1em;  */ 
+/*   padding-top: 1em;  */
   padding-left: 0em;
   padding-right: 1em;
   padding-bottom: 0em;
@@ -3095,7 +3097,7 @@ padding-left : 0em ;
 padding-right : 1em ;
 padding-bottom : 0em ;
 }
- 
+
 sourceDesc[source="edition_template_reconstruction"]::before {
 counter-increment: sourceDesc;                  /* Erhöht den Abschnittszähler */
 content: "Quelle der Rekonstruktion (Quelle Nr. " counter(sourceDesc) "): "; /* Zeigt den Zähler an */;
@@ -3255,37 +3257,37 @@ margin-top: 0em;
 
 
 sourceDesc[source="edition_template_reconstruction"] msIdentifier{
-display: none;      
+display: none;
 }
 
 
 sourceDesc[source="edition_template_reconstruction"] physDesc::before {
         content: none;
         font-weight:bold;
-} 
+}
 
 
 sourceDesc[source="edition_template_reconstruction"] msContents {
-    display:none; 
+    display:none;
 }
 
 
 sourceDesc[source="edition_template_reconstruction"] history {
-    display:none; 
+    display:none;
 }
 
 sourceDesc[source="edition_template_reconstruction"] additional {
-    display:block !important; 
+    display:block !important;
 }
 
 
 
 sourceDesc[source="edition_template_reconstruction"] physDesc accMat{
-display: block !important;      
+display: block !important;
 }
 
 sourceDesc[source="edition_template_reconstruction"] physDesc{
-display: block !important;      
+display: block !important;
 }
 
 
@@ -3294,7 +3296,7 @@ display: block !important;
 
 sourceDesc listBibl bibl {
     display: list-item;
-    margin-left: 1em; 
+    margin-left: 1em;
     padding-left: 0.6em;
     margin-top: 0em;
     margin-bottom: 0em;
@@ -3427,7 +3429,7 @@ encodingDesc projectDesc p {
   display: inline;
   margin-bottom: 0.5em;
   margin-top: 0em;
-  
+
 }
 
 encodingDesc projectDesc::before {
@@ -3486,7 +3488,7 @@ profileDesc correspDesc correspAction[type="sent"] persName[resp="author"] {
 
 profileDesc correspDesc correspAction[type="sent"] persName[resp="author"]::before {
   content: "Autor " counter(persName) ") : "; /* Zeigt den Zähler an */;
-  font-weight:bold; 
+  font-weight:bold;
    }
 
 
@@ -3498,7 +3500,7 @@ profileDesc correspDesc correspAction[type="sent"] persName[resp="writer"] {
 }
 profileDesc correspDesc correspAction[type="sent"] persName[resp="writer"]::before {
   content: "Schreiber " counter(persName) ") : "; /* Zeigt den Zähler an */;
-  font-weight:bold; 
+  font-weight:bold;
   }
 
 
@@ -3512,7 +3514,7 @@ profileDesc correspDesc correspAction[type="received"] persName {
 }
 profileDesc correspDesc correspAction[type="received"] persName::before {
   content: "Empfänger " counter(persName) ") : "; /* Zeigt den Zähler an */;
-  font-weight:bold; 
+  font-weight:bold;
 }
 
 profileDesc correspDesc correspAction persName {
@@ -3582,16 +3584,16 @@ projectDesc {
   display: block;
   margin-bottom: 1em;
 }
-        
+
 docDate {
   display: block;
   margin-bottom: 0.5em;
 }
-    
+
 docImprint docDate {
   display: inline;
 }
-    
+
 docEdition {
   display: block;
   margin-bottom: 0.5em;

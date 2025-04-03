@@ -10,12 +10,18 @@ interface AuthState {
   } | null
   isAuthenticated: boolean;
   token: string | null
+  settings?: {
+    letterFontSize: number | null
+  }
 }
 
 const initialState: AuthState = {
   isAuthenticated: false,
   user: null,
   token: localStorage.getItem(AUTH_TOKEN_NAME) ?? null,
+  settings: {
+    letterFontSize: null
+  }
 };
 
 const authSlice = createSlice({
@@ -37,10 +43,19 @@ const authSlice = createSlice({
     loginSetToken(state, action) {
       state.token = action.payload.token;
       localStorage.setItem(AUTH_TOKEN_NAME, action.payload.token);
+    },
+    setLetterFontSize(state, action) {
+      if (state.settings) {
+        state.settings.letterFontSize = action.payload.fontSize;
+      } else {
+        state.settings = {
+          letterFontSize: action.payload.fontSize,
+        };
+      }
     }
   },
 });
 
-export const { loginState, loginSetToken, logoutState } = authSlice.actions;
+export const { loginState, loginSetToken, logoutState, setLetterFontSize } = authSlice.actions;
 
 export default authSlice.reducer;

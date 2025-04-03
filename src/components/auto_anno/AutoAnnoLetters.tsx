@@ -19,6 +19,7 @@ import { ComponentMappingItem } from "../../services/mappings/editorMappings";
 import SnippetReferencesList from "./snippet_form/SnippetReferencesList";
 import SnippetFormContainer from "./snippet_form/SnippetFormContainer";
 import SnippetEntityInfoDialog from "./snippet_form/SnippetEntityInfoDialog";
+import LetterFontSizeHandle from "./misc/LetterFontSizeHandle";
 
 const AutoAnnoLetters: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +30,7 @@ const AutoAnnoLetters: React.FC = () => {
   const autoAnnoLetterId = Number(id)
   const autoAnnoJobId = Number(job_id);
   const [selectedComponentList, setSelectedComponentList] = useState<ComponentMappingItem| null>(null)
+  const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize)
   const user = useSelector((state: RootState) => state.auth.user);
 
   const reloadLetter = useSelector((state: RootState) =>
@@ -173,7 +175,7 @@ const AutoAnnoLetters: React.FC = () => {
       <div className="container-fmbc-letter">
         <div className="box-1">
           {transformedData?.xmlContent ? (
-            <div className="letter-xml" id="letterXml" ref={containerRef}>
+            <div className="letter-xml" id="letterXml" ref={containerRef} style={{ fontSize: `${stateLetterFontSize}%` }}>
               <XMLDisplayParser xmlString={transformedData.xmlContent}/>;
             </div>
           ) : (
@@ -201,6 +203,7 @@ const AutoAnnoLetters: React.FC = () => {
         referenceKey={refInfoDialogKey}
         handleClose={handleInfoDialogClose}
       />
+      <LetterFontSizeHandle />
     </>
   )
 }
