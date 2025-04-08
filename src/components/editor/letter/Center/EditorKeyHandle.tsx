@@ -29,14 +29,11 @@ const EditorKeyHandle = () => {
         );
       });
 
-
       if (
         isModifiersPressed && event.key.toLowerCase() === mainKey
       ) {
         event.preventDefault(); // Prevent system default behavior
         event.stopPropagation(); // Prevent bubbling
-
-        //if ((!definition?.action && !definition.openDialogAction) || stateEditorLetter.id === null) return;
 
         if (definition.action) {
           definition.action().then((xmlContent) => {
@@ -78,7 +75,6 @@ const EditorKeyHandle = () => {
       document.removeEventListener("keydown", globalKeyListener, false);
       if (stateLetterContent.textIsMarked && markedKeyListener) {
         document.removeEventListener("keydown", markedKeyListener, false);
-        console.log("Removed marked content key event listener");
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps

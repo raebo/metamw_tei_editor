@@ -1,5 +1,6 @@
-export const xmlCheck = {
+import { EditorUtils } from "./index";
 
+export const xmlCheck = {
   elementByXmlTypeAndId: (xmlId: string, nodeType: string, doc: Document = document): Element | null => {
     const baseNode = doc ? doc : document.getElementById("letterXml");
 
@@ -9,13 +10,68 @@ export const xmlCheck = {
       .find((node) => node.getAttribute("xml:id") === xmlId) || null;
   },
   letterXml: () : string | null => {
-    const baseNode = document.getElementById('letterXmlContextMenu')
+    const baseNode = document.getElementById('letterXmlContent')
 
     if (baseNode === null) {
       return null
     } else {
       return baseNode.innerHTML
     }
+  },
+  letterXmlDoc: (xmlContent: string | null) : Document | null => {
+    if (!xmlContent) return null
+
+    return new DOMParser().parseFromString(xmlContent, "application/xml")
+  },
+  getAncestorsNodes: (node: Node): ParentNode[] => {
+    const ancestors = [];
+    let callAgain = true
+    while (node.parentNode && callAgain) {
+      ancestors.push(node.parentNode);
+      node = node.parentNode;
+      if (node.nodeName === "TEI") {
+        callAgain = false
+      }
+    }
+    return ancestors;
+  },
+  getAncestorNodeNames(node: Node): String[] {
+    const ancestorNames: String[] = []
+
+    this.getAncestorsNodes(node).map((ancestor) => {
+      if (ancestor.nodeType === Node.ELEMENT_NODE) {
+        ancestorNames.push(ancestor.nodeName.toLowerCase());
+      }
+    })
+
+    return ancestorNames;
+  },
+  isADeletableNode(
+    node: Node,
+    onValid: (node: Node) => void,
+    onInvalid: (message: string) => void
+  ): boolean {
+
+    const { nodeAnchestorPaths } = EditorUtils.removeNodeHandles
+
+    const ancestorNodeNames = [
+      node.nodeName.toLowerCase(), ...EditorUtils.xmlCheck.getAncestorNodeNames(node)
+    ]
+      .reverse()
+      .join(" ")
+
+    const deletableNodeNames = nodeAnchestorPaths().map(entry => { return entry.parentPath.toLowerCase() })
+    const isDeletable = deletableNodeNames.some((path: string) => {
+      return path === ancestorNodeNames
+    });
+
+    if (isDeletable) {
+      onValid(node)
+    } else {
+      onInvalid("Knoten ist nicht löschbar")
+      return false
+    }
+    return true
   },
   getSelectionOffsets(rootElement: HTMLElement, range: Range): { start: number; end: number } | null {
     let walker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT, null);

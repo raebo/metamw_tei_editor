@@ -1,4 +1,5 @@
 import { initApi } from '../../services/apiRequest.service'
+import { replaceWithCamelCase } from "../auto_anno/domHandling";
 
 export const backendService = {
   patchContent: async (content: string, letterId: number | null, changeType: string, xmlId: string | null): Promise<boolean> => {
@@ -7,7 +8,14 @@ export const backendService = {
     }
 
     try {
-      await initApi().patch(`/jwt/editor/pinned_letters/${letterId}/set_content/`, { changes: { new_content: content, xml_id: xmlId, change_type: changeType  } } );
+      await initApi()
+        .patch(`/jwt/editor/pinned_letters/${letterId}/set_content/`, {
+          changes: {
+            new_content: replaceWithCamelCase(content),
+            xml_id: xmlId,
+            change_type: changeType
+          }
+        } );
     } catch (err: any) {
       const response = err.response;
 

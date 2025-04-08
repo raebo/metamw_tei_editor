@@ -3,7 +3,7 @@ import {
   setContentTextIsMarked, setDialogType, setEditorLetter,
   setEditorPinnedLetters,
   setEditorSelectedItem,
-  setEditorTabNumber, setLetterReference
+  setEditorTabNumber, setLetterReference, setNodeClicked
 } from "../slices/editor.letter.slice";
 import { PinnedLetter } from "../../services/mappings/editorMappings";
 
@@ -43,6 +43,20 @@ export const setEditorMarkedAndContentLeftRightThunk = createAsyncThunk(
   ) => {
 
     dispatch(setContentTextIsMarked({ textIsMarked: textIsMarked }));
+    dispatch(setNodeClicked({ nodeClicked: false}));
+    dispatch(setEditorSelectedItem({ selectedItem: { left: contentLeft, right: contentRight } }))
+  }
+)
+
+export const setEditorNodeClickedAndContentLeftRightThunk = createAsyncThunk(
+  'editor/setEditorNodeClickedAndContentLeftRight',
+  async (
+    { nodeClicked, textIsMarked, contentLeft, contentRight }: { nodeClicked: boolean; textIsMarked: boolean, contentLeft: string | null; contentRight: string | null},
+    { dispatch }
+  ) => {
+
+    dispatch(setNodeClicked({ nodeClicked: nodeClicked }));
+    dispatch(setContentTextIsMarked({ textIsMarked: false}));
     dispatch(setEditorSelectedItem({ selectedItem: { left: contentLeft, right: contentRight } }))
   }
 )

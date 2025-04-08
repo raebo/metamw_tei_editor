@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { fetchLetterData } from "../../../../services/editor/apiLettersRequest.service";
 import XMLDisplayParser from "../../../support/XmlDisplayParser";
 import { useSelector } from "react-redux";
@@ -13,20 +13,74 @@ import {
   setReloadLetterContent
 } from "../../../../redux/slices/editor.letter.slice";
 import { EditorConstants } from "../../../../constants/editor";
-import { setEditorMarkedAndContentLeftRightThunk } from "../../../../redux/thunks/editor.letter.thunk";
+import {
+  setEditorMarkedAndContentLeftRightThunk,
+  setEditorNodeClickedAndContentLeftRightThunk
+} from "../../../../redux/thunks/editor.letter.thunk";
 import { fetchPinnedLetterData } from "../../../../services/editor/apiPinnedLettersRequest.service";
+import { MiscUtils } from "../../../../utils/misc";
+
+type MenuItemType = {
+  label?: string
+  action?: (node?: Node| undefined) => void
+  type?: 'divider' | null
+}
 
 const LetterViewContainer = () => {
 
   const dispatch = useAppDispatch();
   const contentTextIsMarked = useSelector((state: RootState) => state.editorLetter.content.textIsMarked);
+  const nodeClicked = useSelector((state: RootState) => state.editorLetter.content.nodeClicked);
   const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize)
   const [letterXmlContent, setLetterXmlContent] = useState<string | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const contextMenuRef = useRef<HTMLDivElement | null>(null);
+  const xmlContentRef = useRef<HTMLDivElement | null>(null);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters)
   const reloadLetterContent = useSelector((state: RootState) => state.editorLetter.reloadLetterContent);
   const [anchorPosition, setAnchorPosition] = useState<null | { top: number; left: number }>(null);
+
+  const [displayMenuItems, setDisplayMenuItems] = useState<MenuItemType[]>([]);
+  const menuItems : MenuItemType[] = [
+    { label: 'Person Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PERSON) },
+    { label: 'Ort Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PLACE) },
+    { label: 'Werk Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_CREATION) },
+    { label: 'FMBC Werk Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_FMBC_CREATION) },
+    { label: 'Brief Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_LETTER) },
+    { type: 'divider' },
+    { label: 'Kommentar Hinzufügen', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_NOTE) },
+  ];
+
+  const menuItemsNoMarking : MenuItemType[] = [
+    { label: 'Eintrag Entfernen', action: (node: Node | undefined) => {
+        try {
+
+          let xmlContent = EditorUtils.keyPressHandles.removeNode(node)
+
+          if (!xmlContent) {
+            throw new Error("No xml content found");
+          }
+
+          EditorUtils.backendService.patchContent(
+            xmlContent, stateEditorLetter.id, EditorConstants.changeTypes.NODE_REMOVED, null
+          ).then(
+            (result) => {
+              if (result) {
+                dispatch(setReloadLetterContent({ reloadLetterContent: true }))
+                enqueueSnackbar("Node removed", { variant: "success" })
+              } else {
+                enqueueSnackbar("Data could not be updated on backend side", { variant: "error" })
+              }
+            }
+          )
+        } catch(error) {
+          enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+        }
+      } },
+  ]
 
 
   const returnLetterData = (letterId: number) => {
@@ -69,83 +123,119 @@ const LetterViewContainer = () => {
     }
   }, [reloadLetterContent]);
 
-
   useEffect(() => {
-    const contextMenuHandling = () => {
-      const contextMenuElement = document.getElementById("letterXmlContextMenu"); // Use getElementById for more type safety
+    const contextMenuElement = xmlContentRef.current // xmlRef of letter container
 
-      if (contextMenuElement) {
-        const handleContextMenu = (event: MouseEvent) => { // Type the event as MouseEvent
-          event.preventDefault(); // Prevent default context menu
+    if (!contextMenuElement) return;
 
-          const markedElement = EditorUtils.textMarking.markedSpanEntry();
-          if (markedElement) {
-            setAnchorPosition({top: event.clientY, left: event.clientX});
-          }
-        };
-
-        contextMenuElement.addEventListener("contextmenu", handleContextMenu);
-
-        // Cleanup listener when component unmounts or selection changes (important!)
-        return () => {
-          contextMenuElement.removeEventListener("contextmenu", handleContextMenu);
-        };
+    const handleContextMenuTextIsMarked = (event: MouseEvent) => {
+      const target = event?.target as HTMLElement;
+      if (target && target.tagName.toLowerCase() === 'span' && target.classList.contains('marked')) {
+        event.preventDefault(); // Prevent default context menu
+        setAnchorPosition({ top: event.clientY, left: event.clientX });
       }
     }
-    contextMenuHandling()
-  }, [contentTextIsMarked]);
 
-  useEffect(() => {
-    const handleMouseUp = (event: MouseEvent) => {
+    const handleContextMenuNodeClicked = (event: MouseEvent) => {
+      event.preventDefault(); // Prevent default context menu
+      setAnchorPosition({ top: event.clientY, left: event.clientX });
+    }
 
-      const selection = window.getSelection();
-      if (selection && selection.toString().length > 0) {
-        const selectedText = selection.toString();
 
-        EditorUtils.textMarking.isValidSelection(
-          selection,
-          document.getElementById("letterXmlContextMenu") as HTMLElement,
-          (selection: Selection, range: Range) => {
-              EditorUtils.textMarking.removeMarkedSpans()
-              EditorUtils.textMarking.markValidSelection(selection, selection.getRangeAt(0));
-
-              setLetterXmlContent(document.getElementById("letterXmlContextMenu")?.innerHTML ?? "");
-              dispatch(setEditorMarkedAndContentLeftRightThunk({
-                  textIsMarked: true,
-                  contentLeft: null,
-                  contentRight: null
-                } ))
-          },
-          (selection: Selection | null, message: string) => {
-
-            EditorUtils.textMarking.removeMarkedSpans()
-            setLetterXmlContent(document.getElementById("letterXmlContextMenu")?.innerHTML ?? "");
-
-            dispatch(setEditorMarkedAndContentLeftRightThunk({
-              textIsMarked: false,
-              contentLeft: null,
-              contentRight: null
-            }))
-            enqueueSnackbar(message, { variant: "error" });
-          }
-        )
-      } else {
-        setAnchorPosition(null); // Close context menu if no selection
-      }
-    };
-
-    if (containerRef.current && letterXmlContent) { // Check if ref is set and content exists
-      containerRef.current.addEventListener('mouseup', handleMouseUp);
+    if (contentTextIsMarked) {
+      contextMenuElement.addEventListener("contextmenu", handleContextMenuTextIsMarked);
+    } else if (nodeClicked) {
+      contextMenuElement.addEventListener("contextmenu", handleContextMenuNodeClicked);
+    } else {
+      contextMenuElement.removeEventListener("contextmenu", handleContextMenuTextIsMarked);
+      contextMenuElement.removeEventListener("contextmenu", handleContextMenuNodeClicked);
     }
 
     return () => {
-      if (containerRef.current) {
-        containerRef.current.removeEventListener('mouseup', handleMouseUp);
+      contextMenuElement.removeEventListener("contextmenu", handleContextMenuTextIsMarked);
+      contextMenuElement.removeEventListener("contextmenu", handleContextMenuNodeClicked);
+    }
+  }, [contentTextIsMarked, nodeClicked]);
+
+
+  const handleNoMarkupRightClick = (event: MouseEvent) => {
+    if (event.button !== 2) return; // Only right-click
+
+
+    EditorUtils.xmlCheck.isADeletableNode(
+      event.target as Node,
+      (node: Node) => {
+        EditorUtils.textMarking.removeMarkedSpans();
+        setSelectedNode(node)
+        setDisplayMenuItems(menuItemsNoMarking);
+
+        setLetterXmlContent(xmlContentRef.current?.innerHTML ?? "");
+
+        dispatch(setEditorNodeClickedAndContentLeftRightThunk({
+          nodeClicked: true,
+          textIsMarked: false,
+          contentLeft: null,
+          contentRight: null
+        }));
+      },
+      (message: string) => {
+        // enqueueSnackbar(message, { variant: "error" });
+      }
+    );
+  };
+
+  const handleMouseUpMarkedElements = (event: MouseEvent) => {
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) {
+      EditorUtils.textMarking.isValidSelection(
+        selection,
+        xmlContentRef.current as HTMLElement,
+        (selection: Selection) => {
+          EditorUtils.textMarking.removeMarkedSpans();
+          EditorUtils.textMarking.markValidSelection(selection, selection.getRangeAt(0));
+
+          dispatch(setEditorMarkedAndContentLeftRightThunk({
+            textIsMarked: true,
+            contentLeft: null,
+            contentRight: null
+          }));
+
+          setDisplayMenuItems(menuItems);
+          setLetterXmlContent(xmlContentRef.current?.innerHTML ?? "");
+        },
+        (message: string) => {
+          EditorUtils.textMarking.removeMarkedSpans();
+          setLetterXmlContent(xmlContentRef.current?.innerHTML ?? "");
+
+          dispatch(setEditorMarkedAndContentLeftRightThunk({
+            textIsMarked: false,
+            contentLeft: null,
+            contentRight: null
+          }));
+
+          enqueueSnackbar(message, { variant: "error" });
+        }
+      );
+    }
+  };
+
+  useEffect(() => {
+
+    if (xmlContentRef.current && letterXmlContent) {
+      xmlContentRef.current.addEventListener("mouseup", handleMouseUpMarkedElements);
+      xmlContentRef.current.addEventListener("mousedown", handleNoMarkupRightClick);
+    }
+
+    return () => {
+      if (xmlContentRef.current && letterXmlContent) {
+        xmlContentRef.current.removeEventListener("mouseup", handleMouseUpMarkedElements);
+        xmlContentRef.current.removeEventListener("mouseup", handleNoMarkupRightClick);
       }
     };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [letterXmlContent]); // Crucial: Add letterXmlContent to dependency array
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [letterXmlContent]);
+
 
   const handleMenuItemClick = (selectedItemLeft: string | null, selectedItemRight: string | null) => {
     setAnchorPosition(null)
@@ -162,40 +252,50 @@ const LetterViewContainer = () => {
       <div className="container-fmbc-letter">
         <div className="box-1">
           {letterXmlContent ? (
-            <div className="letter-xml" id="letterXml" ref={containerRef} style={ { fontSize: `${stateLetterFontSize}%` } }>
-              <div id="letterXmlContextMenu" style={{ padding: 20 }}>
+            <>
+              <div
+                className="letter-xml"
+                id="letterXml"
+                ref={containerRef}
+                style={{ fontSize: `${stateLetterFontSize}%` }}
+              >
+                <div ref={xmlContentRef} id="letterXmlContent" style={{ padding: 20 }}>
+                  {letterXmlContent && <XMLDisplayParser xmlString={letterXmlContent} />}
+                </div>
 
-                {letterXmlContent && <XMLDisplayParser xmlString={letterXmlContent} />}
-
-                <Menu
-                  open={Boolean(anchorPosition)}
-                  onClose={() => setAnchorPosition(null)}
-                  anchorReference="anchorPosition"
-                  anchorPosition={anchorPosition ? { top: anchorPosition.top, left: anchorPosition.left } : undefined}
-                >
-                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PERSON) }>
-                    <Typography variant="body2">Person Hinzufügen</Typography>
-                  </MenuItem>
-                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PLACE) }>
-                    <Typography variant="body2">Ort Hinzufügen</Typography>
-                  </MenuItem>
-                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_CREATION) }>
-                    <Typography variant="body2">Werk Hinzufügen</Typography>
-                  </MenuItem>
-                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_FMBC_CREATION) }>
-                    <Typography variant="body2">FMBC Werk Hinzufügen</Typography>
-                  </MenuItem>
-                  <MenuItem onClick={() => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_LETTER) }>
-                    <Typography variant="body2">Brief Hinzufügen</Typography>
-                  </MenuItem>
-                  <Divider />
-
-                  <MenuItem onClick={() => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_NOTE) }>
-                    <Typography variant="body2">Kommentar Hinzufügen</Typography>
-                  </MenuItem>
-                </Menu>
+                <div ref={contextMenuRef} id="letterXmlContextMenu" style={{ padding: 20 }}>
+                  <Menu
+                    open={Boolean(anchorPosition)}
+                    onClose={() => setAnchorPosition(null)}
+                    anchorReference="anchorPosition"
+                    anchorPosition={
+                      anchorPosition
+                        ? { top: anchorPosition.top, left: anchorPosition.left }
+                        : undefined
+                    }
+                  >
+                    {displayMenuItems.map((item, index) =>
+                      item.type === 'divider' ? (
+                        <Divider key={index} />
+                      ) : (
+                        <MenuItem key={index} onClick={() => {
+                          if (selectedNode) {
+                            item.action?.(selectedNode);
+                            setSelectedNode(null)
+                            setAnchorPosition(null)
+                          }  else {
+                            item.action?.()
+                          }
+                          }
+                        }>
+                          <Typography variant="body2">{item.label}</Typography>
+                        </MenuItem>
+                      )
+                    )}
+                  </Menu>
+                </div>
               </div>
-            </div>
+            </>
           ) : (
             <p>
               <Alert severity="warning">

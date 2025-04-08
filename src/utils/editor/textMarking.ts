@@ -5,11 +5,10 @@ export const textMarking = {
   isValidSelection(
     selection: Selection | null,
     rootElement: HTMLElement | null,
-    onValid?: (selection: Selection, range: Range) => void,
-    onInvalid?: (selection: Selection| null, message: string) => void
-
+    onValid?: (selection: Selection) => void,
+    onInvalid?: (message: string) => void
   ): boolean {
-    const {ALLOWED_PARENT_TAG, FORBIDDEN_PARENT_TAG, RESTRICTED_TAGS} = EditorConstants
+    const { ALLOWED_PARENT_TAG, FORBIDDEN_PARENT_TAG } = EditorConstants
 
     if (!rootElement) return false;
     if (!selection || selection.isCollapsed) return false;
@@ -19,35 +18,35 @@ export const textMarking = {
     const endParent = range.endContainer.parentElement;
 
     if (!startParent || !endParent) {
-      if (onInvalid) onInvalid(selection, "No start or end parent")
+      if (onInvalid) onInvalid("No start or end parent")
       return false
     }
 
     if (startParent.closest(FORBIDDEN_PARENT_TAG) || endParent.closest(FORBIDDEN_PARENT_TAG)) {
-      if (onInvalid) onInvalid(selection, "Bitte markieren Sie einen Bereich im Textkörper")
+      if (onInvalid) onInvalid("Bitte markieren Sie einen Bereich im Textkörper")
       return false;
     }
 
     const validParent = startParent.closest(ALLOWED_PARENT_TAG);
 
     if (!validParent) {
-      if (onInvalid) onInvalid(selection, "No start or end parent")
+      if (onInvalid) onInvalid("No start or end parent")
       return false
     }
 
     const offsets = EditorUtils.xmlCheck.getSelectionOffsets(rootElement, range);
 
     if (!offsets) {
-      if (onInvalid) onInvalid(selection, "No offsets")
+      if (onInvalid) onInvalid("No offsets")
       return false;
     }
 
     if (range.startContainer !== range.endContainer) {
-      if (onInvalid) onInvalid(selection, "Ihre Auswahl überschneidet mehrere Abschnitte")
+      if (onInvalid) onInvalid("Ihre Auswahl überschneidet mehrere Abschnitte")
       return false; // Do nothing if the selection crosses nodes
     }
 
-    onValid?.(selection, range)
+    onValid?.(selection)
 
     return true
   },

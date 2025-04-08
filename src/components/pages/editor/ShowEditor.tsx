@@ -206,7 +206,7 @@ const ShowEditor = () => {
     setAnchorEl(event.currentTarget);
   }
 
-  const userActionMenudHandleClose = () => {
+  const userActionMenuHandleClose = () => {
     setAnchorEl(null);
   }
 
@@ -364,7 +364,7 @@ const ShowEditor = () => {
         </Box>
       </Box>
       <EditorFormDialog open={false} />i
-      <UserActionMenu anchorEl={anchorEl} open={anchorEl !== null} handleClose={userActionMenudHandleClose} />
+      <UserActionMenu anchorEl={anchorEl} open={anchorEl !== null} handleClose={userActionMenuHandleClose} />
       <EditorKeyHandle />
       <LetterFontSizeHandle />
     </>

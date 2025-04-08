@@ -1,4 +1,5 @@
 import { SnippetEntity } from "../../services/mappings/autoAnnoMappings";
+import { EditorConstants } from "../../constants/editor";
 
 export const markSpanAndScrollToId = (xmlId: String) => {
   const targetElement= document.querySelector('[xml\\:id="' + xmlId + '"]');
@@ -219,4 +220,14 @@ export const removeMarkedSpans = (
   });
 
   return root
+}
+
+export const replaceWithCamelCase = (
+  text: string
+): string => {
+  EditorConstants.camelCaseTags.forEach(tag => {
+    const lowercaseTag = tag.toLowerCase();
+    text = text.replace(new RegExp(`\\b${lowercaseTag}\\b`, 'g'), tag);
+  });
+  return text;
 }

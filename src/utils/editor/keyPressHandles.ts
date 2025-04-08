@@ -23,5 +23,26 @@ export const keyPressHandles = {
   },
   markContentUnderline(xmlContent: string) : string{
     return xmlContent.replace(/<span class="marked">(.*?)<\/span>/g, '<hi rend="underline" n="1">$1</hi>');
+  },
+  removeNode(node: Node | undefined) : string {
+    if (!node) { throw new Error("No node found") }
+
+    const parent = node.parentNode;
+
+    if (parent) {
+      parent.removeChild(node);
+    }
+
+    let parentNode: Node | null = parent;
+
+    while (parentNode && !(parentNode instanceof Element && parentNode.tagName.toLowerCase() === 'tei')) {
+      parentNode = parentNode.parentNode;
+    }
+
+    if (!parentNode) {
+      throw new Error("No ancestor <tei> tag found");
+    } else {
+      return parentNode.outerHTML
+    }
   }
 }

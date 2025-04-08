@@ -17,6 +17,7 @@ interface EditorLetterSlice {
   pinnedLetters: PinnedLetter[]
   searchValue: string | null,
   content: {
+    nodeClicked: boolean
     textIsMarked: boolean
   },
   selectedItem: {
@@ -47,6 +48,7 @@ const initialState: EditorLetterSlice = {
   pinnedLetters: [],
   searchValue: null,
   content: {
+    nodeClicked: false,
     textIsMarked: false
   },
   selectedItem: {
@@ -109,6 +111,10 @@ const EditorLetterSlice = createSlice({
     setContentTextIsMarked(state, action) {
       state.content.textIsMarked = action.payload.textIsMarked
     },
+
+    setNodeClicked(state, action) {
+      state.content.nodeClicked= action.payload.nodeClicked
+    },
     setEditorSelectedItem(state, action) {
       state.selectedItem = {...action.payload.selectedItem}
     },
@@ -122,6 +128,16 @@ const EditorLetterSlice = createSlice({
 })
 
 export const
-  { setEditorLetter, setContentTextIsMarked, setEditorSelectedItem, setEditorTabNumber, setEditorSearchValue, setEditorPinnedLetters, setReloadLetterContent, setDialogType, setLetterReference } = EditorLetterSlice.actions
+  { setEditorLetter,
+    setContentTextIsMarked,
+    setEditorSelectedItem,
+    setEditorTabNumber,
+    setEditorSearchValue,
+    setEditorPinnedLetters,
+    setReloadLetterContent,
+    setDialogType,
+    setLetterReference,
+    setNodeClicked,
+  } = EditorLetterSlice.actions
 
 export default EditorLetterSlice.reducer
