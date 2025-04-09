@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from "uuid"
 import { EditorUtils } from "./index"
+import {xmlCheck} from "./xmlCheck";
 
 export const markupGeneration = {
   addAttachmentMarkup: (xmlContent: string, attachmentType: string, attachmentName: string) : { xmlString: string, contentChanged: boolean } => {
     const parser = new DOMParser()
-    const serializer = new XMLSerializer()
     const xmlDoc = parser.parseFromString(xmlContent, "application/xml")
 
     const listBibl = xmlDoc.querySelector("msdesc accmat listbibl")
@@ -23,7 +23,7 @@ export const markupGeneration = {
       listBibl.appendChild(newBibl)
     }
 
-    return { xmlString: serializer.serializeToString(xmlDoc), contentChanged: true }
+    return { xmlString: xmlCheck.serializeDocument(xmlDoc), contentChanged: true }
   },
   noteMarkup: (xmlContent: string, userLogin: string, noteContent: string, commentType: string) : { xmlString: string, xmlId: string } => {
     const parser = new DOMParser()

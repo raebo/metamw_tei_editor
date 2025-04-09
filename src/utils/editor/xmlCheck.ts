@@ -1,6 +1,24 @@
 import { EditorUtils } from "./index";
 
 export const xmlCheck = {
+  createDocumentFromNodeToTeiRoot: (node: Node): Document => {
+    let current: Node | null = node;
+    
+    while (current && (current as Element).tagName?.toLowerCase() !== 'tei') {
+      current = current.parentNode;
+      if (!current) throw new Error("Reached top of tree without finding <tei>");
+    }
+    
+    const teiElement = current as Element;
+    
+    return xmlCheck.parseXml(teiElement.outerHTML);
+  },
+  parseXml: (xmlString: string) : Document => {
+    return new DOMParser().parseFromString(xmlString, "text/xml");
+  },
+  serializeDocument: (doc: Document): string => {
+    return new XMLSerializer().serializeToString(doc)
+  },
   elementByXmlTypeAndId: (xmlId: string, nodeType: string, doc: Document = document): Element | null => {
     const baseNode = doc ? doc : document.getElementById("letterXml");
 
@@ -18,11 +36,6 @@ export const xmlCheck = {
       return baseNode.innerHTML
     }
   },
-  letterXmlDoc: (xmlContent: string | null) : Document | null => {
-    if (!xmlContent) return null
-
-    return new DOMParser().parseFromString(xmlContent, "application/xml")
-  },
   getAncestorsNodes: (node: Node): ParentNode[] => {
     const ancestors = [];
     let callAgain = true
@@ -38,6 +51,7 @@ export const xmlCheck = {
   getAncestorNodeNames(node: Node): String[] {
     const ancestorNames: String[] = []
 
+    // eslint-disable-next-line array-callback-return
     this.getAncestorsNodes(node).map((ancestor) => {
       if (ancestor.nodeType === Node.ELEMENT_NODE) {
         ancestorNames.push(ancestor.nodeName.toLowerCase());

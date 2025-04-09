@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { fetchLetterData } from "../../../../services/editor/apiLettersRequest.service";
 import XMLDisplayParser from "../../../support/XmlDisplayParser";
 import { useSelector } from "react-redux";
@@ -20,9 +20,13 @@ import {
 import { fetchPinnedLetterData } from "../../../../services/editor/apiPinnedLettersRequest.service";
 import { MiscUtils } from "../../../../utils/misc";
 
+type NodeActionCallback = (args: {
+  node?: Node;
+}) => void;
+
 type MenuItemType = {
   label?: string
-  action?: (node?: Node| undefined) => void
+  action?: NodeActionCallback
   type?: 'divider' | null
 }
 
@@ -55,14 +59,21 @@ const LetterViewContainer = () => {
   ];
 
   const menuItemsNoMarking : MenuItemType[] = [
-    { label: 'Eintrag Entfernen', action: (node: Node | undefined) => {
+    { label: 'Eintrag Entfernen', action: ({ node }: { node?: Node }) => {
         try {
-
-          let xmlContent = EditorUtils.keyPressHandles.removeNode(node)
-
-          if (!xmlContent) {
-            throw new Error("No xml content found");
-          }
+          if (!node) throw new Error("No node given as value")
+          
+          const anchNode = EditorUtils.removeNodeHandles.findAnchestorPathNode(node)
+          
+          if (!anchNode) throw new Error("No anchNode found with given path")
+          
+          const xmlContent =
+            EditorUtils.removeNodeHandles.removeNode(
+              node,
+              anchNode.afterDeleteCallback
+            )
+          
+          if (!xmlContent) throw new Error("No xml content found");
 
           EditorUtils.backendService.patchContent(
             xmlContent, stateEditorLetter.id, EditorConstants.changeTypes.NODE_REMOVED, null
@@ -70,7 +81,7 @@ const LetterViewContainer = () => {
             (result) => {
               if (result) {
                 dispatch(setReloadLetterContent({ reloadLetterContent: true }))
-                enqueueSnackbar("Node removed", { variant: "success" })
+                enqueueSnackbar(`${anchNode.nodeType.name} wurde entfernt`, { variant: "success" })
               } else {
                 enqueueSnackbar("Data could not be updated on backend side", { variant: "error" })
               }
@@ -81,7 +92,6 @@ const LetterViewContainer = () => {
         }
       } },
   ]
-
 
   const returnLetterData = (letterId: number) => {
     fetchLetterData(letterId)
@@ -105,7 +115,7 @@ const LetterViewContainer = () => {
         setLetterXmlContent("ERROR: Failed to fetch letter content");
       });
   }
-
+  
   useEffect(() => {
     if (stateEditorLetter.id && statePinnedLetters.some((letter) => (letter.id === stateEditorLetter.id && letter.isPinned))) {
       returnPinnedLetterData(stateEditorLetter.id)
@@ -160,7 +170,6 @@ const LetterViewContainer = () => {
 
   const handleNoMarkupRightClick = (event: MouseEvent) => {
     if (event.button !== 2) return; // Only right-click
-
 
     EditorUtils.xmlCheck.isADeletableNode(
       event.target as Node,
@@ -220,7 +229,6 @@ const LetterViewContainer = () => {
   };
 
   useEffect(() => {
-
     if (xmlContentRef.current && letterXmlContent) {
       xmlContentRef.current.addEventListener("mouseup", handleMouseUpMarkedElements);
       xmlContentRef.current.addEventListener("mousedown", handleNoMarkupRightClick);
@@ -280,11 +288,11 @@ const LetterViewContainer = () => {
                       ) : (
                         <MenuItem key={index} onClick={() => {
                           if (selectedNode) {
-                            item.action?.(selectedNode);
+                            item.action?.({ node: selectedNode });
                             setSelectedNode(null)
                             setAnchorPosition(null)
                           }  else {
-                            item.action?.()
+                            item.action?.({})
                           }
                           }
                         }>

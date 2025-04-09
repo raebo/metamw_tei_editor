@@ -4,9 +4,8 @@ const XMLDisplayParser: React.FC<{ xmlString: string }> = ({ xmlString }) => {
 
   const parseXml = (xmlString: string) => {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(xmlString, "application/xml");
-
-    return doc;
+    
+    return parser.parseFromString(xmlString, "application/xml");
   };
 
   const renderNode = (node: ChildNode): React.ReactNode => {
@@ -17,7 +16,7 @@ const XMLDisplayParser: React.FC<{ xmlString: string }> = ({ xmlString }) => {
     if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as Element;
       const TagName = element.tagName as keyof JSX.IntrinsicElements;
-      const children = Array.from(element.childNodes).map((child, i) =>
+      const children = Array.from(element.childNodes).map((child ) =>
         renderNode(child)
       );
 
