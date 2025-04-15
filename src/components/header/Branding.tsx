@@ -1,6 +1,6 @@
 import Typography from "@mui/material/Typography";
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import * as React from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import useReactiveVar from "../../utils/makeReactiveVar";
 import { authenticatedVar } from "../../constants/authenticated";

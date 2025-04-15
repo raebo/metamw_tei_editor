@@ -1,6 +1,6 @@
+import React from 'react';
 import Auth from "./Auth";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Link as MuiLink } from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useLogin } from "../../hooks/useLogin";
 
 const Login = () => {

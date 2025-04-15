@@ -1,4 +1,4 @@
-import { ComponentProps } from "react";
+import React, { ComponentProps } from "react";
 
 type ButtonProps = {
   children?: JSX.Element;

@@ -1,3 +1,4 @@
+import React from 'react';
 import excludedRoutes from "../../constants/excluded-routes";
 import { useAuth } from "./AuthContext";
 import { AUTH_TOKEN_NAME } from "../../utils/auth";
@@ -15,7 +16,7 @@ export const Guard: React.FC<GuardProps> = ({ children } : GuardProps) => {
   const dispatch = useDispatch();
   const { isAuthenticated } = useAuth();
   const user = useSelector((state: RootState) => state.auth.user);
-  let token = localStorage.getItem(AUTH_TOKEN_NAME);
+  const token = localStorage.getItem(AUTH_TOKEN_NAME);
 
   useEffect(() => {
     if (!token) {

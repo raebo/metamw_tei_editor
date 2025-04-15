@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface DateDialogProps {
   onClose: () => void; // Function to close the dialog
 }
