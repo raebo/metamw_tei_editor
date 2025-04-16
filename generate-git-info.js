@@ -15,6 +15,6 @@ const gitInfo = {
 };
 
 // Write the Git info to a JSON file
-fs.writeFileSync('./public/git-info.json', JSON.stringify(gitInfo, null, 2));
+fs.writeFileSync('./dist/git-info.json', JSON.stringify(gitInfo, null, 2));
 
 console.log('Git info generated:', gitInfo);

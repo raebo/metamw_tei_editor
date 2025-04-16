@@ -23,6 +23,7 @@ module.exports = (env, argv) => {
       path: path.resolve(__dirname, 'dist'),
       filename: isProd ? 'assets/js/[name].[contenthash].js' : 'assets/js/[name].js',
       assetModuleFilename: 'assets/[name].[contenthash][ext]',
+      publicPath: "/",
       clean: true,
     },
     devtool: isDev ? "eval-source-map" : "source-map",
