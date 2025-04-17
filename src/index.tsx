@@ -20,18 +20,6 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-// const refreshStore = () => {
-//   const savedState = localStorage.getItem('reduxState');
-//   if (savedState) {
-//     const parsedState = JSON.parse(savedState);
-//     // Dispatch actions to restore the state
-//     if (parsedState.user) {
-//       store.dispatch(loginState(parsedState.user));
-//     }
-//   }
-// };
-// refreshStore();
-
 root.render(
   <React.StrictMode>
     <div className="App">

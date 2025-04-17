@@ -1,5 +1,6 @@
 import initApi from "../apiRequest.service";
-import { PinnedLetter } from "../mappings/editorMappings";
+import { SnippetEntity } from '../mappings/autoAnnoMappings';
+import { EditorConstants } from '../../constants/editor';
 
 export const setLetterFavourite= async (letterId: number, isFavourite: boolean): Promise<boolean> => {
   try {
@@ -34,6 +35,27 @@ export const letterContent = async (letterId: number): Promise<string> => {
   } catch (err) {
     console.error(err);
     return "";
+  }
+}
+
+
+export const searchEditortEntities = async (searchString: string, entityType: string): Promise<SnippetEntity[]| undefined> => {
+  const entityKey = EditorConstants.ENTITY_TYPES[entityType as keyof typeof EditorConstants.ENTITY_TYPES];
+  if (!entityKey) {
+    throw new Error(`Unsupported entity type: ${entityType}`);
+  }
+
+  try {
+    const response = await initApi
+      .initApi()
+      .get(
+        `/jwt/editor/letters/search_for_entities/${searchString}/${entityType.toLowerCase()}?per_page=20`
+      );
+
+    return response?.data?.[entityKey.toLowerCase()]?.entries || undefined;
+
+  } catch (err) {
+    throw new Error("Error fetching data for search entity: " + err);
   }
 }
 

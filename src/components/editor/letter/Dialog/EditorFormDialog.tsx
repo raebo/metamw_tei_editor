@@ -14,9 +14,14 @@ import ResetLetterDialog from "./Components/ResetLetterDialog";
 import EditNoteDialog from "./Components/EditNoteDialog";
 import DateWhenAddDialog from "./Components/Date/DateWhenAddDialog";
 import AttachmentAddDialog from "./Components/Misc/AttachmentAddDialog";
+import AddWritingAct from './Components/AddWritingAct';
 
 interface EditorFormDialogProps {
   open: boolean
+}
+
+export interface DefaultDialogProps {
+  onClose: () => void
 }
 
 
@@ -53,6 +58,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.RESET_LETTER]: "Brief Zurücksetzen",
     [EditorConstants.dialogTypes.DATE_WHEN_ADD]: "Datum 'WHEN' Auszeichnen",
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: "Beilage Hinzufügen",
+    [EditorConstants.dialogTypes.ADD_WRITING_PART]: "Schreibakt Hinzufügen",
   }
 
   const DialogContentComponents : Record<string, React.ReactNode> = {
@@ -60,7 +66,8 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.EDIT_NOTE]: <EditNoteDialog onClose={handleClose} />,
     [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog onClose={handleClose} />,
     [EditorConstants.dialogTypes.DATE_WHEN_ADD]: <DateWhenAddDialog onClose={handleClose} />,
-    [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog onClose={handleClose} />
+    [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog onClose={handleClose} />,
+    [EditorConstants.dialogTypes.ADD_WRITING_PART]: <AddWritingAct onClose={handleClose} />,
   }
 
   return (

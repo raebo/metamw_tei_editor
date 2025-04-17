@@ -10,13 +10,10 @@ import { setReloadLetterContent } from "../../../../../redux/slices/editor.lette
 import { enqueueSnackbar } from "notistack";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
+import { DefaultDialogProps } from '../EditorFormDialog';
 
 
-interface EditLetterDialogProps {
-  onClose: () => void; // Function to close the dialog
-}
-
-const EditNoteDialog = (props: EditLetterDialogProps) => {
+const EditNoteDialog = (props: DefaultDialogProps) => {
 
   const dispatch = useAppDispatch();
   const stateLetterReference = useSelector((state: RootState) => state.editorLetter.letterReference)

@@ -9,7 +9,6 @@ import { EditorUtils } from "../../../../utils/editor";
 import { EditorKeyHandleItem } from "../../../../services/mappings/editorMappings";
 
 const EditorKeyHandle = () => {
-
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
   const stateLetterContent= useSelector((state: RootState) => state.editorLetter.content);

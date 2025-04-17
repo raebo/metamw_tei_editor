@@ -59,7 +59,7 @@ const menuItems: MenuItem[] = [
     hasSubMenu: true,
     keyHandleItem: null,
     subMenu: [
-      { label: "Schreibakt Erstellen", keyHandleItem: null, active: false },
+      { label: "Schreibakt Erstellen", keyHandleItem: filterKeyCombination('ctrl+shift+s'), active: true },
       { label: "Vermerk Hinzufügen", keyHandleItem: null, active: false },
     ],
   },
