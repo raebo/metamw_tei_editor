@@ -3,12 +3,12 @@ const path = require('path');
 const dotenv = require("dotenv");
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = (env, argv) => {
   const isDev = argv.mode === "development";
-  const isProd = env.NODE_ENV === 'production';
+  const isProd = env.mode === 'production';
   const envVars = dotenv.config({ path: '.env' }).parsed || {};
 
   const envKeys = Object.keys(envVars).reduce((prev, key) => {
@@ -68,6 +68,11 @@ module.exports = (env, argv) => {
       ],
     },
     plugins: [
+      new CopyPlugin({
+        patterns: [
+          { from: path.resolve(__dirname, "public/favicon.ico"), to: "favicon.ico" },
+        ],
+      }),
       new HtmlWebpackPlugin({
         template: './public/index.html',
         minify: isProd
@@ -82,7 +87,6 @@ module.exports = (env, argv) => {
         ? [new MiniCssExtractPlugin({ filename: '[name].[contenthash].css' })]
         : []),
       new webpack.DefinePlugin(envKeys),
-      // ...(isDev ? [new ReactRefreshWebpackPlugin()] : []),
       new webpack.ProvidePlugin({
         process: 'process/browser.js',
       }),
