@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const stringHandling = {
   removeLastCharIfSemiconlon: (str: string) => {
     if (str.slice(-1) === ';') {

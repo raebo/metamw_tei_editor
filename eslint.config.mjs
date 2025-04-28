@@ -57,6 +57,7 @@ export default defineConfig([{
         "no-console": "warn",
         "no-debugger": "error",
         "no-useless-catch": "off",
+        "no-throw-literal": "off",
 
         // "@typescript-eslint/no-implicit-any-catch": ["warn", {
         //     allowExplicitAny: true,

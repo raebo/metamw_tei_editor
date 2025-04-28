@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FormControl, InputLabel, MenuItem, Select, TextareaAutosize, TextField } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { EditorConstants } from "../../../../../../constants/editor";
 import Button from "@mui/material/Button";
 import { useAppDispatch } from "../../../../../../redux/hooks";

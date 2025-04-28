@@ -1,8 +1,8 @@
 import { DefaultDialogProps } from '../EditorFormDialog';
 import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
 import { DISPLAY_NAME_MAP } from '../../../../../utils/entityMappings';
-import React, { useEffect, useRef, useState } from 'react';
-import { Autocomplete, Checkbox, Divider, FormControlLabel, Stack, TextField } from '@mui/material';
+import React, { useEffect, useRef } from 'react';
+import { Divider } from '@mui/material';
 import TeiHeaderFirstHeadline from './TeiHeaderDialog/01TeiHeaderFirstHeadline';
 import TeiHeaderSndHeadline from './TeiHeaderDialog/02TeiHeaderSndHeadline';
 import TeiHeaderPrevLetter from './TeiHeaderDialog/03TeiHeaderPrevLetter';
