@@ -3,8 +3,8 @@ import {
   EditorLetter,
   EditorLetterData,
   mapApiToEditorLetter,
-  mapApiToEditorLetterData
-} from "../mappings/editorMappings";
+  mapApiToEditorLetterData, mapApiToLetterData,
+} from '../mappings/editorMappings';
 
 
 export const fetchLastUsedLettersByUser = async (): Promise<EditorLetter[]| undefined> => {
@@ -38,4 +38,22 @@ export const fetchLetterData = async (letterId: number): Promise<EditorLetterDat
   } catch (err) {
     console.error(err);
   }
+}
+
+export const searchForLetterNameTitle = async (letterType: string, searchValue: string | null): Promise<EditorLetter[]| undefined> => {
+  let searchUrl = '';
+
+  if (searchValue === null) {
+    searchUrl = `/jwt/editor/letters/search_for_letters/${letterType}`;
+  } else {
+    searchUrl = `/jwt/editor/letters/search_for_letters/${letterType}/${searchValue}`;
+  }
+
+  if (searchUrl === '') {
+    throw new Error('No valid search parameters provided');
+  }
+
+  const response = await initApi.initApi().get(searchUrl);
+
+  return response.data.map(mapApiToLetterData);
 }

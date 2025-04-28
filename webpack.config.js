@@ -36,9 +36,17 @@ module.exports = (env, argv) => {
     module: {
       rules: [
         {
-          test: /\.tsx?$/,
-          use: 'babel-loader',
-          exclude: /node_modules/,
+          test: /\.(ts|tsx)$/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                ['@babel/preset-react', { runtime: 'automatic' }],
+                '@babel/preset-typescript'
+              ]
+            }
+          },
+          exclude: /node_modules/
         },
         {
           test: /\.(woff(2)?|ttf|eot|otf)$/,

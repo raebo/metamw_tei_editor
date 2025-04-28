@@ -28,7 +28,7 @@ type CompletionState = {
   keyWriter: string | null
 }
 
-const AddWritingAct = (props: DefaultDialogProps) => {
+const AddWritingActDialog = (props: DefaultDialogProps) => {
 
   const dispatch = useAppDispatch()
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
@@ -266,4 +266,4 @@ const AddWritingAct = (props: DefaultDialogProps) => {
   )
 }
 
-export default AddWritingAct
+export default AddWritingActDialog

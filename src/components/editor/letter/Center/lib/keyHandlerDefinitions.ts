@@ -44,6 +44,13 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_WRITING_PART) }
   },
+  "alt+c": {
+    key: "alt+c",
+    description: "Header Hinzufügen",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_TEI_HEADER) }
+  },
 }
 
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {

@@ -30,6 +30,11 @@ export interface PinnedLetter {
   contentChanged: boolean,
   isPinned: boolean
 }
+export interface SearchLetter {
+  id: number
+  name: string
+  title: string
+}
 
 export interface ApiPinnedLetter {
   id: number,
@@ -52,6 +57,14 @@ export const mapApiToEditorLetter = (apiLetter: any): EditorLetter => {
     lastUpdatedByName: apiLetter.last_updated_by_name,
     lastUpdatedById: apiLetter.last_updated_by_id,
     updatedAt: new Date(apiLetter.updated_at)
+  }
+}
+
+export const mapApiToLetterData = (apiLetter: any): SearchLetter => {
+  return {
+    id: apiLetter.id,
+    name: apiLetter.name,
+    title: apiLetter.title
   }
 }
 
