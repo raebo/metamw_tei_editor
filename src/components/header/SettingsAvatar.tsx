@@ -1,6 +1,5 @@
+import React from 'react';
 import { Avatar } from "@mui/material";
-import { useSelector } from "react-redux";
-import { RootState } from "../../redux/redux.store";
 
 function stringToColor(string: String) {
   let hash = 0;

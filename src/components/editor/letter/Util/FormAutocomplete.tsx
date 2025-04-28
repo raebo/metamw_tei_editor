@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
-import { searchAutoAnnoSnippetEntities } from "../../../services/auto_anno/apiAutoAnno.service";
-import { SnippetEntity } from "../../../services/mappings/autoAnnoMappings";
+import { searchEditortEntities } from '../../../../services/editor/apiLetterRequest.service';
+import { SnippetEntity } from '../../../../services/mappings/autoAnnoMappings';
 
-interface SnippetFormAutocompleteProps {
-  autoJobLetterId: number
-  entityType: string | null | undefined
+interface FormAutocompleteProps {
+  entityType: string
   entityKey:string | null | undefined
   isDisabled: boolean
   setFormEntityKey: (entityKey: string) => void
-  setSaveButtonDisabled: (isDisabled: boolean) => void
+  afterClickHandler?: (keyValue: string) => void
 }
 
-const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
+const FormAutocomplete = (props: FormAutocompleteProps) => {
 
   const [options, setOptions] = useState<SnippetEntity[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -28,19 +27,17 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
     const fetchData = async () => {
       setLoading(true);
 
-      if (props.entityType !== null && props.entityType !== undefined && props.autoJobLetterId !== null) {
-        try {
-          const response = await searchAutoAnnoSnippetEntities(props.autoJobLetterId, inputValue, props.entityType);
+      try {
+        const response = await searchEditortEntities(inputValue, props.entityType);
 
-          if (response) {
-            setOptions(response || []);
-          }
-        } catch (error) {
-          console.error("Error fetching data:", error);
-          setOptions([]);
-        } finally {
-          setLoading(false);
+        if (response) {
+          setOptions(response || []);
         }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setOptions([]);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -59,7 +56,7 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
         onChange={(event, value) => {
           if (value && typeof value !== 'string') {
             props.setFormEntityKey(value.entityKey); // Store the ID in state or pass it to a parent component
-            props.setSaveButtonDisabled(false);
+            props.afterClickHandler?.(value.entityKey);
           } else {
             props.setFormEntityKey(""); // Handle the case where no valid selection is made
           }
@@ -92,4 +89,4 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
   )
 }
 
-export default SnippetFormAutocomplete;
+export default FormAutocomplete;

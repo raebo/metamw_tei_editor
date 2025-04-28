@@ -30,6 +30,11 @@ export interface PinnedLetter {
   contentChanged: boolean,
   isPinned: boolean
 }
+export interface SearchLetter {
+  id: number
+  name: string
+  title: string
+}
 
 export interface ApiPinnedLetter {
   id: number,
@@ -55,6 +60,14 @@ export const mapApiToEditorLetter = (apiLetter: any): EditorLetter => {
   }
 }
 
+export const mapApiToLetterData = (apiLetter: any): SearchLetter => {
+  return {
+    id: apiLetter.id,
+    name: apiLetter.name,
+    title: apiLetter.title
+  }
+}
+
 export const mapApiToEditorLetterData = (apiLetter: any): EditorLetterData => {
   return {
     id: apiLetter.id,
@@ -73,3 +86,30 @@ export const mapApiToPinnedLetter = (apiPinnedLetter: ApiPinnedLetter): PinnedLe
     isPinned: true
   }
 }
+
+export interface ActOfWritingElement {
+  role: "author" | "writer",
+  key: string,
+  name: string
+}
+
+export interface PersonEntity {
+  fullName: string;
+  birthDate: string | null;
+  deathDate: string | null;
+  placeOfBirth: string | null;
+  placeOfDeath: string | null;
+  wikiLink?: string;
+  // add more as needed
+}
+
+export const mapRemotePersonToEntity = (raw: any): PersonEntity => {
+  return {
+    fullName: raw.full_name?.split(" // ")[0] || "Unbekannt",
+    birthDate: raw.birth_date ?? null,
+    deathDate: raw.death_date ?? null,
+    placeOfBirth: raw.place_of_birth ?? null,
+    placeOfDeath: raw.place_of_death ?? null,
+    wikiLink: raw.relation ?? undefined,
+  };
+};

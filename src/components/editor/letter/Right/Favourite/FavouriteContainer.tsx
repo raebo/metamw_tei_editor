@@ -1,3 +1,4 @@
+import React from 'react';
 import { enqueueSnackbar } from "notistack";
 
 const FavouriteContainer = () => {

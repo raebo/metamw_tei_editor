@@ -1,8 +1,7 @@
-interface DateDialogProps {
-  onClose: () => void; // Function to close the dialog
-}
+import React from 'react';
+import { DefaultDialogProps } from '../../EditorFormDialog';
 
-const DateWhenAddDialog = (props: DateDialogProps) => {
+const DateWhenAddDialog = (props: DefaultDialogProps) => {
 
   return (
     <>

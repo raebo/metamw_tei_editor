@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 import { debounce } from '../utils/debounce';

@@ -23,20 +23,34 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ATTACHMENT_ADD) }
   },
-  "alt+strg+f": {
-    key: "alt+strg+f",
+  "alt+ctrl+f": {
+    key: "alt+ctrl+f",
     description: "Fußnote des Briefautors",
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR) }
   },
-  "strg+t": {
-    key: "strg+t",
+  "ctrl+t": {
+    key: "ctrl+t",
     description: "Quellenbeschreibung Handschrift",
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.SOURCE_DESC_HANDWRITING) }
-  }
+  },
+  "ctrl+shift+s": {
+    key: "ctrl+shift+s",
+    description: "Schreibakt Hinzufügen",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_WRITING_PART) }
+  },
+  "alt+c": {
+    key: "alt+c",
+    description: "Header Hinzufügen",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_TEI_HEADER) }
+  },
 }
 
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {

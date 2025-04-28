@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import { useAppDispatch } from "../../../../../redux/hooks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/redux.store";
@@ -5,18 +6,14 @@ import { EditorUtils } from "../../../../../utils/editor";
 import Button from "@mui/material/Button";
 import { FormControl, InputLabel, MenuItem, Select, TextareaAutosize } from "@mui/material";
 import { EditorConstants } from "../../../../../constants/editor";
-import React, { useEffect, useState } from "react";
 import { setReloadLetterContent } from "../../../../../redux/slices/editor.letter.slice";
 import { enqueueSnackbar } from "notistack";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
+import { DefaultDialogProps } from '../EditorFormDialog';
 
 
-interface EditLetterDialogProps {
-  onClose: () => void; // Function to close the dialog
-}
-
-const EditNoteDialog = (props: EditLetterDialogProps) => {
+const EditNoteDialog = (props: DefaultDialogProps) => {
 
   const dispatch = useAppDispatch();
   const stateLetterReference = useSelector((state: RootState) => state.editorLetter.letterReference)

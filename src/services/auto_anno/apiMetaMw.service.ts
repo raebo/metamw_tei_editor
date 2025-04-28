@@ -1,4 +1,5 @@
 import initApi from "../apiRequest.service";
+import { mapRemotePersonToEntity, PersonEntity } from '../mappings/editorMappings';
 
 export const fetchMetamwEntityData = async (entityKey: string): Promise<{ [key:string]:string}|null> => {
   const response = await initApi
@@ -8,4 +9,10 @@ export const fetchMetamwEntityData = async (entityKey: string): Promise<{ [key:s
     );
 
   return response.data
+}
+
+export const fetchAndMapPersonEntityData = async (entityKey: string): Promise<PersonEntity> => {
+  const data = await fetchMetamwEntityData(entityKey);
+
+  return mapRemotePersonToEntity(data)
 }

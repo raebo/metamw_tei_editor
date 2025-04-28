@@ -1,7 +1,7 @@
+import React, { ReactNode, useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import React, { ReactNode, useEffect, useState } from "react";
 import { Divider, Typography } from "@mui/material";
 import DialogActions from "@mui/material/DialogActions";
 import { EditorConstants } from "../../../../constants/editor";
@@ -14,9 +14,16 @@ import ResetLetterDialog from "./Components/ResetLetterDialog";
 import EditNoteDialog from "./Components/EditNoteDialog";
 import DateWhenAddDialog from "./Components/Date/DateWhenAddDialog";
 import AttachmentAddDialog from "./Components/Misc/AttachmentAddDialog";
+import AddWritingActDialog from './Components/AddWritingActDialog';
+import AddTeiHeaderDialog from './Components/AddTeiHeaderDialog';
 
 interface EditorFormDialogProps {
   open: boolean
+}
+
+export interface DefaultDialogProps {
+  setWidth: (width: number | string) => void,
+  onClose: () => void
 }
 
 
@@ -24,6 +31,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
  const dispatch = useAppDispatch()
 
   const dialogType = useSelector((state: RootState) => state.editorLetter.dialogType)
+  const [dialogWidth, setDialogWidth] = useState<string | number>('auto');
   const [isOpen, setIsOpen] = React.useState(props.open)
   const [dialogTitle, setDialogTitle] = React.useState("")
   const [selectedDialogComp, setSelectedDialogComp] = useState<ReactNode| null>(null)
@@ -53,14 +61,18 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.RESET_LETTER]: "Brief Zurücksetzen",
     [EditorConstants.dialogTypes.DATE_WHEN_ADD]: "Datum 'WHEN' Auszeichnen",
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: "Beilage Hinzufügen",
+    [EditorConstants.dialogTypes.ADD_WRITING_PART]: "Schreibakt Hinzufügen",
+    [EditorConstants.dialogTypes.ADD_TEI_HEADER]: "Header des Briefes Hinzufügen",
   }
 
   const DialogContentComponents : Record<string, React.ReactNode> = {
-    [EditorConstants.dialogTypes.ADD_NOTE]: <AddNoteDialog onClose={handleClose} />,
-    [EditorConstants.dialogTypes.EDIT_NOTE]: <EditNoteDialog onClose={handleClose} />,
-    [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog onClose={handleClose} />,
-    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: <DateWhenAddDialog onClose={handleClose} />,
-    [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog onClose={handleClose} />
+    [EditorConstants.dialogTypes.ADD_NOTE]: <AddNoteDialog onClose={handleClose} setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.EDIT_NOTE]: <EditNoteDialog onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: <DateWhenAddDialog onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.ADD_WRITING_PART]: <AddWritingActDialog onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.ADD_TEI_HEADER]: <AddTeiHeaderDialog onClose={handleClose}  setWidth={setDialogWidth} />,
   }
 
   return (
@@ -70,12 +82,15 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
         open={isOpen}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
+        fullWidth
+        maxWidth="lg"
+        // sx={ { width: "auto" } }
       >
         <DialogTitle id="alert-dialog-title">
           { dialogTitle }
           <hr />
         </DialogTitle>
-        <DialogContent sx={{ p: 2 }}>
+        <DialogContent sx={{ p: 2, width: dialogWidth }}>
           { selectedDialogComp }
         </DialogContent>
         <DialogActions>

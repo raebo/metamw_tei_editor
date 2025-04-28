@@ -14,8 +14,6 @@ $LastChangedDate$, $LastChangedRevision$, $LastChangedBy$
 /* Use Times New Roman for default font */
 
 
-
-
 TEI {
 }
 
@@ -2039,8 +2037,8 @@ note [type="asynchronous_authors"] {
 
 
 /* eingefügt UT 16.05.2023 */
-note [type="asynchronous_authors"] measure [type="number_of_authors"]
-display:none !important;
+note [type="asynchronous_authors"] measure [type="number_of_authors"] {
+  display:none !important;
 }
 
 /* eingefügt UT 16.05.2023 */

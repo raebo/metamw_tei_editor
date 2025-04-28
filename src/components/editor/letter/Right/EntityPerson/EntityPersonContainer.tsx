@@ -1,3 +1,5 @@
+import React from 'react';
+
 const EntityPersonContainer = () => {
   return (
     <div>

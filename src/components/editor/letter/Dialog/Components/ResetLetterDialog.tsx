@@ -1,3 +1,4 @@
+import React from 'react';
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
@@ -8,12 +9,9 @@ import { EditorUtils } from "../../../../../utils/editor";
 import { setReloadLetterContent } from "../../../../../redux/slices/editor.letter.slice";
 import { enqueueSnackbar } from "notistack";
 import { EditorConstants } from "../../../../../constants/editor";
+import { DefaultDialogProps } from '../EditorFormDialog';
 
-interface ResetLetterDialogProps {
-  onClose: () => void; // Function to close the dialog
-}
-
-const ResetLetterDialog = (props: ResetLetterDialogProps) => {
+const ResetLetterDialog = (props: DefaultDialogProps) => {
 
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)

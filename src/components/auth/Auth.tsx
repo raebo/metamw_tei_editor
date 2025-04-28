@@ -1,6 +1,6 @@
+import React from 'react';
 import {Button, Stack, TextField} from "@mui/material";
-import { useEffect, useState } from "react";
-// import { useGetMe } from "../../hooks/useGetMe.ts.txt";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 interface AuthProps {

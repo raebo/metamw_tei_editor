@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid"
 import { EditorUtils } from "./index"
 import {xmlCheck} from "./xmlCheck";
+import { ActOfWritingElement } from '../../services/mappings/editorMappings';
 
 export const markupGeneration = {
   addAttachmentMarkup: (xmlContent: string, attachmentType: string, attachmentName: string) : { xmlString: string, contentChanged: boolean } => {
@@ -100,4 +101,53 @@ export const markupGeneration = {
       xmlString: serializer.serializeToString(doc)
     }
   },
+
+  insertActOfWritingBlock: (
+    xmlDoc: Document,
+    authorWriters: ActOfWritingElement[],
+  ) : { xmlString: string }  => {
+
+    const nValue = xmlDoc.querySelectorAll("div[type='act_of_writing']").length + 1;
+
+    const div = xmlDoc.createElement("div");
+    div.setAttribute("type", "act_of_writing");
+    div.setAttribute("n", nValue.toString());
+
+    const rolePriority: Record<"author" | "writer", number> = {
+      author: 0,
+      writer: 1,
+    }
+    const sortedAuthorWriters = authorWriters.sort((a, b) => rolePriority[a.role as 'author' | 'writer'] - rolePriority[b.role as 'author', 'writer'])
+
+    sortedAuthorWriters.forEach((authorWriter) => {
+      const docAuthor = xmlDoc.createElement("docAuthor");
+      docAuthor.setAttribute("style", "hidden");
+      docAuthor.setAttribute("data-key", authorWriter.key);
+      docAuthor.setAttribute("resp", authorWriter.role);
+      docAuthor.textContent = authorWriter.name;
+      div.appendChild(docAuthor);
+    })
+
+
+    const p = xmlDoc.createElement("p");
+    p.setAttribute("style", "paragraph_without_indent");
+
+    // Create the oxy processing instructions
+    const startPI = xmlDoc.createProcessingInstruction(
+      "oxy_custom_start",
+      'type="oxy_content_highlight" color="235,192,230"'
+    );
+    const endPI = xmlDoc.createProcessingInstruction("oxy_custom_end", "");
+
+    p.appendChild(startPI);
+    p.appendChild(xmlDoc.createTextNode("Brieftext"));
+    p.appendChild(endPI);
+
+    div.appendChild(p);
+
+    // Insert the new div at the desired location
+    xmlDoc.documentElement.appendChild(div); // or use some custom selector
+
+    return { xmlString: xmlCheck.serializeDocument(xmlDoc) }
+  }
 }

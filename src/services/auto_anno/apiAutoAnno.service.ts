@@ -8,7 +8,6 @@ import {
 } from "../mappings/autoAnnoMappings";
 import axios from "axios";
 
-
 export const fetchAutoAnnoJobs = async (): Promise<AutoAnnoJob[] | undefined> => {
   try {
   const response = await initApi.initApi().get('/jwt/automatic_annotations')
@@ -83,8 +82,7 @@ export const searchAutoAnnoSnippetEntities = async (annoLetterId: number, search
     return response?.data?.[entityKey]?.entries || undefined;
 
   } catch (err) {
-
-    throw new Error("Error updating anno letter content: " + err);
+    throw new Error("Error fetching data for search entity: " + err);
   }
 }
 

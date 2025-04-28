@@ -9,12 +9,9 @@ import { setReloadLetterContent } from "../../../../../redux/slices/editor.lette
 import { useAppDispatch } from "../../../../../redux/hooks";
 import { enqueueSnackbar } from "notistack";
 import { EditorConstants } from "../../../../../constants/editor";
+import { DefaultDialogProps } from '../EditorFormDialog';
 
-interface NoteDialogProps {
-  onClose: () => void; // Function to close the dialog
-}
-
-const AddNoteDialog = (props: NoteDialogProps) => {
+const AddNoteDialog = (props: DefaultDialogProps) => {
   const [comment, setComment] = useState("");
   const [noteType, setNoteType] = useState("");
   const [noteLanguage, setNoteLanguage] = useState("");

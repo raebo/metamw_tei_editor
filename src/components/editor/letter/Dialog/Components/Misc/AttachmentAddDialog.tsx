@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FormControl, InputLabel, MenuItem, Select, TextareaAutosize, TextField } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { EditorConstants } from "../../../../../../constants/editor";
 import Button from "@mui/material/Button";
 import { useAppDispatch } from "../../../../../../redux/hooks";
@@ -9,13 +9,9 @@ import { EditorUtils } from "../../../../../../utils/editor";
 import { MiscUtils } from "../../../../../../utils/misc";
 import { enqueueSnackbar } from "notistack";
 import { setReloadLetterContent } from "../../../../../../redux/slices/editor.letter.slice";
+import { DefaultDialogProps } from '../../EditorFormDialog';
 
-interface AttachmentAddDialogProps {
-  onClose: () => void; // Function to close the dialog
-}
-
-
-const AttachmentAddDialog = (props: AttachmentAddDialogProps) => {
+const AttachmentAddDialog = (props: DefaultDialogProps) => {
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
 

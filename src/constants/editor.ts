@@ -1,7 +1,15 @@
+export enum EntityType {
+  PERSON = 'PERSON',
+  INSTITUTION= 'INSTITUTION',
+  SIGHT= 'SIGHT',
+  SETTLEMENT= 'SETTLEMENT',
+}
+
 export const EditorConstants = {
   ALLOWED_PARENT_TAG: "div[type='act_of_writing']",
   FORBIDDEN_PARENT_TAG: "teiHeader",
   RESTRICTED_TAGS: ["persname", "placename", "date", "hi"],
+  ENTITY_TYPES: EntityType,
 
   compMappingLeft: {
     SEARCH: "SEARCH",
@@ -27,6 +35,8 @@ export const EditorConstants = {
     ATTACHMENT_ADD: "ATTACHMENT_ADD",
     ADD_FOOTNOTE_AUTHOR: "ADD_FOOTNOTE_AUTHOR",
     SOURCE_DESC_HANDWRITING: "SOURCE_DESC_HANDWRITING",
+    ADD_WRITING_PART: "ADD_WRITING_PART",
+    ADD_TEI_HEADER: "ADD_TEI_HEADER",
   },
 
   changeTypes: {
@@ -48,7 +58,7 @@ export const EditorConstants = {
   attachmentTypeItems: [
     { value: "certificate", label: "Zeugnis" },
     { value: "letter", label: "Brief" },
-    { value: "letter_of_recommentadion", label: "Empfehlungsschreiben" },
+    { value: "letter_of_recommendation", label: "Empfehlungsschreiben" },
     { value: "notatedMusic", label: "Noten" },
     { value: "textTemplate", label: "Textvorlage" },
     { value: "drawing", label: "Zeichnung" },
