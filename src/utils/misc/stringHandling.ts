@@ -1,3 +1,7 @@
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export const stringHandling = {
   removeLastCharIfSemiconlon: (str: string) => {
     if (str.slice(-1) === ';') {
@@ -5,16 +9,23 @@ export const stringHandling = {
     }
     return str;
   },
-  highlightText: (text: string, query: string) => {
-    if (!query) return text;
+  highlightText: (input: string, query: string) => {
+    if (!query) return input;
 
-    const regex = new RegExp(`(${query})`, 'gi'); // `g` for global, `i` for case-insensitive
-    const parts = text.split(regex);
+    let regex: RegExp;
+    try {
+      regex = new RegExp(escapeRegExp(query), 'gi'); // safely escape query
+    } catch (e) {
+      console.warn('Invalid regex pattern:', e);
+      return input;
+    }
+
+    const parts = input.split(regex);
 
     return parts
-      .map((part) =>
-        regex.test(part)
-          ? `<span style="font-weight: 700; background-color: yellow;">${part}</span>`
+      .map((part, i) =>
+        i < parts.length - 1
+          ? `${part}<span style="font-weight: 700; background-color: yellow;">${query}</span>`
           : part
       )
       .join('');

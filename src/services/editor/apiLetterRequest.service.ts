@@ -4,7 +4,7 @@ import { EditorConstants } from '../../constants/editor';
 
 export const setLetterFavourite= async (letterId: number, isFavourite: boolean): Promise<boolean> => {
   try {
-    const response = await initApi.initApi().get(`/jwt/editor/letters/search?searchValue=FOOBAR`);
+    await initApi.initApi().get(`/jwt/editor/letters/search?searchValue=FOOOBAR&letterId=${letterId}&isFavourite=${isFavourite}`);
 
     return true
 
@@ -39,18 +39,18 @@ export const letterContent = async (letterId: number): Promise<string> => {
 }
 
 
-export const searchEditortEntities = async (searchString: string, entityType: string): Promise<SnippetEntity[]| undefined> => {
+export const searchEditortEntities = async (searchString: string | null, entityType: string): Promise<SnippetEntity[]| undefined> => {
   const entityKey = EditorConstants.ENTITY_TYPES[entityType as keyof typeof EditorConstants.ENTITY_TYPES];
   if (!entityKey) {
     throw new Error(`Unsupported entity type: ${entityType}`);
   }
 
+  let url = `/jwt/editor/letters/search_for_entities/${entityType.toLowerCase()}`
+
+  if (searchString !== null) { url += `/${searchString}` }
+
   try {
-    const response = await initApi
-      .initApi()
-      .get(
-        `/jwt/editor/letters/search_for_entities/${searchString}/${entityType.toLowerCase()}?per_page=20`
-      );
+    const response = await initApi.initApi().get(url + `?per_page=20`)
 
     return response?.data?.[entityKey.toLowerCase()]?.entries || undefined;
 

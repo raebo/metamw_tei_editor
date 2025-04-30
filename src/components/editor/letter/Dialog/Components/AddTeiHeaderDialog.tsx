@@ -8,29 +8,35 @@ import TeiHeaderSndHeadline from './TeiHeaderDialog/02TeiHeaderSndHeadline';
 import TeiHeaderPrevLetter from './TeiHeaderDialog/03TeiHeaderPrevLetter';
 import TeiHeaderNextLetter from './TeiHeaderDialog/04TeiHeaderNextLetter';
 import TeiHeaderTransEdition from './TeiHeaderDialog/05TeiHeaderTransEdition';
+import { MiscUtils } from '../../../../../utils/misc';
+import TeiHeaderWritingReceivingPlace from './TeiHeaderDialog/06TeiHeaderWritingReceivingPlace';
+import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
+import { EditorLetter } from '../../../../../services/mappings/editorMappings';
+import TeiHeaderReceivingPerson from './TeiHeaderDialog/07TeiHeaderReceivingPerson';
 
 
 export type TeiHeaderDialogProps = {
   autoAvailable: boolean | null;
   completionState: CompletionState;
-  // name: string | null;
-  // keyValue: string | null;
   onChange: (updates: Partial<CompletionState>) => void;
 }
+
+export type TeiHeaderWritingReceivingPlaceProps = TeiHeaderDialogProps & {
+  dialogType: 'writing' | 'receiving',
+  textFieldValue: 'Schreibort Auswählen' | 'Empfängerort Auswählen',
+};
 
 type CompletionState = {
   firstHeaderComplete: boolean, firstHeaderContent: string | null,
   sndHeaderComplete: boolean, sndHeaderContent: string | null,
-  prevLetterAutoAvailable: boolean, prevLetterKey: string | null, prevLetterName: string | null,
-  nextLetterAutoAvailable: boolean, nextLetterKey: string | null, nextLetterName: string | null,
+  prevLetterAutoAvailable: boolean, prevLetterType: 'unknown' | 'not_identified' | 'select' | null, prevLetter: EditorLetter | null,
+  nextLetterAutoAvailable: boolean, nextLetterType: 'unknown' | 'not_identified' | 'select' | null, nextLetter: EditorLetter | null,
   transkriptionValue: string, editionValue: string
-  writingPlaceAutoAvailable: boolean, writingPlaceKey: string | null, writingPlaceName: string | null,
-  receiverKey: string | null, receiverName: string | null,
-  receivingPlaceAutoAvailable: boolean, receivingPlaceKey: string | null, receivingPlaceName: string | null,
+  writingPlaceAutoAvailable: boolean, writingPlace: SnippetEntity | null,
+  receiverAutoAvailable: boolean, receiverEntity: SnippetEntity | null,
+  receivingPlaceAutoAvailable: boolean, receivingPlace: SnippetEntity | null,
   letterLanguage: null | "de" | "en" | "fr" | "it" | "la" | "grc" | "he",
 }
-
-
 
 const AddTeiHeaderDialog = (props: DefaultDialogProps) => {
 
@@ -39,12 +45,12 @@ const AddTeiHeaderDialog = (props: DefaultDialogProps) => {
   const [completionState, setCompletionState] = React.useState<CompletionState>({
     firstHeaderComplete: false, firstHeaderContent: null,
     sndHeaderComplete: false, sndHeaderContent: null,
-    prevLetterAutoAvailable: false, prevLetterKey: null, prevLetterName: null,
-    nextLetterAutoAvailable: false, nextLetterKey: null, nextLetterName: null,
+    prevLetterAutoAvailable: false, prevLetterType: null, prevLetter: null,
+    nextLetterAutoAvailable: false, nextLetterType: null, nextLetter: null,
     transkriptionValue: "FMB-C", editionValue: "FMB-C",
-    writingPlaceAutoAvailable: false, writingPlaceKey: null, writingPlaceName: null,
-    receiverKey: null, receiverName: null,
-    receivingPlaceAutoAvailable: false, receivingPlaceKey: null, receivingPlaceName: null,
+    writingPlaceAutoAvailable: false, writingPlace: null,
+    receiverAutoAvailable: true, receiverEntity: null,
+    receivingPlaceAutoAvailable: false, receivingPlace: null,
     letterLanguage: null
   })
 
@@ -57,6 +63,7 @@ const AddTeiHeaderDialog = (props: DefaultDialogProps) => {
     }
   }, []);
 
+  const childOnChange = MiscUtils.stateHandling.createHandleChange(setCompletionState);
 
   return (
     <div ref={ref}>
@@ -69,21 +76,14 @@ const AddTeiHeaderDialog = (props: DefaultDialogProps) => {
         )
         }
       </div>
-      <TeiHeaderFirstHeadline autoAvailable={completionState.firstHeaderComplete} completionState={completionState} onChange={(updates) =>
-        setCompletionState((prev) => ({ ...prev, ...updates }))
-      } />
-      <TeiHeaderSndHeadline autoAvailable={completionState.sndHeaderComplete} completionState={completionState} onChange={(updates) =>
-        setCompletionState((prev) => ({ ...prev, ...updates }))
-      } />
-      <TeiHeaderPrevLetter autoAvailable={completionState.prevLetterAutoAvailable} completionState={completionState} onChange={(updates) =>
-        setCompletionState((prev) => ({ ...prev, ...updates }))
-      } />
-      <TeiHeaderNextLetter autoAvailable={completionState.nextLetterAutoAvailable} completionState={completionState} onChange={(updates) =>
-        setCompletionState((prev) => ({ ...prev, ...updates }))
-      } />
-      <TeiHeaderTransEdition autoAvailable={null} completionState={completionState} onChange={(updates) =>
-        setCompletionState((prev) => ({ ...prev, ...updates }))
-      } />
+      <TeiHeaderFirstHeadline autoAvailable={completionState.firstHeaderComplete} completionState={completionState} onChange={childOnChange} />
+      <TeiHeaderSndHeadline autoAvailable={completionState.sndHeaderComplete} completionState={completionState} onChange={childOnChange} />
+      <TeiHeaderPrevLetter autoAvailable={completionState.prevLetterAutoAvailable} completionState={completionState} onChange={childOnChange}  />
+      <TeiHeaderNextLetter autoAvailable={completionState.nextLetterAutoAvailable} completionState={completionState} onChange={childOnChange} />
+      <TeiHeaderWritingReceivingPlace autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"writing"} textFieldValue={'Schreibort Auswählen'}/>
+      <TeiHeaderReceivingPerson autoAvailable={completionState.receiverAutoAvailable} completionState={completionState} onChange={childOnChange} />
+      <TeiHeaderWritingReceivingPlace autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"receiving"} textFieldValue={'Empfängerort Auswählen'}/>
+      <TeiHeaderTransEdition autoAvailable={null} completionState={completionState} onChange={childOnChange} />
 
       <Divider orientation="vertical" flexItem />
     </div>

@@ -29,7 +29,6 @@ const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
 
           setDisplayData(result)
         } catch (error) {
-          console.log("Error: ", error)
           enqueueSnackbar(`Error fetching data for entity with key: ${props.referenceKey}` , { variant: "error" });
         }
       }

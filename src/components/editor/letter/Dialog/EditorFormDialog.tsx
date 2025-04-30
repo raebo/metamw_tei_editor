@@ -16,6 +16,7 @@ import DateWhenAddDialog from "./Components/Date/DateWhenAddDialog";
 import AttachmentAddDialog from "./Components/Misc/AttachmentAddDialog";
 import AddWritingActDialog from './Components/AddWritingActDialog';
 import AddTeiHeaderDialog from './Components/AddTeiHeaderDialog';
+import AddNewLetterDialog from './Components/AddNewLetterDialog';
 
 interface EditorFormDialogProps {
   open: boolean
@@ -63,6 +64,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: "Beilage Hinzufügen",
     [EditorConstants.dialogTypes.ADD_WRITING_PART]: "Schreibakt Hinzufügen",
     [EditorConstants.dialogTypes.ADD_TEI_HEADER]: "Header des Briefes Hinzufügen",
+    [EditorConstants.dialogTypes.ADD_NEW_LETTER]: "Neuen Briefes Hinzufügen",
   }
 
   const DialogContentComponents : Record<string, React.ReactNode> = {
@@ -73,6 +75,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_WRITING_PART]: <AddWritingActDialog onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_TEI_HEADER]: <AddTeiHeaderDialog onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.ADD_NEW_LETTER]: <AddNewLetterDialog onClose={handleClose}  setWidth={setDialogWidth} />,
   }
 
   return (

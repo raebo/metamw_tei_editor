@@ -21,7 +21,7 @@ const TeiHeaderFirstHeadline = (props: TeiHeaderDialogProps) => {
 
   return (
     <>
-      <div className="autoSnippetFormRow" style={ { marginTop: "25px" }}>
+      <div className="autoSnippetFormRow" style={ { marginTop: "25px", width: "98%" } }>
         <Autocomplete
           freeSolo
           options={firstHeaderOptions}

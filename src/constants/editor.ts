@@ -37,6 +37,15 @@ export const EditorConstants = {
     SOURCE_DESC_HANDWRITING: "SOURCE_DESC_HANDWRITING",
     ADD_WRITING_PART: "ADD_WRITING_PART",
     ADD_TEI_HEADER: "ADD_TEI_HEADER",
+    ADD_NEW_LETTER: "ADD_NEW_LETTER",
+  },
+  AUTOCOMPLETE_INPUT_CHANGE_REASONS: {
+    INPUT: 'input',
+    RESET: 'reset',
+    CLEAR: 'clear',
+    BLUR: 'BLUR',
+    SELECT_OPTION: 'selectOption',
+    REMOVE_OPTION: 'removeOption',
   },
 
   changeTypes: {

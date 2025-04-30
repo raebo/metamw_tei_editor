@@ -34,7 +34,7 @@ const apiRequest = async (
   return response.json();
 };
 
-export const initApi = (): AxiosInstance =>{
+export const initApi = (): AxiosInstance => {
   const _dispatch = store.dispatch
   const _axios = axios.create({
     baseURL: API_URL,
@@ -43,7 +43,14 @@ export const initApi = (): AxiosInstance =>{
   _axios.interceptors.request.use((config) => {
     const token = getToken();
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`
+    }
+
+    if (
+      !config.headers['Content-Type'] &&
+      !(config.data instanceof FormData)
+    ) {
+      config.headers['Content-Type'] = 'application/json';
     }
     return config;
   })

@@ -36,7 +36,6 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
             setOptions(response || []);
           }
         } catch (error) {
-          console.error("Error fetching data:", error);
           setOptions([]);
         } finally {
           setLoading(false);

@@ -44,7 +44,10 @@ const menuItems: MenuItem[] = [
     keyHandleItem: null,
     active: true,
     hasSubMenu: true,
-    subMenu: [{ label: 'Brief Header Erstellen', keyHandleItem: filterKeyCombination('alt+c'), active: true }],
+    subMenu: [
+      { label: 'Brief Header Erstellen', keyHandleItem: filterKeyCombination('alt+c'), active: true },
+      { label: 'Brief Erstellen', keyHandleItem: filterKeyCombination('alt+n'), active: true },
+    ],
   },
   {
     label: 'Brief Header Bearbeitung',

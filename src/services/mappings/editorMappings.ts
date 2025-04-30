@@ -24,6 +24,12 @@ export interface EditorLetter {
   lastUpdatedById: number
   updatedAt: Date;
 }
+export interface EditorEntity {
+  id: number
+  name: string
+  type: string
+  key: string
+}
 export interface PinnedLetter {
   id: number,
   name: string,

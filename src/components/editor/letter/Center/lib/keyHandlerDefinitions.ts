@@ -51,6 +51,13 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_TEI_HEADER) }
   },
+  "alt+n": {
+    key: "alt+n",
+    description: "Brief Erstellen",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_NEW_LETTER) }
+  },
 }
 
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {

@@ -6,12 +6,19 @@ import { EditorLetter } from '../../../../../../services/mappings/editorMappings
 import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash';
 import { MiscUtils } from '../../../../../../utils/misc';
+import { EditorConstants } from '../../../../../../constants/editor';
 
 const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
 
-  const [selectedOption, setSelectedOption] = useState<EditorLetter | null>(null);
   const completionState = props.completionState
-  const [letters, setLetters] = useState<EditorLetter[]>([]);
+  const selectedOption: EditorLetter | null = props.completionState.prevLetter
+  const [letters, setLetters] = useState<EditorLetter[]>([])
+
+  const setSelectedOption = (value: EditorLetter | null) => {
+    if (value) {
+      props.onChange({ prevLetter: value})
+    }
+  }
 
   useEffect(() => {
     const fetchDefaultLetters = async () => {
@@ -34,23 +41,28 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
   const handlePrevLetterCheckboxChange = (value: 'unknown' | 'not_identified' | 'select') => {
     switch (value) {
       case 'unknown':
-        props.onChange({ prevLetterAutoAvailable: false, prevLetterName: value } )
+        props.onChange({ prevLetterAutoAvailable: false, prevLetterType: value } )
 
         break;
       case 'not_identified':
-        props.onChange({ prevLetterAutoAvailable: false, prevLetterName: value } )
+        props.onChange({ prevLetterAutoAvailable: false, prevLetterType: value } )
         break;
       case 'select':
-        props.onChange( { prevLetterAutoAvailable: true, prevLetterName: null } )
+        props.onChange( { prevLetterAutoAvailable: true, prevLetterType: null } )
         break;
     }
   };
 
   const searchForLetters = async (inputValue: string) => {
-    const responseLetters = await searchForLetterNameTitle('fmb', inputValue)
+    try {
+      const responseLetters = await searchForLetterNameTitle('fmb', inputValue)
 
-    if (responseLetters) {
-      setLetters(responseLetters);
+      if (responseLetters) {
+        setLetters(responseLetters);
+      }
+
+    } catch (err) {
+      enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
     }
   }
 
@@ -61,15 +73,16 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
 
   return (
     <>
-      <div className="autoSnippetFormRow" style={ { marginTop: "25px" }}>
+      <div className="autoSnippetFormRow" style={ { marginTop: "25px", width: "98%" } }>
         <Stack spacing={2}>
           <Autocomplete
             disabled={!completionState.prevLetterAutoAvailable}
             options={letters}
             value={selectedOption}
-            onChange={(_, newValue) => setSelectedOption(newValue)}
-            onInputChange={(_, inputValue) => {
-              if (inputValue) {
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            onChange={(_, newValue) => setSelectedOption(newValue) }
+            onInputChange={(_, inputValue, reason) => {
+              if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
                 debouncedSearchForLetters(inputValue);
               }
             }}
@@ -109,7 +122,7 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
               control={
                 <Checkbox
                   onChange={() => handlePrevLetterCheckboxChange('unknown')}
-                  checked={completionState.prevLetterName === 'unknown'}
+                  checked={completionState.prevLetterType === 'unknown'}
                 />
               }
               label="Vorgängerbrief (Unbekannt)"
@@ -119,7 +132,7 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
               control={
                 <Checkbox
                   onChange={() => handlePrevLetterCheckboxChange('not_identified')}
-                  checked={completionState.prevLetterName === 'not_identified'}
+                  checked={completionState.prevLetterType === 'not_identified'}
                 />
               }
               label="Vorgängerbrief (Noch nicht ermittelt)"
