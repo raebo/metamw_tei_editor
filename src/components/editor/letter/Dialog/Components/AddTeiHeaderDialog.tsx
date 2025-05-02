@@ -3,16 +3,16 @@ import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
 import { DISPLAY_NAME_MAP } from '../../../../../utils/entityMappings';
 import React, { useEffect, useRef } from 'react';
 import { Divider } from '@mui/material';
-import TeiHeaderFirstHeadline from './TeiHeaderDialog/01TeiHeaderFirstHeadline';
-import TeiHeaderSndHeadline from './TeiHeaderDialog/02TeiHeaderSndHeadline';
-import TeiHeaderPrevLetter from './TeiHeaderDialog/03TeiHeaderPrevLetter';
-import TeiHeaderNextLetter from './TeiHeaderDialog/04TeiHeaderNextLetter';
-import TeiHeaderTransEdition from './TeiHeaderDialog/05TeiHeaderTransEdition';
+import TeiHeaderFirstHeadline from './TeiHeaderDialog/10TeiHeaderFirstHeadline';
+import TeiHeaderSndHeadline from './TeiHeaderDialog/20TeiHeaderSndHeadline';
+import TeiHeaderPrevLetter from './TeiHeaderDialog/30TeiHeaderPrevLetter';
+import TeiHeaderNextLetter from './TeiHeaderDialog/40TeiHeaderNextLetter';
+import TeiHeaderTransEdition from './TeiHeaderDialog/50TeiHeaderTransEdition';
 import { MiscUtils } from '../../../../../utils/misc';
-import TeiHeaderWritingReceivingPlace from './TeiHeaderDialog/06TeiHeaderWritingReceivingPlace';
+import TeiHeaderWritingReceivingPlace from './TeiHeaderDialog/60TeiHeaderWritingReceivingPlace';
 import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
 import { EditorLetter } from '../../../../../services/mappings/editorMappings';
-import TeiHeaderReceivingPerson from './TeiHeaderDialog/07TeiHeaderReceivingPerson';
+import TeiHeaderReceivingPerson from './TeiHeaderDialog/70TeiHeaderReceivingPerson';
 
 
 export type TeiHeaderDialogProps = {
@@ -40,7 +40,7 @@ type CompletionState = {
 
 const AddTeiHeaderDialog = (props: DefaultDialogProps) => {
 
-  const [displayData, setDisplayData] = React.useState<{ [key: string]:string}|null>(null)
+  const [displayData] = React.useState<{ [key: string]:string}|null>(null)
 
   const [completionState, setCompletionState] = React.useState<CompletionState>({
     firstHeaderComplete: false, firstHeaderContent: null,

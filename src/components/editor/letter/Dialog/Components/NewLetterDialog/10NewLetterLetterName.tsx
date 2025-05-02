@@ -23,15 +23,37 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
   };
 
   const handleBlur = () => {
-    if (!validateLetterName(letterName)) {
+    const isValid = validateLetterName(letterName);
+
+    if (!isValid) {
       setError(true);
-      setHelperText('Invalid format. Expected FMB-YYYY-MM-DD-AA or GB-YYYY-MM-DD-AA with AA between 01 and 99.');
-    } else {
-      props.onChange({ letterName: letterName, letterNameComplete: true });
-      setError(false);
-      setHelperText('');
+      setHelperText(
+        'Invalid format. Expected FMB-YYYY-MM-DD-AA or GB-YYYY-MM-DD-AA with AA between 01 and 99.'
+      );
+      return;
     }
-  };
+
+    const isFmb = isFmbLetter(letterName);
+    const basePayload = {
+      letterName,
+      letterNameComplete: true,
+      isFmbLetter: isFmb,
+    };
+
+    const payload = isFmb
+      ? { ...basePayload, writerAutoAvailable: false, writerEntity: null }
+      : basePayload;
+
+    props.onChange(payload);
+    setError(false);
+    setHelperText('');
+  }
+
+  const isFmbLetter = (letterName: string | null) => {
+    if (letterName === null) { return false }
+
+    return (letterName.length > 3 && letterName.toLowerCase().indexOf('fmb') === 0)
+  }
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLetterName(event.target.value);

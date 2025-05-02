@@ -61,7 +61,14 @@ export const createNewLetter = async (letterData: NewLetterCompletionState): Pro
     '/jwt/editor/letters', {
       letter:
         MiscUtils.misc.pickAttributes(letterData,
-        ["letterName", "firstHeaderContent", "sndHeaderContent", "prevLetter", "nextLetter", "writingPlace", "receivingPlace", "receiverEntity", "transkriptionValue", "editionValue", "letterLanguage"])})
+        ["isFmbLetter", "letterName",
+         "firstHeaderContent", "sndHeaderContent",
+         "prevLetter", "nextLetter",
+         "writerEntity", "writingPlace",
+         "receivingPlace", "receiverEntity",
+         "transkriptionValue", "editionValue", "letterLanguage"
+        ])
+    })
 
   if (response.status === 200) {
     return response.data.message;
