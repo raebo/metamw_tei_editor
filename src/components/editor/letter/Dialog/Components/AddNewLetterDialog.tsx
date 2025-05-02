@@ -127,7 +127,7 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
           variant="contained"
           color="success"
           size="medium"
-          disabled={saveIsAvailable}
+          disabled={!saveIsAvailable}
           onClick={submitCreateHandler}
         >
           Brief Erstellen
