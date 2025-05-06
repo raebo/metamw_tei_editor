@@ -56,7 +56,7 @@ export const searchForLetterNameTitle = async (letterType: string, searchValue: 
   return response.data.map(mapApiToLetterData);
 }
 
-export const createNewLetter = async (letterData: NewLetterCompletionState): Promise< string | undefined> => {
+export const createNewLetter = async (letterData: NewLetterCompletionState): Promise< { newLetterId: number, newLetterName: string, responseMessage: string }> => {
   const response = await initApi.initApi().post(
     '/jwt/editor/letters', {
       letter:
@@ -71,8 +71,19 @@ export const createNewLetter = async (letterData: NewLetterCompletionState): Pro
         ])
     })
 
+  const newLetterId = response.data.letter_id
+  const newLetterName = response.data.letter_name
+  const responseMessage = response.data.message
+
+  if (newLetterId === undefined) throw new Error("Error creating new letter: no new letter Id given" + responseMessage);
+  if (newLetterName === undefined) throw new Error("Error creating new letter: no new letter Name given" + responseMessage);
+
   if (response.status === 200) {
-    return response.data.message;
+    return {
+      newLetterId: newLetterId,
+      newLetterName: newLetterName,
+      responseMessage: responseMessage
+    };
   } else {
     throw new Error('Invalid response' + response.data.message);
   }

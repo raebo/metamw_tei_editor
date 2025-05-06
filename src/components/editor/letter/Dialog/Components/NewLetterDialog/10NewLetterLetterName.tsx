@@ -1,6 +1,9 @@
 import { TextField } from '@mui/material';
 import { NewLetterDialogProps } from '../AddNewLetterDialog';
 import React, { useState } from 'react';
+import {
+  searchForLetterNameTitle,
+} from '../../../../../../services/editor/apiLettersRequest.service';
 
 const NewLetterLetterName= (props: NewLetterDialogProps) => {
 
@@ -13,16 +16,34 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
       return true
     }
 
-    const regex = /^(FMB|GB)-\d{4}-\d{2}-\d{2}-(\d{2})$/;
+    const regex = /^(FMB|GB|fmb|gb)-\d{4}-\d{2}-\d{2}-(\d{2})$/;
     const match = value.match(regex);
     if (!match) {
       return false;
     }
     const aa = parseInt(match[2], 10);
     return aa >= 1 && aa <= 99;
+  }
+
+  const checkLetterNameAvailable = async (letterName: string | null): Promise<boolean> => {
+    const letterType = letterName?.substring(0, 3).toLowerCase() === 'fmb' ? 'FMB' : 'GB';
+
+    try {
+      const responseLetters = await searchForLetterNameTitle(letterType, letterName)
+
+      if (responseLetters && responseLetters.length > 0) {
+        return false
+      } else {
+        return true
+      }
+    } catch (error) {
+      setError(true);
+      setHelperText('Error fetching letter name');
+      return true;
+    }
   };
 
-  const handleBlur = () => {
+  const handleBlur = async () => {
     const isValid = validateLetterName(letterName);
 
     if (!isValid) {
@@ -30,6 +51,14 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
       setHelperText(
         'Invalid format. Expected FMB-YYYY-MM-DD-AA or GB-YYYY-MM-DD-AA with AA between 01 and 99.'
       );
+      return;
+    }
+
+    const letterIsAvailable  = await checkLetterNameAvailable(letterName);
+
+    if (!letterIsAvailable) {
+      setError(true);
+      setHelperText('Letter name already exists');
       return;
     }
 
