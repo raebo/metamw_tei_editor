@@ -5,9 +5,11 @@ import { nodeTypes } from "./nodeTypes";
 import { backendService } from "./backendService";
 import { keyPressHandles } from "./keyPressHandles";
 import { removeNodeHandles } from "./removeNodeHandles";
+import { pinnedLetters } from './pinnedLetters';
 
 export const EditorUtils = {
   backendService,
+  pinnedLetters,
   keyPressHandles,
   markupGeneration,
   nodeTypes,

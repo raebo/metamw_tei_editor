@@ -11,6 +11,7 @@ import {
 } from "../../../../../redux/slices/editor.letter.slice";
 import { RootState } from "../../../../../redux/redux.store";
 import { useAppDispatch } from "../../../../../redux/hooks";
+import { EditorUtils } from '../../../../../utils/editor';
 
 const SearchContainer = () => {
 
@@ -45,36 +46,14 @@ const SearchContainer = () => {
   }
 
   const handleClick = useCallback((letterId: number, letterName: string) => {
-    if (statePinnedLetters.length > 0) {
-      let firstLetter = statePinnedLetters[0]
+    const newPinnedLetters = EditorUtils.pinnedLetters.computeNewPinnedLetters(statePinnedLetters, {
+      id: letterId,
+      name: letterName,
+      isPinned: null
+    });
 
-      if (firstLetter.isPinned) {
-        dispatch(setEditorPinnedLetters(
-          {
-            pinnedLetters: [
-              { id: letterId, name: letterName, isPinned: false },
-              ...statePinnedLetters,
-            ]
-          }
-        ))
-      } else {
-        dispatch(setEditorPinnedLetters(
-          {
-            pinnedLetters:
-              [
-                { id: letterId, name: letterName, isPinned: false },
-                ...statePinnedLetters.slice(1), // Add the rest of the array after the first element
-              ]
-          }
-        ))
-      }
-    } else {
-      dispatch(setEditorPinnedLetters(
-        {
-          pinnedLetters: [{ id: letterId, name: letterName, isPinned: false }]
-        }
-      ))
-    }
+    dispatch(setEditorPinnedLetters({ pinnedLetters: newPinnedLetters }));
+
   }, [dispatch, statePinnedLetters]);
 
   return (
