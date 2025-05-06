@@ -11,18 +11,25 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
   const [error, setError] = useState(false);
   const [helperText, setHelperText] = useState('');
 
-  const validateLetterName = (value: string | null) => {
-    if (!value) {
-      return true
-    }
+  const validateLetterName = (letterName: string) : { isValid: boolean, errorMessage: string | null } => {
+    const regex = /^(FMB|GB|fmb|gb)-(\d{4})-(\d{2})-(\d{2})-(\d{2})$/;
 
-    const regex = /^(FMB|GB|fmb|gb)-\d{4}-\d{2}-\d{2}-(\d{2})$/;
-    const match = value.match(regex);
-    if (!match) {
-      return false;
-    }
-    const aa = parseInt(match[2], 10);
-    return aa >= 1 && aa <= 99;
+    const match = letterName.match(regex);
+    if (!match) return { isValid: false, errorMessage: 'Invalid format. Expected FMB-YYYY-MM-DD-AA or GB-YYYY-MM-DD-AA with AA between 01 and 99.' };
+
+    const [, , yearStr, monthStr, dayStr] = match;
+
+    const year = parseInt(yearStr, 10);
+    const month = parseInt(monthStr, 10);
+    const day = parseInt(dayStr, 10);
+
+    const date = new Date(year, month - 1, day);
+    const isValidDate =
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day;
+
+    return { isValid: isValidDate, errorMessage: isValidDate ? null : 'The given name does not contains a valid date' };
   }
 
   const checkLetterNameAvailable = async (letterName: string | null): Promise<boolean> => {
@@ -44,13 +51,17 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
   };
 
   const handleBlur = async () => {
-    const isValid = validateLetterName(letterName);
 
-    if (!isValid) {
+    if (!letterName || letterName?.length == 0) {
       setError(true);
-      setHelperText(
-        'Invalid format. Expected FMB-YYYY-MM-DD-AA or GB-YYYY-MM-DD-AA with AA between 01 and 99.'
-      );
+      setHelperText('Please enter a letter name');
+      return;
+    }
+    const { isValid, errorMessage } = validateLetterName(letterName);
+
+    if (!isValid && errorMessage) {
+      setError(true);
+      setHelperText( errorMessage );
       return;
     }
 
