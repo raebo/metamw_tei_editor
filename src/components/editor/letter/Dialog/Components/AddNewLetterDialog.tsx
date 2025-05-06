@@ -69,6 +69,7 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
   const submitCreateHandler= async () => {
     try {
       const result = await createNewLetter(completionState)
+      
 
       enqueueSnackbar("New letter created successfully " + result, { variant: "success" });
       // if (result) {

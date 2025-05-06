@@ -63,7 +63,8 @@ export const createNewLetter = async (letterData: NewLetterCompletionState): Pro
         MiscUtils.misc.pickAttributes(letterData,
         ["isFmbLetter", "letterName",
          "firstHeaderContent", "sndHeaderContent",
-         "prevLetter", "nextLetter",
+         "prevLetterType", "prevLetter",
+         "nextLetterType", "nextLetter",
          "writerEntity", "writingPlace",
          "receivingPlace", "receiverEntity",
          "transkriptionValue", "editionValue", "letterLanguage"
