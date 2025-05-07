@@ -12,7 +12,7 @@ import {
   setLetterReference,
   setNodeClicked,
 } from '../slices/editor.letter.slice';
-import { EditorLetter, PinnedLetter } from '../../services/mappings/editorMappings';
+import { PinnedLetter } from '../../services/mappings/editorMappings';
 
 export const setEditorTabAndPinnedLettersThunk = createAsyncThunk(
   'editor/setEditorTabAndPinnedLetters',
