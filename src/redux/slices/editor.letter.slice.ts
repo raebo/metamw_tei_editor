@@ -1,16 +1,18 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { PinnedLetter } from "../../services/mappings/editorMappings";
 
 interface EditorLetterSlice {
   letter: {
     id: number | null
     name: string | null
+    viewMode: 'CODE' | 'WYSIWYG' | null
   },
   tabLetter: {
     id: number | null
     name: string | null
     contentChanged: boolean | null
     isPinned: boolean | null // remote pinned letters are pinned
+    viewMode: 'CODE' | 'WYSIWYG' | null
   },
   reloadLetterContent: boolean
   tabNumber: number
@@ -30,18 +32,21 @@ interface EditorLetterSlice {
     elementXmlId: string | null,
     elementKey: string | null
   }
+  changeLetterViewMode: boolean
 }
 
 const initialState: EditorLetterSlice = {
   letter: {
     id: null,
-    name: null
+    name: null,
+    viewMode: null
   },
   tabLetter: {
     id: null,
     name: null,
     contentChanged: null,
-    isPinned: null
+    isPinned: null,
+    viewMode: null
   },
   reloadLetterContent: false,
   tabNumber: 0,
@@ -60,27 +65,25 @@ const initialState: EditorLetterSlice = {
     elementType: null,
     elementXmlId: null,
     elementKey: null
-  }
+  },
+  changeLetterViewMode: false
 }
 
 const EditorLetterSlice = createSlice({
   name: 'editorLetter',
   initialState,
   reducers: {
+    enableChangeLetterViewMode(state) {
+      state.changeLetterViewMode = true
+    },
+    disableChangeLetterViewMode(state) {
+      state.changeLetterViewMode = true
+    },
     setEditorLetter(state, action) {
       if (!state.letter) {
         state.letter = {...action.payload.letter}
       } else {
         state.letter = {...state.letter, ...action.payload.letter}
-      }
-    },
-    setEditorTabLetter(state, action) {
-      if (!state.tabLetter) {
-        state.tabLetter = { ...action.payload.tabLetter }
-        state.tabNumber = { ...action.payload.tabNumber }
-      } else {
-        state.tabLetter = {...state.tabLetter, ...action.payload.tabLetter}
-        state.tabNumber = { ...action.payload.tabNumber }
       }
     },
     setReloadLetterContent(state, action) {
@@ -95,17 +98,18 @@ const EditorLetterSlice = createSlice({
     setEditorPinnedLetters(state, action) {
       state.pinnedLetters = [...action.payload.pinnedLetters]
     },
+    setEditorPinnedLetterViewMode(state, action: PayloadAction<{ id: number, viewMode: "CODE" | "WYSIWYG" }>) {
+      const letter = state.pinnedLetters.find(item => item.id === action.payload.id);
+      if (letter) {
+        letter.viewMode = action.payload.viewMode;
+      }
+    },
     addLetterToPinned(state, action) {
       if (!state.pinnedLetters.includes(action.payload.pinnedLetter)) {
         let pinnedLetters = [...state.pinnedLetters]
         pinnedLetters.push(action.payload.pinnedLetter)
 
         state.pinnedLetters = pinnedLetters
-      }
-    },
-    removeLetterFromPinned(state, action) {
-      if (action.payload.pinnedLetter) {
-        state.pinnedLetters = state.pinnedLetters.filter((pinnedLetter: PinnedLetter) => pinnedLetter.id !== action.payload.pinnedLetter.id)
       }
     },
     setContentTextIsMarked(state, action) {
@@ -128,12 +132,16 @@ const EditorLetterSlice = createSlice({
 })
 
 export const
-  { setEditorLetter,
+  {
+    enableChangeLetterViewMode,
+    disableChangeLetterViewMode,
+    setEditorLetter,
     setContentTextIsMarked,
     setEditorSelectedItem,
     setEditorTabNumber,
     setEditorSearchValue,
     setEditorPinnedLetters,
+    setEditorPinnedLetterViewMode,
     setReloadLetterContent,
     setDialogType,
     setLetterReference,

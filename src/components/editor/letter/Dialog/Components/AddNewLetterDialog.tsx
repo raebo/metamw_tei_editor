@@ -82,6 +82,7 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
         id: newLetterId,
         name: newLetterName,
         isPinned: true,
+        viewMode: "WYSIWYG"
       })
       dispatch(setEditorPinnedLetters({ pinnedLetters: newPinnedLetters }));
 
@@ -104,13 +105,26 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
       return false
     }
   }
+  const validPrevLetterCheck = () : boolean => {
+    if (completionState.prevLetterType !== null && completionState.prevLetterType === 'unknown' || completionState.prevLetterType === 'not_identified') {
+      return true
+    } else return completionState.prevLetterType === "select" && completionState.prevLetter !== null;
+  }
+
+  const validNextLetterCheck = () : boolean => {
+    if (completionState.nextLetterType !== null && completionState.nextLetterType === 'unknown' || completionState.nextLetterType === 'not_identified') {
+      return true
+    } else return completionState.nextLetterType === "select" && completionState.nextLetter !== null;
+  }
+
   const saveIsAvailable = [
     completionState.letterNameComplete,
     completionState.firstHeaderComplete,
     completionState.sndHeaderComplete,
-    completionState.prevLetterType !== null,
     completionState.nextLetterType !== null,
     validWriterCheck(),
+    validPrevLetterCheck(),
+    validNextLetterCheck(),
     completionState.writingPlace !== null,
     completionState.receiverEntity !== null,
     completionState.receivingPlace !== null,

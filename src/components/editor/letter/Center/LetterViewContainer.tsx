@@ -19,6 +19,7 @@ import {
 } from "../../../../redux/thunks/editor.letter.thunk";
 import { fetchPinnedLetterData } from "../../../../services/editor/apiPinnedLettersRequest.service";
 import { MiscUtils } from "../../../../utils/misc";
+import LetterViewCode from './LetterViewCode';
 
 type NodeActionCallback = (args: {
   node?: Node;
@@ -36,7 +37,6 @@ const LetterViewContainer = () => {
   const contentTextIsMarked = useSelector((state: RootState) => state.editorLetter.content.textIsMarked);
   const nodeClicked = useSelector((state: RootState) => state.editorLetter.content.nodeClicked);
   const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize)
-  const [letterXmlContent, setLetterXmlContent] = useState<string | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const contextMenuRef = useRef<HTMLDivElement | null>(null);
   const xmlContentRef = useRef<HTMLDivElement | null>(null);
@@ -44,6 +44,12 @@ const LetterViewContainer = () => {
 
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters)
+
+  const [letterState, setLetterState] = useState<{ viewMode: "CODE" | "WYSIWYG" | null; xmlContent: string | null }>({
+    viewMode: null,
+    xmlContent: null,
+  });
+
   const reloadLetterContent = useSelector((state: RootState) => state.editorLetter.reloadLetterContent);
   const [anchorPosition, setAnchorPosition] = useState<null | { top: number; left: number }>(null);
 
@@ -62,17 +68,17 @@ const LetterViewContainer = () => {
     { label: 'Eintrag Entfernen', action: ({ node }: { node?: Node }) => {
         try {
           if (!node) throw new Error("No node given as value")
-          
+
           const anchNode = EditorUtils.removeNodeHandles.findAnchestorPathNode(node)
-          
+
           if (!anchNode) throw new Error("No anchNode found with given path")
-          
+
           const xmlContent =
             EditorUtils.removeNodeHandles.removeNode(
               node,
               anchNode.afterDeleteCallback
             )
-          
+
           if (!xmlContent) throw new Error("No xml content found");
 
           EditorUtils.backendService.patchContent(
@@ -93,42 +99,58 @@ const LetterViewContainer = () => {
       } },
   ]
 
-  const returnLetterData = (letterId: number) => {
-    fetchLetterData(letterId)
-      .then((result) => {
-        if (result) {
-          setLetterXmlContent(result.xmlContent);
-        }
-      })
-      .catch(() => {
-        setLetterXmlContent("ERROR: Failed to fetch letter content");
-      });
+  const fetchSingleLetterData = async (letterId: number) : Promise<string> => {
+    try {
+      const result = await fetchLetterData(letterId)
+      return result?.xmlContent ?? "ERROR: Empty result"
+
+    } catch (e) {
+      return "ERROR: Failed to fetch letter content"
+    }
   }
-  const returnPinnedLetterData = (letterId: number) => {
-    fetchPinnedLetterData(letterId)
-      .then((result) => {
-        if (result) {
-          setLetterXmlContent(result.xmlContent);
-        }
-      })
-      .catch(() => {
-        setLetterXmlContent("ERROR: Failed to fetch letter content");
-      });
-  }
-  
+
+  const pinnedLetterData = async (letterId: number): Promise<string> => {
+    try {
+      const result = await fetchPinnedLetterData(letterId);
+      return result?.xmlContent ?? "ERROR: Empty result";
+    } catch (e) {
+      return "ERROR: Failed to fetch letter content";
+    }
+  };
+
   useEffect(() => {
     if (stateEditorLetter.id && statePinnedLetters.some((letter) => (letter.id === stateEditorLetter.id && letter.isPinned))) {
-      returnPinnedLetterData(stateEditorLetter.id)
+      pinnedLetterData(stateEditorLetter.id).then(xmlContent => {
+        setLetterState({
+          viewMode: stateEditorLetter.viewMode,
+          xmlContent: xmlContent
+        })
+      })
     } else if (stateEditorLetter.id !== null) {
-      returnLetterData(stateEditorLetter.id)
-    } else if (stateEditorLetter.id === null) {
-      setLetterXmlContent(null)
+      fetchSingleLetterData(stateEditorLetter.id).then(xmlContent => {
+        setLetterState({
+          viewMode: stateEditorLetter.viewMode,
+          xmlContent: xmlContent
+        })
+      })
+    } else {
+      setLetterState(
+        {
+          viewMode: null,
+          xmlContent: null
+        }
+      )
     }
   }, [stateEditorLetter]);
 
   useEffect(() => {
     if (reloadLetterContent && stateEditorLetter?.id !== null) {
-      returnPinnedLetterData(stateEditorLetter.id);
+      pinnedLetterData(stateEditorLetter.id).then(xml => {
+        setLetterState({
+          viewMode: stateEditorLetter.viewMode,
+          xmlContent: xml
+        })
+      })
       dispatch(setReloadLetterContent({ reloadLetterContent: false }))
     }
   }, [reloadLetterContent]);
@@ -177,8 +199,10 @@ const LetterViewContainer = () => {
         EditorUtils.textMarking.removeMarkedSpans();
         setSelectedNode(node)
         setDisplayMenuItems(menuItemsNoMarking);
-
-        setLetterXmlContent(xmlContentRef.current?.innerHTML ?? "");
+        setLetterState({
+          viewMode: "WYSIWYG",
+          xmlContent: xmlContentRef.current?.innerHTML ?? ""
+        })
 
         dispatch(setEditorNodeClickedAndContentLeftRightThunk({
           nodeClicked: true,
@@ -210,11 +234,18 @@ const LetterViewContainer = () => {
           }));
 
           setDisplayMenuItems(menuItems);
-          setLetterXmlContent(xmlContentRef.current?.innerHTML ?? "");
+          setLetterState( {
+            viewMode: "WYSIWYG",
+            xmlContent: xmlContentRef.current?.innerHTML ?? ""
+          }
+          )
         },
         (message: string) => {
           EditorUtils.textMarking.removeMarkedSpans();
-          setLetterXmlContent(xmlContentRef.current?.innerHTML ?? "");
+          setLetterState({
+            viewMode: "WYSIWYG",
+            xmlContent: xmlContentRef.current?.innerHTML ?? ""
+          })
 
           dispatch(setEditorMarkedAndContentLeftRightThunk({
             textIsMarked: false,
@@ -229,20 +260,19 @@ const LetterViewContainer = () => {
   };
 
   useEffect(() => {
-    if (xmlContentRef.current && letterXmlContent) {
+    if (xmlContentRef.current && letterState.xmlContent && letterState.viewMode === 'WYSIWYG') {
       xmlContentRef.current.addEventListener("mouseup", handleMouseUpMarkedElements);
       xmlContentRef.current.addEventListener("mousedown", handleNoMarkupRightClick);
     }
 
     return () => {
-      if (xmlContentRef.current && letterXmlContent) {
+      if (xmlContentRef.current && letterState.xmlContent && letterState.viewMode === 'WYSIWYG') {
         xmlContentRef.current.removeEventListener("mouseup", handleMouseUpMarkedElements);
         xmlContentRef.current.removeEventListener("mouseup", handleNoMarkupRightClick);
       }
     };
-
  // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [letterXmlContent]);
+ }, [letterState]);
 
 
   const handleMenuItemClick = (selectedItemLeft: string | null, selectedItemRight: string | null) => {
@@ -259,50 +289,56 @@ const LetterViewContainer = () => {
     <div className="letter-view-container">
       <div className="container-fmbc-letter">
         <div className="box-1">
-          {letterXmlContent ? (
+          {letterState.xmlContent ? (
             <>
-              <div
-                className="letter-xml"
-                id="letterXml"
-                ref={containerRef}
-                style={{ fontSize: `${stateLetterFontSize}%` }}
-              >
-                <div ref={xmlContentRef} id="letterXmlContent" style={{ padding: 20 }}>
-                  {letterXmlContent && <XMLDisplayParser xmlString={letterXmlContent} />}
-                </div>
+              { letterState.viewMode === "WYSIWYG" && (
+                <div
+                  className="letter-xml"
+                  id="letterXml"
+                  ref={containerRef}
+                  style={{ fontSize: `${stateLetterFontSize}%` }}
+                >
+                  <div ref={xmlContentRef} id="letterXmlContent" style={{ padding: 20 }}>
+                    { letterState.xmlContent && <XMLDisplayParser xmlString={letterState.xmlContent} /> }
+                  </div>
 
-                <div ref={contextMenuRef} id="letterXmlContextMenu" style={{ padding: 20 }}>
-                  <Menu
-                    open={Boolean(anchorPosition)}
-                    onClose={() => setAnchorPosition(null)}
-                    anchorReference="anchorPosition"
-                    anchorPosition={
-                      anchorPosition
-                        ? { top: anchorPosition.top, left: anchorPosition.left }
-                        : undefined
-                    }
-                  >
-                    {displayMenuItems.map((item, index) =>
-                      item.type === 'divider' ? (
-                        <Divider key={index} />
-                      ) : (
-                        <MenuItem key={index} onClick={() => {
-                          if (selectedNode) {
-                            item.action?.({ node: selectedNode });
-                            setSelectedNode(null)
-                            setAnchorPosition(null)
-                          }  else {
-                            item.action?.({})
-                          }
-                          }
-                        }>
-                          <Typography variant="body2">{item.label}</Typography>
-                        </MenuItem>
-                      )
-                    )}
-                  </Menu>
+                  <div ref={contextMenuRef} id="letterXmlContextMenu" style={{ padding: 20 }}>
+                    <Menu
+                      open={Boolean(anchorPosition)}
+                      onClose={() => setAnchorPosition(null)}
+                      anchorReference="anchorPosition"
+                      anchorPosition={
+                        anchorPosition
+                          ? { top: anchorPosition.top, left: anchorPosition.left }
+                          : undefined
+                      }
+                    >
+                      {displayMenuItems.map((item, index) =>
+                        item.type === 'divider' ? (
+                          <Divider key={index} />
+                        ) : (
+                          <MenuItem key={index} onClick={() => {
+                            if (selectedNode) {
+                              item.action?.({ node: selectedNode });
+                              setSelectedNode(null)
+                              setAnchorPosition(null)
+                            }  else {
+                              item.action?.({})
+                            }
+                            }
+                          }>
+                            <Typography variant="body2">{item.label}</Typography>
+                          </MenuItem>
+                        )
+                      )}
+                    </Menu>
+                  </div>
                 </div>
-              </div>
+              ) }
+              { letterState.viewMode === "CODE" && letterState.xmlContent && (
+                <LetterViewCode xmlString={letterState.xmlContent} />
+              )}
+
             </>
           ) : (
             <p>

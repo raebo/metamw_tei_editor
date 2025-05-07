@@ -41,6 +41,7 @@ const newTabNumber = (tabNumber: number): number => {
 const LetterTabs = () => {
   const dispatch = useAppDispatch();
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
+  const changeLetterViewMode = useSelector((state: RootState) => state.editorLetter.changeLetterViewMode);
   const stateActiveTab = useSelector((state: RootState) => state.editorLetter.tabNumber);
   const [activeTab, setActiveTab] = useState<number>(0);
 
@@ -55,8 +56,10 @@ const LetterTabs = () => {
 
 
   useEffect(() => {
-    if (statePinnedLetters.length > 0) {
-      dispatch(setEditorLetter({ letter: { id: statePinnedLetters[0].id, name: statePinnedLetters[0].name }}))
+    if (statePinnedLetters.length > 0 && !changeLetterViewMode) {
+      dispatch(setEditorLetter(
+          { letter: { id: statePinnedLetters[0].id, name: statePinnedLetters[0].name, viewMode: statePinnedLetters[0].viewMode }
+        }))
       stateActiveTab === null ? setActiveTab(0) : setActiveTab(stateActiveTab);
     }
 
@@ -66,7 +69,7 @@ const LetterTabs = () => {
   const handleTabChange = (_: React.SyntheticEvent, newTabValue: number) => {
     dispatch(
       setEditorTabAndPinnedLetterThunk({
-        pinnedLetter: { id: statePinnedLetters[newTabValue].id, name: statePinnedLetters[newTabValue].name },
+        pinnedLetter: { id: statePinnedLetters[newTabValue].id, name: statePinnedLetters[newTabValue].name, viewMode: statePinnedLetters[newTabValue].viewMode },
         tabNumber: newTabValue,
       })
     )
@@ -106,8 +109,8 @@ const LetterTabs = () => {
     <>
       <Box sx={{ maxWidth: { xs: 320, sm: 840, lg: 960, xl: 1024 }, bgcolor: 'background.paper' }}>
         <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
+          value={ activeTab }
+          onChange={ handleTabChange }
           variant="scrollable"
           scrollButtons = "auto"
           allowScrollButtonsMobile
@@ -123,7 +126,7 @@ const LetterTabs = () => {
               }
             }}
         >
-          {statePinnedLetters.map((pinnedLetter, index) => (
+          { statePinnedLetters.map((pinnedLetter, index) => (
             <Tab
               key={pinnedLetter.id}
               label={

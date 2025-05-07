@@ -3,7 +3,7 @@ import { PinnedLetter } from '../../services/mappings/editorMappings';
 export const pinnedLetters = {
   computeNewPinnedLetters: (
     statePinnedLetters: PinnedLetter[],
-    newLetter: { id: number, name: string, isPinned: boolean | null }
+    newLetter: { id: number, name: string, isPinned: boolean | null, viewMode: "CODE" | "WYSIWYG" | null }
   ): PinnedLetter[] => {
 
     const setIsPinned = newLetter.isPinned === null ? false : newLetter.isPinned;

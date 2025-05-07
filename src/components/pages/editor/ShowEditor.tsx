@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
-import { Box, List, ListItemButton, ListItemIcon } from "@mui/material";
+import { Box, List, ListItemButton, ListItemIcon, Tooltip } from '@mui/material';
+import CodeIcon from '@mui/icons-material/Code';
 import SearchIcon from "@mui/icons-material/Search";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SearchContainer from "../../editor/letter/Left/Search/SearchContainer";
@@ -15,8 +16,8 @@ import {
   setDialogType,
   setEditorLetter,
   setEditorPinnedLetters,
-  setEditorSelectedItem
-} from "../../../redux/slices/editor.letter.slice";
+  setEditorSelectedItem,
+} from '../../../redux/slices/editor.letter.slice';
 import { fetchPinnedLetters } from "../../../services/editor/apiPinnedLettersRequest.service";
 import { useAppDispatch } from "../../../redux/hooks";
 import { EditorConstants } from "../../../constants/editor";
@@ -29,7 +30,10 @@ import EntityFmbcCreationContainer from "../../editor/letter/Right/EntityFmbcCre
 import EntityLetterContainer from "../../editor/letter/Right/EntityLetter/EntityLetterContainer";
 import EditorFormDialog from "../../editor/letter/Dialog/EditorFormDialog";
 import useNoteClickHandler from "../../editor/letter/Center/hooks/useNoteClickHandler";
-import { setEditorDialogAndReferenceThunk } from "../../../redux/thunks/editor.letter.thunk";
+import {
+  setEditorDialogAndReferenceThunk,
+  setEditorPinnedLettersViewModeThunk,
+} from '../../../redux/thunks/editor.letter.thunk';
 import { enqueueSnackbar } from "notistack";
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
@@ -50,6 +54,7 @@ const ShowEditor = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const isMounted = useRef(false)
+  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
   const selectedItem = useSelector((state: RootState) => state.editorLetter.selectedItem);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showLeftContainer, setShowLeftContainer] = useState<boolean>(false)
@@ -60,27 +65,54 @@ const ShowEditor = () => {
   const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem| null>(null)
   const [selectedComponentRight, setSelectedComponentRight] = useState<ComponentMappingItem | null>(null)
 
+  const [isCodeView, setIsCodeView] = useState<boolean>(false)
+
   useEffect(() => {
     if (!isMounted.current) {
-
       fetchPinnedLetters().then((pinnedLetters) => {
         if (letterId && letterName) {
-          pinnedLetters.unshift({ id: parseInt(letterId), name: letterName, contentChanged: false, isPinned: false })
+          pinnedLetters.unshift({ id: parseInt(letterId), name: letterName, contentChanged: false, isPinned: false, viewMode: "WYSIWYG" })
         }
-
-        dispatch(
-          setEditorPinnedLetters({ pinnedLetters })
-        );
+        dispatch(setEditorPinnedLetters({ pinnedLetters }))
       })
 
       if (letterId !== undefined && letterId !== null && !isNaN(parseInt(letterId))) {
-        dispatch(setEditorLetter({ letter: { id: parseInt(letterId), name: letterName } }))
+        dispatch(setEditorLetter({ letter: { id: parseInt(letterId), name: letterName, viewMode: "WYSIWYG" } }))
       }
-
       isMounted.current = true
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (stateEditorLetter.id !== undefined && stateEditorLetter.id !== null) {
+      setIsCodeView(stateEditorLetter.viewMode === "CODE")
+    }
+  }, [stateEditorLetter.id, dispatch])
+
+  const handleToggleCodeview= () => {
+    if (stateEditorLetter.id === null) {
+      return
+    }
+    setIsCodeView(prev => {
+      const nextViewMode = !prev ? "CODE" : "WYSIWYG";
+      dispatch(
+        setEditorPinnedLettersViewModeThunk({
+          stateEditorLetter,
+          viewMode: nextViewMode
+        })
+      );
+      return !prev;
+    });
+    setIsCodeView(!isCodeView);
+    dispatch(
+      setEditorPinnedLettersViewModeThunk({
+        stateEditorLetter: stateEditorLetter,
+        viewMode: isCodeView ? "WYSIWYG" : "CODE"
+      })
+    )
+  };
+
 
   useEffect(() => {
     const validateLetterId = async () => {
@@ -101,7 +133,6 @@ const ShowEditor = () => {
         navigate('/error'); // Redirect to an error page if the validation fails
       }
     };
-
     validateLetterId();
 
   }, [letterId, navigate]);
@@ -209,7 +240,6 @@ const ShowEditor = () => {
   const userActionMenuHandleClose = () => {
     setAnchorEl(null);
   }
-
 
   useNoteClickHandler((noteElement) => {
     const xmlId = noteElement.getAttribute("xml:id");
@@ -352,6 +382,13 @@ const ShowEditor = () => {
                 <CloudUploadOutlinedIcon />
               </ListItemIcon>
             </ListItemButton>
+            <Tooltip title={isCodeView ? 'Switch to WYSIWYG view' : 'Switch to Code view'} placement="right">
+              <ListItemButton onClick={handleToggleCodeview} selected={isCodeView}>
+                <ListItemIcon>
+                  <CodeIcon color={isCodeView ? 'primary' : 'action'} />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
             <ListItemButton
               selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.dialogTypes.RESET_LETTER) }
               onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}

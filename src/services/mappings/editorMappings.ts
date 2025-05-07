@@ -34,7 +34,8 @@ export interface PinnedLetter {
   id: number,
   name: string,
   contentChanged: boolean,
-  isPinned: boolean
+  isPinned: boolean,
+  viewMode: "CODE" | "WYSIWYG" | null
 }
 export interface SearchLetter {
   id: number
@@ -84,12 +85,12 @@ export const mapApiToEditorLetterData = (apiLetter: any): EditorLetterData => {
 }
 
 export const mapApiToPinnedLetter = (apiPinnedLetter: ApiPinnedLetter): PinnedLetter => {
-
   return {
     id: apiPinnedLetter.id,
     name: apiPinnedLetter.name,
     contentChanged: apiPinnedLetter.content_changed,
-    isPinned: true
+    isPinned: true,
+    viewMode: 'WYSIWYG'
   }
 }
 

@@ -49,7 +49,8 @@ const SearchContainer = () => {
     const newPinnedLetters = EditorUtils.pinnedLetters.computeNewPinnedLetters(statePinnedLetters, {
       id: letterId,
       name: letterName,
-      isPinned: null
+      isPinned: null,
+      viewMode: 'WYSIWYG'
     });
 
     dispatch(setEditorPinnedLetters({ pinnedLetters: newPinnedLetters }));
