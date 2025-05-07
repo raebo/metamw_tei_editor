@@ -41,18 +41,12 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
   }, []);
 
   const handlePrevLetterCheckboxChange = (value: 'unknown' | 'not_identified' | 'select') => {
-    switch (value) {
-      case 'unknown':
-        props.onChange({ nextLetterAutoAvailable: false, nextLetterType: value } )
-
-        break;
-      case 'not_identified':
-        props.onChange({ nextLetterAutoAvailable: false, nextLetterType: value } )
-        break;
-      case 'select':
-        props.onChange( { nextLetterAutoAvailable: true, nextLetterType: value} )
-        break;
+    props.onChange({
+      nextLetterAutoAvailable: value === 'select',
+      nextLetterType: value,
+      ...(value !== 'select' && { nextLetter: null })
     }
+    )
   }
 
   const searchForLetters = async (inputValue: string) => {

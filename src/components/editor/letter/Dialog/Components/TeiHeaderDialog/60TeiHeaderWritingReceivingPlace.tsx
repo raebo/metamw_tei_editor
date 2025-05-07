@@ -17,10 +17,8 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
 
   const setSelectedOption = (value: SnippetEntity | null) => {
     if (value && props.dialogType === 'writing') {
-      console.log("writing place selected", value)
       props.onChange({ writingPlace: value })
     } else if (value && props.dialogType === 'receiving') {
-      console.log("receiving place selected", value)
       props.onChange({ receivingPlace: value })
     }
   }

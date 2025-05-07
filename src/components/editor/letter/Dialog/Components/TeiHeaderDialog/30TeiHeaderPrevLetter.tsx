@@ -38,19 +38,13 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
     fetchDefaultLetters();
   }, []);
 
-  const handlePrevLetterCheckboxChange = (value: 'unknown' | 'not_identified' | 'select') => {
-    switch (value) {
-      case 'unknown':
-        props.onChange({ prevLetterAutoAvailable: false, prevLetterType: value } )
 
-        break;
-      case 'not_identified':
-        props.onChange({ prevLetterAutoAvailable: false, prevLetterType: value } )
-        break;
-      case 'select':
-        props.onChange( { prevLetterAutoAvailable: true, prevLetterType: null } )
-        break;
-    }
+  const handlePrevLetterCheckboxChange = (value: 'unknown' | 'not_identified' | 'select') => {
+    props.onChange({
+      prevLetterAutoAvailable: value === 'select',
+      prevLetterType: value,
+      ...(value !== 'select' && { prevLetter: null })
+    });
   };
 
   const searchForLetters = async (inputValue: string) => {
