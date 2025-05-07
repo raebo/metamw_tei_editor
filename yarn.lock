@@ -2342,6 +2342,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@monaco-editor/loader@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@monaco-editor/loader@npm:1.5.0"
+  dependencies:
+    state-local: "npm:^1.0.6"
+  checksum: 10c0/d8e1fd75fea113b4d91405784ed4db757df450c6e57a85e87728281e819a73a3ef9fe0cbb1dc1509456f1e895ad9c11e4748f80b68900cb6cf600170e14ce6ed
+  languageName: node
+  linkType: hard
+
+"@monaco-editor/react@npm:^4.7.0":
+  version: 4.7.0
+  resolution: "@monaco-editor/react@npm:4.7.0"
+  dependencies:
+    "@monaco-editor/loader": "npm:^1.5.0"
+  peerDependencies:
+    monaco-editor: ">= 0.25.0 < 1"
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/a4e91c6eda1a71f5fd23871bd801de435490ccbc43934d23cba65cefe2be7e9d02c9a57c4ef80fc9fe99e4d4deea51e5db19cb4e0ecf3f51818dda0eb9cdbf12
+  languageName: node
+  linkType: hard
+
 "@mui/core-downloads-tracker@npm:^6.4.11":
   version: 6.4.11
   resolution: "@mui/core-downloads-tracker@npm:6.4.11"
@@ -3218,6 +3240,13 @@ __metadata:
   version: 0.0.6
   resolution: "@types/use-sync-external-store@npm:0.0.6"
   checksum: 10c0/77c045a98f57488201f678b181cccd042279aff3da34540ad242f893acc52b358bd0a8207a321b8ac09adbcef36e3236944390e2df4fcedb556ce7bb2a88f2a8
+  languageName: node
+  linkType: hard
+
+"@types/vkbeautify@npm:^0":
+  version: 0.99.4
+  resolution: "@types/vkbeautify@npm:0.99.4"
+  checksum: 10c0/90f776a9e419180270c206adbb99b2ed29ba2969a0cf846f1029e0759bc07eb1512673c2d9bd072e88c5b4cd88e8872b90864fa52808b74cbdc83183752698d4
   languageName: node
   linkType: hard
 
@@ -10584,6 +10613,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"state-local@npm:^1.0.6":
+  version: 1.0.7
+  resolution: "state-local@npm:1.0.7"
+  checksum: 10c0/8dc7daeac71844452fafb514a6d6b6f40d7e2b33df398309ea1c7b3948d6110c57f112b7196500a10c54fdde40291488c52c875575670fb5c819602deca48bd9
+  languageName: node
+  linkType: hard
+
 "statuses@npm:2.0.1, statuses@npm:^2.0.1":
   version: 2.0.1
   resolution: "statuses@npm:2.0.1"
@@ -10934,6 +10970,7 @@ __metadata:
     "@lexical/list": "npm:^0.20.0"
     "@lexical/markdown": "npm:^0.20.0"
     "@lexical/react": "npm:^0.20.0"
+    "@monaco-editor/react": "npm:^4.7.0"
     "@mui/icons-material": "npm:^6.4.0"
     "@mui/material": "npm:^6.4.0"
     "@mui/x-data-grid": "npm:^7.23.0"
@@ -10952,6 +10989,7 @@ __metadata:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
     "@types/react-refresh": "npm:^0"
+    "@types/vkbeautify": "npm:^0"
     "@typescript-eslint/eslint-plugin": "npm:^8.30.1"
     "@typescript-eslint/parser": "npm:^8.30.1"
     autoprefixer: "npm:^10.4.20"
@@ -10993,6 +11031,7 @@ __metadata:
     ts-jest: "npm:^29.2.5"
     typescript: "npm:^5.7.2"
     uuid: "npm:^11.1.0"
+    vkbeautify: "npm:^0.99.3"
     web-vitals: "npm:^4.2.4"
     webpack: "npm:^5.99.5"
     webpack-cli: "npm:^6.0.1"
@@ -11524,6 +11563,13 @@ __metadata:
   version: 1.1.2
   resolution: "vary@npm:1.1.2"
   checksum: 10c0/f15d588d79f3675135ba783c91a4083dcd290a2a5be9fcb6514220a1634e23df116847b1cc51f66bfb0644cf9353b2abb7815ae499bab06e46dd33c1a6bf1f4f
+  languageName: node
+  linkType: hard
+
+"vkbeautify@npm:^0.99.3":
+  version: 0.99.3
+  resolution: "vkbeautify@npm:0.99.3"
+  checksum: 10c0/74999e62fbdeabec4a2382cbd33f6f59c9fa12cb52b29f163ba8e2eaf088625faf71e786a09e4e1635202af616cdc4959cc168bdb1636ec51fdb9ccec89d894c
   languageName: node
   linkType: hard
 
