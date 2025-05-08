@@ -50,6 +50,7 @@ export const EditorConstants = {
 
   changeTypes: {
     NODE_REMOVED: "NODE_REMOVED",
+    MANUAL_CODE_CHANGE: "MANUAL_CODE_CHANGE",
     note: {
       ADDED: "NOTE_ADDED",
       CONTENT_CHANGED: "NOTE_CONTENT_CHANGED",
