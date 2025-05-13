@@ -54,6 +54,7 @@ export interface SnippetEntity {
   entityParentName?: string
   entityPlaceCountryName?: string
   entityKind?: string
+  extraData: {}
 }
 
 export interface SnippetApiEntity {
@@ -66,6 +67,7 @@ export interface SnippetApiEntity {
   entity_parent_name?: string;
   entity_place_country_name?: string;
   entity_kind?: string;
+  extra_data: {};
 }
 
 export type SnippetDialogType = "REJECT" | "ACCEPT" | "RESET_LETTER" | "WRITE_LETTER"

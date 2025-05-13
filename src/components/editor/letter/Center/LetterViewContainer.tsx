@@ -20,6 +20,7 @@ import {
 import { fetchPinnedLetterData } from "../../../../services/editor/apiPinnedLettersRequest.service";
 import { MiscUtils } from "../../../../utils/misc";
 import LetterViewCode from './LetterViewCode';
+import { removeMarkedSpans } from '../../../../utils/auto_anno/domHandling';
 
 type NodeActionCallback = (args: {
   node?: Node;
@@ -173,12 +174,18 @@ const LetterViewContainer = () => {
       setAnchorPosition({ top: event.clientY, left: event.clientX });
     }
 
-
     if (contentTextIsMarked) {
       contextMenuElement.addEventListener("contextmenu", handleContextMenuTextIsMarked);
     } else if (nodeClicked) {
       contextMenuElement.addEventListener("contextmenu", handleContextMenuNodeClicked);
     } else {
+      if (xmlContentRef.current !== null) {
+        removeMarkedSpans(xmlContentRef.current);
+        setLetterState({
+          viewMode: "WYSIWYG",
+          xmlContent: xmlContentRef.current?.innerHTML ?? ""
+        })
+      }
       contextMenuElement.removeEventListener("contextmenu", handleContextMenuTextIsMarked);
       contextMenuElement.removeEventListener("contextmenu", handleContextMenuNodeClicked);
     }
@@ -196,7 +203,7 @@ const LetterViewContainer = () => {
     EditorUtils.xmlCheck.isADeletableNode(
       event.target as Node,
       (node: Node) => {
-        EditorUtils.textMarking.removeMarkedSpans();
+        EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
         setSelectedNode(node)
         setDisplayMenuItems(menuItemsNoMarking);
         setLetterState({
@@ -224,7 +231,7 @@ const LetterViewContainer = () => {
         selection,
         xmlContentRef.current as HTMLElement,
         (selection: Selection) => {
-          EditorUtils.textMarking.removeMarkedSpans();
+          EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
           EditorUtils.textMarking.markValidSelection(selection, selection.getRangeAt(0));
 
           dispatch(setEditorMarkedAndContentLeftRightThunk({
@@ -241,7 +248,7 @@ const LetterViewContainer = () => {
           )
         },
         (message: string) => {
-          EditorUtils.textMarking.removeMarkedSpans();
+          EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
           setLetterState({
             viewMode: "WYSIWYG",
             xmlContent: xmlContentRef.current?.innerHTML ?? ""

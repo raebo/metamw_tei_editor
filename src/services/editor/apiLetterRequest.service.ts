@@ -38,6 +38,21 @@ export const letterContent = async (letterId: number): Promise<string> => {
   }
 }
 
+export const fetchEntityKey = async (entityType: string): Promise<string> => {
+  const entityKey = EditorConstants.ENTITY_TYPES[entityType as keyof typeof EditorConstants.ENTITY_TYPES];
+  if (!entityKey) {
+    throw new Error(`Unsupported entity type: ${entityType}`);
+  }
+
+  try {
+    const response = await initApi.initApi().get(`/jwt/editor/entities/fetch_entity_key?entity_type=${entityType.toLowerCase()}`);
+
+    return response?.data?.entity_key
+  } catch (err) {
+    throw new Error(`Could not fetch new entity key for: ${entityType}`);
+  }
+}
+
 
 export const searchEditortEntities = async (searchString: string | null, entityType: string): Promise<SnippetEntity[]| undefined> => {
   const entityKey = EditorConstants.ENTITY_TYPES[entityType as keyof typeof EditorConstants.ENTITY_TYPES];

@@ -56,16 +56,20 @@ export const textMarking = {
     range.surroundContents(span);
     selection.removeAllRanges();
   },
-  markedSpanEntries(): NodeListOf<Element> | null{
-    return document.querySelectorAll("#letterXml > * span.marked");
+  markedSpanEntries(root: Element): NodeListOf<Element> | null{
+    return root.querySelectorAll("#letterXml > * span.marked");
   },
-  markedSpanEntry(): Element | null {
-    const entries = this.markedSpanEntries()
+  markedSpanEntry(root: Element): Element | null {
+    const entries = this.markedSpanEntries(root)
 
     return entries !== null ? entries[0] : null
   },
-  removeMarkedSpans() {
-    const markedSpans = this.markedSpanEntries()
+  removeMarkedSpans(root: Element | null) {
+    if (root === null) {
+      throw new Error("removeMarkedSpans: root is null");
+    }
+
+    const markedSpans = this.markedSpanEntries(root)
 
     if (!markedSpans) return
 

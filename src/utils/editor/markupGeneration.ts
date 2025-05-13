@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid"
 import { EditorUtils } from "./index"
 import {xmlCheck} from "./xmlCheck";
-import { ActOfWritingElement } from '../../services/mappings/editorMappings';
+import { ActOfWritingElement, MarkupPersonData } from '../../services/mappings/editorMappings';
 
 export const markupGeneration = {
   addAttachmentMarkup: (xmlContent: string, attachmentType: string, attachmentName: string) : { xmlString: string, contentChanged: boolean } => {
@@ -25,6 +25,34 @@ export const markupGeneration = {
     }
 
     return { xmlString: xmlCheck.serializeDocument(xmlDoc), contentChanged: true }
+  },
+  addPersonMarkup: (root: Element, peopleMarkupData: MarkupPersonData[]) : { xmlId: string | null, contentChanged: boolean } => {
+
+    const markedSpans = root.querySelectorAll('span.marked')
+
+    if (markedSpans.length === 0) return { xmlId: null, contentChanged: false };
+
+    const xmlId = `persName_${uuidv4()}`
+
+    markedSpans.forEach(span => {
+      const persNameNode = document.createElement("persName")
+      persNameNode.setAttribute("xml:id", xmlId)
+      persNameNode.textContent = span.textContent
+
+      peopleMarkupData.forEach(markup => {
+        const nameNode = document.createElement("name")
+        nameNode.setAttribute("type", "person")
+        nameNode.setAttribute("key", markup.key)
+        nameNode.setAttribute("style", "hidden")
+        nameNode.textContent = markup.nameDisplay
+
+        persNameNode.appendChild(nameNode)
+      })
+
+      span.replaceWith(persNameNode);
+    })
+
+    return { xmlId: xmlId, contentChanged: true }
   },
   noteMarkup: (xmlContent: string, userLogin: string, noteContent: string, commentType: string) : { xmlString: string, xmlId: string } => {
     const parser = new DOMParser()
@@ -117,7 +145,7 @@ export const markupGeneration = {
       author: 0,
       writer: 1,
     }
-    const sortedAuthorWriters = authorWriters.sort((a, b) => rolePriority[a.role as 'author' | 'writer'] - rolePriority[b.role as 'author', 'writer'])
+    const sortedAuthorWriters = authorWriters.sort((a, b) => rolePriority[a.role as 'author' | 'writer'] - rolePriority[b.role as 'author' | 'writer'])
 
     sortedAuthorWriters.forEach((authorWriter) => {
       const docAuthor = xmlDoc.createElement("docAuthor");

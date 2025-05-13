@@ -77,7 +77,7 @@ const EditorLetterSlice = createSlice({
       state.changeLetterViewMode = true
     },
     disableChangeLetterViewMode(state) {
-      state.changeLetterViewMode = true
+      state.changeLetterViewMode = false
     },
     setEditorLetter(state, action) {
       if (!state.letter) {
@@ -106,10 +106,7 @@ const EditorLetterSlice = createSlice({
     },
     addLetterToPinned(state, action) {
       if (!state.pinnedLetters.includes(action.payload.pinnedLetter)) {
-        let pinnedLetters = [...state.pinnedLetters]
-        pinnedLetters.push(action.payload.pinnedLetter)
-
-        state.pinnedLetters = pinnedLetters
+        state.pinnedLetters = [...state.pinnedLetters, action.payload.pinnedLetter];
       }
     },
     setContentTextIsMarked(state, action) {

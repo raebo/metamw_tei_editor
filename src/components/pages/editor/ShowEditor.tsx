@@ -47,6 +47,10 @@ import QuickContentFormatter from "../../editor/letter/Right/QuickContentFormatt
 import LetterFontSizeHandle from "../../auto_anno/misc/LetterFontSizeHandle";
 
 
+export interface EditorContainerProps {
+  xmlRef: React.RefObject<HTMLDivElement>;
+}
+
 const ShowEditor = () => {
   let { letterId } = useParams<{ letterId: string }>();
   let { letterName } = useParams<{ letterName: string }>();
@@ -54,6 +58,7 @@ const ShowEditor = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const isMounted = useRef(false)
+  const xmlRefCenter = useRef<HTMLDivElement>(null);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
   const selectedItem = useSelector((state: RootState) => state.editorLetter.selectedItem);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -205,7 +210,7 @@ const ShowEditor = () => {
     [EditorConstants.compMappingRight.ASSIGNED]: { name: EditorConstants.compMappingRight.ASSIGNED, showContainer: true , component: <AssignedContainer />, action: () => true },
     [EditorConstants.compMappingRight.SET_FAVOURITE]: { name: EditorConstants.compMappingRight.SET_FAVOURITE, showContainer: false, action: () => handleFavouriteClick(letterId, true) }, // Example with a function
     [EditorConstants.compMappingRight.PUBLISH_LETTER]: { name: EditorConstants.compMappingRight.PUBLISH_LETTER,  showContainer: false, action: () => handlePublishingClick(letterId, true) },
-    [EditorConstants.compMappingRight.ENT_PERSON]: { name: EditorConstants.compMappingRight.ENT_PERSON, showContainer: true , component: <EntityPersonContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_PERSON]: { name: EditorConstants.compMappingRight.ENT_PERSON, showContainer: true , component: <EntityPersonContainer xmlRef={xmlRefCenter} />, action: () => true },
     [EditorConstants.compMappingRight.ENT_PLACE]: { name: EditorConstants.compMappingRight.ENT_PLACE, showContainer: true , component: <EntityPlaceContainer/>, action: () => true },
     [EditorConstants.compMappingRight.ENT_CREATION]: { name: EditorConstants.compMappingRight.ENT_CREATION, showContainer: true , component: <EntityCreationContainer/>, action: () => true },
     [EditorConstants.compMappingRight.ENT_FMBC_CREATION]: { name: EditorConstants.compMappingRight.ENT_FMBC_CREATION,  showContainer: true , component: <EntityFmbcCreationContainer/>, action: () => true },
@@ -319,10 +324,10 @@ const ShowEditor = () => {
             width: showLeftContainer && showRightContainer ? "60%" : showLeftContainer || showRightContainer ? "80%" : "90%",
           }}
         >
-          <>
+          <div ref={xmlRefCenter}>
             <LetterTabs />
             <LetterViewContainer />
-          </>
+          </div>
         </Box>
 
         {showRightContainer && (

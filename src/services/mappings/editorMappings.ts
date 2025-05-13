@@ -56,6 +56,16 @@ export interface EditorLetterData {
   xmlContent: string
 }
 
+export interface MarkupPersonData {
+  id: number | null,
+  key: string,
+  nameDisplay: string,
+  nameLast: string | null,
+  nameFirst: string | null,
+  isNewEntry: boolean
+}
+
+
 export const mapApiToEditorLetter = (apiLetter: any): EditorLetter => {
   return {
     id: apiLetter.id,

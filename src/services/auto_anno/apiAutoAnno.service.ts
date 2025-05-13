@@ -97,7 +97,8 @@ const mapApiToSnippetEntity = (apiEntity: SnippetApiEntity): SnippetEntity => {
     entitySettlementKind: apiEntity.entity_settlement_kind,
     entityParentName: apiEntity.entity_parent_name,
     entityPlaceCountryName: apiEntity.entity_place_country_name,
-    entityKind: apiEntity.entity_kind
+    entityKind: apiEntity.entity_kind,
+    extraData: apiEntity.extra_data,
   }
 }
 

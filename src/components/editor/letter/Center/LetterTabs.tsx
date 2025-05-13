@@ -69,7 +69,7 @@ const LetterTabs = () => {
   const handleTabChange = (_: React.SyntheticEvent, newTabValue: number) => {
     dispatch(
       setEditorTabAndPinnedLetterThunk({
-        pinnedLetter: { id: statePinnedLetters[newTabValue].id, name: statePinnedLetters[newTabValue].name, viewMode: statePinnedLetters[newTabValue].viewMode },
+        letter: { id: statePinnedLetters[newTabValue].id, name: statePinnedLetters[newTabValue].name, viewMode: statePinnedLetters[newTabValue].viewMode },
         tabNumber: newTabValue,
       })
     )

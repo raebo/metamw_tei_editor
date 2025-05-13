@@ -29,16 +29,16 @@ export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
   'editor/setEditorTabAndPinnedLetter',
   async (
     {
-      pinnedLetter,
+      letter,
       tabNumber,
     }: {
-      pinnedLetter: { id: number; name: string; viewMode: 'CODE' | 'WYSIWYG' | null };
+      letter: { id: number; name: string; viewMode: 'CODE' | 'WYSIWYG' | null };
       tabNumber: number;
     },
     { dispatch },
   ) => {
 
-    dispatch(setEditorLetter({ letter: pinnedLetter }));
+    dispatch(setEditorLetter({ letter: letter }));
     dispatch(setEditorTabNumber({ tabNumber }));
     if (tabNumber === -1) {
       dispatch(setEditorLetter({ letter: { id: null, name: null } }));
@@ -61,13 +61,13 @@ export const setEditorPinnedLettersViewModeThunk = createAsyncThunk(
 
     if(!stateEditorLetter.id) return
 
-    dispatch(enableChangeLetterViewMode())
+    dispatch(disableChangeLetterViewMode())
 
     try {
       dispatch(setEditorLetter({ letter: { ...stateEditorLetter, viewMode: viewMode } }));
       dispatch(setEditorPinnedLetterViewMode({ id: stateEditorLetter.id, viewMode: viewMode }));
     } finally {
-      dispatch(disableChangeLetterViewMode())
+      dispatch(enableChangeLetterViewMode())
     }
   },
 );
