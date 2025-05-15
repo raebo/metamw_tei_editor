@@ -211,7 +211,7 @@ const ShowEditor = () => {
     [EditorConstants.compMappingRight.SET_FAVOURITE]: { name: EditorConstants.compMappingRight.SET_FAVOURITE, showContainer: false, action: () => handleFavouriteClick(letterId, true) }, // Example with a function
     [EditorConstants.compMappingRight.PUBLISH_LETTER]: { name: EditorConstants.compMappingRight.PUBLISH_LETTER,  showContainer: false, action: () => handlePublishingClick(letterId, true) },
     [EditorConstants.compMappingRight.ENT_PERSON]: { name: EditorConstants.compMappingRight.ENT_PERSON, showContainer: true , component: <EntityPersonContainer xmlRef={xmlRefCenter} />, action: () => true },
-    [EditorConstants.compMappingRight.ENT_PLACE]: { name: EditorConstants.compMappingRight.ENT_PLACE, showContainer: true , component: <EntityPlaceContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_PLACE]: { name: EditorConstants.compMappingRight.ENT_PLACE, showContainer: true , component: <EntityPlaceContainer xmlRef={xmlRefCenter} />, action: () => true },
     [EditorConstants.compMappingRight.ENT_CREATION]: { name: EditorConstants.compMappingRight.ENT_CREATION, showContainer: true , component: <EntityCreationContainer/>, action: () => true },
     [EditorConstants.compMappingRight.ENT_FMBC_CREATION]: { name: EditorConstants.compMappingRight.ENT_FMBC_CREATION,  showContainer: true , component: <EntityFmbcCreationContainer/>, action: () => true },
     [EditorConstants.compMappingRight.ENT_LETTER]: { name: EditorConstants.compMappingRight.ENT_LETTER, showContainer: true , component: <EntityLetterContainer/>, action: () => true },
@@ -405,7 +405,7 @@ const ShowEditor = () => {
           </List>
         </Box>
       </Box>
-      <EditorFormDialog open={false} />i
+      <EditorFormDialog xmlRef={xmlRefCenter} open={false} />i
       <UserActionMenu anchorEl={anchorEl} open={anchorEl !== null} handleClose={userActionMenuHandleClose} />
       <EditorKeyHandle />
       <LetterFontSizeHandle />

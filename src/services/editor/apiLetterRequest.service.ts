@@ -60,7 +60,7 @@ export const searchEditortEntities = async (searchString: string | null, entityT
     throw new Error(`Unsupported entity type: ${entityType}`);
   }
 
-  let url = `/jwt/editor/letters/search_for_entities/${entityType.toLowerCase()}`
+  let url = `/jwt/editor/entities/search/${entityType.toLowerCase()}`
 
   if (searchString !== null) { url += `/${searchString}` }
 

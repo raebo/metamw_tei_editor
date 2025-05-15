@@ -15,10 +15,9 @@ const AddNoteDialog = (props: DefaultDialogProps) => {
   const [comment, setComment] = useState("");
   const [noteType, setNoteType] = useState("");
   const [noteLanguage, setNoteLanguage] = useState("");
-  const markedSpan = EditorUtils.textMarking.markedSpanEntry();
+  const markedSpan = EditorUtils.textMarking.markedSpanEntry(props.xmlRef.current);
   const markedSection =
     markedSpan?.parentElement?.innerHTML || "<p>No marked section found</p>";
-
 
   const dispatch = useAppDispatch();
   const user = useSelector((state: RootState) => state.auth.user);

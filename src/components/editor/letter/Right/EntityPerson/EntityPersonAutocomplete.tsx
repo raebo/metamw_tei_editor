@@ -94,7 +94,7 @@ const EntityPersonAutocomplete = (props: EntityPersonAutocompleteProps) => {
           );
         }}
         renderInput={(params) => (
-          <TextField {...params} label={ "Empfänger Auswählen"} variant="outlined" />
+          <TextField {...params} label={ "Eintrag Auswählen"} variant="outlined" />
         )}
         fullWidth
       />

@@ -20,10 +20,12 @@ import AddNewLetterDialog from './Components/AddNewLetterDialog';
 
 interface EditorFormDialogProps {
   open: boolean
+  xmlRef:  React.RefObject<HTMLDivElement>,
 }
 
 export interface DefaultDialogProps {
   setWidth: (width: number | string) => void,
+  xmlRef: React.RefObject<HTMLDivElement>;
   onClose: () => void
 }
 
@@ -68,14 +70,14 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
   }
 
   const DialogContentComponents : Record<string, React.ReactNode> = {
-    [EditorConstants.dialogTypes.ADD_NOTE]: <AddNoteDialog onClose={handleClose} setWidth={setDialogWidth} />,
-    [EditorConstants.dialogTypes.EDIT_NOTE]: <EditNoteDialog onClose={handleClose}  setWidth={setDialogWidth} />,
-    [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog onClose={handleClose}  setWidth={setDialogWidth} />,
-    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: <DateWhenAddDialog onClose={handleClose}  setWidth={setDialogWidth} />,
-    [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog onClose={handleClose}  setWidth={setDialogWidth} />,
-    [EditorConstants.dialogTypes.ADD_WRITING_PART]: <AddWritingActDialog onClose={handleClose}  setWidth={setDialogWidth} />,
-    [EditorConstants.dialogTypes.ADD_TEI_HEADER]: <AddTeiHeaderDialog onClose={handleClose}  setWidth={setDialogWidth} />,
-    [EditorConstants.dialogTypes.ADD_NEW_LETTER]: <AddNewLetterDialog onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.ADD_NOTE]: <AddNoteDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.EDIT_NOTE]: <EditNoteDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: <DateWhenAddDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.ADD_WRITING_PART]: <AddWritingActDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.ADD_TEI_HEADER]: <AddTeiHeaderDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.ADD_NEW_LETTER]: <AddNewLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
   }
 
   return (

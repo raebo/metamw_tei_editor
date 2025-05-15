@@ -1,7 +1,65 @@
 import { initApi } from '../../services/apiRequest.service'
 import { replaceWithCamelCase } from "../auto_anno/domHandling";
+import { EntityType } from '../../constants/editor';
 
 export const backendService = {
+  fetchCountryEntries: async (): Promise<{name: string, id: number}[]> => {
+    try {
+      const response = await initApi().get('/jwt/misc/countries');
+
+      if (!response) {
+        throw new Error("No response from server for country entries");
+      }
+
+      return response.data
+    } catch (error: any) {
+      const response = error.response;
+
+      if (response !== undefined) {
+        throw new Error(`Error response is undefined  ${response.data.error}`);
+      } else {
+        throw new Error(`backendService.fetchCountryEntries: ${error.message}`);
+      }
+    }
+  },
+  fetchKindEntries: async (): Promise<string[]> => {
+    try {
+      const response = await initApi().get('/jwt/misc/place_kinds');
+
+      if (!response) {
+        throw new Error("No response from server for place kind entries");
+      }
+
+      return response.data
+    } catch (error: any) {
+      const response = error.response;
+
+      if (response !== undefined) {
+        throw new Error(`Error response is undefined  ${response.data.error}`);
+      } else {
+        throw new Error(`backendService.fetchKindEntries: ${error.message}`);
+      }
+    }
+  },
+  createEntity: async (entityData: any, entityType: EntityType): Promise<any> => {
+    try {
+      const response = await initApi().post(`/jwt/editor/entities?entity_type=${entityType}/`, {
+        entityData: {
+          ...entityData
+        }
+      });
+
+      return response.data;
+    } catch (error: any) {
+      const response = error.response;
+
+      if (response !== undefined) {
+        throw new Error(response.data.error);
+      } else {
+        throw new Error(`backendService.createEntity: ${error.message}`);
+      }
+    }
+  },
   patchContent: async (content: string, letterId: number | null, changeType: string, xmlId: string | null): Promise<boolean> => {
     if (!letterId) {
       throw new Error("No letter id provided");

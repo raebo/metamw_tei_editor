@@ -134,6 +134,10 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
 
       if (!letterElement) { throw new Error('No letter element found!'); }
 
+      for (const person of addedPersonEntries.filter(entry => entry.isNewEntry)) {
+        const responseData = await EditorUtils.backendService.createEntity(person, EditorConstants.ENTITY_TYPES.PERSON);
+      }
+
       const { xmlId, contentChanged } = EditorUtils.markupGeneration.addPersonMarkup(letterElement, addedPersonEntries);
 
       if (!contentChanged) {
@@ -150,7 +154,10 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
           contentLeft: null,
           contentRight: null
         }));
-        enqueueSnackbar('Person markup was added successfully', { variant: 'success' });
+
+        const newPeopleCount =  addedPersonEntries.filter(entry => entry.isNewEntry).length
+
+        enqueueSnackbar(`Person markup was added successfully. ${newPeopleCount} new people has been created`, { variant: 'success' });
       }
 
     } catch (err) {
@@ -190,11 +197,10 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
           </Stack>
         </Box>
 
-
         <FormControl component="fieldset" sx={{ mb: 3 }}>
           <RadioGroup row value={selectedOption} onChange={(e) => handleSelectOption(e.target.value as SelectOption)}>
             <FormControlLabel value="EXISTING_ENTRY" control={<Radio/>} label="Vorhandenen Eintrag" />
-            <FormControlLabel value="NEW_ENTRY" control={<Radio/>} label="Neuer Eintrag" />
+            <FormControlLabel disabled={false} value="NEW_ENTRY" control={<Radio/>} label="Neuer Eintrag" />
           </RadioGroup>
         </FormControl>
 
@@ -208,7 +214,7 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
               nameDisplay: entry.entityName,
               nameLast: null,
               nameFirst: null,
-              isNewEntry: false
+              isNewEntry: selectedOption === 'NEW_ENTRY'
             })
           }}
         />

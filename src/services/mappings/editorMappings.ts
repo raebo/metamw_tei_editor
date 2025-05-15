@@ -65,6 +65,21 @@ export interface MarkupPersonData {
   isNewEntry: boolean
 }
 
+export interface MarkupPlaceData {
+  id: number | null,
+  key: string,
+  placeType: string,
+  name: string,
+  settlement: string | null
+  country: string,
+  kind: string
+  isNewEntry: boolean,
+}
+
+export type SelectCompleteOption = {
+  label: string;
+  value: string;
+}
 
 export const mapApiToEditorLetter = (apiLetter: any): EditorLetter => {
   return {
