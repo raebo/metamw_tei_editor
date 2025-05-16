@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
 import {
   Badge,
@@ -30,6 +30,7 @@ import { EditorUtils } from '../../../../../utils/editor';
 import { MiscUtils } from '../../../../../utils/misc';
 import PlaceKindAutocomplete from './PlaceKindAutocomplete';
 import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
+import { fetchEntityKey } from '../../../../../services/editor/apiLetterRequest.service';
 
 type SelectTypeOption = null | EntityType.SETTLEMENT | EntityType.INSTITUTION | EntityType.SIGHT;
 
@@ -44,14 +45,15 @@ export interface PlaceFormData {
   country: SelectCompleteOption | null;
   kind: string | null;
   settlement?: string | null;
+  isNewEntry: boolean;
 }
 
-const requiredPlaceFormFields: (keyof PlaceFormData)[] = ['key', 'placeType', 'name', 'country', 'kind'];
+const requiredPlaceFormFields: (keyof PlaceFormData)[] = ['key', 'placeType', 'name', 'country', 'isNewEntry'];
 const allRequiredFieldsPresent = (placeFormData: PlaceFormData): placeFormData is Required<MarkupPlaceData> => {
-  return requiredPlaceFormFields.every((field) => placeFormData[field] !== null && placeFormData[field] !== undefined);
+  return requiredPlaceFormFields.every((field) => placeFormData[field] !== null && placeFormData[field] !== undefined && placeFormData[field] !== '');
 };
 
-const blankPlaceFormData: PlaceFormData = { key: '', name: '', placeType: '', country: { label: '', value: '' }, kind: '', settlement: ''}
+const blankPlaceFormData: PlaceFormData = { key: '', name: '', placeType: '', country: { label: '', value: '' }, kind: '', settlement: '', isNewEntry: false };
 
 
 const EntityPlaceContainer = (props: EditorContainerProps) => {
@@ -64,7 +66,8 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
     placeType: null,
     country: { label: '', value: '' },
     kind: null,
-    settlement: null
+    settlement: null,
+    isNewEntry: false,
   });
 
   const [selectedPlace, setSelectedPlace] = useState<SnippetEntity | null>(null);
@@ -128,33 +131,75 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
     if (kindOptions.length === 0) { fetchKindOptions(); }
   }, []);
 
-  const handleSelectTypeOption = (option: SelectTypeOption) => {
+  const fetchAndSetNewKey = (entityType: SelectTypeOption) => {
+    if (entityType === null) {
+      return;
+    }
+    fetchEntityKey(entityType).then((key: string) => {
+      setPlaceFormData((prevState) => ({
+        ...prevState,
+        key: key,
+      }))
+    }).catch((error) => {
+      enqueueSnackbar(`Could not fetch a valid new key for a Place: "${error.message}", please try again"`, { variant: 'error' });
+    })
+  }
 
+  const handleSelectTypeOption = (option: SelectTypeOption) => {
     setPlaceFormData(blankPlaceFormData)
     handleResetPlace()
     setSelectedTypeOption(option);
     setSelectedActionOption('EXISTING_ENTRY');
     setAutoCmplNameDisabled(false);
+    setAutoCmplCountryDisabled(true)
 
     if (option === EntityType.SIGHT) {
+      setAutoCmplKindDisabled(true)
 
     } else if (option === EntityType.SETTLEMENT) {
+      setAutoCmplKindDisabled(true)
 
     } else if (option === EntityType.INSTITUTION) {
-
+      setAutoCmplKindDisabled(false)
     }
   };
 
   const handleSelectActionOption = (option: SelectActionOption) => {
     setSelectedActionOption(option);
 
-    if (option === 'EXISTING_ENTRY') {
-    } else if (option === 'NEW_ENTRY') {
-      setPlaceFormData(blankPlaceFormData)
+    if (option === 'NEW_ENTRY') {
+      fetchAndSetNewKey(selectedTypeOption)
+      setPlaceFormData({...blankPlaceFormData, placeType: selectedTypeOption, isNewEntry: true})
       handleResetPlace();
+      setAutoCmplCountryDisabled(true)
+    }
+    if (selectedTypeOption === EntityType.SETTLEMENT) {
       setAutoCmplCountryDisabled(false)
     }
   };
+
+  const isValidFormData = () : boolean => {
+    const validKey = placeFormData.key !== null && placeFormData.key !== undefined && placeFormData.key.length > 0;
+    const validName = placeFormData.name !== null && placeFormData.name !== undefined && placeFormData.name.length > 0;
+    const validCountry = placeFormData.country !== null && placeFormData.country !== undefined && placeFormData.country.label.length > 0 && placeFormData.country.value !== null && placeFormData.country.value !== undefined;
+    const validSettlement = placeFormData.settlement !== null && placeFormData.settlement !== undefined && placeFormData.settlement.length > 0;
+    const validKind = placeFormData.kind !== null && placeFormData.kind !== undefined && placeFormData.kind.length > 0;
+
+    // console.log("validKey", validKey, validName, validCountry, validSettlement, validKind)
+
+    if ( !validKey || !validName || !validCountry ) {
+      return false
+    }
+
+    switch (selectedTypeOption) {
+      case EntityType.INSTITUTION:
+        return ( validSettlement && validKind ) ? true : false
+      case EntityType.SIGHT:
+       return ( validSettlement ) ? true : false
+      default:
+        return true
+    }
+  }
 
   const removeExistingEntry = (key: string) => {
     setAddedPlaceEntries((prevEntries) => prevEntries.filter((entry: MarkupPlaceData) => entry.key !== key));
@@ -165,18 +210,20 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
   };
 
   const buttonAddNewPlaceEntry = () => {
-    if (allRequiredFieldsPresent(placeFormData)) {
-      // TypeScript now knows: placeFormData.key is string, not string | null
+    if (isValidFormData() && allRequiredFieldsPresent(placeFormData)) {
       addNewPlaceEntry({
         id: null,
         key: placeFormData.key,
         placeType: placeFormData.placeType,
         name: placeFormData.name,
-        settlement: null,
         country: placeFormData.country,
         kind: placeFormData.kind,
-        isNewEntry: false,
+        isNewEntry: placeFormData.isNewEntry,
+        settlement: placeFormData.settlement
       });
+
+      handleResetPlace()
+      setPlaceFormData(blankPlaceFormData);
     }
   };
 
@@ -281,6 +328,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
               <EntityPlaceAutocomplete
                 isDisabled={autoCmplNameDisabled}
                 value={selectedPlace}
+                isNewEntry={false}
                 placeType={selectedTypeOption}
                 addedPlaceEntries={addedPlaceEntries}
                 onValueChange={setSelectedPlace}
@@ -335,12 +383,15 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
               selectedOption={placeFormData.country !== null && placeFormData.country !== undefined ? placeFormData.country : { label: '', value: ''}}
               allOptions={countryOptions}
               afterSelectHandler={(entry) => {
-
+                setPlaceFormData((prev) => ({
+                  ...prev,
+                  country: entry
+                }));
               }}
             />
           </Grid>
           <Grid size={12}>
-            { selectedActionOption === 'EXISTING_ENTRY' && (
+            { ( selectedActionOption === 'EXISTING_ENTRY' || selectedActionOption === null ) && (
               <TextField
                 label="Ortschaft"
                 variant="outlined"
@@ -360,17 +411,16 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
                 <EntityPlaceAutocomplete
                   isDisabled={autoCmplNameDisabled}
                   value={selectedPlace}
+                  isNewEntry={true}
                   placeType={"SETTLEMENT"}
                   addedPlaceEntries={addedPlaceEntries}
                   onValueChange={setSelectedPlace}
                   afterSelectHandler={(entry) => {
-
-                    switch (selectedTypeOption) {
-                      case EntityType.SIGHT:
-                        break;
-                      case EntityType.INSTITUTION:
-                        break;
-                    }
+                    setPlaceFormData((prev) => ({
+                      ...prev,
+                      settlement: entry.name,
+                      country: entry.country
+                    }))
                   }}
                 />
             )}
@@ -381,7 +431,11 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
                 isDisabled={autoCmplKindDisabled}
                 selectedOption={placeFormData.kind !== null && placeFormData.kind !== undefined ? { label: placeFormData.kind, value: placeFormData.kind } : { label: '', value: ''}}
                 allOptions={kindOptions}
-                afterSelectHandler={(entry) => {
+                afterSelectHandler={(kindName: string) => {
+                  setPlaceFormData((prev) => ({
+                    ...prev,
+                    kind: kindName
+                  }));
                 }}
               />
           </Grid>
@@ -390,7 +444,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
         <Divider sx={{ my: 3 }} />
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-          <Button variant="contained" color="primary" onClick={buttonAddNewPlaceEntry} disabled={false} startIcon={<AddIcon />}>
+          <Button variant="contained" color="primary" onClick={buttonAddNewPlaceEntry} disabled={!isValidFormData()} startIcon={<AddIcon />}>
             Ort Hinzufügen
           </Button>
 
@@ -405,6 +459,9 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
           </Button>
         </Box>
       </Box>
+      <div>
+        <pre>{JSON.stringify(placeFormData, null, 2)}</pre>
+      </div>
     </div>
   );
 };

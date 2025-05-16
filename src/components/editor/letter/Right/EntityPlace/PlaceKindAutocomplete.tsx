@@ -4,7 +4,7 @@ import { Autocomplete, TextField } from '@mui/material';
 
 interface PlaceKindAutocompleteProps {
   isDisabled: boolean
-  afterSelectHandler: (entryData: {}) => void;
+  afterSelectHandler: (kindName: string) => void;
   selectedOption: SelectCompleteOption | null
   allOptions: SelectCompleteOption[]
 }
@@ -31,8 +31,10 @@ const PlaceKindAutocomplete = (props: PlaceKindAutocompleteProps) => {
 
 
   const handleChange = ( kind: SelectCompleteOption | null) => {
-    setSelectedOption(kind);
-    props.afterSelectHandler?.(kind ?? {});
+    if (kind !== null) {
+      setSelectedOption(kind);
+      props.afterSelectHandler?.(kind.label);
+    }
   }
 
   return (

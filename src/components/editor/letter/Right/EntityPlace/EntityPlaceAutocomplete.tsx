@@ -13,6 +13,7 @@ import { PlaceFormData } from './EntityPlaceContainer';
 interface EntityPlaceAutocompleteProps {
   isDisabled: boolean
   placeType: null | "SIGHT" | "INSTITUTION" | "SETTLEMENT"
+  isNewEntry: boolean
   value: SnippetEntity | null
   afterSelectHandler: (entryData: PlaceFormData) => void;
   addedPlaceEntries: MarkupPlaceData[]
@@ -22,6 +23,7 @@ interface EntityPlaceAutocompleteProps {
 const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
 
   const latestProps = useRef(props);
+  const [isNewEntry, setIsNewEntry] = useState(props.isNewEntry);
   const [autocompletePlaces, setAutocompletePlaces] = useState<SnippetEntity[]>([]);
   const entriesToExclude = useMemo(() => {
     return new Set(props.addedPlaceEntries.map(item => item.key))
@@ -47,6 +49,7 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
     if (latestProps.current.placeType !== null) {
       fetchDefaultPlaces(latestProps.current.placeType)
     }
+    setIsNewEntry(latestProps.current.isNewEntry)
   }, [props]);
 
   const searchForPlaces = useCallback(
@@ -72,50 +75,60 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
 
   const setAutoCompletePlace = async (entry: SnippetEntity | null) => {
     if (entry) {
-      // get detail data of the selected entry
-      const response = await fetchMetamwEntityData(entry.entityKey)
+      try {
+        const response = await fetchMetamwEntityData(entry.entityKey)
 
-      if (!response) {
-        enqueueSnackbar("No data found", { variant:"error" });
-        return;
-      }
+        if (!response) {
+          enqueueSnackbar("No data found", { variant:"error" });
+          return;
+        }
 
-      switch (latestProps.current.placeType) {
-        case EntityType.SETTLEMENT:
-          props.afterSelectHandler({
-            id: response.id,
-            key: response.key,
-            name: response.name,
-            placeType: latestProps.current.placeType,
-            country: { label: response?.country_name, value: response?.country_id },
-            kind: null,
-            settlement: null
-          })
-          break
-        case EntityType.SIGHT:
-          props.afterSelectHandler({
-            id: response.id,
-            key: response.key,
-            name: response.name,
-            placeType: latestProps.current.placeType,
-            country: { label: response?.country_name, value: response?.country_id },
-            kind: null,
-            settlement: response.misc_only_settlement_name
-          })
-          break
-        case EntityType.INSTITUTION:
-          props.afterSelectHandler({
-            id: response.id,
-            key: response.key,
-            name: response.name,
-            placeType: latestProps.current.placeType,
-            country: { label: response?.country_name, value: response?.country_id },
-            kind: response?.kind,
-            settlement: response.misc_only_settlement_name
-          })
-          break;
-        default:
-          throw new Error('Place type is not supported')
+        switch (latestProps.current.placeType) {
+          case EntityType.SETTLEMENT:
+            props.afterSelectHandler({
+              id: response.id,
+              key: response.key,
+              name: response.name,
+              placeType: latestProps.current.placeType,
+              country: { label: response?.country_name, value: response?.country_id },
+              kind: null,
+              settlement: null,
+              isNewEntry: isNewEntry
+            })
+            break
+          case EntityType.SIGHT:
+            props.afterSelectHandler({
+              id: response.id,
+              key: response.key,
+              name: response.name,
+              placeType: latestProps.current.placeType,
+              country: { label: response?.country_name, value: response?.country_id },
+              kind: null,
+              settlement: response.misc_only_settlement_name,
+              isNewEntry: isNewEntry
+            })
+            break
+          case EntityType.INSTITUTION:
+
+            console.log("response country_id: ", response)
+
+            props.afterSelectHandler({
+              id: response.id,
+              key: response.key,
+              name: response.name,
+              placeType: latestProps.current.placeType,
+              country: { label: response?.country_name, value: response?.country_id },
+              kind: response?.kind,
+              settlement: response.misc_only_settlement_name,
+              isNewEntry: isNewEntry
+            })
+            break;
+          default:
+            throw new Error('Place type is not supported')
+
+        }
+      } catch (error) {
+        enqueueSnackbar(`Error fetching place data for '${entry.entityKey}'`, { variant:"error" });
       }
     }
   }

@@ -20,6 +20,7 @@ interface SnippetReferencesInfoDialogProps {
 const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
 
   const [displayData, setDisplayData] = React.useState<{ [key: string]:string}|null>(null);
+  const filterAttributeList = ["country_id"]
 
   useEffect(() => {
     (async () => {
@@ -27,7 +28,16 @@ const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
         try {
           const result = await fetchMetamwEntityData(String(props.referenceKey));
 
-          setDisplayData(result)
+          if (result === null) {
+            enqueueSnackbar(`No data found for entity with key: ${props.referenceKey}`, { variant: "error" });
+            return;
+          }
+
+          setDisplayData(
+            Object.fromEntries(
+              Object.entries(result).filter(([key]) => !filterAttributeList.includes(key))
+            )
+          )
         } catch (error) {
           enqueueSnackbar(`Error fetching data for entity with key: ${props.referenceKey}` , { variant: "error" });
         }
