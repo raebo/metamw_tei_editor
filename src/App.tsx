@@ -14,9 +14,9 @@ import AutoAnnoList from "./components/auto_anno/AutoAnnoList";
 import Guard from "./components/auth/Guard";
 import React from "react";
 import CircularIndeterminate from "./components/support/CircularIndeterminate";
-import AutoAnnoLetters from "./components/auto_anno/AutoAnnoLetters";
-import IndexLetters from "./components/pages/editor/IndexLetters";
-import ShowEditor from "./components/pages/editor/ShowEditor";
+const AutoAnnoLetters = React.lazy(() => import("./components/auto_anno/AutoAnnoLetters"));
+const IndexLetters = React.lazy(() => import("./components/pages/editor/IndexLetters"));
+const ShowEditor = React.lazy(() => import("./components/pages/editor/ShowEditor"))
 import { AuthProvider } from "./components/auth/AuthContext";
 import GitInfo from "./components/misc/GitInfo";
 

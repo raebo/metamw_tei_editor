@@ -9,7 +9,7 @@ import FavouritesContainer from "../../editor/letter/Left/Favourites/FavouritesC
 import AssignedContainer from "../../editor/letter/Right/Assigned/AssignedContainer";
 import { ComponentMappingItem } from "../../../services/mappings/editorMappings";
 import { handleFavouriteClick } from "../../editor/letter/Right/Favourite/LetterFavouriteHandling";
-import LetterViewContainer from "../../editor/letter/Center/LetterViewContainer";
+const LetterViewContainer = React.lazy(() => import("../../editor/letter/Center/LetterViewContainer"));
 import { letterExists } from "../../../services/editor/apiLetterRequest.service";
 import LetterTabs from "../../editor/letter/Center/LetterTabs";
 import {
