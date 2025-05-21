@@ -65,6 +65,10 @@ export const EditorConstants = {
       WHEN_ADDED: "DATE_WHEN_ADDED",
       WHEN_MODIFIED: "DATE_WHEN_MODIFIED",
     },
+    place: {
+      ADDED: "PLACE_ADDED",
+      REMOVED: "PLACE_REMOVED",
+    },
     misc: {
       ATTACHMENT_ADDED: "ATTACHMENT_ADDED",
     }

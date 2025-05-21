@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography, Paper, Box } from "@mui/material";
+import {Typography, Paper, Box, Alert} from "@mui/material";
 
 interface DynamicDataDisplayProps {
   data: { [key: string]: string } | null;
@@ -10,7 +10,6 @@ const DynamicDataDisplay: React.FC<DynamicDataDisplayProps> = ({
                                                                  data,
                                                                  displayNameMap,
                                                                }) => {
-
   if (!data) {
     return (
       <Paper elevation={3} style={{ padding: "16px", margin: "16px" }}>
@@ -30,13 +29,18 @@ const DynamicDataDisplay: React.FC<DynamicDataDisplayProps> = ({
       >
         {Object.entries(data).map(([key, value]) => (
           <Box key={key} display="flex" flexDirection="column">
-            {/* Label */}
             <Typography variant="subtitle1" fontWeight="bold">
               {displayNameMap[key] || key}:
             </Typography>
-            {/* Value */}
             <Typography variant="body1">
-              {value !== null && value !== undefined ? value : "N/A"}
+              { value === null || value === undefined ? (
+                "N/A"
+              ) : typeof value === 'object' ? (
+                // JSON.stringify(value, null, 2)
+                <Alert severity="info">Complex data not displayed</Alert>
+              ) : (
+                value.toString()
+              )}
             </Typography>
           </Box>
         ))}

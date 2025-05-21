@@ -1,28 +1,20 @@
 import React, { useEffect, useMemo } from 'react';
-import { SelectCompleteOption } from '../../../../../services/mappings/editorMappings';
+import {CountryOption } from '../../../../../services/mappings/editorMappings';
 import { Autocomplete, TextField } from '@mui/material';
 
 interface PlaceCountryAutocompleteProps {
   isDisabled: boolean
-  afterSelectHandler: (entryData: SelectCompleteOption) => void;
-  selectedOption: SelectCompleteOption | null
-  allOptions: SelectCompleteOption[]
-}
-
-function isValidOption(option: any): option is SelectCompleteOption {
-  return option && typeof option === "object" && "value" in option && "label" in option;
+  afterSelectHandler: (entryData: CountryOption) => void;
+  selectedOption: CountryOption | null
+  allOptions: CountryOption[]
 }
 
 const PlaceCountryAutocomplete = (props: PlaceCountryAutocompleteProps) => {
 
-  const [selectedOption, setSelectedOption] = React.useState<SelectCompleteOption | null>(props.selectedOption);
+  const [selectedOption, setSelectedOption] = React.useState<CountryOption | null>(props.selectedOption);
 
   useEffect(() => {
-    if (isValidOption(props.selectedOption)) {
-      setSelectedOption(props.selectedOption);
-    } else {
-      setSelectedOption(null);
-    }
+    setSelectedOption(props.selectedOption);
   }, [props.selectedOption]);
 
   const allOptions = useMemo(() => {
@@ -30,7 +22,7 @@ const PlaceCountryAutocomplete = (props: PlaceCountryAutocompleteProps) => {
   }, [props.allOptions]);
 
 
-  const handleChange = ( country: SelectCompleteOption | null) => {
+  const handleChange = ( country: CountryOption | null) => {
     if (country) {
       setSelectedOption(country);
       props.afterSelectHandler(country);
@@ -42,13 +34,11 @@ const PlaceCountryAutocomplete = (props: PlaceCountryAutocompleteProps) => {
       <Autocomplete
         disabled={props.isDisabled}
         options={allOptions}
-        getOptionLabel={(option) => {
-          return option.label
-        }}
-        value={selectedOption ?? undefined}
+        getOptionLabel={(country) => country.name ?? ''}
+        value={ selectedOption ?? undefined}
         onChange={(event, country) => handleChange(country)}
         isOptionEqualToValue={(option, value) => {
-          return option.value === value.value;
+          return option.id === value.id;
         }}
         renderInput={(params) => <TextField {...params} label="Auswahl Land" variant="outlined" />}
         disableClearable

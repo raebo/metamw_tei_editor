@@ -56,8 +56,6 @@ const AutoAnnoLetters: React.FC = () => {
     },
   }), [autoAnnoLetterId, snippetReferences.items]);
 
-
-  // handling the dialog for the snippet references
   const [refInfoDialogOpen, setRefInfoDialogOpen] = useState(false)
   const [refInfoDialogKey, setRefInfoDialogKey] = useState<string | null>(null)
   const stateEntityInfo = useSelector((state: RootState) => state.autoLetterSnippet.entityInfo)

@@ -17,43 +17,50 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useAppDispatch } from '../../../../../redux/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../../redux/redux.store';
-import { MarkupPlaceData, SelectCompleteOption } from '../../../../../services/mappings/editorMappings';
+import {
+  CountryOption,
+  MarkupPlaceData,
+  MarkupPlaceSettlement,
+  SelectCompleteOption
+} from '../../../../../services/mappings/editorMappings';
 import EntityPlaceAutocomplete from './EntityPlaceAutocomplete';
 import Grid from '@mui/material/Grid2';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import { setEditorMarkedAndContentLeftRightThunk } from '../../../../../redux/thunks/editor.letter.thunk';
 import { enqueueSnackbar } from 'notistack';
-import { EntityType } from '../../../../../constants/editor';
+import { EntityType} from '../../../../../constants/editor';
 import PlaceCountryAutocomplete from './PlaceCountryAutocomplete';
 import { EditorUtils } from '../../../../../utils/editor';
 import { MiscUtils } from '../../../../../utils/misc';
 import PlaceKindAutocomplete from './PlaceKindAutocomplete';
 import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
 import { fetchEntityKey } from '../../../../../services/editor/apiLetterRequest.service';
+import {setReloadLetterContent} from "../../../../../redux/slices/editor.letter.slice";
 
 type SelectTypeOption = null | EntityType.SETTLEMENT | EntityType.INSTITUTION | EntityType.SIGHT;
 
 type SelectActionOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 
 
+
 export interface PlaceFormData {
-  id?: string | null;
+  id?: number | null;
   key: string | null;
   name: string | null;
   placeType: string | null;
-  country: SelectCompleteOption | null;
+  country: CountryOption | null;
   kind: string | null;
-  settlement?: string | null;
+  settlement: MarkupPlaceSettlement | null;
   isNewEntry: boolean;
 }
 
-const requiredPlaceFormFields: (keyof PlaceFormData)[] = ['key', 'placeType', 'name', 'country', 'isNewEntry'];
+const requiredPlaceFormFields: (keyof PlaceFormData)[] = ['key', 'placeType', 'name', 'isNewEntry'];
 const allRequiredFieldsPresent = (placeFormData: PlaceFormData): placeFormData is Required<MarkupPlaceData> => {
   return requiredPlaceFormFields.every((field) => placeFormData[field] !== null && placeFormData[field] !== undefined && placeFormData[field] !== '');
 };
 
-const blankPlaceFormData: PlaceFormData = { key: '', name: '', placeType: '', country: { label: '', value: '' }, kind: '', settlement: '', isNewEntry: false };
+const blankPlaceFormData: PlaceFormData = { key: '', name: '', placeType: '', country: { id: null, name: null }, kind: '', settlement: null, isNewEntry: false };
 
 
 const EntityPlaceContainer = (props: EditorContainerProps) => {
@@ -64,7 +71,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
     key: null,
     name: null,
     placeType: null,
-    country: { label: '', value: '' },
+    country: { id: null, name: null },
     kind: null,
     settlement: null,
     isNewEntry: false,
@@ -84,43 +91,24 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
 
   const [addedPlaceEntries, setAddedPlaceEntries] = useState<MarkupPlaceData[]>([]);
 
-  const [formIsDisabled, setFormIsDisabled] = useState(true);
-
-  const [countryOptions, setCountryOptions] = useState<SelectCompleteOption[]>([]);
+  const [countryOptions, setCountryOptions] = useState<CountryOption[]>([]);
   const [kindOptions, setKindOptions] = useState<SelectCompleteOption[]>([]);
 
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const countries = await EditorUtils.backendService.fetchCountryEntries();
-        if (countries) {
-          const options = countries.map((country) => ({
-            label: country.name,
-            value: String(country.id),
-          }));
-          setCountryOptions(options);
-        } else {
-          throw new Error("No countries found");
-        }
+        const countries = await EditorUtils.placeDataService.fetchCountries();
+        setCountryOptions(countries);
       } catch (error) {
         enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
         setCountryOptions([]);
       }
     };
 
-
     const fetchKindOptions= async () => {
       try {
-        const kindEntries= await EditorUtils.backendService.fetchKindEntries();
-        if (kindEntries) {
-          const kindOptions = kindEntries.map((kindName) => ({
-            label: kindName,
-            value: kindName
-          }));
-          setKindOptions(kindOptions);
-        } else {
-          throw new Error("No countries found");
-        }
+        const kindEntries= await EditorUtils.placeDataService.fetchKindEntries();
+        setKindOptions(kindEntries);
       } catch (error) {
         enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
         setCountryOptions([]);
@@ -174,6 +162,9 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
       setAutoCmplCountryDisabled(true)
     }
     if (selectedTypeOption === EntityType.SETTLEMENT) {
+      setPlaceFormData((prev) => ({
+        ...prev, kind: ''
+      }))
       setAutoCmplCountryDisabled(false)
     }
   };
@@ -181,11 +172,9 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
   const isValidFormData = () : boolean => {
     const validKey = placeFormData.key !== null && placeFormData.key !== undefined && placeFormData.key.length > 0;
     const validName = placeFormData.name !== null && placeFormData.name !== undefined && placeFormData.name.length > 0;
-    const validCountry = placeFormData.country !== null && placeFormData.country !== undefined && placeFormData.country.label.length > 0 && placeFormData.country.value !== null && placeFormData.country.value !== undefined;
-    const validSettlement = placeFormData.settlement !== null && placeFormData.settlement !== undefined && placeFormData.settlement.length > 0;
+    const validCountry = placeFormData.country !== null && placeFormData.country !== undefined && placeFormData.country.id !== null && placeFormData.country.name !== null;
+    const validSettlement = placeFormData.settlement !== null && placeFormData.settlement !== undefined
     const validKind = placeFormData.kind !== null && placeFormData.kind !== undefined && placeFormData.kind.length > 0;
-
-    // console.log("validKey", validKey, validName, validCountry, validSettlement, validKind)
 
     if ( !validKey || !validName || !validCountry ) {
       return false
@@ -193,9 +182,11 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
 
     switch (selectedTypeOption) {
       case EntityType.INSTITUTION:
-        return ( validSettlement && validKind ) ? true : false
+        return (validSettlement)
       case EntityType.SIGHT:
-       return ( validSettlement ) ? true : false
+       return (validSettlement)
+     case EntityType.SETTLEMENT:
+        return true
       default:
         return true
     }
@@ -212,12 +203,11 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
   const buttonAddNewPlaceEntry = () => {
     if (isValidFormData() && allRequiredFieldsPresent(placeFormData)) {
       addNewPlaceEntry({
-        id: null,
         key: placeFormData.key,
         placeType: placeFormData.placeType,
         name: placeFormData.name,
         country: placeFormData.country,
-        kind: placeFormData.kind,
+        kind: checkNewKind(),
         isNewEntry: placeFormData.isNewEntry,
         settlement: placeFormData.settlement
       });
@@ -226,6 +216,19 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
       setPlaceFormData(blankPlaceFormData);
     }
   };
+  
+  const checkNewKind = (): string | null => {
+    switch (placeFormData.placeType) {
+      case EntityType.SIGHT:
+        return placeFormData.kind
+      case EntityType.INSTITUTION:
+        return placeFormData.kind
+      case EntityType.SETTLEMENT:
+        return 'locality'
+      default:
+        return null
+    }
+  }
 
   const handleCancelButtonClick = () => {
     dispatch(
@@ -243,30 +246,32 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
         throw new Error('XML reference is null');
       }
 
-      // const letterElement = props.xmlRef.current.querySelector('#letterXmlContent');
-      //
-      // if (!letterElement) { throw new Error('No letter element found!'); }
-      //
-      // const { xmlId, contentChanged } = EditorUtils.markupGeneration.addPersonMarkup(letterElement, addedPersonEntries);
-      //
-      // if (!contentChanged) {
-      //   enqueueSnackbar('No changes were made to the letter content', { variant: 'info' });
-      //   return;
-      // }
-      //
-      // const response = await EditorUtils.backendService.patchContent(letterElement.innerHTML, stateEditorLetter.id, EditorConstants.changeTypes.person.ADDED, xmlId)
-      //
-      // if (response) {
-      //   dispatch(setReloadLetterContent( { reloadLetterContent: true } ))
-      //   dispatch(setEditorMarkedAndContentLeftRightThunk({
-      //     textIsMarked: false,
-      //     contentLeft: null,
-      //     contentRight: null
-      //   }));
-      //   enqueueSnackbar('Person markup was added successfully', { variant: 'success' });
-      // }
+      const letterElement = props.xmlRef.current.querySelector('#letterXmlContent');
+      if (!letterElement) { throw new Error('No letter element found!'); }
+      
+      if (stateEditorLetter.id === null || stateEditorLetter.name === null) {
+        throw new Error('No letter id or name found!');
+      }
+      
+      await EditorUtils.placeDataService.handlePlaceDataEntries(
+        letterElement,
+        {
+          id: stateEditorLetter.id!,  // ← assert non-null
+          name: stateEditorLetter.name!
+        },
+        addedPlaceEntries
+      )
+      
+      enqueueSnackbar('Place markup was added successfully', { variant: 'success' });
     } catch (err) {
       enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
+    } finally {
+      dispatch(setReloadLetterContent( { reloadLetterContent: true } ))
+      dispatch(setEditorMarkedAndContentLeftRightThunk({
+          textIsMarked: false,
+          contentLeft: null,
+          contentRight: null
+      }));
     }
   };
 
@@ -333,15 +338,43 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
                 addedPlaceEntries={addedPlaceEntries}
                 onValueChange={setSelectedPlace}
                 afterSelectHandler={(entry) => {
-                  setPlaceFormData(entry)
+                  const settlement = entry.settlement
 
                   switch (selectedTypeOption) {
                     case EntityType.SIGHT:
+                      if (settlement !== undefined && settlement !== null) {
+                        setPlaceFormData((prevState) => ({
+                          ...prevState,
+                          placeType: entry.placeType,
+                          key: entry.key,
+                          name: entry.name,
+                          settlement: { key: settlement.key, name: settlement.name, type: settlement.type },
+                          country: entry.country,
+                        }))
+                      }
                       break;
                     case EntityType.SETTLEMENT:
+                      setPlaceFormData((prevState) => ({
+                        ...prevState,
+                        placeType: entry.placeType,
+                        key: entry.key,
+                        name: entry.name,
+                        settlement: { key: entry.key, name: entry.name, type: entry.kind },
+                        country: entry.country,
+                      }))
                       break
                     case EntityType.INSTITUTION:
-                      setAutoCmplKindDisabled(false)
+                      if (settlement !== undefined && settlement !== null) {
+                        setPlaceFormData((prevState) => ({
+                          ...prevState,
+                          placeType: entry.placeType,
+                          key: entry.key,
+                          name: entry.name,
+                          settlement: { key: settlement.key, name: settlement.name, type: settlement.type },
+                          country: entry.country,
+                        }))
+                        setAutoCmplKindDisabled(false)
+                      }
                       break;
                   }
                 }}
@@ -380,7 +413,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
           <Grid size={8}>
             <PlaceCountryAutocomplete
               isDisabled={autoCmplCountryDisabled}
-              selectedOption={placeFormData.country !== null && placeFormData.country !== undefined ? placeFormData.country : { label: '', value: ''}}
+              selectedOption={placeFormData.country !== null && placeFormData.country !== undefined ? placeFormData.country : { id: null, name: null }}
               allOptions={countryOptions}
               afterSelectHandler={(entry) => {
                 setPlaceFormData((prev) => ({
@@ -397,14 +430,8 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
                 variant="outlined"
                 fullWidth
                 slotProps={{ inputLabel: { shrink: true } }}
-                value={placeFormData.settlement}
-                disabled={formIsDisabled}
-                onChange={(event) => {
-                  setPlaceFormData((prev) => ({
-                    ...prev,
-                    settlement: event.target.value,
-                  }));
-                }}
+                value={ placeFormData.settlement !== null && placeFormData.settlement !== undefined ? placeFormData.settlement.name : '' }
+                disabled={true}
               />
             )}
             { selectedActionOption === 'NEW_ENTRY' && selectedTypeOption !== "SETTLEMENT" && (
@@ -418,7 +445,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
                   afterSelectHandler={(entry) => {
                     setPlaceFormData((prev) => ({
                       ...prev,
-                      settlement: entry.name,
+                      settlement: { key: entry.key, name: entry.name, type: entry.kind },
                       country: entry.country
                     }))
                   }}

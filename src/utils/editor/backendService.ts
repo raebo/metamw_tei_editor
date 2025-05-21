@@ -41,9 +41,13 @@ export const backendService = {
       }
     }
   },
-  createEntity: async (entityData: any, entityType: EntityType): Promise<any> => {
+  createEntity: async (entityData: any, entityType: string): Promise<{newId: number }> => {
     try {
-      const response = await initApi().post(`/jwt/editor/entities?entity_type=${entityType}/`, {
+      if (!Object.values(EntityType).includes(entityType as EntityType)) {
+        throw new Error(`Invalid entity type: ${entityType}`);
+      }
+      
+      const response = await initApi().post(`/jwt/editor/entities?entity_type=${entityType}`, {
         entityData: {
           ...entityData
         }

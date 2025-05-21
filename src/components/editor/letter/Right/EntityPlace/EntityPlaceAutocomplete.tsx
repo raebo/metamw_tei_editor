@@ -4,11 +4,20 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { enqueueSnackbar } from 'notistack';
 import { searchEditortEntities } from '../../../../../services/editor/apiLetterRequest.service';
 import { debounce } from 'lodash';
-import { EditorConstants, EntityType } from '../../../../../constants/editor';
+import { EditorConstants } from '../../../../../constants/editor';
 import { Autocomplete, TextField } from '@mui/material';
 import { MiscUtils } from '../../../../../utils/misc';
 import { fetchMetamwEntityData } from '../../../../../services/auto_anno/apiMetaMw.service';
-import { PlaceFormData } from './EntityPlaceContainer';
+import { RemotePlaceDataSchema } from "../../../../../schemas";
+import { z } from "zod";
+
+export const PlaceFormDataSchema = RemotePlaceDataSchema.extend({
+  placeType: z.string(), // or a literal union if needed
+  isNewEntry: z.boolean(),
+});
+
+export type PlaceFormData = z.infer<typeof PlaceFormDataSchema>;
+
 
 interface EntityPlaceAutocompleteProps {
   isDisabled: boolean
@@ -79,53 +88,27 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
         const response = await fetchMetamwEntityData(entry.entityKey)
 
         if (!response) {
-          enqueueSnackbar("No data found", { variant:"error" });
+          enqueueSnackbar(`No place data found for ${entry.entityKey}`, { variant:"error" });
           return;
         }
-
-        switch (latestProps.current.placeType) {
-          case EntityType.SETTLEMENT:
-            props.afterSelectHandler({
-              id: response.id,
-              key: response.key,
-              name: response.name,
-              placeType: latestProps.current.placeType,
-              country: { label: response?.country_name, value: response?.country_id },
-              kind: null,
-              settlement: null,
-              isNewEntry: isNewEntry
-            })
-            break
-          case EntityType.SIGHT:
-            props.afterSelectHandler({
-              id: response.id,
-              key: response.key,
-              name: response.name,
-              placeType: latestProps.current.placeType,
-              country: { label: response?.country_name, value: response?.country_id },
-              kind: null,
-              settlement: response.misc_only_settlement_name,
-              isNewEntry: isNewEntry
-            })
-            break
-          case EntityType.INSTITUTION:
-
-            console.log("response country_id: ", response)
-
-            props.afterSelectHandler({
-              id: response.id,
-              key: response.key,
-              name: response.name,
-              placeType: latestProps.current.placeType,
-              country: { label: response?.country_name, value: response?.country_id },
-              kind: response?.kind,
-              settlement: response.misc_only_settlement_name,
-              isNewEntry: isNewEntry
-            })
-            break;
-          default:
-            throw new Error('Place type is not supported')
-
+        
+        try {
+          const parsedResult = RemotePlaceDataSchema.safeParse(response);
+          
+          if( !parsedResult.success) {
+            throw new Error("Invalid data format from server");
+          }
+          const parsedPlace = parsedResult.data;
+          
+          const formData: PlaceFormData = {
+            ...parsedPlace,
+            isNewEntry: isNewEntry,
+            placeType: latestProps.current.placeType ?? "SETTLEMENT",
+          }
+          
+          props.afterSelectHandler(formData)
+        } catch (error) {
+          enqueueSnackbar(`Unexpected error: : ${error}`, { variant:"error" });
         }
       } catch (error) {
         enqueueSnackbar(`Error fetching place data for '${entry.entityKey}'`, { variant:"error" });

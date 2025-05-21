@@ -65,20 +65,30 @@ export interface MarkupPersonData {
   isNewEntry: boolean
 }
 
+export interface MarkupPlaceSettlement {
+  key: string | null;
+  type: string | null;
+  name: string | null;
+}
+
 export interface MarkupPlaceData {
-  id: number | null,
   key: string,
   placeType: string,
   name: string,
-  settlement: string | null
-  country: string,
-  kind: string
+  settlement: MarkupPlaceSettlement | null
+  country: CountryOption
+  kind: string | null
   isNewEntry: boolean,
 }
 
 export type SelectCompleteOption = {
   label: string;
   value: string;
+}
+
+export type CountryOption = {
+  id: number | null;
+  name: string | null;
 }
 
 export const mapApiToEditorLetter = (apiLetter: any): EditorLetter => {
