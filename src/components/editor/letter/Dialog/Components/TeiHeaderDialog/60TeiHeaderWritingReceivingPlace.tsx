@@ -2,7 +2,7 @@ import { TeiHeaderWritingReceivingPlaceProps } from '../AddTeiHeaderDialog';
 import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 import { EditorConstants, EntityType } from '../../../../../../constants/editor';
 import { MiscUtils } from '../../../../../../utils/misc';
 import { Autocomplete, TextField } from '@mui/material';

@@ -174,11 +174,8 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
     const validName = placeFormData.name !== null && placeFormData.name !== undefined && placeFormData.name.length > 0;
     const validCountry = placeFormData.country !== null && placeFormData.country !== undefined && placeFormData.country.id !== null && placeFormData.country.name !== null;
     const validSettlement = placeFormData.settlement !== null && placeFormData.settlement !== undefined
-    const validKind = placeFormData.kind !== null && placeFormData.kind !== undefined && placeFormData.kind.length > 0;
 
-    if ( !validKey || !validName || !validCountry ) {
-      return false
-    }
+    if ( !validKey || !validName || !validCountry ) { return false }
 
     switch (selectedTypeOption) {
       case EntityType.INSTITUTION:

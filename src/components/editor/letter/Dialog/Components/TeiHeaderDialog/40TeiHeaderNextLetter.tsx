@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EditorLetter } from '../../../../../../services/mappings/editorMappings';
 import { searchForLetterNameTitle } from '../../../../../../services/editor/apiLettersRequest.service';
 import { enqueueSnackbar } from 'notistack';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 import { MiscUtils } from '../../../../../../utils/misc';
 import { EditorConstants } from '../../../../../../constants/editor';
 

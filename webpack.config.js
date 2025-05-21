@@ -27,11 +27,27 @@ module.exports = (env, argv) => {
       clean: true,
     },
     devtool: isDev ? "eval-source-map" : "source-map",
+    optimization: {
+      minimize: isProd,
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
+      },
+    },
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
       fallback: {
         process: require.resolve('process/browser.js'),
       },
+      alias: {
+        'lodash': 'lodash-es',
+      }
     },
     module: {
       rules: [

@@ -137,17 +137,12 @@ const AutoAnnoLetters: React.FC = () => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reloadLetter, dispatch]);
-
+  
   useEffect(() => {
-    // This ensures that setSelectedComponentList always gets the latest componentMappingList and triggers a re-render when necessary.
-    setSelectedComponentList(prevState => {
-      return snippetReferences.showReferences
-        ? componentMappingList["REFERENCE_LIST"]
-        : componentMappingList["SNIPPET_LIST"];
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    const listKey = snippetReferences.showReferences ? "REFERENCE_LIST" : "SNIPPET_LIST";
+    setSelectedComponentList(componentMappingList[listKey]);
   }, [snippetReferences.showReferences, componentMappingList]);
-
+  
   const containerRef = React.useRef<HTMLDivElement>(null)
 
   useEffect(() => {

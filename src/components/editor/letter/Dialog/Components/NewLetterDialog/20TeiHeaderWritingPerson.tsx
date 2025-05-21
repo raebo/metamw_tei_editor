@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
 import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
 import { enqueueSnackbar } from 'notistack';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 import { NewLetterDialogProps } from '../AddNewLetterDialog';
 
 const TeiHeaderWritingPerson = (props: NewLetterDialogProps) => {

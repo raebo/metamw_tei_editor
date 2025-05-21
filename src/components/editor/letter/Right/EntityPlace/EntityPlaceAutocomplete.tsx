@@ -3,7 +3,7 @@ import { MarkupPlaceData } from '../../../../../services/mappings/editorMappings
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
 import { searchEditortEntities } from '../../../../../services/editor/apiLetterRequest.service';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 import { EditorConstants } from '../../../../../constants/editor';
 import { Autocomplete, TextField } from '@mui/material';
 import { MiscUtils } from '../../../../../utils/misc';
