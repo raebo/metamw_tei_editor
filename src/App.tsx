@@ -22,6 +22,7 @@ import GitInfo from "./components/misc/GitInfo";
 
 import './extensions'
 import StateMessages from "./components/snackbar/StateMessages";
+import ErrorBoundary from "./components/support/ErrorBoundary";
 
 const lightTheme = createTheme({
   palette: {
@@ -33,36 +34,38 @@ const App = () => {
   const isLoading = useSelector((state: RootState) => state.spinnerLoading.isLoading);
 
   return (
-    <ThemeProvider theme={lightTheme}>
-      <AuthProvider>
-        <BrowserRouter>
-          <Guard>
-            <Routes>
-              <Route path="/">
-                <Route element={<Layout />}>
-                  <Route index element={<HomePage />} />
-                  <Route path="about" element={<AboutPage />} />
-                  <Route path="login" element={<Login />} />
-                  <Route path={"/automatic_annotations/:id?"} element={<AutoAnnoList />} />
-                  <Route path={"/automatic_annotations/:job_id/letters/:id"} element={<AutoAnnoLetters />} />
-                  <Route path={"/editor/letters"} element={<IndexLetters />} />
-                  <Route path={"/editor/"} element={<ShowEditor />} />
-                  <Route path={"/editor/letters/:letterId/:letterName"} element={<ShowEditor />} />
+    <ErrorBoundary>
+      <ThemeProvider theme={lightTheme}>
+        <AuthProvider>
+          <BrowserRouter>
+            <Guard>
+              <Routes>
+                <Route path="/">
+                  <Route element={<Layout />}>
+                    <Route index element={<HomePage />} />
+                    <Route path="about" element={<AboutPage />} />
+                    <Route path="login" element={<Login />} />
+                    <Route path={"/automatic_annotations/:id?"} element={<AutoAnnoList />} />
+                    <Route path={"/automatic_annotations/:job_id/letters/:id"} element={<AutoAnnoLetters />} />
+                    <Route path={"/editor/letters"} element={<IndexLetters />} />
+                    <Route path={"/editor/"} element={<ShowEditor />} />
+                    <Route path={"/editor/letters/:letterId/:letterName"} element={<ShowEditor />} />
+                  </Route>
+                  <Route element={<AutoAnnoLayout/>}>
+                    {/*<GuardedRoute path="/dashboard" component={Dashboard} auth={isAuthenticated} />*/}
+                  </Route>
                 </Route>
-                <Route element={<AutoAnnoLayout/>}>
-                  {/*<GuardedRoute path="/dashboard" component={Dashboard} auth={isAuthenticated} />*/}
-                </Route>
-              </Route>
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Guard>
-        </BrowserRouter>
-      </AuthProvider>
-      { isLoading && <CircularIndeterminate />}
-      <StateMessages />
-      <Snackbar />
-      <GitInfo />
-    </ThemeProvider>
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </Guard>
+          </BrowserRouter>
+        </AuthProvider>
+        { isLoading && <CircularIndeterminate />}
+        <StateMessages />
+        <Snackbar />
+        <GitInfo />
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

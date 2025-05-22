@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import React from "react";
+import React, { startTransition } from "react";
 import { Page } from "../../interfaces/page.interface";
 import { useNavigate } from "react-router-dom";
 
@@ -12,14 +12,17 @@ interface NavigationProps {
 const Navigation = ( { pages } : NavigationProps) => {
   const navigate = useNavigate()
 
-
   return (
     <>
       <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
         {pages.map((page) => (
           <Button
             key={page.title}
-            onClick={() => navigate(page.path)}
+            onClick={() => {
+              startTransition(() => {
+                navigate(page.path);
+              });
+            }}
             sx={{ my: 2, color: 'white', display: 'block' }}
           >
             {page.title}
