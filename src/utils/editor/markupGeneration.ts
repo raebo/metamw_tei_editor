@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid"
+// import { v4 as uuidv4 } from "uuid"
 import { EditorUtils } from "./index"
 import {xmlCheck} from "./xmlCheck";
 import {ActOfWritingElement, MarkupPersonData, MarkupPlaceData} from '../../services/mappings/editorMappings';
@@ -32,7 +32,8 @@ const generateCountryNode = (data: { name: string | null}) : HTMLElement => {
 
 export const markupGeneration = {
   generateXmlId: (xmlType: string) : string => {
-    return `${xmlType}_${uuidv4()}`;
+    // return `${xmlType}_${uuidv4()}`;
+    return `${xmlType}`
   },
   replaceMarkedNode: (spanNode: Element, nodeReplacement : Element) : void => {
     const content = spanNode.textContent || ""
