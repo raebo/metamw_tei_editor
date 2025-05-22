@@ -26,6 +26,7 @@
     "@types/react-dom": "^18.0.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.8.4",
+    "crypto-randomuuid": "^1.0.0",
     "date-fns": "^4.1.0",
     "fast-xml-parser": "^5.2.2",
     "jwt-decode": "^4.0.0",
@@ -39,6 +40,7 @@
     "react-redux": "^9.1.2",
     "react-router-dom": "^6.26.2",
     "typescript": "^5.7.2",
+    "uuid": "^11.1.0",
     "vkbeautify": "^0.99.3",
     "web-vitals": "^4.2.4",
     "zod": "^3.24.4"
