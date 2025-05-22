@@ -1,6 +1,5 @@
 import {EditorUtils} from "./index";
 import {CountryOption, MarkupPlaceData} from "../../services/mappings/editorMappings";
-import {v4 as uuidv4} from "uuid";
 import {EditorConstants, EntityType} from "../../constants/editor";
 import {SelectCompleteOption} from "../../schemas";
 
@@ -35,13 +34,13 @@ export const placeDataService = {
     const newEntries  = markupPlaceData.filter((placeData) => placeData.isNewEntry);
     
     for(const placeData of newEntries) {
-      const { newId } = await EditorUtils.backendService.createEntity(placeData, placeData.placeType)
+      await EditorUtils.backendService.createEntity(placeData, placeData.placeType)
     }
     
     const markedSpan= letterElement.querySelectorAll('span.marked')[0]
     if (markedSpan === undefined) return { xmlId: '', contentChanged: false };
     
-    const xmlId = `placeName_${uuidv4()}`
+    const xmlId = EditorUtils.markupGeneration.generateXmlId('placeName');
     const placeNameNode = document.createElement("placeName")
     placeNameNode.setAttribute("xml:id", xmlId)
     

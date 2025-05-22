@@ -31,6 +31,9 @@ const generateCountryNode = (data: { name: string | null}) : HTMLElement => {
 }
 
 export const markupGeneration = {
+  generateXmlId: (xmlType: string) : string => {
+    return `${xmlType}_${uuidv4()}`;
+  },
   replaceMarkedNode: (spanNode: Element, nodeReplacement : Element) : void => {
     const content = spanNode.textContent || ""
     const textNode = document.createTextNode(content)
@@ -122,7 +125,7 @@ export const markupGeneration = {
 
     if (markedSpans.length === 0) return { xmlId: null, contentChanged: false };
 
-    const xmlId = `persName_${uuidv4()}`
+    const xmlId = EditorUtils.markupGeneration.generateXmlId('persName')
 
     markedSpans.forEach(span => {
       const persNameNode = document.createElement("persName")
@@ -146,7 +149,7 @@ export const markupGeneration = {
   },
   noteMarkup: (xmlContent: string, userLogin: string, noteContent: string, commentType: string) : { xmlString: string, xmlId: string } => {
     const parser = new DOMParser()
-    const xmlId = `note-${uuidv4()}`
+    const xmlId = EditorUtils.markupGeneration.generateXmlId('note')
     const serializer = new XMLSerializer()
     const doc = parser.parseFromString(xmlContent, "application/xml")
 
