@@ -14,9 +14,27 @@ import AutoAnnoList from "./components/auto_anno/AutoAnnoList";
 import Guard from "./components/auth/Guard";
 import React from "react";
 import CircularIndeterminate from "./components/support/CircularIndeterminate";
-const AutoAnnoLetters = React.lazy(() => import("./components/auto_anno/AutoAnnoLetters"));
-const IndexLetters = React.lazy(() => import("./components/pages/editor/IndexLetters"));
-const ShowEditor = React.lazy(() => import("./components/pages/editor/ShowEditor"))
+const AutoAnnoLetters = React.lazy(() =>
+  import("./components/auto_anno/AutoAnnoLetters").catch((err) => {
+    console.error("Failed to load chunk for AutoAnnoLetters", err);
+    window.location.reload(); // oder Redirect zur Startseite
+    return new Promise(() => {});
+  })
+)
+const IndexLetters = React.lazy(() =>
+  import("./components/pages/editor/IndexLetters").catch((err) => {
+  console.error("Failed to load chunk for IndexLetters", err);
+  window.location.reload(); // oder Redirect zur Startseite
+  return new Promise(() => {});
+})
+)
+const ShowEditor = React.lazy(() =>
+  import("./components/pages/editor/ShowEditor").catch((err) => {
+  console.error("Failed to load chunk for ShowEditor", err);
+  window.location.reload(); // oder Redirect zur Startseite
+  return new Promise(() => {});
+})
+)
 import { AuthProvider } from "./components/auth/AuthContext";
 import GitInfo from "./components/misc/GitInfo";
 

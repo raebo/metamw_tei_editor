@@ -9,7 +9,13 @@ import FavouritesContainer from "../../editor/letter/Left/Favourites/FavouritesC
 import AssignedContainer from "../../editor/letter/Right/Assigned/AssignedContainer";
 import { ComponentMappingItem } from "../../../services/mappings/editorMappings";
 import { handleFavouriteClick } from "../../editor/letter/Right/Favourite/LetterFavouriteHandling";
-const LetterViewContainer = React.lazy(() => import("../../editor/letter/Center/LetterViewContainer"));
+const LetterViewContainer = React.lazy(() =>
+  import("../../editor/letter/Center/LetterViewContainer").catch((err) => {
+    console.error("Failed to load chunk for LetterViewContainer", err);
+    window.location.reload(); // oder Redirect zur Startseite
+    return new Promise(() => {});
+  })
+  )
 import { letterExists } from "../../../services/editor/apiLetterRequest.service";
 import LetterTabs from "../../editor/letter/Center/LetterTabs";
 import {
