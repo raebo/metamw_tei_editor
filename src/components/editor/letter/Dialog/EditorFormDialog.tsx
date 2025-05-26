@@ -17,6 +17,7 @@ import AttachmentAddDialog from "./Components/Misc/AttachmentAddDialog";
 import AddWritingActDialog from './Components/AddWritingActDialog';
 import AddTeiHeaderDialog from './Components/AddTeiHeaderDialog';
 import AddNewLetterDialog from './Components/AddNewLetterDialog';
+import PublishLetterDialog from './Components/PublishLetterDialog';
 
 interface EditorFormDialogProps {
   open: boolean
@@ -62,6 +63,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.ADD_NOTE]: "Kommentar Hinzufügen",
     [EditorConstants.dialogTypes.EDIT_NOTE]: "Kommentar Bearbeiten/Löschen",
     [EditorConstants.dialogTypes.RESET_LETTER]: "Brief Zurücksetzen",
+    [EditorConstants.dialogTypes.PUBLISH_LETTER]: "Brief Veröffentlichen",
     [EditorConstants.dialogTypes.DATE_WHEN_ADD]: "Datum 'WHEN' Auszeichnen",
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: "Beilage Hinzufügen",
     [EditorConstants.dialogTypes.ADD_WRITING_PART]: "Schreibakt Hinzufügen",
@@ -73,6 +75,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.ADD_NOTE]: <AddNoteDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.EDIT_NOTE]: <EditNoteDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.PUBLISH_LETTER]: <PublishLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.DATE_WHEN_ADD]: <DateWhenAddDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_WRITING_PART]: <AddWritingActDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,

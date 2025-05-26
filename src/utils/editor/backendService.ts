@@ -47,7 +47,6 @@ export const backendService = {
       if (!Object.values(EntityType).includes(entityType as EntityType)) {
         throw new Error(`Invalid entity type: ${entityType}`);
       }
-      
       const response = await initApi().post(`/jwt/editor/entities?entity_type=${entityType}`, {
         entityData: {
           ...entityData
@@ -103,6 +102,22 @@ export const backendService = {
         throw new Error("Error resetting letter content: " + response.data.error);
       } else {
         throw new Error("Error resetting letter content: " + err);
+      }
+    }
+  },
+  publishLetter: async (letterId: number): Promise<boolean> => {
+    try {
+      await initApi().post(`/jwt/editor/pinned_letters/${letterId}/publish/`);
+
+      return true;
+    } catch (err: any) {
+
+      const response = err.response;
+
+      if (response !== undefined) {
+        throw new Error(response.data.error);
+      } else {
+        throw new Error("Error publishing letter content: " + err);
       }
     }
   }

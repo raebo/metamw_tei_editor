@@ -46,7 +46,6 @@ import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { handlePublishingClick } from "../../editor/letter/Right/Publishing/LetterPublishingHandling";
 import UserActionMenu from "../../editor/letter/Right/UserActionMenu";
 import EditorKeyHandle from "../../editor/letter/Center/EditorKeyHandle";
 import QuickContentFormatter from "../../editor/letter/Right/QuickContentFormatter";
@@ -215,7 +214,7 @@ const ShowEditor = () => {
   const componentMappingRight: Record<string, ComponentMappingItem> = {
     [EditorConstants.compMappingRight.ASSIGNED]: { name: EditorConstants.compMappingRight.ASSIGNED, showContainer: true , component: <AssignedContainer />, action: () => true },
     [EditorConstants.compMappingRight.SET_FAVOURITE]: { name: EditorConstants.compMappingRight.SET_FAVOURITE, showContainer: false, action: () => handleFavouriteClick(letterId, true) }, // Example with a function
-    [EditorConstants.compMappingRight.PUBLISH_LETTER]: { name: EditorConstants.compMappingRight.PUBLISH_LETTER,  showContainer: false, action: () => handlePublishingClick(letterId, true) },
+    [EditorConstants.compMappingRight.PUBLISH_LETTER]: { name: EditorConstants.compMappingRight.PUBLISH_LETTER, showContainer: false, component: null, action: () => setModalDialog(EditorConstants.dialogTypes.PUBLISH_LETTER) },
     [EditorConstants.compMappingRight.ENT_PERSON]: { name: EditorConstants.compMappingRight.ENT_PERSON, showContainer: true , component: <EntityPersonContainer xmlRef={xmlRefCenter} />, action: () => true },
     [EditorConstants.compMappingRight.ENT_PLACE]: { name: EditorConstants.compMappingRight.ENT_PLACE, showContainer: true , component: <EntityPlaceContainer xmlRef={xmlRefCenter} />, action: () => true },
     [EditorConstants.compMappingRight.ENT_CREATION]: { name: EditorConstants.compMappingRight.ENT_CREATION, showContainer: true , component: <EntityCreationContainer/>, action: () => true },
