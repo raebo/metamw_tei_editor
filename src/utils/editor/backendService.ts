@@ -1,6 +1,7 @@
 import { initApi } from '../../services/apiRequest.service'
-import { replaceWithCamelCase } from "../auto_anno/domHandling";
+import { replaceDataKeys, replaceWithCamelCase } from '../auto_anno/domHandling';
 import { EntityType } from '../../constants/editor';
+import { MiscUtils } from '../misc';
 
 export const backendService = {
   fetchCountryEntries: async (): Promise<{name: string, id: number}[]> => {
@@ -73,7 +74,7 @@ export const backendService = {
       await initApi()
         .patch(`/jwt/editor/pinned_letters/${letterId}/set_content/`, {
           changes: {
-            new_content: replaceWithCamelCase(content),
+            new_content: MiscUtils.misc.pipeFunctions(content, replaceWithCamelCase, replaceDataKeys),
             xml_id: xmlId,
             change_type: changeType
           }

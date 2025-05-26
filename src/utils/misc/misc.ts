@@ -7,10 +7,14 @@ function pickAttributes<T extends object, K extends keyof T>(obj: T, keys: K[]):
   }, {} as Pick<T, K>);
 }
 
+function pipeFunctions<T>(value: T, ...fns: Array<(x: T) => T>): T {
+  return fns.reduce((acc, fn) => fn(acc), value);
+}
 
 export const misc = {
   getErrorMessage: (error: unknown): string => {
     return error instanceof Error ? error.message : String(error);
   },
-  pickAttributes
+  pickAttributes,
+  pipeFunctions
 }

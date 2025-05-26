@@ -231,3 +231,9 @@ export const replaceWithCamelCase = (
   });
   return text;
 }
+
+export const replaceDataKeys= (
+  text: string
+): string => {
+  return text.replace(/data-key="(.*?)"/g, 'key="$1"')
+}
