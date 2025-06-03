@@ -8,17 +8,28 @@ export interface EntityExistingCreationProps {
   creationKinds: string[];
   creationAutocompleteDisabled: boolean;
   afterEntitySelected: (entity: SnippetEntity) => void;
+  resetSignal?: number;
 }
 
 const EntityExistingCreation = (props: EntityExistingCreationProps) => {
 
   const [creationKinds, setCreationKinds] = React.useState<string[]>(props.creationKinds);
+  const [selectedCreation, setSelectedCreation] = React.useState<SnippetEntity | undefined>(undefined)
   const [selectedKind, setSelectedKind] = React.useState<string | null>(null);
 
   useEffect(() => {
     setCreationKinds(props.creationKinds);
   }, [props.creationKinds]);
 
+  useEffect(() => {
+    console.log("resetSignal changed: ", props.resetSignal);
+    setSelectedCreation(undefined)
+    setSelectedKind(null);
+  }, [props.resetSignal]);
+
+  useEffect(() => {
+    console.log("selectedCreation changed: ", selectedCreation);
+  }, [selectedCreation]);
 
   const handleCreationChange = (creation: SnippetEntity | null) => {
     if (creation) {
@@ -33,8 +44,10 @@ const EntityExistingCreation = (props: EntityExistingCreationProps) => {
     <>
         <Grid size={{ xs: 12, md: 12, lg: 12 }}>
             <Autocomplete
+              key={`creation-autocomplete-${props.resetSignal}`} // forces remount on reset
               disabled={props.creationAutocompleteDisabled}
               options={props.creationList}
+              value={selectedCreation}
               getOptionLabel={(creation: SnippetEntity) => creation.entityName ?? ''}
               onChange={(event, creation) => handleCreationChange(creation)}
               isOptionEqualToValue={(option, value) => {

@@ -80,6 +80,9 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
   const [selectCreationOptionDisabled, setSelectCreationOptionDisabled] = useState<boolean>(true);
   const [creationKinds, setCreationKinds] = useState<string[]>([]);
 
+  const [resetCreationCmp, setResetCreationCmp] = useState<number>(0); // used to reset the creation form when a new author is selected
+
+
   useEffect(() => {
     backendService.fetchCreationKinds()
       .then((result) => {
@@ -122,6 +125,10 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
     if (option === 'NEW_ENTRY') {
       fetchAndSetNewCreationKey()
     }
+  }
+
+  const callResetCreationCmp = () => {
+    setResetCreationCmp((prev) => prev + 1);
   }
 
   const resetAuthorFormData = () => {
@@ -213,6 +220,10 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
 
       resetAuthorFormData()
       resetCreationFormData()
+      setAuthorCreations([])
+      setSelectCreationOptionDisabled(true)
+      callResetCreationCmp()
+      setSelectedCreationOption(null)
     }
   }
 
@@ -370,6 +381,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
               creationList={authorCreations}
               creationAutocompleteDisabled={selectedCreationOption !== 'EXISTING_ENTRY'}
               creationKinds={creationKinds}
+              resetSignal={resetCreationCmp}
               afterEntitySelected={(entity) => {
               setCreationFormData((prevState) => ({
                 ...prevState,
