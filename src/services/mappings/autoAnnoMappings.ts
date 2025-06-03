@@ -49,6 +49,8 @@ export interface SnippetEntity {
   entityType: string
   entityKey: string
   entityName: string
+  entityFirstName?: string
+  entityLastName?: string
   entityDisplayName: string
   entitySettlementKind?: string
   entityParentName?: string

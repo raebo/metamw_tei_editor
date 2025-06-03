@@ -42,8 +42,6 @@ type SelectTypeOption = null | EntityType.SETTLEMENT | EntityType.INSTITUTION | 
 
 type SelectActionOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 
-
-
 export interface PlaceFormData {
   id?: number | null;
   key: string | null;
@@ -213,7 +211,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
       setPlaceFormData(blankPlaceFormData);
     }
   };
-  
+
   const checkNewKind = (): string | null => {
     switch (placeFormData.placeType) {
       case EntityType.SIGHT:
@@ -239,17 +237,15 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
 
   const handleSubmitButtonClick = async () => {
     try {
-      if (props.xmlRef.current === null) {
-        throw new Error('XML reference is null');
-      }
+      if (props.xmlRef.current === null) { throw new Error('XML reference is null'); }
 
       const letterElement = props.xmlRef.current.querySelector('#letterXmlContent');
       if (!letterElement) { throw new Error('No letter element found!'); }
-      
+
       if (stateEditorLetter.id === null || stateEditorLetter.name === null) {
         throw new Error('No letter id or name found!');
       }
-      
+
       await EditorUtils.placeDataService.handlePlaceDataEntries(
         letterElement,
         {
@@ -258,7 +254,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
         },
         addedPlaceEntries
       )
-      
+
       enqueueSnackbar('Place markup was added successfully', { variant: 'success' });
     } catch (err) {
       enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
@@ -281,7 +277,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
 
         <Box sx={{ mb: 3 }}>
           <Stack spacing={1}>
-            {addedPlaceEntries.map((entry) => (
+            { addedPlaceEntries.map((entry) => (
               <Box
                 key={entry.key}
                 sx={{
@@ -465,7 +461,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
           </Grid>
         </Grid>
 
-        <Divider sx={{ my: 3 }} />
+       <Divider sx={{ my: 3 }} />
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
           <Button variant="contained" color="primary" onClick={buttonAddNewPlaceEntry} disabled={!isValidFormData()} startIcon={<AddIcon />}>

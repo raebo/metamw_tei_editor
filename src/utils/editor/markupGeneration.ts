@@ -2,31 +2,32 @@ import { v4 as uuidv4 } from "uuid"
 import { EditorUtils } from "./index"
 import {xmlCheck} from "./xmlCheck";
 import {ActOfWritingElement, MarkupPersonData, MarkupPlaceData} from '../../services/mappings/editorMappings';
+import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
 
 const generateSettlementNode = ( data: { key: string | null, name: string | null, type: string | null}) : HTMLElement => {
   if (data.key === null || data.name === null || data.type === null) {
     throw new Error("generateSettlementNode missing key name or type is null")
   }
-  
+
   const settlementNode = document.createElement("settlement")
   settlementNode.setAttribute("style", "hidden")
   settlementNode.setAttribute("key", data.key)
   settlementNode.setAttribute("type",data.type)
   settlementNode.textContent = data.name
-  
+
   return settlementNode
 }
 
 const generateCountryNode = (data: { name: string | null}) : HTMLElement => {
-  
+
   if (data.name === null) {
     throw new Error("generateCountryNode missing key name or type is null")
   }
-  
+
   const countryNode = document.createElement("country")
   countryNode.setAttribute("style", "hidden")
   countryNode.textContent = data.name
-  
+
   return countryNode
 }
 
@@ -35,12 +36,17 @@ export const markupGeneration = {
     return `${xmlType}_${uuidv4()}`;
   },
   replaceMarkedNode: (spanNode: Element, nodeReplacement : Element) : void => {
-    const content = spanNode.textContent || ""
-    const textNode = document.createTextNode(content)
-    
-    spanNode.parentNode?.replaceChild(textNode, spanNode)
-    
-    textNode.after(nodeReplacement)
+    const content = spanNode.textContent || "";
+
+    // Clone the replacement node to avoid side effects
+    const clonedReplacement = nodeReplacement.cloneNode(true) as Element;
+
+    // Prepend the original marked text as a text node at the beginning
+    const textNode = document.createTextNode(content);
+    clonedReplacement.insertBefore(textNode, clonedReplacement.firstChild);
+
+    // Replace the marked span with the enriched replacement node
+    spanNode.parentNode?.replaceChild(clonedReplacement, spanNode);
   },
   addAttachmentMarkup: (xmlContent: string, attachmentType: string, attachmentName: string) : { xmlString: string, contentChanged: boolean } => {
     const parser = new DOMParser()
@@ -67,56 +73,68 @@ export const markupGeneration = {
   addSightMarkup: (placeNameNode: HTMLElement, markupPlace: MarkupPlaceData) : {} => {
     const country = markupPlace.country
     const settlement = markupPlace.settlement
-    
+
     if (country === null || settlement === null || settlement.key === null) { throw new Error("markupData contains no settlement or country") }
-    
+
     const sightNode = document.createElement("name")
     sightNode.setAttribute("style", "hidden")
-    
+
     sightNode.setAttribute("key", markupPlace.key)
     sightNode.setAttribute("type", 'sight')
     sightNode.textContent = markupPlace.name
     placeNameNode.appendChild(sightNode)
-    
+
     placeNameNode.appendChild(generateSettlementNode( {
       key: settlement.key, name: settlement.name, type: settlement.type }))
-    
+
     placeNameNode.appendChild(generateCountryNode({ name: country.name }))
-    
+
     return {  }
   },
   addSettlementMarkup: (placeNameNode: HTMLElement, markupPlace: MarkupPlaceData) : {} => {
     const country = markupPlace.country
-    
+
     if (country === null) { throw new Error("markupData contains no settlement or country") }
     placeNameNode.appendChild(generateSettlementNode({
         key: markupPlace.key, name: markupPlace.name, type: markupPlace.kind
       }
     ))
     placeNameNode.appendChild(generateCountryNode({ name: country.name }))
-    
+
     return {}
   },
   addInstitutionMarkup: (placeNameNode: HTMLElement, markupPlace: MarkupPlaceData) : { } => {
     const country = markupPlace.country
     const settlement = markupPlace.settlement
-    
+
     if (country === null || settlement === null || settlement.key === null) { throw new Error("markupData contains no settlement or country") }
-    
+
     const instNode = document.createElement("name")
     instNode.setAttribute("style", "hidden")
     instNode.setAttribute("key", markupPlace.key)
     instNode.setAttribute("type", 'institution')
     instNode.setAttribute("subtype", markupPlace.kind === null ? '' : markupPlace.kind)
-    
+
     instNode.textContent = markupPlace.name
     placeNameNode.appendChild(instNode)
-    
+
     placeNameNode.appendChild(generateSettlementNode( {
       key: settlement.key, name: settlement.name, type: settlement.type }))
-    
+
     placeNameNode.appendChild(generateCountryNode({ name: country.name }))
-    
+
+    return {}
+  },
+  addAuthorMarkup: (titleNode: Element, people: SnippetEntity[]) : {} => {
+    for (const person of people) {
+      const nameNode = document.createElement("name")
+      nameNode.setAttribute("style", "hidden")
+      nameNode.setAttribute("type", "author")
+      nameNode.setAttribute("key", person.entityKey)
+      nameNode.textContent = person.entityDisplayName
+      titleNode.appendChild(nameNode)
+    }
+
     return {}
   },
   addPersonMarkup: (root: Element, peopleMarkupData: MarkupPersonData[]) : { xmlId: string | null, contentChanged: boolean } => {
@@ -141,7 +159,7 @@ export const markupGeneration = {
 
         persNameNode.appendChild(nameNode)
       })
-      
+
       EditorUtils.markupGeneration.replaceMarkedNode(span, persNameNode)
     })
 

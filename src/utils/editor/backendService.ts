@@ -2,8 +2,54 @@ import { initApi } from '../../services/apiRequest.service'
 import { replaceDataKeys, replaceWithCamelCase } from '../auto_anno/domHandling';
 import { EntityType } from '../../constants/editor';
 import { MiscUtils } from '../misc';
+import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
 
 export const backendService = {
+  fetchCreationKinds: async (): Promise<string[]> => {
+    try {
+      const response = await initApi().get('/jwt/misc/creation_kinds');
+
+      if (!response) {
+        throw new Error("No response from server for creation kinds");
+      }
+
+      return response.data;
+    } catch (error: any) {
+      const response = error.response;
+
+      if (response !== undefined) {
+        throw new Error(`Error response is undefined  ${response.data.error}`);
+      } else {
+        throw new Error(`backendService.fetchCreationKinds: ${error.message}`);
+      }
+    }
+  },
+  fetchAuthorCreations: async (authorKey: string): Promise<SnippetEntity[]> => {
+    try {
+      const response = await initApi().get(`/jwt/misc/author/${authorKey}/creations`);
+
+      if (!response) {
+        throw new Error("No response from server for author creations");
+      }
+
+      return response.data.map((item: any) => {
+        return {
+          entityId: item.id,
+          entityKey: item.key,
+          entityName: item.name,
+          entityKind: item.kind,
+        } as SnippetEntity;
+      });
+    } catch (error: any) {
+      const response = error.response;
+
+      if (response !== undefined) {
+        throw new Error(`Error response is undefined  ${response.data.error}`);
+      } else {
+        throw new Error(`backendService.fetchAuthorCreations: ${error.message}`);
+      }
+    }
+  },
   fetchCountryEntries: async (): Promise<{name: string, id: number}[]> => {
     try {
       const response = await initApi().get('/jwt/misc/countries');

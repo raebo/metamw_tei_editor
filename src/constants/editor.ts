@@ -3,6 +3,8 @@ export enum EntityType {
   INSTITUTION= 'INSTITUTION',
   SIGHT= 'SIGHT',
   SETTLEMENT= 'SETTLEMENT',
+  CREATION = 'CREATION',
+  PROTAG_CREATION = 'PROTAG_CREATION'
 }
 
 export const EditorConstants = {
@@ -69,6 +71,14 @@ export const EditorConstants = {
     place: {
       ADDED: "PLACE_ADDED",
       REMOVED: "PLACE_REMOVED",
+    },
+    creation: {
+      ADDED: "CREATION_ADDED",
+      REMOVED: "CREATION_REMOVED",
+    },
+    protag_creation: {
+      ADDED: "PROTAG_CREATION_ADDED",
+      REMOVED: "PROTAG_CREATION_REMOVED",
     },
     misc: {
       ATTACHMENT_ADDED: "ATTACHMENT_ADDED",

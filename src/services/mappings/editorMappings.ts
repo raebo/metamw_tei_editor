@@ -81,6 +81,21 @@ export interface MarkupPlaceData {
   isNewEntry: boolean,
 }
 
+export interface MarkupCreationData {
+  author: {
+    key: string
+    firstName: string
+    lastName: string
+    isNewEntry: boolean
+  } | null,
+  creation: {
+    key: string
+    name: string
+    kind: string
+    isNewEntry: boolean
+  } | null
+}
+
 export type SelectCompleteOption = {
   label: string;
   value: string;

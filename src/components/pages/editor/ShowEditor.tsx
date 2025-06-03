@@ -217,7 +217,7 @@ const ShowEditor = () => {
     [EditorConstants.compMappingRight.PUBLISH_LETTER]: { name: EditorConstants.compMappingRight.PUBLISH_LETTER, showContainer: false, component: null, action: () => setModalDialog(EditorConstants.dialogTypes.PUBLISH_LETTER) },
     [EditorConstants.compMappingRight.ENT_PERSON]: { name: EditorConstants.compMappingRight.ENT_PERSON, showContainer: true , component: <EntityPersonContainer xmlRef={xmlRefCenter} />, action: () => true },
     [EditorConstants.compMappingRight.ENT_PLACE]: { name: EditorConstants.compMappingRight.ENT_PLACE, showContainer: true , component: <EntityPlaceContainer xmlRef={xmlRefCenter} />, action: () => true },
-    [EditorConstants.compMappingRight.ENT_CREATION]: { name: EditorConstants.compMappingRight.ENT_CREATION, showContainer: true , component: <EntityCreationContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_CREATION]: { name: EditorConstants.compMappingRight.ENT_CREATION, showContainer: true , component: <EntityCreationContainer xmlRef={xmlRefCenter} />, action: () => true },
     [EditorConstants.compMappingRight.ENT_FMBC_CREATION]: { name: EditorConstants.compMappingRight.ENT_FMBC_CREATION,  showContainer: true , component: <EntityFmbcCreationContainer/>, action: () => true },
     [EditorConstants.compMappingRight.ENT_LETTER]: { name: EditorConstants.compMappingRight.ENT_LETTER, showContainer: true , component: <EntityLetterContainer/>, action: () => true },
     [EditorConstants.dialogTypes.RESET_LETTER]: { name: EditorConstants.dialogTypes.RESET_LETTER, showContainer: false, component: null, action: () => setModalDialog(EditorConstants.dialogTypes.RESET_LETTER) },

@@ -135,7 +135,7 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
       if (!letterElement) { throw new Error('No letter element found!'); }
 
       for (const person of addedPersonEntries.filter(entry => entry.isNewEntry)) {
-        const responseData = await EditorUtils.backendService.createEntity(person, EditorConstants.ENTITY_TYPES.PERSON);
+        await EditorUtils.backendService.createEntity(person, EditorConstants.ENTITY_TYPES.PERSON);
       }
 
       const { xmlId, contentChanged } = EditorUtils.markupGeneration.addPersonMarkup(letterElement, addedPersonEntries);
@@ -219,10 +219,10 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
           }}
         />
         <Grid container spacing={2} sx={{ marginTop: 3,  mb: 3 }}>
-          <Grid spacing={{ xs: 6 }}>
+          <Grid spacing={{ xs: 3, md: 3, lg: 3 }}>
             <TextField variant="outlined"  value={personFormData.key} fullWidth disabled={ true }  />
           </Grid>
-          <Grid spacing={{ xs: 6 }}>
+          <Grid spacing={{ xs: 12, md: 9, lg: 9 }}>
             <TextField
               label="Vorname"
               variant="outlined"
@@ -235,20 +235,24 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
                 }))
               }} />
           </Grid>
+          <Grid spacing={{ xs: 12, md: 12, lg: 12 }}>
+            <TextField
+              label="Nachname"
+              variant="outlined"
+              fullWidth value={personFormData.nameLast}
+              sx={{ mb: 3 }}
+              disabled={ formIsDisabled }
+              onChange={(event) => {
+                setPersonFormData((prev) => ({
+                  ...prev,
+                  nameLast: event.target.value
+                }))
+              }} />
+          </Grid>
         </Grid>
-        <TextField
-          label="Nachname"
-          variant="outlined"
-          fullWidth value={personFormData.nameLast}
-          sx={{ mb: 3 }}
-          disabled={ formIsDisabled }
-          onChange={(event) => {
-            setPersonFormData((prev) => ({
-              ...prev,
-              nameLast: event.target.value
-            }))
-          }} />
+
         <Divider sx={{ my: 3 }} />
+
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
           <Button variant="contained" color="primary" onClick={buttonAddNewPersonEntry} disabled={!allowPersonAdding} startIcon={<AddIcon />}>
             Person Hinzufügen
