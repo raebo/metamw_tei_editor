@@ -8,12 +8,14 @@ import { removeNodeHandles } from "./removeNodeHandles";
 import { pinnedLetters } from './pinnedLetters';
 import { creationDataService } from "./creationDataService";
 import { placeDataService } from "./placeDataService";
+import { protagCreationDataService } from './protagCreationDataService';
 
 export const EditorUtils = {
   backendService,
   creationDataService,
   pinnedLetters,
   placeDataService,
+  protagCreationDataService,
   keyPressHandles,
   markupGeneration,
   nodeTypes,

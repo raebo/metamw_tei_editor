@@ -32,7 +32,6 @@ import { RootState } from "../../../redux/redux.store";
 import EntityPersonContainer from "../../editor/letter/Right/EntityPerson/EntityPersonContainer";
 import EntityCreationContainer from "../../editor/letter/Right/EntityCreation/EntityCreationContainer";
 import EntityPlaceContainer from "../../editor/letter/Right/EntityPlace/EntityPlaceContainer";
-import EntityFmbcCreationContainer from "../../editor/letter/Right/EntityFmbcCreation/EntityFmbcCreationContainer";
 import EntityLetterContainer from "../../editor/letter/Right/EntityLetter/EntityLetterContainer";
 import EditorFormDialog from "../../editor/letter/Dialog/EditorFormDialog";
 import useNoteClickHandler from "../../editor/letter/Center/hooks/useNoteClickHandler";
@@ -50,6 +49,8 @@ import UserActionMenu from "../../editor/letter/Right/UserActionMenu";
 import EditorKeyHandle from "../../editor/letter/Center/EditorKeyHandle";
 import QuickContentFormatter from "../../editor/letter/Right/QuickContentFormatter";
 import LetterFontSizeHandle from "../../auto_anno/misc/LetterFontSizeHandle";
+import EntityProtagCreationContainer
+  from '../../editor/letter/Right/EntityProtagCreation/EntityProtagCreationContainer';
 
 
 export interface EditorContainerProps {
@@ -218,7 +219,7 @@ const ShowEditor = () => {
     [EditorConstants.compMappingRight.ENT_PERSON]: { name: EditorConstants.compMappingRight.ENT_PERSON, showContainer: true , component: <EntityPersonContainer xmlRef={xmlRefCenter} />, action: () => true },
     [EditorConstants.compMappingRight.ENT_PLACE]: { name: EditorConstants.compMappingRight.ENT_PLACE, showContainer: true , component: <EntityPlaceContainer xmlRef={xmlRefCenter} />, action: () => true },
     [EditorConstants.compMappingRight.ENT_CREATION]: { name: EditorConstants.compMappingRight.ENT_CREATION, showContainer: true , component: <EntityCreationContainer xmlRef={xmlRefCenter} />, action: () => true },
-    [EditorConstants.compMappingRight.ENT_FMBC_CREATION]: { name: EditorConstants.compMappingRight.ENT_FMBC_CREATION,  showContainer: true , component: <EntityFmbcCreationContainer/>, action: () => true },
+    [EditorConstants.compMappingRight.ENT_FMBC_CREATION]: { name: EditorConstants.compMappingRight.ENT_FMBC_CREATION,  showContainer: true , component: <EntityProtagCreationContainer xmlRef={xmlRefCenter}/>, action: () => true },
     [EditorConstants.compMappingRight.ENT_LETTER]: { name: EditorConstants.compMappingRight.ENT_LETTER, showContainer: true , component: <EntityLetterContainer/>, action: () => true },
     [EditorConstants.dialogTypes.RESET_LETTER]: { name: EditorConstants.dialogTypes.RESET_LETTER, showContainer: false, component: null, action: () => setModalDialog(EditorConstants.dialogTypes.RESET_LETTER) },
   };
@@ -340,6 +341,8 @@ const ShowEditor = () => {
             sx={{
               width: "20%",
               backgroundColor: "#cce5ff",
+              paddingLeft: "10px",
+              paddingRight: "10px",
               transition: "width 0.3s",
             }}
           >

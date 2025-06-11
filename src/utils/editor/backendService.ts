@@ -3,8 +3,68 @@ import { replaceDataKeys, replaceWithCamelCase } from '../auto_anno/domHandling'
 import { EntityType } from '../../constants/editor';
 import { MiscUtils } from '../misc';
 import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
+import { ProtagCreation, ProtagCreationCategory } from '../../services/mappings/editorMappings';
 
 export const backendService = {
+  fetchProtagCreationEntries : async (protagCreationCategory: ProtagCreationCategory): Promise<ProtagCreation[]> => {
+    try {
+      const response = await initApi().get(`/jwt/misc/protag_creations_for_category/${protagCreationCategory.id}`, {
+      });
+
+      if (!response) {
+        throw new Error("No response from server for protag creation entries");
+      }
+
+      return response.data.map((protag : { id: number, key: string, name: string, protag_creation_category_id: number, mwv: string | null, op: string | null} ) => {
+        return {
+          id: protag.id,
+          key: protag.key,
+          name: protag.name,
+          protagCreationCategoryId: protag.protag_creation_category_id,
+          mwv: protag.mwv || null,
+          opus: protag.op || null
+        } as ProtagCreation
+      })
+    } catch (error: any) {
+      const response = error.response;
+
+      if (response !== undefined) {
+        throw new Error(`Error response is undefined  ${response.data.error}`);
+      } else {
+        throw new Error(`backendService.fetchProtagCreationEntries: ${error.message}`);
+      }
+    }
+  },
+  fetchProtagCreationCategories: async (categoryId : number | null): Promise<ProtagCreationCategory[]> => {
+    try {
+      const response = await initApi().get(`/jwt/misc/protag_creation_categories`, {
+        params: {
+          categoryId: categoryId
+        }
+      });
+
+      if (!response) {
+        throw new Error("No response from server for protag creation categories");
+      }
+
+      return response.data.map((protag : { id: number, name: string, name_en: string, protag_creation_category_id: number} ) => {
+        return {
+          id: protag.id,
+          name: protag.name,
+          name_en: protag.name_en,
+          protagCreationCategoryId: protag.protag_creation_category_id,
+        } as ProtagCreationCategory;
+      })
+    } catch (error: any) {
+      const response = error.response;
+
+      if (response !== undefined) {
+        throw new Error(`Error response is undefined  ${response.data.error}`);
+      } else {
+        throw new Error(`backendService.fetchCreationKinds: ${error.message}`);
+      }
+    }
+  },
   fetchCreationKinds: async (): Promise<string[]> => {
     try {
       const response = await initApi().get('/jwt/misc/creation_kinds');

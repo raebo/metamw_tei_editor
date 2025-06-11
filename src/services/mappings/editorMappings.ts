@@ -81,6 +81,32 @@ export interface MarkupPlaceData {
   isNewEntry: boolean,
 }
 
+export interface ProtagCreationCategory {
+  id: number;
+  name: string;
+  name_en: string
+  protagCreationCategoryId: number | null;
+}
+
+export interface ProtagCreation{
+  id: number;
+  key: string;
+  name: string;
+  protagCreationCategoryId: number;
+  mwv: string | null;
+  opus: string | null;
+}
+
+export interface MarkupProtagCreationData {
+  key: string
+  name: string
+  mwv: string | null
+  opus: string  | null
+  isNewEntry: boolean
+  parentProtagCreations: ProtagCreationCategory[] | null
+  protagCreationCategory: ProtagCreationCategory
+}
+
 export interface MarkupCreationData {
   author: {
     key: string

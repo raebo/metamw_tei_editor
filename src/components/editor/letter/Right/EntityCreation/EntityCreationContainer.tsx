@@ -261,7 +261,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
   }
 
   return (
-    <div>
+    <>
       <Box component="form" sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
         <Typography variant="h5" gutterBottom>
           Werk Auszeichnen und Hinzufügen
@@ -433,7 +433,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
         <pre>{JSON.stringify(authorFormData, null, 2)}</pre>
         <pre>{JSON.stringify(creationFormData, null, 2)}</pre>
       </div>
-    </div>
+    </>
   );
 }
 
