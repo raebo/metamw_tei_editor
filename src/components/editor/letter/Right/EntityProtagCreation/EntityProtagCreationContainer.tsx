@@ -68,31 +68,6 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
     opus: null,
     parentProtagCreationCategories: null,
     protagCreationCategory: null,
-  //   "key": "PRC0100128",
-  //   "name": "Antiphona et Responsorium »Hora est« für vier gemischte Chöre und Basso continuo, zum 14. November 1828; 6. Dezember 1828",
-  //   "isNewEntry": false,
-  //   "mwv": "B 18",
-  //   "opus": null,
-  //   "parentProtagCreationCategories": [
-  //   {
-  //     "id": 2,
-  //     "name": "Vokalmusik",
-  //     "name_en": "vocal_music",
-  //     "protagCreationCategoryId": 1
-  //   },
-  //   {
-  //     "id": 1,
-  //     "name": "Musikalische Werke",
-  //     "name_en": "musical_works",
-  //     "protagCreationCategoryId": null
-  //   }
-  // ],
-  //   "protagCreationCategory": {
-  //   "id": 3,
-  //     "name": "Geistliche Vokalmusik",
-  //     "name_en": "sacred_vocal_music",
-  //     "protagCreationCategoryId": 2
-  // }
   })
 
   useEffect(() => {
@@ -109,7 +84,7 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
   }, []); // empty array = run once on mount
 
   const fetchProtagCreationEntries = (protagCreationCategory: ProtagCreationCategory)  : void => {
-    backendService.fetchProtagCreationEntries(protagCreationCategory).then((entries) => {
+    EditorUtils.backendService.fetchProtagCreationEntries(protagCreationCategory).then((entries) => {
       setProtagCreations(entries);
     })
     .catch(error => {

@@ -100,6 +100,20 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_ADD) }
   },
+  "ctrl+alt+v": {
+    key: "ctrl+alt+v",
+    description: "letters to protagonist",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG) }
+  },
+  "ctrl+alt+b": {
+    key: "ctrl+alt+b",
+    description: "letters from protagonist",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG) }
+  },
 }
 
 

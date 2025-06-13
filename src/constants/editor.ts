@@ -41,6 +41,8 @@ export const EditorConstants = {
     ADD_TEI_HEADER: "ADD_TEI_HEADER",
     ADD_NEW_LETTER: "ADD_NEW_LETTER",
     PUBLISH_LETTER: "PUBLISH_LETTER",
+    ADD_LETTER_TO_PROTAG: "ADD_LETTER_TO_PROTAG",
+    ADD_LETTER_FROM_PROTAG: "ADD_LETTER_FROM_PROTAG",
   },
   AUTOCOMPLETE_INPUT_CHANGE_REASONS: {
     INPUT: 'input',
@@ -82,6 +84,8 @@ export const EditorConstants = {
     },
     misc: {
       ATTACHMENT_ADDED: "ATTACHMENT_ADDED",
+      GB_LETTER_ADDED: "GB_LETTER_ADDED",
+      PROTAG_LETTER_ADDED: "PROTAG_LETTER_ADDED",
     }
   },
   attachmentTypeItems: [

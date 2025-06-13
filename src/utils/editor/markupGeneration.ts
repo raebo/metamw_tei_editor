@@ -1,8 +1,13 @@
 import { v4 as uuidv4 } from "uuid"
 import { EditorUtils } from "./index"
 import {xmlCheck} from "./xmlCheck";
-import {ActOfWritingElement, MarkupPersonData, MarkupPlaceData} from '../../services/mappings/editorMappings';
+import {
+  ActOfWritingElement,
+  MarkupPersonData,
+  MarkupPlaceData,
+} from '../../services/mappings/editorMappings';
 import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
+import { EditorConstants } from '../../constants/editor';
 
 const generateSettlementNode = ( data: { key: string | null, name: string | null, type: string | null}) : HTMLElement => {
   if (data.key === null || data.name === null || data.type === null) {
@@ -136,6 +141,74 @@ export const markupGeneration = {
     }
 
     return {}
+  },
+  addProtagLetterMarkup: async (
+    letterElement: Element,
+    stateEditorLetter: { id: number, name: string },
+    markupLetterData: { letterKey: string, letterName: string }
+  ) : Promise<any> => {
+
+    const protagData = await EditorUtils.protagCreationDataService.fetchProtagPersonData()
+
+    const markedSpan= letterElement.querySelectorAll('span.marked')[0]
+    if (markedSpan === undefined) throw new Error("no marked span found in letter element")
+
+    const titleNode = document.createElement("title")
+    const nameNode = document.createElement("name")
+    nameNode.setAttribute("type", "author")
+    nameNode.setAttribute("key", protagData.entityKey)
+    nameNode.setAttribute("style", "hidden")
+    nameNode.textContent = protagData.entityDisplayName
+    titleNode.appendChild(nameNode)
+
+    const letterNode = document.createElement("name")
+    letterNode.setAttribute("type", "letter")
+    letterNode.setAttribute("key", markupLetterData.letterKey)
+    letterNode.setAttribute("style", "hidden")
+    letterNode.textContent = markupLetterData.letterName
+    titleNode.appendChild(letterNode)
+
+    EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNode)
+
+    await EditorUtils.backendService.patchContent(
+      letterElement.innerHTML,
+      stateEditorLetter.id,
+      EditorConstants.changeTypes.misc.PROTAG_LETTER_ADDED,
+      null
+    );
+  },
+  addGbLetterMarkup: async (
+    letterElement: Element,
+    stateEditorLetter: { id: number, name: string },
+    markupLetterData: { authorKey: string, authorName: string, letterKey: string, letterName: string }
+  ) : Promise<any> => {
+
+    const markedSpan= letterElement.querySelectorAll('span.marked')[0]
+    if (markedSpan === undefined) throw new Error("no marked span found in letter element")
+
+    const titleNode = document.createElement("title")
+    const nameNode = document.createElement("name")
+    nameNode.setAttribute("type", "author")
+    nameNode.setAttribute("key", markupLetterData.authorKey)
+    nameNode.setAttribute("style", "hidden")
+    nameNode.textContent = markupLetterData.authorName
+    titleNode.appendChild(nameNode)
+
+    const letterNode = document.createElement("name")
+    letterNode.setAttribute("type", "letter")
+    letterNode.setAttribute("key", markupLetterData.letterKey)
+    letterNode.setAttribute("style", "hidden")
+    letterNode.textContent = markupLetterData.letterName
+    titleNode.appendChild(letterNode)
+
+    EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNode)
+
+    await EditorUtils.backendService.patchContent(
+      letterElement.innerHTML,
+      stateEditorLetter.id,
+      EditorConstants.changeTypes.misc.GB_LETTER_ADDED,
+      null
+    );
   },
   addPersonMarkup: (root: Element, peopleMarkupData: MarkupPersonData[]) : { xmlId: string | null, contentChanged: boolean } => {
 

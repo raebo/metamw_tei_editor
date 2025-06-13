@@ -60,7 +60,8 @@ const LetterViewContainer = () => {
     { label: 'Ort Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PLACE) },
     { label: 'Werk Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_CREATION) },
     { label: 'FMBC Werk Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_FMBC_CREATION) },
-    { label: 'Brief Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_LETTER) },
+    { label: 'Verweis FMB-Brief Hinzufügen', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG) },
+    { label: 'Verweis GB-Brief Hinzufügen', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG) },
     { type: 'divider' },
     { label: 'Kommentar Hinzufügen', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_NOTE) },
   ];

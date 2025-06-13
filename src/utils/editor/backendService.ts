@@ -6,6 +6,66 @@ import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
 import { ProtagCreation, ProtagCreationCategory } from '../../services/mappings/editorMappings';
 
 export const backendService = {
+  fetchAuthorSenderLetters: async (author: SnippetEntity, isSender: boolean, searchValue: string | null): Promise<SnippetEntity[]> => {
+    const searchParam = searchValue ? `/${encodeURIComponent(searchValue)}` : '';
+
+    try {
+      const response = await initApi().get(`/jwt/misc/author_receiver_letters/${isSender}/${author.entityKey}${searchParam}`);
+
+      if (!response) {
+        throw new Error("No response from server for author letters");
+      }
+
+      return response.data.map((item: any) => {
+        return {
+          entityId: item.id,
+          entityKey: item.name,
+          entityName: item.title,
+          entityDisplayName: item.display_name,
+        } as SnippetEntity;
+      });
+    } catch (error: any) {
+      const response = error.response;
+
+      if (response !== undefined) {
+        throw new Error(`Error response is undefined  ${response.data.error}`);
+      } else {
+        throw new Error(`backendService.fetchAuthorLetters: ${error.message}`);
+      }
+    }
+  },
+  fetchLetterAuthorsSenders: async (seachValue: string | null, isSender: boolean): Promise<SnippetEntity[]> => {
+    const searchParam = seachValue ? `/${encodeURIComponent(seachValue)}` : '';
+
+    try {
+      const response = await initApi().get(`/jwt/misc/letter_authors_receivers/${isSender}${searchParam}`, {
+      });
+
+      if (!response) {
+        throw new Error("No response from server for letter authors");
+      }
+
+      console.log("Response data for letter authors:", response.data);
+
+      return response.data.map((item: any) => {
+        return {
+          entityId: item.id,
+          entityKey: item.key,
+          entityLastName: item.last_name,
+          entityFirstName: item.first_name,
+          entityDisplayName: item.display_name,
+        } as SnippetEntity;
+      });
+    } catch (error: any) {
+      const response = error.response;
+
+      if (response !== undefined) {
+        throw new Error(`Error response is undefined  ${response.data.error}`);
+      } else {
+        throw new Error(`backendService.fetchLetterAuthors: ${error.message}`);
+      }
+    }
+  },
   fetchProtagCreationEntries : async (protagCreationCategory: ProtagCreationCategory): Promise<ProtagCreation[]> => {
     try {
       const response = await initApi().get(`/jwt/misc/protag_creations_for_category/${protagCreationCategory.id}`, {
