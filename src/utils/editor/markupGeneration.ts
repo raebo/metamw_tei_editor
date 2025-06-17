@@ -142,6 +142,28 @@ export const markupGeneration = {
 
     return {}
   },
+  addDateMarkup: async (
+    letterElement: Element,
+    stateEditorLetter: { id: number },
+    markupDateString: string
+  ) : Promise<boolean> => {
+
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(markupDateString, "application/xml");
+    const dateNode = xmlDoc.documentElement;
+
+    const markedSpan= letterElement.querySelectorAll('span.marked')[0]
+    if (markedSpan === undefined) throw new Error("no marked span found in letter element")
+
+    EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, dateNode)
+
+    return await EditorUtils.backendService.patchContent(
+      letterElement.innerHTML,
+      stateEditorLetter.id,
+      EditorConstants.changeTypes.misc.DATE_ADDED,
+      null
+    );
+  },
   addProtagLetterMarkup: async (
     letterElement: Element,
     stateEditorLetter: { id: number, name: string },

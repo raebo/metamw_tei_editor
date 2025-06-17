@@ -10,7 +10,7 @@ import {
   setEditorSelectedItem,
   setEditorTabNumber,
   setLetterReference,
-  setNodeClicked,
+  setNodeClicked, setReloadLetterContent,
 } from '../slices/editor.letter.slice';
 import { PinnedLetter } from '../../services/mappings/editorMappings';
 
@@ -111,6 +111,7 @@ export const setEditorNodeClickedAndContentLeftRightThunk = createAsyncThunk(
     dispatch(setNodeClicked({ nodeClicked: nodeClicked }));
     dispatch(setContentTextIsMarked({ textIsMarked: false }));
     dispatch(setEditorSelectedItem({ selectedItem: { left: contentLeft, right: contentRight } }));
+    dispatch(setReloadLetterContent({ reloadLetterContent: true }))
   },
 );
 

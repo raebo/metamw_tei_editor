@@ -7,6 +7,9 @@ export enum EntityType {
   PROTAG_CREATION = 'PROTAG_CREATION'
 }
 
+export type EditorDateType  = "when" | "when-custom" | "notAfter" | "notBefore" | "from-to" | "notBefore-notAfter"
+export type DateCertainty = "high" | "medium" | "low";
+
 export const EditorConstants = {
   ALLOWED_PARENT_TAG: "div[type='act_of_writing']",
   FORBIDDEN_PARENT_TAG: "teiHeader",
@@ -34,6 +37,11 @@ export const EditorConstants = {
     ADD_NOTE: "ADD_NOTE",
     EDIT_NOTE: "EDIT_NOTE",
     DATE_WHEN_ADD: "DATE_WHEN_ADD",
+    DATE_WHEN_CUSTOM_ADD: "DATE_WHEN_CUSTOM_ADD",
+    DATE_NOT_AFTER_ADD: "DATE_NOT_AFTER_ADD",
+    DATE_NOT_BEFORE_ADD: "DATE_NOT_BEFORE_ADD",
+    DATE_FROM_TO_ADD: "DATE_FROM_TO_ADD",
+    DATE_NOT_BEFORE_AFTER_ADD: "DATE_NOT_BEFORE_AFTER_ADD",
     ATTACHMENT_ADD: "ATTACHMENT_ADD",
     ADD_FOOTNOTE_AUTHOR: "ADD_FOOTNOTE_AUTHOR",
     SOURCE_DESC_HANDWRITING: "SOURCE_DESC_HANDWRITING",
@@ -86,6 +94,8 @@ export const EditorConstants = {
       ATTACHMENT_ADDED: "ATTACHMENT_ADDED",
       GB_LETTER_ADDED: "GB_LETTER_ADDED",
       PROTAG_LETTER_ADDED: "PROTAG_LETTER_ADDED",
+      DATE_ADDED: "DATE_ADDED",
+      DATE_REMOVED: "DATE_REMOVED",
     }
   },
   attachmentTypeItems: [
@@ -121,6 +131,16 @@ export const EditorConstants = {
     panel: {
       buttonSize: "small",
     }
+  },
+  dateDialog: {
+    dateTypes: {
+      WHEN: "when",
+      WHEN_CUSTOM: "when-custom",
+      NOT_AFTER: "notAfter",
+      NOT_BEFORE: "notBefore",
+      FROM_TO: "from-to",
+      NOT_BEFORE_NOT_AFTER: "notBefore-notAfter"
+    },
   },
   camelCaseTags: [
     "accMat", "addName", "addrLine", "addSpan", "adminInfo",

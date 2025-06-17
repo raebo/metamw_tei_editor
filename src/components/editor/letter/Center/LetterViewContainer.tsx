@@ -21,25 +21,17 @@ import { fetchPinnedLetterData } from "../../../../services/editor/apiPinnedLett
 import { MiscUtils } from "../../../../utils/misc";
 import LetterViewCode from './LetterViewCode';
 import { removeMarkedSpans } from '../../../../utils/auto_anno/domHandling';
-
-type NodeActionCallback = (args: {
-  node?: Node;
-}) => void;
-
-type MenuItemType = {
-  label?: string
-  action?: NodeActionCallback
-  type?: 'divider' | null
-}
+import {createContextMenuItems, MenuItemType} from "../Util/ContextMenuLetterItems";
 
 const LetterViewContainer = () => {
-
   const dispatch = useAppDispatch();
   const contentTextIsMarked = useSelector((state: RootState) => state.editorLetter.content.textIsMarked);
   const nodeClicked = useSelector((state: RootState) => state.editorLetter.content.nodeClicked);
   const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize)
   const containerRef = React.useRef<HTMLDivElement>(null);
   const contextMenuRef = useRef<HTMLDivElement | null>(null);
+  const [submenuAnchorEl, setSubmenuAnchorEl] = useState<HTMLElement | null>(null);
+  const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
   const xmlContentRef = useRef<HTMLDivElement | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
@@ -55,16 +47,6 @@ const LetterViewContainer = () => {
   const [anchorPosition, setAnchorPosition] = useState<null | { top: number; left: number }>(null);
 
   const [displayMenuItems, setDisplayMenuItems] = useState<MenuItemType[]>([]);
-  const menuItems : MenuItemType[] = [
-    { label: 'Person Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PERSON) },
-    { label: 'Ort Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PLACE) },
-    { label: 'Werk Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_CREATION) },
-    { label: 'FMBC Werk Hinzufügen', action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_FMBC_CREATION) },
-    { label: 'Verweis FMB-Brief Hinzufügen', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG) },
-    { label: 'Verweis GB-Brief Hinzufügen', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG) },
-    { type: 'divider' },
-    { label: 'Kommentar Hinzufügen', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_NOTE) },
-  ];
 
   const menuItemsNoMarking : MenuItemType[] = [
     { label: 'Eintrag Entfernen', action: ({ node }: { node?: Node }) => {
@@ -77,14 +59,17 @@ const LetterViewContainer = () => {
 
           const xmlContent =
             EditorUtils.removeNodeHandles.removeNode(
-              node,
-              anchNode.afterDeleteCallback
-            )
+            node,
+            anchNode.afterDeleteCallback,
+          );
 
           if (!xmlContent) throw new Error("No xml content found");
 
           EditorUtils.backendService.patchContent(
-            xmlContent, stateEditorLetter.id, EditorConstants.changeTypes.NODE_REMOVED, null
+              xmlContent,
+              stateEditorLetter.id,
+              EditorConstants.changeTypes.NODE_REMOVED,
+              null,
           ).then(
             (result) => {
               if (result) {
@@ -100,6 +85,22 @@ const LetterViewContainer = () => {
         }
       } },
   ]
+
+
+  const handleMenuItemClick = (selectedItemLeft: string | null, selectedItemRight: string | null) => {
+    setAnchorPosition(null)
+    dispatch(setEditorSelectedItem({ selectedItem: { left: selectedItemLeft, right: selectedItemRight } }))
+  }
+
+  const handleMenuItemDialogClick = (dialogType: string ) => {
+    setAnchorPosition(null)
+    dispatch(setDialogType({ dialogType: dialogType }));
+  }
+
+  const menuItems = createContextMenuItems({
+    handleMenuItemClick,
+    handleMenuItemDialogClick,
+  });
 
   const fetchSingleLetterData = async (letterId: number) : Promise<string> => {
     try {
@@ -283,15 +284,7 @@ const LetterViewContainer = () => {
  }, [letterState]);
 
 
-  const handleMenuItemClick = (selectedItemLeft: string | null, selectedItemRight: string | null) => {
-    setAnchorPosition(null)
-    dispatch(setEditorSelectedItem({ selectedItem: { left: selectedItemLeft, right: selectedItemRight } }))
-  }
 
-  const handleMenuItemDialogClick = (dialogType: string ) => {
-    setAnchorPosition(null)
-    dispatch(setDialogType({ dialogType: dialogType } ));
-  }
 
   return (
     <div className="letter-view-container">
@@ -313,7 +306,11 @@ const LetterViewContainer = () => {
                   <div ref={contextMenuRef} id="letterXmlContextMenu" style={{ padding: 20 }}>
                     <Menu
                       open={Boolean(anchorPosition)}
-                      onClose={() => setAnchorPosition(null)}
+                      onClose={() => {
+                        setAnchorPosition(null);
+                        setOpenSubmenuIndex(null);
+                        setSubmenuAnchorEl(null);
+                      }}
                       anchorReference="anchorPosition"
                       anchorPosition={
                         anchorPosition
@@ -325,21 +322,80 @@ const LetterViewContainer = () => {
                         item.type === 'divider' ? (
                           <Divider key={index} />
                         ) : (
-                          <MenuItem key={index} onClick={() => {
-                            if (selectedNode) {
-                              item.action?.({ node: selectedNode });
-                              setSelectedNode(null)
-                              setAnchorPosition(null)
-                            }  else {
-                              item.action?.({})
-                            }
-                            }
-                          }>
+                          <MenuItem
+                            key={index}
+                            onClick={(e) => {
+                              if (item.hasSubMenu) {
+                                setSubmenuAnchorEl(e.currentTarget);
+                                setOpenSubmenuIndex(index);
+                              } else {
+                                if (selectedNode) {
+                                  item.action?.({ node: selectedNode });
+                                  setSelectedNode(null);
+                                  setAnchorPosition(null);
+                                } else {
+                                  item.action?.({});
+                                  setAnchorPosition(null);
+                                }
+                              }
+                            }}
+                            onMouseEnter={(e) => {
+                              if (item.hasSubMenu) {
+                                setSubmenuAnchorEl(e.currentTarget);
+                                setOpenSubmenuIndex(index);
+                              }
+                            }}
+                            onMouseLeave={() => {
+                              if (!item.hasSubMenu) {
+                                setOpenSubmenuIndex(null);
+                                setSubmenuAnchorEl(null);
+                              }
+                            }}
+                          >
                             <Typography variant="body2">{item.label}</Typography>
+                            {item.hasSubMenu && <span style={{ marginLeft: 'auto' }}>▶</span>}
                           </MenuItem>
                         )
                       )}
                     </Menu>
+                    {openSubmenuIndex !== null &&
+                      displayMenuItems[openSubmenuIndex]?.subMenu && (
+                        <Menu
+                          anchorEl={submenuAnchorEl}
+                          open={Boolean(submenuAnchorEl)}
+                          onClose={() => {
+                            setSubmenuAnchorEl(null);
+                            setOpenSubmenuIndex(null);
+                          }}
+                          anchorOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                          }}
+                          transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'left',
+                          }}
+                        >
+                          {displayMenuItems[openSubmenuIndex]!.subMenu!.map((subItem, subIndex) => (
+                            <MenuItem
+                              key={subIndex}
+                              onClick={() => {
+                                if (selectedNode) {
+                                  subItem.action?.({ node: selectedNode });
+                                  setSelectedNode(null);
+                                } else {
+                                  subItem.action?.({});
+                                }
+                                setAnchorPosition(null);
+                                setSubmenuAnchorEl(null);
+                                setOpenSubmenuIndex(null);
+                              }}
+                            >
+                              <Typography variant="body2">{subItem.label}</Typography>
+                            </MenuItem>
+                          ))}
+                        </Menu>
+                      )}
                   </div>
                 </div>
               ) }

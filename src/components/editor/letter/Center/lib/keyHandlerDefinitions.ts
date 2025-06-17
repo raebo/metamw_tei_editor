@@ -86,19 +86,47 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_NOTE) }
   },
-  "alt+shift+1": {
-    key: "alt+shift+1",
-    description: "date when marking content",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_ADD) }
-  },
   "alt+shift+!": {
     key: "alt+shift+!",
     description: "date when marking content",
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_ADD) }
+  },
+  'alt+shift+"': {
+    key: 'alt+shift+"',
+    description: "date 'when-custom' marking content",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD) }
+  },
+  'alt+shift+§': {
+    key: 'alt+shift+§',
+    description: "date 'notAfter' marking content",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD) }
+  },
+  'alt+shift+$': {
+    key: 'alt+shift+$',
+    description: "date 'notBefore' marking content",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD) }
+  },
+  'alt+shift+%': {
+    key: 'alt+shift+%',
+    description: "date 'From-To' marking content",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_FROM_TO_ADD) }
+  },
+  'alt+shift+&': {
+    key: 'alt+shift+&',
+    description: "date 'notBefore-notAfter' marking content",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD) }
   },
   "ctrl+alt+v": {
     key: "ctrl+alt+v",

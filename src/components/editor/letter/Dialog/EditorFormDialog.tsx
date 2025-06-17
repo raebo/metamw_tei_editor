@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/redux.store";
 import ResetLetterDialog from "./Components/ResetLetterDialog";
 import EditNoteDialog from "./Components/EditNoteDialog";
-import DateWhenAddDialog from "./Components/Date/DateWhenAddDialog";
+import DateAddDialog from "./Components/Date/DateAddDialog";
 import AttachmentAddDialog from "./Components/Misc/AttachmentAddDialog";
 import AddWritingActDialog from './Components/AddWritingActDialog';
 import AddTeiHeaderDialog from './Components/AddTeiHeaderDialog';
@@ -67,6 +67,11 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.RESET_LETTER]: "Brief Zurücksetzen",
     [EditorConstants.dialogTypes.PUBLISH_LETTER]: "Brief Veröffentlichen",
     [EditorConstants.dialogTypes.DATE_WHEN_ADD]: "Datum 'WHEN' Auszeichnen",
+    [EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD]: "Datum 'WHEN CUSTOM' Auszeichnen",
+    [EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD]: "Datum 'Not After' Auszeichnen",
+    [EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD]: "Datum 'Not Before' Auszeichnen",
+    [EditorConstants.dialogTypes.DATE_FROM_TO_ADD]: "Datum 'From To' Auszeichnen",
+    [EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD]: "Datum 'NotBefore NotAfter' Auszeichnen",
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: "Beilage Hinzufügen",
     [EditorConstants.dialogTypes.ADD_WRITING_PART]: "Schreibakt Hinzufügen",
     [EditorConstants.dialogTypes.ADD_TEI_HEADER]: "Header des Briefes Hinzufügen",
@@ -80,7 +85,12 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.EDIT_NOTE]: <EditNoteDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.PUBLISH_LETTER]: <PublishLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
-    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: <DateWhenAddDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.DATE_WHEN_ADD]: <DateAddDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} dateType={EditorConstants.dateDialog.dateTypes.WHEN}/>,
+    [EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD]: <DateAddDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} dateType={EditorConstants.dateDialog.dateTypes.WHEN_CUSTOM}/>,
+    [EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD]: <DateAddDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} dateType={EditorConstants.dateDialog.dateTypes.NOT_AFTER}/>,
+    [EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD]: <DateAddDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} dateType={EditorConstants.dateDialog.dateTypes.NOT_BEFORE}/>,
+    [EditorConstants.dialogTypes.DATE_FROM_TO_ADD]: <DateAddDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} dateType={EditorConstants.dateDialog.dateTypes.FROM_TO}/>,
+    [EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD]: <DateAddDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} dateType={EditorConstants.dateDialog.dateTypes.NOT_BEFORE_NOT_AFTER}/>,
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_WRITING_PART]: <AddWritingActDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_TEI_HEADER]: <AddTeiHeaderDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,

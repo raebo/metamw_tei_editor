@@ -1,16 +1,40 @@
 import { EditorUtils } from "./index";
+import React from 'react';
 
 export const xmlCheck = {
+  xmlLetterDate: (
+    xmlRef: React.RefObject<HTMLDivElement>
+  ) : string => {
+
+    if (xmlRef.current === null) { throw new Error('XML reference is null'); }
+
+    const xmlContainer = xmlRef.current.querySelector('#letterXmlContent');
+
+    if (!xmlContainer || !xmlContainer.firstChild) {
+      console.warn("No valid XML content found in letterXmlContent");
+      return new Date().toISOString().split('T')[0];
+    }
+    const firstElement = xmlContainer.firstChild as Element;
+    const letterNameValue = firstElement.getAttribute("xml:id") ?? '';
+
+    if (letterNameValue === undefined) {
+      console.warn("No xml:id attribute found in the first element of letterXmlContent");
+      return new Date().toISOString().split('T')[0];
+    }
+    const parts = letterNameValue.split('-');
+
+    return parts.slice(1, 4).join('-');
+  },
   createDocumentFromNodeToTeiRoot: (node: Node): Document => {
     let current: Node | null = node;
-    
+
     while (current && (current as Element).tagName?.toLowerCase() !== 'tei') {
       current = current.parentNode;
       if (!current) throw new Error("Reached top of tree without finding <tei>");
     }
-    
+
     const teiElement = current as Element;
-    
+
     return xmlCheck.parseXml(teiElement.outerHTML);
   },
   parseXml: (xmlString: string) : Document => {
@@ -74,18 +98,23 @@ export const xmlCheck = {
       .reverse()
       .join(" ")
 
-    const deletableNodeNames = nodeAnchestorPaths().map(entry => { return entry.parentPath.toLowerCase() })
-    const isDeletable = deletableNodeNames.some((path: string) => {
-      return path === ancestorNodeNames
+    const matchingEntry = nodeAnchestorPaths().find(entry => {
+      return entry.parentPath.toLowerCase() === ancestorNodeNames;
     });
 
-    if (isDeletable) {
-      onValid(node)
-    } else {
-      onInvalid("Knoten ist nicht löschbar")
-      return false
+    if (!matchingEntry) {
+      onInvalid("Knoten ist nicht löschbar: " + ancestorNodeNames);
+      return false;
     }
-    return true
+
+    if (matchingEntry.checkElementDetails(node as Element)) {
+      onValid(node);
+      return true
+    } else {
+      onInvalid("Knoten ist nicht löschbar: " + ancestorNodeNames);
+      return false;
+    }
+
   },
   getSelectionOffsets(rootElement: HTMLElement, range: Range): { start: number; end: number } | null {
     let walker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT, null);

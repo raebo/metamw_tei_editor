@@ -5,6 +5,7 @@ import {NodeType, nodeTypes, NodeTypes} from "./nodeTypes";
 interface NodeAnchestorPath {
   parentPath: string,
   nodeType: NodeType,
+  checkElementDetails: (node: Element) => boolean,
   afterDeleteCallback: (xmlDoc: Document, node: Node) => string
 }
 
@@ -14,6 +15,16 @@ export const removeNodeHandles = {
       {
         parentPath: 'tei teiheader filedesc sourcedesc msDesc physDesc accMat listBibl bibl',
         nodeType: nodeTypes.get(NodeTypes.ATTACHMENT),
+        checkElementDetails: (nodeElement: Element): boolean => {
+          const typeValue = nodeElement.getAttribute("type");
+
+          if (!typeValue || typeValue === "none") {
+            console.warn("Node is not an attachment or has no type attribute set");
+            return false;
+          } else {
+            return true
+          }
+        },
         afterDeleteCallback: (xmlDoc: Document, node: Node) => handleBiblNode(xmlDoc, node),
       },
     ]
@@ -29,22 +40,22 @@ export const removeNodeHandles = {
     const anchestor = this.nodeAnchestorPaths().find((entry: NodeAnchestorPath) => {
       return entry.parentPath.toLowerCase() === path.toLowerCase()
     })
-    
+
     if (!anchestor) throw new Error("No anchestor enty found for " +  path)
-    
+
     return anchestor;
   },
   removeNode: (
     node: Node,
     callbackSuccess: (xmlDoc: Document, node: Node) => string
   ): string => {
-    
+
     const parentNode = node.parentNode;
-    
+
     if (!parentNode) throw new Error("No parent node found")
-    
+
     parentNode.removeChild(node);
-    
+
     return callbackSuccess(
       xmlCheck.createDocumentFromNodeToTeiRoot(parentNode),
       parentNode
@@ -54,12 +65,12 @@ export const removeNodeHandles = {
 
 const handleBiblNode = (xmlDoc: Document, node: Node): string => {
   if (node.childNodes.length > 0) return xmlCheck.serializeDocument(xmlDoc)
-  
+
   const attachmentMarkup = markupGeneration.addAttachmentMarkup(
     xmlCheck.serializeDocument(xmlDoc),
     "none",
     ""
   )
-  
+
   return attachmentMarkup.xmlString
 };

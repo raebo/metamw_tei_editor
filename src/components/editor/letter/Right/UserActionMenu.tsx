@@ -67,16 +67,6 @@ const menuItems: MenuItem[] = [
       { label: 'Vermerk Hinzufügen', keyHandleItem: null, active: false },
     ],
   },
-  {
-    label: 'Datum Einfügen',
-    active: true,
-    hasSubMenu: true,
-    keyHandleItem: null,
-    subMenu: [
-      { label: 'Datum when', keyHandleItem: null, active: false }, // "ctrl+alt+shift+1"
-      { label: 'Datum when-custom', keyHandleItem: null, active: false }, // "ctrl+alt+shift+2"
-    ],
-  },
 ];
 
 const UserActionMenu = (props: UserActionMenuProps) => {
@@ -121,14 +111,14 @@ const UserActionMenu = (props: UserActionMenuProps) => {
   };
 
   const getMenuItemStyles = (active: boolean) => ({
-    fontSize: '0.675rem',
+    fontSize: '0.775rem',
     padding: '4px 12px',
     minHeight: '32px',
     color: active ? 'black' : 'gray',
     cursor: 'pointer',
   });
   const getSndMenuItemStyles = (active: boolean) => ({
-    fontSize: '0.575rem',
+    fontSize: '0.675rem',
     padding: '2px 12px',
     minHeight: '15px',
     color: active ? 'black' : 'grey',
