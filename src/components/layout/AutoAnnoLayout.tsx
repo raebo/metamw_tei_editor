@@ -8,7 +8,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import Header from "../header/Header";
 import { useAuthToken } from "../../services/authentication.service";
 import { authenticatedVar } from "../../constants/authenticated";

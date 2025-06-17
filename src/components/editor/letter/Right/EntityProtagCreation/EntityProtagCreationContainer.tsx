@@ -17,7 +17,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import ProtagCrtCatSelector from './ProtagCrtCatSelector';
 import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
 import Button from '@mui/material/Button';

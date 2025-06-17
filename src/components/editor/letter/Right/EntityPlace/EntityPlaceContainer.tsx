@@ -24,7 +24,7 @@ import {
   SelectCompleteOption
 } from '../../../../../services/mappings/editorMappings';
 import EntityPlaceAutocomplete from './EntityPlaceAutocomplete';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import { setEditorMarkedAndContentLeftRightThunk } from '../../../../../redux/thunks/editor.letter.thunk';

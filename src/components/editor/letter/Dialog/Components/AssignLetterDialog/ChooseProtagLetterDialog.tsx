@@ -9,7 +9,7 @@ import { enqueueSnackbar } from 'notistack';
 import { setEditorMarkedAndContentLeftRightThunk } from '../../../../../../redux/thunks/editor.letter.thunk';
 import { setReloadLetterContent } from '../../../../../../redux/slices/editor.letter.slice';
 import { Box, Divider, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import AssignLetterAuthorAutocomplete from './AssignLetterAuthorAutocomplete';
 import Button from '@mui/material/Button';
 

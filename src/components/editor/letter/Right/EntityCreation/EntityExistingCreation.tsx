@@ -1,7 +1,7 @@
 import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
 import { Autocomplete, TextField } from '@mui/material';
 import React, { useEffect } from 'react';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 
 export interface EntityExistingCreationProps {
   creationList: SnippetEntity[],

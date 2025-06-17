@@ -5,7 +5,7 @@ import { RootState } from '../../../../../../redux/redux.store';
 import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
 import React, { useEffect, useState } from 'react';
 import { EditorUtils } from '../../../../../../utils/editor';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import { enqueueSnackbar } from 'notistack';
 import Button from '@mui/material/Button';
 import { setEditorMarkedAndContentLeftRightThunk } from '../../../../../../redux/thunks/editor.letter.thunk';

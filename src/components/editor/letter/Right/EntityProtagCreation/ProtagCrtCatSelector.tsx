@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import { ProtagCreationCategory } from '../../../../../services/mappings/editorMappings';
 
 interface CategorySelectorProps {
