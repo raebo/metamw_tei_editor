@@ -91,21 +91,21 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
           enqueueSnackbar(`No place data found for ${entry.entityKey}`, { variant:"error" });
           return;
         }
-        
+
         try {
           const parsedResult = RemotePlaceDataSchema.safeParse(response);
-          
+
           if( !parsedResult.success) {
             throw new Error("Invalid data format from server");
           }
           const parsedPlace = parsedResult.data;
-          
+
           const formData: PlaceFormData = {
             ...parsedPlace,
             isNewEntry: isNewEntry,
             placeType: latestProps.current.placeType ?? "SETTLEMENT",
           }
-          
+
           props.afterSelectHandler(formData)
         } catch (error) {
           enqueueSnackbar(`Unexpected error: : ${error}`, { variant:"error" });

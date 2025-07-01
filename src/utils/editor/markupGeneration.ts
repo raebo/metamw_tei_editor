@@ -243,7 +243,6 @@ export const markupGeneration = {
     markedSpans.forEach(span => {
       const persNameNode = document.createElement("persName")
       persNameNode.setAttribute("xml:id", xmlId)
-      persNameNode.textContent = span.textContent
 
       peopleMarkupData.forEach(markup => {
         const nameNode = document.createElement("name")

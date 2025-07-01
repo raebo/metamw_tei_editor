@@ -358,43 +358,50 @@ const ShowEditor = () => {
             alignItems: "center",
             justifyContent: "center",
           }}
-          // onClick={() => setShowRightContainer(!showRightContainer)}
         >
           <List component="nav" aria-label="handle edit labels">
             <QuickContentFormatter />
-            <ListItemButton
-              selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.USER_ACTIONS) }
-              onClick={(event) => handleButtonMenuClick(event)}
-            >
-              <ListItemIcon>
-                <MoreHorizIcon />
-              </ListItemIcon>
-            </ListItemButton>
-            <ListItemButton
-              selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.ASSIGNED) }
-              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
-            >
-              <ListItemIcon>
-                <AssignmentIcon />
-              </ListItemIcon>
-            </ListItemButton>
-            <ListItemButton
-              selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.SET_FAVOURITE) }
-              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
-            >
-              <ListItemIcon>
-                <StarOutlineIcon />
-              </ListItemIcon>
-            </ListItemButton>
+            <Tooltip title={"Click for more actions"} placement={"right"} >
+              <ListItemButton
+                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.USER_ACTIONS) }
+                onClick={(event) => handleButtonMenuClick(event)}
+              >
+                <ListItemIcon>
+                  <MoreHorizIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+            <Tooltip title={"This button has currently no function"} placement={"right"} >
+              <ListItemButton
+                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.ASSIGNED) }
+                onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
+              >
+                <ListItemIcon>
+                  <AssignmentIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+            <Tooltip title={'Add letter to favourite list'} placement={'right'}>
+              <ListItemButton
+                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.SET_FAVOURITE) }
+                onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
+              >
+                <ListItemIcon>
+                  <StarOutlineIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
 
-            <ListItemButton
-              selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.PUBLISH_LETTER) }
-              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
-            >
-              <ListItemIcon>
-                <CloudUploadOutlinedIcon />
-              </ListItemIcon>
-            </ListItemButton>
+            <Tooltip title={'Publish letter to backend'} placement="right">
+              <ListItemButton
+                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.PUBLISH_LETTER) }
+                onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
+              >
+                <ListItemIcon>
+                  <CloudUploadOutlinedIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
             <Tooltip title={isCodeView ? 'Switch to WYSIWYG view' : 'Switch to Code view'} placement="right">
               <ListItemButton onClick={handleToggleCodeview} selected={isCodeView}>
                 <ListItemIcon>
@@ -402,14 +409,16 @@ const ShowEditor = () => {
                 </ListItemIcon>
               </ListItemButton>
             </Tooltip>
-            <ListItemButton
-              selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.dialogTypes.RESET_LETTER) }
-              onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
-            >
-              <ListItemIcon>
-                <RestartAltIcon />
-              </ListItemIcon>
-            </ListItemButton>
+            <Tooltip title={'Reset letter status'} placement="right">
+              <ListItemButton
+                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.dialogTypes.RESET_LETTER) }
+                onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
+              >
+                <ListItemIcon>
+                  <RestartAltIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
           </List>
         </Box>
       </Box>

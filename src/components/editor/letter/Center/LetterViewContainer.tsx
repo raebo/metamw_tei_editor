@@ -358,7 +358,7 @@ const LetterViewContainer = () => {
                         )
                       )}
                     </Menu>
-                    {openSubmenuIndex !== null &&
+                    { openSubmenuIndex !== null &&
                       displayMenuItems[openSubmenuIndex]?.subMenu && (
                         <Menu
                           anchorEl={submenuAnchorEl}
@@ -376,7 +376,7 @@ const LetterViewContainer = () => {
                             horizontal: 'left',
                           }}
                         >
-                          {displayMenuItems[openSubmenuIndex]!.subMenu!.map((subItem, subIndex) => (
+                          { displayMenuItems[openSubmenuIndex]!.subMenu!.map((subItem, subIndex) => (
                             <MenuItem
                               key={subIndex}
                               onClick={() => {

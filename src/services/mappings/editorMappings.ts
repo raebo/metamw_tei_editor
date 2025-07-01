@@ -77,7 +77,8 @@ export interface MarkupPlaceData {
   name: string,
   settlement: MarkupPlaceSettlement | null
   country: CountryOption
-  kind: string | null
+  kind: string | null,
+  kindOriginal: string | null,
   isNewEntry: boolean,
 }
 

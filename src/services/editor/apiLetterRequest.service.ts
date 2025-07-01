@@ -60,12 +60,24 @@ export const searchEditortEntities = async (searchString: string | null, entityT
     throw new Error(`Unsupported entity type: ${entityType}`);
   }
 
-  let url = `/jwt/editor/entities/search/${entityType.toLowerCase()}`
-
-  if (searchString !== null) { url += `/${searchString}` }
-
   try {
-    const response = await initApi.initApi().get(url + `?per_page=20`)
+    type SearchKeys = 'entity_type' | 'search_value';
+    let search_data : Partial<Record<SearchKeys, string>> = {
+      entity_type: entityType
+    }
+
+    if (searchString !== null && searchString.trim() !== '') {
+      search_data = {
+        ...search_data,
+        search_value: searchString.trim(),
+      }
+    }
+
+    const response = await initApi.initApi().post(
+      '/jwt/editor/entities/search?per_page=20',
+      { search_data },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
 
     return response?.data?.[entityKey.toLowerCase()]?.entries || undefined;
 

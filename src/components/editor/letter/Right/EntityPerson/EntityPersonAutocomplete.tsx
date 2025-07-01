@@ -61,7 +61,6 @@ const EntityPersonAutocomplete = (props: EntityPersonAutocompleteProps) => {
     }
   }
 
-
   return (
     <>
       <Autocomplete

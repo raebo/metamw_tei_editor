@@ -27,6 +27,7 @@ import { MarkupPersonData } from '../../../../../services/mappings/editorMapping
 import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
 import { EditorUtils } from '../../../../../utils/editor';
 import { setReloadLetterContent } from '../../../../../redux/slices/editor.letter.slice';
+import {SnippetEntity} from "../../../../../services/mappings/autoAnnoMappings";
 
 type SelectOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 
@@ -66,11 +67,18 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
       addNewPersonEntry({
         id: null,
         key: personFormData.key,
-        nameDisplay: `${personFormData.nameLast} ${personFormData.nameLast}`,
+        nameDisplay: personFormData.nameFull ?? `${personFormData.nameFirst ?? ''} ${personFormData.nameLast ?? ''}`,
         nameLast: null,
         nameFirst: null,
         isNewEntry: false
       })
+
+      setPersonFormData({
+        key: null,
+        nameFull: null,
+        nameLast: null,
+        nameFirst: null
+      });
     }
   }
 
@@ -114,9 +122,23 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
   }, []);
 
   const allowPersonAdding = useMemo(() => {
-    return selectedOption === 'NEW_ENTRY' && personFormData.nameFirst && personFormData.nameLast && personFormData.key;
+    if (selectedOption === 'NEW_ENTRY') {
+      return (
+        personFormData.nameFirst?.trim() &&
+        personFormData.nameLast?.trim() &&
+        personFormData.key !== null
+      )
+    } else if (selectedOption === 'EXISTING_ENTRY') {
+      return (
+        personFormData.key !== null &&
+        (
+          personFormData.nameLast?.trim() || personFormData.nameFirst?.trim()
+        )
+      )
+    } else {
+      return false;
+    }
   }, [selectedOption, personFormData]);
-
 
   const handleCancelButtonClick = () => {
     dispatch(setEditorMarkedAndContentLeftRightThunk({
@@ -207,26 +229,32 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
         <EntityPersonAutocomplete
           isDisabled={ autocompleteDisabled }
           addedPersonEntries={addedPersonEntries}
-          afterSelectHandler={ (entry) => {
-            addNewPersonEntry({
+          afterSelectHandler={ (entry: SnippetEntity) => {
+            setPersonFormData((prev) => ({
+              ...prev,
               id: entry.entityId,
               key: entry.entityKey,
-              nameDisplay: entry.entityName,
-              nameLast: null,
-              nameFirst: null,
-              isNewEntry: selectedOption === 'NEW_ENTRY'
-            })
-          }}
+              nameFull: entry.entityName,
+              nameLast: entry.entityLastName ?? null,
+              nameFirst: entry.entityFirstName ?? null,
+              isNewEntry: selectedOption === 'NEW_ENTRY',
+            }))
+          }
+        }
         />
         <Grid container spacing={2} sx={{ marginTop: 3,  mb: 3 }}>
           <Grid spacing={{ xs: 3, md: 3, lg: 3 }}>
-            <TextField variant="outlined"  value={personFormData.key} fullWidth disabled={ true }  />
+            <TextField
+              variant="outlined"
+              value={personFormData.key ?? ''}
+              fullWidth disabled={ true }
+            />
           </Grid>
           <Grid spacing={{ xs: 12, md: 9, lg: 9 }}>
             <TextField
               label="Vorname"
               variant="outlined"
-              fullWidth value={personFormData.nameFirst}
+              fullWidth value={personFormData.nameFirst ?? ''}
               disabled={ formIsDisabled }
               onChange={(event) => {
                 setPersonFormData((prev) => ({
@@ -239,7 +267,7 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
             <TextField
               label="Nachname"
               variant="outlined"
-              fullWidth value={personFormData.nameLast}
+              fullWidth value={personFormData.nameLast ?? ''}
               sx={{ mb: 3 }}
               disabled={ formIsDisabled }
               onChange={(event) => {
