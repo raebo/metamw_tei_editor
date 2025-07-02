@@ -81,7 +81,8 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
   const [creationKinds, setCreationKinds] = useState<string[]>([]);
 
   const [resetCreationCmp, setResetCreationCmp] = useState<number>(0); // used to reset the creation form when a new author is selected
-
+  const [autocompleteAuthorResetKey, setAutocompleteAuthorResetKey] = useState(0);
+  const [authorCreationResetKey, setAuthorCreationResetKey] = useState(0);
 
   useEffect(() => {
     backendService.fetchCreationKinds()
@@ -94,6 +95,18 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
         });
       });
   }, []); // empty array = run once on mount
+
+  const fetchAndSetAuthorCategories = (authorKey: string) => {
+    backendService.fetchAuthorCategories(authorKey)
+      .then((result) => {
+        setCreationKinds(result);
+      })
+      .catch(error => {
+        enqueueSnackbar(`Could not fetch author categories: "${error.message}", please try again`, {
+          variant: 'error',
+        });
+      });
+  }
 
   const handleAuthorOptionChange = (option: SelectActionAuthorOption) => {
     resetAuthorFormData()
@@ -224,6 +237,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
       setSelectCreationOptionDisabled(true)
       callResetCreationCmp()
       setSelectedCreationOption(null)
+      setAutocompleteAuthorResetKey((prev) => prev + 1);
     }
   }
 
@@ -308,12 +322,14 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
         <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
           <Grid size={{ xs: 12, md: 12, lg: 12 }}>
             <EntityAuthorAutocomplete
+              key={autocompleteAuthorResetKey}
               isDisabled={ authorAutocompleteDisabled }
               afterSelectHandler={ (entry) => {
-
                 fetchAndSetAuthorCreations(entry.entityKey)
+                fetchAndSetAuthorCategories(entry.entityKey)
                 setSelectedCreationOption('EXISTING_ENTRY')
                 setSelectCreationOptionDisabled(false)
+                setAuthorCreationResetKey((prev) => prev + 1);
                 setAuthorFormData((prevState) => ({
                   ...prevState,
                   key: entry.entityKey,
@@ -378,6 +394,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
           { (selectedCreationOption === 'EXISTING_ENTRY' || selectedCreationOption === null) && (
 
             <EntityExistingCreation
+              key={authorCreationResetKey}
               creationList={authorCreations}
               creationAutocompleteDisabled={selectedCreationOption !== 'EXISTING_ENTRY'}
               creationKinds={creationKinds}

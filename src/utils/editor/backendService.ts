@@ -144,6 +144,25 @@ export const backendService = {
       }
     }
   },
+  fetchAuthorCategories: async (authorKey: string): Promise<string[]> => {
+    try {
+      const response = await initApi().get(`/jwt/misc/author/${authorKey}/categories`);
+
+      if (!response) {
+        throw new Error("No response from server for author categories");
+      } else {
+        return response.data;
+      }
+    } catch (error: any) {
+      const response = error.response;
+
+      if (response !== undefined) {
+        throw new Error(`Error response is undefined  ${response.data.error}`);
+      } else {
+        throw new Error(`backendService.fetchAuthorCategories: ${error.message}`);
+      }
+    }
+  },
   fetchAuthorCreations: async (authorKey: string): Promise<SnippetEntity[]> => {
     try {
       const response = await initApi().get(`/jwt/misc/author/${authorKey}/creations`);
