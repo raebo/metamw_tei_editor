@@ -74,13 +74,20 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
     backendService.fetchProtagCreationCategories(null)
       .then((result: ProtagCreationCategory[]) => {
         setProtagCreationCategories(result);
-        console.log("Protag creation categories fetched: ", result.length);
       })
       .catch(error => {
         enqueueSnackbar(`Could not fetch protag creation categories: "${error.message}", please try again`, {
           variant: 'error',
         });
       });
+    backendService.fetchProtagCreationEntries(null).then((entries: ProtagCreation[]) => {
+      setProtagCreations(entries);
+    })
+    .catch(error => {
+        enqueueSnackbar(`Could not fetch protag creation entries: "${error instanceof Error ? error.message : error}", please try again`, {
+          variant: 'error',
+        })
+      })
   }, []); // empty array = run once on mount
 
   const fetchProtagCreationEntries = (protagCreationCategory: ProtagCreationCategory)  : void => {
@@ -169,6 +176,34 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
       protagCreationCategory: protagFormData.protagCreationCategory ?? null,
     })
   }
+
+  async function onProtagCreationChange(protagCreation: ProtagCreation) {
+    try {
+      let categoryUpdate = {};
+
+      if (protagFormData.protagCreationCategory == null) {
+        const categories = await backendService.fetchCategoriesForProtagCreation(protagCreation.id);
+        categoryUpdate = {
+          protagCreationCategory: categories.length > 0 ? categories[0] : null,
+          parentProtagCreationCategories: categories.length > 1 ? categories.slice(1) : null,
+        };
+      }
+
+      setProtagFormData((prev) => ({
+        ...prev,
+        key: protagCreation.key,
+        name: protagCreation.name,
+        mwv: protagCreation.mwv,
+        opus: protagCreation.opus,
+        isNewEntry: false,
+        ...categoryUpdate,
+      }));
+
+    } catch (error) {
+      enqueueSnackbar("Error fetching protag creation data: " + (error instanceof Error ? error.message : String(error)), { variant: 'error' });
+    }
+  }
+
 
   const buttonAddNewProtagEntry = () => {
     const { key, name, mwv, opus, isNewEntry, parentProtagCreationCategories, protagCreationCategory } = protagFormData;
@@ -284,19 +319,8 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
               <EntityExistingProtagCreation
                 resetSignal={resetProtagCreationCmp}
                 protagCreations={protagCreations}
-                handleProtagCreationChange={(protagCreation: ProtagCreation) => {
-                  setProtagFormData((prevState) => ({
-                    ...prevState,
-                    key: protagCreation.key,
-                    name: protagCreation.name,
-                    mwv: protagCreation.mwv,
-                    opus: protagCreation.opus,
-                    isNewEntry: false,
-                  })
-                  );
-                }
-                }
-                />
+                handleProtagCreationChange={ onProtagCreationChange}
+              />
           ) }
           { (selectedProtagCreationOption === 'NEW_ENTRY') && (
               <EntityNewProtagCreation

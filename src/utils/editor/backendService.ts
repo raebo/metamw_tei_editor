@@ -66,10 +66,40 @@ export const backendService = {
       }
     }
   },
-  fetchProtagCreationEntries : async (protagCreationCategory: ProtagCreationCategory): Promise<ProtagCreation[]> => {
+  fetchCategoriesForProtagCreation: async (protagCreationId: number): Promise<ProtagCreationCategory[]> => {
     try {
-      const response = await initApi().get(`/jwt/misc/protag_creations_for_category/${protagCreationCategory.id}`, {
-      });
+      const response = await initApi().get(`/jwt/misc/categories_for_protag_creation/${protagCreationId}`);
+
+      if (!response) {
+        throw new Error("No response from server for protag creation categories");
+      }
+
+      return response.data.map((protag : { id: number, name: string, name_en: string, protag_creation_category_id: number} ) => {
+        return {
+          id: protag.id,
+          name: protag.name,
+          name_en: protag.name_en,
+          protagCreationCategoryId: protag.protag_creation_category_id,
+        } as ProtagCreationCategory;
+      })
+    } catch (error: any) {
+      const response = error.response;
+
+      if (response !== undefined) {
+        throw new Error(`Error response is undefined  ${response.data.error}`);
+      } else {
+        throw new Error(`backendService.fetchCategoriesForProtagCreation: ${error.message}`);
+      }
+    }
+  },
+  fetchProtagCreationEntries : async (protagCreationCategory: ProtagCreationCategory | null): Promise<ProtagCreation[]> => {
+    try {
+
+      const url = protagCreationCategory !== null
+        ? `/jwt/misc/protag_creations_for_category/${protagCreationCategory.id}`
+        : `/jwt/misc/protag_creations`;
+
+      const response = await initApi().get(url, {});
 
       if (!response) {
         throw new Error("No response from server for protag creation entries");
