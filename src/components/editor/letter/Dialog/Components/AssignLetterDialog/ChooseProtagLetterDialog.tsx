@@ -8,34 +8,39 @@ import { EditorUtils } from '../../../../../../utils/editor';
 import { enqueueSnackbar } from 'notistack';
 import { setEditorMarkedAndContentLeftRightThunk } from '../../../../../../redux/thunks/editor.letter.thunk';
 import { setReloadLetterContent } from '../../../../../../redux/slices/editor.letter.slice';
-import { Box, Divider, Typography } from '@mui/material';
+import {Badge, Box, Divider, IconButton, Stack, Typography} from '@mui/material';
 import Grid from '@mui/material/Grid';
 import AssignLetterAuthorAutocomplete from './AssignLetterAuthorAutocomplete';
 import Button from '@mui/material/Button';
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
 
 interface AssignedLetterData {
   receiver: SnippetEntity | null
   letter: SnippetEntity | null
+  authors: SnippetEntity[] | null
 }
 
 const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const [letterDialogResetKey, setLetterDialogResetKey] = useState(0);
 
   const [assignedLetterFormData, setAssignedLetterFormData] = useState<AssignedLetterData>({
     receiver: null,
     letter: null,
+    authors: null,
   })
 
-  const [letterAutoCmplDisabled, setLetterAutoCmplDisabled] = useState(true);
-  const isAuthor = false
+  const senderType = 'RECEIVER'
 
+  const [addedLetters, setAddedLetters] = useState<AssignedLetterData[]>([]);
   const [letterReceivers, setLetterReceivers] = useState<SnippetEntity[]>([]);
   const [receiverLetters, setReceiverLetters] = useState<SnippetEntity[]>([]);
 
   const fetchLetterReceivers = async (searchValue : string | null) => {
     try {
-      const receivers: SnippetEntity[] = await EditorUtils.backendService.fetchLetterAuthorsSenders(searchValue, isAuthor);
+      const receivers: SnippetEntity[] = await EditorUtils.backendService.fetchLetterAuthorsSenders(searchValue, senderType);
       setLetterReceivers(receivers);
     } catch (error) {
       console.error("Error fetching letter receivers:", error);
@@ -48,7 +53,7 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
 
   const fetchReceiverLetters = async (receiver: SnippetEntity, searchValue : string | null) => {
     try {
-      const letters: SnippetEntity[] = await EditorUtils.backendService.fetchAuthorSenderLetters(receiver, isAuthor, searchValue);
+      const letters: SnippetEntity[] = await EditorUtils.backendService.fetchAuthorSenderLetters(receiver, senderType, searchValue);
       setReceiverLetters(letters);
     } catch (error) {
       console.error("Error fetching receiver letters:", error);
@@ -56,16 +61,50 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
     }
   }
 
+  const removeExistingEntry = (entry: AssignedLetterData) => {
+    setAddedLetters((prevEntries) => prevEntries.filter((e) => e.letter?.entityKey !== entry.letter?.entityKey));
+  }
+
+  const buttonAddNewLetter = () => {
+    if (assignedLetterFormData.letter) {
+      const newEntry: AssignedLetterData = {
+        receiver: assignedLetterFormData.receiver,
+        letter: assignedLetterFormData.letter,
+        authors: assignedLetterFormData.authors
+      };
+      setAddedLetters((prevEntries) => [...prevEntries, newEntry]);
+      setAssignedLetterFormData({ receiver: null, letter: null, authors: null });
+      setLetterReceivers([])
+      setReceiverLetters([])
+      setLetterDialogResetKey((prevKey) => prevKey + 1);
+    } else {
+      enqueueSnackbar("Bitte wählen Sie einen Empfänger und einen Brief aus", { variant: "warning" });
+    }
+  }
+
+  const isValidFormData = () => {
+    return assignedLetterFormData.letter !== null;
+  }
+
+  const fetchSenderReceiverLetters = async (searchValue: string | null) => {
+    try {
+      const letters: SnippetEntity[] = await EditorUtils.backendService.searchSenderReceiverLetters(searchValue, senderType);
+      setReceiverLetters(letters);
+    } catch (error) {
+      enqueueSnackbar("Error fetching sending receiver letters", { variant:"error" });
+    }
+  }
+
   const receiverSearchChange = async (inputValue: string) => {
     setReceiverLetters([])
-    fetchLetterReceivers(inputValue);
+    await fetchLetterReceivers(inputValue);
   }
 
   const letterSearchChange = async (inputValue: string) => {
     if (assignedLetterFormData.receiver) {
       await fetchReceiverLetters(assignedLetterFormData.receiver, inputValue);
     } else {
-      enqueueSnackbar("Please select an receiver first", { variant: "warning" });
+      await fetchSenderReceiverLetters(inputValue);
     }
   }
 
@@ -77,47 +116,41 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
         })
       )
       await fetchReceiverLetters(entry, null)
-      setLetterAutoCmplDisabled(false)
     }
   }
 
   const setAutocompleteLetter = async (entry: SnippetEntity | null) => {
     if (entry) {
+      const authors: SnippetEntity[] = await EditorUtils.backendService.fetchLetterAuthors(entry.entityKey)
+
       setAssignedLetterFormData((prevData) => ({
           ...prevData,
-          letter: entry
+          letter: entry,
+          authors: authors
         })
       )
     }
   }
 
-  const handleCancelButtonClick = () => {
-    dispatch(setEditorMarkedAndContentLeftRightThunk({
-      textIsMarked: false,
-      contentLeft: null,
-      contentRight: null
-    }));
-  }
-
   const handleSubmitButtonClick = async () => {
-    if (assignedLetterFormData.receiver && assignedLetterFormData.letter) {
       if (props.xmlRef.current === null) {
         throw new Error('XML reference is null');
       }     try {
 
-        const letterElement = props.xmlRef.current.querySelector('#letterXmlContent');
-        if (!letterElement) { throw new Error('No letter element found!'); }
+      const letterElement = props.xmlRef.current.querySelector('#letterXmlContent');
+      if (!letterElement) { throw new Error('No letter element found!'); }
 
-        if (stateEditorLetter.id === null || stateEditorLetter.name === null) {
-          throw new Error('No letter id or name found!');
-        }
-
-        const letter = assignedLetterFormData.letter;
+      if (stateEditorLetter.id === null || stateEditorLetter.name === null) {
+        throw new Error('No letter id or name found!');
+      }
 
         await EditorUtils.markupGeneration.addProtagLetterMarkup(letterElement,
           { id: stateEditorLetter.id!, name: stateEditorLetter.name },
-          { letterKey: letter.entityKey, letterName: letter.entityName
-          })
+          addedLetters.map((entry) => {
+              return { letterKey: entry.letter?.entityKey, letterName: entry.letter?.entityName, authors: entry.authors }
+            }
+          ) as [{ letterKey: string, letterName: string, authors: SnippetEntity[] }]
+        )
 
         enqueueSnackbar('Letter markup was added successfully', { variant: 'success' });
 
@@ -133,9 +166,6 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
         }));
         props.onClose();
       }
-    } else {
-      enqueueSnackbar("Bitte wählen Sie einen Empfänger und einen Brief aus", { variant: "warning" });
-    }
   }
 
   return (
@@ -144,9 +174,39 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
         <Typography variant="h5" gutterBottom>
           Brief von FMB Auszeichnen
         </Typography>
+        <Box sx={{ mb: 3 }}>
+          <Stack spacing={1}>
+            { addedLetters.map((entry, index) => (
+              <Box
+                key={(entry.letter !== null && entry.letter.entityKey !== null) ? entry.letter.entityKey: ''}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  p: 1,
+                  border: '1px solid #ccc',
+                  borderRadius: 1,
+                }}
+              >
+                <Box>
+                  <Typography variant="body2" fontWeight="bold">
+                    { entry.letter?.entityKey }
+                  </Typography>
+                  <Typography variant="body2">
+                    { entry.letter?.entityDisplayName }
+                  </Typography>
+                </Box>
+                <IconButton edge="end" onClick={() => removeExistingEntry(entry)} aria-label="delete">
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+            ))}
+          </Stack>
+        </Box>
         <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
           <Grid size={{ xs: 12, md: 12, lg: 12 }}>
             <AssignLetterAuthorAutocomplete
+              key={letterDialogResetKey}
               disabled={false}
               options={ letterReceivers }
               onValueChange={(receiver) => setAutocompleteReceiver(receiver)}
@@ -158,7 +218,8 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
 
           <Grid size={{ xs: 12, md: 12, lg: 12 }}>
             <AssignLetterAuthorAutocomplete
-              disabled={ letterAutoCmplDisabled }
+              key={letterDialogResetKey}
+              disabled={ false }
               options={ receiverLetters }
               onValueChange={ (letter) => setAutocompleteLetter(letter) }
               onInputChangeHandler={ (inputValue) => letterSearchChange(inputValue) }
@@ -169,18 +230,19 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
         <Divider sx={{ my: 3 }} />
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-          <Button variant="contained" color="primary" onClick={handleSubmitButtonClick} disabled={ assignedLetterFormData.receiver === null || assignedLetterFormData.letter === null } >
-            Brief Auszeichnen
+          <Button variant="contained" color="primary" onClick={buttonAddNewLetter} disabled={!isValidFormData()} startIcon={<AddIcon />}>
+            Brief Hinzufügen
           </Button>
-
-          <Button variant="text" onClick={handleCancelButtonClick} color="secondary">
-            Abbrechen
+          <Button variant="contained" color="primary" onClick={handleSubmitButtonClick} disabled={ addedLetters.length === 0 } >
+            <Badge badgeContent={addedLetters.length} color="secondary">
+              Brief Auszeichnen
+            </Badge>
           </Button>
         </Box>
       </Box>
-      <div>
-        <pre>{JSON.stringify(assignedLetterFormData, null, 2)}</pre>
-      </div>
+      {/*<div>*/}
+      {/*  <pre>{JSON.stringify(assignedLetterFormData, null, 2)}</pre>*/}
+      {/*</div>*/}
     </>
   )
 }

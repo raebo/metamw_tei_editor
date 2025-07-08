@@ -167,28 +167,32 @@ export const markupGeneration = {
   addProtagLetterMarkup: async (
     letterElement: Element,
     stateEditorLetter: { id: number, name: string },
-    markupLetterData: { letterKey: string, letterName: string }
+    markupLetterData: [{ letterKey: string, letterName: string, authors: SnippetEntity[] }]
   ) : Promise<any> => {
-
-    const protagData = await EditorUtils.protagCreationDataService.fetchProtagPersonData()
 
     const markedSpan= letterElement.querySelectorAll('span.marked')[0]
     if (markedSpan === undefined) throw new Error("no marked span found in letter element")
 
     const titleNode = document.createElement("title")
-    const nameNode = document.createElement("name")
-    nameNode.setAttribute("type", "author")
-    nameNode.setAttribute("key", protagData.entityKey)
-    nameNode.setAttribute("style", "hidden")
-    nameNode.textContent = protagData.entityDisplayName
-    titleNode.appendChild(nameNode)
+    titleNode.setAttribute("xml:id", EditorUtils.markupGeneration.generateXmlId('title'))
 
-    const letterNode = document.createElement("name")
-    letterNode.setAttribute("type", "letter")
-    letterNode.setAttribute("key", markupLetterData.letterKey)
-    letterNode.setAttribute("style", "hidden")
-    letterNode.textContent = markupLetterData.letterName
-    titleNode.appendChild(letterNode)
+    for(const letterData of markupLetterData) {
+      for(const authorData of letterData.authors) {
+        const nameNode = document.createElement("name")
+        nameNode.setAttribute("type", "author")
+        nameNode.setAttribute("key", authorData.entityKey)
+        nameNode.setAttribute("style", "hidden")
+        nameNode.textContent = authorData.entityDisplayName
+        titleNode.appendChild(nameNode)
+      }
+
+      const letterNode = document.createElement("name")
+      letterNode.setAttribute("type", "letter")
+      letterNode.setAttribute("key", letterData.letterKey)
+      letterNode.setAttribute("style", "hidden")
+      letterNode.textContent = letterData.letterName
+      titleNode.appendChild(letterNode)
+    }
 
     EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNode)
 
@@ -202,26 +206,32 @@ export const markupGeneration = {
   addGbLetterMarkup: async (
     letterElement: Element,
     stateEditorLetter: { id: number, name: string },
-    markupLetterData: { authorKey: string, authorName: string, letterKey: string, letterName: string }
+    markupLetterData: [{ letterKey: string, letterName: string, authors: SnippetEntity[]  }]
   ) : Promise<any> => {
 
     const markedSpan= letterElement.querySelectorAll('span.marked')[0]
     if (markedSpan === undefined) throw new Error("no marked span found in letter element")
 
     const titleNode = document.createElement("title")
-    const nameNode = document.createElement("name")
-    nameNode.setAttribute("type", "author")
-    nameNode.setAttribute("key", markupLetterData.authorKey)
-    nameNode.setAttribute("style", "hidden")
-    nameNode.textContent = markupLetterData.authorName
-    titleNode.appendChild(nameNode)
+    titleNode.setAttribute("xml:id", EditorUtils.markupGeneration.generateXmlId('title'))
 
-    const letterNode = document.createElement("name")
-    letterNode.setAttribute("type", "letter")
-    letterNode.setAttribute("key", markupLetterData.letterKey)
-    letterNode.setAttribute("style", "hidden")
-    letterNode.textContent = markupLetterData.letterName
-    titleNode.appendChild(letterNode)
+    for(const entry of markupLetterData) {
+      for(const author of entry.authors) {
+        const nameNode = document.createElement("name")
+        nameNode.setAttribute("type", "author")
+        nameNode.setAttribute("key", author.entityKey)
+        nameNode.setAttribute("style", "hidden")
+        nameNode.textContent = author.entityDisplayName
+        titleNode.appendChild(nameNode)
+      }
+
+      const letterNode = document.createElement("name")
+      letterNode.setAttribute("type", "letter")
+      letterNode.setAttribute("key", entry.letterKey)
+      letterNode.setAttribute("style", "hidden")
+      letterNode.textContent = entry.letterName
+      titleNode.appendChild(letterNode)
+    }
 
     EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNode)
 

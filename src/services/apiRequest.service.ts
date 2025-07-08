@@ -52,6 +52,11 @@ export const initApi = (): AxiosInstance => {
     ) {
       config.headers['Content-Type'] = 'application/json';
     }
+
+    if (config.method?.toLowerCase() === 'post') {
+      config.headers['Accept'] = 'application/json';
+    }
+
     return config;
   })
 
