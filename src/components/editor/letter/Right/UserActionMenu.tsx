@@ -54,7 +54,10 @@ const menuItems: MenuItem[] = [
     keyHandleItem: null,
     active: true,
     hasSubMenu: true,
-    subMenu: [{ label: 'Beilage Hinzufügen', keyHandleItem: filterKeyCombination('ctrl+alt+6'), active: true }],
+    subMenu: [
+			{ label: 'Brief Header Bearbeiten', keyHandleItem: filterKeyCombination('alt+c'), active: true },
+			{ label: 'Beilage Hinzufügen', keyHandleItem: filterKeyCombination('ctrl+alt+6'), active: true }
+		],
   },
   { label: 'Brief Text Erstellung', keyHandleItem: null, active: false },
   {

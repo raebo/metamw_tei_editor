@@ -1,6 +1,7 @@
-import { TeiHeaderDialogProps } from '../AddTeiHeaderDialog';
+import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { Autocomplete, TextField } from '@mui/material';
-import React from 'react';
+import React, {useEffect} from 'react';
+import {EditorUtils} from "../../../../../../utils/editor";
 
 const firstHeaderOptions = [
   "Anna Mustermann an Felix Mendelssohn Bartholdy in Musterstadt",
@@ -14,6 +15,14 @@ const firstHeaderOptions = [
 const TeiHeaderFirstHeadline = (props: TeiHeaderDialogProps) => {
 
   const completionState = props.completionState;
+
+	useEffect(() => {
+		const { firstHeadline, sndHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(props.teiHeader)
+
+		if (firstHeadline) {
+			props.onChange({ firstHeaderComplete: true, firstHeaderContent: firstHeadline });
+		}
+	}, [props.teiHeader]);
 
   const setFirstHeaderValue = (value: string) => {
     props.onChange({ firstHeaderComplete: true, firstHeaderContent: value })

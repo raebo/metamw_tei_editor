@@ -1,6 +1,7 @@
-import { TeiHeaderDialogProps } from '../AddTeiHeaderDialog';
+import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { Autocomplete, TextField } from '@mui/material';
-import React from 'react';
+import React, {useEffect} from 'react';
+import {EditorUtils} from "../../../../../../utils/editor";
 
 const sndHeaderOptions = [
   "Musterstadt, 01. Januar 1821",
@@ -17,7 +18,15 @@ const sndHeaderOptions = [
 const TeiHeaderSndHeadline = (props: TeiHeaderDialogProps) => {
   const completionState = props.completionState
 
-  const setSndHeaderValue = (value: string) => {
+	useEffect(() => {
+		const { firstHeadline, sndHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(props.teiHeader)
+
+		if (sndHeadline) {
+			props.onChange({ sndHeaderComplete: true, sndHeaderContent: sndHeadline});
+		}
+	}, [props.teiHeader]);
+
+	const setSndHeaderValue = (value: string) => {
     props.onChange( { sndHeaderComplete: true, sndHeaderContent: value })
   }
 

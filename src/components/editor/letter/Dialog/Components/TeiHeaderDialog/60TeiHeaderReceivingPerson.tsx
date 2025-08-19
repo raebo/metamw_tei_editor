@@ -1,4 +1,4 @@
-import { TeiHeaderDialogProps } from '../AddTeiHeaderDialog';
+import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
@@ -7,6 +7,7 @@ import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
 import { Autocomplete, TextField } from '@mui/material';
 import { MiscUtils } from '../../../../../../utils/misc';
+import {EditorUtils} from "../../../../../../utils/editor";
 
 const TeiHeaderReceivingPerson = (props: TeiHeaderDialogProps) => {
 
@@ -34,9 +35,25 @@ const TeiHeaderReceivingPerson = (props: TeiHeaderDialogProps) => {
         enqueueSnackbar("Error fetching people", { variant:"error" });
       }
     };
+		const assignedReceivingPerson = async () => {
+			const { name, key } = EditorUtils.teiHeaderContent.extractReceiver(props.teiHeader)
 
-    fetchDefaultPeople();
-  }, []);
+			if (name && key) {
+				const person: SnippetEntity[] | undefined = await searchEditortEntities(key, EntityType.PERSON)
+				if (person && person[0]) {
+					setSelectedOption(person[0]);
+					props.onChange( { receiverEntity: person[0] } )
+				}
+			}
+		}
+
+		try {
+			fetchDefaultPeople();
+			assignedReceivingPerson();
+		} catch (error) {
+			enqueueSnackbar("Fehler beim Lesen der TEI-Header-Daten: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+		}
+  }, [props.teiHeader]);
 
 
   const searchForPeople = async (inputValue: string) => {

@@ -10,11 +10,38 @@ export enum EntityType {
 export type EditorDateType  = "when" | "when-custom" | "notAfter" | "notBefore" | "from-to" | "notBefore-notAfter"
 export type DateCertainty = "high" | "medium" | "low";
 
+const languageMap = {
+	de: "Deutsch",
+	en: "Englisch",
+	fr: "Französisch",
+	it: "Italienisch",
+	span: "Spanisch",
+	la: "Latein",
+	grc: "Altgriechisch",
+	yi: "Jiddisch",
+} as const;
+
+export type LanguageOption = {
+	[K in keyof typeof languageMap]: { value: K; label: typeof languageMap[K] }
+}[keyof typeof languageMap];
+
+const languages: LanguageOption[] = [
+	{ value: "de", label: "Deutsch" },
+	{ value: "en", label: "Englisch" },
+	{ value: "fr", label: "Französisch" },
+	{ value: "it", label: "Italienisch" },
+	{ value: "span", label: "Spanisch" },
+	{ value: "la", label: "Latein" },
+	{ value: "grc", label: "Altgriechisch" },
+	{ value: "yi", label: "Jiddisch" },
+];
+
 export const EditorConstants = {
   ALLOWED_PARENT_TAG: "div[type='act_of_writing']",
   FORBIDDEN_PARENT_TAG: "teiHeader",
   RESTRICTED_TAGS: ["persname", "placename", "date", "hi"],
   ENTITY_TYPES: EntityType,
+	LANGUAGES: languages,
 
   compMappingLeft: {
     SEARCH: "SEARCH",
@@ -96,6 +123,7 @@ export const EditorConstants = {
       PROTAG_LETTER_ADDED: "PROTAG_LETTER_ADDED",
       DATE_ADDED: "DATE_ADDED",
       DATE_REMOVED: "DATE_REMOVED",
+			HEADER_UPDATED: "HEADER_UPDATED",
     }
   },
   attachmentTypeItems: [

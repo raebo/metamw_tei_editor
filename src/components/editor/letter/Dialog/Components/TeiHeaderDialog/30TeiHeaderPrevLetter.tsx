@@ -1,4 +1,4 @@
-import { TeiHeaderDialogProps } from '../AddTeiHeaderDialog';
+import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { Autocomplete, Checkbox, FormControlLabel, Stack, TextField } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
 import { searchForLetterNameTitle } from '../../../../../../services/editor/apiLettersRequest.service';
@@ -7,6 +7,7 @@ import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
 import { MiscUtils } from '../../../../../../utils/misc';
 import { EditorConstants } from '../../../../../../constants/editor';
+import {EditorUtils} from "../../../../../../utils/editor";
 
 const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
 
@@ -35,8 +36,30 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
       }
     };
 
+		const fetchPrevLetter = async() => {
+			const { title, name, letterPrefix, letterStatus } = EditorUtils.teiHeaderContent.extractPrevNextLetter(props.teiHeader, 'precursor');
+			if (name && letterPrefix) {
+				const prevLetter: EditorLetter[] | undefined = await searchForLetterNameTitle(letterPrefix, name)
+
+				if (prevLetter && prevLetter[0]) {
+					props.onChange({
+						prevLetterAutoAvailable: true,
+						prevLetterType: 'select',
+						prevLetter: prevLetter[0]
+					});
+				}
+			} else {
+				props.onChange({
+					prevLetterAutoAvailable: false,
+					prevLetterType: letterStatus,
+					prevLetter: null
+				});
+			}
+		}
+
     fetchDefaultLetters();
-  }, []);
+		fetchPrevLetter();
+  }, [props.teiHeader]);
 
 
   const handlePrevLetterCheckboxChange = (value: 'unknown' | 'not_identified' | 'select') => {

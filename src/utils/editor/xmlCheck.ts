@@ -37,6 +37,26 @@ export const xmlCheck = {
 
     return xmlCheck.parseXml(teiElement.outerHTML);
   },
+	extractXmlByRef: (xmlRef: React.RefObject<HTMLDivElement> | null): XMLDocument => {
+		if (xmlRef === null || xmlRef.current === null) {
+			throw new Error('XML reference is null');
+		}
+
+		const container = xmlRef.current?.querySelector<HTMLDivElement>('#letterXmlContent');
+
+		if (!container) { throw new Error('No valid XML content found in letterXmlContent'); }
+
+		const xmlString = container.innerHTML.trim();
+
+		const parser = new DOMParser();
+		const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+
+		if (xmlDoc.getElementsByTagName("parsererror").length) {
+			throw new Error("Error parsing XML: " + xmlDoc.getElementsByTagName("parsererror")[0].textContent);
+		}
+
+		return xmlDoc;
+	},
   parseXml: (xmlString: string) : Document => {
     return new DOMParser().parseFromString(xmlString, "text/xml");
   },

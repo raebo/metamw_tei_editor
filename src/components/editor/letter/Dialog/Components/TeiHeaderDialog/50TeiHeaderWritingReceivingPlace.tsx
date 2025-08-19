@@ -1,4 +1,4 @@
-import { TeiHeaderWritingReceivingPlaceProps } from '../AddTeiHeaderDialog';
+import { TeiHeaderWritingReceivingPlaceProps } from '../ManageTeiHeaderDialog';
 import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
@@ -7,23 +7,38 @@ import { EditorConstants, EntityType } from '../../../../../../constants/editor'
 import { MiscUtils } from '../../../../../../utils/misc';
 import { Autocomplete, TextField } from '@mui/material';
 import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
+import {EditorUtils} from "../../../../../../utils/editor";
+import {fetchMetamwEntityData} from "../../../../../../services/auto_anno/apiMetaMw.service";
 
 
 const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlaceProps) => {
 
   const completionState = props.completionState
-  const selectedOption: SnippetEntity | null = props.dialogType === 'writing' ? props.completionState.writingPlace : props.completionState.receivingPlace
+  const [selectedOption, setSelectedOption] = useState<SnippetEntity | null>(null)
   const [places, setPlaces] = useState<SnippetEntity[]>([]);
 
-  const setSelectedOption = (value: SnippetEntity | null) => {
-    if (value && props.dialogType === 'writing') {
-      props.onChange({ writingPlace: value })
-    } else if (value && props.dialogType === 'receiving') {
-      props.onChange({ receivingPlace: value })
+  const setAutocmplSelectedOption = (settlement: SnippetEntity | null) => {
+		if (settlement !== null && settlement.entityKey !== null) {
+			fetchMetamwEntityData(settlement.entityKey).then((data) => {
+				if (data !== null ) {
+					settlement.entityName = data.name || '';
+					settlement.entityPlaceCountryName = data.country_name || '';
+				}
+			})
+		}
+
+    if (settlement && props.dialogType === 'writing') {
+      props.onChange({ writingPlace: settlement })
+    } else if (settlement && props.dialogType === 'receiving') {
+      props.onChange({ receivingPlace: settlement })
     }
   }
 
   useEffect(() => {
+		const setInitialSelectedOption = async () => {
+			setSelectedOption(props.dialogType === 'writing' ? props.completionState.writingPlace : props.completionState.receivingPlace)
+		}
+
     const fetchDefaultPlaces = async () => {
       try {
         const defaultPlaces: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.SETTLEMENT)
@@ -38,8 +53,38 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
       }
     };
 
+		const assignedWritingPlace = async () => {
+			const { name, key } = EditorUtils.teiHeaderContent.extractWritingPlace(props.teiHeader)
+
+			if (name && key) {
+				const place: SnippetEntity[] | undefined = await searchEditortEntities(key, EntityType.SETTLEMENT)
+				if (place && place[0]) {
+					setSelectedOption(place[0]);
+					props.onChange( { writingPlace: place[0], writingPlaceAutoAvailable: true } )
+				}
+			}
+		}
+
+		const assignedReceivingPlace = async () => {
+			const { name, key } = EditorUtils.teiHeaderContent.extractReceivingPlace(props.teiHeader)
+
+			if (name && key) {
+				const place: SnippetEntity[] | undefined = await searchEditortEntities(key, EntityType.SETTLEMENT)
+				if (place && place[0]) {
+					setSelectedOption(place[0]);
+					props.onChange( { receivingPlace: place[0], receivingPlaceAutoAvailable: true } )
+				}
+			}
+		}
+
+		setInitialSelectedOption()
     fetchDefaultPlaces();
-  }, []);
+		if (props.dialogType === 'writing') {
+			assignedWritingPlace()
+		} else if (props.dialogType === 'receiving') {
+			assignedReceivingPlace()
+		}
+  }, [props.teiHeader]);
 
   const searchForPlacess = async (inputValue: string) => {
     try {
@@ -76,7 +121,7 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
           options={places}
           value={selectedOption}
           isOptionEqualToValue={(option, value) => option.entityId === value.entityId }
-          onChange={(_, newValue) => setSelectedOption(newValue)}
+          onChange={(_, newValue) => setAutocmplSelectedOption(newValue)}
           onInputChange={(_, inputValue, reason) => {
             if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
               debouncedSearchForPlacess(inputValue);

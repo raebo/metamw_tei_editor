@@ -1,4 +1,4 @@
-import { TeiHeaderDialogProps } from '../AddTeiHeaderDialog';
+import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { Autocomplete, Checkbox, FormControlLabel, Stack, TextField } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
 import { EditorLetter } from '../../../../../../services/mappings/editorMappings';
@@ -7,6 +7,7 @@ import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
 import { MiscUtils } from '../../../../../../utils/misc';
 import { EditorConstants } from '../../../../../../constants/editor';
+import {EditorUtils} from "../../../../../../utils/editor";
 
 
 const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
@@ -37,8 +38,32 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
       }
     };
 
+		const fetchPrevLetter = async() => {
+			const { title, name, letterPrefix, letterStatus } = EditorUtils.teiHeaderContent.extractPrevNextLetter(props.teiHeader, 'successor');
+			if (name && letterPrefix) {
+				const nextLetter: EditorLetter[] | undefined = await searchForLetterNameTitle(letterPrefix, name)
+
+				if (nextLetter && nextLetter[0]) {
+					props.onChange({
+						nextLetterAutoAvailable: true,
+						nextLetterType: 'select',
+						nextLetter: nextLetter[0]
+					});
+				}
+			} else {
+				console.log("no next letter found, setting to null: ", letterStatus)
+
+				props.onChange({
+					nextLetterAutoAvailable: false,
+					nextLetterType: letterStatus,
+					nextLetter: null
+				})
+			}
+		}
+
+		fetchPrevLetter();
     fetchDefaultLetters();
-  }, []);
+  }, [props.teiHeader]);
 
   const handlePrevLetterCheckboxChange = (value: 'unknown' | 'not_identified' | 'select') => {
     props.onChange({

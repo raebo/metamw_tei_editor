@@ -15,7 +15,7 @@ import EditNoteDialog from "./Components/EditNoteDialog";
 import DateAddDialog from "./Components/Date/DateAddDialog";
 import AttachmentAddDialog from "./Components/Misc/AttachmentAddDialog";
 import AddWritingActDialog from './Components/AddWritingActDialog';
-import AddTeiHeaderDialog from './Components/AddTeiHeaderDialog';
+import ManageTeiHeaderDialog from './Components/ManageTeiHeaderDialog';
 import AddNewLetterDialog from './Components/AddNewLetterDialog';
 import PublishLetterDialog from './Components/PublishLetterDialog';
 import ChooseGbLetterDialog from './Components/AssignLetterDialog/ChooseGbLetterDialog';
@@ -29,7 +29,7 @@ interface EditorFormDialogProps {
 export interface DefaultDialogProps {
   setWidth: (width: number | string) => void,
   xmlRef: React.RefObject<HTMLDivElement>;
-  onClose: () => void
+  onClose: () => void,
 }
 
 
@@ -74,7 +74,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD]: "Datum 'NotBefore NotAfter' Auszeichnen",
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: "Beilage Hinzufügen",
     [EditorConstants.dialogTypes.ADD_WRITING_PART]: "Schreibakt Hinzufügen",
-    [EditorConstants.dialogTypes.ADD_TEI_HEADER]: "Header des Briefes Hinzufügen",
+    [EditorConstants.dialogTypes.ADD_TEI_HEADER]: "Header des Briefes Hinzufügen/Bearbeiten",
     [EditorConstants.dialogTypes.ADD_NEW_LETTER]: "Neuen Brief Hinzufügen",
     [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: "Verweis an einen Brief an den Protagonisten Hinzufügen",
     [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: "Verweis an einen Brief vom Protagonisten Hinzufügen",
@@ -93,7 +93,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD]: <DateAddDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} dateType={EditorConstants.dateDialog.dateTypes.NOT_BEFORE_NOT_AFTER}/>,
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_WRITING_PART]: <AddWritingActDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
-    [EditorConstants.dialogTypes.ADD_TEI_HEADER]: <AddTeiHeaderDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.ADD_TEI_HEADER]: <ManageTeiHeaderDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_NEW_LETTER]: <AddNewLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: <ChooseGbLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: <ChooseProtagLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,

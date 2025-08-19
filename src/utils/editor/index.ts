@@ -9,6 +9,7 @@ import { pinnedLetters } from './pinnedLetters';
 import { creationDataService } from "./creationDataService";
 import { placeDataService } from "./placeDataService";
 import { protagCreationDataService } from './protagCreationDataService';
+import {teiHeaderContent} from "./teiHeaderContent";
 
 export const EditorUtils = {
   backendService,
@@ -20,6 +21,7 @@ export const EditorUtils = {
   markupGeneration,
   nodeTypes,
   removeNodeHandles,
+	teiHeaderContent,
   textMarking,
-  xmlCheck
+  xmlCheck,
 }
