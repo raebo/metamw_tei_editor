@@ -39,7 +39,7 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
     };
 
 		const fetchPrevLetter = async() => {
-			const { title, name, letterPrefix, letterStatus } = EditorUtils.teiHeaderContent.extractPrevNextLetter(props.teiHeader, 'successor');
+			const { name, letterPrefix, letterStatus } = EditorUtils.teiHeaderContent.extractPrevNextLetter(props.teiHeader, 'successor');
 			if (name && letterPrefix) {
 				const nextLetter: EditorLetter[] | undefined = await searchForLetterNameTitle(letterPrefix, name)
 

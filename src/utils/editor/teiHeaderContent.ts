@@ -78,7 +78,6 @@ export const teiHeaderContent = {
 			if (node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName === "lb") {
 				foundLb = true;
 			} else if (node.nodeType === Node.TEXT_NODE) {
-				const text = node.textContent?.trim() ?? "";
 				if (!foundLb) {
 					node.textContent = firstHeadline
 				} else {
@@ -107,7 +106,7 @@ export const teiHeaderContent = {
 	},
 	extractPrevNextLetter : (teiHeader: Element | null, titleType: "precursor" | "successor" ): { title: string | null, name: string | null, letterPrefix: 'fmb' | 'gb' | null, letterStatus: 'unknown' | 'not_identified' | 'select' | null } => {
 		if (!teiHeader) {
-			throw new Error("No teiHeader given for: " + titleType);
+			return { title: null, name: null, letterPrefix: null, letterStatus: null };
 		}
 
 		const titles = queryPath(teiHeader, `filedesc > titlestmt > title[@type='${titleType}']`)
@@ -196,7 +195,8 @@ export const teiHeaderContent = {
 
 	},
 	extractReceiver: (teiHeader: Element | null): { name: string | null, key: string | null } => {
-		if( !teiHeader) { throw new Error("No teiHeader given for extracting receiver"); }
+		if( !teiHeader) {
+			return { name: null, key: null }; }
 
 		const receiverElements = queryPath(teiHeader, 'profiledesc > correspdesc > correspaction[2] > persname');
 		if (receiverElements.length > 0) {

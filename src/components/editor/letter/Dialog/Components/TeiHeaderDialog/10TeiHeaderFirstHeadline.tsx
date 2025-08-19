@@ -17,7 +17,7 @@ const TeiHeaderFirstHeadline = (props: TeiHeaderDialogProps) => {
   const completionState = props.completionState;
 
 	useEffect(() => {
-		const { firstHeadline, sndHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(props.teiHeader)
+		const { firstHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(props.teiHeader)
 
 		if (firstHeadline) {
 			props.onChange({ firstHeaderComplete: true, firstHeaderContent: firstHeadline });

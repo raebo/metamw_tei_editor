@@ -54,7 +54,7 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 	const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
 	const [formIsValid, setFormIsValid] = React.useState<boolean>(false);
 
-	const { xmlDoc, teiHeader } = React.useMemo(() => {
+	const { teiHeader } = React.useMemo(() => {
 		try {
 			const xmlDoc = EditorUtils.xmlCheck.extractXmlByRef(props.xmlRef);
 			if (!xmlDoc) throw new Error("Failed to parse XML");
