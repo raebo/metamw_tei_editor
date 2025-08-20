@@ -21,6 +21,7 @@ import {useSelector} from "react-redux";
 import {RootState} from "../../../../../redux/redux.store";
 import {setReloadLetterContent} from "../../../../../redux/slices/editor.letter.slice";
 import {useAppDispatch} from "../../../../../redux/hooks";
+import TeiHeaderEditorTranskriptor from "./TeiHeaderDialog/80EditorTranskriptor";
 
 
 export type TeiHeaderDialogProps = {
@@ -45,6 +46,8 @@ type CompletionState = {
   receiverAutoAvailable: boolean, receiverEntity: SnippetEntity | null,
   receivingPlaceAutoAvailable: boolean, receivingPlace: SnippetEntity | null,
   letterLanguage: LanguageOption[] | []
+	editorValue: string | null,
+	transkriptorValue: string | null,
 }
 
 const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
@@ -85,7 +88,8 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
     writingPlaceAutoAvailable: false, writingPlace: null,
     receiverAutoAvailable: true, receiverEntity: null,
     receivingPlaceAutoAvailable: false, receivingPlace: null,
-    letterLanguage: []
+    letterLanguage: [],
+		editorValue: null, transkriptorValue: null
   })
 
   const ref = useRef<HTMLDivElement>(null);
@@ -131,6 +135,8 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 			EditorUtils.teiHeaderContent.setReceivingPlace(teiHeader, completionState.receivingPlace);
 			EditorUtils.teiHeaderContent.setReceiver(teiHeader, completionState.receiverEntity);
 			EditorUtils.teiHeaderContent.setLanguages(teiHeader, completionState.letterLanguage);
+			EditorUtils.teiHeaderContent.setEditorTranskriptorName(teiHeader, 'edition', completionState.editorValue);
+			EditorUtils.teiHeaderContent.setEditorTranskriptorName(teiHeader, 'transcription', completionState.transkriptorValue);
 
 
 		} catch (error) {
@@ -186,6 +192,7 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
       <TeiHeaderReceivingPerson teiHeader={teiHeader} autoAvailable={completionState.receiverAutoAvailable} completionState={completionState} onChange={childOnChange} />
       <TeiHeaderWritingReceivingPlace teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"receiving"} textFieldValue={'Empfängerort Auswählen'}/>
       <TeiHeaderTransEdition teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
+			<TeiHeaderEditorTranskriptor teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
 
       <Divider orientation="vertical" flexItem />
 
@@ -212,10 +219,9 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 				</Button>
 			</Box>
 
-			<div>
-				<pre>{JSON.stringify(completionState, null, 2)}</pre>
-			</div>
-
+			{/*<div>*/}
+			{/*	<pre>{JSON.stringify(completionState, null, 2)}</pre>*/}
+			{/*</div>*/}
     </div>
   )
 }

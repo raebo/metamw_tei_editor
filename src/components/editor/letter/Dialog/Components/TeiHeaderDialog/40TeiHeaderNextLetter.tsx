@@ -12,7 +12,8 @@ import {EditorUtils} from "../../../../../../utils/editor";
 
 const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
 
-  const completionState = props.completionState
+	const [nextLetterType, setNextLetterType] = useState<'unknown' | 'not_identified' | 'select' | null>(null)
+	const [autoAvailable, setAutoAvailable] = useState<boolean>(false)
   const selectedOption: EditorLetter | null = props.completionState.nextLetter
   const [letters, setLetters] = useState<EditorLetter[]>([]);
 
@@ -38,8 +39,8 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
       }
     };
 
-		const fetchPrevLetter = async() => {
-			const { name, letterPrefix, letterStatus } = EditorUtils.teiHeaderContent.extractPrevNextLetter(props.teiHeader, 'successor');
+		const fetchNextLetter = async() => {
+			const { name, letterPrefix } = EditorUtils.teiHeaderContent.extractPrevNextLetter(props.teiHeader, 'successor');
 			if (name && letterPrefix) {
 				const nextLetter: EditorLetter[] | undefined = await searchForLetterNameTitle(letterPrefix, name)
 
@@ -49,19 +50,24 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
 						nextLetterType: 'select',
 						nextLetter: nextLetter[0]
 					});
+					setNextLetterType('select')
+					setAutoAvailable(true)
 				}
 			} else {
-				console.log("no next letter found, setting to null: ", letterStatus)
-
 				props.onChange({
 					nextLetterAutoAvailable: false,
-					nextLetterType: letterStatus,
+					nextLetterType: name as 'unknown' | 'not_identified' | null,
 					nextLetter: null
 				})
+				if (name === 'unknown' || name === 'not_identified' || name === null) {
+					setNextLetterType(name as 'unknown' | 'not_identified' | null);
+				} else {
+					setNextLetterType(null);
+				}
 			}
 		}
 
-		fetchPrevLetter();
+		fetchNextLetter();
     fetchDefaultLetters();
   }, [props.teiHeader]);
 
@@ -72,6 +78,10 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
       ...(value !== 'select' && { nextLetter: null })
     }
     )
+		setNextLetterType(value);
+		if (value === 'select') {
+			setAutoAvailable(true);
+		}
   }
 
   const searchForLetters = async (inputValue: string) => {
@@ -96,7 +106,7 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
       <div className="autoSnippetFormRow" style={ { marginTop: "25px", width: "98%" } }>
         <Stack spacing={2}>
           <Autocomplete
-            disabled={!completionState.nextLetterAutoAvailable}
+            disabled={!autoAvailable}
             options={letters}
             value={selectedOption}
             isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -142,7 +152,7 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
               control={
                 <Checkbox
                   onChange={() => handlePrevLetterCheckboxChange('unknown')}
-                  checked={completionState.nextLetterType === 'unknown'}
+                  checked={nextLetterType === 'unknown'}
                 />
               }
               label="Folgerbrief (Unbekannt)"
@@ -152,7 +162,7 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
               control={
                 <Checkbox
                   onChange={() => handlePrevLetterCheckboxChange('not_identified')}
-                  checked={completionState.nextLetterType === 'not_identified'}
+                  checked={nextLetterType === 'not_identified'}
                 />
               }
               label="Folgebrief (Noch nicht ermittelt)"
@@ -162,7 +172,7 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
               control={
                 <Checkbox
                   onChange={() => handlePrevLetterCheckboxChange('select')}
-                  checked={completionState.nextLetterAutoAvailable}
+                  checked={autoAvailable}
                 />
               }
               label="Auswahl Folgebrief"

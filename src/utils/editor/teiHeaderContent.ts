@@ -263,12 +263,45 @@ export const teiHeaderContent = {
 			}
 		}
 
-		// Add new <language> elements
 		for (const lang of languages) {
 			const langElement = document.createElementNS(TEI_NS, "language");
 			langElement.setAttribute("ident", lang.value);
 			langElement.textContent = lang.label;
 			langUsageWrapper.appendChild(langElement);
 		}
+	},
+	extractEditorTranskriptorName: (teiHeader: Element | null, respStmtType: string): { name: string | null } => {
+		let name = null;
+
+		if (!teiHeader) {
+			return { name: name }
+		}
+
+		const elements = queryPath(teiHeader, `filedesc > titlestmt > respstmt[@resp=\'${respStmtType}\'] > name`);
+
+		if (elements.length > 1) {
+			name = elements[elements.length-1].textContent?.trim() || null;
+		}
+
+		return { name: name };
+	},
+	setEditorTranskriptorName: (teiHeader: Element | null, respStmtType: string, newName: string | null): void => {
+		if (!teiHeader || !newName) {
+			return;
+		}
+
+		const elements = queryPath(teiHeader, `filedesc > titlestmt > respstmt[@resp=\'${respStmtType}\'] > name`);
+
+		const lastElement = elements[elements.length-1];
+
+		if (elements.length > 1) {
+			lastElement.textContent = newName;
+		} else {
+			const nameNode = document.createElementNS(TEI_NS, "name");
+			nameNode.setAttribute("resp", respStmtType);
+			nameNode.textContent = newName;
+			lastElement.parentElement?.appendChild(nameNode);
+		}
+
 	}
 }
