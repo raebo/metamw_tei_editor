@@ -67,7 +67,8 @@ export const createNewLetter = async (letterData: NewLetterCompletionState): Pro
          "nextLetterType", "nextLetter",
          "writerEntity", "writingPlace",
          "receivingPlace", "receiverEntity",
-         "transkriptionValue", "editionValue", "letterLanguage"
+         "transkriptionValue", "editionValue", "letterLanguage",
+					"transkriptorValue", "editorValue"
         ])
     })
 

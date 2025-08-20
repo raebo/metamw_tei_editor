@@ -24,6 +24,7 @@ import { RootState } from '../../../../../redux/redux.store';
 import { EditorUtils } from '../../../../../utils/editor';
 import { setEditorPinnedLetters } from '../../../../../redux/slices/editor.letter.slice';
 import {LanguageOption} from "../../../../../constants/editor";
+import TeiHeaderEditorTranskriptor from "./TeiHeaderDialog/80EditorTranskriptor";
 
 export type NewLetterDialogProps = {
   autoAvailable: boolean | null;
@@ -42,7 +43,9 @@ export type NewLetterCompletionState = {
   writingPlaceAutoAvailable: boolean, writingPlace: SnippetEntity | null,
   receiverAutoAvailable: boolean, receiverEntity: SnippetEntity | null,
   receivingPlaceAutoAvailable: boolean, receivingPlace: SnippetEntity | null,
-  letterLanguage: LanguageOption[] | []
+  letterLanguage: LanguageOption[] | [],
+	editorValue: string | null, transkriptorValue: string | null,
+
 }
 
 const AddNewLetterDialog= (props: DefaultDialogProps) => {
@@ -63,7 +66,8 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
     writingPlaceAutoAvailable: true, writingPlace: null,
     receiverAutoAvailable: true, receiverEntity: null,
     receivingPlaceAutoAvailable: true, receivingPlace: null,
-    letterLanguage: []
+    letterLanguage: [],
+		editorValue: null, transkriptorValue: null
   })
 
   const ref = useRef<HTMLDivElement>(null);
@@ -129,7 +133,9 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
     completionState.writingPlace !== null,
     completionState.receiverEntity !== null,
     completionState.receivingPlace !== null,
-    completionState.letterLanguage !== null,
+    completionState.letterLanguage.length > 0,
+		completionState.editorValue !== null,
+		completionState.transkriptorValue !== null
   ].every(Boolean);
 
   return (
@@ -153,6 +159,7 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
       <TeiHeaderReceivingPerson teiHeader={null} autoAvailable={completionState.receiverAutoAvailable} completionState={completionState} onChange={childOnChange} />
       <TeiHeaderWritingReceivingPlace teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"receiving"} textFieldValue={"Empfängerort Auswählen"}/>
       <TeiHeaderTransEdition teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
+			<TeiHeaderEditorTranskriptor teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
 
       <Divider orientation="vertical" flexItem />
       <Box
