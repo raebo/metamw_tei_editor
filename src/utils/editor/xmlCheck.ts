@@ -86,7 +86,7 @@ export const xmlCheck = {
     while (node.parentNode && callAgain) {
       ancestors.push(node.parentNode);
       node = node.parentNode;
-      if (node.nodeName === "TEI") {
+      if (node.nodeName === "TEI" || node.nodeName === 'tei') {
         callAgain = false
       }
     }
@@ -114,9 +114,7 @@ export const xmlCheck = {
 
     const ancestorNodeNames = [
       node.nodeName.toLowerCase(), ...EditorUtils.xmlCheck.getAncestorNodeNames(node)
-    ]
-      .reverse()
-      .join(" ")
+    ].reverse().join(" ")
 
     const matchingEntry = nodeAnchestorPaths().find(entry => {
       return entry.parentPath.toLowerCase() === ancestorNodeNames;
@@ -131,10 +129,9 @@ export const xmlCheck = {
       onValid(node);
       return true
     } else {
-      onInvalid("Knoten ist nicht löschbar: " + ancestorNodeNames);
+      onInvalid("Knoten ist nicht löschbar checkElementDetails: " + ancestorNodeNames);
       return false;
     }
-
   },
   getSelectionOffsets(rootElement: HTMLElement, range: Range): { start: number; end: number } | null {
     let walker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT, null);

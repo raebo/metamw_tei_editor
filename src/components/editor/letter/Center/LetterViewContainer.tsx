@@ -22,6 +22,7 @@ import { MiscUtils } from "../../../../utils/misc";
 import LetterViewCode from './LetterViewCode';
 import { removeMarkedSpans } from '../../../../utils/auto_anno/domHandling';
 import {createContextMenuItems, MenuItemType} from "../Util/ContextMenuLetterItems";
+import RightClickActionMenu from "./LetterViewContainer/RightClickActionMenu";
 
 const LetterViewContainer = () => {
   const dispatch = useAppDispatch();
@@ -29,9 +30,6 @@ const LetterViewContainer = () => {
   const nodeClicked = useSelector((state: RootState) => state.editorLetter.content.nodeClicked);
   const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize)
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const contextMenuRef = useRef<HTMLDivElement | null>(null);
-  const [submenuAnchorEl, setSubmenuAnchorEl] = useState<HTMLElement | null>(null);
-  const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
   const xmlContentRef = useRef<HTMLDivElement | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
@@ -49,7 +47,7 @@ const LetterViewContainer = () => {
   const [displayMenuItems, setDisplayMenuItems] = useState<MenuItemType[]>([]);
 
   const menuItemsNoMarking : MenuItemType[] = [
-    { label: 'Eintrag Entfernen', action: ({ node }: { node?: Node }) => {
+    { label: 'Eintrag Entfernen', action: async ({ node }: { node?: Node }) => {
         try {
           if (!node) throw new Error("No node given as value")
 
@@ -65,27 +63,24 @@ const LetterViewContainer = () => {
 
           if (!xmlContent) throw new Error("No xml content found");
 
-          EditorUtils.backendService.patchContent(
+          const result = await EditorUtils.backendService.patchContent(
               xmlContent,
               stateEditorLetter.id,
               EditorConstants.changeTypes.NODE_REMOVED,
               null,
-          ).then(
-            (result) => {
-              if (result) {
-                dispatch(setReloadLetterContent({ reloadLetterContent: true }))
-                enqueueSnackbar(`${anchNode.nodeType.name} wurde entfernt`, { variant: "success" })
-              } else {
-                enqueueSnackbar("Data could not be updated on backend side", { variant: "error" })
-              }
-            }
           )
-        } catch(error) {
+					if (result) {
+
+						dispatch(setReloadLetterContent({ reloadLetterContent: true }))
+						enqueueSnackbar(`${anchNode.nodeType.name} wurde entfernt`, { variant: "success" })
+					} else {
+						enqueueSnackbar("Data could not be updated on backend side", { variant: "error" })
+					}
+				} catch(error) {
           enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
         }
-      } },
+			} },
   ]
-
 
   const handleMenuItemClick = (selectedItemLeft: string | null, selectedItemRight: string | null) => {
     setAnchorPosition(null)
@@ -101,6 +96,151 @@ const LetterViewContainer = () => {
     handleMenuItemClick,
     handleMenuItemDialogClick,
   });
+
+	useEffect(() => {
+		let useFallBack = true
+		const contextMenuElement = xmlContentRef.current // xmlRef of letter container
+
+		if (!contextMenuElement) return;
+
+		const handleContextMenuTextIsMarked = (event: MouseEvent) => {
+			const target = event?.target as HTMLElement;
+			if (target && target.tagName.toLowerCase() === 'span' && target.classList.contains('marked')) {
+				event.preventDefault(); // Prevent default context menu
+				setAnchorPosition({ top: event.clientY, left: event.clientX });
+			}
+		}
+
+		const handleContextMenuNodeClicked = (event: MouseEvent) => {
+			event.preventDefault(); // Prevent default context menu
+			setAnchorPosition({ top: event.clientY, left: event.clientX });
+		}
+
+		if (contentTextIsMarked) {
+			contextMenuElement.addEventListener("contextmenu", handleContextMenuTextIsMarked);
+			useFallBack = false;
+		}
+
+		if (nodeClicked) {
+			contextMenuElement.addEventListener("contextmenu", handleContextMenuNodeClicked);
+			useFallBack = false
+		}
+
+		if (useFallBack) {
+			if (xmlContentRef.current !== null) {
+				removeMarkedSpans(xmlContentRef.current);
+				setLetterState({
+					viewMode: "WYSIWYG",
+					xmlContent: xmlContentRef.current?.innerHTML ?? ""
+				})
+			}
+			//ok no menu to display remove listener
+			contextMenuElement.removeEventListener("contextmenu", handleContextMenuTextIsMarked);
+			contextMenuElement.removeEventListener("contextmenu", handleContextMenuNodeClicked);
+		}
+
+		return () => {
+			contextMenuElement.removeEventListener("contextmenu", handleContextMenuTextIsMarked);
+			contextMenuElement.removeEventListener("contextmenu", handleContextMenuNodeClicked);
+		}
+	}, [contentTextIsMarked, nodeClicked]);
+
+
+	const handleMouseUpMarkedElements = (event: MouseEvent) => {
+		const selection = window.getSelection();
+		if (selection && selection.toString().length > 0) {
+			EditorUtils.textMarking.isValidSelection(
+				selection,
+				xmlContentRef.current as HTMLElement,
+				(selection: Selection) => {
+					EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
+					EditorUtils.textMarking.markValidSelection(selection, selection.getRangeAt(0));
+
+					dispatch(setEditorMarkedAndContentLeftRightThunk({
+						textIsMarked: true,
+						contentLeft: null,
+						contentRight: null
+					}));
+
+					setDisplayMenuItems(menuItems);
+					setLetterState( {
+							viewMode: "WYSIWYG",
+							xmlContent: xmlContentRef.current?.innerHTML ?? ""
+						}
+					)
+				},
+				(message: string) => {
+					EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
+					setLetterState({
+						viewMode: "WYSIWYG",
+						xmlContent: xmlContentRef.current?.innerHTML ?? ""
+					})
+
+					dispatch(setEditorMarkedAndContentLeftRightThunk({
+						textIsMarked: false,
+						contentLeft: null,
+						contentRight: null
+					}));
+
+					enqueueSnackbar(message, { variant: "error" });
+				}
+			);
+		}
+	};
+
+	const handleNoMarkupRightClick = (event: MouseEvent) => {
+		if (event.button !== 2) return; // Only right-click
+
+		EditorUtils.xmlCheck.isADeletableNode(
+			event.target as Node,
+			(node: Node) => {
+
+				event.preventDefault();
+
+				EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
+				setSelectedNode(node)
+				setDisplayMenuItems(menuItemsNoMarking);
+				setLetterState({
+					viewMode: "WYSIWYG",
+					xmlContent: xmlContentRef.current?.innerHTML ?? ""
+				})
+
+				dispatch(setEditorNodeClickedAndContentLeftRightThunk({
+					nodeClicked: true,
+					textIsMarked: false,
+					contentLeft: null,
+					contentRight: null
+				}));
+			},
+			(message: string) => {
+				// ok when no other text is marked change state to default. preventing from wrong right clicks
+				if (!contentTextIsMarked) {
+					dispatch(setEditorNodeClickedAndContentLeftRightThunk({
+						nodeClicked: false,
+						textIsMarked: false,
+						contentLeft: null,
+						contentRight: null
+					}));
+				}
+			}
+		);
+	};
+
+	useEffect(() => {
+		if (xmlContentRef.current && letterState.xmlContent && letterState.viewMode === 'WYSIWYG') {
+			xmlContentRef.current.addEventListener("mouseup", handleMouseUpMarkedElements);
+			xmlContentRef.current.addEventListener("mousedown", handleNoMarkupRightClick);
+		}
+
+		return () => {
+			if (xmlContentRef.current && letterState.xmlContent && letterState.viewMode === 'WYSIWYG') {
+				xmlContentRef.current.removeEventListener("mouseup", handleMouseUpMarkedElements);
+				xmlContentRef.current.removeEventListener("mousedown", handleNoMarkupRightClick);
+			}
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [letterState]);
+
 
   const fetchSingleLetterData = async (letterId: number) : Promise<string> => {
     try {
@@ -158,139 +298,13 @@ const LetterViewContainer = () => {
     }
   }, [reloadLetterContent]);
 
-  useEffect(() => {
-    const contextMenuElement = xmlContentRef.current // xmlRef of letter container
-
-    if (!contextMenuElement) return;
-
-    const handleContextMenuTextIsMarked = (event: MouseEvent) => {
-      const target = event?.target as HTMLElement;
-      if (target && target.tagName.toLowerCase() === 'span' && target.classList.contains('marked')) {
-        event.preventDefault(); // Prevent default context menu
-        setAnchorPosition({ top: event.clientY, left: event.clientX });
-      }
-    }
-
-    const handleContextMenuNodeClicked = (event: MouseEvent) => {
-      event.preventDefault(); // Prevent default context menu
-      setAnchorPosition({ top: event.clientY, left: event.clientX });
-    }
-
-    if (contentTextIsMarked) {
-      contextMenuElement.addEventListener("contextmenu", handleContextMenuTextIsMarked);
-    } else if (nodeClicked) {
-      contextMenuElement.addEventListener("contextmenu", handleContextMenuNodeClicked);
-    } else {
-      if (xmlContentRef.current !== null) {
-        removeMarkedSpans(xmlContentRef.current);
-        setLetterState({
-          viewMode: "WYSIWYG",
-          xmlContent: xmlContentRef.current?.innerHTML ?? ""
-        })
-      }
-      contextMenuElement.removeEventListener("contextmenu", handleContextMenuTextIsMarked);
-      contextMenuElement.removeEventListener("contextmenu", handleContextMenuNodeClicked);
-    }
-
-    return () => {
-      contextMenuElement.removeEventListener("contextmenu", handleContextMenuTextIsMarked);
-      contextMenuElement.removeEventListener("contextmenu", handleContextMenuNodeClicked);
-    }
-  }, [contentTextIsMarked, nodeClicked]);
-
-
-  const handleNoMarkupRightClick = (event: MouseEvent) => {
-    if (event.button !== 2) return; // Only right-click
-
-    EditorUtils.xmlCheck.isADeletableNode(
-      event.target as Node,
-      (node: Node) => {
-        EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
-        setSelectedNode(node)
-        setDisplayMenuItems(menuItemsNoMarking);
-        setLetterState({
-          viewMode: "WYSIWYG",
-          xmlContent: xmlContentRef.current?.innerHTML ?? ""
-        })
-
-        dispatch(setEditorNodeClickedAndContentLeftRightThunk({
-          nodeClicked: true,
-          textIsMarked: false,
-          contentLeft: null,
-          contentRight: null
-        }));
-      },
-      (message: string) => {
-        // enqueueSnackbar(message, { variant: "error" });
-      }
-    );
-  };
-
-  const handleMouseUpMarkedElements = (event: MouseEvent) => {
-    const selection = window.getSelection();
-    if (selection && selection.toString().length > 0) {
-      EditorUtils.textMarking.isValidSelection(
-        selection,
-        xmlContentRef.current as HTMLElement,
-        (selection: Selection) => {
-          EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
-          EditorUtils.textMarking.markValidSelection(selection, selection.getRangeAt(0));
-
-          dispatch(setEditorMarkedAndContentLeftRightThunk({
-            textIsMarked: true,
-            contentLeft: null,
-            contentRight: null
-          }));
-
-          setDisplayMenuItems(menuItems);
-          setLetterState( {
-            viewMode: "WYSIWYG",
-            xmlContent: xmlContentRef.current?.innerHTML ?? ""
-          }
-          )
-        },
-        (message: string) => {
-          EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
-          setLetterState({
-            viewMode: "WYSIWYG",
-            xmlContent: xmlContentRef.current?.innerHTML ?? ""
-          })
-
-          dispatch(setEditorMarkedAndContentLeftRightThunk({
-            textIsMarked: false,
-            contentLeft: null,
-            contentRight: null
-          }));
-
-          enqueueSnackbar(message, { variant: "error" });
-        }
-      );
-    }
-  };
-
-  useEffect(() => {
-    if (xmlContentRef.current && letterState.xmlContent && letterState.viewMode === 'WYSIWYG') {
-      xmlContentRef.current.addEventListener("mouseup", handleMouseUpMarkedElements);
-      xmlContentRef.current.addEventListener("mousedown", handleNoMarkupRightClick);
-    }
-
-    return () => {
-      if (xmlContentRef.current && letterState.xmlContent && letterState.viewMode === 'WYSIWYG') {
-        xmlContentRef.current.removeEventListener("mouseup", handleMouseUpMarkedElements);
-        xmlContentRef.current.removeEventListener("mouseup", handleNoMarkupRightClick);
-      }
-    };
- // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [letterState]);
-
-
 
 
   return (
     <div className="letter-view-container">
       <div className="container-fmbc-letter">
         <div className="box-1">
-          {letterState.xmlContent ? (
+          { letterState.xmlContent ? (
             <>
               { letterState.viewMode === "WYSIWYG" && (
                 <div
@@ -302,106 +316,20 @@ const LetterViewContainer = () => {
                   <div ref={xmlContentRef} id="letterXmlContent" style={{ padding: 20 }}>
                     { letterState.xmlContent && <XMLDisplayParser xmlString={letterState.xmlContent} /> }
                   </div>
-
-                  <div ref={contextMenuRef} id="letterXmlContextMenu" style={{ padding: 20 }}>
-                    <Menu
-                      open={Boolean(anchorPosition)}
-                      onClose={() => {
-                        setAnchorPosition(null);
-                        setOpenSubmenuIndex(null);
-                        setSubmenuAnchorEl(null);
-                      }}
-                      anchorReference="anchorPosition"
-                      anchorPosition={
-                        anchorPosition
-                          ? { top: anchorPosition.top, left: anchorPosition.left }
-                          : undefined
-                      }
-                    >
-                      {displayMenuItems.map((item, index) =>
-                        item.type === 'divider' ? (
-                          <Divider key={index} />
-                        ) : (
-                          <MenuItem
-                            key={index}
-                            onClick={(e) => {
-                              if (item.hasSubMenu) {
-                                setSubmenuAnchorEl(e.currentTarget);
-                                setOpenSubmenuIndex(index);
-                              } else {
-                                if (selectedNode) {
-                                  item.action?.({ node: selectedNode });
-                                  setSelectedNode(null);
-                                  setAnchorPosition(null);
-                                } else {
-                                  item.action?.({});
-                                  setAnchorPosition(null);
-                                }
-                              }
-                            }}
-                            onMouseEnter={(e) => {
-                              if (item.hasSubMenu) {
-                                setSubmenuAnchorEl(e.currentTarget);
-                                setOpenSubmenuIndex(index);
-                              }
-                            }}
-                            onMouseLeave={() => {
-                              if (!item.hasSubMenu) {
-                                setOpenSubmenuIndex(null);
-                                setSubmenuAnchorEl(null);
-                              }
-                            }}
-                          >
-                            <Typography variant="body2">{item.label}</Typography>
-                            {item.hasSubMenu && <span style={{ marginLeft: 'auto' }}>▶</span>}
-                          </MenuItem>
-                        )
-                      )}
-                    </Menu>
-                    { openSubmenuIndex !== null &&
-                      displayMenuItems[openSubmenuIndex]?.subMenu && (
-                        <Menu
-                          anchorEl={submenuAnchorEl}
-                          open={Boolean(submenuAnchorEl)}
-                          onClose={() => {
-                            setSubmenuAnchorEl(null);
-                            setOpenSubmenuIndex(null);
-                          }}
-                          anchorOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                          }}
-                          transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'left',
-                          }}
-                        >
-                          { displayMenuItems[openSubmenuIndex]!.subMenu!.map((subItem, subIndex) => (
-                            <MenuItem
-                              key={subIndex}
-                              onClick={() => {
-                                if (selectedNode) {
-                                  subItem.action?.({ node: selectedNode });
-                                  setSelectedNode(null);
-                                } else {
-                                  subItem.action?.({});
-                                }
-                                setAnchorPosition(null);
-                                setSubmenuAnchorEl(null);
-                                setOpenSubmenuIndex(null);
-                              }}
-                            >
-                              <Typography variant="body2">{subItem.label}</Typography>
-                            </MenuItem>
-                          ))}
-                        </Menu>
-                      )}
-                  </div>
+									<RightClickActionMenu
+										anchorPosition={anchorPosition}
+										onClose={() => {
+											setAnchorPosition(null);
+											setSelectedNode(null);
+										}}
+										items={displayMenuItems}
+										selectedNode={selectedNode}
+									/>
                 </div>
               ) }
               { letterState.viewMode === "CODE" && letterState.xmlContent && (
                 <LetterViewCode xmlString={letterState.xmlContent} />
-              )}
+              ) }
 
             </>
           ) : (
@@ -410,7 +338,7 @@ const LetterViewContainer = () => {
                 Kein Brief zur Anzeige vorhanden, bitte wählen Sie einen Brief über die Suche aus.
               </Alert>
             </p>
-          )}
+          ) }
         </div>
       </div>
     </div>
