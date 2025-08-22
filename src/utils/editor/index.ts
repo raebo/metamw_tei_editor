@@ -4,7 +4,7 @@ import { markupGeneration } from "./markupGeneration";
 import { nodeTypes } from "./nodeTypes";
 import { backendService } from "./backendService";
 import { keyPressHandles } from "./keyPressHandles";
-import { removeNodeHandles } from "./removeNodeHandles";
+import { rightClickPathHandles } from "./rightClickPathHandles";
 import { pinnedLetters } from './pinnedLetters';
 import { creationDataService } from "./creationDataService";
 import { placeDataService } from "./placeDataService";
@@ -20,7 +20,7 @@ export const EditorUtils = {
   keyPressHandles,
   markupGeneration,
   nodeTypes,
-  removeNodeHandles,
+  rightClickPathHandles,
 	teiHeaderContent,
   textMarking,
   xmlCheck,

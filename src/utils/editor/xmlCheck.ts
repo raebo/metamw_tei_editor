@@ -1,5 +1,6 @@
 import { EditorUtils } from "./index";
 import React from 'react';
+import {NodeAnchestorPath} from "./rightClickPathHandles";
 
 export const xmlCheck = {
   xmlLetterDate: (
@@ -92,8 +93,8 @@ export const xmlCheck = {
     }
     return ancestors;
   },
-  getAncestorNodeNames(node: Node): String[] {
-    const ancestorNames: String[] = []
+  getAncestorNodeNames(node: Node): string[] {
+    const ancestorNames: string[] = []
 
     // eslint-disable-next-line array-callback-return
     this.getAncestorsNodes(node).map((ancestor) => {
@@ -104,35 +105,44 @@ export const xmlCheck = {
 
     return ancestorNames;
   },
-  isADeletableNode(
-    node: Node,
-    onValid: (node: Node) => void,
-    onInvalid: (message: string) => void
-  ): boolean {
+	isNodeMatchingPath(
+		node: Node,
+		nodeAnchestorPaths: NodeAnchestorPath[],
+		onValid: (node: Node) => void,
+		onInvalid: (message: string) => void
+	) : boolean {
+		const ancestorNodeNames = [
+			node.nodeName.toLowerCase(),
+			...EditorUtils.xmlCheck.getAncestorNodeNames(node)
+		]
+			.reverse()
+			.join(" ");
 
-    const { nodeAnchestorPaths } = EditorUtils.removeNodeHandles
+		const matchingEntry = nodeAnchestorPaths.find(
+			(entry) => {
+				const pathMatches = entry.parentPath.toLowerCase() === ancestorNodeNames
+				const attributesMatch = entry.checkAttributes ? entry.checkAttributes(node as Element) : true;
 
-    const ancestorNodeNames = [
-      node.nodeName.toLowerCase(), ...EditorUtils.xmlCheck.getAncestorNodeNames(node)
-    ].reverse().join(" ")
+				return pathMatches && attributesMatch;
+			}
+		);
 
-    const matchingEntry = nodeAnchestorPaths().find(entry => {
-      return entry.parentPath.toLowerCase() === ancestorNodeNames;
-    });
+		if (!matchingEntry) {
+			onInvalid("No matching entry for: " + ancestorNodeNames);
+			return false;
+		}
 
-    if (!matchingEntry) {
-      onInvalid("Knoten ist nicht löschbar: " + ancestorNodeNames);
-      return false;
-    }
+		// ✅ If checkElementDetails exists, call it
+		if (matchingEntry.checkElementDetails) {
+			if (!matchingEntry.checkElementDetails(node as Element)) {
+				onInvalid("CheckElementDetails failed: " + ancestorNodeNames);
+				return false;
+			}
+		}
 
-    if (matchingEntry.checkElementDetails(node as Element)) {
-      onValid(node);
-      return true
-    } else {
-      onInvalid("Knoten ist nicht löschbar checkElementDetails: " + ancestorNodeNames);
-      return false;
-    }
-  },
+		onValid(node);
+		return true;
+	},
   getSelectionOffsets(rootElement: HTMLElement, range: Range): { start: number; end: number } | null {
     let walker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT, null);
     let currentNode: Node | null = walker.nextNode();

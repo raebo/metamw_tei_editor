@@ -5,6 +5,7 @@ type NodeActionCallback = (args: {
 }) => void;
 
 export type MenuItemType = {
+	identifier?: string;
   label?: string;
   action?: NodeActionCallback;
   type?: 'divider' | null;

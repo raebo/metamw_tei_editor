@@ -86,21 +86,34 @@ teiheader {
             }
         }
      }
-      sourcedesc {
-         msdesc {
-            physdesc {
-               accmat {
-                  listbibl {
-                     bibl {
-                        cursor: pointer;
-                     }
-                  }
-
-               }
-            }
+   profiledesc {
+     correspdesc {
+         correspaction {
+             persname {
+             }
          }
-      }
+     }
    }
+   sourcedesc {
+     msdesc {
+        physdesc {
+           accmat {
+              listbibl {
+                 bibl {
+                    cursor: pointer;
+                 }
+              }
+
+           }
+        }
+     }
+   }
+  }
+}
+
+profileDesc correspDesc correspAction[type="received"] persName,
+profileDesc correspDesc correspAction[type="sent"] persName {
+    cursor: pointer;
 }
 
 /*.hidden {*/

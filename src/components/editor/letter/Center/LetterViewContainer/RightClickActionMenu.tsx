@@ -8,7 +8,7 @@ import {EditorConstants, LetterState} from "../../../../../constants/editor";
 import {EditorUtils} from "../../../../../utils/editor";
 import {
 	setDialogType,
-	setEditorSelectedItem,
+	setEditorSelectedItem, setNodeClicked,
 	setReloadLetterContent
 } from "../../../../../redux/slices/editor.letter.slice";
 import {enqueueSnackbar} from "notistack";
@@ -57,41 +57,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 	}, [props.xmlContentRef]);
 
 
-	const menuItemsNoMarking : MenuItemType[] = [
-		{ label: 'Eintrag Entfernen', action: async ({ node }: { node?: Node }) => {
-				try {
-					if (!node) throw new Error("No node given as value")
 
-					const anchNode = EditorUtils.removeNodeHandles.findAnchestorPathNode(node)
-
-					if (!anchNode) throw new Error("No anchNode found with given path")
-
-					const xmlContent =
-						EditorUtils.removeNodeHandles.removeNode(
-							node,
-							anchNode.afterDeleteCallback,
-						);
-
-					if (!xmlContent) throw new Error("No xml content found");
-
-					const result = await EditorUtils.backendService.patchContent(
-						xmlContent,
-						stateEditorLetter.id,
-						EditorConstants.changeTypes.NODE_REMOVED,
-						null,
-					)
-					if (result) {
-
-						dispatch(setReloadLetterContent({ reloadLetterContent: true }))
-						enqueueSnackbar(`${anchNode.nodeType.name} wurde entfernt`, { variant: "success" })
-					} else {
-						enqueueSnackbar("Data could not be updated on backend side", { variant: "error" })
-					}
-				} catch(error) {
-					enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
-				}
-			} },
-	]
 
 	const handleMenuItemClick = (selectedItemLeft: string | null, selectedItemRight: string | null) => {
 		props.setAnchorPosition(null)
@@ -128,19 +94,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 			useFallBack = false;
 		}
 
-		const handleContextMenuNodeClicked = (event: MouseEvent) => {
-			event.preventDefault(); // Prevent default context menu
-			props.setAnchorPosition({ top: event.clientY, left: event.clientX });
-		}
-
-
-		if (nodeClicked) {
-			contextMenuElement.addEventListener("contextmenu", handleContextMenuNodeClicked);
-			useFallBack = false
-		}
-
 		if (useFallBack) {
-			console.log("138 useFallBack: ", useFallBack)
 			if (xmlContentRef.current !== null) {
 				removeMarkedSpans(xmlContentRef.current);
 				props.setLetterState({
@@ -149,8 +103,16 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 				})
 			}
 		}
-	}, [contentTextIsMarked, nodeClicked]);
 
+		return () => {
+			if (contentTextIsMarked) {
+				contextMenuElement.removeEventListener(
+					"contextmenu",
+					handleContextMenuTextIsMarked
+				);
+			}
+		};
+	}, [contentTextIsMarked ]);
 
 	const handleMouseUpMarkedElements = (event: MouseEvent) => {
 		const selection = window.getSelection();
@@ -173,7 +135,6 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 					setDisplayMenuItems(menuItems);
 				},
 				(message: string) => {
-					console.log("189 handleMouseUpMarkedElements: ", message);
 					EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
 					props.setLetterState({
 						viewMode: "WYSIWYG",
@@ -192,34 +153,176 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 		}
 	};
 
+	const menuItemsNoMarking : MenuItemType[] = [
+		{
+			identifier: EditorConstants.menuItemTypes.DELETE_NODE, label: 'Eintrag Entfernen', action: async ({ node }: { node?: Node }) => {
+				try {
+					if (!node) throw new Error("No node given as value")
+
+					const anchNode = EditorUtils.rightClickPathHandles.findAnchestorPathNode(node)
+
+					if (!anchNode) throw new Error("No anchNode found with given path")
+
+					const xmlContent =
+						EditorUtils.rightClickPathHandles.removeNode(
+							node,
+							anchNode.afterActionCallback,
+						);
+
+					if (!xmlContent) throw new Error("No xml content found");
+
+					const result = await EditorUtils.backendService.patchContent(
+						xmlContent,
+						stateEditorLetter.id,
+						EditorConstants.changeTypes.NODE_REMOVED,
+						null,
+					)
+					if (result) {
+
+						dispatch(setReloadLetterContent({ reloadLetterContent: true }))
+						enqueueSnackbar(`${anchNode.nodeType.name} wurde entfernt`, { variant: "success" })
+					} else {
+						enqueueSnackbar("Data could not be updated on backend side", { variant: "error" })
+					}
+				} catch(error) {
+					enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+				}
+			}
+		},
+		{
+			identifier: EditorConstants.menuItemTypes.MANAGE_WRITER_AUTHOR_HEADER, label: 'Autoren/Schreiber Verwalten', action: async ({node}: { node?: Node }) => {
+				try {
+					if (!node) throw new Error("No node given as value")
+
+					dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER}))
+
+				} catch (error) {
+					enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), {variant: "error"});
+				}
+			}
+		},
+		{
+			identifier: EditorConstants.menuItemTypes.MANAGE_RECEIVER, label: 'Empfänger Verwalten', action: async ({node}: { node?: Node }) => {
+				try {
+					if (!node) throw new Error("No node given as value")
+
+					dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER}))
+
+				} catch (error) {
+					enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), {variant: "error"});
+				}
+			}
+		}
+	]
+
+
+	useEffect(() => {
+		const contextMenuElement = xmlContentRef.current // xmlRef of letter container
+		if (!contextMenuElement) return;
+
+		const handleContextMenuNodeClicked = (event: MouseEvent) => {
+			event.preventDefault(); // Prevent default context menu
+			props.setAnchorPosition({ top: event.clientY, left: event.clientX });
+		}
+
+		if (nodeClicked) {
+			contextMenuElement.addEventListener("contextmenu", handleContextMenuNodeClicked);
+		}
+
+		return () => {
+			contextMenuElement.removeEventListener(
+				"contextmenu",
+				handleContextMenuNodeClicked
+			);
+		};
+
+	}, [nodeClicked]);
+
+
 	const handleNoMarkupRightClick = (event: MouseEvent) => {
 		if (event.button !== 2) return; // Only right-click
+		event.preventDefault();
 
-		EditorUtils.xmlCheck.isADeletableNode(
+		const menuItemsToAdd : MenuItemType[] = []
+		const isClickableNode : boolean[] = []
+
+		EditorUtils.xmlCheck.isNodeMatchingPath(
 			event.target as Node,
+			EditorUtils.rightClickPathHandles.deletableAnchestorPaths(),
 			(node: Node) => {
-
-				event.preventDefault();
 
 				EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
 				setSelectedNode(node)
-				setDisplayMenuItems(menuItemsNoMarking);
-				props.setLetterState({
-					viewMode: "WYSIWYG",
-					xmlContent: xmlContentRef.current?.innerHTML ?? ""
-				})
 
-				dispatch(setEditorNodeClickedAndContentLeftRightThunk({
-					nodeClicked: true,
-					textIsMarked: false,
-					contentLeft: null,
-					contentRight: null
-				}));
+
+				const itemToAdd = menuItemsNoMarking.find(
+					item => item.identifier === EditorConstants.menuItemTypes.DELETE_NODE
+				);
+
+				if (itemToAdd) {
+					menuItemsToAdd.push(itemToAdd);
+					setDisplayMenuItems([ ...displayMenuItems, itemToAdd]);
+					isClickableNode.push(true);
+				}
 			},
 			(message: string) => {
-				// If the node is not deletable, we can do anything we want, e.g. show a message
+				isClickableNode.push(false);
 			}
 		);
+		EditorUtils.xmlCheck.isNodeMatchingPath(
+			event.target as Node,
+			EditorUtils.rightClickPathHandles.manageAuthorWriterAnchestorPaths(),
+			(node: Node) => {
+				const itemToAdd = menuItemsNoMarking.find(
+					item => item.identifier === EditorConstants.menuItemTypes.MANAGE_WRITER_AUTHOR_HEADER
+				);
+				if (itemToAdd) {
+					menuItemsToAdd.push(itemToAdd);
+					isClickableNode.push(true);
+				}
+			},
+			(message: string) => {
+				isClickableNode.push(false);
+			}
+		)
+
+		EditorUtils.xmlCheck.isNodeMatchingPath(
+			event.target as Node,
+			EditorUtils.rightClickPathHandles.manageReceiverAnchestorPaths(),
+			(node: Node) => {
+				const itemToAdd = menuItemsNoMarking.find(
+					item => item.identifier === EditorConstants.menuItemTypes.MANAGE_RECEIVER
+				);
+				if (itemToAdd) {
+					menuItemsToAdd.push(itemToAdd);
+					isClickableNode.push(true);
+				}
+			},
+			(message: string) => {
+				isClickableNode.push(false);
+			}
+		)
+
+
+		if (isClickableNode.filter((entry) => entry ).length > 0) {
+			props.setLetterState({
+				viewMode: "WYSIWYG",
+				xmlContent: xmlContentRef.current?.innerHTML ?? ""
+			})
+
+			dispatch(setEditorNodeClickedAndContentLeftRightThunk({
+				nodeClicked: true,
+				textIsMarked: false,
+				contentLeft: null,
+				contentRight: null
+			}));
+
+			setDisplayMenuItems([ ...displayMenuItems, ...menuItemsToAdd]);
+
+		} else {
+			props.setAnchorPosition(null)
+			dispatch(setNodeClicked({nodeClicked: false}));
+		}
 	};
 
 	const handleCloseAll = () => {

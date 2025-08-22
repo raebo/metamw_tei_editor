@@ -20,6 +20,8 @@ import AddNewLetterDialog from './Components/AddNewLetterDialog';
 import PublishLetterDialog from './Components/PublishLetterDialog';
 import ChooseGbLetterDialog from './Components/AssignLetterDialog/ChooseGbLetterDialog';
 import ChooseProtagLetterDialog from './Components/AssignLetterDialog/ChooseProtagLetterDialog';
+import ManageTeiHeaderAuthorWriterDialog from "./Components/ManageTeiHeaderAuthorWriterDialog";
+import ManageTeiHeaderReceiverDialog from "./Components/ManageTeiHeaderReceiverDialog";
 
 interface EditorFormDialogProps {
   open: boolean
@@ -78,6 +80,8 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.ADD_NEW_LETTER]: "Neuen Brief Hinzufügen",
     [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: "Verweis an einen Brief an den Protagonisten Hinzufügen",
     [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: "Verweis an einen Brief vom Protagonisten Hinzufügen",
+		[EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER]: "Autoren/Schreiber Verwalten",
+		[EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: "Empfänger Verwalten",
   }
 
   const DialogContentComponents : Record<string, React.ReactNode> = {
@@ -94,6 +98,8 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: <AttachmentAddDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_WRITING_PART]: <AddWritingActDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_TEI_HEADER]: <ManageTeiHeaderDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} />,
+		[EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER]: <ManageTeiHeaderAuthorWriterDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} />,
+		[EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: <ManageTeiHeaderReceiverDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_NEW_LETTER]: <AddNewLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: <ChooseGbLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: <ChooseProtagLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,

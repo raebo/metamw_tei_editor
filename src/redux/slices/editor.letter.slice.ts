@@ -112,9 +112,8 @@ const EditorLetterSlice = createSlice({
     setContentTextIsMarked(state, action) {
       state.content.textIsMarked = action.payload.textIsMarked
     },
-
     setNodeClicked(state, action) {
-      state.content.nodeClicked= action.payload.nodeClicked
+      state.content.nodeClicked = action.payload.nodeClicked
     },
     setEditorSelectedItem(state, action) {
       state.selectedItem = {...action.payload.selectedItem}
