@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchAutoAnnoLetter } from "../../services/auto_anno/apiAutoAnno.service";
 import { enqueueSnackbar } from "notistack";
-import XMLDisplayParser from "../support/XmlDisplayParser";
+import XMLDisplayParser from "../editor/letter/Center/LetterViewContainer/XmlDisplayParser";
 import { RootState } from "../../redux/redux.store";
 import {  useSelector } from "react-redux";
 import AutoAnnoSnippetList from "./AutoAnnoSnippetList";
@@ -196,7 +196,7 @@ const AutoAnnoLettersResizable: React.FC = () => {
         <Box sx={{ width: `${box1Width}px`, bgcolor: "#f5f5f5", p: 2, borderRight: "1px solid #ddd" }}>
           {transformedData?.xmlContent ? (
             <div className="letter-xml letter-xml--auto-anno" id="letterXml" ref={containerRef}>
-              <XMLDisplayParser xmlString={transformedData.xmlContent}/>;
+              <XMLDisplayParser xmlContentRef={null} xmlString={transformedData.xmlContent}/>;
             </div>
             ) : (
             <p>

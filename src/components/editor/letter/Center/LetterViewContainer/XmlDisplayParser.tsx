@@ -1,10 +1,17 @@
-import React from "react";
+import React, {useEffect} from "react";
 
-const XMLDisplayParser: React.FC<{ xmlString: string }> = ({ xmlString }) => {
+type XmlDisplayParserProps = {
+	xmlContentRef: React.RefObject<HTMLDivElement> | null;
+	xmlString: string;
+	onRightClickMarked?: (pos: { top: number; left: number }) => void | null;
+};
+
+
+const XMLDisplayParser = (props: XmlDisplayParserProps)  => {
 
   const parseXml = (xmlString: string) => {
     const parser = new DOMParser();
-    
+
     return parser.parseFromString(xmlString, "application/xml");
   };
 
@@ -48,11 +55,40 @@ const XMLDisplayParser: React.FC<{ xmlString: string }> = ({ xmlString }) => {
     return null;
   };
 
+	const handleNativeContextMenu = (event: MouseEvent) => {
+		const target = event.target as HTMLElement;
+		if (target?.tagName.toLowerCase() === "span" && target.classList.contains("marked")) {
+			event.preventDefault();
+			props.onRightClickMarked?.({ top: event.clientY, left: event.clientX });
+		}
+	};
 
-  const doc = parseXml(xmlString);
+	const handleReactContextMenu = (event: React.MouseEvent) => {
+		event.preventDefault();
+		handleNativeContextMenu(event.nativeEvent); // delegate to native handler
+	};
+
+
+	useEffect(() => {
+		if (!props.xmlContentRef || !props.xmlContentRef.current) return;
+
+		const container = props.xmlContentRef.current;
+
+		container.addEventListener("contextmenu", handleNativeContextMenu);
+		return () => {
+			container.removeEventListener("contextmenu", handleNativeContextMenu);
+		};
+	}, []);
+
+
+	const containerProps = props.xmlContentRef && props.xmlContentRef.current
+		? { onContextMenu: handleReactContextMenu }
+		: {};
+
+  const doc = parseXml(props.xmlString);
   const root = doc.documentElement;
 
-  return <>{renderNode(root)}</>;
+	return <div {...containerProps}>{renderNode(root)}</div>;
 };
 
 export default XMLDisplayParser;

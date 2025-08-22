@@ -9,6 +9,10 @@ export enum EntityType {
 
 export type EditorDateType  = "when" | "when-custom" | "notAfter" | "notBefore" | "from-to" | "notBefore-notAfter"
 export type DateCertainty = "high" | "medium" | "low";
+export type LetterState = {
+	viewMode: "CODE" | "WYSIWYG" | null;
+	xmlContent: string | null;
+};
 
 const languageMap = {
 	de: "Deutsch",

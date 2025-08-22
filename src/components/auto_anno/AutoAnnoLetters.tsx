@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchAutoAnnoLetter, patchAutoAnnoLetterLockingUser } from "../../services/auto_anno/apiAutoAnno.service";
 import { enqueueSnackbar } from "notistack";
-import XMLDisplayParser from "../support/XmlDisplayParser";
+import XMLDisplayParser from "../editor/letter/Center/LetterViewContainer/XmlDisplayParser";
 import { RootState } from "../../redux/redux.store";
 import {  useSelector } from "react-redux";
 import AutoAnnoSnippetList from "./AutoAnnoSnippetList";
@@ -137,12 +137,12 @@ const AutoAnnoLetters: React.FC = () => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reloadLetter, dispatch]);
-  
+
   useEffect(() => {
     const listKey = snippetReferences.showReferences ? "REFERENCE_LIST" : "SNIPPET_LIST";
     setSelectedComponentList(componentMappingList[listKey]);
   }, [snippetReferences.showReferences, componentMappingList]);
-  
+
   const containerRef = React.useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -169,7 +169,7 @@ const AutoAnnoLetters: React.FC = () => {
         <div className="box-1">
           {transformedData?.xmlContent ? (
             <div className="letter-xml" id="letterXml" ref={containerRef} style={{ fontSize: `${stateLetterFontSize}%` }}>
-              <XMLDisplayParser xmlString={transformedData.xmlContent}/>;
+              <XMLDisplayParser xmlContentRef={null} xmlString={transformedData.xmlContent} />;
             </div>
           ) : (
             <p>
