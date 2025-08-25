@@ -6,6 +6,7 @@ interface EditorLetterSlice {
     id: number | null
     name: string | null
     viewMode: 'CODE' | 'WYSIWYG' | null
+		xmlContent: string | null
   },
   tabLetter: {
     id: number | null
@@ -39,7 +40,8 @@ const initialState: EditorLetterSlice = {
   letter: {
     id: null,
     name: null,
-    viewMode: null
+    viewMode: null,
+		xmlContent: null
   },
   tabLetter: {
     id: null,
@@ -54,7 +56,7 @@ const initialState: EditorLetterSlice = {
   searchValue: null,
   content: {
     nodeClicked: false,
-    textIsMarked: false
+    textIsMarked: false,
   },
   selectedItem: {
     left: null,
@@ -89,6 +91,9 @@ const EditorLetterSlice = createSlice({
     setReloadLetterContent(state, action) {
       state.reloadLetterContent = action.payload.reloadLetterContent
     },
+		setXmlLetterContent(state, action) {
+			state.letter.xmlContent = action.payload.content.xmlContent
+		},
     setEditorTabNumber(state, action) {
       state.tabNumber = action.payload.tabNumber
     },
@@ -139,6 +144,7 @@ export const
     setEditorPinnedLetters,
     setEditorPinnedLetterViewMode,
     setReloadLetterContent,
+		setXmlLetterContent,
     setDialogType,
     setLetterReference,
     setNodeClicked,

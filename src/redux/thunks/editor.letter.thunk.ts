@@ -1,16 +1,16 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
-  disableChangeLetterViewMode,
-  enableChangeLetterViewMode,
-  setContentTextIsMarked,
-  setDialogType,
-  setEditorLetter,
-  setEditorPinnedLetters,
-  setEditorPinnedLetterViewMode,
-  setEditorSelectedItem,
-  setEditorTabNumber,
-  setLetterReference,
-  setNodeClicked, setReloadLetterContent,
+	disableChangeLetterViewMode,
+	enableChangeLetterViewMode,
+	setContentTextIsMarked,
+	setDialogType,
+	setEditorLetter,
+	setEditorPinnedLetters,
+	setEditorPinnedLetterViewMode,
+	setEditorSelectedItem,
+	setEditorTabNumber,
+	setLetterReference,
+	setNodeClicked, setReloadLetterContent, setXmlLetterContent,
 } from '../slices/editor.letter.slice';
 import { PinnedLetter } from '../../services/mappings/editorMappings';
 
@@ -143,3 +143,21 @@ export const setEditorDialogAndReferenceThunk = createAsyncThunk(
     );
   },
 );
+
+export const setReloadXmlContentLetterThunk = createAsyncThunk(
+	'editor/setReloadXmlContentLetter',
+	async (
+		{
+			reloadLetterContent,
+			xmlContent
+		} : {
+			reloadLetterContent: boolean,
+			xmlContent: string | null
+		},
+		{ dispatch }
+
+	) => {
+		dispatch(setReloadLetterContent({ reloadLetterContent: reloadLetterContent }))
+		dispatch(setXmlLetterContent({ content: { xmlContent: xmlContent } }) )
+	}
+)

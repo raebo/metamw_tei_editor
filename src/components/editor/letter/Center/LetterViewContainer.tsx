@@ -5,13 +5,11 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/redux.store";
 import { Alert } from "@mui/material";
 import { useAppDispatch } from "../../../../redux/hooks";
-import {
-  setReloadLetterContent
-} from "../../../../redux/slices/editor.letter.slice";
 import { LetterState } from "../../../../constants/editor";
 import { fetchPinnedLetterData } from "../../../../services/editor/apiPinnedLettersRequest.service";
 import LetterViewCode from './LetterViewCode';
 import RightClickActionMenu from "./LetterViewContainer/RightClickActionMenu";
+import {setReloadXmlContentLetterThunk} from "../../../../redux/thunks/editor.letter.thunk";
 
 const LetterViewContainer = () => {
   const dispatch = useAppDispatch();
@@ -75,14 +73,26 @@ const LetterViewContainer = () => {
   }, [stateEditorLetter]);
 
   useEffect(() => {
+		const reloadNewData = async () => {
+			if (stateEditorLetter.id === null) return;
+
+			const xml = await pinnedLetterData(stateEditorLetter.id)
+
+			setLetterState({
+				viewMode: stateEditorLetter.viewMode,
+				xmlContent: xml
+			})
+
+			dispatch(
+				setReloadXmlContentLetterThunk({
+					reloadLetterContent: false,
+					xmlContent: xml
+				})
+			)
+		}
+
     if (reloadLetterContent && stateEditorLetter?.id !== null) {
-      pinnedLetterData(stateEditorLetter.id).then(xml => {
-        setLetterState({
-          viewMode: stateEditorLetter.viewMode,
-          xmlContent: xml
-        })
-      })
-      dispatch(setReloadLetterContent({ reloadLetterContent: false }))
+			reloadNewData()
     }
   }, [reloadLetterContent]);
 
