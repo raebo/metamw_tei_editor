@@ -14,6 +14,11 @@ export type LetterState = {
 	xmlContent: string | null;
 };
 
+export type HeaderAuthorWriter = {
+	name: string;
+	key: string;
+}
+
 const languageMap = {
 	de: "Deutsch",
 	en: "Englisch",

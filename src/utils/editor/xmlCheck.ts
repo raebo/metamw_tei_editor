@@ -3,6 +3,18 @@ import React from 'react';
 import {NodeAnchestorPath} from "./rightClickPathHandles";
 
 export const xmlCheck = {
+	extractTeiDocumentFromString: (xmlString: string|  null) : XMLDocument => {
+		if (!xmlString) throw new Error("XML string is null");
+
+		const parser = new DOMParser();
+		const xmlDoc = parser.parseFromString(xmlString, "application/xml") as unknown as XMLDocument;
+
+		if (xmlDoc.getElementsByTagName("parsererror").length) {
+			throw new Error("Error parsing XML: " + xmlDoc.getElementsByTagName("parsererror")[0].textContent);
+		}
+
+		return xmlDoc;
+	},
   xmlLetterDate: (
     xmlRef: React.RefObject<HTMLDivElement>
   ) : string => {

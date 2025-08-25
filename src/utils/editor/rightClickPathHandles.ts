@@ -42,6 +42,18 @@ export namespace rightClickPathHandles {
 			},
 			afterActionCallback: () => "",
 		},
+		{
+			parentPath: "tei teiheader filedesc titlestmt author",
+			nodeType: nodeTypes.get(NodeTypes.AUTHOR),
+			checkElementDetails: () => true,
+			afterActionCallback: () => "",
+		},
+		{
+			parentPath: "tei teiheader filedesc titlestmt respstmt persname",
+			nodeType: nodeTypes.get(NodeTypes.PERSON),
+			checkElementDetails: () => true,
+			afterActionCallback: () => "",
+		},
 	];
 
 	export const manageReceiverAnchestorPaths = (): NodeAnchestorPath[] => [

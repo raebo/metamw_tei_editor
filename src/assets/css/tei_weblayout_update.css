@@ -71,34 +71,43 @@ div [type="act_of_writing"] {
 
 
 
-teiheader {
-   filedesc {
-     titlestmt {
-        respstmt {
+teiHeader {
+   fileDesc {
+     titleStmt {
+         author {
+             display: block;
+             font-weight: bold;
+             cursor: pointer;
+         }
+        respStmt {
             display: block;
             name {
                 display: inline-block;
                 font-weight: bold;
+                cursor: pointer;
             }
             resp {
                 display: inline-block;
                 font-style: italic;
             }
+            persname {
+                cursor: pointer;
+            }
         }
      }
-   profiledesc {
-     correspdesc {
-         correspaction {
-             persname {
+   profileDesc {
+     correspDesc {
+         correspAction {
+             persName {
              }
          }
      }
    }
-   sourcedesc {
-     msdesc {
-        physdesc {
-           accmat {
-              listbibl {
+   sourceDesc {
+     msDesc {
+        physDesc {
+           accMat {
+              listBibl {
                  bibl {
                     cursor: pointer;
                  }

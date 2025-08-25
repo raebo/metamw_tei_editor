@@ -55,29 +55,40 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 	const dispatch = useAppDispatch();
   const [displayData] = React.useState<{ [key: string]:string}|null>(null)
 	const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
+	const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
+
 	const [formIsValid, setFormIsValid] = React.useState<boolean>(false);
 
-	const { teiHeader } = React.useMemo(() => {
-		try {
-			const xmlDoc = EditorUtils.xmlCheck.extractXmlByRef(props.xmlRef);
-			if (!xmlDoc) throw new Error("Failed to parse XML");
+	const [parsedXml, setParsedXml] = React.useState<{
+		xmlDoc: XMLDocument | null;
+		teiHeader: Element | null;
+	}>({ xmlDoc: null, teiHeader: null });
 
-			const ns = "http://www.tei-c.org/ns/1.0";
-			const header = xmlDoc.getElementsByTagNameNS(ns, "teiheader")[0];
-
-			if (!header ) throw new Error("<teiHeader> not found");
-
-			return { xmlDoc, teiHeader: header };
-		} catch (error) {
-			enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
-			return { xmlDoc: null, teiHeader: null };
+	React.useEffect(() => {
+		if (!stateTeiXml) {
+			dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+			return;
 		}
-	}, [props.xmlRef]);
 
-	if (!teiHeader) {
-		enqueueSnackbar("Fehler beim Laden des TEI-Headers", { variant: "error" });
-		return null;
-	}
+		try {
+			const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
+			const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(xmlDoc);
+			setParsedXml({ xmlDoc, teiHeader });
+		} catch (err) {
+			enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: "error" });
+			setParsedXml({ xmlDoc: null, teiHeader: null });
+		}
+	}, [stateTeiXml, dispatch]);
+
+	const { xmlDoc, teiHeader } = parsedXml;
+
+	// if(!xmlDoc) {
+	// 	enqueueSnackbar("Invalid XML document", { variant: "error" });
+	// }
+	//
+	// if (!teiHeader) {
+	// 	enqueueSnackbar("No TEI header found in the document", { variant: "error" });
+	// }
 
   const [completionState, setCompletionState] = React.useState<CompletionState>({
     firstHeaderComplete: false, firstHeaderContent: null,
@@ -123,7 +134,7 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 
 	const writeHeaderData = () : boolean => {
 		if (teiHeader === null) {
-			enqueueSnackbar("TEI-Header ist nicht verfügbar", {variant: "error"});
+			enqueueSnackbar("TEI-Header ist nicht verfügbar", { variant: "error" });
 			return false;
 		}
 
@@ -150,10 +161,16 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 
 	const submitSaveHandler = async () => {
 		try {
+
+			if(!xmlDoc || !teiHeader) {
+				enqueueSnackbar("Ungültiges XML-Dokument oder kein TEI-Header gefunden", { variant: "error" });
+				return;
+			}
+
 			writeHeaderData()
 
 			const serializer = new XMLSerializer();
-			const updatedXml = serializer.serializeToString(teiHeader);
+			const updatedXml = serializer.serializeToString(xmlDoc);
 
 			const result = await EditorUtils.backendService.patchContent(
 				updatedXml, stateEditorLetter.id, EditorConstants.changeTypes.misc.HEADER_UPDATED, null)

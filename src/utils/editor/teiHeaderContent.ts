@@ -1,4 +1,4 @@
-import {EditorConstants, LanguageOption} from "../../constants/editor";
+import {EditorConstants, HeaderAuthorWriter, LanguageOption} from "../../constants/editor";
 import { EditorLetter } from "../../services/mappings/editorMappings";
 import { SnippetEntity } from "../../services/mappings/autoAnnoMappings";
 
@@ -37,8 +37,14 @@ function queryPath(root: Element, path: string): Element[] {
 
 	return elements;
 }
-
 export const teiHeaderContent = {
+	extractTeiHeader: (xmlDoc: Document): Element => {
+		const teiHeader = xmlDoc.getElementsByTagNameNS(TEI_NS, "teiHeader")[0];
+
+		if (!teiHeader) throw new Error("<teiHeader> not found");
+
+		return teiHeader
+	},
 	titleElementHeadlines : (teiHeader: Element | null): { firstHeadline: string | null, sndHeadline: string | null } => {
 		if (!teiHeader) {
 			return { firstHeadline: null, sndHeadline: null };
@@ -48,7 +54,7 @@ export const teiHeaderContent = {
 		let textAfterLb = "";
 		let foundLb = false;
 
-		const titles = queryPath(teiHeader, "filedesc > titlestmt > title")
+		const titles = queryPath(teiHeader, "fileDesc > titleStmt > title")
 		const children = Array.from(titles[0].childNodes);
 
 		children.forEach(node => {
@@ -70,7 +76,7 @@ export const teiHeaderContent = {
 		return { firstHeadline: textBeforeLb, sndHeadline: textAfterLb };
 	},
 	setTitleElementHeadlines : (teiHeader: Element, firstHeadline: string | null, sndHeadline: string | null): void => {
-		const titles = queryPath(teiHeader, "filedesc > titlestmt > title");
+		const titles = queryPath(teiHeader, "fileDesc > titleStmt > title");
 		const children = Array.from(titles[0].childNodes);
 		let foundLb = false
 
@@ -87,7 +93,7 @@ export const teiHeaderContent = {
 		})
 	},
 	setPrevNextLetter : (teiHeader: Element, titleType: 'precursor' | 'successor', letterType: 'unknown' | 'not_identified' | 'select' | null, editorLetter: EditorLetter | null): void => {
-		const titles = queryPath(teiHeader, `filedesc > titlestmt > title[@type='${titleType}']`)
+		const titles = queryPath(teiHeader, `fileDesc > titleStmt > title[@type='${titleType}']`)
 
 		if (titles.length === 0) { throw new Error("No title headline found for type: " + titleType); }
 
@@ -109,7 +115,7 @@ export const teiHeaderContent = {
 			return { title: null, name: null, letterPrefix: null, letterStatus: null };
 		}
 
-		const titles = queryPath(teiHeader, `filedesc > titlestmt > title[@type='${titleType}']`)
+		const titles = queryPath(teiHeader, `fileDesc > titleStmt > title[@type='${titleType}']`)
 
 		if (titles.length === 0) return { title: null, name: null, letterPrefix: null, letterStatus: null };
 
@@ -143,7 +149,7 @@ export const teiHeaderContent = {
 	extractWritingPlace : (teiHeader: Element | null): { name: string | null, key: string | null } => {
 		if (!teiHeader) { return { name: null, key: null }; }
 
-		const writingPlaceElements = queryPath(teiHeader, 'profiledesc > correspdesc > correspaction[1] > placename > settlement');
+		const writingPlaceElements = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[1] > placeName > settlement');
 		if (writingPlaceElements.length > 0) {
 			const writingPlace = writingPlaceElements[0].textContent?.trim();
 			return { name: writingPlace || null , key: writingPlaceElements[0].getAttribute('data-key') || null };
@@ -154,14 +160,14 @@ export const teiHeaderContent = {
 	setWritingPlace: (teiHeader: Element, settlement: SnippetEntity | null ): void => {
 		if (!settlement) { return; }
 
-		const writingPlaceElements = queryPath(teiHeader, 'profiledesc > correspdesc > correspaction[1] > placename > settlement');
+		const writingPlaceElements = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[1] > placeName > settlement');
 
 		if (writingPlaceElements.length > 0) {
 			writingPlaceElements[0].textContent = settlement.entityName || '';
 			writingPlaceElements[0].setAttribute('data-key', settlement.entityKey || '');
 		}
 
-		const countryElements = queryPath(teiHeader, 'profiledesc > correspdesc > correspaction[1] > placename > country');
+		const countryElements = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[1] > placeName > country');
 
 		if (countryElements.length > 0) {
 			countryElements[0].textContent = settlement.entityPlaceCountryName || '';
@@ -170,7 +176,7 @@ export const teiHeaderContent = {
 	extractReceivingPlace : (teiHeader: Element | null) : { name: string | null, key: string | null } => {
 		if (!teiHeader) { return { name: null, key: null }; }
 
-		const receivingPlaceElements = queryPath(teiHeader, 'profiledesc > correspdesc > correspaction[2] > placename > settlement');
+		const receivingPlaceElements = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2] > placeName > settlement');
 		if (receivingPlaceElements.length > 0) {
 			const receivingPlace = receivingPlaceElements[0].textContent?.trim();
 			return { name: receivingPlace || null, key: receivingPlaceElements[0].getAttribute('data-key') || null };
@@ -181,14 +187,14 @@ export const teiHeaderContent = {
 	setReceivingPlace: (teiHeader: Element, settlement: SnippetEntity | null ): void => {
 		if (!settlement) { return; }
 
-		const receivingPlaceElements = queryPath(teiHeader, 'profiledesc > correspdesc > correspaction[2] > placename > settlement');
+		const receivingPlaceElements = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2] > placeName > settlement');
 
 		if (receivingPlaceElements.length > 0) {
 			receivingPlaceElements[0].textContent = settlement.entityName || '';
 			receivingPlaceElements[0].setAttribute('data-key', settlement.entityKey || '');
 		}
 
-		const countryElements = queryPath(teiHeader, 'profiledesc > correspdesc > correspaction[2] > placename > country');
+		const countryElements = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2] > placeName > country');
 		if (countryElements.length > 0) {
 			countryElements[0].textContent = settlement.entityPlaceCountryName || '';
 		}
@@ -198,7 +204,7 @@ export const teiHeaderContent = {
 		if( !teiHeader) {
 			return { name: null, key: null }; }
 
-		const receiverElements = queryPath(teiHeader, 'profiledesc > correspdesc > correspaction[2] > persname');
+		const receiverElements = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2] > persname');
 		if (receiverElements.length > 0) {
 			const receiverName = receiverElements[0].textContent?.trim();
 			return { name: receiverName || null, key: receiverElements[0].getAttribute('data-key') || null };
@@ -206,8 +212,112 @@ export const teiHeaderContent = {
 
 		return { name: null, key: null };
 	},
+	extractAuthorWriters: (teiHeader: Element | null): { authors: HeaderAuthorWriter[], writers: HeaderAuthorWriter[] } => {
+		if( !teiHeader) { return { authors: [], writers: [] }; }
+
+		const autors: HeaderAuthorWriter[] = [];
+		const writer: HeaderAuthorWriter[] = [];
+
+		if( !teiHeader) { return { authors: autors, writers: writer }; }
+
+		const correspAction = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[1]')[0];
+
+		const writerAuthorElements = Array.from(correspAction.children).filter(el =>
+			el.tagName === 'persName')
+
+		if (writerAuthorElements.length > 0) {
+			writerAuthorElements.forEach(el => {
+				const resp = el.getAttribute('resp');
+				const dataKey = el.getAttribute('data-key');
+				const name = el.textContent?.trim() || '';
+
+				if (resp === 'author' && dataKey) {
+					autors.push({ name: name, key: dataKey });
+				} else if (resp === 'writer' && dataKey) {
+					writer.push({ name: name, key: dataKey });
+				}
+			});
+		}
+
+		return { authors: autors, writers: writer };
+	},
+	setAuthorWritersFirstPosition: (teiHeader: Element, authors: HeaderAuthorWriter[], writers: HeaderAuthorWriter[]): void => {
+		const doc = teiHeader.ownerDocument;
+		const titleStmt = teiHeader.querySelector("titleStmt");
+		if (!titleStmt) {
+			throw new Error("Unable to set author/writer - no <titleStmt> found");
+		}
+
+		const firstRespStmt = titleStmt.querySelector("respStmt");
+		if (!firstRespStmt) {
+			throw new Error(`Unable to set author stmt for ${titleStmt} - no <respStmt> found`);
+		}
+		let writerResp = firstRespStmt.querySelector("resp");
+		const insertBeforeNode = firstRespStmt || null;
+
+		if (!writerResp) {
+			writerResp = doc.createElement("resp");
+			writerResp.textContent = "writer";
+			firstRespStmt.appendChild(writerResp);
+		}
+
+		Array.from(titleStmt.querySelectorAll("author")).forEach(node =>
+			node.remove()
+		);
+
+		Array.from(titleStmt.querySelectorAll("respStmt > persName")).forEach(node =>
+			node.remove()
+		);
+
+		authors.forEach(a => {
+			const authorEl = doc.createElement("author");
+			authorEl.setAttribute("key", a.key);
+			authorEl.setAttribute("resp", "author");
+			authorEl.textContent = a.name;
+
+			titleStmt.insertBefore(authorEl, insertBeforeNode);
+		});
+
+		writers.forEach(w => {
+			const persNameEl = doc.createElement("persName");
+			persNameEl.setAttribute("key", w.key);
+			persNameEl.setAttribute("resp", "writer");
+			persNameEl.textContent = w.name;
+			writerResp.parentNode!.appendChild(persNameEl);
+		});
+
+	},
+	setAuthorsWritersSndPosition: (teiHeader: Element, authors: HeaderAuthorWriter[], writers: HeaderAuthorWriter[]): void => {
+		const doc = teiHeader.ownerDocument as unknown as XMLDocument;
+		const sndAuthorsWriters = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[1]')[0];
+
+		Array.from(sndAuthorsWriters.childNodes).forEach(node => {
+			if (node.nodeType === Node.ELEMENT_NODE && (node as Element).nodeName === 'persName') {
+				sndAuthorsWriters.removeChild(node);
+			}
+		})
+
+		authors.forEach(a => {
+			const authorEl = doc.createElement("persName");
+			authorEl.setAttribute("key", a.key);
+			authorEl.setAttribute("resp", "author");
+			const textNode = doc.createTextNode(a.name);
+			authorEl.appendChild(textNode);
+			sndAuthorsWriters.appendChild(authorEl);
+		});
+
+		writers.forEach(a => {
+			const writerEl = doc.createElement("persName");
+			writerEl.setAttribute("key", a.key);
+			writerEl.setAttribute("resp", "writer");
+
+			const textNode = doc.createTextNode(a.name);
+			writerEl.appendChild(textNode);
+			sndAuthorsWriters.appendChild(writerEl);
+		});
+	},
 	setReceiver: (teiHeader: Element, receiver: SnippetEntity | null): void => {
-		const receiverStart = queryPath(teiHeader, 'profiledesc > correspdesc > correspaction[2]')[0];
+		const receiverStart = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2]')[0];
 
 		if (receiverStart && receiver) {
 
@@ -229,7 +339,7 @@ export const teiHeaderContent = {
 	extractLanguages: (teiHeader: Element | null): LanguageOption[] => {
 		if (!teiHeader) { return [] }
 
-		const languageElements = queryPath(teiHeader, 'profiledesc > langusage > language');
+		const languageElements = queryPath(teiHeader, 'profileDesc > langUsage > language');
 		const letterLanguages: LanguageOption[] = [];
 
 		if (languageElements.length === 0) { return letterLanguages; }
@@ -250,7 +360,7 @@ export const teiHeaderContent = {
 	setLanguages: (teiHeader: Element, languages: LanguageOption[]): void => {
 		if (!teiHeader) return;
 
-		const langUsageWrapper = queryPath(teiHeader, "profiledesc > langusage")[0];
+		const langUsageWrapper = queryPath(teiHeader, "profileDesc > langUsage")[0];
 		if (!langUsageWrapper) return;
 
 		// Remove old <language> children
@@ -277,7 +387,7 @@ export const teiHeaderContent = {
 			return { name: name }
 		}
 
-		const elements = queryPath(teiHeader, `filedesc > titlestmt > respstmt[@resp=\'${respStmtType}\'] > name`);
+		const elements = queryPath(teiHeader, `fileDesc > titleStmt > respStmt[@resp=\'${respStmtType}\'] > name`);
 
 		if (elements.length > 1) {
 			name = elements[elements.length-1].textContent?.trim() || null;
@@ -290,7 +400,7 @@ export const teiHeaderContent = {
 			return;
 		}
 
-		const elements = queryPath(teiHeader, `filedesc > titlestmt > respstmt[@resp=\'${respStmtType}\'] > name`);
+		const elements = queryPath(teiHeader, `fileDesc > titleStmt > respStmt[@resp=\'${respStmtType}\'] > name`);
 
 		const lastElement = elements[elements.length-1];
 

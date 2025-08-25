@@ -273,6 +273,9 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 			event.target as Node,
 			EditorUtils.rightClickPathHandles.manageAuthorWriterAnchestorPaths(),
 			(node: Node) => {
+
+				setSelectedNode(node)
+
 				const itemToAdd = menuItemsNoMarking.find(
 					item => item.identifier === EditorConstants.menuItemTypes.MANAGE_WRITER_AUTHOR_HEADER
 				);
@@ -290,6 +293,9 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 			event.target as Node,
 			EditorUtils.rightClickPathHandles.manageReceiverAnchestorPaths(),
 			(node: Node) => {
+
+				setSelectedNode(node)
+
 				const itemToAdd = menuItemsNoMarking.find(
 					item => item.identifier === EditorConstants.menuItemTypes.MANAGE_RECEIVER
 				);
@@ -302,7 +308,6 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 				isClickableNode.push(false);
 			}
 		)
-
 
 		if (isClickableNode.filter((entry) => entry ).length > 0) {
 			props.setLetterState({
