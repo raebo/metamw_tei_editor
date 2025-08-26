@@ -14,7 +14,7 @@ export type LetterState = {
 	xmlContent: string | null;
 };
 
-export type HeaderAuthorWriter = {
+export type HeaderPerson = {
 	name: string;
 	key: string;
 }

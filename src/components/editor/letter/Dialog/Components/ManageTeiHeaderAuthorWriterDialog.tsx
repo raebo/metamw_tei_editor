@@ -1,6 +1,6 @@
 import {DefaultDialogProps} from "../EditorFormDialog";
 import React, {useEffect, useMemo, useState} from 'react';
-import {EditorConstants, EntityType, HeaderAuthorWriter} from "../../../../../constants/editor";
+import {EditorConstants, EntityType, HeaderPerson} from "../../../../../constants/editor";
 import {EditorUtils} from "../../../../../utils/editor";
 import {enqueueSnackbar} from "notistack";
 import {MiscUtils} from "../../../../../utils/misc";
@@ -36,8 +36,8 @@ import {useAppDispatch} from "../../../../../redux/hooks";
 const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 
 	const dispatch = useAppDispatch();
-	const [authors, setAuthors] = React.useState<HeaderAuthorWriter[]>([]);
-	const [writers, setWriters] = React.useState<HeaderAuthorWriter[]>([]);
+	const [authors, setAuthors] = React.useState<HeaderPerson[]>([]);
+	const [writers, setWriters] = React.useState<HeaderPerson[]>([]);
 	const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
 	const [role, setRole] = useState<"author" | "writer">("author");
 	const [people, setPeople] = useState<SnippetEntity[]>([]);
@@ -90,8 +90,6 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 			}
 		};
 
-
-
 		if (teiHeader) {
 			try {
 				setAuthorWriterData();
@@ -120,7 +118,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 		[]
 	)
 
-	const handleInfoIconClick = async (reference: HeaderAuthorWriter) => {
+	const handleInfoIconClick = async (reference: HeaderPerson) => {
 		if (!reference.key) {
 			return;
 		}
@@ -132,7 +130,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 		}
 	};
 
-	const handleRemove = (type: "author" | "writer", reference: HeaderAuthorWriter) => {
+	const handleRemove = (type: "author" | "writer", reference: HeaderPerson) => {
 		if (type === "author") {
 			setAuthors(prev => prev.filter(a => a.key !== reference.key));
 		} else {
@@ -184,13 +182,11 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 			}
 
 			props.onClose()
-
 		} catch (error) {
 			console.log(error)
 			enqueueSnackbar("Fehler beim Schreiben der TEI-Header-Daten: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
 			return false;
 		}
-
 		return true;
 	}
 
@@ -218,7 +214,6 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 									</Box>
 								}
 							>
-
 								<ListItemText secondary={author.key} primary={author.name} />
 							</ListItem>
 						))}
@@ -247,6 +242,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 					</List>
 
 					<Divider sx={{ my: 2 }} />
+
 					<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
 						<Autocomplete
 							disabled={false}

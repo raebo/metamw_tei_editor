@@ -1,4 +1,4 @@
-import {EditorConstants, HeaderAuthorWriter, LanguageOption} from "../../constants/editor";
+import {EditorConstants, HeaderPerson, LanguageOption} from "../../constants/editor";
 import { EditorLetter } from "../../services/mappings/editorMappings";
 import { SnippetEntity } from "../../services/mappings/autoAnnoMappings";
 
@@ -204,7 +204,7 @@ export const teiHeaderContent = {
 		if( !teiHeader) {
 			return { name: null, key: null }; }
 
-		const receiverElements = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2] > persname');
+		const receiverElements = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2] > persName');
 		if (receiverElements.length > 0) {
 			const receiverName = receiverElements[0].textContent?.trim();
 			return { name: receiverName || null, key: receiverElements[0].getAttribute('data-key') || null };
@@ -212,13 +212,29 @@ export const teiHeaderContent = {
 
 		return { name: null, key: null };
 	},
-	extractAuthorWriters: (teiHeader: Element | null): { authors: HeaderAuthorWriter[], writers: HeaderAuthorWriter[] } => {
+	extractReceivers: (teiHeader: Element | null): HeaderPerson[] => {
+		if( !teiHeader) { return []  }
+
+		const receivers: HeaderPerson[] = [];
+
+		const receiverElements = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2] > persName');
+
+		receiverElements.forEach(receiver => {
+			const name = receiver.textContent?.trim() || '';
+			const dataKey = receiver.getAttribute('data-key') || '';
+
+			if (name && dataKey) {
+				receivers.push({ name, key: dataKey });
+			}
+		})
+
+		return receivers
+	},
+	extractAuthorWriters: (teiHeader: Element | null): { authors: HeaderPerson[], writers: HeaderPerson[] } => {
 		if( !teiHeader) { return { authors: [], writers: [] }; }
 
-		const autors: HeaderAuthorWriter[] = [];
-		const writer: HeaderAuthorWriter[] = [];
-
-		if( !teiHeader) { return { authors: autors, writers: writer }; }
+		const autors: HeaderPerson[] = [];
+		const writer: HeaderPerson[] = [];
 
 		const correspAction = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[1]')[0];
 
@@ -241,7 +257,7 @@ export const teiHeaderContent = {
 
 		return { authors: autors, writers: writer };
 	},
-	setAuthorWritersFirstPosition: (teiHeader: Element, authors: HeaderAuthorWriter[], writers: HeaderAuthorWriter[]): void => {
+	setAuthorWritersFirstPosition: (teiHeader: Element, authors: HeaderPerson[], writers: HeaderPerson[]): void => {
 		const doc = teiHeader.ownerDocument;
 		const titleStmt = teiHeader.querySelector("titleStmt");
 		if (!titleStmt) {
@@ -287,7 +303,7 @@ export const teiHeaderContent = {
 		});
 
 	},
-	setAuthorsWritersSndPosition: (teiHeader: Element, authors: HeaderAuthorWriter[], writers: HeaderAuthorWriter[]): void => {
+	setAuthorsWritersSndPosition: (teiHeader: Element, authors: HeaderPerson[], writers: HeaderPerson[]): void => {
 		const doc = teiHeader.ownerDocument as unknown as XMLDocument;
 		const sndAuthorsWriters = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[1]')[0];
 
@@ -334,6 +350,26 @@ export const teiHeaderContent = {
 
 			receiverStart.insertBefore(receiverNode, receiverStart.firstChild);
 
+		}
+	},
+	setReceivers: (teiHeader: Element, receivers: HeaderPerson[]): void => {
+		const receiverStart = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2]')[0];
+
+		if (receiverStart) {
+			for( const child of receiverStart.childNodes) {
+				if (child.nodeType === Node.ELEMENT_NODE && (child as Element).nodeName === 'persname') {
+					receiverStart.removeChild(child);
+				}
+			}
+
+			receivers.forEach(r => {
+				const receiverNode = document.createElementNS(TEI_NS, "persname");
+				receiverNode.setAttribute("data-key", r.key);
+				receiverNode.setAttribute("resp", "receiver");
+				receiverNode.textContent = r.name || '';
+
+				receiverStart.appendChild(receiverNode);
+			});
 		}
 	},
 	extractLanguages: (teiHeader: Element | null): LanguageOption[] => {
