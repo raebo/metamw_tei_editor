@@ -2,7 +2,7 @@ import { DefaultDialogProps } from '../EditorFormDialog';
 import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
 import { DISPLAY_NAME_MAP } from '../../../../../utils/entityMappings';
 import React, { useEffect, useRef } from 'react';
-import { Box, Divider } from '@mui/material';
+import { Divider } from '@mui/material';
 import TeiHeaderFirstHeadline from './TeiHeaderDialog/10TeiHeaderFirstHeadline';
 import TeiHeaderSndHeadline from './TeiHeaderDialog/20TeiHeaderSndHeadline';
 import TeiHeaderPrevLetter from './TeiHeaderDialog/30TeiHeaderPrevLetter';
@@ -10,21 +10,22 @@ import TeiHeaderNextLetter from './TeiHeaderDialog/40TeiHeaderNextLetter';
 import TeiHeaderTransEdition from './TeiHeaderDialog/70TeiHeaderTransEdition';
 import { MiscUtils } from '../../../../../utils/misc';
 import NewLetterLetterName from './NewLetterDialog/10NewLetterLetterName';
-import Button from '@mui/material/Button';
 import { enqueueSnackbar } from 'notistack';
 import { createNewLetter } from '../../../../../services/editor/apiLettersRequest.service';
 import TeiHeaderWritingReceivingPlace from './TeiHeaderDialog/50TeiHeaderWritingReceivingPlace';
 import { EditorLetter } from '../../../../../services/mappings/editorMappings';
 import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
-import TeiHeaderReceivingPerson from './TeiHeaderDialog/60TeiHeaderReceivingPerson';
 import TeiHeaderWritingPerson from './NewLetterDialog/20TeiHeaderWritingPerson';
 import { useAppDispatch } from '../../../../../redux/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../../redux/redux.store';
 import { EditorUtils } from '../../../../../utils/editor';
 import { setEditorPinnedLetters } from '../../../../../redux/slices/editor.letter.slice';
-import {LanguageOption} from "../../../../../constants/editor";
+import {HeaderPerson, LanguageOption} from "../../../../../constants/editor";
 import TeiHeaderEditorTranskriptor from "./TeiHeaderDialog/80EditorTranskriptor";
+import TeiHeaderReceivers from "./TeiHeaderDialog/60TeiHeaderReceivers";
+import DialogContent from "@mui/material/DialogContent";
+import {DialogActionButton} from "./Misc/DialogActionButton";
 
 export type NewLetterDialogProps = {
   autoAvailable: boolean | null;
@@ -41,7 +42,7 @@ export type NewLetterCompletionState = {
   transkriptionValue: string, editionValue: string
   writerAutoAvailable: boolean, writerEntity: SnippetEntity | null,
   writingPlaceAutoAvailable: boolean, writingPlace: SnippetEntity | null,
-  receiverAutoAvailable: boolean, receiverEntity: SnippetEntity | null,
+  receiverAutoAvailable: boolean, receivers: HeaderPerson[],
   receivingPlaceAutoAvailable: boolean, receivingPlace: SnippetEntity | null,
   letterLanguage: LanguageOption[] | [],
 	editorValue: string | null, transkriptorValue: string | null,
@@ -64,7 +65,7 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
     transkriptionValue: "FMB-C", editionValue: "FMB-C",
     writerAutoAvailable: true, writerEntity: null,
     writingPlaceAutoAvailable: true, writingPlace: null,
-    receiverAutoAvailable: true, receiverEntity: null,
+    receiverAutoAvailable: true, receivers: [],
     receivingPlaceAutoAvailable: true, receivingPlace: null,
     letterLanguage: [],
 		editorValue: null, transkriptorValue: null
@@ -131,7 +132,7 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
     validPrevLetterCheck(),
     validNextLetterCheck(),
     completionState.writingPlace !== null,
-    completionState.receiverEntity !== null,
+    completionState.receivers.length > 0,
     completionState.receivingPlace !== null,
     completionState.letterLanguage.length > 0,
 		completionState.editorValue !== null,
@@ -140,53 +141,35 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
 
   return (
     <div ref={ref}>
-      <div className="autoSnippetFormRow">
-        { displayData !== null ? (
-          <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
-        ) : (
-          <>
-          </>
-        )
-        }
-      </div>
-      <NewLetterLetterName autoAvailable={null} completionState={completionState} onChange={childOnChange} />
-      <TeiHeaderFirstHeadline teiHeader={null} autoAvailable={completionState.firstHeaderComplete} completionState={completionState} onChange={childOnChange} />
-      <TeiHeaderSndHeadline teiHeader={null} autoAvailable={completionState.sndHeaderComplete} completionState={completionState} onChange={childOnChange} />
-      <TeiHeaderPrevLetter teiHeader={null} autoAvailable={completionState.prevLetterAutoAvailable} completionState={completionState} onChange={childOnChange}  />
-      <TeiHeaderNextLetter teiHeader={null} autoAvailable={completionState.nextLetterAutoAvailable} completionState={completionState} onChange={childOnChange} />
-      <TeiHeaderWritingPerson autoAvailable={completionState.letterNameComplete} completionState={completionState} onChange={childOnChange} />
-      <TeiHeaderWritingReceivingPlace teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"writing"} textFieldValue={"Schreibort Auswählen"}/>
-      <TeiHeaderReceivingPerson teiHeader={null} autoAvailable={completionState.receiverAutoAvailable} completionState={completionState} onChange={childOnChange} />
-      <TeiHeaderWritingReceivingPlace teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"receiving"} textFieldValue={"Empfängerort Auswählen"}/>
-      <TeiHeaderTransEdition teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
-			<TeiHeaderEditorTranskriptor teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
+			<DialogContent>
+				<div className="autoSnippetFormRow">
+					{ displayData !== null ? (
+						<DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
+					) : (
+						<>
+						</>
+					)
+					}
+				</div>
+				<NewLetterLetterName autoAvailable={null} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderFirstHeadline teiHeader={null} autoAvailable={completionState.firstHeaderComplete} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderSndHeadline teiHeader={null} autoAvailable={completionState.sndHeaderComplete} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderPrevLetter teiHeader={null} autoAvailable={completionState.prevLetterAutoAvailable} completionState={completionState} onChange={childOnChange}  />
+				<TeiHeaderNextLetter teiHeader={null} autoAvailable={completionState.nextLetterAutoAvailable} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderWritingPerson autoAvailable={completionState.letterNameComplete} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderWritingReceivingPlace teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"writing"} textFieldValue={"Schreibort Auswählen"}/>
+				<TeiHeaderReceivers teiHeader={null} autoAvailable={completionState.receiverAutoAvailable} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderWritingReceivingPlace teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"receiving"} textFieldValue={"Empfängerort Auswählen"}/>
+				<TeiHeaderTransEdition teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderEditorTranskriptor teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
 
-      <Divider orientation="vertical" flexItem />
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          mt: 10,
-          borderTop: '2px solid',
-          borderColor: 'lightgray',
-          // borderColor: 'primary.main',
-          pt: 2,
-        }}
-      >
-        <Button
-          variant="contained"
-          color="success"
-          size="medium"
-          disabled={!saveIsAvailable}
-          onClick={submitCreateHandler}
-        >
-          Brief Erstellen
-        </Button>
-      </Box>
+			</DialogContent>
+			<Divider />
+			<DialogActionButton label={"Brief Erstellen"} onClick={submitCreateHandler} disabled={!saveIsAvailable} />
 
-      <div>
-        <pre>{JSON.stringify(completionState, null, 2)}</pre>
-      </div>
+      {/*<div>*/}
+      {/*  <pre>{JSON.stringify(completionState, null, 2)}</pre>*/}
+      {/*</div>*/}
     </div>
   )
 }

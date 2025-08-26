@@ -115,7 +115,7 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
 
   return (
     <>
-      <div className="autoSnippetFormRow" style={ { marginTop: "25px", width: "98%" } }>
+      <div className="autoSnippetFormRow" style={ { marginTop: "35px", width: "98%" } }>
         <Autocomplete
           disabled={autoCompleteAvailable()}
           options={places}

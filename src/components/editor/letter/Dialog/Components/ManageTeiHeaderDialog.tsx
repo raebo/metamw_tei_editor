@@ -2,7 +2,7 @@ import { DefaultDialogProps } from '../EditorFormDialog';
 import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
 import { DISPLAY_NAME_MAP } from '../../../../../utils/entityMappings';
 import React, { useEffect, useRef } from 'react';
-import {Box, Divider} from '@mui/material';
+import {Divider} from '@mui/material';
 import TeiHeaderFirstHeadline from './TeiHeaderDialog/10TeiHeaderFirstHeadline';
 import TeiHeaderSndHeadline from './TeiHeaderDialog/20TeiHeaderSndHeadline';
 import TeiHeaderPrevLetter from './TeiHeaderDialog/30TeiHeaderPrevLetter';
@@ -12,16 +12,17 @@ import { MiscUtils } from '../../../../../utils/misc';
 import TeiHeaderWritingReceivingPlace from './TeiHeaderDialog/50TeiHeaderWritingReceivingPlace';
 import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
 import { EditorLetter } from '../../../../../services/mappings/editorMappings';
-import TeiHeaderReceivingPerson from './TeiHeaderDialog/60TeiHeaderReceivingPerson';
-import Button from "@mui/material/Button";
 import {EditorUtils} from "../../../../../utils/editor";
 import {enqueueSnackbar} from "notistack";
-import {EditorConstants, LanguageOption } from "../../../../../constants/editor";
+import {EditorConstants, HeaderPerson, LanguageOption} from "../../../../../constants/editor";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../../../redux/redux.store";
 import {setReloadLetterContent} from "../../../../../redux/slices/editor.letter.slice";
 import {useAppDispatch} from "../../../../../redux/hooks";
 import TeiHeaderEditorTranskriptor from "./TeiHeaderDialog/80EditorTranskriptor";
+import TeiHeaderReceivers from "./TeiHeaderDialog/60TeiHeaderReceivers";
+import DialogContent from "@mui/material/DialogContent";
+import {DialogActionButton} from "./Misc/DialogActionButton";
 
 
 export type TeiHeaderDialogProps = {
@@ -43,7 +44,7 @@ type CompletionState = {
   nextLetterAutoAvailable: boolean, nextLetterType: 'unknown' | 'not_identified' | 'select' | null, nextLetter: EditorLetter | null,
   transkriptionValue: string, editionValue: string
   writingPlaceAutoAvailable: boolean, writingPlace: SnippetEntity | null,
-  receiverAutoAvailable: boolean, receiverEntity: SnippetEntity | null,
+  receiverAutoAvailable: boolean, receivers: HeaderPerson[],
   receivingPlaceAutoAvailable: boolean, receivingPlace: SnippetEntity | null,
   letterLanguage: LanguageOption[] | []
 	editorValue: string | null,
@@ -82,14 +83,6 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 
 	const { xmlDoc, teiHeader } = parsedXml;
 
-	// if(!xmlDoc) {
-	// 	enqueueSnackbar("Invalid XML document", { variant: "error" });
-	// }
-	//
-	// if (!teiHeader) {
-	// 	enqueueSnackbar("No TEI header found in the document", { variant: "error" });
-	// }
-
   const [completionState, setCompletionState] = React.useState<CompletionState>({
     firstHeaderComplete: false, firstHeaderContent: null,
     sndHeaderComplete: false, sndHeaderContent: null,
@@ -97,7 +90,7 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
     nextLetterAutoAvailable: false, nextLetterType: null, nextLetter: null,
     transkriptionValue: "FMB-C", editionValue: "FMB-C",
     writingPlaceAutoAvailable: false, writingPlace: null,
-    receiverAutoAvailable: true, receiverEntity: null,
+    receiverAutoAvailable: true, receivers: [],
     receivingPlaceAutoAvailable: false, receivingPlace: null,
     letterLanguage: [],
 		editorValue: null, transkriptorValue: null
@@ -144,7 +137,7 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 			EditorUtils.teiHeaderContent.setPrevNextLetter(teiHeader, "successor", completionState.nextLetterType, completionState.nextLetter);
 			EditorUtils.teiHeaderContent.setWritingPlace(teiHeader, completionState.writingPlace);
 			EditorUtils.teiHeaderContent.setReceivingPlace(teiHeader, completionState.receivingPlace);
-			EditorUtils.teiHeaderContent.setReceiver(teiHeader, completionState.receiverEntity);
+			EditorUtils.teiHeaderContent.setReceivers(teiHeader, completionState.receivers);
 			EditorUtils.teiHeaderContent.setLanguages(teiHeader, completionState.letterLanguage);
 			EditorUtils.teiHeaderContent.setEditorTranskriptorName(teiHeader, 'edition', completionState.editorValue);
 			EditorUtils.teiHeaderContent.setEditorTranskriptorName(teiHeader, 'transcription', completionState.transkriptorValue);
@@ -192,49 +185,30 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 
   return (
     <div ref={ref}>
-      <div className="autoSnippetFormRow">
-        { displayData !== null ? (
-          <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
-        ) : (
-          <>
-          </>
-        )
-        }
-      </div>
-      <TeiHeaderFirstHeadline teiHeader={teiHeader} autoAvailable={completionState.firstHeaderComplete} completionState={completionState} onChange={childOnChange} />
-      <TeiHeaderSndHeadline teiHeader={teiHeader} autoAvailable={completionState.sndHeaderComplete} completionState={completionState} onChange={childOnChange} />
-			<TeiHeaderPrevLetter teiHeader={teiHeader} autoAvailable={completionState.prevLetterAutoAvailable} completionState={completionState} onChange={childOnChange}  />
-      <TeiHeaderNextLetter teiHeader={teiHeader} autoAvailable={completionState.nextLetterAutoAvailable} completionState={completionState} onChange={childOnChange} />
-      <TeiHeaderWritingReceivingPlace teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"writing"} textFieldValue={'Schreibort Auswählen'}/>
-      <TeiHeaderReceivingPerson teiHeader={teiHeader} autoAvailable={completionState.receiverAutoAvailable} completionState={completionState} onChange={childOnChange} />
-      <TeiHeaderWritingReceivingPlace teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"receiving"} textFieldValue={'Empfängerort Auswählen'}/>
-      <TeiHeaderTransEdition teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
-			<TeiHeaderEditorTranskriptor teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
+			<DialogContent>
+				<div className="autoSnippetFormRow">
+					{ displayData !== null ? (
+						<DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
+					) : (
+						<>
+						</>
+					)
+					}
+				</div>
+				<TeiHeaderFirstHeadline teiHeader={teiHeader} autoAvailable={completionState.firstHeaderComplete} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderSndHeadline teiHeader={teiHeader} autoAvailable={completionState.sndHeaderComplete} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderPrevLetter teiHeader={teiHeader} autoAvailable={completionState.prevLetterAutoAvailable} completionState={completionState} onChange={childOnChange}  />
+				<TeiHeaderNextLetter teiHeader={teiHeader} autoAvailable={completionState.nextLetterAutoAvailable} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderWritingReceivingPlace teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"writing"} textFieldValue={'Schreibort Auswählen'}/>
+				<TeiHeaderReceivers teiHeader={teiHeader} autoAvailable={completionState.receiverAutoAvailable} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderWritingReceivingPlace teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"receiving"} textFieldValue={'Empfängerort Auswählen'}/>
+				<TeiHeaderTransEdition teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderEditorTranskriptor teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
 
-      <Divider orientation="vertical" flexItem />
-
-			<Divider orientation="vertical" flexItem />
-			<Box
-				sx={{
-					display: 'flex',
-					justifyContent: 'flex-end',
-					mt: 10,
-					borderTop: '2px solid',
-					borderColor: 'lightgray',
-					// borderColor: 'primary.main',
-					pt: 2,
-				}}
-			>
-				<Button
-					variant="contained"
-					color="success"
-					size="medium"
-					disabled={!formIsValid}
-					onClick={submitSaveHandler}
-				>
-					Header Speichern
-				</Button>
-			</Box>
+				<Divider orientation="vertical" flexItem />
+			</DialogContent>
+			<Divider />
+			<DialogActionButton label={"Header Speichern"} onClick={submitSaveHandler} disabled={!formIsValid}/>
 
 			{/*<div>*/}
 			{/*	<pre>{JSON.stringify(completionState, null, 2)}</pre>*/}

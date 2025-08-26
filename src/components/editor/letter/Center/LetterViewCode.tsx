@@ -162,7 +162,6 @@ const LetterViewCode = ({ xmlString }: LetterViewCodeProps) => {
         <div className="letterViewCodeContainer">
           <Editor
             key={xmlString}
-            height="1000px"
             defaultLanguage="xml"
             value={formattedXml}
             options={{

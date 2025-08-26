@@ -29,8 +29,7 @@ import {
 import InfoIcon from "@mui/icons-material/Info";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
+import {DialogActionButton} from "./Misc/DialogActionButton";
 
 const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 
@@ -137,6 +136,7 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 			return;
 		}
 		setReceivers(prev => [...prev, { key: selectedPerson.entityKey, name: selectedPerson.entityName }]);
+		setSelectedPerson(null)
 	}
 
 
@@ -239,6 +239,17 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 							color="primary"
 							onClick={handleAdd}
 							disabled={!selectedPerson}
+							sx={{
+								backgroundColor: "primary.main",
+								color: "white",
+								"&:hover": {
+									backgroundColor: "primary.dark",
+								},
+								"&.Mui-disabled": {
+									backgroundColor: "grey.300",
+									color: "grey.600",
+								},
+							}}
 						>
 							<AddIcon />
 						</IconButton>
@@ -247,16 +258,7 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 			</DialogContent>
 
 			<Divider />
-			<DialogActions sx={{ paddingTop: 5}}>
-				<Button
-					size={EditorConstants.styles.panel.buttonSize}
-					variant="contained"
-					color="primary"
-					onClick={handleSave}
-				>
-					Empfänger im Header Speichern
-				</Button>
-			</DialogActions>
+			<DialogActionButton label={"Empfänger im Header Speichern"} onClick={handleSave} disabled={false} />
 		</>
 	)
 }

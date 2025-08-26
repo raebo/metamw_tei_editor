@@ -332,45 +332,31 @@ export const teiHeaderContent = {
 			sndAuthorsWriters.appendChild(writerEl);
 		});
 	},
-	setReceiver: (teiHeader: Element, receiver: SnippetEntity | null): void => {
-		const receiverStart = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2]')[0];
-
-		if (receiverStart && receiver) {
-
-			for( const child of receiverStart.childNodes) {
-				if (child.nodeType === Node.ELEMENT_NODE && (child as Element).nodeName === 'persname') {
-					receiverStart.removeChild(child);
-				}
-			}
-
-			const receiverNode = document.createElementNS(TEI_NS, "persname");
-			receiverNode.setAttribute("data-key", receiver.entityKey);
-			receiverNode.setAttribute("resp", "receiver");
-			receiverNode.textContent = receiver.entityName || '';
-
-			receiverStart.insertBefore(receiverNode, receiverStart.firstChild);
-
-		}
-	},
 	setReceivers: (teiHeader: Element, receivers: HeaderPerson[]): void => {
 		const receiverStart = queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2]')[0];
 
-		if (receiverStart) {
-			for( const child of receiverStart.childNodes) {
-				if (child.nodeType === Node.ELEMENT_NODE && (child as Element).nodeName === 'persname') {
-					receiverStart.removeChild(child);
-				}
-			}
-
-			receivers.forEach(r => {
-				const receiverNode = document.createElementNS(TEI_NS, "persname");
-				receiverNode.setAttribute("data-key", r.key);
-				receiverNode.setAttribute("resp", "receiver");
-				receiverNode.textContent = r.name || '';
-
-				receiverStart.appendChild(receiverNode);
-			});
+		if (!receiverStart) {
+			return
 		}
+
+		Array.from(receiverStart.childNodes)
+			.filter(node => node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'persName')
+			.map(node => receiverStart.removeChild(node));
+
+		const placeNameNode = Array.from(receiverStart.childNodes).find(node => node.nodeName === 'placeName');
+
+		receivers.forEach(r => {
+			const receiverNode = document.createElementNS(TEI_NS, "persName");
+			receiverNode.setAttribute("data-key", r.key);
+			receiverNode.setAttribute("resp", "receiver");
+			receiverNode.textContent = r.name || '';
+
+			if (placeNameNode) {
+				receiverStart.insertBefore(receiverNode, placeNameNode);
+			} else {
+				receiverStart.insertBefore(receiverNode, receiverStart.firstChild);
+			}
+		});
 	},
 	extractLanguages: (teiHeader: Element | null): LanguageOption[] => {
 		if (!teiHeader) { return [] }
@@ -399,7 +385,6 @@ export const teiHeaderContent = {
 		const langUsageWrapper = queryPath(teiHeader, "profileDesc > langUsage")[0];
 		if (!langUsageWrapper) return;
 
-		// Remove old <language> children
 		for (const el of Array.from(langUsageWrapper.childNodes)) {
 			if (
 				el.nodeType === Node.ELEMENT_NODE &&

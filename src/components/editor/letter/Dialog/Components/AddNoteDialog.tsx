@@ -1,5 +1,4 @@
-import { FormControl, InputLabel, MenuItem, Select, TextareaAutosize } from "@mui/material";
-import Button from "@mui/material/Button";
+import {Divider, FormControl, InputLabel, MenuItem, Select, TextareaAutosize} from "@mui/material";
 import React, { useState } from "react";
 import { EditorUtils } from "../../../../../utils/editor";
 import { useSelector } from "react-redux";
@@ -10,6 +9,8 @@ import { useAppDispatch } from "../../../../../redux/hooks";
 import { enqueueSnackbar } from "notistack";
 import { EditorConstants } from "../../../../../constants/editor";
 import { DefaultDialogProps } from '../EditorFormDialog';
+import DialogContent from "@mui/material/DialogContent";
+import {DialogActionButton} from "./Misc/DialogActionButton";
 
 const AddNoteDialog = (props: DefaultDialogProps) => {
   const [comment, setComment] = useState("");
@@ -52,73 +53,65 @@ const AddNoteDialog = (props: DefaultDialogProps) => {
   };
 
   return (
-    <div style={{padding: 5}}>
-      <div style={{padding: 5}}>
-        <div id="noteReferencedXmlWrapper" style={{padding: 5}}>
-          <div id="noteReferencedXml" dangerouslySetInnerHTML={{ __html: markedSection }} />
-        </div>
-        <div className="form-item form-item--key">
-          <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
-            <InputLabel id="add-note-dialog-comment-type">Kommentar (Typ)</InputLabel>
-            <Select
-              defaultValue={""}
-              disabled={false}
-              labelId="simple-select-filled-label"
-              id="simple-select-filled"
-              onChange={(event) => setNoteType(event.target.value)}
-            >
-              { EditorConstants.noteTypeItems.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.label}
-                </MenuItem>
-              )) }
-            </Select>
-          </FormControl>
-        </div>
+		<>
+			<DialogContent>
+					<div style={{padding: 5}}>
+						<div id="noteReferencedXmlWrapper" style={{padding: 5}}>
+							<div id="noteReferencedXml" dangerouslySetInnerHTML={{ __html: markedSection }} />
+						</div>
+						<div className="form-item form-item--key">
+							<FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
+								<InputLabel id="add-note-dialog-comment-type">Kommentar (Typ)</InputLabel>
+								<Select
+									defaultValue={""}
+									disabled={false}
+									labelId="simple-select-filled-label"
+									id="simple-select-filled"
+									onChange={(event) => setNoteType(event.target.value)}
+								>
+									{ EditorConstants.noteTypeItems.map((item) => (
+										<MenuItem key={item.value} value={item.value}>
+											{item.label}
+										</MenuItem>
+									)) }
+								</Select>
+							</FormControl>
+						</div>
 
-        <div className="form-item form-item--key">
-          <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
-            <InputLabel id="auto-anno-snippet-reference-type">Kommentar (Sprache)</InputLabel>
-            <Select
-              defaultValue={""}
-              disabled={false}
-              labelId="demo-simple-select-filled-label"
-              id="demo-simple-select-filled"
-              onChange={(event) => setNoteLanguage(event.target.value)}
-            >
-              { EditorConstants.noteTypeLanguages.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.label}
-                </MenuItem>
-              )) }
-            </Select>
-          </FormControl>
-        </div>
-        <div className="form-item form-item--key" style={{margin: 5}}>
-          <TextareaAutosize
-            aria-label="comment"
-            minRows={10}
-            maxRows={20}
-            placeholder="Kommentar"
-            style={{ width: "100%", padding: 8 }}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-          <div style={{ textAlign: "right" }}>
-            <Button
-              size={EditorConstants.styles.panel.buttonSize}
-              variant="contained"
-              color="primary"
-              onClick={handleSubmit}
-              style={{ marginTop: 8 }}
-              disabled={!comment.trim() || noteType === "" || noteLanguage === ""} // Disable if empty
-            >
-             Einfügen
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
+						<div className="form-item form-item--key">
+							<FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
+								<InputLabel id="auto-anno-snippet-reference-type">Kommentar (Sprache)</InputLabel>
+								<Select
+									defaultValue={""}
+									disabled={false}
+									labelId="demo-simple-select-filled-label"
+									id="demo-simple-select-filled"
+									onChange={(event) => setNoteLanguage(event.target.value)}
+								>
+									{ EditorConstants.noteTypeLanguages.map((item) => (
+										<MenuItem key={item.value} value={item.value}>
+											{item.label}
+										</MenuItem>
+									)) }
+								</Select>
+							</FormControl>
+						</div>
+						<div className="form-item form-item--key" style={{margin: 5}}>
+							<TextareaAutosize
+								aria-label="comment"
+								minRows={10}
+								maxRows={20}
+								placeholder="Kommentar"
+								style={{ width: "100%", padding: 8 }}
+								value={comment}
+								onChange={(e) => setComment(e.target.value)}
+							/>
+						</div>
+					</div>
+			</DialogContent>
+			<Divider />
+			<DialogActionButton label={"Kommentar Einfügen"} onClick={handleSubmit} disabled={!comment.trim() || noteType === "" || noteLanguage === ""} />
+    </>
   )
 }
 

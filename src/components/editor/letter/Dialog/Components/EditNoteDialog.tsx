@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/redux.store";
 import { EditorUtils } from "../../../../../utils/editor";
 import Button from "@mui/material/Button";
-import { FormControl, InputLabel, MenuItem, Select, TextareaAutosize } from "@mui/material";
+import {Divider, FormControl, InputLabel, MenuItem, Select, TextareaAutosize} from "@mui/material";
 import { EditorConstants } from "../../../../../constants/editor";
 import { setReloadLetterContent } from "../../../../../redux/slices/editor.letter.slice";
 import { enqueueSnackbar } from "notistack";
@@ -161,6 +161,7 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
           />
         </div>
         </DialogContent>
+				<Divider />
         <DialogActions>
           { !deleteButtonsVisible && <Button
               variant="contained"

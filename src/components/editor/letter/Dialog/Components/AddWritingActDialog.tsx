@@ -2,13 +2,12 @@ import React from 'react';
 import { DefaultDialogProps } from '../EditorFormDialog';
 import { EditorConstants, EntityType } from '../../../../../constants/editor';
 import FormAutocomplete from '../../Util/FormAutocomplete';
-import { Box, Divider, IconButton } from '@mui/material';
+import { Divider, IconButton } from '@mui/material';
 import { InfoOutlined, InfoSharp } from '@mui/icons-material';
 import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
 import { DISPLAY_NAME_MAP } from '../../../../../utils/entityMappings';
 import { fetchAndMapPersonEntityData, fetchMetamwEntityData } from '../../../../../services/auto_anno/apiMetaMw.service';
 import { enqueueSnackbar } from 'notistack';
-import Button from '@mui/material/Button';
 import { fetchLetterData } from '../../../../../services/editor/apiLettersRequest.service';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../../redux/redux.store';
@@ -18,6 +17,8 @@ import { EditorUtils } from '../../../../../utils/editor';
 import { setReloadLetterContent } from '../../../../../redux/slices/editor.letter.slice';
 import { useAppDispatch } from '../../../../../redux/hooks';
 import { ActOfWritingElement, PersonEntity } from '../../../../../services/mappings/editorMappings';
+import DialogContent from "@mui/material/DialogContent";
+import {DialogActionButton} from "./Misc/DialogActionButton";
 
 type CompletionState = {
   authorCompleteAvailable: boolean;
@@ -161,72 +162,68 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
 
   return (
     <>
-      <div className="autoSnippetFormRow">
-        {displayData !== null ? <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} /> : <></>}
-      </div>
-      <div className="autoSnippetFormRow">
-        <div className="form-item form-item--key">
-          <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            Autor Auswählen:
-            {keyAuthor && (
-              <>
-                <span style={{ fontWeight: 'bold' }}>{keyAuthor}</span>
-                <IconButton onClick={() => handleInfoIconClick(keyAuthor)} edge="end" size="small">
-                  <InfoSharp />
-                </IconButton>
-              </>
-            )}
-            {!keyAuthor && (
-              <IconButton onClick={() => handleInfoIconClick(null)} edge="end" size="small">
-                <InfoOutlined />
-              </IconButton>
-            )}
-          </label>
-          <FormAutocomplete
-            isDisabled={!completionState.authorCompleteAvailable}
-            entityType={EntityType.PERSON}
-            entityKey={keyAuthor}
-            setFormEntityKey={setKeyAuthor}
-            afterClickHandler={authorChoosed}
-          />
-        </div>
-      </div>
+			<DialogContent>
+				<div className="autoSnippetFormRow">
+					{displayData !== null ? <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} /> : <></>}
+				</div>
+				<div className="autoSnippetFormRow">
+					<div className="form-item form-item--key">
+						<label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+							Autor Auswählen:
+							{keyAuthor && (
+								<>
+									<span style={{ fontWeight: 'bold' }}>{keyAuthor}</span>
+									<IconButton onClick={() => handleInfoIconClick(keyAuthor)} edge="end" size="small">
+										<InfoSharp />
+									</IconButton>
+								</>
+							)}
+							{!keyAuthor && (
+								<IconButton onClick={() => handleInfoIconClick(null)} edge="end" size="small">
+									<InfoOutlined />
+								</IconButton>
+							)}
+						</label>
+						<FormAutocomplete
+							isDisabled={!completionState.authorCompleteAvailable}
+							entityType={EntityType.PERSON}
+							entityKey={keyAuthor}
+							setFormEntityKey={setKeyAuthor}
+							afterClickHandler={authorChoosed}
+						/>
+					</div>
+				</div>
 
-      <div className="autoSnippetFormRow">
-        <div className="form-item form-item--key">
-          <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            Schreiber Auswählen:
-            {keyWriter && (
-              <>
-                <span style={{ fontWeight: 'bold' }}>{keyWriter}</span>
-                <IconButton onClick={() => handleInfoIconClick(keyWriter)} edge="end" size="small">
-                  <InfoSharp />
-                </IconButton>
-              </>
-            )}
-            {!keyWriter && (
-              <IconButton onClick={() => handleInfoIconClick(null)} edge="end" size="small">
-                <InfoOutlined />
-              </IconButton>
-            )}
-          </label>
-          <FormAutocomplete
-            isDisabled={!completionState.writerCompleteAvailable}
-            entityType={EntityType.PERSON}
-            entityKey={keyWriter}
-            setFormEntityKey={setKeyWriter}
-            afterClickHandler={writerChoosed}
-          />
-        </div>
-      </div>
-      <Divider orientation="vertical" flexItem />
-      <div>
-        <Box display="flex" justifyContent="flex-end" sx={{ marginTop: '10%' }}>
-          <Button disabled={keyAuthor === null || keyWriter === null} variant="contained" onClick={handleAddClick}>
-            Schreibakt Hinzufügen
-          </Button>
-        </Box>
-      </div>
+				<div className="autoSnippetFormRow">
+					<div className="form-item form-item--key">
+						<label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+							Schreiber Auswählen:
+							{keyWriter && (
+								<>
+									<span style={{ fontWeight: 'bold' }}>{keyWriter}</span>
+									<IconButton onClick={() => handleInfoIconClick(keyWriter)} edge="end" size="small">
+										<InfoSharp />
+									</IconButton>
+								</>
+							)}
+							{!keyWriter && (
+								<IconButton onClick={() => handleInfoIconClick(null)} edge="end" size="small">
+									<InfoOutlined />
+								</IconButton>
+							)}
+						</label>
+						<FormAutocomplete
+							isDisabled={!completionState.writerCompleteAvailable}
+							entityType={EntityType.PERSON}
+							entityKey={keyWriter}
+							setFormEntityKey={setKeyWriter}
+							afterClickHandler={writerChoosed}
+						/>
+					</div>
+				</div>
+			</DialogContent>
+      <Divider />
+			<DialogActionButton label={ "Schreibakt Hinzufügen" } onClick={handleAddClick} disabled={keyAuthor === null || keyWriter === null} />
     </>
   );
 };

@@ -24,13 +24,12 @@ import AddIcon from "@mui/icons-material/Add";
 import {SnippetEntity} from "../../../../../services/mappings/autoAnnoMappings";
 import {searchEditortEntities} from "../../../../../services/editor/apiLetterRequest.service";
 import {debounce} from "lodash-es";
-import Button from "@mui/material/Button";
 import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
 import {setReloadLetterContent} from "../../../../../redux/slices/editor.letter.slice";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../../../redux/redux.store";
 import {useAppDispatch} from "../../../../../redux/hooks";
+import {DialogActionButton} from "./Misc/DialogActionButton";
 
 
 const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
@@ -158,6 +157,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 			}
 			setWriters(prev => [...prev, { key: selectedPerson.entityKey, name: selectedPerson.entityName }]);
 		}
+		setSelectedPerson(null)
 	}
 
 	const handleSave = async () => {
@@ -292,6 +292,17 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 							color="primary"
 							onClick={handleAdd}
 							disabled={!selectedPerson}
+							sx={{
+								backgroundColor: "primary.main",
+								color: "white",
+								"&:hover": {
+									backgroundColor: "primary.dark",
+								},
+								"&.Mui-disabled": {
+									backgroundColor: "grey.300",
+									color: "grey.600",
+								},
+							}}
 						>
 							<AddIcon />
 						</IconButton>
@@ -299,16 +310,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 				</div>
 			</DialogContent>
 			<Divider />
-			<DialogActions sx={{ paddingTop: 5}}>
-				<Button
-					size={EditorConstants.styles.panel.buttonSize}
-					variant="contained"
-					color="primary"
-					onClick={handleSave}
-				>
-					Autoren/Schreiber im Header Speichern
-				</Button>
-			</DialogActions>
+			<DialogActionButton label={"Authoren/Schreiber im Header Speichern"} onClick={ handleSave } disabled={false} />
 		</>
 	)
 }
