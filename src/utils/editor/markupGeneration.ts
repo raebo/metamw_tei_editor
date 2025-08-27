@@ -348,9 +348,15 @@ export const markupGeneration = {
   insertActOfWritingBlock: (
     xmlDoc: Document,
     authorWriters: ActOfWritingElement[],
-  ) : { xmlString: string }  => {
+  ) : void  => {
 
     const nValue = xmlDoc.querySelectorAll("div[type='act_of_writing']").length + 1;
+
+		const bodyTag = xmlDoc.querySelector("text > body")
+
+		if (!bodyTag) {
+			throw new Error('Could not insert act_of_writing block, because no <body> tag was found.')
+		}
 
     const div = xmlDoc.createElement("div");
     div.setAttribute("type", "act_of_writing");
@@ -371,9 +377,8 @@ export const markupGeneration = {
       div.appendChild(docAuthor);
     })
 
-
-    const p = xmlDoc.createElement("p");
-    p.setAttribute("style", "paragraph_without_indent");
+    const paragraph = xmlDoc.createElement("p");
+    paragraph.setAttribute("style", "paragraph_without_indent");
 
     // Create the oxy processing instructions
     const startPI = xmlDoc.createProcessingInstruction(
@@ -382,15 +387,12 @@ export const markupGeneration = {
     );
     const endPI = xmlDoc.createProcessingInstruction("oxy_custom_end", "");
 
-    p.appendChild(startPI);
-    p.appendChild(xmlDoc.createTextNode("Brieftext"));
-    p.appendChild(endPI);
+    paragraph.appendChild(startPI);
+    paragraph.appendChild(xmlDoc.createTextNode("Brieftext"));
+    paragraph.appendChild(endPI);
 
-    div.appendChild(p);
+    div.appendChild(paragraph);
 
-    // Insert the new div at the desired location
-    xmlDoc.documentElement.appendChild(div); // or use some custom selector
-
-    return { xmlString: xmlCheck.serializeDocument(xmlDoc) }
+    bodyTag.appendChild(div); // or use some custom selector
   }
 }

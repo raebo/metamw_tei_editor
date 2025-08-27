@@ -16,20 +16,19 @@ import DialogContent from "@mui/material/DialogContent";
 import DynamicDataDisplay from "../../../../support/DynamicDataDisplay";
 import {DISPLAY_NAME_MAP} from "../../../../../utils/entityMappings";
 import {
-	Autocomplete,
 	Box,
 	Divider,
 	IconButton,
 	List,
 	ListItem,
 	ListItemText,
-	TextField,
 	Typography
 } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import {DialogActionButton} from "./Misc/DialogActionButton";
+import FormAutocomplete from "../../Util/FormAutocomplete";
 
 const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 
@@ -40,8 +39,6 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 	const [selectedPerson, setSelectedPerson] = React.useState<SnippetEntity | null>(null)
 	const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
 	const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
-
-
 	const [parsedXml, setParsedXml] = React.useState<{
 		xmlDoc: XMLDocument | null;
 		teiHeader: Element | null;
@@ -94,22 +91,6 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 	}, [teiHeader]);
 
 
-	const searchForPeople = async (inputValue: string) => {
-		try {
-			const responsePeoples = await searchEditortEntities(inputValue, EntityType.PERSON)
-
-			if (responsePeoples) {
-				setPeople(responsePeoples);
-			}
-		} catch (err) {
-			enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
-		}
-	}
-
-	const debouncedSearchForPeople = useMemo(
-		() => debounce(searchForPeople, 300), // 300ms delay
-		[]
-	)
 	const handleInfoIconClick = async (reference: HeaderPerson) => {
 		if (!reference.key) {
 			return;
@@ -200,40 +181,13 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 					<Divider sx={{ my: 2 }} />
 
 					<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-						<Autocomplete
-							disabled={false}
-							options={people}
-							value={selectedPerson}
-							isOptionEqualToValue={(option, value) => option.entityId === value.entityId }
-							onChange={(_, newValue) => setSelectedPerson(newValue)}
-							onInputChange={(_, inputValue, reason) => {
-								if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
-									debouncedSearchForPeople(inputValue);
-								}
-							}}
-							getOptionLabel={(option) => option.entityName || ''}
-							filterOptions={(options, { inputValue }) =>
-								options.filter((option) =>
-									option.entityName.toLowerCase().includes(inputValue.toLowerCase())
-								)
-							}
-							renderOption={(props, option, { inputValue }) => {
-								return (
-									<li {...props}>
-										<div>
-											<div
-												dangerouslySetInnerHTML={{
-													__html: MiscUtils.stringHandling.highlightText(option.entityName, inputValue)
-												}}
-											/>
-										</div>
-									</li>
-								);
-							}}
-							renderInput={(params) => (
-								<TextField {...params} label={ "Empfänger Auswählen"} variant="outlined" />
-							)}
-							fullWidth
+						<FormAutocomplete
+							isDisabled={false}
+							initialOptions={people}
+							entityType={EntityType.PERSON}
+							entityKey={selectedPerson ? selectedPerson.entityKey : null }
+							afterClickHandler={setSelectedPerson}
+							selectedValue={selectedPerson}
 						/>
 						<IconButton
 							color="primary"

@@ -135,6 +135,7 @@ export const EditorConstants = {
       DATE_ADDED: "DATE_ADDED",
       DATE_REMOVED: "DATE_REMOVED",
 			HEADER_UPDATED: "HEADER_UPDATED",
+			ACT_OF_WRITING_ADDED: "ACT_OF_WRITING_ADDED",
     }
   },
   attachmentTypeItems: [

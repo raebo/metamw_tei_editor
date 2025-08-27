@@ -112,13 +112,13 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
     }
   }
   const validPrevLetterCheck = () : boolean => {
-    if (completionState.prevLetterType !== null && completionState.prevLetterType === 'unknown' || completionState.prevLetterType === 'not_identified') {
+    if (completionState.prevLetterType !== null && (completionState.prevLetterType === 'unknown' || completionState.prevLetterType === 'not_identified')) {
       return true
     } else return completionState.prevLetterType === "select" && completionState.prevLetter !== null;
   }
 
   const validNextLetterCheck = () : boolean => {
-    if (completionState.nextLetterType !== null && completionState.nextLetterType === 'unknown' || completionState.nextLetterType === 'not_identified') {
+    if (completionState.nextLetterType !== null && (completionState.nextLetterType === 'unknown' || completionState.nextLetterType === 'not_identified')) {
       return true
     } else return completionState.nextLetterType === "select" && completionState.nextLetter !== null;
   }
@@ -127,7 +127,6 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
     completionState.letterNameComplete,
     completionState.firstHeaderComplete,
     completionState.sndHeaderComplete,
-    completionState.nextLetterType !== null,
     validWriterCheck(),
     validPrevLetterCheck(),
     validNextLetterCheck(),

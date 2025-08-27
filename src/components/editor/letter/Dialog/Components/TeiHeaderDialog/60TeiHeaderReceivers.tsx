@@ -2,14 +2,15 @@ import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
-import {EditorConstants, EntityType, HeaderPerson} from '../../../../../../constants/editor';
+import { EntityType, HeaderPerson} from '../../../../../../constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
-import {Autocomplete, Box, Chip, IconButton, TextField} from '@mui/material';
+import { Box, Chip, IconButton } from '@mui/material';
 import { MiscUtils } from '../../../../../../utils/misc';
 import {EditorUtils} from "../../../../../../utils/editor";
 import AddIcon from "@mui/icons-material/Add";
 import CancelIcon from "@mui/icons-material/Cancel";
+import FormAutocomplete from "../../../Util/FormAutocomplete";
 
 const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
 
@@ -47,24 +48,6 @@ const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
 		props.onChange({ receivers: receivers })
 	}, [receivers]);
 
-
-  const searchForPeople = async (inputValue: string) => {
-    try {
-      const responsePeoples = await searchEditortEntities(inputValue, EntityType.PERSON)
-
-      if (responsePeoples) {
-        setPeople(responsePeoples);
-      }
-    } catch (err) {
-      enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
-    }
-  }
-
-  const debouncedSearchForPeople = useMemo(
-    () => debounce(searchForPeople, 300), // 300ms delay
-    []
-  );
-
 	const handleAddReceiver = () => {
 		if (!selectedPerson) {
 			return
@@ -86,42 +69,14 @@ const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
   return (
     <>
       <div className="autoSnippetFormRow" style={ { marginTop: "25px", width: "98%" } }>
-
 				<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-					<Autocomplete
-						disabled={false}
-						options={people}
-						value={selectedPerson}
-						isOptionEqualToValue={(option, value) => option.entityId === value.entityId }
-						onChange={(_, newValue) => setSelectedPerson(newValue)}
-						onInputChange={(_, inputValue, reason) => {
-							if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
-								debouncedSearchForPeople(inputValue);
-							}
-						}}
-						getOptionLabel={(option) => option.entityName || ''}
-						filterOptions={(options, { inputValue }) =>
-							options.filter((option) =>
-								option.entityName.toLowerCase().includes(inputValue.toLowerCase())
-							)
-						}
-						renderOption={(props, option, { inputValue }) => {
-							return (
-								<li {...props}>
-									<div>
-										<div
-											dangerouslySetInnerHTML={{
-												__html: MiscUtils.stringHandling.highlightText(option.entityName, inputValue)
-											}}
-										/>
-									</div>
-								</li>
-							);
-						}}
-						renderInput={(params) => (
-							<TextField {...params} label={ "Empfänger Auswählen"} variant="outlined" />
-						)}
-						fullWidth
+					<FormAutocomplete
+						isDisabled={false}
+						initialOptions={people}
+						entityType={EntityType.PERSON}
+						entityKey={selectedPerson ? selectedPerson.entityKey : null }
+						afterClickHandler={setSelectedPerson}
+						selectedValue={selectedPerson}
 					/>
 					<IconButton
 						color="primary"

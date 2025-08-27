@@ -5,11 +5,13 @@ import { searchEditortEntities } from '../../../../services/editor/apiLetterRequ
 import { SnippetEntity } from '../../../../services/mappings/autoAnnoMappings';
 
 interface FormAutocompleteProps {
-  entityType: string
-  entityKey:string | null | undefined
-  isDisabled: boolean
-  setFormEntityKey: (entityKey: string) => void
-  afterClickHandler?: (keyValue: string) => void
+	entityType: string
+	entityKey: string | null | undefined
+	isDisabled: boolean,
+	selectedValue: SnippetEntity | null,
+	initialOptions: SnippetEntity[]
+	setFormEntityKey?: (entityKey: string) => void
+	afterClickHandler?: (entity: SnippetEntity | null) => void
 }
 
 const FormAutocomplete = (props: FormAutocompleteProps) => {
@@ -17,6 +19,13 @@ const FormAutocomplete = (props: FormAutocompleteProps) => {
   const [options, setOptions] = useState<SnippetEntity[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+		if (props.initialOptions && props.initialOptions.length > 0) {
+			setOptions(props.initialOptions);
+		}
+	}, [props]);
+
 
   useEffect(() => {
     if (inputValue.trim() === "") {
@@ -50,15 +59,18 @@ const FormAutocomplete = (props: FormAutocompleteProps) => {
         freeSolo={false}
         disabled={props.isDisabled}
         options={options} // Dynamic options
+				value={props.selectedValue? props.selectedValue : null}
         loading={loading} // Display loading indicator
         onInputChange={(event, value) => setInputValue(value)} // Update input value
         onChange={(event, value) => {
-          if (value && typeof value !== 'string') {
-            props.setFormEntityKey(value.entityKey); // Store the ID in state or pass it to a parent component
-            props.afterClickHandler?.(value.entityKey);
-          } else {
-            props.setFormEntityKey(""); // Handle the case where no valid selection is made
-          }
+					if (value && typeof value !== "string") {
+						props.setFormEntityKey?.(value.entityKey);
+						props.afterClickHandler?.(value);
+					} else {
+						props.setFormEntityKey?.("");
+						props.afterClickHandler?.(null);
+					}
+
         }}
         renderOption={(props, option) => (
           <li {...props} key={option.entityKey}>
@@ -83,6 +95,7 @@ const FormAutocomplete = (props: FormAutocompleteProps) => {
             }}
           />
         )}
+				fullWidth
       />
     </>
   )

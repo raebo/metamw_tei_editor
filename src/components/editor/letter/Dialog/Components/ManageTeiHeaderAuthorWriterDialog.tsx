@@ -5,14 +5,12 @@ import {EditorUtils} from "../../../../../utils/editor";
 import {enqueueSnackbar} from "notistack";
 import {MiscUtils} from "../../../../../utils/misc";
 import {
-	Autocomplete,
-	Box,
-	Divider, FormControlLabel,
+	Box, Checkbox,
+	Divider, FormControlLabel, FormGroup,
 	IconButton,
 	List,
 	ListItem,
-	ListItemText, Radio,
-	RadioGroup, TextField,
+	ListItemText,
 	Typography
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -30,6 +28,7 @@ import {useSelector} from "react-redux";
 import {RootState} from "../../../../../redux/redux.store";
 import {useAppDispatch} from "../../../../../redux/hooks";
 import {DialogActionButton} from "./Misc/DialogActionButton";
+import FormAutocomplete from "../../Util/FormAutocomplete";
 
 
 const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
@@ -38,7 +37,8 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 	const [authors, setAuthors] = React.useState<HeaderPerson[]>([]);
 	const [writers, setWriters] = React.useState<HeaderPerson[]>([]);
 	const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
-	const [role, setRole] = useState<"author" | "writer">("author");
+	const [roleAuthor, setRoleAuthor] = React.useState<boolean>(true);
+	const [roleWriter, setRoleWriter] = React.useState<boolean>(true);
 	const [people, setPeople] = useState<SnippetEntity[]>([]);
 	const [selectedPerson, setSelectedPerson] = React.useState<SnippetEntity | null>(null)
 	const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
@@ -100,23 +100,6 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 
 	}, [teiHeader]);
 
-	const searchForPeople = async (inputValue: string) => {
-		try {
-			const responsePeoples = await searchEditortEntities(inputValue, EntityType.PERSON)
-
-			if (responsePeoples) {
-				setPeople(responsePeoples);
-			}
-		} catch (err) {
-			enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
-		}
-	}
-
-	const debouncedSearchForPeople = useMemo(
-		() => debounce(searchForPeople, 300), // 300ms delay
-		[]
-	)
-
 	const handleInfoIconClick = async (reference: HeaderPerson) => {
 		if (!reference.key) {
 			return;
@@ -142,7 +125,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 			return
 		}
 
-		if (role === "author") {
+		if (roleAuthor) {
 			if (authors.find(a => a.key === selectedPerson.entityKey)) {
 				enqueueSnackbar("Author already added", { variant: "warning" });
 				return;
@@ -150,7 +133,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 			setAuthors(prev => [...prev, { key: selectedPerson.entityKey, name: selectedPerson.entityName }]);
 		}
 
-		if (role === "writer") {
+		if (roleWriter) {
 			if (writers.find(w => w.key === selectedPerson.entityKey)) {
 				enqueueSnackbar("Writer already added", { variant: "warning" });
 				return;
@@ -240,54 +223,40 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 							</ListItem>
 						))}
 					</List>
+				</div>
 
+				<div className={"autoSnippetFormRow"} style={{ marginTop: "25px", width: "98%" }}>
 					<Divider sx={{ my: 2 }} />
 
 					<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-						<Autocomplete
-							disabled={false}
-							options={people}
-							value={selectedPerson}
-							isOptionEqualToValue={(option, value) => option.entityId === value.entityId }
-							onChange={(_, newValue) => setSelectedPerson(newValue)}
-							onInputChange={(_, inputValue, reason) => {
-								if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
-									debouncedSearchForPeople(inputValue);
-								}
-							}}
-							getOptionLabel={(option) => option.entityName || ''}
-							filterOptions={(options, { inputValue }) =>
-								options.filter((option) =>
-									option.entityName.toLowerCase().includes(inputValue.toLowerCase())
-								)
-							}
-							renderOption={(props, option, { inputValue }) => {
-								return (
-									<li {...props}>
-										<div>
-											<div
-												dangerouslySetInnerHTML={{
-													__html: MiscUtils.stringHandling.highlightText(option.entityName, inputValue)
-												}}
-											/>
-										</div>
-									</li>
-								);
-							}}
-							renderInput={(params) => (
-								<TextField {...params} label={ "Empfänger Auswählen"} variant="outlined" />
-							)}
-							fullWidth
+						<FormAutocomplete
+							isDisabled={false}
+							initialOptions={people}
+							entityType={EntityType.PERSON}
+							entityKey={selectedPerson ? selectedPerson.entityKey : null }
+							afterClickHandler={setSelectedPerson}
+							selectedValue={selectedPerson}
 						/>
-
-						<RadioGroup
-							row
-							value={role}
-							onChange={e => setRole(e.target.value as "author" | "writer")}
-						>
-							<FormControlLabel value="author" control={<Radio />} label="Autor" />
-							<FormControlLabel value="writer" control={<Radio />} label="Schreiber" />
-						</RadioGroup>
+						<FormGroup>
+							<FormControlLabel
+								control={
+									<Checkbox
+										checked={roleAuthor}
+										onChange={(e) => setRoleAuthor(e.target.checked)}
+									/>
+								}
+								label="Autor"
+							/>
+							<FormControlLabel
+								control={
+									<Checkbox
+										checked={roleWriter}
+										onChange={(e) => setRoleWriter(e.target.checked)}
+									/>
+								}
+								label="Schreiber"
+							/>
+						</FormGroup>
 						<IconButton
 							color="primary"
 							onClick={handleAdd}

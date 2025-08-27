@@ -118,6 +118,9 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 			if (completionState.nextLetterType === 'select' && completionState.nextLetter === null) {
 				formStatus.push(false)
 			}
+			if (completionState.prevLetterType === null || completionState.nextLetterType === null) {
+				formStatus.push(false)
+			}
 
 			return !formStatus.some((status) =>  !status );
 		}
