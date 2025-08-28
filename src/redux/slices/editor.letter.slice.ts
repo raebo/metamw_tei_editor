@@ -7,6 +7,9 @@ interface EditorLetterSlice {
     name: string | null
     viewMode: 'CODE' | 'WYSIWYG' | null
 		xmlContent: string | null
+		actOfWriting: {
+			orderNumber: number | null
+		}
   },
   tabLetter: {
     id: number | null
@@ -41,7 +44,10 @@ const initialState: EditorLetterSlice = {
     id: null,
     name: null,
     viewMode: null,
-		xmlContent: null
+		xmlContent: null,
+		actOfWriting: {
+			orderNumber: null
+		},
   },
   tabLetter: {
     id: null,
@@ -68,7 +74,7 @@ const initialState: EditorLetterSlice = {
     elementXmlId: null,
     elementKey: null
   },
-  changeLetterViewMode: false
+  changeLetterViewMode: false,
 }
 
 const EditorLetterSlice = createSlice({
@@ -128,7 +134,16 @@ const EditorLetterSlice = createSlice({
     },
     setLetterReference(state, action) {
       state.letterReference = { ...action.payload.letterReference }
-    }
+    },
+		setEditorLetterActOfWriting(state, action) {
+			state.letter = {
+				...state.letter,
+				actOfWriting: {
+					...state.letter.actOfWriting,
+					...action.payload.letter.actOfWriting,
+				},
+			}
+		}
   }
 })
 
@@ -136,13 +151,14 @@ export const
   {
     enableChangeLetterViewMode,
     disableChangeLetterViewMode,
-    setEditorLetter,
     setContentTextIsMarked,
-    setEditorSelectedItem,
-    setEditorTabNumber,
-    setEditorSearchValue,
+		setEditorLetter,
+		setEditorLetterActOfWriting,
     setEditorPinnedLetters,
     setEditorPinnedLetterViewMode,
+		setEditorSearchValue,
+		setEditorSelectedItem,
+		setEditorTabNumber,
     setReloadLetterContent,
 		setXmlLetterContent,
     setDialogType,

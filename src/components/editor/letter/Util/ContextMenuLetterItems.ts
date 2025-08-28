@@ -8,7 +8,7 @@ export type MenuItemType = {
 	identifier?: string;
   label?: string;
   action?: NodeActionCallback;
-  type?: 'divider' | null;
+  type?: 'divider' | 'inactive' | null;
   hasSubMenu?: boolean;
   subMenu?: {
     label: string;

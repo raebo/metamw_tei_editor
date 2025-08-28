@@ -1,8 +1,56 @@
 import { EditorUtils } from "./index";
 import React from 'react';
 import {NodeAnchestorPath} from "./rightClickPathHandles";
+import {EditorConstants} from "../../constants/editor";
 
 export const xmlCheck = {
+	queryPath: (root: Element | XMLDocument, path: string): Element[] => {
+		const doc = root.nodeType === Node.DOCUMENT_NODE
+			? root as XMLDocument
+			: (root.ownerDocument as XMLDocument);
+
+		if (!doc) return [];
+
+		const xpath = path
+			.split(">")
+			.map(part => {
+				const match = part.match(/^([^\[]+)(\[.*\])?$/); // split name and [..]
+				if (!match) return "";
+
+				const nodeName = match[1].trim();
+				const predicate = match[2]
+					? match[2].replace(/\[([^\]=]+)=/g, "[@$1=") // insert @ before attr name
+					: "";
+
+				return "tei:" + nodeName + predicate;
+			})
+			.join("/");
+
+		const nsResolver = (prefix: string | null): string | null => {
+			if (prefix === "tei") return EditorConstants.TEI_NS;
+			return null;
+		};
+
+		if (!nsResolver)	{ throw new Error("Namespace resolver is not defined"); }
+
+		const result = doc.evaluate(
+			xpath,
+			root,
+			nsResolver,
+			XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+			null
+		);
+
+		const elements: Element[] = [];
+		for (let i = 0; i < result.snapshotLength; i++) {
+			const el = result.snapshotItem(i);
+			if (el && el.nodeType === Node.ELEMENT_NODE) {
+				elements.push(el as Element);
+			}
+		}
+
+		return elements;
+	},
 	extractTeiDocumentFromString: (xmlString: string|  null) : XMLDocument => {
 		if (!xmlString) throw new Error("XML string is null");
 

@@ -86,6 +86,7 @@ export const EditorConstants = {
 		EDIT_NOTE: "EDIT_NOTE",
 		MANAGE_HEADER_AUTHOR_WRITER: "MANAGE_HEADER_AUTHOR_WRITER",
 		MANAGE_HEADER_RECEIVER: "MANAGE_HEADER_RECEIVER",
+		MANAGE_WRITING_ACT_AUTHOR_WRITER: "MANAGE_WRITING_ACT_AUTHOR_WRITER",
 		PUBLISH_LETTER: "PUBLISH_LETTER",
 		RESET_LETTER: "RESET_LETTER",
 		SOURCE_DESC_HANDWRITING: "SOURCE_DESC_HANDWRITING",
@@ -128,6 +129,10 @@ export const EditorConstants = {
       ADDED: "PROTAG_CREATION_ADDED",
       REMOVED: "PROTAG_CREATION_REMOVED",
     },
+		writing_act: {
+			MANAGE_AUTHORS_WRITERS: "ACT_OF_WRITING_MANAGE_AUTHORS_WRITERS",
+			CHANGED_ORDER: "ACT_OF_WRITING_CHANGED_ORDER",
+		},
     misc: {
       ATTACHMENT_ADDED: "ATTACHMENT_ADDED",
       GB_LETTER_ADDED: "GB_LETTER_ADDED",
@@ -171,7 +176,13 @@ export const EditorConstants = {
 		DELETE_NODE: "DELETE_NODE",
 		MANAGE_WRITER_AUTHOR_HEADER: "MANAGE_WRITER_AUTHOR_HEADER",
 		MANAGE_RECEIVER: "MANAGE_RECEIVER",
-		MANAGE_WRITER_AUTHOR_WRITING_ACT: "MANAGE_WRITER_AUTHOR_WRITING_ACT",
+		WRITING_ACT: {
+			LABEL_MOVE_UP: "LABEL_MOVE_UP",
+			LABEL_MOVE_DOWN: "LABEL_MOVE_DOWN",
+			MOVE_UP: "MOVE_UP",
+			MOVE_DOWN: "MOVE_DOWN",
+			MANAGE_AUTHOR_WRITER: "MANAGE_AUTHOR_WRITER",
+		}
 	},
   styles: {
     panel: {
@@ -191,8 +202,8 @@ export const EditorConstants = {
   camelCaseTags: [
     "accMat", "addName", "addrLine", "addSpan", "adminInfo",
     "altGrp", "altIdent", "altIdentifier", "annotationBlock", "anyElement", "appInfo", "attDef", "attList", "attRef", "biblFull", "biblScope", "biblStruct", "binaryObject", "bindingDesc", "calendarDesc", "castGroup", "castItem", "castList", "catDesc", "catRef", "charDecl", "charName", "charProp", "citeData", "citedRange", "citeStructure", "classCode", "classDecl", "classRef", "classSpec", "constraintSpec", "correspAction", "correspContext", "correspDesc", "cRefPattern", "custEvent", "custodialHist", "damageSpan", "dataFacet", "dataRef", "dataSpec", "decoDesc", "decoNote", "defaultVal", "delSpan", "dictScrap", "divGen", "docAuthor", "docDate", "docEdition", "docImprint", "docTitle", "editionStmt", "editorialDecl", "egXML", "eLeaf", "elementRef", "elementSpec", "encodingDesc", "entryFree", "eTree", "fDecl", "fDescr", "figDesc", "fileDesc", "finalRubric", "fLib", "floatingText", "fsConstraints", "fsdDecl", "fsDecl", "fsDescr", "fsdLink", "fvLib", "genName", "geoDecl", "geogFeat", "geogName", "glyphName", "gramGrp", "handDesc", "handNote", "handNotes", "handShift", "headItem", "headLabel", "iNode", "interpGrp", "iType", "joinGrp", "lacunaEnd", "lacunaStart", "langKnowledge", "langKnown", "langUsage", "layoutDesc", "linkGrp", "listAnnotation", "listApp", "listBibl", "listChange", "listEvent", "listForest", "listNym", "listObject", "listOrg", "listPerson", "listPlace", "listPrefixDef", "listRef", "listRelation", "listTranspose", "listWit", "localName", "localProp", "locusGrp", "macroRef", "macroSpec", "measureGrp", "memberOf", "metDecl", "metSym", "modelGrp", "modelSequence", "moduleRef", "moduleSpec", "msContents", "msDesc", "msFrag", "msIdentifier", "msItem", "msItemStruct", "msName", "msPart", "musicNotation", "nameLink", "notatedMusic", "noteGrp", "notesStmt", "objectDesc", "objectIdentifier", "objectName", "objectType", "oRef", "orgName", "origDate", "origPlace", "outputRendition", "paramList", "paramSpec", "particDesc", "persName", "personGrp", "persPronouns", "physDesc", "placeName", "postBox", "postCode", "pRef", "prefixDef", "profileDesc", "projectDesc", "publicationStmt", "pubPlace", "rdgGrp", "recordHist", "recordingStmt", "refsDecl", "refState", "relatedItem", "respStmt", "revisionDesc", "roleDesc", "roleName", "samplingDecl", "schemaRef", "schemaSpec", "scriptDesc", "scriptNote", "scriptStmt", "sealDesc", "secFol", "seriesStmt", "settingDesc", "soCalled", "socecStatus", "sourceDesc", "sourceDoc", "spanGrp", "specDesc", "specGrp", "specGrpRef", "specList", "spGrp", "standOff", "stdVals", "styleDefDecl", "substJoin", "superEntry", "supportDesc", "surfaceGrp", "tagsDecl", "tagUsage", "teiCorpus", "teiHeader", "textClass", "textDesc", "textLang", "textNode", "titlePage", "titlePart", "titleStmt", "transcriptionDesc", "typeDesc", "typeNote", "unicodeName", "unicodeProp", "unihanProp", "unitDecl", "unitDef", "valDesc", "valItem", "valList", "vAlt", "variantEncoding", "vColl", "vDefault", "vLabel", "vMerge", "vNot", "vRange", "witDetail", "witEnd", "witStart", "xenoData"
-  ]
-
+  ],
+	TEI_NS: 'http://www.tei-c.org/ns/1.0'
 } as const
 
 

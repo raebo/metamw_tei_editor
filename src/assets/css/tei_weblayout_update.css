@@ -70,54 +70,86 @@ div [type="act_of_writing"] {
 
 
 
-
-teiHeader {
-   fileDesc {
-     titleStmt {
-         author {
-             display: block;
-             font-weight: bold;
-             cursor: pointer;
-         }
-        respStmt {
-            display: block;
-            name {
-                display: inline-block;
-                font-weight: bold;
-                cursor: pointer;
-            }
-            resp {
-                display: inline-block;
-                font-style: italic;
-            }
-            persname {
-                cursor: pointer;
-            }
-        }
-     }
-   profileDesc {
-     correspDesc {
-         correspAction {
-             persName {
-             }
-         }
-     }
-   }
-   sourceDesc {
-     msDesc {
-        physDesc {
-           accMat {
-              listBibl {
-                 bibl {
+tei {
+    teiHeader {
+        fileDesc {
+            titleStmt {
+                author {
+                    display: block;
+                    font-weight: bold;
                     cursor: pointer;
-                 }
-              }
+                }
+                respStmt {
+                    display: block;
+                    name {
+                        display: inline-block;
+                        font-weight: bold;
+                        cursor: pointer;
+                    }
+                    resp {
+                        display: inline-block;
+                        font-style: italic;
+                    }
+                    persname {
+                        cursor: pointer;
+                    }
+                }
+            }
+            profileDesc {
+                correspDesc {
+                    correspAction {
+                        persName {
+                        }
+                    }
+                }
+            }
+            sourceDesc {
+                msDesc {
+                    physDesc {
+                        accMat {
+                            listBibl {
+                                bibl {
+                                    cursor: pointer;
+                                }
+                            }
 
-           }
+                        }
+                    }
+                }
+            }
         }
-     }
-   }
-  }
+    }
+    body {
+        div[type="act_of_writing"]::before {
+            content: "▶";
+            font-size: 60%;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        div[type="act_of_writing"] {
+            counter-reset: authorCounter writerCounter;
+
+            docAuthor[resp="author"]::before {
+                counter-increment: authorCounter;
+                content: "Autor " counter(authorCounter) ". : ";
+                font-size: 100%;
+                font-weight: bold;
+                margin-right: 5px;
+            }
+            docAuthor[resp="writer"]::before {
+                counter-increment: writerCounter;
+                content: "Schreiber " counter(writerCounter) ". : ";
+                font-size: 100%;
+                font-weight: bold;
+                margin-right: 5px;
+            }
+            docAuthor {
+                margin: 10px 5px;
+                display: block;
+                font-size: 60%;
+            }
+        }
+    }
 }
 
 profileDesc correspDesc correspAction[type="received"] persName,

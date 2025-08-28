@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import { DefaultDialogProps } from '../EditorFormDialog';
-import {EditorConstants, EntityType, HeaderPerson} from '../../../../../constants/editor';
-import FormAutocomplete from '../../Util/FormAutocomplete';
+import { DefaultDialogProps } from '../../EditorFormDialog';
+import {EditorConstants, EntityType, HeaderPerson} from '../../../../../../constants/editor';
+import FormAutocomplete from '../../../Util/FormAutocomplete';
 import {
 	Box, Checkbox,
 	Divider,
@@ -12,25 +12,25 @@ import {
 	ListItemText,
 	Typography
 } from '@mui/material';
-import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
-import { DISPLAY_NAME_MAP } from '../../../../../utils/entityMappings';
-import { fetchMetamwEntityData } from '../../../../../services/auto_anno/apiMetaMw.service';
+import DynamicDataDisplay from '../../../../../support/DynamicDataDisplay';
+import { DISPLAY_NAME_MAP } from '../../../../../../utils/entityMappings';
+import { fetchMetamwEntityData } from '../../../../../../services/auto_anno/apiMetaMw.service';
 import { enqueueSnackbar } from 'notistack';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../../redux/redux.store';
-import { markupGeneration } from '../../../../../utils/editor/markupGeneration';
-import { EditorUtils } from '../../../../../utils/editor';
-import { setReloadLetterContent } from '../../../../../redux/slices/editor.letter.slice';
-import { useAppDispatch } from '../../../../../redux/hooks';
-import { ActOfWritingElement } from '../../../../../services/mappings/editorMappings';
+import { RootState } from '../../../../../../redux/redux.store';
+import { markupGeneration } from '../../../../../../utils/editor/markupGeneration';
+import { EditorUtils } from '../../../../../../utils/editor';
+import { setReloadLetterContent } from '../../../../../../redux/slices/editor.letter.slice';
+import { useAppDispatch } from '../../../../../../redux/hooks';
+import { ActOfWritingElement } from '../../../../../../services/mappings/editorMappings';
 import DialogContent from "@mui/material/DialogContent";
-import {DialogActionButton} from "./Misc/DialogActionButton";
-import {SnippetEntity} from "../../../../../services/mappings/autoAnnoMappings";
+import {DialogActionButton} from "../Misc/DialogActionButton";
+import {SnippetEntity} from "../../../../../../services/mappings/autoAnnoMappings";
 import InfoIcon from "@mui/icons-material/Info";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import {searchEditortEntities} from "../../../../../services/editor/apiLetterRequest.service";
-import {MiscUtils} from "../../../../../utils/misc";
+import {searchEditortEntities} from "../../../../../../services/editor/apiLetterRequest.service";
+import {MiscUtils} from "../../../../../../utils/misc";
 
 type CompletionState = {
   authorCompleteAvailable: boolean;

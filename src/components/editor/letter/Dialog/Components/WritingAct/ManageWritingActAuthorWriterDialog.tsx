@@ -1,54 +1,53 @@
-import {DefaultDialogProps} from "../EditorFormDialog";
-import React, {useEffect, useState} from 'react';
-import {EditorConstants, EntityType, HeaderPerson} from "../../../../../constants/editor";
-import {EditorUtils} from "../../../../../utils/editor";
+import {DefaultDialogProps} from "../../EditorFormDialog";
+import {useAppDispatch} from "../../../../../../redux/hooks";
+import {useSelector} from "react-redux";
+import {RootState} from "../../../../../../redux/redux.store";
+import React, {useEffect, useState} from "react";
+import {setReloadLetterContent} from "../../../../../../redux/slices/editor.letter.slice";
+import {EditorUtils} from "../../../../../../utils/editor";
 import {enqueueSnackbar} from "notistack";
-import {MiscUtils} from "../../../../../utils/misc";
+import {MiscUtils} from "../../../../../../utils/misc";
+import {EditorConstants, EntityType, HeaderPerson} from "../../../../../../constants/editor";
+import DialogContent from "@mui/material/DialogContent";
+import DynamicDataDisplay from "../../../../../support/DynamicDataDisplay";
+import {DISPLAY_NAME_MAP} from "../../../../../../utils/entityMappings";
 import {
 	Box, Checkbox,
-	Divider, FormControlLabel, FormGroup,
+	Divider,
+	FormControlLabel,
+	FormGroup,
 	IconButton,
 	List,
 	ListItem,
 	ListItemText,
 	Typography
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 import InfoIcon from "@mui/icons-material/Info";
-import {fetchMetamwEntityData} from "../../../../../services/auto_anno/apiMetaMw.service";
-import DynamicDataDisplay from "../../../../support/DynamicDataDisplay";
-import {DISPLAY_NAME_MAP} from "../../../../../utils/entityMappings";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {fetchMetamwEntityData} from "../../../../../../services/auto_anno/apiMetaMw.service";
+import {SnippetEntity} from "../../../../../../services/mappings/autoAnnoMappings";
+import FormAutocomplete from "../../../Util/FormAutocomplete";
 import AddIcon from "@mui/icons-material/Add";
-import {SnippetEntity} from "../../../../../services/mappings/autoAnnoMappings";
-import {searchEditortEntities} from "../../../../../services/editor/apiLetterRequest.service";
-import DialogContent from "@mui/material/DialogContent";
-import {setReloadLetterContent} from "../../../../../redux/slices/editor.letter.slice";
-import {useSelector} from "react-redux";
-import {RootState} from "../../../../../redux/redux.store";
-import {useAppDispatch} from "../../../../../redux/hooks";
-import {DialogActionButton} from "./Misc/DialogActionButton";
-import FormAutocomplete from "../../Util/FormAutocomplete";
+import {searchEditortEntities} from "../../../../../../services/editor/apiLetterRequest.service";
+import {DialogActionButton} from "../Misc/DialogActionButton";
 
-
-const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
-
+const ManageWritingActAuthorWriterDialog = (props: DefaultDialogProps) => {
 	const dispatch = useAppDispatch();
+	const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
+	const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
+	const stateActOfWriting= useSelector((state: RootState) => state.editorLetter.letter.actOfWriting)
+
 	const [authors, setAuthors] = React.useState<HeaderPerson[]>([]);
 	const [writers, setWriters] = React.useState<HeaderPerson[]>([]);
+	const [people, setPeople] = useState<SnippetEntity[]>([]);
 	const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
 	const [roleAuthor, setRoleAuthor] = React.useState<boolean>(true);
 	const [roleWriter, setRoleWriter] = React.useState<boolean>(true);
-	const [people, setPeople] = useState<SnippetEntity[]>([]);
 	const [selectedPerson, setSelectedPerson] = React.useState<SnippetEntity | null>(null)
-	const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
-	const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
 
-	const [parsedXml, setParsedXml] = React.useState<{
-		xmlDoc: XMLDocument | null;
-		teiHeader: Element | null;
-	}>({ xmlDoc: null, teiHeader: null });
+	const [xmlDoc, setXmlDoc] = React.useState< XMLDocument | null>(null);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (!stateTeiXml) {
 			dispatch(setReloadLetterContent({ reloadLetterContent: true }));
 			return;
@@ -56,22 +55,24 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 
 		try {
 			const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
-			const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(xmlDoc);
-			setParsedXml({ xmlDoc, teiHeader });
+			setXmlDoc(xmlDoc);
 		} catch (err) {
 			enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: "error" });
-			setParsedXml({ xmlDoc: null, teiHeader: null });
+			setXmlDoc(null);
 		}
 	}, [stateTeiXml, dispatch]);
 
-	const { xmlDoc, teiHeader } = parsedXml;
-
 	useEffect(() => {
-		const setAuthorWriterData = () => {
-			const { authors, writers } = EditorUtils.teiHeaderContent.extractAuthorWriters(teiHeader);
+		const extractExistingAuthorsWriters = (xmlDoc: XMLDocument) => {
+			try {
+				const { authors, writers } = EditorUtils.writingActContent.extractAuthorsWriters(xmlDoc, stateActOfWriting.orderNumber);
 
-			setAuthors(authors);
-			setWriters(writers);
+				setAuthors(authors);
+				setWriters(writers);
+
+			} catch (error) {
+				enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+			}
 		}
 
 		const fetchDefaultPeople = async () => {
@@ -88,16 +89,13 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 			}
 		};
 
-		if (teiHeader) {
-			try {
-				setAuthorWriterData();
-				fetchDefaultPeople();
-			} catch (error) {
-				enqueueSnackbar("Fehler beim Lesen der TEI-Header-Daten: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
-			}
+		if (xmlDoc) {
+			extractExistingAuthorsWriters(xmlDoc);
+			fetchDefaultPeople()
 		}
 
-	}, [teiHeader]);
+	}, [xmlDoc]);
+
 
 	const handleInfoIconClick = async (reference: HeaderPerson) => {
 		if (!reference.key) {
@@ -142,32 +140,38 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 		setSelectedPerson(null)
 	}
 
+
 	const handleSave = async () => {
-		if (!xmlDoc || !teiHeader) {
-			enqueueSnackbar("TEI-Header ist nicht verfügbar", { variant: "error" });
+		if (!xmlDoc) {
+			enqueueSnackbar("Xml Document ist nicht verfügbar", { variant: "error" });
 			return false;
 		}
 
 		try {
-			EditorUtils.teiHeaderContent.setAuthorWritersFirstPosition(teiHeader, authors, writers);
-			EditorUtils.teiHeaderContent.setAuthorsWritersSndPosition(teiHeader, authors, writers);
+			EditorUtils.writingActContent.setAuthorsWriters(xmlDoc, stateActOfWriting.orderNumber, authors, writers);
 
 			const serializer = new XMLSerializer();
 
 			const result = await EditorUtils.backendService.patchContent(
-				serializer.serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.misc.HEADER_UPDATED, null)
+				serializer.serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.writing_act.MANAGE_AUTHORS_WRITERS, null
+			)
 
 			if (result) {
 				dispatch(setReloadLetterContent({ reloadLetterContent: true }))
-				enqueueSnackbar("Die Autoren/Schreiber des Briefes wurden erfolgreich gespeichert", { variant: "success" })
+				enqueueSnackbar("Authoren/Schreiber erfolgreich im Schreibakt gespeichert", { variant: "success" });
+			} else {
+				enqueueSnackbar("Daten konnten auf der Serverseite nicht aktualisiert werden", { variant: "error" });
+				return false;
 			}
-		} catch (error) {
-			enqueueSnackbar("Fehler beim Schreiben der TEI-Header-Daten: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+		} catch (error)	{
+			enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
 			return false;
+		} finally {
+			props.onClose()
 		}
-		return true;
-	}
 
+		return true
+	}
 
 	return (
 		<>
@@ -219,7 +223,6 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 						))}
 					</List>
 				</div>
-
 				<div className={"autoSnippetFormRow"} style={{ marginTop: "25px", width: "98%" }}>
 					<Divider sx={{ my: 2 }} />
 
@@ -274,9 +277,9 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 				</div>
 			</DialogContent>
 			<Divider />
-			<DialogActionButton label={"Authoren/Schreiber im Header Speichern"} onClick={ handleSave } disabled={false} />
+			<DialogActionButton label={"Authoren/Schreiber im Schreibakt Speichern"} onClick={ handleSave } disabled={false} />
 		</>
-	)
+	);
 }
 
-export default ManageTeiHeaderAuthorWriterDialog
+export default ManageWritingActAuthorWriterDialog;

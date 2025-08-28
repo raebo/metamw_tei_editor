@@ -7,7 +7,7 @@ import {RootState} from "../../../../../redux/redux.store";
 import {EditorConstants, LetterState} from "../../../../../constants/editor";
 import {EditorUtils} from "../../../../../utils/editor";
 import {
-	setDialogType,
+	setDialogType, setEditorLetterActOfWriting,
 	setEditorSelectedItem, setNodeClicked,
 	setReloadLetterContent
 } from "../../../../../redux/slices/editor.letter.slice";
@@ -39,6 +39,23 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 	const [submenuAnchorEl, setSubmenuAnchorEl] = useState<null | HTMLElement>(null);
 	const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
 
+	const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
+	const xmlDocRef = React.useRef<XMLDocument | null>(null);
+
+	useEffect(() => {
+		if (!stateTeiXml) {
+			dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+			return;
+		}
+
+		try {
+			xmlDocRef.current = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
+		} catch (err) {
+			enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: "error" });
+			xmlDocRef.current = null;
+		}
+	}, [stateTeiXml, dispatch]);
+
 	useEffect(() => {
 		if (
 			xmlContentRef.current
@@ -55,8 +72,6 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [props.xmlContentRef]);
-
-
 
 
 	const handleMenuItemClick = (selectedItemLeft: string | null, selectedItemRight: string | null) => {
@@ -153,7 +168,79 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 		}
 	};
 
-	const menuItemsNoMarking : MenuItemType[] = [
+	const menuItemsNoMarking : MenuItemType[] = React.useMemo(() => [
+		{ identifier: EditorConstants.menuItemTypes.WRITING_ACT.LABEL_MOVE_DOWN, label: "Verschieben Unten", type: 'inactive' },
+		{ identifier: EditorConstants.menuItemTypes.WRITING_ACT.LABEL_MOVE_UP, label: "Verschieben Oben", type: 'inactive'},
+		{ identifier: EditorConstants.menuItemTypes.WRITING_ACT.MOVE_DOWN, label: "Verschieben Unten", action: async ({node}: { node?: Node}) =>
+			{
+				try {
+					const currentDoc = xmlDocRef.current;
+					if (!currentDoc) {
+						enqueueSnackbar("No xml document found", { variant: "error" });
+						return;
+					}
+					EditorUtils.writingActContent.moveActDown(currentDoc, node as Element)
+
+					const result = await EditorUtils.backendService.patchContent(
+						new XMLSerializer().serializeToString(currentDoc), stateEditorLetter.id, EditorConstants.changeTypes.writing_act.CHANGED_ORDER, null
+					)
+
+					if (result) {
+						dispatch(setReloadLetterContent({ reloadLetterContent: true }))
+						enqueueSnackbar("Schreibakt wurde verschoben", { variant: "success" })
+					} else {
+						enqueueSnackbar("Data could not be updated on backend side", { variant: "error" })
+					}
+
+				} catch (error) {
+					console.log("error", error)
+					enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+				}
+			}
+		},
+		{ identifier: EditorConstants.menuItemTypes.WRITING_ACT.MOVE_UP, label: "Verschieben Oben", action: async ({node}: { node?: Node}) =>
+			{
+				try {
+					const currentDoc = xmlDocRef.current;
+					if (!currentDoc) {
+						enqueueSnackbar("No xml document found", { variant: "error" });
+						return;
+					}
+					EditorUtils.writingActContent.moveActUp(currentDoc, node as Element)
+
+					const result = await EditorUtils.backendService.patchContent(
+						new XMLSerializer().serializeToString(currentDoc), stateEditorLetter.id, EditorConstants.changeTypes.writing_act.CHANGED_ORDER, null
+					)
+
+					if (result) {
+						dispatch(setReloadLetterContent({ reloadLetterContent: true }))
+						enqueueSnackbar("Schreibakt wurde verschoben", { variant: "success" })
+					} else {
+						enqueueSnackbar("Data could not be updated on backend side", { variant: "error" })
+					}
+
+				} catch (error) {
+					enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+				}
+
+			}
+		},
+		{
+			identifier: EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_AUTHOR_WRITER, label: "Schreiber/Autoren Verwalten", action: async ({node}: { node?: Node }) => {
+				try {
+					if (!node) throw new Error("No node given as value")
+
+					const numberOfAct = (node as Element).getAttribute('n');
+
+					if (!numberOfAct) throw new Error("No act number found on node")
+
+					dispatch(setEditorLetterActOfWriting({ letter: { actOfWriting: { orderNumber: numberOfAct } }  } ))
+					dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER}))
+				} catch(error) {
+					enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+				}
+			}
+		},
 		{
 			identifier: EditorConstants.menuItemTypes.DELETE_NODE, label: 'Eintrag Entfernen', action: async ({ node }: { node?: Node }) => {
 				try {
@@ -178,7 +265,6 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 						null,
 					)
 					if (result) {
-
 						dispatch(setReloadLetterContent({ reloadLetterContent: true }))
 						enqueueSnackbar(`${anchNode.nodeType.name} wurde entfernt`, { variant: "success" })
 					} else {
@@ -192,7 +278,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 		{
 			identifier: EditorConstants.menuItemTypes.MANAGE_WRITER_AUTHOR_HEADER, label: 'Autoren/Schreiber Verwalten', action: async ({node}: { node?: Node }) => {
 				try {
-					if (!node) throw new Error("No node given as value")
+					if(!node) throw new Error("No node given as value")
 
 					dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER}))
 
@@ -213,7 +299,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 				}
 			}
 		}
-	]
+	], [stateTeiXml]);
 
 
 	useEffect(() => {
@@ -243,8 +329,47 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 		if (event.button !== 2) return; // Only right-click
 		event.preventDefault();
 
+		const getMenuItem = (id: string) =>
+			menuItemsNoMarking.find(item => item.identifier === id);
+
+		const hasNoUndefinedItems = (items: (MenuItemType | undefined)[]) =>
+			items.every(item => item !== undefined);
+
 		const menuItemsToAdd : MenuItemType[] = []
 		const isClickableNode : boolean[] = []
+
+		EditorUtils.xmlCheck.isNodeMatchingPath(
+			event.target as Node,
+			EditorUtils.rightClickPathHandles.manageWritingActPaths(),
+			(node: Node) => {
+
+				setSelectedNode(node);
+
+				const itemsToAdd: (MenuItemType | undefined)[] = [
+					getMenuItem(EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_AUTHOR_WRITER),
+					getMenuItem(
+						EditorUtils.writingActContent.currentActIsMovableUp(node as Element)
+							? EditorConstants.menuItemTypes.WRITING_ACT.MOVE_UP
+							: EditorConstants.menuItemTypes.WRITING_ACT.LABEL_MOVE_UP
+					),
+					getMenuItem(
+						EditorUtils.writingActContent.currenActIsMovableDown(node as Element)
+							? EditorConstants.menuItemTypes.WRITING_ACT.MOVE_DOWN
+							: EditorConstants.menuItemTypes.WRITING_ACT.LABEL_MOVE_DOWN
+					),
+				];
+
+				if (hasNoUndefinedItems(itemsToAdd)) {
+					itemsToAdd.map(item => {
+						if (item) menuItemsToAdd.push(item);
+					})
+					isClickableNode.push(true);
+				}
+			},
+			(message: string) => {
+				isClickableNode.push(false);
+			}
+		);
 
 		EditorUtils.xmlCheck.isNodeMatchingPath(
 			event.target as Node,
@@ -254,10 +379,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 				EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
 				setSelectedNode(node)
 
-
-				const itemToAdd = menuItemsNoMarking.find(
-					item => item.identifier === EditorConstants.menuItemTypes.DELETE_NODE
-				);
+				const itemToAdd = getMenuItem(EditorConstants.menuItemTypes.DELETE_NODE)
 
 				if (itemToAdd) {
 					menuItemsToAdd.push(itemToAdd);
@@ -275,10 +397,8 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 			(node: Node) => {
 
 				setSelectedNode(node)
+				const itemToAdd = getMenuItem(EditorConstants.menuItemTypes.MANAGE_WRITER_AUTHOR_HEADER)
 
-				const itemToAdd = menuItemsNoMarking.find(
-					item => item.identifier === EditorConstants.menuItemTypes.MANAGE_WRITER_AUTHOR_HEADER
-				);
 				if (itemToAdd) {
 					menuItemsToAdd.push(itemToAdd);
 					isClickableNode.push(true);
@@ -287,7 +407,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 			(message: string) => {
 				isClickableNode.push(false);
 			}
-		)
+		);
 
 		EditorUtils.xmlCheck.isNodeMatchingPath(
 			event.target as Node,
@@ -295,10 +415,8 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 			(node: Node) => {
 
 				setSelectedNode(node)
+				const itemToAdd = getMenuItem(EditorConstants.menuItemTypes.MANAGE_RECEIVER)
 
-				const itemToAdd = menuItemsNoMarking.find(
-					item => item.identifier === EditorConstants.menuItemTypes.MANAGE_RECEIVER
-				);
 				if (itemToAdd) {
 					menuItemsToAdd.push(itemToAdd);
 					isClickableNode.push(true);
@@ -309,25 +427,28 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 			}
 		)
 
-		if (isClickableNode.filter((entry) => entry ).length > 0) {
-			props.setLetterState({
-				viewMode: "WYSIWYG",
-				xmlContent: xmlContentRef.current?.innerHTML ?? ""
-			})
-
-			dispatch(setEditorNodeClickedAndContentLeftRightThunk({
-				nodeClicked: true,
-				textIsMarked: false,
-				contentLeft: null,
-				contentRight: null
-			}));
-
-			setDisplayMenuItems([ ...displayMenuItems, ...menuItemsToAdd]);
-
-		} else {
+		if (isClickableNode.filter((entry) => entry ).length === 0) {
 			props.setAnchorPosition(null)
 			dispatch(setNodeClicked({nodeClicked: false}));
+
+			return
 		}
+
+
+		props.setLetterState({
+			viewMode: "WYSIWYG",
+			xmlContent: xmlContentRef.current?.innerHTML ?? ""
+		})
+
+		dispatch(setEditorNodeClickedAndContentLeftRightThunk({
+			nodeClicked: true,
+			textIsMarked: false,
+			contentLeft: null,
+			contentRight: null
+		}));
+
+		setDisplayMenuItems([ ...displayMenuItems, ...menuItemsToAdd]);
+
 	};
 
 	const handleCloseAll = () => {
@@ -352,6 +473,10 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 				{ displayMenuItems.map((item, index) =>
 					item.type === "divider" ? (
 						<Divider key={index} />
+					) : item.type === "inactive" ? (
+						<MenuItem key={index} disabled sx={{ fontSize: '90%', opacity: 1, fontWeight: 'normal' }}>
+							{ item.label }
+						</MenuItem>
 					) : (
 						<MenuItem
 							key={index}

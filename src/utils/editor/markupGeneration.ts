@@ -346,7 +346,7 @@ export const markupGeneration = {
   },
 
   insertActOfWritingBlock: (
-    xmlDoc: Document,
+    xmlDoc: XMLDocument,
     authorWriters: ActOfWritingElement[],
   ) : void  => {
 
@@ -358,9 +358,10 @@ export const markupGeneration = {
 			throw new Error('Could not insert act_of_writing block, because no <body> tag was found.')
 		}
 
-    const div = xmlDoc.createElement("div");
+		const div = xmlDoc.createElementNS(EditorConstants.TEI_NS, "div");
     div.setAttribute("type", "act_of_writing");
     div.setAttribute("n", nValue.toString());
+		div.setAttribute("xml:id", EditorUtils.markupGeneration.generateXmlId('div'));
 
     const rolePriority: Record<"author" | "writer", number> = {
       author: 0,
@@ -377,10 +378,9 @@ export const markupGeneration = {
       div.appendChild(docAuthor);
     })
 
-    const paragraph = xmlDoc.createElement("p");
+    const paragraph = xmlDoc.createElementNS(EditorConstants.TEI_NS, "p");
     paragraph.setAttribute("style", "paragraph_without_indent");
 
-    // Create the oxy processing instructions
     const startPI = xmlDoc.createProcessingInstruction(
       "oxy_custom_start",
       'type="oxy_content_highlight" color="235,192,230"'

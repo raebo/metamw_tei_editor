@@ -31,6 +31,19 @@ export namespace rightClickPathHandles {
 		},
 	];
 
+	export const manageWritingActPaths = (): NodeAnchestorPath[] => [
+		{
+			parentPath: "tei text body div",
+			nodeType: nodeTypes.get(NodeTypes.WRITING_ACT),
+			checkElementDetails: (nodeElement: Element): boolean => {
+				// console.log("Checking writing act for", nodeElement.nodeName.toLowerCase() === 'div' && nodeElement.getAttribute("type") === "act_of_writing");
+				return nodeElement.nodeName.toLowerCase() === "div" && nodeElement.getAttribute("type") === "act_of_writing";
+			},
+			afterActionCallback: (xmlDoc: Document, node: Node) =>
+				xmlCheck.serializeDocument(xmlDoc),
+		}
+	]
+
 	export const manageAuthorWriterAnchestorPaths = (): NodeAnchestorPath[] => [
 		{
 			parentPath: "tei teiheader profiledesc correspdesc correspaction persname",

@@ -10,6 +10,7 @@ import { creationDataService } from "./creationDataService";
 import { placeDataService } from "./placeDataService";
 import { protagCreationDataService } from './protagCreationDataService';
 import {teiHeaderContent} from "./teiHeaderContent";
+import {writingActContent} from "./writingActContent";
 
 export const EditorUtils = {
   backendService,
@@ -23,5 +24,6 @@ export const EditorUtils = {
   rightClickPathHandles,
 	teiHeaderContent,
   textMarking,
+	writingActContent,
   xmlCheck,
 }
