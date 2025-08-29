@@ -32,16 +32,18 @@ export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
       letter,
       tabNumber,
     }: {
-      letter: { id: number; name: string; viewMode: 'CODE' | 'WYSIWYG' | null };
+      letter: { id: number; name: string; viewMode: 'CODE' | 'WYSIWYG' | null, xmlContent: string | null };
       tabNumber: number;
     },
     { dispatch },
   ) => {
-
+    
+    dispatch(setReloadLetterContent({ reloadLetterContent: false} ))
     dispatch(setEditorLetter({ letter: letter }));
     dispatch(setEditorTabNumber({ tabNumber }));
+    dispatch(setReloadLetterContent({ reloadLetterContent: true } ))
     if (tabNumber === -1) {
-      dispatch(setEditorLetter({ letter: { id: null, name: null } }));
+      dispatch(setEditorLetter({ letter: { id: null, name: null } } ));
     }
   },
 );

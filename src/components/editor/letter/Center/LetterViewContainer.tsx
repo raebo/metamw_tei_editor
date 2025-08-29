@@ -10,6 +10,7 @@ import { fetchPinnedLetterData } from "../../../../services/editor/apiPinnedLett
 import LetterViewCode from './LetterViewCode';
 import RightClickActionMenu from "./LetterViewContainer/RightClickActionMenu";
 import {setReloadXmlContentLetterThunk} from "../../../../redux/thunks/editor.letter.thunk";
+import StateInfo from "./StateInfo";
 
 const LetterViewContainer = () => {
   const dispatch = useAppDispatch();
@@ -27,7 +28,8 @@ const LetterViewContainer = () => {
   });
 
   const reloadLetterContent = useSelector((state: RootState) => state.editorLetter.reloadLetterContent);
-
+  const isDebugMode= process.env.REACT_DEBUG_MODE === "true";
+  
   const fetchSingleLetterData = async (letterId: number) : Promise<string> => {
     try {
       const result = await fetchLetterData(letterId)
@@ -94,7 +96,7 @@ const LetterViewContainer = () => {
     if (reloadLetterContent && stateEditorLetter?.id !== null) {
 			reloadNewData()
     }
-  }, [reloadLetterContent]);
+  }, [reloadLetterContent, stateEditorLetter]);
 
 	// 👇 memoize XMLDisplayParser so it only re-renders if xmlContent changes
 	const parserXmlMemo = useMemo(() => {
@@ -155,6 +157,13 @@ const LetterViewContainer = () => {
           ) }
         </div>
       </div>
+      { isDebugMode ?  (
+        <StateInfo />
+        ) : (
+        <></>
+        )
+      }
+      
     </div>
   );
 }

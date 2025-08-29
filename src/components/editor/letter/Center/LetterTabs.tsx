@@ -16,6 +16,7 @@ import {
   setEditorTabAndPinnedLetterThunk
 } from "../../../../redux/thunks/editor.letter.thunk";
 import { useAppDispatch } from "../../../../redux/hooks";
+import {fetchLetterData} from "../../../../services/editor/apiLettersRequest.service";
 
 const updatePinnedLetterStatus = (
   pinnedLetters: PinnedLetter[],
@@ -67,9 +68,21 @@ const LetterTabs = () => {
   }, [statePinnedLetters]);
 
   const handleTabChange = (_: React.SyntheticEvent, newTabValue: number) => {
+    const newPinndedLetter = statePinnedLetters[newTabValue];
+    let newXmlContent : string | null = null
+    
+    fetchLetterData(newPinndedLetter.id).then((letter) => {
+      if (!letter) {
+        enqueueSnackbar(`Failed to fetch letter data for letter ID: ${newPinndedLetter.id}`, { variant: "error" });
+        return;
+      }
+      
+      newXmlContent = letter.xmlContent
+    })
+    
     dispatch(
       setEditorTabAndPinnedLetterThunk({
-        letter: { id: statePinnedLetters[newTabValue].id, name: statePinnedLetters[newTabValue].name, viewMode: statePinnedLetters[newTabValue].viewMode },
+        letter: { id: newPinndedLetter.id, name: newPinndedLetter.name, viewMode: newPinndedLetter.viewMode, xmlContent: newXmlContent },
         tabNumber: newTabValue,
       })
     )

@@ -35,6 +35,7 @@ export interface PinnedLetter {
   name: string,
   contentChanged: boolean,
   isPinned: boolean,
+  xmlContentCurrent?: string | null,
   viewMode: "CODE" | "WYSIWYG" | null
 }
 export interface SearchLetter {
@@ -47,6 +48,7 @@ export interface ApiPinnedLetter {
   id: number,
   name: string,
   content_changed: boolean
+  xml_content_current?: string | null,
 }
 
 export interface EditorLetterData {
@@ -166,6 +168,7 @@ export const mapApiToPinnedLetter = (apiPinnedLetter: ApiPinnedLetter): PinnedLe
     id: apiPinnedLetter.id,
     name: apiPinnedLetter.name,
     contentChanged: apiPinnedLetter.content_changed,
+    xmlContentCurrent: apiPinnedLetter.xml_content_current ?? null,
     isPinned: true,
     viewMode: 'WYSIWYG'
   }

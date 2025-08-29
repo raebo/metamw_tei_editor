@@ -11,10 +11,11 @@ interface EditorLetterSlice {
 			orderNumber: number | null
 		}
   },
-  tabLetter: {
+  tabLetter: { //PinnedLetter
     id: number | null
     name: string | null
     contentChanged: boolean | null
+    xmlContentCurrent?: string | null
     isPinned: boolean | null // remote pinned letters are pinned
     viewMode: 'CODE' | 'WYSIWYG' | null
   },
@@ -53,6 +54,7 @@ const initialState: EditorLetterSlice = {
     id: null,
     name: null,
     contentChanged: null,
+    xmlContentCurrent: null,
     isPinned: null,
     viewMode: null
   },
