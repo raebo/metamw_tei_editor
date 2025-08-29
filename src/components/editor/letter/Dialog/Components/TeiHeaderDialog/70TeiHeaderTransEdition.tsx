@@ -39,7 +39,6 @@ const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {
 			props.onChange({ letterLanguage: Array.from(new Set([...letterLanguages, language]) ) });
 			setSelectedLang("");
 		}
-
 	}
 
 	const handleRemoveLanguage = (lang: LanguageOption) => {

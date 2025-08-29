@@ -119,6 +119,13 @@ tei {
             }
         }
     }
+    profileDesc {
+        langusage {
+            language:not(:first-child)::before {
+              padding-left: 5px;
+            }
+        }
+    }
     body {
         div[type="act_of_writing"]::before {
             content: "▶";

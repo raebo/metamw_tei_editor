@@ -277,7 +277,7 @@ const ManageWritingActAuthorWriterDialog = (props: DefaultDialogProps) => {
 				</div>
 			</DialogContent>
 			<Divider />
-			<DialogActionButton label={"Authoren/Schreiber im Schreibakt Speichern"} onClick={ handleSave } disabled={false} />
+			<DialogActionButton label={"Autoren/Schreiber im Schreibakt Speichern"} onClick={ handleSave } disabled={false} />
 		</>
 	);
 }

@@ -30,6 +30,13 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR) }
   },
+  "alt+j": {
+    key: "alt+j",
+    description: "Sprachen Verwalten",
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.EDIT_LANGUAGES) }
+  },
   "ctrl+t": {
     key: "ctrl+t",
     description: "Quellenbeschreibung Handschrift",

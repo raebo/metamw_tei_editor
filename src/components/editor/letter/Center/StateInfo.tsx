@@ -4,29 +4,16 @@ import {useSelector} from "react-redux";
 import {RootState} from "../../../../redux/redux.store";
 import React from "react";
 import {setReloadLetterContent} from "../../../../redux/slices/editor.letter.slice";
-import {EditorUtils} from "../../../../utils/editor";
-import {enqueueSnackbar} from "notistack";
-import {MiscUtils} from "../../../../utils/misc";
 
 const StateInfo = () => {
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
   const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
   
-  const [xmlDoc, setXmlDoc] = React.useState< XMLDocument | null>(null);
-  
   React.useEffect(() => {
     if (!stateTeiXml) {
       dispatch(setReloadLetterContent({ reloadLetterContent: true }));
       return;
-    }
-    
-    try {
-      const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
-      setXmlDoc(xmlDoc);
-    } catch (err) {
-      enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: "error" });
-      setXmlDoc(null);
     }
   }, [stateTeiXml]);
   

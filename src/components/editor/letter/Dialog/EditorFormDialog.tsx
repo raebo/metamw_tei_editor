@@ -23,6 +23,7 @@ import ChooseProtagLetterDialog from './Components/AssignLetterDialog/ChooseProt
 import ManageTeiHeaderAuthorWriterDialog from "./Components/ManageTeiHeaderAuthorWriterDialog";
 import ManageTeiHeaderReceiverDialog from "./Components/ManageTeiHeaderReceiverDialog";
 import ManageWritingActAuthorWriterDialog from "./Components/WritingAct/ManageWritingActAuthorWriterDialog";
+import EditLanguagesDialog from "./Components/Misc/EditLanguagesDialog";
 
 interface EditorFormDialogProps {
   open: boolean
@@ -66,6 +67,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
 
   const DialogTitles : Record<string, string> = {
     [EditorConstants.dialogTypes.ADD_NOTE]: "Kommentar Hinzufügen",
+    [EditorConstants.dialogTypes.EDIT_LANGUAGES]: "Sprachen Verwalten",
     [EditorConstants.dialogTypes.EDIT_NOTE]: "Kommentar Bearbeiten/Löschen",
     [EditorConstants.dialogTypes.RESET_LETTER]: "Brief Zurücksetzen",
     [EditorConstants.dialogTypes.PUBLISH_LETTER]: "Brief Veröffentlichen",
@@ -88,6 +90,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
 
   const DialogContentComponents : Record<string, React.ReactNode> = {
     [EditorConstants.dialogTypes.ADD_NOTE]: <AddNoteDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} />,
+    [EditorConstants.dialogTypes.EDIT_LANGUAGES]: <EditLanguagesDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.EDIT_NOTE]: <EditNoteDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.RESET_LETTER]: <ResetLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.PUBLISH_LETTER]: <PublishLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
