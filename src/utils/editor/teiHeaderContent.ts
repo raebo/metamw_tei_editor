@@ -351,7 +351,7 @@ export const teiHeaderContent = {
 		for (const lang of languages) {
 			const langElement = document.createElementNS(EditorConstants.TEI_NS, "language");
 			langElement.setAttribute("ident", lang.value);
-			langElement.textContent = lang.label;
+			langElement.textContent = lang.label.toLowerCase();
 			langUsageWrapper.appendChild(langElement);
 		}
 	},
