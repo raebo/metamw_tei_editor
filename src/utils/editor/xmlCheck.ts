@@ -135,11 +135,20 @@ export const xmlCheck = {
   letterXml: () : string | null => {
     const baseNode = document.getElementById('letterXmlContent')
 
-    if (baseNode === null) {
-      return null
-    } else {
-      return baseNode.innerHTML
-    }
+    if (baseNode === null) { return null }
+
+		let currentNode = baseNode as Element
+
+		while (currentNode !== null && currentNode.tagName?.toLowerCase() !== 'tei') {
+			if (currentNode.children.length === 0) break;
+			currentNode = currentNode.children[0]
+		}
+
+		if (currentNode.tagName?.toLowerCase() !== 'tei') {
+			throw new Error("No <tei> root element found");
+		}
+
+    return currentNode.outerHTML
   },
   getAncestorsNodes: (node: Node): ParentNode[] => {
     const ancestors = [];
