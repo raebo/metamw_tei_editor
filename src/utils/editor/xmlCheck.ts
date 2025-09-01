@@ -4,6 +4,9 @@ import {NodeAnchestorPath} from "./rightClickPathHandles";
 import {EditorConstants} from "../../constants/editor";
 
 export const xmlCheck = {
+	// be careful with the path syntax: When giving an attribute, do not forget the @ before the attribute name
+  // this is correct:  EditorUtils.xmlCheck.queryPath(teiHeader, `fileDesc > titleStmt > title[@type='${titleType}']`)
+	// this is incorrect: EditorUtils.xmlCheck.queryPath(teiHeader, `fileDesc > titleStmt > title[type='${titleType}']`)
 	queryPath: (root: Element | XMLDocument, path: string): Element[] => {
 		const doc = root.nodeType === Node.DOCUMENT_NODE
 			? root as XMLDocument
@@ -19,7 +22,7 @@ export const xmlCheck = {
 
 				const nodeName = match[1].trim();
 				const predicate = match[2]
-					? match[2].replace(/\[([^\]=]+)=/g, "[@$1=") // insert @ before attr name
+					? match[2].replace(/\[([^\]=]+)=/g, "[$1=") // insert @ before attr name
 					: "";
 
 				return "tei:" + nodeName + predicate;
