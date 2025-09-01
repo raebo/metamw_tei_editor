@@ -15,6 +15,39 @@ export const keyPressHandles = {
 
     return keyFunction(xmlContent)
   },
+	moveWritingActUp(xmlContent: string) : string{
+		const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(xmlContent);
+
+		try {
+			const markedNode = EditorUtils.xmlCheck.markedSpanNode(xmlDoc);
+			const writingActNode = EditorUtils.xmlCheck.findNearestWritingActNode(markedNode);
+
+			EditorUtils.writingActContent.moveActUp(xmlDoc, writingActNode);
+			EditorUtils.xmlCheck.unwrapedMarkedSpan(xmlDoc);
+
+			return new XMLSerializer().serializeToString(xmlDoc)
+
+		} catch (error) {
+			throw error;
+	    //do nothing - we have the problem that the event is triggered for alt+shift+v as well what leads to an error here
+		}
+	},
+	moveWritingActDown(xmlContent: string) : string{
+		const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(xmlContent);
+
+		try {
+			const markedNode = EditorUtils.xmlCheck.markedSpanNode(xmlDoc);
+			const writingActNode = EditorUtils.xmlCheck.findNearestWritingActNode(markedNode);
+
+			EditorUtils.writingActContent.moveActDown(xmlDoc, writingActNode);
+			EditorUtils.xmlCheck.unwrapedMarkedSpan(xmlDoc);
+
+			return new XMLSerializer().serializeToString(xmlDoc)
+
+		} catch (error) {
+			throw error;
+		}
+	},
   markContentBold(xmlContent: string): string {
     return xmlContent.replace(/<span class="marked">(.*?)<\/span>/g, '<hi rend="bold">$1</hi>');
   },

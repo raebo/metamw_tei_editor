@@ -15,6 +15,33 @@ export const filterForKeyHandleDefinitions = (keyHandleDefinitions: Record<strin
   return filteredKeyHandle;
 }
 
+// Function to find a key handle definition based on a key combination string
+// This function ignores the order of modifier keys and is case-insensitive
+// Example: "Ctrl+Alt+K" will match "alt+ctrl+k" or "CTRL+ALT+K" or "alt+CTRL+k"
+export const findKeyHandleDefinition = (comboToMatch: string, keyHandleDefinitions: Record<string, EditorKeyHandleItem>) : EditorKeyHandleItem | null => {
+	const comboParts = comboToMatch.toLowerCase().split("+");
+	if (comboParts.length < 2) return null;
+
+	const mainKey = comboParts[comboParts.length - 1];
+	const modifiers = comboParts.slice(0, -1);
+
+	for (const [defCombo, definition] of Object.entries(keyHandleDefinitions)) {
+		const defParts = defCombo.toLowerCase().split("+");
+		const defMainKey = defParts[defParts.length - 1];
+		const defModifiers = defParts.slice(0, -1);
+
+		if (defMainKey !== mainKey) continue;
+
+		if (defModifiers.length !== modifiers.length) continue;
+
+		const allModifiersMatch = defModifiers.every((m) => modifiers.includes(m));
+		if (allModifiersMatch) return definition;
+	}
+
+	return null;
+}
+
+
 export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {
   "ctrl+alt+6": {
     key: "ctrl+alt+6",
@@ -68,6 +95,22 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
 }
 
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {
+	"alt+v": {
+		key: "alt+v",
+		description: "move current writing act up",
+		component: null,
+		action: () => {
+			return EditorUtils.keyPressHandles.baseHandling(EditorUtils.keyPressHandles.moveWritingActUp)
+		}
+	},
+	"shift+alt+v": {
+		key: "shift+alt+v",
+		description: "move current writing act down",
+		component: null,
+		action: () => {
+			return EditorUtils.keyPressHandles.baseHandling(EditorUtils.keyPressHandles.moveWritingActDown)
+		}
+	},
   "ctrl+b": {
     key: "ctrl+b",
     description: "mark content bold",

@@ -272,4 +272,51 @@ export const xmlCheck = {
 
     return true;
   },
+	markedSpanNode(xmlDoc: Document | null): Element {
+		if(!xmlDoc) throw new Error("markedSpanNode: xmlDoc is null");
+
+		const markedNodes = xmlDoc.getElementsByTagName("span");
+
+		// Filter only those with class="marked"
+		const marked = Array.from(markedNodes).filter(
+			(node) => node.getAttribute("class") === "marked"
+		);
+
+		// Example: take the first one
+		if (marked.length > 0) {
+			const firstMarked = marked[0];
+		}
+
+		if (marked.length === 0) { throw new Error("No marked span found"); }
+
+		return marked[0];
+	},
+	findNearestWritingActNode(node: Node): Element  {
+		let current: Element | null = node.parentElement;
+
+		while (current) {
+			if (
+				current.tagName.toLowerCase() === "div" &&
+				current.getAttribute("type") === "act_of_writing"
+			) {
+				return current;
+			}
+			current = current.parentElement;
+		}
+
+		throw new Error("No ancestor <div type='writing_act'> found");
+	},
+	unwrapedMarkedSpan(xmlDoc : Document | null) {
+		if(!xmlDoc) throw new Error("unwrapedMarkedSpan: xmlDoc is null");
+
+		const markedSpan = this.markedSpanNode(xmlDoc);
+
+		const parent = markedSpan.parentNode;
+		if (!parent) throw new Error("Marked span has no parent");
+
+		while (markedSpan.firstChild) {
+			parent.insertBefore(markedSpan.firstChild, markedSpan);
+		}
+		parent.removeChild(markedSpan);
+	}
 }

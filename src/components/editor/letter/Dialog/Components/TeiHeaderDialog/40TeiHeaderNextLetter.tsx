@@ -67,8 +67,12 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
 			}
 		}
 
-		fetchNextLetter();
-    fetchDefaultLetters();
+		try {
+			fetchNextLetter();
+			fetchDefaultLetters()
+		} catch (error) {
+			enqueueSnackbar("Error during initialization nextLetter: " + MiscUtils.misc.getErrorMessage(error), { variant:"error" });
+		}
   }, [props.teiHeader]);
 
   const handlePrevLetterCheckboxChange = (value: 'unknown' | 'not_identified' | 'select') => {

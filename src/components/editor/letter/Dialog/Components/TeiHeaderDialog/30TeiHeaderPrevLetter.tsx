@@ -67,8 +67,12 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
 			}
 		}
 
-    fetchDefaultLetters();
-		fetchPrevLetter();
+		try {
+			fetchDefaultLetters();
+			fetchPrevLetter();
+		} catch (error) {
+			enqueueSnackbar("Error during initialization prevLetter " + MiscUtils.misc.getErrorMessage(error), { variant:"error" });
+		}
   }, [props.teiHeader]);
 
 
