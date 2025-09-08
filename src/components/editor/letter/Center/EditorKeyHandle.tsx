@@ -25,8 +25,6 @@ function normalizeKeyEvent(event: KeyboardEvent): string {
 	return keys.join("+");
 }
 
-
-
 const EditorKeyHandle = () => {
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
@@ -40,7 +38,6 @@ const EditorKeyHandle = () => {
 		}
 
 		const combo = normalizeKeyEvent(event);
-
 		const definition = findKeyHandleDefinition(combo, keyDefinitions)
 
 		if (definition) {

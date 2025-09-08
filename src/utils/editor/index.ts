@@ -9,8 +9,9 @@ import { pinnedLetters } from './pinnedLetters';
 import { creationDataService } from "./creationDataService";
 import { placeDataService } from "./placeDataService";
 import { protagCreationDataService } from './protagCreationDataService';
-import {teiHeaderContent} from "./teiHeaderContent";
-import {writingActContent} from "./writingActContent";
+import { teiHeaderContent } from "./teiHeaderContent";
+import { writingActContent } from "./writingActContent";
+import {miscContentCheck} from "./miscContentCheck";
 
 export const EditorUtils = {
   backendService,
@@ -20,6 +21,7 @@ export const EditorUtils = {
   protagCreationDataService,
   keyPressHandles,
   markupGeneration,
+	miscContentCheck,
   nodeTypes,
   rightClickPathHandles,
 	teiHeaderContent,

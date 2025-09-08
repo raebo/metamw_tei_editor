@@ -14,7 +14,7 @@
     "@lexical/react": "^0.20.0",
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^6.4.0",
-    "@mui/material": "^7.1.1",
+    "@mui/material": "^7.3.2",
     "@mui/x-data-grid": "^7.23.0",
     "@mui/x-date-pickers": "^8.5.2",
     "@reduxjs/toolkit": "^2.3.0",

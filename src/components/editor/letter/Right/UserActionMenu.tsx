@@ -67,6 +67,8 @@ const menuItems: MenuItem[] = [
     keyHandleItem: null,
     subMenu: [
       { label: 'Schreibakt Erstellen', keyHandleItem: filterKeyCombination('ctrl+shift+s'), active: true },
+			{ label: 'Adresse Empfänger', keyHandleItem: filterKeyCombination('ctrl+shift+a'), active: true },
+			{ label: 'Adresse Sender', keyHandleItem: filterKeyCombination('ctrl+shift+b'), active: true },
       { label: 'Vermerk Hinzufügen', keyHandleItem: null, active: false },
     ],
   },

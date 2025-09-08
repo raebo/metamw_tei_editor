@@ -45,6 +45,40 @@ const languages: LanguageOption[] = [
 	{ value: "yi", label: "Jiddisch" },
 ];
 
+export type MenuAction = ({ node }: { node?: Node }) => Promise<void>;
+
+export interface MenuItem {
+	identifier: string;
+	label: string;
+	type?: 'inactive';
+	action?: MenuAction;
+}
+
+export type ContentAddrLine = {
+	hasHighlight: boolean,
+	content: string,
+	rendType: string | null
+}
+
+export const validParagraphClasses = [
+	"PARAGRAPH_LEFT",
+	"PARAGRAPH_RIGHT",
+	"PARAGRAPH_CENTER",
+] as const;
+
+export type ParagraphClass = typeof validParagraphClasses[number];
+
+
+export type ContentAddressEntry = {
+	isNewEntry: boolean;
+	deleteAddress: boolean;
+	type: 'SENDER' | 'RECIPIENT';
+	hasHead: boolean;
+	hasParagraph: boolean;
+	paragraph: ParagraphClass | null;
+	addrLines: ContentAddrLine[]
+}
+
 export const EditorConstants = {
   ALLOWED_PARENT_TAG: "div[type='act_of_writing']",
   FORBIDDEN_PARENT_TAG: "teiHeader",
@@ -85,6 +119,8 @@ export const EditorConstants = {
 		DATE_WHEN_ADD: "DATE_WHEN_ADD",
 		DATE_WHEN_CUSTOM_ADD: "DATE_WHEN_CUSTOM_ADD",
 		EDIT_NOTE: "EDIT_NOTE",
+		MANAGE_ADDRESS_RECIPIENT: "MANAGE_ADDRESS_RECIPIENT",
+		MANAGE_ADDRESS_SENDER: "MANAGE_ADDRESS_SENDER",
 		MANAGE_HEADER_AUTHOR_WRITER: "MANAGE_HEADER_AUTHOR_WRITER",
 		MANAGE_HEADER_RECEIVER: "MANAGE_HEADER_RECEIVER",
 		MANAGE_WRITING_ACT_AUTHOR_WRITER: "MANAGE_WRITING_ACT_AUTHOR_WRITER",
@@ -143,6 +179,8 @@ export const EditorConstants = {
       DATE_REMOVED: "DATE_REMOVED",
 			HEADER_UPDATED: "HEADER_UPDATED",
 			ACT_OF_WRITING_ADDED: "ACT_OF_WRITING_ADDED",
+			BODY_ADDRESS_SENDER_CHANGED: "BODY_ADDRESS_SENDER_CHANGED",
+			BODY_ADDRESS_RECEIVER_CHANGED: "BODY_ADDRESS_RECEIVER_CHANGED",
     }
   },
   attachmentTypeItems: [
@@ -176,6 +214,7 @@ export const EditorConstants = {
   ],
 	menuItemTypes: {
 		DELETE_NODE: "DELETE_NODE",
+		MANAGE_TEXT_ADDRESS: "MANAGE_TEXT_ADDRESS",
 		MANAGE_WRITER_AUTHOR_HEADER: "MANAGE_WRITER_AUTHOR_HEADER",
 		MANAGE_RECEIVER: "MANAGE_RECEIVER",
 		WRITING_ACT: {

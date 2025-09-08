@@ -36,6 +36,10 @@ export const xmlCheck = {
 
 		if (!nsResolver)	{ throw new Error("Namespace resolver is not defined"); }
 
+		// const xmlString = new XMLSerializer().serializeToString(doc)
+		// console.log("XML String:", xmlString);
+		// console.log("Evaluating XPath:", xpath, "on root:", root, "with nsResolver:", nsResolver);
+
 		const result = doc.evaluate(
 			xpath,
 			root,
@@ -66,19 +70,22 @@ export const xmlCheck = {
 
 		return xmlDoc;
 	},
+	xmlLetterBody: (xmlDoc: XMLDocument) : Element => {
+		const letterBody = EditorUtils.xmlCheck.queryPath(xmlDoc, 'tei > text > body')[0]
+
+		if (!letterBody) { throw new Error("No <body> element found in the TEI document"); }
+
+		return letterBody;
+	},
   xmlLetterDate: (
     xmlRef: React.RefObject<HTMLDivElement>
   ) : string => {
 
     if (xmlRef.current === null) { throw new Error('XML reference is null'); }
 
-    const xmlContainer = xmlRef.current.querySelector('#letterXmlContent');
+		const xmlDoc = EditorUtils.xmlCheck.extractDocumentByRef(xmlRef);
 
-    if (!xmlContainer || !xmlContainer.firstChild) {
-      console.warn("No valid XML content found in letterXmlContent");
-      return new Date().toISOString().split('T')[0];
-    }
-    const firstElement = xmlContainer.firstChild as Element;
+    const firstElement = xmlDoc.firstChild as Element;
     const letterNameValue = firstElement.getAttribute("xml:id") ?? '';
 
     if (letterNameValue === undefined) {
@@ -101,7 +108,7 @@ export const xmlCheck = {
 
     return xmlCheck.parseXml(teiElement.outerHTML);
   },
-	extractXmlByRef: (xmlRef: React.RefObject<HTMLDivElement> | null): XMLDocument => {
+	extractDocumentByRef: (xmlRef: React.RefObject<HTMLDivElement> | null): Document => {
 		if (xmlRef === null || xmlRef.current === null) {
 			throw new Error('XML reference is null');
 		}
@@ -110,16 +117,19 @@ export const xmlCheck = {
 
 		if (!container) { throw new Error('No valid XML content found in letterXmlContent'); }
 
-		const xmlString = container.innerHTML.trim();
+		let currentNode = container as Element
 
-		const parser = new DOMParser();
-		const xmlDoc = parser.parseFromString(xmlString, "application/xml");
-
-		if (xmlDoc.getElementsByTagName("parsererror").length) {
-			throw new Error("Error parsing XML: " + xmlDoc.getElementsByTagName("parsererror")[0].textContent);
+		while (currentNode !== null && currentNode.tagName?.toLowerCase() !== 'tei') {
+			if (currentNode.children.length === 0) break;
+			currentNode = currentNode.children[0]
 		}
 
-		return xmlDoc;
+		if (currentNode.tagName?.toLowerCase() !== 'tei') {
+			throw new Error("No <tei> root element found");
+		}
+
+		return EditorUtils.xmlCheck.extractTeiDocumentFromString(currentNode.outerHTML)
+
 	},
   parseXml: (xmlString: string) : Document => {
     return new DOMParser().parseFromString(xmlString, "text/xml");
@@ -189,6 +199,8 @@ export const xmlCheck = {
 		]
 			.reverse()
 			.join(" ");
+
+		console.log(ancestorNodeNames);
 
 		const matchingEntry = nodeAnchestorPaths.find(
 			(entry) => {

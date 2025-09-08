@@ -29,7 +29,6 @@ export const keyPressHandles = {
 
 		} catch (error) {
 			throw error;
-	    //do nothing - we have the problem that the event is triggered for alt+shift+v as well what leads to an error here
 		}
 	},
 	moveWritingActDown(xmlContent: string) : string{

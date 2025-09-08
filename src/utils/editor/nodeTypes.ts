@@ -1,8 +1,9 @@
 export enum NodeTypes {
   ATTACHMENT = 'ATTACHMENT',
-  WRITER = 'WRITER',
-  AUTHOR = 'AUTHOR',
+	AUTHOR = 'AUTHOR',
+	BODY_ADDRESS = 'BODY_ADDRESS',
 	PERSON = 'PERSON',
+	WRITER = 'WRITER',
 	WRITING_ACT= 'WRITING_ACT',
 }
 
@@ -13,10 +14,11 @@ export interface NodeType {
 
 export const nodeTypesMap: Record<NodeTypes, NodeType> = {
   [NodeTypes.ATTACHMENT]: { key: NodeTypes.ATTACHMENT, name: "Beilage" },
-  [NodeTypes.WRITER]: { key: NodeTypes.WRITER, name: "Schreiber" },
-  [NodeTypes.AUTHOR]: { key: NodeTypes.AUTHOR, name: "Autor" },
+	[NodeTypes.AUTHOR]: { key: NodeTypes.AUTHOR, name: "Autor" },
+	[NodeTypes.BODY_ADDRESS]: { key: NodeTypes.BODY_ADDRESS, name: "Adresse (Brief)" },
 	[NodeTypes.PERSON]: { key: NodeTypes.PERSON, name: "Person" },
 	[NodeTypes.WRITING_ACT]: { key: NodeTypes.WRITING_ACT, name: "Schreibakt" },
+	[NodeTypes.WRITER]: { key: NodeTypes.WRITER, name: "Schreiber" },
 }
 
 export const nodeTypes = {

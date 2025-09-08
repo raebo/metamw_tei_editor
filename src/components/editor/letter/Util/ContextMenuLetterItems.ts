@@ -7,12 +7,14 @@ type NodeActionCallback = (args: {
 export type MenuItemType = {
 	identifier?: string;
   label?: string;
+	keyShortcut?: string;
   action?: NodeActionCallback;
   type?: 'divider' | 'inactive' | null;
   hasSubMenu?: boolean;
   subMenu?: {
     label: string;
     action?: NodeActionCallback;
+		keyShortcut?: string;
   }[]
 }
 
@@ -60,13 +62,41 @@ export function createContextMenuItems({
       label: 'Auszeichnungen Datum',
       hasSubMenu: true,
       subMenu: [
-        { label: 'Datum-When', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_WHEN_ADD) },
-        { label: 'Datum-When-CUSTOM', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD) },
-        { label: 'Datum-Not-After', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD) },
-        { label: 'Datum-Not-Before', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD) },
-        { label: 'Datum-From-To', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_FROM_TO_ADD) },
-        { label: 'Datum-NotBefore-NotAfter', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD) },
+        { label: 'Datum-When', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_WHEN_ADD), keyShortcut: 'Alt+SHIFT+1' },
+        { label: 'Datum-When-CUSTOM', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD), keyShortcut: 'Alt+SHIFT+2' },
+        { label: 'Datum-Not-After', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD), keyShortcut: 'Alt+SHIFT+3' },
+        { label: 'Datum-Not-Before', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD), keyShortcut: 'Alt+SHIFT+4' },
+        { label: 'Datum-From-To', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_FROM_TO_ADD), keyShortcut: 'Alt+SHIFT+5' },
+        { label: 'Datum-NotBefore-NotAfter', action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD), keyShortcut: 'Alt+SHIFT+6' },
       ]
-    }
+    },
+		{
+			label: 'Schreibakt Anpassen',
+			hasSubMenu: true,
+			subMenu: [
+				{ label: 'Bewegen ▲', action: (node) => {
+						const event = new KeyboardEvent("keydown", {
+							key: "v",
+							code: "KeyV",
+							ctrlKey: false,
+							shiftKey: false,
+							altKey: true,
+							bubbles: true
+						});
+						document.dispatchEvent(event);
+					}, keyShortcut: 'ALT+V' },
+				{ label: 'Bewegen ▼', action: (node) => {
+						const event = new KeyboardEvent("keydown", {
+							key: "v",
+							code: "KeyV",
+							shiftKey: true,
+							altKey: true,
+							bubbles: true
+						});
+
+						document.dispatchEvent(event);
+					}, keyShortcut: 'SHIFT+ALT+V' },
+			]
+		}
     ]
 }

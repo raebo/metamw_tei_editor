@@ -44,6 +44,39 @@ export namespace rightClickPathHandles {
 		}
 	]
 
+	export const manageTextLetterAddressPaths = (): NodeAnchestorPath[] => [
+		{
+			parentPath: "tei text body div head address addrline hi",
+			nodeType: nodeTypes.get(NodeTypes.BODY_ADDRESS),
+			checkElementDetails: (nodeElement: Element): boolean => {
+				return true
+				// return nodeElement.nodeName.toLowerCase() === "div" && (nodeElement.getAttribute("type") === "address" || nodeElement.getAttribute("type") === "sender_address");
+			},
+			afterActionCallback: (xmlDoc: Document, node: Node) =>
+				xmlCheck.serializeDocument(xmlDoc),
+		},
+		{
+			parentPath: "tei text body div p address addrline",
+			nodeType: nodeTypes.get(NodeTypes.BODY_ADDRESS),
+			checkElementDetails: (nodeElement: Element): boolean => {
+				return true
+				// return nodeElement.nodeName.toLowerCase() === "div" && (nodeElement.getAttribute("type") === "address" || nodeElement.getAttribute("type") === "sender_address");
+			},
+			afterActionCallback: (xmlDoc: Document, node: Node) =>
+				xmlCheck.serializeDocument(xmlDoc),
+		},
+		{
+			parentPath: "tei text body div head p address addrline",
+			nodeType: nodeTypes.get(NodeTypes.BODY_ADDRESS),
+			checkElementDetails: (nodeElement: Element): boolean => {
+				return true
+				// return nodeElement.nodeName.toLowerCase() === "div" && (nodeElement.getAttribute("type") === "address" || nodeElement.getAttribute("type") === "sender_address");
+			},
+			afterActionCallback: (xmlDoc: Document, node: Node) =>
+				xmlCheck.serializeDocument(xmlDoc),
+		},
+	]
+
 	export const manageAuthorWriterAnchestorPaths = (): NodeAnchestorPath[] => [
 		{
 			parentPath: "tei teiheader profiledesc correspdesc correspaction persname",

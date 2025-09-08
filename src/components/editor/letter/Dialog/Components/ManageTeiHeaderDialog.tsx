@@ -165,9 +165,7 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 
 			writeHeaderData()
 
-			const serializer = new XMLSerializer();
-			const updatedXml = serializer.serializeToString(xmlDoc);
-
+			const updatedXml = new XMLSerializer().serializeToString(xmlDoc);
 			const result = await EditorUtils.backendService.patchContent(
 				updatedXml, stateEditorLetter.id, EditorConstants.changeTypes.misc.HEADER_UPDATED, null)
 

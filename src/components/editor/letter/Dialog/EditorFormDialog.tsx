@@ -24,6 +24,7 @@ import ManageTeiHeaderAuthorWriterDialog from "./Components/ManageTeiHeaderAutho
 import ManageTeiHeaderReceiverDialog from "./Components/ManageTeiHeaderReceiverDialog";
 import ManageWritingActAuthorWriterDialog from "./Components/WritingAct/ManageWritingActAuthorWriterDialog";
 import EditLanguagesDialog from "./Components/Misc/EditLanguagesDialog";
+import ManageTextAddress from "./Components/ManageTextAddress";
 
 interface EditorFormDialogProps {
   open: boolean
@@ -86,6 +87,8 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
 		[EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER]: "Autoren/Schreiber Verwalten",
 		[EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER]: "Autoren/Schreiber Verwalten",
 		[EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: "Empfänger Verwalten",
+		[EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER]: "Adresse Sender Verwalten",
+		[EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT]: "Adresse Empfänger Verwalten",
   }
 
   const DialogContentComponents : Record<string, React.ReactNode> = {
@@ -109,6 +112,8 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.ADD_NEW_LETTER]: <AddNewLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: <ChooseGbLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: <ChooseProtagLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+		[EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT]: <ManageTextAddress xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth}  addressType={"RECIPIENT"}/>,
+		[EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER]: <ManageTextAddress xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth}  addressType={"SENDER"}/>,
   }
 
   return (

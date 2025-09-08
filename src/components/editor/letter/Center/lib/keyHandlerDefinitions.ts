@@ -43,26 +43,33 @@ export const findKeyHandleDefinition = (comboToMatch: string, keyHandleDefinitio
 
 
 export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {
-  "ctrl+alt+6": {
-    key: "ctrl+alt+6",
-    description: "add attachment to letter header",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ATTACHMENT_ADD) }
-  },
+	"alt+c": {
+		key: "alt+c",
+		description: "Header Hinzufügen",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_TEI_HEADER) }
+	},
+	"alt+j": {
+		key: "alt+j",
+		description: "Sprachen Verwalten",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.EDIT_LANGUAGES) }
+	},
+	"alt+n": {
+		key: "alt+n",
+		description: "Brief Erstellen",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_NEW_LETTER) }
+	},
   "alt+ctrl+f": {
     key: "alt+ctrl+f",
     description: "Fußnote des Briefautors",
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR) }
-  },
-  "alt+j": {
-    key: "alt+j",
-    description: "Sprachen Verwalten",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.EDIT_LANGUAGES) }
   },
   "ctrl+t": {
     key: "ctrl+t",
@@ -71,30 +78,44 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.SOURCE_DESC_HANDWRITING) }
   },
-  "ctrl+shift+s": {
-    key: "ctrl+shift+s",
-    description: "Schreibakt Hinzufügen",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_WRITING_PART) }
-  },
-  "alt+c": {
-    key: "alt+c",
-    description: "Header Hinzufügen",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_TEI_HEADER) }
-  },
-  "alt+n": {
-    key: "alt+n",
-    description: "Brief Erstellen",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_NEW_LETTER) }
-  },
+	"ctrl+alt+6": {
+		key: "ctrl+alt+6",
+		description: "add attachment to letter header",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ATTACHMENT_ADD) }
+	},
+	"ctrl+shift+a": {
+		key: "ctrl+shift+a",
+		description: "manage address line for recipient",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT) }
+	},
+	"ctrl+shift+b": {
+		key: "ctrl+shift+b",
+		description: "manage address line for sender",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER) }
+	},
+	"ctrl+shift+s": {
+		key: "ctrl+shift+s",
+		description: "Schreibakt Hinzufügen",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_WRITING_PART) }
+	},
 }
 
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {
+	"alt+1": {
+		key: 'alt+1',
+		description: "insert line of date on top of the current element",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => {  }
+	},
 	"alt+v": {
 		key: "alt+v",
 		description: "move current writing act up",
@@ -102,6 +123,48 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
 		action: () => {
 			return EditorUtils.keyPressHandles.baseHandling(EditorUtils.keyPressHandles.moveWritingActUp)
 		}
+	},
+	"alt+shift+!": {
+		key: "alt+shift+!",
+		description: "date when marking content",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_ADD) }
+	},
+	'alt+shift+"': {
+		key: 'alt+shift+"',
+		description: "date 'when-custom' marking content",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD) }
+	},
+	'alt+shift+§': {
+		key: 'alt+shift+§',
+		description: "date 'notAfter' marking content",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD) }
+	},
+	'alt+shift+$': {
+		key: 'alt+shift+$',
+		description: "date 'notBefore' marking content",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD) }
+	},
+	'alt+shift+%': {
+		key: 'alt+shift+%',
+		description: "date 'From-To' marking content",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_FROM_TO_ADD) }
+	},
+	'alt+shift+&': {
+		key: 'alt+shift+&',
+		description: "date 'notBefore-notAfter' marking content",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD) }
 	},
 	"shift+alt+v": {
 		key: "shift+alt+v",
@@ -136,48 +199,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     action: null,
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_NOTE) }
   },
-  "alt+shift+!": {
-    key: "alt+shift+!",
-    description: "date when marking content",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_ADD) }
-  },
-  'alt+shift+"': {
-    key: 'alt+shift+"',
-    description: "date 'when-custom' marking content",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD) }
-  },
-  'alt+shift+§': {
-    key: 'alt+shift+§',
-    description: "date 'notAfter' marking content",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD) }
-  },
-  'alt+shift+$': {
-    key: 'alt+shift+$',
-    description: "date 'notBefore' marking content",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD) }
-  },
-  'alt+shift+%': {
-    key: 'alt+shift+%',
-    description: "date 'From-To' marking content",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_FROM_TO_ADD) }
-  },
-  'alt+shift+&': {
-    key: 'alt+shift+&',
-    description: "date 'notBefore-notAfter' marking content",
-    component: null,
-    action: null,
-    openDialogAction: (dispatch: AppDispatch) => { console.info("Date when custom add"); return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD) }
-  },
+
   "ctrl+alt+v": {
     key: "ctrl+alt+v",
     description: "letters to protagonist",
@@ -193,19 +215,3 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG) }
   },
 }
-
-
-// <String>&lt;accMat xmlns="http://www.tei-c.org/ns/1.0" type="${ask('Beilagentyp', combobox, ('Keine':'Keine';'certificate':'Zeugnis';'letter':'Brief';'letter_of_recommendation':'Empfehlungsschreiben';'notatedMusic':'Noten';'textTemplate':'Textvorlage';'drawing':'Zeichnung';'bill':'Rechnung';'print':'Druckerzeugnis';'diploma':'Diplom';'medal':'Orden';'other':  'Sonstiges'), 'Keine')}">${ask('Genaue Bezeichnung der Beilage eintragen (wenn keine Beilage vorhanden, einen Bindestrich (-) eintragen )', generic, '')}&lt;/accMat></String>
-
-
-// Quellen hinzufügen (Quellenbeschreibung Rekonstruktion) (Alt+Q)
-//
-// Scheibakt (Strg+Umschalt+S)
-//
-// Schlussformel in neuer Zeile  hinzufügen - oberhalb des Schreibaktes (Alt+6)
-//
-// Standort der Quelle ändern (msIdentifier) (Alt+Umschalt+8)
-//
-// TEI Header Text Body (Alt+C)
-//
-// Unleserliche Zeichen - gap (Strg+Umschalt+X)
