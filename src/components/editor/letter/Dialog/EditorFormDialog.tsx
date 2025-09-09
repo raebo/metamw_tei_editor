@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, {ReactNode, useEffect, useState} from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -6,7 +6,7 @@ import { Divider, Typography } from "@mui/material";
 import DialogActions from "@mui/material/DialogActions";
 import { EditorConstants } from "../../../../constants/editor";
 import AddNoteDialog from "./Components/AddNoteDialog";
-import { setDialogType, setEditorSelectedItem } from "../../../../redux/slices/editor.letter.slice";
+import {setDialogType, setEditorSelectedItem, setXmlLetterContent} from "../../../../redux/slices/editor.letter.slice";
 import { useAppDispatch } from "../../../../redux/hooks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/redux.store";
@@ -25,6 +25,8 @@ import ManageTeiHeaderReceiverDialog from "./Components/ManageTeiHeaderReceiverD
 import ManageWritingActAuthorWriterDialog from "./Components/WritingAct/ManageWritingActAuthorWriterDialog";
 import EditLanguagesDialog from "./Components/Misc/EditLanguagesDialog";
 import ManageTextAddress from "./Components/ManageTextAddress";
+import GreetingsFormulaDialog from "./Components/Misc/GreetingsFormulaDialog";
+import {EditorUtils} from "../../../../utils/editor";
 
 interface EditorFormDialogProps {
   open: boolean
@@ -47,6 +49,30 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
   const [dialogTitle, setDialogTitle] = React.useState("")
   const [selectedDialogComp, setSelectedDialogComp] = useState<ReactNode| null>(null)
 
+	const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
+
+	const handleClose = () => {
+		if (!stateTeiXml) {
+			setIsOpen(false);
+			dispatch(setDialogType({ dialogType: null }));
+			dispatch(setEditorSelectedItem({ selectedItem: { left: null, right: null } }));
+			return;
+		}
+		const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
+		const nodes = xmlDoc.querySelectorAll(`[tmp_id]`);
+		nodes.forEach(node => {
+		  node.removeAttribute("tmp_id");
+		});
+		const cleanedXml = new XMLSerializer().serializeToString(xmlDoc);
+
+
+		dispatch(setXmlLetterContent({ content: { xmlContent: cleanedXml }} ));
+
+		setIsOpen(false)
+		dispatch(setDialogType({ dialogType: null }))
+		dispatch(setEditorSelectedItem({ selectedItem: { left: null, right: null } }))
+	}
+
   useEffect(() => {
     const initDialog = () => {
       if (dialogType !== null) {
@@ -60,14 +86,9 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     //eslint-disable-next-line
   }, [dialogType]);
 
-  const handleClose = () => {
-    setIsOpen(false)
-    dispatch(setDialogType({ dialogType: null }))
-    dispatch(setEditorSelectedItem({ selectedItem: { left: null, right: null } }))
-  }
+
 
   const DialogTitles : Record<string, string> = {
-    [EditorConstants.dialogTypes.ADD_NOTE]: "Kommentar Hinzufügen",
     [EditorConstants.dialogTypes.EDIT_LANGUAGES]: "Sprachen Verwalten",
     [EditorConstants.dialogTypes.EDIT_NOTE]: "Kommentar Bearbeiten/Löschen",
     [EditorConstants.dialogTypes.RESET_LETTER]: "Brief Zurücksetzen",
@@ -79,11 +100,14 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
     [EditorConstants.dialogTypes.DATE_FROM_TO_ADD]: "Datum 'From To' Auszeichnen",
     [EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD]: "Datum 'NotBefore NotAfter' Auszeichnen",
     [EditorConstants.dialogTypes.ATTACHMENT_ADD]: "Beilage Hinzufügen",
-    [EditorConstants.dialogTypes.ADD_WRITING_PART]: "Schreibakt Hinzufügen",
-    [EditorConstants.dialogTypes.ADD_TEI_HEADER]: "Header des Briefes Hinzufügen/Bearbeiten",
-    [EditorConstants.dialogTypes.ADD_NEW_LETTER]: "Neuen Brief Hinzufügen",
+		[EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: "Begrüßungsformel Hinzufügen",
+		[EditorConstants.dialogTypes.ADD_NEW_LETTER]: "Neuen Brief Hinzufügen",
+		[EditorConstants.dialogTypes.ADD_NOTE]: "Kommentar Hinzufügen",
+		[EditorConstants.dialogTypes.ADD_TEI_HEADER]: "Header des Briefes Hinzufügen/Bearbeiten",
     [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: "Verweis an einen Brief an den Protagonisten Hinzufügen",
     [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: "Verweis an einen Brief vom Protagonisten Hinzufügen",
+		[EditorConstants.dialogTypes.ADD_WRITING_PART]: "Schreibakt Hinzufügen",
+		[EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA]: "Begrüßungsformel Verwalten",
 		[EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER]: "Autoren/Schreiber Verwalten",
 		[EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER]: "Autoren/Schreiber Verwalten",
 		[EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: "Empfänger Verwalten",
@@ -110,8 +134,10 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
 		[EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: <ManageTeiHeaderReceiverDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} />,
 		[EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER]: <ManageWritingActAuthorWriterDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_NEW_LETTER]: <AddNewLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+		[EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: <GreetingsFormulaDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: <ChooseGbLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
     [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: <ChooseProtagLetterDialog xmlRef={props.xmlRef} onClose={handleClose}  setWidth={setDialogWidth} />,
+		[EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA]: <GreetingsFormulaDialog xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth} />,
 		[EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT]: <ManageTextAddress xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth}  addressType={"RECIPIENT"}/>,
 		[EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER]: <ManageTextAddress xmlRef={props.xmlRef} onClose={handleClose} setWidth={setDialogWidth}  addressType={"SENDER"}/>,
   }

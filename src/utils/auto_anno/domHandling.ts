@@ -237,3 +237,8 @@ export const replaceDataKeys= (
 ): string => {
   return text.replace(/data-key="(.*?)"/g, 'key="$1"')
 }
+
+export const removeTmpIds = (text: string): string => {
+	// remove all tmp:id="..." or tmp_id="..."
+	return text.replace(/\s?tmp:id=".*?"/g, '').replace(/\s?tmp_id=".*?"/g, '');
+};

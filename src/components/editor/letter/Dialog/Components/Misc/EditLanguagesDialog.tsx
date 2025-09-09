@@ -19,18 +19,18 @@ const EditLanguagesDialog = (props: DefaultDialogProps) => {
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
   const [selectedLang, setSelectedLang] = useState("");
   const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
-  
+
   const [parsedXml, setParsedXml] = React.useState<{
     xmlDoc: XMLDocument | null;
     teiHeader: Element | null;
   }>({ xmlDoc: null, teiHeader: null });
-  
+
   useEffect(() => {
     if (!stateTeiXml) {
       dispatch(setReloadLetterContent({ reloadLetterContent: true }));
       return;
     }
-    
+
    	try {
 			const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
 			const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(xmlDoc);
@@ -40,46 +40,44 @@ const EditLanguagesDialog = (props: DefaultDialogProps) => {
 			setParsedXml({ xmlDoc: null, teiHeader: null });
 		}
   }, [stateTeiXml, dispatch]);
-  
+
   useEffect(() => {
-    
-    
     if(parsedXml && parsedXml.teiHeader) {
       const assignedLanguages : LanguageOption[] = EditorUtils.teiHeaderContent.extractLanguages(parsedXml.teiHeader)
       setLetterLanguages(Array.from(new Set([...assignedLanguages, ...letterLanguages])));
     }
   }, [parsedXml]);
-  
+
   const handleLanguageChange = (event: SelectChangeEvent) => {
     const value = event.target.value as 'de' | 'en' | 'fr' | 'it' | 'la' | 'grc' | 'he';
-    
+
     const language = EditorConstants.LANGUAGES.find( lang => lang.value === value)
-    
+
     if (language) {
       setLetterLanguages(Array.from(new Set([...letterLanguages, language])));
       setSelectedLang("");
     }
   }
-  
+
   const handleRemoveLanguage = (lang: LanguageOption) => {
     const updatedLanguages = letterLanguages.filter((l) => l !== lang);
     setLetterLanguages(updatedLanguages);
   }
-  
+
   const handleSave = async () => {
     try {
       if (!parsedXml.xmlDoc || !parsedXml.teiHeader) {
         throw new Error("No xml content found");
       }
-      
+
       EditorUtils.teiHeaderContent.setLanguages(parsedXml.teiHeader, letterLanguages);
-      
+
       const xmlSerializer = new XMLSerializer();
-      
+
       const result = await EditorUtils.backendService.patchContent(
         xmlSerializer.serializeToString(parsedXml.xmlDoc) , stateEditorLetter.id, EditorConstants.changeTypes.misc.HEADER_LANGUAGES_UPDATED, null
       )
-      
+
       if (result) {
         dispatch(setReloadLetterContent( { reloadLetterContent: true } ));
         enqueueSnackbar("Languages updated", { variant: "success" });
@@ -89,12 +87,12 @@ const EditLanguagesDialog = (props: DefaultDialogProps) => {
     } catch (error) {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
     }
-    
+
     props.onClose();
   }
 
-  
-  
+
+
   return (
     <>
       <DialogContent>
@@ -130,7 +128,7 @@ const EditLanguagesDialog = (props: DefaultDialogProps) => {
                 { letterLanguages.map((lang) => {
                   const label =
                     EditorConstants.LANGUAGES.filter((l) => l.value === lang.value)[0].label || ""
-                  
+
                   return (
                     <Chip
                       key={lang.value}

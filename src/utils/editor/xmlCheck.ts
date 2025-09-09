@@ -187,6 +187,31 @@ export const xmlCheck = {
 
     return ancestorNames;
   },
+	getNodePath(node: Node): number[]{
+		const path: number[] = [];
+		let current: Node | null = node;
+
+		while (current && current.parentNode) {
+			const parent: Node | null = current.parentNode; // explicitly typed
+
+			if (!parent) break;
+			const index = Array.from(parent.childNodes).indexOf(current as ChildNode);
+			path.unshift(index);
+			current = parent;
+		}
+
+		return path; // e.g. [0, 2, 5]
+	},
+	getNodeByPath(xmlDoc: Document, path: number[]): Node | null {
+		let current: Node | null = xmlDoc.childNodes[0];
+
+		for (const index of path) {
+			if (!current || !current.childNodes[index]) return null;
+			current = current.childNodes[index];
+		}
+
+		return current;
+	},
 	isNodeMatchingPath(
 		node: Node,
 		nodeAnchestorPaths: NodeAnchestorPath[],
@@ -199,8 +224,6 @@ export const xmlCheck = {
 		]
 			.reverse()
 			.join(" ");
-
-		console.log(ancestorNodeNames);
 
 		const matchingEntry = nodeAnchestorPaths.find(
 			(entry) => {
@@ -293,11 +316,6 @@ export const xmlCheck = {
 		const marked = Array.from(markedNodes).filter(
 			(node) => node.getAttribute("class") === "marked"
 		);
-
-		// Example: take the first one
-		if (marked.length > 0) {
-			const firstMarked = marked[0];
-		}
 
 		if (marked.length === 0) { throw new Error("No marked span found"); }
 

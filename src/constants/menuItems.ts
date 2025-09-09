@@ -1,13 +1,18 @@
 import {EditorConstants, MenuItem} from "./editor";
 import {enqueueSnackbar} from "notistack";
 import {EditorUtils} from "../utils/editor";
-import {setDialogType, setEditorLetterActOfWriting, setReloadLetterContent} from "../redux/slices/editor.letter.slice";
+import {
+	setDialogType,
+	setEditorLetterActOfWriting,
+	setReloadLetterContent,
+	setXmlLetterContent
+} from "../redux/slices/editor.letter.slice";
 import {MiscUtils} from "../utils/misc";
 
 export const getMenuItemsNoMarking = (
 	dispatch: any,
 	stateEditorLetter: any,
-	xmlDocRef: React.MutableRefObject<XMLDocument | null>
+	xmlDocRef: React.MutableRefObject<XMLDocument | null>,
 ): MenuItem[] => [
 	{ identifier: EditorConstants.menuItemTypes.WRITING_ACT.LABEL_MOVE_DOWN, label: "Verschieben Unten", type: 'inactive' },
 	{ identifier: EditorConstants.menuItemTypes.WRITING_ACT.LABEL_MOVE_UP, label: "Verschieben Oben", type: 'inactive'},
@@ -182,6 +187,44 @@ export const getMenuItemsNoMarking = (
 				enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), {variant: "error"});
 			}
 		}
-	}
+	},
+	{
+		identifier: EditorConstants.menuItemTypes.WRITING_ACT.ADD_GREETINGS_FORMULA, label: 'Begrüßungsformel Hinzufügen', action: async ({node}: { node?: Node }) => {
+			try {
+
+				if (!node) throw new Error("No node given as value")
+
+				const xmlDoc = xmlDocRef.current;
+				if (!xmlDoc) throw new Error("XML document not loaded");
+				EditorUtils.textMarking.addTmpIdToNode(xmlDoc, node as Element, "MANAGE_GREETINGS_FORMULA");
+
+				const serializer = new XMLSerializer();
+				dispatch(setXmlLetterContent({ content: { xmlContent: serializer.serializeToString(xmlDoc)} }) )
+
+				dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA}))
+			} catch (error) {
+				enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), {variant: "error"});
+			}
+		}
+	},
+	{
+		identifier: EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_GREETINGS_FORMULA, label: 'Begrüßungsformel Bearbeiten', action: async ({node}: { node?: Node }) => {
+			try {
+
+				if (!node) throw new Error("No node given as value")
+
+				const xmlDoc = xmlDocRef.current;
+				if (!xmlDoc) throw new Error("XML document not loaded");
+				EditorUtils.textMarking.addTmpIdToNode(xmlDoc, node as Element, "MANAGE_GREETINGS_FORMULA");
+
+				const serializer = new XMLSerializer();
+				dispatch(setXmlLetterContent({ content: { xmlContent: serializer.serializeToString(xmlDoc)} }) )
+
+				dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA}))
+			} catch (error) {
+				enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), {variant: "error"});
+			}
+		}
+	},
 ];
 

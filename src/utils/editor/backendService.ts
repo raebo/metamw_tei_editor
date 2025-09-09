@@ -1,5 +1,5 @@
 import { initApi } from '../../services/apiRequest.service'
-import { replaceDataKeys, replaceWithCamelCase } from '../auto_anno/domHandling';
+import {removeTmpIds, replaceDataKeys, replaceWithCamelCase} from '../auto_anno/domHandling';
 import { EntityType } from '../../constants/editor';
 import { MiscUtils } from '../misc';
 import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
@@ -362,7 +362,7 @@ export const backendService = {
       await initApi()
         .patch(`/jwt/editor/pinned_letters/${letterId}/set_content/`, {
           changes: {
-            new_content: MiscUtils.misc.pipeFunctions(content, replaceWithCamelCase, replaceDataKeys),
+            new_content: MiscUtils.misc.pipeFunctions(content, replaceWithCamelCase, replaceDataKeys, removeTmpIds),
             xml_id: xmlId,
             change_type: changeType
           }

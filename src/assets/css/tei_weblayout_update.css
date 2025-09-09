@@ -131,6 +131,25 @@ tei {
         }
     }
     body {
+        div {
+            p {
+                cursor: pointer;
+            }
+            salute {
+                cursor: pointer;
+            }
+            dateline {
+                date {
+                    cursor: pointer;
+                }
+            }
+            seg[type="closer"] {
+                cursor: pointer;
+            }
+            signed {
+                cursor: pointer;
+            }
+        }
         div[type="address"], div[type="sender_address"] {
             address {
                 cursor: pointer;

@@ -87,5 +87,17 @@ export const textMarking = {
       }
       span.parentNode?.removeChild(span);
     });
-  }
+  },
+	addTmpIdToNode(xmlDoc: Document, node: Element, tmpIdPrefix: string): void {
+		if (!xmlDoc) throw new Error("No XML document provided.");
+		const nodePath = EditorUtils.xmlCheck.getNodePath(node);
+		const xmlNode = EditorUtils.xmlCheck.getNodeByPath(xmlDoc, nodePath) as Element | null;
+		if (!xmlNode) throw new Error("Could not resolve node in XML doc");
+
+		let tmpId = xmlNode.getAttribute("tmp_id");
+		if (!tmpId) {
+			tmpId = `tmp-${tmpIdPrefix}-${Date.now()}`; // or a counter/uuid
+			xmlNode.setAttribute("tmp_id", tmpId);
+		}
+	}
 }

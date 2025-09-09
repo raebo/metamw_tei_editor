@@ -65,6 +65,58 @@ export namespace rightClickPathHandles {
 		}
 	]
 
+	export const manageGreetingsFormulaPaths = (): NodeAnchestorPath[] => [
+		{
+			parentPath: "tei text body div p",
+			nodeType: nodeTypes.get(NodeTypes.BODY_GREETINGS_FORMULA),
+			checkElementDetails: (nodeElement: Element): boolean => {
+				return true
+			},
+			afterActionCallback: (xmlDoc: Document, node: Node) =>
+				xmlCheck.serializeDocument(xmlDoc),
+		},
+		{
+			parentPath: "tei text body div salute",
+			nodeType: nodeTypes.get(NodeTypes.BODY_GREETINGS_FORMULA),
+			checkElementDetails: (nodeElement: Element): boolean => {
+				return true
+			},
+			afterActionCallback: (xmlDoc: Document, node: Node) =>
+				xmlCheck.serializeDocument(xmlDoc),
+		},
+		{
+			parentPath: "tei text body div dateline date",
+			nodeType: nodeTypes.get(NodeTypes.BODY_GREETINGS_FORMULA),
+			checkElementDetails: (nodeElement: Element): boolean => {
+				return true
+			},
+			afterActionCallback: (xmlDoc: Document, node: Node) =>
+				xmlCheck.serializeDocument(xmlDoc),
+		},
+		{
+			parentPath: "tei text body div signed",
+			nodeType: nodeTypes.get(NodeTypes.BODY_GREETINGS_FORMULA),
+			checkElementDetails: (nodeElement: Element): boolean => {
+				return true
+			},
+			afterActionCallback: (xmlDoc: Document, node: Node) =>
+				xmlCheck.serializeDocument(xmlDoc),
+		},
+		{
+			parentPath: "tei text body div seg",
+			nodeType: nodeTypes.get(NodeTypes.BODY_GREETINGS_FORMULA),
+			checkElementDetails: (nodeElement: Element): boolean => {
+				const typeAttr= nodeElement.getAttribute("type");
+
+				if (!typeAttr) return false;
+				return typeAttr.toLowerCase() === "closer";
+			},
+			afterActionCallback: (xmlDoc: Document, node: Node) =>
+				xmlCheck.serializeDocument(xmlDoc),
+		},
+	]
+
+
 	export const manageTextLetterAddressPaths = (): NodeAnchestorPath[] => [
 		{
 			parentPath: "tei text body div head address addrline hi",

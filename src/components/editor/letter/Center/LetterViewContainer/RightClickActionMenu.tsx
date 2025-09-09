@@ -245,6 +245,35 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 
 		EditorUtils.xmlCheck.isNodeMatchingPath(
 			event.target as Node,
+			EditorUtils.rightClickPathHandles.manageGreetingsFormulaPaths(),
+			(node: Node) => {
+				const itemsToAdd: (MenuItemType | undefined)[] = [];
+				setSelectedNode(node);
+
+				const addItem = getMenuItem(
+					EditorConstants.menuItemTypes.WRITING_ACT.ADD_GREETINGS_FORMULA
+				);
+				if (addItem) itemsToAdd.push(addItem);
+
+
+				if (node.nodeName.toLowerCase() === "salute") {
+					const manageItem = getMenuItem(
+						EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_GREETINGS_FORMULA
+					);
+					if (manageItem) itemsToAdd.push(manageItem);
+				}
+
+				menuItemsToAdd.push(...itemsToAdd.map(item => item as MenuItemType));
+				isClickableNode.push(...itemsToAdd.map(() => true));
+			},
+			(message: string) => {
+				isClickableNode.push(false);
+			}
+		)
+
+
+		EditorUtils.xmlCheck.isNodeMatchingPath(
+			event.target as Node,
 			EditorUtils.rightClickPathHandles.deletableAnchestorPaths(),
 			(node: Node) => {
 
@@ -255,7 +284,6 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 
 				if (itemToAdd) {
 					menuItemsToAdd.push(itemToAdd);
-					setDisplayMenuItems([ ...displayMenuItems, itemToAdd]);
 					isClickableNode.push(true);
 				}
 			},
