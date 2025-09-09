@@ -44,6 +44,27 @@ export namespace rightClickPathHandles {
 		}
 	]
 
+	export const manageHeaderLanguagesPaths = (): NodeAnchestorPath[] => [
+		{
+			parentPath: "tei teiheader profiledesc langusage language",
+			nodeType: nodeTypes.get(NodeTypes.LANGUAGE),
+			checkElementDetails: (nodeElement: Element): boolean => {
+				return true
+			},
+			afterActionCallback: (xmlDoc: Document, node: Node) =>
+				xmlCheck.serializeDocument(xmlDoc),
+		},
+		{
+			parentPath: "tei teiheader profiledesc langusage",
+			nodeType: nodeTypes.get(NodeTypes.LANGUAGE),
+			checkElementDetails: (nodeElement: Element): boolean => {
+				return true
+			},
+			afterActionCallback: (xmlDoc: Document, node: Node) =>
+				xmlCheck.serializeDocument(xmlDoc),
+		}
+	]
+
 	export const manageTextLetterAddressPaths = (): NodeAnchestorPath[] => [
 		{
 			parentPath: "tei text body div head address addrline hi",

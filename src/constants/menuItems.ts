@@ -3,7 +3,6 @@ import {enqueueSnackbar} from "notistack";
 import {EditorUtils} from "../utils/editor";
 import {setDialogType, setEditorLetterActOfWriting, setReloadLetterContent} from "../redux/slices/editor.letter.slice";
 import {MiscUtils} from "../utils/misc";
-import {Edit} from "@mui/icons-material";
 
 export const getMenuItemsNoMarking = (
 	dispatch: any,
@@ -168,6 +167,17 @@ export const getMenuItemsNoMarking = (
 
 				dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER}))
 
+			} catch (error) {
+				enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), {variant: "error"});
+			}
+		}
+	},
+	{
+		identifier: EditorConstants.menuItemTypes.MANAGE_HEADER_LANGUAGES, label: 'Sprachen Verwalten', action: async ({node}: { node?: Node }) => {
+			try {
+				if (!node) throw new Error("No node given as value")
+
+				dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.EDIT_LANGUAGES}))
 			} catch (error) {
 				enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), {variant: "error"});
 			}

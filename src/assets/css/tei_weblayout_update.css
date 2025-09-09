@@ -121,12 +121,21 @@ tei {
     }
     profileDesc {
         langusage {
+            cursor: pointer;
+            language {
+                cursor: pointer;
+            }
             language:not(:first-child)::before {
               padding-left: 5px;
             }
         }
     }
     body {
+        div[type="address"], div[type="sender_address"] {
+            address {
+                cursor: pointer;
+            }
+        }
         div[type="act_of_writing"]::before {
             content: "▶";
             font-size: 60%;

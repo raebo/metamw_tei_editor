@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Menu, MenuItem, Divider, Typography, Box} from "@mui/material";
+import {Menu, MenuItem, Divider, Box} from "@mui/material";
 import {createContextMenuItems, MenuItemType} from "../../Util/ContextMenuLetterItems";
 import {useAppDispatch} from "../../../../../redux/hooks";
 import {useSelector} from "react-redux";
@@ -7,7 +7,7 @@ import {RootState} from "../../../../../redux/redux.store";
 import {EditorConstants, LetterState} from "../../../../../constants/editor";
 import {EditorUtils} from "../../../../../utils/editor";
 import {
-	setDialogType, setEditorLetterActOfWriting,
+	setDialogType,
 	setEditorSelectedItem, setNodeClicked,
 	setReloadLetterContent
 } from "../../../../../redux/slices/editor.letter.slice";
@@ -298,6 +298,22 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 			}
 		)
 
+		EditorUtils.xmlCheck.isNodeMatchingPath(
+			event.target as Node,
+			EditorUtils.rightClickPathHandles.manageHeaderLanguagesPaths(),
+			(node: Node) => {
+				setSelectedNode(node)
+				const itemToAdd = getMenuItem(EditorConstants.menuItemTypes.MANAGE_HEADER_LANGUAGES)
+
+				if (itemToAdd) {
+					menuItemsToAdd.push(itemToAdd);
+					isClickableNode.push(true);
+				}
+			},
+			(message: string) => {
+				isClickableNode.push(false);
+			}
+		)
 
 		EditorUtils.xmlCheck.isNodeMatchingPath(
 			event.target as Node,
