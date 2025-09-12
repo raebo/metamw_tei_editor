@@ -159,7 +159,7 @@ const ChooseGbLetterDialog = (props: DefaultDialogProps) => {
         </Typography>
         <Box sx={{ mb: 3 }}>
           <Stack spacing={1}>
-            { addedLetters.map((entry, index) => (
+            { addedLetters.map((entry, _index) => (
               <Box
                 key={(entry.letter !== null && entry.letter.entityKey !== null) ? entry.letter.entityKey: ''}
                 sx={{

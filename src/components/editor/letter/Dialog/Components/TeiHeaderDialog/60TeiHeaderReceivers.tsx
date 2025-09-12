@@ -1,6 +1,6 @@
 import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
 import { EntityType, HeaderPerson} from '../../../../../../constants/editor';
 import { enqueueSnackbar } from 'notistack';

@@ -178,12 +178,6 @@ export const miscContentCheck = {
 			}
 		})
 
-		console.log(contentAddressEntry.addrLines);
-
 		return contentAddressEntry
-	},
-	extractSalutationData: (xmlDoc: XMLDocument, tmpIdValue: string): string | null => {
-
-		return ""
 	},
 }

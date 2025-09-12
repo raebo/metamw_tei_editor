@@ -121,7 +121,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
 		description: "insert line of date on top of the current element",
 		component: null,
 		action: null,
-		openDialogAction: (dispatch: AppDispatch) => {  }
+		openDialogAction: (_dispatch: AppDispatch) => {  }
 	},
 	"alt+v": {
 		key: "alt+v",

@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from "uuid"
 import { EditorUtils } from "./index"
-import {xmlCheck} from "./xmlCheck";
 import {
   ActOfWritingElement,
   MarkupPersonData,
@@ -8,7 +7,6 @@ import {
 } from '../../services/mappings/editorMappings';
 import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
 import { EditorConstants } from '../../constants/editor';
-import {xml} from "vkbeautify";
 
 const generateSettlementNode = ( data: { key: string | null, name: string | null, type: string | null}) : HTMLElement => {
   if (data.key === null || data.name === null || data.type === null) {

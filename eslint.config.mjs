@@ -69,6 +69,7 @@ export default defineConfig([{
         "@typescript-eslint/no-unused-vars": ["warn", {
             argsIgnorePattern: "^_",
         }],
+	    "@typescript-eslint/no-throw-literal": "off",
 
         "react/prop-types": "off",
         "react/react-in-jsx-scope": "off",

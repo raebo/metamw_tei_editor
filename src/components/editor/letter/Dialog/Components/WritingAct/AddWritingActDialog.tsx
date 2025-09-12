@@ -19,7 +19,6 @@ import { enqueueSnackbar } from 'notistack';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../../../redux/redux.store';
 import { markupGeneration } from '../../../../../../utils/editor/markupGeneration';
-import { useAppDispatch } from '../../../../../../redux/hooks';
 import { ActOfWritingElement } from '../../../../../../services/mappings/editorMappings';
 import DialogContent from "@mui/material/DialogContent";
 import {DialogActionButton} from "../Misc/DialogActionButton";
@@ -29,15 +28,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import {searchEditortEntities} from "../../../../../../services/editor/apiLetterRequest.service";
 import {MiscUtils} from "../../../../../../utils/misc";
-
-type CompletionState = {
-  authorCompleteAvailable: boolean;
-  nameAuthor: string | null;
-  keyAuthor: string | null;
-  writerCompleteAvailable: boolean;
-  nameWriter: string | null;
-  keyWriter: string | null;
-};
 
 const AddWritingActDialog = (props: DefaultDialogProps) => {
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);

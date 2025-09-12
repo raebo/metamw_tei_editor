@@ -1,6 +1,6 @@
 import {DefaultDialogProps} from "../EditorFormDialog";
 import {EditorConstants, EntityType, HeaderPerson} from "../../../../../constants/editor";
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {SnippetEntity} from "../../../../../services/mappings/autoAnnoMappings";
 import {EditorUtils} from "../../../../../utils/editor";
 import {enqueueSnackbar} from "notistack";

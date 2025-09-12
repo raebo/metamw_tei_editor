@@ -1,13 +1,12 @@
 import { DefaultDialogProps} from "../../EditorFormDialog";
 import DialogContent from "@mui/material/DialogContent";
-import {FormControl, InputLabel, MenuItem, Select, TextField, Typography} from "@mui/material";
+import {FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import React, {useEffect, useState} from "react";
 import {EditorUtils} from "../../../../../../utils/editor";
 import {enqueueSnackbar} from "notistack";
 import {MiscUtils} from "../../../../../../utils/misc";
 import {EditorConstants} from "../../../../../../constants/editor";
 import {DialogActionButton} from "./DialogActionButton";
-import {Simulate} from "react-dom/test-utils";
 
 export interface GreetingsFormulaProps extends DefaultDialogProps{
 	formulaType: typeof EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA | typeof EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA

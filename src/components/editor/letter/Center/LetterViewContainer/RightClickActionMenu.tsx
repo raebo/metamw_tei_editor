@@ -130,7 +130,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 		};
 	}, [contentTextIsMarked ]);
 
-	const handleMouseUpMarkedElements = (event: MouseEvent) => {
+	const handleMouseUpMarkedElements = (_event: MouseEvent) => {
 		const selection = window.getSelection();
 
 		try {
@@ -247,7 +247,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 					isClickableNode.push(true);
 				}
 			},
-			(message: string) => {
+			(_message: string) => {
 				isClickableNode.push(false);
 			}
 		);
@@ -274,7 +274,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 				menuItemsToAdd.push(...itemsToAdd.map(item => item as MenuItemType));
 				isClickableNode.push(...itemsToAdd.map(() => true));
 			},
-			(message: string) => {
+			(_message: string) => {
 				isClickableNode.push(false);
 			}
 		)
@@ -296,7 +296,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 					}
 				})
 			},
-			(message: string) => {
+			(_message: string) => {
 				isClickableNode.push(false);
 			}
 		);
@@ -316,7 +316,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 					isClickableNode.push(true);
 				}
 			},
-			(message: string) => {
+			(_message: string) => {
 				isClickableNode.push(false);
 			}
 		);
@@ -333,7 +333,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 					isClickableNode.push(true);
 				}
 			},
-			(message: string) => {
+			(_message: string) => {
 				isClickableNode.push(false);
 			}
 		);
@@ -350,7 +350,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 					isClickableNode.push(true);
 				}
 			},
-			(message: string) => {
+			(_message: string) => {
 				isClickableNode.push(false);
 			}
 		)
@@ -367,7 +367,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 					isClickableNode.push(true);
 				}
 			},
-			(message: string) => {
+			(_message: string) => {
 				isClickableNode.push(false);
 			}
 		)
@@ -385,7 +385,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 					isClickableNode.push(true);
 				}
 			},
-			(message: string) => {
+			(_message: string) => {
 				isClickableNode.push(false);
 			}
 		)
