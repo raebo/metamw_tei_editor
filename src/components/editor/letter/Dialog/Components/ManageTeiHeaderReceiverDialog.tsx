@@ -1,16 +1,11 @@
 import {DefaultDialogProps} from "../EditorFormDialog";
-import {useAppDispatch} from "../../../../../redux/hooks";
 import {EditorConstants, EntityType, HeaderPerson} from "../../../../../constants/editor";
 import React, {useEffect, useMemo, useState} from "react";
 import {SnippetEntity} from "../../../../../services/mappings/autoAnnoMappings";
-import {useSelector} from "react-redux";
-import {RootState} from "../../../../../redux/redux.store";
-import {setReloadLetterContent} from "../../../../../redux/slices/editor.letter.slice";
 import {EditorUtils} from "../../../../../utils/editor";
 import {enqueueSnackbar} from "notistack";
 import {MiscUtils} from "../../../../../utils/misc";
 import {searchEditortEntities} from "../../../../../services/editor/apiLetterRequest.service";
-import {debounce} from "lodash-es";
 import {fetchMetamwEntityData} from "../../../../../services/auto_anno/apiMetaMw.service";
 import DialogContent from "@mui/material/DialogContent";
 import DynamicDataDisplay from "../../../../support/DynamicDataDisplay";
@@ -31,36 +26,35 @@ import {DialogActionButton} from "./Misc/DialogActionButton";
 import FormAutocomplete from "../../Util/FormAutocomplete";
 
 const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
-
-	const dispatch = useAppDispatch();
 	const [receivers, setReceivers] = React.useState<HeaderPerson[]>([]);
 	const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
 	const [people, setPeople] = useState<SnippetEntity[]>([]);
 	const [selectedPerson, setSelectedPerson] = React.useState<SnippetEntity | null>(null)
-	const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
-	const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
-	const [parsedXml, setParsedXml] = React.useState<{
+
+	const [docData, setDocData] = React.useState<{
 		xmlDoc: XMLDocument | null;
 		teiHeader: Element | null;
-	}>({ xmlDoc: null, teiHeader: null });
+	}>({ xmlDoc: props.xmlDoc, teiHeader: null });
 
 	React.useEffect(() => {
-		if (!stateTeiXml) {
-			dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+		if (!docData.xmlDoc) {
+			enqueueSnackbar("Kein XML-Dokument verfügbar", { variant: "error" });
 			return;
 		}
 
 		try {
-			const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
-			const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(xmlDoc);
-			setParsedXml({ xmlDoc, teiHeader });
+			const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(docData.xmlDoc);
+
+			if (!teiHeader) {
+				enqueueSnackbar("Kein TEI-Header im Dokument gefunden", { variant: "error" });
+				return
+			}
+			setDocData((prevState) => ({ ...prevState, teiHeader }));
 		} catch (err) {
 			enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: "error" });
-			setParsedXml({ xmlDoc: null, teiHeader: null });
+			setDocData({ xmlDoc: null, teiHeader: null });
 		}
-	}, [stateTeiXml, dispatch]);
-
-	const { xmlDoc, teiHeader } = parsedXml;
+	}, [props.xmlDoc]);
 
 	useEffect(() => {
 		const fetchDefaultPeople = async () => {
@@ -77,18 +71,18 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 			}
 		};
 
-		if (teiHeader) {
+		if (docData.teiHeader) {
 			try {
 				setReceivers(
-					EditorUtils.teiHeaderContent.extractReceivers(teiHeader)
+					EditorUtils.teiHeaderContent.extractReceivers(docData.teiHeader)
 				)
 
-				fetchDefaultPeople();
+				void fetchDefaultPeople();
 			} catch (error) {
 				enqueueSnackbar("Fehler beim Lesen der TEI-Header-Daten: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
 			}
 		}
-	}, [teiHeader]);
+	}, [docData.teiHeader]);
 
 
 	const handleInfoIconClick = async (reference: HeaderPerson) => {
@@ -108,9 +102,7 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 	};
 
 	const handleAdd = () => {
-		if (!selectedPerson) {
-			return
-		}
+		if (!selectedPerson) return
 
 		if (receivers.find(w => w.key === selectedPerson.entityKey)) {
 			enqueueSnackbar("Receiver already added", { variant: "warning" });
@@ -122,29 +114,21 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 
 
 	const handleSave = async () => {
-		if (!xmlDoc || !teiHeader) {
+		if (!docData.xmlDoc || !docData.teiHeader) {
 			enqueueSnackbar("TEI-Header ist nicht verfügbar", { variant: "error" });
 			return false;
 		}
 
 		try {
-			EditorUtils.teiHeaderContent.setReceivers(teiHeader, receivers);
+			EditorUtils.teiHeaderContent.setReceivers(docData.teiHeader, receivers);
 
-			const serializer = new XMLSerializer();
-			const updatedXml = serializer.serializeToString(xmlDoc)
+			props.onSave(docData.xmlDoc, EditorConstants.changeTypes.misc.HEADER_UPDATED, "Die Empfänger des Briefes wurden aktualisiert.", null);
 
-			const result = await EditorUtils.backendService.patchContent(
-				updatedXml, stateEditorLetter.id, EditorConstants.changeTypes.misc.HEADER_UPDATED, null)
 
-			if (result) {
-				dispatch(setReloadLetterContent({ reloadLetterContent: true }))
-				enqueueSnackbar("Die Empfänger des Briefes wurden erfolgreich gespeichert", { variant: "success" })
-			}
-
-			props.onClose()
 		} catch (error) {
 			console.log(error)
 			enqueueSnackbar("Fehler beim Schreiben der TEI-Header-Daten: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+			props.onClose()
 			return false;
 		}
 		return true;

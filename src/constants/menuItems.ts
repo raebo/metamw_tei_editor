@@ -8,6 +8,7 @@ import {
 	setXmlLetterContent
 } from "../redux/slices/editor.letter.slice";
 import {MiscUtils} from "../utils/misc";
+import {setEditorDialogAndReferenceThunk} from "../redux/thunks/editor.letter.thunk";
 
 export const getMenuItemsNoMarking = (
 	dispatch: any,
@@ -124,7 +125,7 @@ export const getMenuItemsNoMarking = (
 			try {
 				if (!node) throw new Error("No node given as value")
 
-				const anchNode = EditorUtils.rightClickPathHandles.findAnchestorPathNode(node)
+				const anchNode = EditorUtils.rightClickPathHandles.findAncestorPathNode(node)
 
 				if (!anchNode) throw new Error("No anchNode found with given path")
 
@@ -196,7 +197,7 @@ export const getMenuItemsNoMarking = (
 
 				const xmlDoc = xmlDocRef.current;
 				if (!xmlDoc) throw new Error("XML document not loaded");
-				EditorUtils.textMarking.addTmpIdToNode(xmlDoc, node as Element, "MANAGE_GREETINGS_FORMULA");
+				EditorUtils.textMarking.addTmpIdToNode(xmlDoc, node as Element, EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA);
 
 				const serializer = new XMLSerializer();
 				dispatch(setXmlLetterContent({ content: { xmlContent: serializer.serializeToString(xmlDoc)} }) )
@@ -210,7 +211,6 @@ export const getMenuItemsNoMarking = (
 	{
 		identifier: EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_GREETINGS_FORMULA, label: 'Begrüßungsformel Bearbeiten', action: async ({node}: { node?: Node }) => {
 			try {
-
 				if (!node) throw new Error("No node given as value")
 
 				const xmlDoc = xmlDocRef.current;
@@ -225,6 +225,27 @@ export const getMenuItemsNoMarking = (
 				enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), {variant: "error"});
 			}
 		}
-	},
+	}, {
+		identifier: EditorConstants.menuItemTypes.WRITING_ACT.EDIT_NOTE, label: 'Kommentar Bearbeiten', action: async ({node}: { node?: Node }) => {
+			try {
+				if (!node) throw new Error("No node given as value")
+
+				const xmlId = (node as Element).getAttribute('xml:id');
+
+				if (!xmlId) throw new Error("No xml:id found on node")
+
+				dispatch(
+					setEditorDialogAndReferenceThunk({
+						dialogType: EditorConstants.dialogTypes.EDIT_NOTE,
+						elementType: "note",
+						elementXmlId: xmlId,
+						elementKey: null
+					})
+				)
+			} catch (error) {
+				enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), {variant: "error"});
+			}
+		}
+	}
 ];
 

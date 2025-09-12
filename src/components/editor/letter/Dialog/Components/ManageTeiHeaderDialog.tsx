@@ -1,4 +1,4 @@
-import { DefaultDialogProps } from '../EditorFormDialog';
+import { DefaultDialogProps} from '../EditorFormDialog';
 import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
 import { DISPLAY_NAME_MAP } from '../../../../../utils/entityMappings';
 import React, { useEffect, useRef } from 'react';
@@ -15,10 +15,6 @@ import { EditorLetter } from '../../../../../services/mappings/editorMappings';
 import {EditorUtils} from "../../../../../utils/editor";
 import {enqueueSnackbar} from "notistack";
 import {EditorConstants, HeaderPerson, LanguageOption} from "../../../../../constants/editor";
-import {useSelector} from "react-redux";
-import {RootState} from "../../../../../redux/redux.store";
-import {setReloadLetterContent} from "../../../../../redux/slices/editor.letter.slice";
-import {useAppDispatch} from "../../../../../redux/hooks";
 import TeiHeaderEditorTranskriptor from "./TeiHeaderDialog/80EditorTranskriptor";
 import TeiHeaderReceivers from "./TeiHeaderDialog/60TeiHeaderReceivers";
 import DialogContent from "@mui/material/DialogContent";
@@ -53,35 +49,34 @@ type CompletionState = {
 
 const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 
-	const dispatch = useAppDispatch();
   const [displayData] = React.useState<{ [key: string]:string}|null>(null)
-	const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
-	const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
-
 	const [formIsValid, setFormIsValid] = React.useState<boolean>(false);
-
-	const [parsedXml, setParsedXml] = React.useState<{
+	const [docData, setDocData] = React.useState<{
 		xmlDoc: XMLDocument | null;
 		teiHeader: Element | null;
-	}>({ xmlDoc: null, teiHeader: null });
+	}>({ xmlDoc: props.xmlDoc, teiHeader: null });
 
 	React.useEffect(() => {
-		if (!stateTeiXml) {
-			dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-			return;
+		if (!docData.xmlDoc) {
+			enqueueSnackbar("Kein XML-Dokument zum Parsen vorhanden", { variant: "error" });
+			return
 		}
 
 		try {
-			const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
-			const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(xmlDoc);
-			setParsedXml({ xmlDoc, teiHeader });
+			const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(docData.xmlDoc);
+
+			if (!teiHeader) {
+				enqueueSnackbar("Kein TEI-Header im XML-Dokument gefunden", { variant: "error" });
+				setDocData({ xmlDoc: null, teiHeader: null });
+				return;
+			}
+
+			setDocData((prevState) => ({ ...prevState, teiHeader }));
 		} catch (err) {
 			enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: "error" });
-			setParsedXml({ xmlDoc: null, teiHeader: null });
+			setDocData({ xmlDoc: null, teiHeader: null });
 		}
-	}, [stateTeiXml, dispatch]);
-
-	const { xmlDoc, teiHeader } = parsedXml;
+	}, [props]);
 
   const [completionState, setCompletionState] = React.useState<CompletionState>({
     firstHeaderComplete: false, firstHeaderContent: null,
@@ -97,13 +92,6 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
   })
 
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (ref.current) {
-      const width = ref.current.scrollWidth;
-      props.setWidth(`${width}px`); // add some padding if needed
-    }
-  }, []);
 
 	useEffect(() => {
 		const saveIsAvailable  = () : boolean => {
@@ -129,22 +117,21 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 	}, [completionState])
 
 	const writeHeaderData = () : boolean => {
-		if (teiHeader === null) {
+		if (docData.teiHeader === null) {
 			enqueueSnackbar("TEI-Header ist nicht verfügbar", { variant: "error" });
 			return false;
 		}
 
 		try {
-			EditorUtils.teiHeaderContent.setTitleElementHeadlines(teiHeader, completionState.firstHeaderContent, completionState.sndHeaderContent);
-			EditorUtils.teiHeaderContent.setPrevNextLetter(teiHeader, "precursor", completionState.prevLetterType, completionState.prevLetter);
-			EditorUtils.teiHeaderContent.setPrevNextLetter(teiHeader, "successor", completionState.nextLetterType, completionState.nextLetter);
-			EditorUtils.teiHeaderContent.setWritingPlace(teiHeader, completionState.writingPlace);
-			EditorUtils.teiHeaderContent.setReceivingPlace(teiHeader, completionState.receivingPlace);
-			EditorUtils.teiHeaderContent.setReceivers(teiHeader, completionState.receivers);
-			EditorUtils.teiHeaderContent.setLanguages(teiHeader, completionState.letterLanguage);
-			EditorUtils.teiHeaderContent.setEditorTranskriptorName(teiHeader, 'edition', completionState.editorValue);
-			EditorUtils.teiHeaderContent.setEditorTranskriptorName(teiHeader, 'transcription', completionState.transkriptorValue);
-
+			EditorUtils.teiHeaderContent.setTitleElementHeadlines(docData.teiHeader, completionState.firstHeaderContent, completionState.sndHeaderContent);
+			EditorUtils.teiHeaderContent.setPrevNextLetter(docData.teiHeader, "precursor", completionState.prevLetterType, completionState.prevLetter);
+			EditorUtils.teiHeaderContent.setPrevNextLetter(docData.teiHeader, "successor", completionState.nextLetterType, completionState.nextLetter);
+			EditorUtils.teiHeaderContent.setWritingPlace(docData.teiHeader, completionState.writingPlace);
+			EditorUtils.teiHeaderContent.setReceivingPlace(docData.teiHeader, completionState.receivingPlace);
+			EditorUtils.teiHeaderContent.setReceivers(docData.teiHeader, completionState.receivers);
+			EditorUtils.teiHeaderContent.setLanguages(docData.teiHeader, completionState.letterLanguage);
+			EditorUtils.teiHeaderContent.setEditorTranskriptorName(docData.teiHeader, 'edition', completionState.editorValue);
+			EditorUtils.teiHeaderContent.setEditorTranskriptorName(docData.teiHeader, 'transcription', completionState.transkriptorValue);
 
 		} catch (error) {
 			enqueueSnackbar("Fehler beim Schreiben der TEI-Header-Daten: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
@@ -154,32 +141,21 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 		return true;
 	}
 
-
 	const submitSaveHandler = async () => {
+		if(!docData.xmlDoc|| !docData.teiHeader) {
+			enqueueSnackbar("Ungültiges XML-Dokument oder kein TEI-Header gefunden", { variant: "error" });
+			return;
+		}
+
 		try {
-
-			if(!xmlDoc || !teiHeader) {
-				enqueueSnackbar("Ungültiges XML-Dokument oder kein TEI-Header gefunden", { variant: "error" });
-				return;
-			}
-
 			writeHeaderData()
 
-			const updatedXml = new XMLSerializer().serializeToString(xmlDoc);
-			const result = await EditorUtils.backendService.patchContent(
-				updatedXml, stateEditorLetter.id, EditorConstants.changeTypes.misc.HEADER_UPDATED, null)
-
-			if (result) {
-				dispatch(setReloadLetterContent({ reloadLetterContent: true }))
-				enqueueSnackbar("Die Kopfdaten des Briefes wurden erfolgreich gespeichert", { variant: "success" })
-			}
+			props.onSave(docData.xmlDoc, EditorConstants.changeTypes.misc.HEADER_UPDATED, "Der HEI-Header wurde aktualisiert.", null );
 
 		} catch (error) {
 			enqueueSnackbar("Fehler beim Speichern des TEI-Headers: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+			props.onClose()
 		}
-
-		props.onClose()
-
 	}
 
   const childOnChange = MiscUtils.stateHandling.createHandleChange(setCompletionState);
@@ -188,23 +164,19 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
     <div ref={ref}>
 			<DialogContent>
 				<div className="autoSnippetFormRow">
-					{ displayData !== null ? (
+					{ displayData !== null && (
 						<DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
-					) : (
-						<>
-						</>
-					)
-					}
+					)}
 				</div>
-				<TeiHeaderFirstHeadline teiHeader={teiHeader} autoAvailable={completionState.firstHeaderComplete} completionState={completionState} onChange={childOnChange} />
-				<TeiHeaderSndHeadline teiHeader={teiHeader} autoAvailable={completionState.sndHeaderComplete} completionState={completionState} onChange={childOnChange} />
-				<TeiHeaderPrevLetter teiHeader={teiHeader} autoAvailable={completionState.prevLetterAutoAvailable} completionState={completionState} onChange={childOnChange}  />
-				<TeiHeaderNextLetter teiHeader={teiHeader} autoAvailable={completionState.nextLetterAutoAvailable} completionState={completionState} onChange={childOnChange} />
-				<TeiHeaderWritingReceivingPlace teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"writing"} textFieldValue={'Schreibort Auswählen'}/>
-				<TeiHeaderReceivers teiHeader={teiHeader} autoAvailable={completionState.receiverAutoAvailable} completionState={completionState} onChange={childOnChange} />
-				<TeiHeaderWritingReceivingPlace teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"receiving"} textFieldValue={'Empfängerort Auswählen'}/>
-				<TeiHeaderTransEdition teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
-				<TeiHeaderEditorTranskriptor teiHeader={teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderFirstHeadline teiHeader={docData.teiHeader} autoAvailable={completionState.firstHeaderComplete} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderSndHeadline teiHeader={docData.teiHeader} autoAvailable={completionState.sndHeaderComplete} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderPrevLetter teiHeader={docData.teiHeader} autoAvailable={completionState.prevLetterAutoAvailable} completionState={completionState} onChange={childOnChange}  />
+				<TeiHeaderNextLetter teiHeader={docData.teiHeader} autoAvailable={completionState.nextLetterAutoAvailable} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderWritingReceivingPlace teiHeader={docData.teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"writing"} textFieldValue={'Schreibort Auswählen'}/>
+				<TeiHeaderReceivers teiHeader={docData.teiHeader} autoAvailable={completionState.receiverAutoAvailable} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderWritingReceivingPlace teiHeader={docData.teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"receiving"} textFieldValue={'Empfängerort Auswählen'}/>
+				<TeiHeaderTransEdition teiHeader={docData.teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
+				<TeiHeaderEditorTranskriptor teiHeader={docData.teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
 
 				<Divider orientation="vertical" flexItem />
 			</DialogContent>

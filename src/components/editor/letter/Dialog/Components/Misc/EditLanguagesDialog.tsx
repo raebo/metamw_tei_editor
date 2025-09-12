@@ -1,9 +1,5 @@
-import {DefaultDialogProps} from "../../EditorFormDialog";
-import {useAppDispatch} from "../../../../../../redux/hooks";
-import {useSelector} from "react-redux";
-import {RootState} from "../../../../../../redux/redux.store";
+import { DefaultDialogProps} from "../../EditorFormDialog";
 import React, {useEffect, useState} from "react";
-import {setReloadLetterContent} from "../../../../../../redux/slices/editor.letter.slice";
 import {EditorUtils} from "../../../../../../utils/editor";
 import {enqueueSnackbar} from "notistack";
 import {MiscUtils} from "../../../../../../utils/misc";
@@ -15,38 +11,22 @@ import {DialogActionButton} from "./DialogActionButton";
 
 const EditLanguagesDialog = (props: DefaultDialogProps) => {
   const [letterLanguages, setLetterLanguages] = useState<LanguageOption[]>([])
-  const dispatch = useAppDispatch();
-  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
   const [selectedLang, setSelectedLang] = useState("");
-  const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
-
-  const [parsedXml, setParsedXml] = React.useState<{
-    xmlDoc: XMLDocument | null;
-    teiHeader: Element | null;
-  }>({ xmlDoc: null, teiHeader: null });
+	const xmlDoc: Document = props.xmlDoc;
+	const [teiHeader, setTeiHeader] = useState<Element | null>(null)
 
   useEffect(() => {
-    if (!stateTeiXml) {
-      dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-      return;
-    }
-
-   	try {
-			const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
-			const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(xmlDoc);
-			setParsedXml({ xmlDoc, teiHeader });
+		try {
+			setTeiHeader(EditorUtils.teiHeaderContent.extractTeiHeader(xmlDoc))
 		} catch (err) {
 			enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: "error" });
-			setParsedXml({ xmlDoc: null, teiHeader: null });
 		}
-  }, [stateTeiXml, dispatch]);
+  }, [props]);
 
-  useEffect(() => {
-    if(parsedXml && parsedXml.teiHeader) {
-      const assignedLanguages : LanguageOption[] = EditorUtils.teiHeaderContent.extractLanguages(parsedXml.teiHeader)
-      setLetterLanguages(Array.from(new Set([...assignedLanguages, ...letterLanguages])));
-    }
-  }, [parsedXml]);
+	useEffect(() => {
+		const assignedLanguages : LanguageOption[] = EditorUtils.teiHeaderContent.extractLanguages(teiHeader)
+		setLetterLanguages(Array.from(new Set([...assignedLanguages, ...letterLanguages])));
+	}, [teiHeader]);
 
   const handleLanguageChange = (event: SelectChangeEvent) => {
     const value = event.target.value as 'de' | 'en' | 'fr' | 'it' | 'la' | 'grc' | 'he';
@@ -65,33 +45,13 @@ const EditLanguagesDialog = (props: DefaultDialogProps) => {
   }
 
   const handleSave = async () => {
-    try {
-      if (!parsedXml.xmlDoc || !parsedXml.teiHeader) {
-        throw new Error("No xml content found");
-      }
+		if (!xmlDoc || !teiHeader) return
 
-      EditorUtils.teiHeaderContent.setLanguages(parsedXml.teiHeader, letterLanguages);
+		EditorUtils.teiHeaderContent.setLanguages(teiHeader, letterLanguages);
 
-      const xmlSerializer = new XMLSerializer();
+		props.onSave(xmlDoc, EditorConstants.changeTypes.misc.HEADER_LANGUAGES_UPDATED, "Sprachen im Header wurden aktualisiert", null);
 
-      const result = await EditorUtils.backendService.patchContent(
-        xmlSerializer.serializeToString(parsedXml.xmlDoc) , stateEditorLetter.id, EditorConstants.changeTypes.misc.HEADER_LANGUAGES_UPDATED, null
-      )
-
-      if (result) {
-        dispatch(setReloadLetterContent( { reloadLetterContent: true } ));
-        enqueueSnackbar("Languages updated", { variant: "success" });
-      } else {
-        enqueueSnackbar("Data could not be updated on backend side", { variant: "error" });
-      }
-    } catch (error) {
-      enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
-    }
-
-    props.onClose();
   }
-
-
 
   return (
     <>

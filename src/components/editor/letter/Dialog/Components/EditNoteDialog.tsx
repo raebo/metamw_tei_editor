@@ -1,23 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { useAppDispatch } from "../../../../../redux/hooks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/redux.store";
 import { EditorUtils } from "../../../../../utils/editor";
 import Button from "@mui/material/Button";
 import {Divider, FormControl, InputLabel, MenuItem, Select, TextareaAutosize} from "@mui/material";
 import { EditorConstants } from "../../../../../constants/editor";
-import { setReloadLetterContent } from "../../../../../redux/slices/editor.letter.slice";
 import { enqueueSnackbar } from "notistack";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import { DefaultDialogProps } from '../EditorFormDialog';
+import {DefaultDialogProps} from '../EditorFormDialog';
+import {MiscUtils} from "../../../../../utils/misc";
 
 
 const EditNoteDialog = (props: DefaultDialogProps) => {
 
-  const dispatch = useAppDispatch();
   const stateLetterReference = useSelector((state: RootState) => state.editorLetter.letterReference)
-  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
   const [noteContent, setNoteContent] = useState("");
   const [noteType, setNoteType] = useState("");
   const [noteLanguage, setNoteLanguage] = useState("");
@@ -26,10 +23,11 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
   const [noteParentContent, setNoteParentContent] = useState("")
   const [noteXmlId, setNoteXmlId] = useState("")
   const [deleteButtonsVisible, setDeleteButtonsVisible] = useState(false)
+	const xmlDoc = props.xmlDoc
 
   useEffect(() => {
     const initNoteContent = (xmlId: string) => {
-      const note = EditorUtils.xmlCheck.elementByXmlTypeAndId(xmlId, 'note')
+      const note = EditorUtils.xmlCheck.elementByXmlTypeAndId(xmlId, 'note', xmlDoc)
       if (note) {
         if (note?.parentElement) {
           setNoteParentContent(note?.parentElement?.innerHTML)
@@ -55,55 +53,32 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
 
   const handleDeleteNote= () => {
     try {
-      const noteMarkup = EditorUtils.markupGeneration.deleteNoteMarkup(noteXmlId)
+      EditorUtils.markupGeneration.deleteNoteMarkup(xmlDoc, noteXmlId)
 
-      EditorUtils.backendService.patchContent(
-        noteMarkup.xmlString, stateEditorLetter.id, EditorConstants.changeTypes.note.REMOVED, noteXmlId
-      ).then((result) => {
-        if (result) {
-          dispatch(setReloadLetterContent({reloadLetterContent: true}))
-          enqueueSnackbar("Note deleted", {variant: "success"})
-        } else {
-          enqueueSnackbar("Data could not be updated on backend side", {variant: "error"})
-        }
-      }).catch(error => {
-        enqueueSnackbar("Data could not be updated on backend side: " + error.toString(), {variant: "error"})
-      })
+			props.onSave(xmlDoc, EditorConstants.changeTypes.note.REMOVED, "Note deleted", null)
+
     } catch (error) {
-      enqueueSnackbar("No xml content found", {variant: "error"})
+      enqueueSnackbar("Error durign deletion of note: " + MiscUtils.misc.getErrorMessage(error), {variant: "error"})
+			props.onClose()
     }
-
-    props.onClose()
   }
 
   const handleUpdateNote= () => {
     try {
-      const noteMarkup =
-        EditorUtils.markupGeneration.updateNoteMarkup(
+      EditorUtils.markupGeneration.updateNoteMarkup(
+					xmlDoc,
           noteXmlId,
           noteType,
           noteLanguage,
           noteContent
         )
 
-      EditorUtils.backendService.patchContent(
-        noteMarkup.xmlString, stateEditorLetter.id, EditorConstants.changeTypes.note.ADDED, noteXmlId
-      ).then(
-        (result) => {
-          if (result) {
-            dispatch(setReloadLetterContent({ reloadLetterContent: true }))
-            enqueueSnackbar("Note updated", { variant: "success" })
-          } else {
-            enqueueSnackbar("Data could not be updated on backend side", { variant: "error" })
-          }
-        }
-      ).catch((error) => {
-        enqueueSnackbar("Data could not be updated on backend side: " +  error.toString(), { variant: "error" })
-      })
+			props.onSave(xmlDoc, EditorConstants.changeTypes.note.CONTENT_CHANGED, "Note content changed", noteXmlId)
+
     } catch {
       enqueueSnackbar("No xml content found", { variant: "error" })
+			props.onClose()
     }
-    props.onClose()
   }
 
   return(
@@ -114,12 +89,12 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
         </div>
         <div className="form-item form-item--key">
           <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
-            <InputLabel id="auto-anno-snippet-reference-type">Kommentar (Typ)</InputLabel>
+            <InputLabel id="editor-dialog-edit-note-type">Kommentar (Typ)</InputLabel>
             <Select
               value={noteType}
               disabled={deleteButtonsVisible}
-              labelId="demo-simple-select-filled-label"
-              id="demo-simple-select-filled"
+              labelId="editor-dialog-edit-note-label"
+              id="editor-dialog-edit-note-select"
               onChange={(event) => setNoteType(event.target.value)}
             >
               { noteTypeItems.map((item) => (

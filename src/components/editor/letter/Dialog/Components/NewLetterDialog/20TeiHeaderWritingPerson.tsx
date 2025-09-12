@@ -11,7 +11,6 @@ import { NewLetterDialogProps } from '../AddNewLetterDialog';
 const TeiHeaderWritingPerson = (props: NewLetterDialogProps) => {
 
   const completionState = props.completionState
-
   const selectedOption: SnippetEntity | null = completionState.writerEntity
   const [people, setPeople] = useState<SnippetEntity[]>([]);
 
@@ -36,7 +35,7 @@ const TeiHeaderWritingPerson = (props: NewLetterDialogProps) => {
       }
     };
 
-    fetchDefaultPeople();
+    void fetchDefaultPeople();
   }, []);
 
 
@@ -68,7 +67,7 @@ const TeiHeaderWritingPerson = (props: NewLetterDialogProps) => {
           onChange={(_, newValue) => setSelectedOption(newValue)}
           onInputChange={(_, inputValue, reason) => {
             if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
-              debouncedSearchForPeople(inputValue);
+              void debouncedSearchForPeople(inputValue);
             }
           }}
           getOptionLabel={(option) => option.entityName || ''}

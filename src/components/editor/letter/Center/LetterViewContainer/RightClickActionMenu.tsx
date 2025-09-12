@@ -133,39 +133,48 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 	const handleMouseUpMarkedElements = (event: MouseEvent) => {
 		const selection = window.getSelection();
 
-		if (selection && selection.toString().length > 0) {
-			EditorUtils.textMarking.isValidSelection(
-				selection,
-				xmlContentRef.current as HTMLElement,
-				(selection: Selection) => {
+		try {
+			if (selection && selection.toString().length > 0) {
+				EditorUtils.textMarking.isValidSelection(
+					selection,
+					xmlContentRef.current as HTMLElement,
+					(selection: Selection) => {
 
-					EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
-					EditorUtils.textMarking.markValidSelection(selection, selection.getRangeAt(0));
+						if (!xmlContentRef.current) throw new Error("xmlContentRef is null");
 
-					dispatch(setEditorMarkedAndContentLeftRightThunk({
-						textIsMarked: true,
-						contentLeft: null,
-						contentRight: null
-					}));
+						EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
+						EditorUtils.textMarking.markValidSelection(selection, selection.getRangeAt(0));
 
-					setDisplayMenuItems(menuItems);
-				},
-				(message: string) => {
-					EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
-					props.setLetterState({
-						viewMode: "WYSIWYG",
-						xmlContent: xmlContentRef.current?.innerHTML ?? ""
-					})
+						const xmlDoc = EditorUtils.xmlCheck.extractDocumentByRef(xmlContentRef)
 
-					dispatch(setEditorMarkedAndContentLeftRightThunk({
-						textIsMarked: false,
-						contentLeft: null,
-						contentRight: null
-					}));
+						dispatch(setEditorMarkedAndContentLeftRightThunk({
+							textIsMarked: true,
+							contentLeft: null,
+							contentRight: null,
+							xmlContent: new XMLSerializer().serializeToString(xmlDoc)
+						}));
 
-					enqueueSnackbar(message, { variant: "error" });
-				}
-			);
+						setDisplayMenuItems(menuItems);
+					},
+					(message: string) => {
+						EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
+						props.setLetterState({
+							viewMode: "WYSIWYG",
+							xmlContent: xmlContentRef.current?.innerHTML ?? ""
+						})
+
+						dispatch(setEditorMarkedAndContentLeftRightThunk({
+							textIsMarked: false,
+							contentLeft: null,
+							contentRight: null
+						}));
+
+						enqueueSnackbar(message, { variant: "error" });
+					}
+				);
+			}
+		} catch (err) {
+			enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: "error" });
 		}
 	};
 
@@ -201,7 +210,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 		if (event.button !== 2) return; // Only right-click
 		event.preventDefault();
 
-		const getMenuItem = (id: string) =>
+		const getMenuItem = (id: string): MenuItemType | undefined =>
 			menuItemsNoMarking.find(item => item.identifier === id);
 
 		const hasNoUndefinedItems = (items: (MenuItemType | undefined)[]) =>
@@ -255,7 +264,6 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 				);
 				if (addItem) itemsToAdd.push(addItem);
 
-
 				if (node.nodeName.toLowerCase() === "salute") {
 					const manageItem = getMenuItem(
 						EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_GREETINGS_FORMULA
@@ -270,11 +278,32 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 				isClickableNode.push(false);
 			}
 		)
+		EditorUtils.xmlCheck.isNodeMatchingPath(
+			event.target as Node,
+			EditorUtils.rightClickPathHandles.manageBodyNotePaths(),
+			(node: Node) => {
 
+				EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
+				setSelectedNode(node)
+
+				const editNote = EditorConstants.menuItemTypes.WRITING_ACT.EDIT_NOTE;
+
+				[editNote].forEach(entry => {
+					const item = getMenuItem(entry as string)
+					if (item) {
+						menuItemsToAdd.push(item);
+						isClickableNode.push(true);
+					}
+				})
+			},
+			(message: string) => {
+				isClickableNode.push(false);
+			}
+		);
 
 		EditorUtils.xmlCheck.isNodeMatchingPath(
 			event.target as Node,
-			EditorUtils.rightClickPathHandles.deletableAnchestorPaths(),
+			EditorUtils.rightClickPathHandles.deletableAncestorPaths(),
 			(node: Node) => {
 
 				EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
@@ -293,7 +322,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 		);
 		EditorUtils.xmlCheck.isNodeMatchingPath(
 			event.target as Node,
-			EditorUtils.rightClickPathHandles.manageAuthorWriterAnchestorPaths(),
+			EditorUtils.rightClickPathHandles.manageAuthorWriterAncestorPaths(),
 			(node: Node) => {
 
 				setSelectedNode(node)
@@ -345,7 +374,7 @@ const RightClickActionMenu = ( props: UserActionMenuProps ) => {
 
 		EditorUtils.xmlCheck.isNodeMatchingPath(
 			event.target as Node,
-			EditorUtils.rightClickPathHandles.manageReceiverAnchestorPaths(),
+			EditorUtils.rightClickPathHandles.manageReceiverAncestorPaths(),
 			(node: Node) => {
 
 				setSelectedNode(node)

@@ -9,32 +9,31 @@ import { EditorUtils } from "../../../../../utils/editor";
 import { setReloadLetterContent } from "../../../../../redux/slices/editor.letter.slice";
 import { enqueueSnackbar } from "notistack";
 import { EditorConstants } from "../../../../../constants/editor";
-import { DefaultDialogProps } from '../EditorFormDialog';
+import { DefaultDialogProps} from '../EditorFormDialog';
 import { Alert } from '@mui/material';
+import {MiscUtils} from "../../../../../utils/misc";
 
 const PublishLetterDialog= (props: DefaultDialogProps) => {
-
   const dispatch = useAppDispatch();
   const [errorMessage, setErrorMessage] = React.useState<string>();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
 
-  const publishLetter = () => {
+  const publishLetter = async () => {
+    if (!stateEditorLetter?.id) {
+			enqueueSnackbar("Letter could not publish on backend side: No letter id found", { variant: "error" })
+			props.onClose()
+			return
+		}
 
-    if (stateEditorLetter?.id) {
-      EditorUtils.backendService.publishLetter(
-        stateEditorLetter.id
-      ).then(() => {
-        dispatch(setReloadLetterContent({ reloadLetterContent: true}))
-        enqueueSnackbar(`Letter ${stateEditorLetter.name} successfully published!`, { variant: "success" })
-        props.onClose();
-      }
-    ).catch((error) => {
-      setErrorMessage(error.toString())
-      enqueueSnackbar("Letter could not publisheed on backend side. Please check the details.",  { variant: "error" })
-    })
-    } else {
-      enqueueSnackbar("Letter could not reset on backend side: No letter id found", { variant: "error" })
-    }
+		try {
+			await EditorUtils.backendService.publishLetter(stateEditorLetter.id)
+
+			dispatch(setReloadLetterContent({ reloadLetterContent: true}))
+			enqueueSnackbar(`Letter ${stateEditorLetter.name} successfully published!`, { variant: "success" })
+		} catch (error) {
+			setErrorMessage(MiscUtils.misc.getErrorMessage(error))
+			enqueueSnackbar("Letter could not publisheed on backend side. Please check the details." + MiscUtils.misc.getErrorMessage(error),  { variant: "error" })
+		}
   }
 
   return(

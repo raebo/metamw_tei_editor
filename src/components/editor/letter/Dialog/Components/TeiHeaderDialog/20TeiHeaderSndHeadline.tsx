@@ -37,12 +37,12 @@ const TeiHeaderSndHeadline = (props: TeiHeaderDialogProps) => {
           freeSolo
           options={sndHeaderOptions}
           value={completionState.sndHeaderContent}
-          onChange={(event, newValue) => {
+          onChange={(_event, newValue) => {
             if (newValue !== null) {
               setSndHeaderValue(newValue);
             }
           }}
-          onInputChange={(event, newInputValue) => {
+          onInputChange={(_event, newInputValue) => {
             setSndHeaderValue(newInputValue);
           }}
           renderInput={(params) => (

@@ -182,4 +182,8 @@ export const miscContentCheck = {
 
 		return contentAddressEntry
 	},
+	extractSalutationData: (xmlDoc: XMLDocument, tmpIdValue: string): string | null => {
+
+		return ""
+	},
 }

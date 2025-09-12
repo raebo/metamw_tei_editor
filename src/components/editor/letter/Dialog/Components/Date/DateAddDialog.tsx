@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { DefaultDialogProps } from '../../EditorFormDialog';
-import { DateCertainty, EditorDateType } from '../../../../../../constants/editor';
+import { DefaultDialogProps} from '../../EditorFormDialog';
+import {DateCertainty, EditorConstants, EditorDateType} from '../../../../../../constants/editor';
 import {
   Box,
   Divider,
@@ -15,30 +15,24 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/de'
 import Button from '@mui/material/Button';
-import { useAppDispatch } from '../../../../../../redux/hooks';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../../../redux/redux.store';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { EditorUtils } from '../../../../../../utils/editor';
 import { enqueueSnackbar } from 'notistack';
-import { setReloadLetterContent } from '../../../../../../redux/slices/editor.letter.slice';
 
 export interface DateWhenAddDialogProps extends DefaultDialogProps {
   dateType: EditorDateType;
 }
 
 const DateAddDialog = (props: DateWhenAddDialogProps) => {
-  const dispatch = useAppDispatch();
-  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
 
   dayjs.locale('de')
+	const xmlDoc = props.xmlDoc
   const fallbackDate = dayjs("1832-01-01");
   const [dateStart, setDateStart] = useState<Dayjs | null>(null) //dayjs("1842-01-01"); // this is used as default only
   const minDate = dayjs("1800-01-01");
   const [selectedType, setSelectedType] = useState<EditorDateType>(props.dateType)
   const [certainty, setCertainty] = useState<DateCertainty>("high")
   const [dates, setDates] = useState<Dayjs[]>([])
-  const [result, setResult] = useState<string|null>(null)
 
   const dateLabelValues = {
     "when": "Datum",
@@ -52,7 +46,7 @@ const DateAddDialog = (props: DateWhenAddDialogProps) => {
   }
 
   useEffect(() => {
-    const dateStart = dayjs(EditorUtils.xmlCheck.xmlLetterDate(props.xmlRef))
+    const dateStart = dayjs(EditorUtils.xmlCheck.xmlLetterDate(xmlDoc))
     setDateStart(dateStart)
     setSelectedType(props.dateType);
 
@@ -88,26 +82,18 @@ const DateAddDialog = (props: DateWhenAddDialogProps) => {
 
   const handleSubmitButtonClick = async () => {
     try {
-      if (props.xmlRef.current === null) { throw new Error('XML reference is null'); }
+      if (!xmlDoc) {
+				enqueueSnackbar("Kein XML-Dokument vorhanden", { variant: 'error' });
+				props.onClose()
+			}
 
-      const letterElement = props.xmlRef.current.querySelector('#letterXmlContent');
-      if (!letterElement) { throw new Error('No letter element found!'); }
+      EditorUtils.markupGeneration.addDateMarkup(xmlDoc, handleGenerate() )
 
-      const response = await EditorUtils.markupGeneration.addDateMarkup(letterElement, { id: stateEditorLetter.id! }, handleGenerate() )
-
-      if (!response) {
-        enqueueSnackbar('No changes were made to the letter content', { variant: 'info' });
-        return;
-      } else {
-        console.log("Response from addDateMarkup: ", response);
-        dispatch(setReloadLetterContent( { reloadLetterContent: true } ))
-        props.onClose()
-
-        enqueueSnackbar("Datum erfolgreich ausgezeichnet", { variant: 'success' });
-      }
+			props.onSave(xmlDoc, EditorConstants.changeTypes.misc.DATE_ADDED, "Datum wurde erfolgreich ausgezeichnet", null)
 
     } catch (err) {
       enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
+			props.onClose()
     }
   }
 
@@ -264,22 +250,6 @@ const DateAddDialog = (props: DateWhenAddDialogProps) => {
             Abbrechen
           </Button>
         </Box>
-
-        {result && (
-          <Box mt={3}>
-            <Typography variant="subtitle1">Generated XML:</Typography>
-            <Box
-              component="pre"
-              bgcolor="#f5f5f5"
-              p={2}
-              borderRadius={2}
-              overflow="auto"
-            >
-              {result}
-            </Box>
-          </Box>
-        )}
-
       </Box>
     </>
   )

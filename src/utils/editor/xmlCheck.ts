@@ -1,7 +1,7 @@
 import { EditorUtils } from "./index";
 import React from 'react';
-import {NodeAnchestorPath} from "./rightClickPathHandles";
-import {EditorConstants} from "../../constants/editor";
+import {NodeAncestorPath} from "./rightClickPathHandles";
+import {EditorConstants, TmpIdPrefix} from "../../constants/editor";
 
 export const xmlCheck = {
 	// be careful with the path syntax: When giving an attribute, do not forget the @ before the attribute name
@@ -78,13 +78,8 @@ export const xmlCheck = {
 		return letterBody;
 	},
   xmlLetterDate: (
-    xmlRef: React.RefObject<HTMLDivElement>
+		xmlDoc: XMLDocument
   ) : string => {
-
-    if (xmlRef.current === null) { throw new Error('XML reference is null'); }
-
-		const xmlDoc = EditorUtils.xmlCheck.extractDocumentByRef(xmlRef);
-
     const firstElement = xmlDoc.firstChild as Element;
     const letterNameValue = firstElement.getAttribute("xml:id") ?? '';
 
@@ -109,27 +104,18 @@ export const xmlCheck = {
     return xmlCheck.parseXml(teiElement.outerHTML);
   },
 	extractDocumentByRef: (xmlRef: React.RefObject<HTMLDivElement> | null): Document => {
-		if (xmlRef === null || xmlRef.current === null) {
-			throw new Error('XML reference is null');
-		}
+		if (xmlRef === null || xmlRef.current === null) throw new Error('XML reference is null');
 
-		const container = xmlRef.current?.querySelector<HTMLDivElement>('#letterXmlContent');
+		const currentId = xmlRef.current.getAttribute("id");
+		const container = currentId === 'letterXmlContent' ? xmlRef.current : xmlRef.current?.querySelector<HTMLDivElement>('#letterXmlContent');
 
-		if (!container) { throw new Error('No valid XML content found in letterXmlContent'); }
+		if (!container) throw new Error("No container with id 'letterXmlContent' found");
 
-		let currentNode = container as Element
+		const teiElement = container.querySelector("TEI");
+		if (!teiElement) throw new Error("No TEI document found in the provided reference");
 
-		while (currentNode !== null && currentNode.tagName?.toLowerCase() !== 'tei') {
-			if (currentNode.children.length === 0) break;
-			currentNode = currentNode.children[0]
-		}
-
-		if (currentNode.tagName?.toLowerCase() !== 'tei') {
-			throw new Error("No <tei> root element found");
-		}
-
-		return EditorUtils.xmlCheck.extractTeiDocumentFromString(currentNode.outerHTML)
-
+		// console.log(new XMLSerializer().serializeToString(xmlDoc));
+		return new DOMParser().parseFromString(teiElement.outerHTML, "application/xml");
 	},
   parseXml: (xmlString: string) : Document => {
     return new DOMParser().parseFromString(xmlString, "text/xml");
@@ -214,7 +200,7 @@ export const xmlCheck = {
 	},
 	isNodeMatchingPath(
 		node: Node,
-		nodeAnchestorPaths: NodeAnchestorPath[],
+		nodeAncestorPaths: NodeAncestorPath[],
 		onValid: (node: Node) => void,
 		onInvalid: (message: string) => void
 	) : boolean {
@@ -225,7 +211,10 @@ export const xmlCheck = {
 			.reverse()
 			.join(" ");
 
-		const matchingEntry = nodeAnchestorPaths.find(
+		// console.log("Checking node path:", ancestorNodeNames);
+
+
+		const matchingEntry = nodeAncestorPaths.find(
 			(entry) => {
 				const pathMatches = entry.parentPath.toLowerCase() === ancestorNodeNames
 				const attributesMatch = entry.checkAttributes ? entry.checkAttributes(node as Element) : true;
@@ -348,5 +337,21 @@ export const xmlCheck = {
 			parent.insertBefore(markedSpan.firstChild, markedSpan);
 		}
 		parent.removeChild(markedSpan);
+	},
+	nodeWithTmpId(xmlDoc: Document, idPrefix: TmpIdPrefix): Element {
+		const nodes = xmlDoc.querySelectorAll(`[tmp_id]`);
+
+		if (!nodes) throw new Error("No nodes with tmp_id found for xmlDoc");
+
+		for (let i = 0; i < nodes.length; i++) {
+			const node = nodes[i];
+			const tmpId = node.getAttribute("tmp_id");
+			if (tmpId && tmpId.startsWith(`tmp-id-${idPrefix.toString()}`)) {
+				return node as Element;
+			}
+
+		}
+
+		throw new Error("No node with tmp_id found in xmlDoc for idType: " + idPrefix);
 	}
 }

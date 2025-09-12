@@ -77,12 +77,12 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
 			}
 		}
 
-		setInitialSelectedOption()
-    fetchDefaultPlaces();
+		void setInitialSelectedOption()
+    void fetchDefaultPlaces();
 		if (props.dialogType === 'writing') {
-			assignedWritingPlace()
+			void assignedWritingPlace()
 		} else if (props.dialogType === 'receiving') {
-			assignedReceivingPlace()
+			void assignedReceivingPlace()
 		}
   }, [props.teiHeader]);
 
@@ -124,7 +124,7 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
           onChange={(_, newValue) => setAutocmplSelectedOption(newValue)}
           onInputChange={(_, inputValue, reason) => {
             if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
-              debouncedSearchForPlacess(inputValue);
+              void debouncedSearchForPlacess(inputValue);
             }
           }}
           getOptionLabel={(option) => option.entityName || ''}

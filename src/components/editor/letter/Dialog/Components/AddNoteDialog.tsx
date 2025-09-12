@@ -4,11 +4,9 @@ import { EditorUtils } from "../../../../../utils/editor";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/redux.store";
 import { MiscUtils } from "../../../../../utils/misc";
-import { setReloadLetterContent } from "../../../../../redux/slices/editor.letter.slice";
-import { useAppDispatch } from "../../../../../redux/hooks";
 import { enqueueSnackbar } from "notistack";
 import { EditorConstants } from "../../../../../constants/editor";
-import { DefaultDialogProps } from '../EditorFormDialog';
+import { DefaultDialogProps} from '../EditorFormDialog';
 import DialogContent from "@mui/material/DialogContent";
 import {DialogActionButton} from "./Misc/DialogActionButton";
 
@@ -16,40 +14,27 @@ const AddNoteDialog = (props: DefaultDialogProps) => {
   const [comment, setComment] = useState("");
   const [noteType, setNoteType] = useState("");
   const [noteLanguage, setNoteLanguage] = useState("");
-  const markedSpan = EditorUtils.textMarking.markedSpanEntry(props.xmlRef.current);
+  const markedSpan = EditorUtils.textMarking.markedSpanEntry(props.xmlRef?.current ?? null);
+	const xmlDoc = props.xmlDoc;
   const markedSection =
     markedSpan?.parentElement?.innerHTML || "<p>No marked section found</p>";
 
-  const dispatch = useAppDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
-  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
 
   const handleSubmit = () => {
-    const xmlContent = EditorUtils.xmlCheck.letterXml();
     const userNameShort = MiscUtils.userHandling.nameShortCut( MiscUtils.userHandling.stateUserToAuthUser(user) );
 
-    if (xmlContent !== null) {
-      const noteMarkup = EditorUtils.markupGeneration.noteMarkup(xmlContent, userNameShort, comment, noteType);
-
-      EditorUtils.backendService.patchContent(
-        noteMarkup.xmlString, stateEditorLetter.id, EditorConstants.changeTypes.note.ADDED, noteMarkup.xmlId
-      ).then(
-        (result) => {
-          if (result) {
-            dispatch(setReloadLetterContent({ reloadLetterContent: true }))
-            enqueueSnackbar("Note added", { variant: "success" })
-          } else {
-            enqueueSnackbar("Data could not be updated on backend side", { variant: "error" })
-          }
-        }
-      ).catch((error) => {
-        enqueueSnackbar("Data could not be updated on backend side: " +  error.toString(), { variant: "error" })
-      })
-    } else {
+		try {
+      const { xmlId } = EditorUtils.markupGeneration.noteMarkup(xmlDoc, userNameShort, comment, noteType);
+			props.onSave(
+				xmlDoc,
+				EditorConstants.changeTypes.note.ADDED,
+				"Kommentar wurde hinzugefügt",
+				xmlId
+			)
+    } catch (error) {
       enqueueSnackbar("No xml content found", { variant: "error" })
     }
-
-    props.onClose();
   };
 
   return (

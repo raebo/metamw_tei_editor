@@ -68,8 +68,8 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
 		}
 
 		try {
-			fetchNextLetter();
-			fetchDefaultLetters()
+			void fetchNextLetter();
+			void fetchDefaultLetters()
 		} catch (error) {
 			enqueueSnackbar("Error during initialization nextLetter: " + MiscUtils.misc.getErrorMessage(error), { variant:"error" });
 		}
@@ -114,10 +114,10 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
             options={letters}
             value={selectedOption}
             isOptionEqualToValue={(option, value) => option.id === value.id}
-            onChange={(_, newValue) => setSelectedOption(newValue)}
-            onInputChange={(_, inputValue, reason) => {
+            onChange={(_event, newValue) => setSelectedOption(newValue)}
+            onInputChange={(_event, inputValue, reason) => {
               if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
-                debouncedSearchForLetters(inputValue);
+                void debouncedSearchForLetters(inputValue);
               }
             }}
             getOptionLabel={(option) => option.title || ''}

@@ -2,48 +2,31 @@ import React, { useState } from "react";
 import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { EditorConstants } from "../../../../../../constants/editor";
 import Button from "@mui/material/Button";
-import { useAppDispatch } from "../../../../../../redux/hooks";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../../../redux/redux.store";
 import { EditorUtils } from "../../../../../../utils/editor";
 import { MiscUtils } from "../../../../../../utils/misc";
 import { enqueueSnackbar } from "notistack";
-import { setReloadLetterContent } from "../../../../../../redux/slices/editor.letter.slice";
 import { DefaultDialogProps } from '../../EditorFormDialog';
 
 const AttachmentAddDialog = (props: DefaultDialogProps) => {
-  const dispatch = useAppDispatch();
-  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
 
+	const xmlDoc = props.xmlDoc
   const [attachmentType, setAttachmentType] = useState<string>("");
   const [attachmentName, setAttachmentName] = useState<string>("");
 
   const handleSubmit = async () => {
     try {
-      const xmlContent = EditorUtils.xmlCheck.letterXml();
-
-      if (!xmlContent) {
-        throw new Error("No xml content found");
-      }
-
       const attachmentMarkup = EditorUtils.markupGeneration.addAttachmentMarkup(
-        xmlContent, attachmentType, attachmentName
+        xmlDoc, attachmentType, attachmentName
       )
 
       if (!attachmentMarkup.contentChanged) {
-        throw new Error("No attachment markup added. No cantent has been changed");
+        enqueueSnackbar("Fehler beim Hinzufügen der Beilage", { variant: "error" });
+				props.onClose()
+				return;
       }
 
-      const result = await EditorUtils.backendService.patchContent(
-        attachmentMarkup.xmlString, stateEditorLetter.id, EditorConstants.changeTypes.misc.ATTACHMENT_ADDED, null
-      )
+			props.onSave(xmlDoc, EditorConstants.changeTypes.misc.ATTACHMENT_ADDED, "Beilage erfolgreich hinzugefügt", null)
 
-      if (result) {
-        dispatch(setReloadLetterContent( { reloadLetterContent: true } ));
-        enqueueSnackbar("Attachment added", { variant: "success" });
-      } else {
-        enqueueSnackbar("Data could not be updated on backend side", { variant: "error" });
-      }
     } catch (error) {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: "error" });
     }

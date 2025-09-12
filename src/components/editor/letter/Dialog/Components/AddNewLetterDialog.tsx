@@ -1,7 +1,7 @@
-import { DefaultDialogProps } from '../EditorFormDialog';
+import { DefaultDialogProps} from '../EditorFormDialog';
 import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
 import { DISPLAY_NAME_MAP } from '../../../../../utils/entityMappings';
-import React, { useEffect, useRef } from 'react';
+import React  from 'react';
 import { Divider } from '@mui/material';
 import TeiHeaderFirstHeadline from './TeiHeaderDialog/10TeiHeaderFirstHeadline';
 import TeiHeaderSndHeadline from './TeiHeaderDialog/20TeiHeaderSndHeadline';
@@ -51,7 +51,7 @@ export type NewLetterCompletionState = {
 
 const AddNewLetterDialog= (props: DefaultDialogProps) => {
 
-  const dispatch = useAppDispatch();
+	const dispatch = useAppDispatch();
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
 
   const [displayData] = React.useState<{ [key: string]:string}|null>(null)
@@ -70,15 +70,6 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
     letterLanguage: [],
 		editorValue: null, transkriptorValue: null
   })
-
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (ref.current) {
-      const width = ref.current.scrollWidth;
-      props.setWidth(`${width}px`); // add some padding if needed
-    }
-  }, []);
 
   const submitCreateHandler= async () => {
     try {
@@ -139,7 +130,7 @@ const AddNewLetterDialog= (props: DefaultDialogProps) => {
   ].every(Boolean);
 
   return (
-    <div ref={ref}>
+    <div>
 			<DialogContent>
 				<div className="autoSnippetFormRow">
 					{ displayData !== null ? (

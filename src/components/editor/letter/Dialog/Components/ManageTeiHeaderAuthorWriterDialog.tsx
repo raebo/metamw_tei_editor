@@ -22,17 +22,12 @@ import AddIcon from "@mui/icons-material/Add";
 import {SnippetEntity} from "../../../../../services/mappings/autoAnnoMappings";
 import {searchEditortEntities} from "../../../../../services/editor/apiLetterRequest.service";
 import DialogContent from "@mui/material/DialogContent";
-import {setReloadLetterContent} from "../../../../../redux/slices/editor.letter.slice";
-import {useSelector} from "react-redux";
-import {RootState} from "../../../../../redux/redux.store";
-import {useAppDispatch} from "../../../../../redux/hooks";
 import {DialogActionButton} from "./Misc/DialogActionButton";
 import FormAutocomplete from "../../Util/FormAutocomplete";
 
 
 const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 
-	const dispatch = useAppDispatch();
 	const [authors, setAuthors] = React.useState<HeaderPerson[]>([]);
 	const [writers, setWriters] = React.useState<HeaderPerson[]>([]);
 	const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
@@ -40,35 +35,37 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 	const [roleWriter, setRoleWriter] = React.useState<boolean>(true);
 	const [people, setPeople] = useState<SnippetEntity[]>([]);
 	const [selectedPerson, setSelectedPerson] = React.useState<SnippetEntity | null>(null)
-	const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
-	const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
 
-	const [parsedXml, setParsedXml] = React.useState<{
+	const [docData, setDocData] = React.useState<{
 		xmlDoc: XMLDocument | null;
 		teiHeader: Element | null;
-	}>({ xmlDoc: null, teiHeader: null });
+	}>({ xmlDoc: props.xmlDoc, teiHeader: null });
 
 	React.useEffect(() => {
-		if (!stateTeiXml) {
-			dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+
+		if (!docData.xmlDoc) {
+			setDocData({ xmlDoc: props.xmlDoc, teiHeader: null });
 			return;
 		}
 
 		try {
-			const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
-			const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(xmlDoc);
-			setParsedXml({ xmlDoc, teiHeader });
+			const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(docData.xmlDoc);
+
+			if(!teiHeader) {
+				enqueueSnackbar("No TEI-Header found in the document.", { variant: "error" });
+				return
+			}
+			setDocData((prevState) => ({...prevState, teiHeader: teiHeader }));
+
 		} catch (err) {
 			enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: "error" });
-			setParsedXml({ xmlDoc: null, teiHeader: null });
+			setDocData({ xmlDoc: null, teiHeader: null });
 		}
-	}, [stateTeiXml, dispatch]);
-
-	const { xmlDoc, teiHeader } = parsedXml;
+	}, [props.xmlDoc]);
 
 	useEffect(() => {
 		const setAuthorWriterData = () => {
-			const { authors, writers } = EditorUtils.teiHeaderContent.extractAuthorWriters(teiHeader);
+			const { authors, writers } = EditorUtils.teiHeaderContent.extractAuthorWriters(docData.teiHeader);
 
 			setAuthors(authors);
 			setWriters(writers);
@@ -88,16 +85,17 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 			}
 		};
 
-		if (teiHeader) {
+		if (docData.teiHeader) {
+
 			try {
 				setAuthorWriterData();
-				fetchDefaultPeople();
+				void fetchDefaultPeople();
 			} catch (error) {
 				enqueueSnackbar("Fehler beim Lesen der TEI-Header-Daten: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
 			}
 		}
 
-	}, [teiHeader]);
+	}, [docData.teiHeader]);
 
 	const handleInfoIconClick = async (reference: HeaderPerson) => {
 		if (!reference.key) {
@@ -143,26 +141,20 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 	}
 
 	const handleSave = async () => {
-		if (!xmlDoc || !teiHeader) {
+		if (!docData.xmlDoc || !docData.teiHeader) {
 			enqueueSnackbar("TEI-Header ist nicht verfügbar", { variant: "error" });
 			return false;
 		}
 
 		try {
-			EditorUtils.teiHeaderContent.setAuthorWritersFirstPosition(teiHeader, authors, writers);
-			EditorUtils.teiHeaderContent.setAuthorsWritersSndPosition(teiHeader, authors, writers);
+			EditorUtils.teiHeaderContent.setAuthorWritersFirstPosition(docData.teiHeader, authors, writers);
+			EditorUtils.teiHeaderContent.setAuthorsWritersSndPosition(docData.teiHeader, authors, writers);
 
-			const serializer = new XMLSerializer();
+			props.onSave(docData.xmlDoc, EditorConstants.changeTypes.misc.HEADER_UPDATED, "Die Autoren/Schreiber des Briefes wurden aktualisiert.", null );
 
-			const result = await EditorUtils.backendService.patchContent(
-				serializer.serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.misc.HEADER_UPDATED, null)
-
-			if (result) {
-				dispatch(setReloadLetterContent({ reloadLetterContent: true }))
-				enqueueSnackbar("Die Autoren/Schreiber des Briefes wurden erfolgreich gespeichert", { variant: "success" })
-			}
 		} catch (error) {
 			enqueueSnackbar("Fehler beim Schreiben der TEI-Header-Daten: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+			props.onClose()
 			return false;
 		}
 		return true;
@@ -274,7 +266,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 				</div>
 			</DialogContent>
 			<Divider />
-			<DialogActionButton label={"Authoren/Schreiber im Header Speichern"} onClick={ handleSave } disabled={false} />
+			<DialogActionButton label={"Autoren/Schreiber im Header Speichern"} onClick={ handleSave } disabled={false} />
 		</>
 	)
 }

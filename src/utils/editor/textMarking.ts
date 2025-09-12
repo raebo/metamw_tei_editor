@@ -96,7 +96,7 @@ export const textMarking = {
 
 		let tmpId = xmlNode.getAttribute("tmp_id");
 		if (!tmpId) {
-			tmpId = `tmp-${tmpIdPrefix}-${Date.now()}`; // or a counter/uuid
+			tmpId = `tmp-id-${tmpIdPrefix}-${Date.now()}`; // or a counter/uuid
 			xmlNode.setAttribute("tmp_id", tmpId);
 		}
 	}

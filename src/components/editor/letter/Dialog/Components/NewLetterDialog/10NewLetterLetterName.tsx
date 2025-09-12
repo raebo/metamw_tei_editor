@@ -6,7 +6,6 @@ import {
 } from '../../../../../../services/editor/apiLettersRequest.service';
 
 const NewLetterLetterName= (props: NewLetterDialogProps) => {
-
   const [letterName, setLetterName] = React.useState<string | null>(props.completionState.letterName)
   const [error, setError] = useState(false);
   const [helperText, setHelperText] = useState('');
@@ -38,11 +37,7 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
     try {
       const responseLetters = await searchForLetterNameTitle(letterType, letterName)
 
-      if (responseLetters && responseLetters.length > 0) {
-        return false
-      } else {
-        return true
-      }
+      return !(responseLetters && responseLetters.length > 0);
     } catch (error) {
       setError(true);
       setHelperText('Error fetching letter name');

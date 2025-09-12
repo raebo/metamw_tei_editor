@@ -50,6 +50,13 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
 		action: null,
 		openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_TEI_HEADER) }
 	},
+	"alt+d": {
+		key: "alt+d",
+		description: "Empfänger Bearbeiten",
+		component: null,
+		action: null,
+		openDialogAction: (dispatch: AppDispatch) => { return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER) }
+	},
 	"alt+j": {
 		key: "alt+j",
 		description: "Sprachen Verwalten",

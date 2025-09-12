@@ -1,19 +1,15 @@
-import { DefaultDialogProps } from '../../EditorFormDialog';
+import { DefaultDialogProps} from '../../EditorFormDialog';
 import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
-import { useAppDispatch } from '../../../../../../redux/hooks';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../../../redux/redux.store';
 import React, { useEffect, useState } from 'react';
 import { EditorUtils } from '../../../../../../utils/editor';
 import { enqueueSnackbar } from 'notistack';
-import { setEditorMarkedAndContentLeftRightThunk } from '../../../../../../redux/thunks/editor.letter.thunk';
-import { setReloadLetterContent } from '../../../../../../redux/slices/editor.letter.slice';
 import {Badge, Box, Divider, IconButton, Stack, Typography} from '@mui/material';
 import Grid from '@mui/material/Grid';
 import AssignLetterAuthorAutocomplete from './AssignLetterAuthorAutocomplete';
 import Button from '@mui/material/Button';
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import { EditorConstants } from "../../../../../../constants/editor";
 
 interface AssignedLetterData {
   receiver: SnippetEntity | null
@@ -22,9 +18,8 @@ interface AssignedLetterData {
 }
 
 const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
-  const dispatch = useAppDispatch();
-  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
   const [letterDialogResetKey, setLetterDialogResetKey] = useState(0);
+	const xmlDoc = props.xmlDoc
 
   const [assignedLetterFormData, setAssignedLetterFormData] = useState<AssignedLetterData>({
     receiver: null,
@@ -48,7 +43,7 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
     }
   }
   useEffect(() => {
-    fetchLetterReceivers(null)
+    void fetchLetterReceivers(null)
   }, []);
 
   const fetchReceiverLetters = async (receiver: SnippetEntity, searchValue : string | null) => {
@@ -133,38 +128,26 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
   }
 
   const handleSubmitButtonClick = async () => {
-      if (props.xmlRef.current === null) {
-        throw new Error('XML reference is null');
-      }     try {
+			try {
+				const markedContent = xmlDoc.querySelectorAll('span.marked')[0];
+				if (!markedContent) {
+					enqueueSnackbar('No marked content found! Please mark the content you want to annotate.', { variant: "error" } );
+					return
+				}
 
-      const letterElement = props.xmlRef.current.querySelector('#letterXmlContent');
-      if (!letterElement) { throw new Error('No letter element found!'); }
-
-      if (stateEditorLetter.id === null || stateEditorLetter.name === null) {
-        throw new Error('No letter id or name found!');
-      }
-
-        await EditorUtils.markupGeneration.addProtagLetterMarkup(letterElement,
-          { id: stateEditorLetter.id!, name: stateEditorLetter.name },
+        EditorUtils.markupGeneration.addProtagLetterMarkup(
+					markedContent,
           addedLetters.map((entry) => {
               return { letterKey: entry.letter?.entityKey, letterName: entry.letter?.entityName, authors: entry.authors }
             }
           ) as [{ letterKey: string, letterName: string, authors: SnippetEntity[] }]
         )
 
-        enqueueSnackbar('Letter markup was added successfully', { variant: 'success' });
+				props.onSave(xmlDoc, EditorConstants.changeTypes.misc.PROTAG_LETTER_ADDED, "Briefe wurden dem markierten Text zugewiesen", null)
 
       } catch (error) {
-        console.error("Error submitting letter:", error);
         enqueueSnackbar("Fehler beim Auszeichnen des Briefs", { variant: "error" });
-      } finally {
-        dispatch(setReloadLetterContent( { reloadLetterContent: true } ))
-        dispatch(setEditorMarkedAndContentLeftRightThunk({
-          textIsMarked: false,
-          contentLeft: null,
-          contentRight: null
-        }));
-        props.onClose();
+				props.onClose();
       }
   }
 

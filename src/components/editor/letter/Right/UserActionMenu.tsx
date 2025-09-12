@@ -56,6 +56,7 @@ const menuItems: MenuItem[] = [
     hasSubMenu: true,
     subMenu: [
 			{ label: 'Brief Header Bearbeiten', keyHandleItem: filterKeyCombination('alt+c'), active: true },
+			{ label: 'Empfänger Bearbeiten', keyHandleItem: filterKeyCombination('alt+d'), active: true },
 			{ label: 'Beilage Hinzufügen', keyHandleItem: filterKeyCombination('ctrl+alt+6'), active: true }
 		],
   },
@@ -131,7 +132,7 @@ const UserActionMenu = (props: UserActionMenuProps) => {
   });
 
   const SndMenuItemStylesSpan = {
-    fontSize: '0.475rem',
+    fontSize: '0.575rem',
     padding: '0px 12px',
     minHeight: '15px',
     color: 'grey',

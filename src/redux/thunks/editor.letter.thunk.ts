@@ -37,7 +37,7 @@ export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
     },
     { dispatch },
   ) => {
-    
+
     dispatch(setReloadLetterContent({ reloadLetterContent: false} ))
     dispatch(setEditorLetter({ letter: letter }));
     dispatch(setEditorTabNumber({ tabNumber }));
@@ -81,16 +81,23 @@ export const setEditorMarkedAndContentLeftRightThunk = createAsyncThunk(
       textIsMarked,
       contentLeft,
       contentRight,
+			xmlContent
     }: {
       textIsMarked: boolean;
       contentLeft: string | null;
       contentRight: string | null;
+			xmlContent?: string | null
     },
     { dispatch },
   ) => {
     dispatch(setContentTextIsMarked({ textIsMarked: textIsMarked }));
     dispatch(setNodeClicked({ nodeClicked: false }));
     dispatch(setEditorSelectedItem({ selectedItem: { left: contentLeft, right: contentRight } }));
+
+		if (xmlContent !== undefined) {
+			dispatch(setXmlLetterContent({ content: { xmlContent: xmlContent } }) )
+		}
+
   },
 );
 

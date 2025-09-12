@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { DefaultDialogProps } from '../../EditorFormDialog';
+import { DefaultDialogProps} from '../../EditorFormDialog';
 import {EditorConstants, EntityType, HeaderPerson} from '../../../../../../constants/editor';
 import FormAutocomplete from '../../../Util/FormAutocomplete';
 import {
@@ -19,8 +19,6 @@ import { enqueueSnackbar } from 'notistack';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../../../redux/redux.store';
 import { markupGeneration } from '../../../../../../utils/editor/markupGeneration';
-import { EditorUtils } from '../../../../../../utils/editor';
-import { setReloadLetterContent } from '../../../../../../redux/slices/editor.letter.slice';
 import { useAppDispatch } from '../../../../../../redux/hooks';
 import { ActOfWritingElement } from '../../../../../../services/mappings/editorMappings';
 import DialogContent from "@mui/material/DialogContent";
@@ -42,9 +40,7 @@ type CompletionState = {
 };
 
 const AddWritingActDialog = (props: DefaultDialogProps) => {
-  const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
-	const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
 
 	const [authors, setAuthors] = React.useState<HeaderPerson[]>([]);
 	const [writers, setWriters] = React.useState<HeaderPerson[]>([]);
@@ -56,40 +52,9 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
 
   const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
 
-  const [completionState, setCompletionState] = React.useState<CompletionState>({
-    authorCompleteAvailable: true,
-    nameAuthor: null,
-    keyAuthor: null,
-    writerCompleteAvailable: false,
-    nameWriter: null,
-    keyWriter: null,
-  });
-
-	const [xmlDoc, setXmlDoc] = React.useState< XMLDocument | null>(null);
-
-
-	React.useEffect(() => {
-		if (!stateTeiXml) {
-			dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-			return;
-		}
-
-		try {
-			const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
-			setXmlDoc(xmlDoc);
-		} catch (err) {
-			enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: "error" });
-			setXmlDoc(null);
-		}
-	}, [stateTeiXml, dispatch]);
-
+	const xmlDoc = props.xmlDoc
 
 	useEffect(() => {
-		if (!stateTeiXml) {
-			dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-			return;
-		}
-
 		const fetchDefaultPeople = async () => {
 			try {
 				const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.PERSON)
@@ -104,8 +69,9 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
 			}
 		};
 
-		fetchDefaultPeople()
-
+		if (people.length === 0) {
+			void fetchDefaultPeople()
+		}
 	}, [props]);
 
 
@@ -156,46 +122,34 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
   const writeDateToDoc= async () => {
     if (!stateEditorLetter.id) {
       enqueueSnackbar('No letter ID found', { variant: 'error' });
+			props.onClose()
       return;
     }
 
 		if (!xmlDoc) {
 			enqueueSnackbar('No valid TEI XML document found', { variant: 'error' });
+			props.onClose()
 			return;
 		}
 
-    try {
+		const authorWriters: ActOfWritingElement[] = []
 
-      const authorWriters: ActOfWritingElement[] = []
+		authors.forEach(author => {
+			authorWriters.push({ role: 'author', key: author.key, name: author.name });
+		});
+		writers.forEach(writer => {
+			authorWriters.push({ role: 'writer', key: writer.key, name: writer.name });
+		})
 
-			authors.forEach(author => {
-				authorWriters.push({ role: 'author', key: author.key, name: author.name });
-			});
-			writers.forEach(writer => {
-				authorWriters.push({ role: 'writer', key: writer.key, name: writer.name });
-			})
+		try {
+			markupGeneration.insertActOfWritingBlock(xmlDoc, authorWriters);
 
-      markupGeneration.insertActOfWritingBlock(xmlDoc, authorWriters);
-			const serializer = new XMLSerializer();
+			props.onSave(xmlDoc, EditorConstants.changeTypes.misc.ACT_OF_WRITING_ADDED, "Neuer Schreibakt wurde hinzugefügt", null)
+		} catch (error) {
+			enqueueSnackbar("Error durign adding writing act: " + MiscUtils.misc.getErrorMessage(error), {variant: "error"})
 
-      const patchResult = await EditorUtils.backendService.patchContent(
-        serializer.serializeToString(xmlDoc),
-        stateEditorLetter.id,
-        EditorConstants.changeTypes.misc.ACT_OF_WRITING_ADDED,
-        null,
-      );
-
-      if (patchResult) {
-        dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-        enqueueSnackbar('Neuer Schreibakt wurde hinzugefügt', { variant: 'success' });
-      } else {
-        enqueueSnackbar('Daten konnten nicht aktualisiert werden', { variant: 'error' });
-      }
-    } catch (error) {
-      enqueueSnackbar(`Fehler beim Hinzufügen des Schreibakts: ${String(error)}`, { variant: 'error' });
-    }
-
-    props.onClose();
+			props.onClose()
+		}
   };
 
   return (
@@ -254,7 +208,7 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
 				<div className={"autoSnippetFormRow"} style={{ marginTop: "25px", width: "98%" }}>
 					<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
 						<FormAutocomplete
-							isDisabled={!completionState.authorCompleteAvailable}
+							isDisabled={false}
 							initialOptions={people}
 							entityType={EntityType.PERSON}
 							entityKey={selectedPerson ? selectedPerson.entityKey : null }

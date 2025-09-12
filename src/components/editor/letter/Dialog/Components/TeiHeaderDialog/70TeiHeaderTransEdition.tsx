@@ -6,7 +6,6 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import {EditorUtils} from "../../../../../../utils/editor";
 
 const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {
-
   const [letterLanguages, setLetterLanguages] = useState<LanguageOption[]>([])
 	const [selectedLang, setSelectedLang] = useState("");
 	const [transkriptionValue, setTranskriptionValue] = useState<string>(props.completionState.transkriptionValue)

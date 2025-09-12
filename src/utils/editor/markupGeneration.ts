@@ -8,6 +8,7 @@ import {
 } from '../../services/mappings/editorMappings';
 import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
 import { EditorConstants } from '../../constants/editor';
+import {xml} from "vkbeautify";
 
 const generateSettlementNode = ( data: { key: string | null, name: string | null, type: string | null}) : HTMLElement => {
   if (data.key === null || data.name === null || data.type === null) {
@@ -53,12 +54,10 @@ export const markupGeneration = {
     // Replace the marked span with the enriched replacement node
     spanNode.parentNode?.replaceChild(clonedReplacement, spanNode);
   },
-  addAttachmentMarkup: (xmlContent: string, attachmentType: string, attachmentName: string) : { xmlString: string, contentChanged: boolean } => {
-    const parser = new DOMParser()
-    const xmlDoc = parser.parseFromString(xmlContent, "application/xml")
+  addAttachmentMarkup: (xmlDoc: XMLDocument, attachmentType: string, attachmentName: string) : { contentChanged: boolean } => {
 
     const listBibl = xmlDoc.querySelector("msdesc accmat listbibl")
-    if (!listBibl) return { xmlString: xmlContent, contentChanged: false }
+    if (!listBibl) return { contentChanged: false }
 
     const existingBiblEntries = listBibl.querySelectorAll("bibl")
 
@@ -73,7 +72,7 @@ export const markupGeneration = {
       listBibl.appendChild(newBibl)
     }
 
-    return { xmlString: xmlCheck.serializeDocument(xmlDoc), contentChanged: true }
+    return { contentChanged: true }
   },
   addSightMarkup: (placeNameNode: HTMLElement, markupPlace: MarkupPlaceData) : {} => {
     const country = markupPlace.country
@@ -143,35 +142,24 @@ export const markupGeneration = {
     return {}
   },
   addDateMarkup: async (
-    letterElement: Element,
-    stateEditorLetter: { id: number },
-    markupDateString: string
-  ) : Promise<boolean> => {
+    xmlDoc: XMLDocument,
+    markupDateString: string,
+  ) => {
 
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(markupDateString, "application/xml");
-    const dateNode = xmlDoc.documentElement;
+		const parser = new DOMParser();
+		const dateDoc = parser.parseFromString(markupDateString, "application/xml");
+		const dateNode = dateDoc.documentElement;
 
-    const markedSpan= letterElement.querySelectorAll('span.marked')[0]
-    if (markedSpan === undefined) throw new Error("no marked span found in letter element")
+		const markedSpan = xmlDoc.querySelector("span.marked");
+		if (!markedSpan) throw new Error("No marked span found in XML document");
 
     EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, dateNode)
 
-    return await EditorUtils.backendService.patchContent(
-      letterElement.innerHTML,
-      stateEditorLetter.id,
-      EditorConstants.changeTypes.misc.DATE_ADDED,
-      null
-    );
   },
-  addProtagLetterMarkup: async (
-    letterElement: Element,
-    stateEditorLetter: { id: number, name: string },
+  addProtagLetterMarkup: (
+    nodeToUpdate: Element,
     markupLetterData: [{ letterKey: string, letterName: string, authors: SnippetEntity[] }]
-  ) : Promise<any> => {
-
-    const markedSpan= letterElement.querySelectorAll('span.marked')[0]
-    if (markedSpan === undefined) throw new Error("no marked span found in letter element")
+  )  => {
 
     const titleNode = document.createElement("title")
     titleNode.setAttribute("xml:id", EditorUtils.markupGeneration.generateXmlId('title'))
@@ -194,23 +182,12 @@ export const markupGeneration = {
       titleNode.appendChild(letterNode)
     }
 
-    EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNode)
-
-    await EditorUtils.backendService.patchContent(
-      letterElement.innerHTML,
-      stateEditorLetter.id,
-      EditorConstants.changeTypes.misc.PROTAG_LETTER_ADDED,
-      null
-    );
+    EditorUtils.markupGeneration.replaceMarkedNode(nodeToUpdate, titleNode)
   },
-  addGbLetterMarkup: async (
-    letterElement: Element,
-    stateEditorLetter: { id: number, name: string },
+  addGbLetterMarkup: (
+		nodeToUpdate: Element,
     markupLetterData: [{ letterKey: string, letterName: string, authors: SnippetEntity[]  }]
-  ) : Promise<any> => {
-
-    const markedSpan= letterElement.querySelectorAll('span.marked')[0]
-    if (markedSpan === undefined) throw new Error("no marked span found in letter element")
+  )  => {
 
     const titleNode = document.createElement("title")
     titleNode.setAttribute("xml:id", EditorUtils.markupGeneration.generateXmlId('title'))
@@ -233,14 +210,7 @@ export const markupGeneration = {
       titleNode.appendChild(letterNode)
     }
 
-    EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNode)
-
-    await EditorUtils.backendService.patchContent(
-      letterElement.innerHTML,
-      stateEditorLetter.id,
-      EditorConstants.changeTypes.misc.GB_LETTER_ADDED,
-      null
-    );
+    EditorUtils.markupGeneration.replaceMarkedNode(nodeToUpdate, titleNode)
   },
   addPersonMarkup: (root: Element, peopleMarkupData: MarkupPersonData[]) : { xmlId: string | null, contentChanged: boolean } => {
 
@@ -269,47 +239,37 @@ export const markupGeneration = {
 
     return { xmlId: xmlId, contentChanged: true }
   },
-  noteMarkup: (xmlContent: string, userLogin: string, noteContent: string, commentType: string) : { xmlString: string, xmlId: string } => {
-    const parser = new DOMParser()
-    const xmlId = EditorUtils.markupGeneration.generateXmlId('note')
-    const serializer = new XMLSerializer()
-    const doc = parser.parseFromString(xmlContent, "application/xml")
+  noteMarkup: (xmlDoc: XMLDocument | null, userLogin: string, noteContent: string, commentType: string):  { xmlId: string } => {
+		if(!xmlDoc) { throw new Error("No xml document provided") }
 
-    const markedSpan = doc.querySelector('span.marked')
+		const xmlId = EditorUtils.markupGeneration.generateXmlId('note')
+    const markedSpan = xmlDoc.querySelector('span.marked')
 
-    if (markedSpan && markedSpan.parentNode) {
-      const content = markedSpan.textContent || ""
+    if (!markedSpan || !markedSpan.parentNode) throw new Error("no markedSpan found in markupGeneration")
 
-      // Create <note> element
-      const noteElement = doc.createElement("note")
-      noteElement.setAttribute("resp", userLogin)
-      noteElement.setAttribute("type", commentType)
-      noteElement.setAttribute("xml:id", xmlId)
-      noteElement.setAttribute("xml:lang", "de")
-      noteElement.textContent = `${content} - ${noteContent}` // Prefix comment with span content
+		const content = markedSpan.textContent || ""
 
-      // Replace <span> with its inner text
-      const textNode = document.createTextNode(content)
-      markedSpan.parentNode.replaceChild(textNode, markedSpan)
+		// Create <note> element
+		const noteElement = xmlDoc.createElementNS(EditorConstants.TEI_NS, "note")
+		noteElement.setAttribute("resp", userLogin)
+		noteElement.setAttribute("type", commentType)
+		noteElement.setAttribute("xml:id", xmlId)
+		noteElement.setAttribute("xml:lang", "de")
+		noteElement.textContent = `${content} - ${noteContent}` // Prefix comment with span content
 
-      // Insert <note> after the text
-      textNode.after(noteElement)
-    }
+		// Replace <span> with its inner text
+		const textNode = document.createTextNode(content)
+		markedSpan.parentNode.replaceChild(textNode, markedSpan)
+
+		// Insert <note> after the text
+		textNode.after(noteElement)
 
     return {
-      xmlString: serializer.serializeToString(doc),
       xmlId: xmlId
     }
   },
-  updateNoteMarkup: (xmlId: string, noteType: string, noteLanguage: string, noteContent: string) : { xmlString: string, oldNoteType: string | null, oldNoteContent: string | null } => {
-    const parser = new DOMParser()
-    const serializer = new XMLSerializer()
-    const xmlString = EditorUtils.xmlCheck.letterXml()
-
-    if (!xmlString) { throw new Error("No xml content found") }
-    const doc = parser.parseFromString(xmlString, 'application/xml')
-
-    const noteElement = EditorUtils.xmlCheck.elementByXmlTypeAndId(xmlId, 'note', doc)
+  updateNoteMarkup: (xmlDoc: Document, xmlId: string, noteType: string, noteLanguage: string, noteContent: string) : { oldNoteType: string | null, oldNoteContent: string | null } => {
+    const noteElement = EditorUtils.xmlCheck.elementByXmlTypeAndId(xmlId, 'note', xmlDoc)
 
     if (!noteElement) { throw new Error(`Note with xml:id ${xmlId} not found`) }
 
@@ -321,28 +281,16 @@ export const markupGeneration = {
     noteElement.innerHTML = noteContent
 
     return {
-      xmlString: serializer.serializeToString(doc),
       oldNoteType: oldNoteType,
       oldNoteContent: oldNoteContent
     }
   },
-  deleteNoteMarkup: (xmlId: string) : { xmlString: string } => {
-    const parser = new DOMParser()
-    const serializer = new XMLSerializer()
-    const xmlString = EditorUtils.xmlCheck.letterXml()
-
-    if (!xmlString) { throw new Error("No xml content found") }
-    const doc = parser.parseFromString(xmlString, 'application/xml')
-
-    const noteElement = EditorUtils.xmlCheck.elementByXmlTypeAndId(xmlId, 'note', doc)
+  deleteNoteMarkup: (xmlDoc: Document, xmlId: string) => {
+    const noteElement = EditorUtils.xmlCheck.elementByXmlTypeAndId(xmlId, 'note', xmlDoc)
 
     if (!noteElement) { throw new Error(`Note with xml:id ${xmlId} not found`) }
 
     noteElement.remove()
-
-    return {
-      xmlString: serializer.serializeToString(doc)
-    }
   },
 
   insertActOfWritingBlock: (
@@ -394,5 +342,19 @@ export const markupGeneration = {
     div.appendChild(paragraph);
 
     bodyTag.appendChild(div); // or use some custom selector
-  }
+  },
+	addSaluteMarkup: (referencedNode: Element, saluteNode: Element) : void => {
+		let prevSibling: Element | null = referencedNode.previousElementSibling;
+
+		// loop until we find a node which is not a salute
+		while (prevSibling && prevSibling.nodeName === "SALUTE") {
+			prevSibling = prevSibling.previousElementSibling;
+		}
+
+		const parent = referencedNode.parentNode;
+		if (!parent) throw new Error("Referenced node has no parent");
+
+		// insert saluteNode before the first non-salute sibling (or at start if prevSibling is null)
+		parent.insertBefore(saluteNode, prevSibling?.nextElementSibling ?? parent.firstChild);
+	}
 }

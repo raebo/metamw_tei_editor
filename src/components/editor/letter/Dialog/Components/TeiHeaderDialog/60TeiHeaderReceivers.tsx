@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
 import { EntityType, HeaderPerson} from '../../../../../../constants/editor';
 import { enqueueSnackbar } from 'notistack';
-import { debounce } from 'lodash-es';
 import { Box, Chip, IconButton } from '@mui/material';
 import { MiscUtils } from '../../../../../../utils/misc';
 import {EditorUtils} from "../../../../../../utils/editor";
@@ -37,7 +36,7 @@ const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
 		}
 
 		try {
-			fetchDefaultPeople();
+			void fetchDefaultPeople();
 			assignedReceivers()
 		} catch (error) {
 			enqueueSnackbar("Fehler beim Lesen der TEI-Header-Daten: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });

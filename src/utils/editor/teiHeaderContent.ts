@@ -174,6 +174,10 @@ export const teiHeaderContent = {
 		const receiverElements =  EditorUtils.xmlCheck.queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2] > persName');
 
 		receiverElements.forEach(receiver => {
+
+			const respData = receiver.getAttribute('resp');
+			if (respData !== 'receiver') return
+
 			const name = receiver.textContent?.trim() || '';
 			const dataKey = receiver.getAttribute('data-key') || '';
 

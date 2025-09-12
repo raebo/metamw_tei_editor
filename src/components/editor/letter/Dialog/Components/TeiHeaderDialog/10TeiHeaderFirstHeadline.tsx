@@ -35,12 +35,12 @@ const TeiHeaderFirstHeadline = (props: TeiHeaderDialogProps) => {
           freeSolo
           options={firstHeaderOptions}
           value={completionState.firstHeaderContent}
-          onChange={(event, newValue) => {
+          onChange={(_event, newValue) => {
             if (newValue !== null) {
               setFirstHeaderValue(newValue);
             }
           }}
-          onInputChange={(event, newInputValue) => {
+          onInputChange={(_event, newInputValue) => {
             setFirstHeaderValue(newInputValue);
           }}
           renderInput={(params) => (

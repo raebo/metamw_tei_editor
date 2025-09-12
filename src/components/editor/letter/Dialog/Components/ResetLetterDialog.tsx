@@ -9,30 +9,29 @@ import { EditorUtils } from "../../../../../utils/editor";
 import { setReloadLetterContent } from "../../../../../redux/slices/editor.letter.slice";
 import { enqueueSnackbar } from "notistack";
 import { EditorConstants } from "../../../../../constants/editor";
-import { DefaultDialogProps } from '../EditorFormDialog';
+import { DefaultDialogProps} from '../EditorFormDialog';
+import {MiscUtils} from "../../../../../utils/misc";
 
 const ResetLetterDialog = (props: DefaultDialogProps) => {
 
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
 
-  const resetLetter = () => {
+  const resetLetter = async  () => {
+			if (!stateEditorLetter || !stateEditorLetter.id) {
+				enqueueSnackbar("Letter could not reset on backend side: No letter id found", { variant: "error" })
+				props.onClose();
+				return;
+			}
 
-    if (stateEditorLetter?.id) {
-      EditorUtils.backendService.resetLetter(
-        stateEditorLetter.id
-      ).then(() => {
-        dispatch(setReloadLetterContent({ reloadLetterContent: true}))
-        enqueueSnackbar(`Letter content for ${stateEditorLetter.name} reset!`, { variant: "success" })
-        props.onClose();
+			try {
+				await EditorUtils.backendService.resetLetter(stateEditorLetter.id)
+				dispatch(setReloadLetterContent({ reloadLetterContent: true}))
+				enqueueSnackbar(`Der Brief '${stateEditorLetter.name}' wurde zurückgesetzt!`, { variant: "success" })
+			} catch (error) {
+				enqueueSnackbar("Error during backend update. " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
       }
-    ).catch((error) => {
-        enqueueSnackbar("Letter could not reset on backend side: " +  error.toString(), { variant: "error" })
-      })
-    } else {
-      enqueueSnackbar("Letter could not reset on backend side: No letter id found", { variant: "error" })
-    }
-
+		props.onClose();
   }
 
   return(
