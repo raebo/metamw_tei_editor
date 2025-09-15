@@ -11,6 +11,8 @@ import LetterViewCode from './LetterViewCode';
 import { setReloadXmlContentLetterThunk } from '../../../../redux/thunks/editor.letter.thunk';
 import StateInfo from './StateInfo';
 import RightClickActionMenu from './LetterViewContainer/RightClickActionMenu';
+import { enqueueSnackbar } from 'notistack';
+import { MiscUtils } from '../../../../utils/misc';
 
 const LetterViewContainer = () => {
   const dispatch = useAppDispatch();
@@ -35,48 +37,57 @@ const LetterViewContainer = () => {
   const isDebugMode = process.env.REACT_DEBUG_MODE === 'true';
 
   const fetchSingleLetterData = async (letterId: number): Promise<string> => {
-    try {
-      const result = await fetchLetterData(letterId);
-      return result?.xmlContent ?? 'ERROR: Empty result';
-    } catch (_e) {
-      return 'ERROR: Failed to fetch letter content';
-    }
+    const result = await fetchLetterData(letterId);
+
+    return result?.xmlContent ?? 'ERROR: Empty result';
   };
 
   const pinnedLetterData = async (letterId: number): Promise<string> => {
-    try {
-      const result = await fetchPinnedLetterData(letterId);
-      return result?.xmlContent ?? 'ERROR: Empty result';
-    } catch (_e) {
-      return 'ERROR: Failed to fetch letter content';
-    }
+    const result = await fetchPinnedLetterData(letterId);
+    return result?.xmlContent ?? 'ERROR: Empty result';
   };
 
   useEffect(() => {
-    if (
-      stateEditorLetter.id &&
-      statePinnedLetters.some((letter) => letter.id === stateEditorLetter.id && letter.isPinned)
-    ) {
-      pinnedLetterData(stateEditorLetter.id).then((xmlContent) => {
+    const loadLetterData = async () => {
+      const letterId = stateEditorLetter.id; // capture in a local variable
+      if (letterId === null) {
+        setLetterState({ viewMode: null, xmlContent: null });
+        return;
+      }
+      const hasPinnedLetters = statePinnedLetters.some(
+        (letter) => letter.id === stateEditorLetter.id && letter.isPinned,
+      );
+
+      let xmlContent;
+
+      if (hasPinnedLetters) {
+        xmlContent = await pinnedLetterData(letterId);
+      } else {
+        xmlContent = await fetchSingleLetterData(letterId);
+      }
+
+      if (xmlContent) {
         setLetterState({
           viewMode: stateEditorLetter.viewMode,
           xmlContent: xmlContent,
         });
-      });
-    } else if (stateEditorLetter.id !== null) {
-      fetchSingleLetterData(stateEditorLetter.id).then((xmlContent) => {
+      } else {
         setLetterState({
-          viewMode: stateEditorLetter.viewMode,
-          xmlContent: xmlContent,
+          viewMode: null,
+          xmlContent: null,
         });
-      });
-    } else {
-      setLetterState({
-        viewMode: null,
-        xmlContent: null,
-      });
+      }
+    };
+
+    try {
+      void loadLetterData();
+    } catch (error) {
+      enqueueSnackbar(
+        'Fehler beim Laden des Briefinhalts: ' + MiscUtils.misc.getErrorMessage(error),
+        { variant: 'error' },
+      );
     }
-  }, [stateEditorLetter, statePinnedLetters]);
+  }, [stateEditorLetter.id, stateEditorLetter.viewMode, statePinnedLetters]);
 
   useEffect(() => {
     const reloadNewData = async () => {
@@ -98,7 +109,7 @@ const LetterViewContainer = () => {
     };
 
     if (reloadLetterContent && stateEditorLetter?.id !== null) {
-      reloadNewData();
+      void reloadNewData();
     }
   }, [dispatch, reloadLetterContent, stateEditorLetter]);
 

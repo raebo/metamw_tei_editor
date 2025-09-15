@@ -86,54 +86,58 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   /** DEBOUNCED SELECTION HANDLER */
   const handleMouseUpMarkedElements = useCallback(
     debounce((_event: MouseEvent) => {
+      // (_event: MouseEvent) => {
       const selection = window.getSelection();
       if (!selection || selection.toString().length === 0) return;
 
-      try {
-        if (!xmlContentRef.current) throw new Error('xmlContentRef is null');
+      requestAnimationFrame(() => {
+        try {
+          if (!xmlContentRef.current) throw new Error('xmlContentRef is null');
 
-        EditorUtils.textMarking.isValidSelection(
-          selection,
-          xmlContentRef.current,
-          (sel: Selection) => {
-            EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current!);
-            EditorUtils.textMarking.markValidSelection(sel, sel.getRangeAt(0));
+          EditorUtils.textMarking.isValidSelection(
+            selection,
+            xmlContentRef.current,
+            (sel: Selection) => {
+              EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current!);
+              EditorUtils.textMarking.markValidSelection(sel, sel.getRangeAt(0));
 
-            const xmlDoc = EditorUtils.xmlCheck.extractDocumentByRef(xmlContentRef);
+              const xmlDoc = EditorUtils.xmlCheck.extractDocumentByRef(xmlContentRef);
 
-            dispatch(
-              setEditorMarkedAndContentLeftRightThunk({
-                textIsMarked: true,
-                contentLeft: null,
-                contentRight: null,
-                xmlContent: new XMLSerializer().serializeToString(xmlDoc),
-              }),
-            );
+              dispatch(
+                setEditorMarkedAndContentLeftRightThunk({
+                  textIsMarked: true,
+                  contentLeft: null,
+                  contentRight: null,
+                  xmlContent: new XMLSerializer().serializeToString(xmlDoc),
+                }),
+              );
 
-            setDisplayMenuItems(menuItems);
-          },
-          (message: string) => {
-            EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current!);
-            props.setLetterState({
-              viewMode: 'WYSIWYG',
-              xmlContent: xmlContentRef.current?.innerHTML ?? '',
-            });
+              setDisplayMenuItems(menuItems);
+            },
+            (message: string) => {
+              EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current!);
+              props.setLetterState({
+                viewMode: 'WYSIWYG',
+                xmlContent: xmlContentRef.current?.innerHTML ?? '',
+              });
 
-            dispatch(
-              setEditorMarkedAndContentLeftRightThunk({
-                textIsMarked: false,
-                contentLeft: null,
-                contentRight: null,
-              }),
-            );
+              dispatch(
+                setEditorMarkedAndContentLeftRightThunk({
+                  textIsMarked: false,
+                  contentLeft: null,
+                  contentRight: null,
+                }),
+              );
 
-            enqueueSnackbar(message, { variant: 'error' });
-          },
-        );
-      } catch (err) {
-        enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
-      }
-    }, 150),
+              enqueueSnackbar(message, { variant: 'error' });
+            },
+          );
+        } catch (err) {
+          enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
+        }
+      });
+    }, 100),
+    // },
     [dispatch, menuItems, props],
   );
 
@@ -203,7 +207,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       el.removeEventListener('mouseup', handleMouseUpMarkedElements, { capture: true });
       el.removeEventListener('contextmenu', handleNoMarkupRightClick, { capture: true });
     };
-  }, [xmlContentRef, handleMouseUpMarkedElements, handleNoMarkupRightClick]);
+  }, [props.xmlContentRef, handleMouseUpMarkedElements, handleNoMarkupRightClick, xmlContentRef]);
 
   /** RENDER */
   return (
