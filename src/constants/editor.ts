@@ -25,6 +25,7 @@ export type HeaderPerson = {
   key: string;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const languageMap = {
   de: 'Deutsch',
   en: 'Englisch',

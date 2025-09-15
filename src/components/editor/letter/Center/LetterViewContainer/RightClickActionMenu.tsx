@@ -92,7 +92,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       try {
         if (!xmlContentRef.current) throw new Error('xmlContentRef is null');
 
-        const valid = EditorUtils.textMarking.isValidSelection(
+        EditorUtils.textMarking.isValidSelection(
           selection,
           xmlContentRef.current,
           (sel: Selection) => {
@@ -147,8 +147,6 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const menuItemsToAdd: MenuItemType[] = [];
       let isClickable = false;
 
-      // Define a mapping of path check -> menu items to add
-
       for (const handler of pathHandlers) {
         EditorUtils.xmlCheck.isNodeMatchingPath(
           targetNode,
@@ -182,7 +180,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         }),
       );
     },
-    [dispatch, menuItemsNoMarking, props],
+    [dispatch, pathHandlers, props],
   );
 
   /** CLOSE MENU */
