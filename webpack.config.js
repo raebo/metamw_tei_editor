@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require("copy-webpack-plugin");
+const BundleAnalyzerPlugin =
+	require("webpack-bundle-analyzer").BundleAnalyzerPlugin
 
 module.exports = (env, argv) => {
   const isDev = argv.mode === "development";
@@ -26,7 +28,7 @@ module.exports = (env, argv) => {
       publicPath: "/",
       clean: true,
     },
-    devtool: isDev ? "eval-source-map" : "source-map",
+    devtool: isDev ? "eval-source-map" : false,
     optimization: {
       minimize: isProd,
       splitChunks: {
@@ -110,6 +112,13 @@ module.exports = (env, argv) => {
       ...(isProd
         ? [new MiniCssExtractPlugin({ filename: '[name].[contenthash].css' })]
         : []),
+	    ...(isProd
+	    ? [new BundleAnalyzerPlugin({
+		    analyzerMode: 'static',        // generate a static HTML report
+		    reportFilename: 'bundle-report.html', // optional, name of the HTML file
+		    openAnalyzer: true,            // open the report automatically after build
+		    generateStatsFile: false       // optional, whether to create stats.json
+	    })] : []),
       new webpack.DefinePlugin(envKeys),
       new webpack.ProvidePlugin({
         process: 'process/browser.js',
