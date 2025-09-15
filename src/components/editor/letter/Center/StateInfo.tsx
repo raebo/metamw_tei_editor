@@ -1,22 +1,23 @@
-import Box from "@mui/material/Box";
-import {useAppDispatch} from "../../../../redux/hooks";
-import {useSelector} from "react-redux";
-import {RootState} from "../../../../redux/redux.store";
-import React from "react";
-import {setReloadLetterContent} from "../../../../redux/slices/editor.letter.slice";
+import Box from '@mui/material/Box';
+import { useAppDispatch } from '../../../../redux/hooks';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../redux/redux.store';
+import React from 'react';
+import { setReloadLetterContent } from '../../../../redux/slices/editor.letter.slice';
 
 const StateInfo = () => {
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
-  const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent)
-  
+  const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent);
+
   React.useEffect(() => {
     if (!stateTeiXml) {
       dispatch(setReloadLetterContent({ reloadLetterContent: true }));
       return;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stateTeiXml]);
-  
+
   return (
     <>
       <Box
@@ -31,7 +32,7 @@ const StateInfo = () => {
           boxShadow: 1,
         }}
       >
-        { stateEditorLetter.name }
+        {stateEditorLetter.name}
       </Box>
       <Box
         sx={{
@@ -43,14 +44,14 @@ const StateInfo = () => {
           padding: 1,
           borderRadius: 1,
           boxShadow: 1,
-          maxHeight: '70vh',   // or use e.g. '70vh'
-          overflowY: 'auto'
+          maxHeight: '70vh', // or use e.g. '70vh'
+          overflowY: 'auto',
         }}
       >
-        { stateTeiXml }
+        {stateTeiXml}
       </Box>
     </>
-  )
-}
+  );
+};
 
-export default StateInfo
+export default StateInfo;

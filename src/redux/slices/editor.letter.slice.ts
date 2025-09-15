@@ -1,43 +1,44 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { PinnedLetter } from "../../services/mappings/editorMappings";
+import { PinnedLetter } from '../../services/mappings/editorMappings';
 
 interface EditorLetterSlice {
   letter: {
-    id: number | null
-    name: string | null
-    viewMode: 'CODE' | 'WYSIWYG' | null
-		xmlContent: string | null
-		actOfWriting: {
-			orderNumber: number | null
-		}
-  },
-  tabLetter: { //PinnedLetter
-    id: number | null
-    name: string | null
-    contentChanged: boolean | null
-    xmlContentCurrent?: string | null
-    isPinned: boolean | null // remote pinned letters are pinned
-    viewMode: 'CODE' | 'WYSIWYG' | null
-  },
-  reloadLetterContent: boolean
-  tabNumber: number
-  pinnedLetters: PinnedLetter[]
-  searchValue: string | null,
+    id: number | null;
+    name: string | null;
+    viewMode: 'CODE' | 'WYSIWYG' | null;
+    xmlContent: string | null;
+    actOfWriting: {
+      orderNumber: number | null;
+    };
+  };
+  tabLetter: {
+    //PinnedLetter
+    id: number | null;
+    name: string | null;
+    contentChanged: boolean | null;
+    xmlContentCurrent?: string | null;
+    isPinned: boolean | null; // remote pinned letters are pinned
+    viewMode: 'CODE' | 'WYSIWYG' | null;
+  };
+  reloadLetterContent: boolean;
+  tabNumber: number;
+  pinnedLetters: PinnedLetter[];
+  searchValue: string | null;
   content: {
-    nodeClicked: boolean
-    textIsMarked: boolean
-  },
+    nodeClicked: boolean;
+    textIsMarked: boolean;
+  };
   selectedItem: {
-    left: string | null,
-    right: string | null,
-  },
-  dialogType: string | null,
+    left: string | null;
+    right: string | null;
+  };
+  dialogType: string | null;
   letterReference: {
-    elementType: string | null,
-    elementXmlId: string | null,
-    elementKey: string | null
-  }
-  changeLetterViewMode: boolean
+    elementType: string | null;
+    elementXmlId: string | null;
+    elementKey: string | null;
+  };
+  changeLetterViewMode: boolean;
 }
 
 const initialState: EditorLetterSlice = {
@@ -45,10 +46,10 @@ const initialState: EditorLetterSlice = {
     id: null,
     name: null,
     viewMode: null,
-		xmlContent: null,
-		actOfWriting: {
-			orderNumber: null
-		},
+    xmlContent: null,
+    actOfWriting: {
+      orderNumber: null,
+    },
   },
   tabLetter: {
     id: null,
@@ -56,7 +57,7 @@ const initialState: EditorLetterSlice = {
     contentChanged: null,
     xmlContentCurrent: null,
     isPinned: null,
-    viewMode: null
+    viewMode: null,
   },
   reloadLetterContent: false,
   tabNumber: 0,
@@ -68,51 +69,54 @@ const initialState: EditorLetterSlice = {
   },
   selectedItem: {
     left: null,
-    right: null
+    right: null,
   },
   dialogType: null,
   letterReference: {
     elementType: null,
     elementXmlId: null,
-    elementKey: null
+    elementKey: null,
   },
   changeLetterViewMode: false,
-}
+};
 
 const EditorLetterSlice = createSlice({
   name: 'editorLetter',
   initialState,
   reducers: {
     enableChangeLetterViewMode(state) {
-      state.changeLetterViewMode = true
+      state.changeLetterViewMode = true;
     },
     disableChangeLetterViewMode(state) {
-      state.changeLetterViewMode = false
+      state.changeLetterViewMode = false;
     },
     setEditorLetter(state, action) {
       if (!state.letter) {
-        state.letter = {...action.payload.letter}
+        state.letter = { ...action.payload.letter };
       } else {
-        state.letter = {...state.letter, ...action.payload.letter}
+        state.letter = { ...state.letter, ...action.payload.letter };
       }
     },
     setReloadLetterContent(state, action) {
-      state.reloadLetterContent = action.payload.reloadLetterContent
+      state.reloadLetterContent = action.payload.reloadLetterContent;
     },
-		setXmlLetterContent(state, action) {
-			state.letter.xmlContent = action.payload.content.xmlContent
-		},
+    setXmlLetterContent(state, action) {
+      state.letter.xmlContent = action.payload.content.xmlContent;
+    },
     setEditorTabNumber(state, action) {
-      state.tabNumber = action.payload.tabNumber
+      state.tabNumber = action.payload.tabNumber;
     },
     setEditorSearchValue(state, action) {
-      state.searchValue = action.payload.searchValue
+      state.searchValue = action.payload.searchValue;
     },
     setEditorPinnedLetters(state, action) {
-      state.pinnedLetters = [...action.payload.pinnedLetters]
+      state.pinnedLetters = [...action.payload.pinnedLetters];
     },
-    setEditorPinnedLetterViewMode(state, action: PayloadAction<{ id: number, viewMode: "CODE" | "WYSIWYG" }>) {
-      const letter = state.pinnedLetters.find(item => item.id === action.payload.id);
+    setEditorPinnedLetterViewMode(
+      state,
+      action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>,
+    ) {
+      const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
       if (letter) {
         letter.viewMode = action.payload.viewMode;
       }
@@ -123,49 +127,48 @@ const EditorLetterSlice = createSlice({
       }
     },
     setContentTextIsMarked(state, action) {
-      state.content.textIsMarked = action.payload.textIsMarked
+      state.content.textIsMarked = action.payload.textIsMarked;
     },
     setNodeClicked(state, action) {
-      state.content.nodeClicked = action.payload.nodeClicked
+      state.content.nodeClicked = action.payload.nodeClicked;
     },
     setEditorSelectedItem(state, action) {
-      state.selectedItem = {...action.payload.selectedItem}
+      state.selectedItem = { ...action.payload.selectedItem };
     },
     setDialogType(state, action) {
-      state.dialogType = action.payload.dialogType
+      state.dialogType = action.payload.dialogType;
     },
     setLetterReference(state, action) {
-      state.letterReference = { ...action.payload.letterReference }
+      state.letterReference = { ...action.payload.letterReference };
     },
-		setEditorLetterActOfWriting(state, action) {
-			state.letter = {
-				...state.letter,
-				actOfWriting: {
-					...state.letter.actOfWriting,
-					...action.payload.letter.actOfWriting,
-				},
-			}
-		}
-  }
-})
+    setEditorLetterActOfWriting(state, action) {
+      state.letter = {
+        ...state.letter,
+        actOfWriting: {
+          ...state.letter.actOfWriting,
+          ...action.payload.letter.actOfWriting,
+        },
+      };
+    },
+  },
+});
 
-export const
-  {
-    enableChangeLetterViewMode,
-    disableChangeLetterViewMode,
-    setContentTextIsMarked,
-		setEditorLetter,
-		setEditorLetterActOfWriting,
-    setEditorPinnedLetters,
-    setEditorPinnedLetterViewMode,
-		setEditorSearchValue,
-		setEditorSelectedItem,
-		setEditorTabNumber,
-    setReloadLetterContent,
-		setXmlLetterContent,
-    setDialogType,
-    setLetterReference,
-    setNodeClicked,
-  } = EditorLetterSlice.actions
+export const {
+  enableChangeLetterViewMode,
+  disableChangeLetterViewMode,
+  setContentTextIsMarked,
+  setEditorLetter,
+  setEditorLetterActOfWriting,
+  setEditorPinnedLetters,
+  setEditorPinnedLetterViewMode,
+  setEditorSearchValue,
+  setEditorSelectedItem,
+  setEditorTabNumber,
+  setReloadLetterContent,
+  setXmlLetterContent,
+  setDialogType,
+  setLetterReference,
+  setNodeClicked,
+} = EditorLetterSlice.actions;
 
-export default EditorLetterSlice.reducer
+export default EditorLetterSlice.reducer;

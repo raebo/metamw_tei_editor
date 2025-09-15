@@ -1,22 +1,27 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
-	disableChangeLetterViewMode,
-	enableChangeLetterViewMode,
-	setContentTextIsMarked,
-	setDialogType,
-	setEditorLetter,
-	setEditorPinnedLetters,
-	setEditorPinnedLetterViewMode,
-	setEditorSelectedItem,
-	setEditorTabNumber,
-	setLetterReference,
-	setNodeClicked, setReloadLetterContent, setXmlLetterContent,
+  disableChangeLetterViewMode,
+  enableChangeLetterViewMode,
+  setContentTextIsMarked,
+  setDialogType,
+  setEditorLetter,
+  setEditorPinnedLetters,
+  setEditorPinnedLetterViewMode,
+  setEditorSelectedItem,
+  setEditorTabNumber,
+  setLetterReference,
+  setNodeClicked,
+  setReloadLetterContent,
+  setXmlLetterContent,
 } from '../slices/editor.letter.slice';
 import { PinnedLetter } from '../../services/mappings/editorMappings';
 
 export const setEditorTabAndPinnedLettersThunk = createAsyncThunk(
   'editor/setEditorTabAndPinnedLetters',
-  async ({ pinnedLetters, tabNumber }: { pinnedLetters: PinnedLetter[]; tabNumber: number }, { dispatch }) => {
+  async (
+    { pinnedLetters, tabNumber }: { pinnedLetters: PinnedLetter[]; tabNumber: number },
+    { dispatch },
+  ) => {
     dispatch(setEditorPinnedLetters({ pinnedLetters }));
     dispatch(setEditorTabNumber({ tabNumber }));
     if (tabNumber === -1) {
@@ -32,18 +37,22 @@ export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
       letter,
       tabNumber,
     }: {
-      letter: { id: number; name: string; viewMode: 'CODE' | 'WYSIWYG' | null, xmlContent: string | null };
+      letter: {
+        id: number;
+        name: string;
+        viewMode: 'CODE' | 'WYSIWYG' | null;
+        xmlContent: string | null;
+      };
       tabNumber: number;
     },
     { dispatch },
   ) => {
-
-    dispatch(setReloadLetterContent({ reloadLetterContent: false} ))
+    dispatch(setReloadLetterContent({ reloadLetterContent: false }));
     dispatch(setEditorLetter({ letter: letter }));
     dispatch(setEditorTabNumber({ tabNumber }));
-    dispatch(setReloadLetterContent({ reloadLetterContent: true } ))
+    dispatch(setReloadLetterContent({ reloadLetterContent: true }));
     if (tabNumber === -1) {
-      dispatch(setEditorLetter({ letter: { id: null, name: null } } ));
+      dispatch(setEditorLetter({ letter: { id: null, name: null } }));
     }
   },
 );
@@ -55,21 +64,24 @@ export const setEditorPinnedLettersViewModeThunk = createAsyncThunk(
       stateEditorLetter,
       viewMode,
     }: {
-      stateEditorLetter: { id: number | null; name: string | null; viewMode: 'CODE' | 'WYSIWYG' | null };
+      stateEditorLetter: {
+        id: number | null;
+        name: string | null;
+        viewMode: 'CODE' | 'WYSIWYG' | null;
+      };
       viewMode: 'CODE' | 'WYSIWYG';
     },
     { dispatch },
   ) => {
+    if (!stateEditorLetter.id) return;
 
-    if(!stateEditorLetter.id) return
-
-    dispatch(disableChangeLetterViewMode())
+    dispatch(disableChangeLetterViewMode());
 
     try {
       dispatch(setEditorLetter({ letter: { ...stateEditorLetter, viewMode: viewMode } }));
       dispatch(setEditorPinnedLetterViewMode({ id: stateEditorLetter.id, viewMode: viewMode }));
     } finally {
-      dispatch(enableChangeLetterViewMode())
+      dispatch(enableChangeLetterViewMode());
     }
   },
 );
@@ -81,12 +93,12 @@ export const setEditorMarkedAndContentLeftRightThunk = createAsyncThunk(
       textIsMarked,
       contentLeft,
       contentRight,
-			xmlContent
+      xmlContent,
     }: {
       textIsMarked: boolean;
       contentLeft: string | null;
       contentRight: string | null;
-			xmlContent?: string | null
+      xmlContent?: string | null;
     },
     { dispatch },
   ) => {
@@ -94,10 +106,9 @@ export const setEditorMarkedAndContentLeftRightThunk = createAsyncThunk(
     dispatch(setNodeClicked({ nodeClicked: false }));
     dispatch(setEditorSelectedItem({ selectedItem: { left: contentLeft, right: contentRight } }));
 
-		if (xmlContent !== undefined) {
-			dispatch(setXmlLetterContent({ content: { xmlContent: xmlContent } }) )
-		}
-
+    if (xmlContent !== undefined) {
+      dispatch(setXmlLetterContent({ content: { xmlContent: xmlContent } }));
+    }
   },
 );
 
@@ -120,7 +131,7 @@ export const setEditorNodeClickedAndContentLeftRightThunk = createAsyncThunk(
     dispatch(setNodeClicked({ nodeClicked: nodeClicked }));
     dispatch(setContentTextIsMarked({ textIsMarked: textIsMarked }));
     dispatch(setEditorSelectedItem({ selectedItem: { left: contentLeft, right: contentRight } }));
-    dispatch(setReloadLetterContent({ reloadLetterContent: true }))
+    dispatch(setReloadLetterContent({ reloadLetterContent: true }));
   },
 );
 
@@ -154,19 +165,18 @@ export const setEditorDialogAndReferenceThunk = createAsyncThunk(
 );
 
 export const setReloadXmlContentLetterThunk = createAsyncThunk(
-	'editor/setReloadXmlContentLetter',
-	async (
-		{
-			reloadLetterContent,
-			xmlContent
-		} : {
-			reloadLetterContent: boolean,
-			xmlContent: string | null
-		},
-		{ dispatch }
-
-	) => {
-		dispatch(setReloadLetterContent({ reloadLetterContent: reloadLetterContent }))
-		dispatch(setXmlLetterContent({ content: { xmlContent: xmlContent } }) )
-	}
-)
+  'editor/setReloadXmlContentLetter',
+  async (
+    {
+      reloadLetterContent,
+      xmlContent,
+    }: {
+      reloadLetterContent: boolean;
+      xmlContent: string | null;
+    },
+    { dispatch },
+  ) => {
+    dispatch(setReloadLetterContent({ reloadLetterContent: reloadLetterContent }));
+    dispatch(setXmlLetterContent({ content: { xmlContent: xmlContent } }));
+  },
+);

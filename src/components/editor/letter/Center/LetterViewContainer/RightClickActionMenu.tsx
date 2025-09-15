@@ -86,13 +86,15 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   /** DEBOUNCED SELECTION HANDLER */
   const handleMouseUpMarkedElements = useCallback(
     debounce((_event: MouseEvent) => {
-      // (_event: MouseEvent) => {
       const selection = window.getSelection();
       if (!selection || selection.toString().length === 0) return;
 
       requestAnimationFrame(() => {
         try {
-          if (!xmlContentRef.current) throw new Error('xmlContentRef is null');
+          if (!xmlContentRef.current) {
+            enqueueSnackbar('No XML content reference found', { variant: 'error' });
+            return;
+          }
 
           EditorUtils.textMarking.isValidSelection(
             selection,
