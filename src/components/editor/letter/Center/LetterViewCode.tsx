@@ -1,9 +1,8 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { RootState } from "../../../../redux/redux.store";
-import Editor, { OnMount } from '@monaco-editor/react';
-import * as monaco from 'monaco-editor';
+import React, { Suspense, useMemo, useRef, useState } from 'react';
+import { RootState } from '../../../../redux/redux.store';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
 import vkbeautify from 'vkbeautify';
-import { XMLParser } from "fast-xml-parser";
+import { XMLParser } from 'fast-xml-parser';
 import { Badge, Box } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -13,6 +12,8 @@ import { EditorUtils } from '../../../../utils/editor';
 import { EditorConstants } from '../../../../constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import { setReloadLetterContent } from '../../../../redux/slices/editor.letter.slice';
+import { debounce } from 'lodash-es';
+import { OnMount } from '@monaco-editor/react';
 
 type LetterViewCodeProps = {
   xmlString: string;
@@ -30,8 +31,6 @@ const validateXml = (xmlString: string): { line: number; column: number; message
     parser.parse(xmlString, true); // Try parsing XML
     return [];
   } catch (error: any) {
-
-    console.log(error);
     const errorMessage = error.message || 'Invalid XML structure';
     const errorLine = 1; // Use a default value or improve with further parsing
     const errorColumn = 1; // Same as above
@@ -40,8 +39,8 @@ const validateXml = (xmlString: string): { line: number; column: number; message
       {
         line: errorLine,
         column: errorColumn,
-        message: errorMessage
-      }
+        message: errorMessage,
+      },
     ];
   }
 };
@@ -55,7 +54,7 @@ const setXmlMarkers = (xml: string, model: monaco.editor.ITextModel) => {
     startLineNumber: error.line,
     startColumn: error.column,
     endLineNumber: error.line,
-    endColumn: error.column + 1
+    endColumn: error.column + 1,
   }));
 
   monaco.editor.setModelMarkers(model, 'xml', markers);
@@ -86,7 +85,7 @@ const LetterViewCode = ({ xmlString }: LetterViewCodeProps) => {
     const model = editor.getModel();
     if (model) {
       modelRef.current = model;
-      editorRef.current = editor
+      editorRef.current = editor;
 
       const updateMarkers = () => {
         const markers = monaco.editor.getModelMarkers({ resource: model.uri });
@@ -111,19 +110,27 @@ const LetterViewCode = ({ xmlString }: LetterViewCodeProps) => {
 
       return () => disposable.dispose();
     }
-  }
+  };
+
+  const debouncedSetXmlMarkers = useMemo(
+    () =>
+      debounce((value: string, model) => {
+        setXmlMarkers(value, model);
+      }, 300),
+    [],
+  );
 
   const handleEditorChange = (value: string | undefined) => {
     const model = modelRef.current;
 
     if (model && value !== undefined) {
-      setXmlMarkers(value, model);
+      debouncedSetXmlMarkers(value, model);
     }
   };
 
   const handleSave = async () => {
     if (!stateEditorLetter.id) {
-      enqueueSnackbar("No letter ID given from state", { variant: "error" });
+      enqueueSnackbar('No letter ID given from state', { variant: 'error' });
       return;
     }
 
@@ -139,43 +146,51 @@ const LetterViewCode = ({ xmlString }: LetterViewCodeProps) => {
       }
 
       try {
-        await EditorUtils.backendService.patchContent(content, stateEditorLetter.id, EditorConstants.changeTypes.MANUAL_CODE_CHANGE, null)
+        await EditorUtils.backendService.patchContent(
+          content,
+          stateEditorLetter.id,
+          EditorConstants.changeTypes.MANUAL_CODE_CHANGE,
+          null,
+        );
 
-        dispatch(setReloadLetterContent({ reloadLetterContent: true }))
-        enqueueSnackbar("Änderungen wurden gespeichert", { variant: "success" });
-
+        dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+        enqueueSnackbar('Änderungen wurden gespeichert', { variant: 'success' });
       } catch (error: any) {
         const response = error.response;
 
         if (response !== undefined) {
-          enqueueSnackbar("Error saving content: " + response.data.error, { variant: "error" });
+          enqueueSnackbar('Error saving content: ' + response.data.error, { variant: 'error' });
         } else {
-          enqueueSnackbar("Error saving content: " + error, { variant: "error" });
+          enqueueSnackbar('Error saving content: ' + error, { variant: 'error' });
         }
       }
     }
-  }
+  };
+
+  const MonacoEditor = React.lazy(() => import('@monaco-editor/react'));
 
   return (
     <>
-      <Box display="flex" flexDirection="column" gap={2} sx={ { width: "100%" }}>
+      <Box display="flex" flexDirection="column" gap={2} sx={{ width: '100%' }}>
         <div className="letterViewCodeContainer">
-          <Editor
-            key={xmlString}
-            defaultLanguage="xml"
-            value={formattedXml}
-            options={{
-              readOnly: false,
-              minimap: { enabled: true },
-              lineNumbers: 'on',
-              wordWrap: 'on',
-              scrollBeyondLastLine: false,
-              formatOnPaste: true,
-              formatOnType: true
-            }}
-            onMount={handleEditorMount}
-            onChange={handleEditorChange}
-          />
+          <Suspense fallback={<div>Loading editor...</div>}>
+            <MonacoEditor
+              key={xmlString}
+              defaultLanguage="xml"
+              value={formattedXml}
+              options={{
+                readOnly: false,
+                minimap: { enabled: false },
+                lineNumbers: 'on',
+                wordWrap: 'on',
+                scrollBeyondLastLine: false,
+                formatOnPaste: false,
+                formatOnType: false,
+              }}
+              onMount={handleEditorMount}
+              onChange={handleEditorChange}
+            />
+          </Suspense>
         </div>
         <Box
           component="hr"
@@ -195,10 +210,10 @@ const LetterViewCode = ({ xmlString }: LetterViewCodeProps) => {
           borderRadius={1}
           boxShadow={2}
           width="100%"
-          >
+        >
           <Badge
             badgeContent={errorCount}
-            color={errorCount > 0 ? "error" : "success"}
+            color={errorCount > 0 ? 'error' : 'success'}
             overlap="circular"
             anchorOrigin={{
               vertical: 'top',
@@ -213,7 +228,7 @@ const LetterViewCode = ({ xmlString }: LetterViewCodeProps) => {
             color="primary"
             disabled={errorCount > 0}
             onClick={handleSave}
-            sx={{marginRight: "20px" }}
+            sx={{ marginRight: '20px' }}
           >
             Inhalt Speichern
           </Button>

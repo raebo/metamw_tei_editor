@@ -1,127 +1,129 @@
-import React, {useEffect, useMemo, useRef, useState} from "react";
-import { fetchLetterData } from "../../../../services/editor/apiLettersRequest.service";
-import XMLDisplayParser from "./LetterViewContainer/XmlDisplayParser";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../redux/redux.store";
-import { Alert } from "@mui/material";
-import { useAppDispatch } from "../../../../redux/hooks";
-import { LetterState } from "../../../../constants/editor";
-import { fetchPinnedLetterData } from "../../../../services/editor/apiPinnedLettersRequest.service";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { fetchLetterData } from '../../../../services/editor/apiLettersRequest.service';
+import XMLDisplayParser from './LetterViewContainer/XmlDisplayParser';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../redux/redux.store';
+import { Alert } from '@mui/material';
+import { useAppDispatch } from '../../../../redux/hooks';
+import { LetterState } from '../../../../constants/editor';
+import { fetchPinnedLetterData } from '../../../../services/editor/apiPinnedLettersRequest.service';
 import LetterViewCode from './LetterViewCode';
-import RightClickActionMenu from "./LetterViewContainer/RightClickActionMenu";
-import {setReloadXmlContentLetterThunk} from "../../../../redux/thunks/editor.letter.thunk";
-import StateInfo from "./StateInfo";
+import { setReloadXmlContentLetterThunk } from '../../../../redux/thunks/editor.letter.thunk';
+import StateInfo from './StateInfo';
+import RightClickActionMenu from './LetterViewContainer/RightClickActionMenu';
 
 const LetterViewContainer = () => {
   const dispatch = useAppDispatch();
-  const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize)
+  const stateLetterFontSize = useSelector(
+    (state: RootState) => state.auth.settings?.letterFontSize,
+  );
   const containerRef = React.useRef<HTMLDivElement>(null);
   const xmlContentRef = useRef<HTMLDivElement | null>(null);
-	const [anchorPosition, setAnchorPosition] = useState<null | { top: number; left: number }>(null);
+  const [anchorPosition, setAnchorPosition] = useState<null | { top: number; left: number }>(null);
 
-  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter)
-  const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters)
+  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
 
   const [letterState, setLetterState] = useState<LetterState>({
     viewMode: null,
     xmlContent: null,
   });
 
-  const reloadLetterContent = useSelector((state: RootState) => state.editorLetter.reloadLetterContent);
-  const isDebugMode= process.env.REACT_DEBUG_MODE === "true";
-  
-  const fetchSingleLetterData = async (letterId: number) : Promise<string> => {
-    try {
-      const result = await fetchLetterData(letterId)
-      return result?.xmlContent ?? "ERROR: Empty result"
+  const reloadLetterContent = useSelector(
+    (state: RootState) => state.editorLetter.reloadLetterContent,
+  );
+  const isDebugMode = process.env.REACT_DEBUG_MODE === 'true';
 
-    } catch (e) {
-      return "ERROR: Failed to fetch letter content"
+  const fetchSingleLetterData = async (letterId: number): Promise<string> => {
+    try {
+      const result = await fetchLetterData(letterId);
+      return result?.xmlContent ?? 'ERROR: Empty result';
+    } catch (_e) {
+      return 'ERROR: Failed to fetch letter content';
     }
-  }
+  };
 
   const pinnedLetterData = async (letterId: number): Promise<string> => {
     try {
       const result = await fetchPinnedLetterData(letterId);
-      return result?.xmlContent ?? "ERROR: Empty result";
-    } catch (e) {
-      return "ERROR: Failed to fetch letter content";
+      return result?.xmlContent ?? 'ERROR: Empty result';
+    } catch (_e) {
+      return 'ERROR: Failed to fetch letter content';
     }
   };
 
   useEffect(() => {
-    if (stateEditorLetter.id && statePinnedLetters.some((letter) => (letter.id === stateEditorLetter.id && letter.isPinned))) {
-      pinnedLetterData(stateEditorLetter.id).then(xmlContent => {
+    if (
+      stateEditorLetter.id &&
+      statePinnedLetters.some((letter) => letter.id === stateEditorLetter.id && letter.isPinned)
+    ) {
+      pinnedLetterData(stateEditorLetter.id).then((xmlContent) => {
         setLetterState({
           viewMode: stateEditorLetter.viewMode,
-          xmlContent: xmlContent
-        })
-      })
+          xmlContent: xmlContent,
+        });
+      });
     } else if (stateEditorLetter.id !== null) {
-      fetchSingleLetterData(stateEditorLetter.id).then(xmlContent => {
+      fetchSingleLetterData(stateEditorLetter.id).then((xmlContent) => {
         setLetterState({
           viewMode: stateEditorLetter.viewMode,
-          xmlContent: xmlContent
-        })
-      })
+          xmlContent: xmlContent,
+        });
+      });
     } else {
-      setLetterState(
-        {
-          viewMode: null,
-          xmlContent: null
-        }
-      )
+      setLetterState({
+        viewMode: null,
+        xmlContent: null,
+      });
     }
-  }, [stateEditorLetter]);
+  }, [stateEditorLetter, statePinnedLetters]);
 
   useEffect(() => {
-		const reloadNewData = async () => {
-			if (stateEditorLetter.id === null) return;
+    const reloadNewData = async () => {
+      if (stateEditorLetter.id === null) return;
 
-			const xml = await pinnedLetterData(stateEditorLetter.id)
+      const xml = await pinnedLetterData(stateEditorLetter.id);
 
-			setLetterState({
-				viewMode: stateEditorLetter.viewMode,
-				xmlContent: xml
-			})
+      setLetterState({
+        viewMode: stateEditorLetter.viewMode,
+        xmlContent: xml,
+      });
 
-			dispatch(
-				setReloadXmlContentLetterThunk({
-					reloadLetterContent: false,
-					xmlContent: xml
-				})
-			)
-		}
+      dispatch(
+        setReloadXmlContentLetterThunk({
+          reloadLetterContent: false,
+          xmlContent: xml,
+        }),
+      );
+    };
 
     if (reloadLetterContent && stateEditorLetter?.id !== null) {
-			reloadNewData()
+      reloadNewData();
     }
-  }, [reloadLetterContent, stateEditorLetter]);
+  }, [dispatch, reloadLetterContent, stateEditorLetter]);
 
-	// 👇 memoize XMLDisplayParser so it only re-renders if xmlContent changes
-	const parserXmlMemo = useMemo(() => {
-		if (letterState && letterState.xmlContent !== null) {
-			return (
-				<XMLDisplayParser
-					xmlContentRef={xmlContentRef}
-					xmlString={letterState.xmlContent}
-					onRightClickMarked={(pos) => setAnchorPosition(pos)}
-				/>
-			);
-		} else {
-			return <></>
-		}
-	}, [letterState.xmlContent]);
-
-
+  // 👇 memoize XMLDisplayParser so it only re-renders if xmlContent changes
+  const parserXmlMemo = useMemo(() => {
+    if (letterState && letterState.xmlContent !== null) {
+      return (
+        <XMLDisplayParser
+          xmlContentRef={xmlContentRef}
+          xmlString={letterState.xmlContent}
+          onRightClickMarked={(pos) => setAnchorPosition(pos)}
+        />
+      );
+    } else {
+      return <></>;
+    }
+  }, [letterState]);
 
   return (
     <div className="letter-view-container">
       <div className="container-fmbc-letter">
         <div className="box-1">
-          { letterState.xmlContent ? (
+          {letterState.xmlContent ? (
             <>
-              { letterState.viewMode === "WYSIWYG" && (
+              {letterState.viewMode === 'WYSIWYG' && (
                 <div
                   className="letter-xml"
                   id="letterXml"
@@ -129,24 +131,21 @@ const LetterViewContainer = () => {
                   style={{ fontSize: `${stateLetterFontSize}%` }}
                 >
                   <div ref={xmlContentRef} id="letterXmlContent" style={{ padding: 20 }}>
-                    { letterState.xmlContent &&
-											parserXmlMemo
-										}
+                    {letterState.xmlContent && parserXmlMemo}
                   </div>
-									<RightClickActionMenu
-										xmlContentRef={xmlContentRef}
-										setLetterState={ (letterState: LetterState) => {
-											setLetterState( letterState );
-										}}
-										anchorPosition={anchorPosition}
-										setAnchorPosition={(pos) => setAnchorPosition(pos)}
-									/>
+                  <RightClickActionMenu
+                    xmlContentRef={xmlContentRef}
+                    setLetterState={(letterState: LetterState) => {
+                      setLetterState(letterState);
+                    }}
+                    anchorPosition={anchorPosition}
+                    setAnchorPosition={(pos) => setAnchorPosition(pos)}
+                  />
                 </div>
-              ) }
-              { letterState.viewMode === "CODE" && letterState.xmlContent && (
+              )}
+              {letterState.viewMode === 'CODE' && letterState.xmlContent && (
                 <LetterViewCode xmlString={letterState.xmlContent} />
-              ) }
-
+              )}
             </>
           ) : (
             <p>
@@ -154,18 +153,12 @@ const LetterViewContainer = () => {
                 Kein Brief zur Anzeige vorhanden, bitte wählen Sie einen Brief über die Suche aus.
               </Alert>
             </p>
-          ) }
+          )}
         </div>
       </div>
-      { isDebugMode ?  (
-        <StateInfo />
-        ) : (
-        <></>
-        )
-      }
-      
+      {isDebugMode ? <StateInfo /> : <></>}
     </div>
   );
-}
+};
 
 export default LetterViewContainer;
