@@ -1,19 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { DefaultDialogProps} from '../../EditorFormDialog';
-import {DateCertainty, EditorConstants, EditorDateType} from '../../../../../../constants/editor';
-import {
-  Box,
-  Divider,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-} from '@mui/material';
+import { DefaultDialogProps } from '../../EditorFormDialog';
+import { DateCertainty, EditorConstants, EditorDateType } from '../../../../../../constants/editor';
+import { Box, Divider, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
-import 'dayjs/locale/de'
+import 'dayjs/locale/de';
 import Button from '@mui/material/Button';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { EditorUtils } from '../../../../../../utils/editor';
@@ -24,47 +16,44 @@ export interface DateWhenAddDialogProps extends DefaultDialogProps {
 }
 
 const DateAddDialog = (props: DateWhenAddDialogProps) => {
-
-  dayjs.locale('de')
-	const xmlDoc = props.xmlDoc
-  const fallbackDate = dayjs("1832-01-01");
-  const [dateStart, setDateStart] = useState<Dayjs | null>(null) //dayjs("1842-01-01"); // this is used as default only
-  const minDate = dayjs("1800-01-01");
-  const [selectedType, setSelectedType] = useState<EditorDateType>(props.dateType)
-  const [certainty, setCertainty] = useState<DateCertainty>("high")
-  const [dates, setDates] = useState<Dayjs[]>([])
+  dayjs.locale('de');
+  const xmlDoc = props.xmlDoc;
+  const fallbackDate = dayjs('1832-01-01');
+  const [dateStart, setDateStart] = useState<Dayjs | null>(null); //dayjs("1842-01-01"); // this is used as default only
+  const minDate = dayjs('1800-01-01');
+  const [selectedType, setSelectedType] = useState<EditorDateType>(props.dateType);
+  const [certainty, setCertainty] = useState<DateCertainty>('high');
+  const [dates, setDates] = useState<Dayjs[]>([]);
 
   const dateLabelValues = {
-    "when": "Datum",
-    "when-custom": "Datum",
-    "notAfter": "Nicht nach",
-    "notBefore": "Nicht vor",
-    "from-to-one": "Von (Start)",
-    "from-to-two": "Bis (Ende)",
-    "notBefore-notAfter-one": "Nicht vor",
+    when: 'Datum',
+    'when-custom': 'Datum',
+    notAfter: 'Nicht nach',
+    notBefore: 'Nicht vor',
+    'from-to-one': 'Von (Start)',
+    'from-to-two': 'Bis (Ende)',
+    'notBefore-notAfter-one': 'Nicht vor',
     'notBefore-notAfter-two': 'Nicht nach',
-  }
+  };
 
   useEffect(() => {
-    const dateStart = dayjs(EditorUtils.xmlCheck.xmlLetterDate(xmlDoc))
-    setDateStart(dateStart)
+    const dateStart = dayjs(EditorUtils.xmlCheck.xmlLetterDate(xmlDoc));
+    setDateStart(dateStart);
     setSelectedType(props.dateType);
 
     switch (props.dateType) {
-      case "when":
-      case "notAfter":
-      case "notBefore":
+      case 'when':
+      case 'notAfter':
+      case 'notBefore':
         setDates([dateStart]);
         break;
-      case "from-to":
-      case "notBefore-notAfter":
-      case "when-custom":
+      case 'from-to':
+      case 'notBefore-notAfter':
+      case 'when-custom':
         setDates([dateStart, dateStart]);
         break;
     }
-
-  }, [props.dateType]);
-
+  }, [props.dateType, xmlDoc]);
 
   const setDateValueFromPosition = (position: number, dateValue: Dayjs) => {
     const newDates = [...dates];
@@ -74,126 +63,143 @@ const DateAddDialog = (props: DateWhenAddDialogProps) => {
       newDates.push(dateValue);
     }
     setDates(newDates);
-  }
+  };
 
   const handleCancelButtonClick = () => {
-    props.onClose()
-  }
+    props.onClose();
+  };
 
   const handleSubmitButtonClick = async () => {
     try {
       if (!xmlDoc) {
-				enqueueSnackbar("Kein XML-Dokument vorhanden", { variant: 'error' });
-				props.onClose()
-			}
+        enqueueSnackbar('Kein XML-Dokument vorhanden', { variant: 'error' });
+        props.onClose();
+      }
 
-      EditorUtils.markupGeneration.addDateMarkup(xmlDoc, handleGenerate() )
+      EditorUtils.markupGeneration.addDateMarkup(xmlDoc, generateDateNode());
 
-			props.onSave(xmlDoc, EditorConstants.changeTypes.misc.DATE_ADDED, "Datum wurde erfolgreich ausgezeichnet", null)
-
+      props.onSave(
+        xmlDoc,
+        EditorConstants.changeTypes.misc.DATE_ADDED,
+        'Datum wurde erfolgreich ausgezeichnet',
+        null,
+      );
     } catch (err) {
-      enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
-			props.onClose()
+      enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
+        variant: 'error',
+      });
+      props.onClose();
     }
-  }
+  };
 
-  const handleGenerate = () : string => {
-    let tag = "<date ";
+  const generateDateNode = (): Element => {
+    const dateNode = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'date');
+
     switch (selectedType) {
-      case "when":
-        tag += `when="${dates[0].format('YYYY-MM-DD')}"`;
+      case 'when':
+        dateNode.setAttribute('when', dates[0].format('YYYY-MM-DD'));
         break;
-      case "when-custom":
-        tag += `when-custom="${dates.map((entry) => entry.format("YYYY-MM-DD")).filter(Boolean).join(" and ")}"`;
+      case 'when-custom':
+        dateNode.setAttribute(
+          'when-custom',
+          dates.map((d) => d.format('YYYY-MM-DD')).join(' and '),
+        );
         break;
-      case "notAfter":
-        tag += `notAfter="${dates[0].format('YYYY-MM-DD')}"`;
+      case 'notAfter':
+        dateNode.setAttribute('notAfter', dates[0].format('YYYY-MM-DD'));
         break;
-      case "notBefore":
-        tag += `notBefore="${dates[0]}.format('YYYY-MM-DD')}"`;
+      case 'notBefore':
+        dateNode.setAttribute('notBefore', dates[0].format('YYYY-MM-DD'));
         break;
-      case "from-to":
-        tag += `from="${dates[0].format('YYYY-MM-DD')}" to="${dates[1].format('YYYY-MM-DD')}"`;
+      case 'from-to':
+        dateNode.setAttribute('from', dates[0].format('YYYY-MM-DD'));
+        dateNode.setAttribute('to', dates[1].format('YYYY-MM-DD'));
         break;
-      case "notBefore-notAfter":
-        tag += `notBefore="${dates[0].format('YYYY-MM-DD')}" notAfter="${dates[1].format('YYYY-MM-DD')}"`;
+      case 'notBefore-notAfter':
+        dateNode.setAttribute('notBefore', dates[0].format('YYYY-MM-DD'));
+        dateNode.setAttribute('notAfter', dates[1].format('YYYY-MM-DD'));
         break;
     }
-    tag += ` cert="${certainty}" />`;
 
-    return tag
+    dateNode.setAttribute('cert', certainty);
+
+    return dateNode;
   };
 
   const renderDateInputs = () => {
     switch (selectedType) {
-      case "when":
-      case "notAfter":
-      case "notBefore":
+      case 'when':
+      case 'notAfter':
+      case 'notBefore':
         return (
           <DatePicker
             minDate={minDate}
-            label={ dateLabelValues[selectedType] }
-            value={dates[0] ? dates[0] : dateStart ? dateStart : fallbackDate }
+            label={dateLabelValues[selectedType]}
+            value={dates[0] ? dates[0] : dateStart ? dateStart : fallbackDate}
             onChange={(date) => setDateValueFromPosition(0, dayjs(date))}
             slotProps={{
               textField: {
-                InputLabelProps: { shrink: true }
-              }
+                InputLabelProps: { shrink: true },
+              },
             }}
-            />
+          />
         );
-      case "from-to":
-      case "notBefore-notAfter":
+      case 'from-to':
+      case 'notBefore-notAfter':
         return (
           <Box display="flex" gap={2}>
             <DatePicker
               minDate={minDate}
-              label={ dateLabelValues[`${selectedType}-one`] }
-              value={ dates[0] ? dates[0] : dateStart ? dateStart : fallbackDate }
-              onChange={(date) => setDateValueFromPosition(0, dayjs(date)) }
+              label={dateLabelValues[`${selectedType}-one`]}
+              value={dates[0] ? dates[0] : dateStart ? dateStart : fallbackDate}
+              onChange={(date) => setDateValueFromPosition(0, dayjs(date))}
               slotProps={{
                 textField: {
-                  InputLabelProps: { shrink: true }
-                }
+                  InputLabelProps: { shrink: true },
+                },
               }}
             />
             <DatePicker
               minDate={minDate}
-              label={ dateLabelValues[`${selectedType}-two`] }
-              value={ dates[1] ? dates[1] : dateStart ? dateStart : fallbackDate }
-              onChange={(date) => setDateValueFromPosition(1, dayjs(date)) }
+              label={dateLabelValues[`${selectedType}-two`]}
+              value={dates[1] ? dates[1] : dateStart ? dateStart : fallbackDate}
+              onChange={(date) => setDateValueFromPosition(1, dayjs(date))}
               slotProps={{
                 textField: {
-                  InputLabelProps: { shrink: true }
-                }
+                  InputLabelProps: { shrink: true },
+                },
               }}
             />
           </Box>
         );
-      case "when-custom":
+      case 'when-custom':
         return (
           <Box display="flex" flexDirection="column" gap={1}>
-            { dates.map((date, index) => (
+            {dates.map((date, index) => (
               <DatePicker
                 minDate={minDate}
-                label={ dateLabelValues[selectedType] }
-                key={"datepicker-" + index}
-                value={ dates[index] }
-                onChange={(date) => setDateValueFromPosition(index, dayjs(date) ) }// .format("YYYY-MM-DD"))}
+                label={dateLabelValues[selectedType]}
+                key={'datepicker-' + index}
+                value={dates[index]}
+                onChange={(date) => setDateValueFromPosition(index, dayjs(date))} // .format("YYYY-MM-DD"))}
                 slotProps={{
                   textField: {
-                    InputLabelProps: { shrink: true }
-                  }
+                    InputLabelProps: { shrink: true },
+                  },
                 }}
-                />
+              />
             ))}
-            <Button disabled={dates.length > 2} onClick={() => setDates([...dates, dateStart ? dateStart : fallbackDate])} variant="outlined">
+            <Button
+              disabled={dates.length > 2}
+              onClick={() => setDates([...dates, dateStart ? dateStart : fallbackDate])}
+              variant="outlined"
+            >
               + Add another date
             </Button>
           </Box>
         );
     }
-  }
+  };
 
   return (
     <>
@@ -242,7 +248,12 @@ const DateAddDialog = (props: DateWhenAddDialogProps) => {
         <Divider sx={{ my: 3 }} />
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-          <Button variant="contained" color="primary" onClick={handleSubmitButtonClick} disabled={ dates.length === 0 || certainty === null } >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmitButtonClick}
+            disabled={dates.length === 0 || certainty === null}
+          >
             Datum Auszeichnen
           </Button>
 
@@ -252,7 +263,7 @@ const DateAddDialog = (props: DateWhenAddDialogProps) => {
         </Box>
       </Box>
     </>
-  )
-}
+  );
+};
 
 export default DateAddDialog;

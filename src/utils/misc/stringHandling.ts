@@ -3,12 +3,6 @@ function escapeRegExp(text: string): string {
 }
 
 export const stringHandling = {
-  removeLastCharIfSemiconlon: (str: string) => {
-    if (str.slice(-1) === ';') {
-      return str.slice(0, -1);
-    }
-    return str;
-  },
   highlightText: (input: string, query: string) => {
     if (!query) return input;
 
@@ -26,8 +20,8 @@ export const stringHandling = {
       .map((part, i) =>
         i < parts.length - 1
           ? `${part}<span style="font-weight: 700; background-color: yellow;">${query}</span>`
-          : part
+          : part,
       )
       .join('');
-  }
-}
+  },
+};
