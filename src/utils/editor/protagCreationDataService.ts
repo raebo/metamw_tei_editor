@@ -65,11 +65,11 @@ export const protagCreationDataService = {
     if (markedSpan === undefined) return { xmlId: '', contentChanged: false };
 
     const xmlId = EditorUtils.markupGeneration.generateXmlId('title');
-    const titleNameNode = document.createElement('title');
+    const titleNameNode = document.createElementNS(EditorConstants.TEI_NS, 'title');
     titleNameNode.setAttribute('xml:id', xmlId);
 
     for (const protagCreationData of markupProtagCreationData) {
-      const catListNode = document.createElement('list');
+      const catListNode = document.createElementNS(EditorConstants.TEI_NS, 'list');
       const listXmlId = EditorUtils.markupGeneration.generateXmlId('title');
       catListNode.setAttribute('xml:id', listXmlId);
 
@@ -79,7 +79,7 @@ export const protagCreationDataService = {
       ];
 
       allCategories.reverse().forEach((protagCreation, index) => {
-        const categoryNode = document.createElement('item');
+        const categoryNode = document.createElementNS(EditorConstants.TEI_NS, 'item');
         categoryNode.setAttribute('n', (index + 1).toString());
         categoryNode.setAttribute('sortKey', protagCreation.name_en ?? protagCreation.name);
         categoryNode.setAttribute('style', 'hidden');
@@ -88,27 +88,27 @@ export const protagCreationDataService = {
 
       titleNameNode.appendChild(catListNode);
 
-      const nameNode = document.createElement('name');
+      const nameNode = document.createElementNS(EditorConstants.TEI_NS, 'name');
       nameNode.setAttribute('style', 'hidden');
       nameNode.setAttribute('type', 'author');
       nameNode.setAttribute('key', protagData.entityKey);
       nameNode.textContent = protagData.entityDisplayName;
       titleNameNode.appendChild(nameNode);
 
-      const protagCreationNode = document.createElement('name');
+      const protagCreationNode = document.createElementNS(EditorConstants.TEI_NS, 'name');
       protagCreationNode.setAttribute('key', protagCreationData.key);
       protagCreationNode.setAttribute('style', 'hidden');
       protagCreationNode.textContent = protagCreationData.name;
 
       if (protagCreationData.mwv) {
-        const mwvNode = document.createElement('idno');
+        const mwvNode = document.createElementNS(EditorConstants.TEI_NS, 'idno');
         mwvNode.setAttribute('type', 'MWV');
         mwvNode.textContent = protagCreationData.mwv;
         protagCreationNode.appendChild(mwvNode);
       }
 
       if (protagCreationData.opus) {
-        const opusNode = document.createElement('idno');
+        const opusNode = document.createElementNS(EditorConstants.TEI_NS, 'idno');
         opusNode.setAttribute('type', 'op');
         opusNode.textContent = protagCreationData.opus;
         protagCreationNode.appendChild(opusNode);

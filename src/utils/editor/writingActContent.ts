@@ -174,7 +174,7 @@ export const writingActContent = {
     });
 
     authors.reverse().forEach((author) => {
-      const authorElement = xmlDoc.createElement('docAuthor');
+      const authorElement = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'docAuthor');
       authorElement.setAttribute('resp', 'author');
       if (author.key) {
         authorElement.setAttribute('data-key', author.key);

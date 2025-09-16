@@ -73,7 +73,9 @@ const ManageWritingActAuthorWriterDialog = (props: DefaultDialogProps) => {
           setPeople(defaultPeople);
         }
       } catch (error) {
-        enqueueSnackbar('Error fetching people', { variant: 'error' });
+        enqueueSnackbar('Error fetching people: ' + MiscUtils.misc.getErrorMessage(error), {
+          variant: 'error',
+        });
       }
     };
 
@@ -81,7 +83,7 @@ const ManageWritingActAuthorWriterDialog = (props: DefaultDialogProps) => {
       extractExistingAuthorsWriters(xmlDoc);
       void fetchDefaultPeople();
     }
-  }, [xmlDoc]);
+  }, [stateActOfWriting.orderNumber, xmlDoc]);
 
   const handleInfoIconClick = async (reference: HeaderPerson) => {
     if (!reference.key) {
@@ -91,9 +93,12 @@ const ManageWritingActAuthorWriterDialog = (props: DefaultDialogProps) => {
       const result = await fetchMetamwEntityData(reference.key);
       setDisplayData(result);
     } catch (error) {
-      enqueueSnackbar(`Error fetching data for entity with key: ${reference.key}`, {
-        variant: 'error',
-      });
+      enqueueSnackbar(
+        `Error fetching data for entity with key: ${reference.key} ${MiscUtils.misc.getErrorMessage(error)}`,
+        {
+          variant: 'error',
+        },
+      );
     }
   };
 

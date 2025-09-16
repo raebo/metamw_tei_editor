@@ -18,7 +18,9 @@ export const xmlCheck = {
     const xpath = path
       .split('>')
       .map((part) => {
+        // eslint-disable-next-line no-useless-escape
         const match = part.match(/^([^\[]+)(\[.*\])?$/); // split name and [..]
+
         if (!match) return '';
 
         const nodeName = match[1].trim();
@@ -89,7 +91,6 @@ export const xmlCheck = {
     const letterNameValue = firstElement.getAttribute('xml:id') ?? '';
 
     if (letterNameValue === undefined) {
-      console.warn('No xml:id attribute found in the first element of letterXmlContent');
       return new Date().toISOString().split('T')[0];
     }
     const parts = letterNameValue.split('-');
@@ -230,7 +231,9 @@ export const xmlCheck = {
     // console.log("Checking node path:", ancestorNodeNames);
 
     const matchingEntry = nodeAncestorPaths.find((entry) => {
-      const pathMatches = entry.parentPath.toLowerCase() === ancestorNodeNames;
+      const paths = Array.isArray(entry.parentPath) ? entry.parentPath : [entry.parentPath];
+
+      const pathMatches = paths.some((path) => path.toLowerCase() === ancestorNodeNames);
       const attributesMatch = entry.checkAttributes ? entry.checkAttributes(node as Element) : true;
 
       return pathMatches && attributesMatch;

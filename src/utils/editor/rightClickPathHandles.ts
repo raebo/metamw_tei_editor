@@ -6,7 +6,7 @@ import { EditorUtils } from './index';
 import { EditorConstants } from '../../constants/editor';
 
 export interface NodeAncestorPath {
-  parentPath: string;
+  parentPath: string | string[];
   nodeType: NodeType;
   checkElementDetails: (node: Element) => boolean;
   afterActionCallback: (xmlDoc: Document, node: Node) => string;
@@ -102,6 +102,22 @@ export namespace rightClickPathHandles {
         return true;
       },
       afterActionCallback: (xmlDoc: Document, _node: Node) => xmlCheck.serializeDocument(xmlDoc),
+    },
+  ];
+
+  export const removeAnnotationFromNOde = (): NodeAncestorPath[] => [
+    {
+      parentPath: [
+        'tei text body div p persName',
+        'tei text body div p placeName',
+        'tei text body div p title',
+        'tei text body div p date',
+      ],
+      nodeType: nodeTypes.get(NodeTypes.ANNOTATION),
+      checkElementDetails: (_nodeElement: Element): boolean => {
+        return true;
+      },
+      afterActionCallback: (xmlDoc, _node: Node) => xmlCheck.serializeDocument(xmlDoc),
     },
   ];
 
@@ -230,9 +246,12 @@ export namespace rightClickPathHandles {
   };
 
   export const findAncestorPathEntry = (path: string): NodeAncestorPath => {
-    const ancestor = deletableAncestorPaths().find(
-      (entry) => entry.parentPath.toLowerCase() === path.toLowerCase(),
-    );
+    const ancestor = deletableAncestorPaths().find((entry) => {
+      if (Array.isArray(entry.parentPath)) {
+        return entry.parentPath.some((p) => p.toLowerCase() === path.toLowerCase());
+      }
+      return entry.parentPath.toLowerCase() === path.toLowerCase();
+    });
 
     if (!ancestor) throw new Error('No ancestor entry found for ' + path);
 
@@ -252,6 +271,15 @@ export namespace rightClickPathHandles {
   };
 
   export const pathHandlerFactory = (menuItemsNoMarking: MenuItemType[]) => [
+    {
+      paths: EditorUtils.rightClickPathHandles.removeAnnotationFromNOde(),
+      getMenuItems: (_node: Node) => {
+        const item = menuItemsNoMarking.find(
+          (i) => i.identifier === EditorConstants.menuItemTypes.REMOVE_ANNOTATION,
+        );
+        return item ? [item] : [];
+      },
+    },
     {
       paths: EditorUtils.rightClickPathHandles.manageWritingActPaths(),
       getMenuItems: (node: Node) =>

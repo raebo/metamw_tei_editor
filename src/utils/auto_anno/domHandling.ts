@@ -60,7 +60,7 @@ export const autoAnnoReplaceDomNodeContent = (
       replacePlaceDomNodeInstiSight(domNode, 'sight', snippetEntity),
   };
 
-  if (referenceHandlers.hasOwnProperty(referenceType)) {
+  if (Object.prototype.hasOwnProperty.call(referenceHandlers, referenceType)) {
     referenceHandlers[referenceType](domNode, snippetEntity);
   } else {
     throw new Error(
@@ -80,7 +80,7 @@ export const referenceTypeForXmlId = (xmlId: string): string => {
     PLACENAME: 'Settlement',
   };
 
-  if (referenceTypeMapping.hasOwnProperty(domNode.tagName)) {
+  if (Object.prototype.hasOwnProperty.call(referenceTypeMapping, domNode.tagName)) {
     return referenceTypeMapping[domNode.tagName];
   } else {
     throw new Error(
@@ -95,7 +95,7 @@ const replacePersonDomNode = (
 ): void => {
   let nameNode = domNode.querySelector('name');
   if (!nameNode) {
-    nameNode = document.createElement('name');
+    nameNode = document.createElementNS(EditorConstants.TEI_NS, 'name');
     nameNode.setAttribute('key', entityKey);
     nameNode.textContent = entityName;
     domNode.appendChild(nameNode);
@@ -113,7 +113,7 @@ const replacePlaceDomNodeSettlement = (
     throw new Error(`Invalid element provided for ${placeNameNode.tagName}`);
   }
 
-  const settlementNode = document.createElement('settlement');
+  const settlementNode = document.createElementNS(EditorConstants.TEI_NS, 'settlement');
 
   if (snippetEntity.entityKind) {
     settlementNode.setAttribute('type', snippetEntity.entityKind);
@@ -126,7 +126,7 @@ const replacePlaceDomNodeSettlement = (
   placeNameNode.appendChild(settlementNode);
 
   if (snippetEntity.entityPlaceCountryName) {
-    const countryNode = document.createElement('country');
+    const countryNode = document.createElementNS(EditorConstants.TEI_NS, 'country');
     countryNode.textContent = snippetEntity.entityPlaceCountryName;
     countryNode.setAttribute('style', 'hidden');
     placeNameNode.appendChild(countryNode);
@@ -142,7 +142,7 @@ const replacePlaceDomNodeInstiSight = (
     throw new Error(`Invalid element provided for ${placeNameNode.tagName}`);
   }
 
-  const nameNode = document.createElement('name');
+  const nameNode = document.createElementNS(EditorConstants.TEI_NS, 'name');
   nameNode.setAttribute('key', snippetEntity.entityKey);
   nameNode.setAttribute('type', typeOfPlace);
   nameNode.setAttribute('sub_type', '');
@@ -153,7 +153,7 @@ const replacePlaceDomNodeInstiSight = (
 
   console.log('snippetEntity: ', snippetEntity);
 
-  const settlementNode = document.createElement('settlement');
+  const settlementNode = document.createElementNS(EditorConstants.TEI_NS, 'settlement');
   settlementNode.setAttribute('type', 'locality');
   settlementNode.setAttribute('key', snippetEntity.entityKey);
   settlementNode.setAttribute('style', 'hidden');
@@ -164,16 +164,10 @@ const replacePlaceDomNodeInstiSight = (
   placeNameNode.appendChild(settlementNode);
 
   if (snippetEntity.entityPlaceCountryName) {
-    const countryNode = document.createElement('country');
+    const countryNode = document.createElementNS(EditorConstants.TEI_NS, 'country');
     countryNode.textContent = snippetEntity.entityPlaceCountryName;
     countryNode.setAttribute('style', 'hidden');
     placeNameNode.appendChild(countryNode);
-  }
-};
-
-const replacePlaceDomNodeSight = (placeNameNode: Element, snippetEntity: SnippetEntity): void => {
-  if (placeNameNode.tagName !== 'PLACENAME') {
-    throw new Error(`Invalid element provided for ${placeNameNode.tagName}`);
   }
 };
 

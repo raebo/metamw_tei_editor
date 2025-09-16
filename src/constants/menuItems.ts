@@ -16,6 +16,43 @@ export const getMenuItemsNoMarking = (
   xmlDocRef: React.MutableRefObject<XMLDocument | null>,
 ): MenuItem[] => [
   {
+    identifier: EditorConstants.menuItemTypes.REMOVE_ANNOTATION,
+    label: 'Auszeichnung Entfernen',
+    action: async ({ node }: { node?: Node }) => {
+      try {
+        const currentDoc = xmlDocRef.current;
+        if (!currentDoc) {
+          enqueueSnackbar('No xml document found', { variant: 'error' });
+          return;
+        }
+        if (!node) throw new Error('No node given as value');
+
+        const refNode = EditorUtils.xmlCheck.getNodeByPath(
+          currentDoc,
+          EditorUtils.xmlCheck.getNodePath(node),
+        );
+        EditorUtils.textMarking.unwrapNode(refNode as Element);
+
+        if (!refNode) throw new Error('No refNode found in current XML document');
+
+        const result = await EditorUtils.backendService.patchContent(
+          new XMLSerializer().serializeToString(currentDoc),
+          stateEditorLetter.id,
+          EditorConstants.changeTypes.misc.BODY_ANNOTATION_REMOVED,
+          null,
+        );
+        if (result) {
+          dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+          enqueueSnackbar('Die Auszeichnung wurde entfernt', { variant: 'success' });
+        } else {
+          enqueueSnackbar('Data could not be updated on backend side', { variant: 'error' });
+        }
+      } catch (error) {
+        enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
+      }
+    },
+  },
+  {
     identifier: EditorConstants.menuItemTypes.WRITING_ACT.LABEL_MOVE_DOWN,
     label: 'Verschieben Unten',
     type: 'inactive',

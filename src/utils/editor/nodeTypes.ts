@@ -1,10 +1,6 @@
-import { NodeAncestorPath } from './rightClickPathHandles';
-import { MenuItemType } from '../../components/editor/letter/Util/ContextMenuLetterItems';
-import { EditorUtils } from './index';
-import { EditorConstants } from '../../constants/editor';
-
 export enum NodeTypes {
   ATTACHMENT = 'ATTACHMENT',
+  ANNOTATION = 'ANNOTATION',
   AUTHOR = 'AUTHOR',
   BODY_ADDRESS = 'BODY_ADDRESS',
   BODY_GREETINGS_FORMULA = 'BODY_GREETINGS_FORMULA',
@@ -22,6 +18,7 @@ export interface NodeType {
 
 export const nodeTypesMap: Record<NodeTypes, NodeType> = {
   [NodeTypes.ATTACHMENT]: { key: NodeTypes.ATTACHMENT, name: 'Beilage' },
+  [NodeTypes.ANNOTATION]: { key: NodeTypes.ANNOTATION, name: 'Auszeichnung' },
   [NodeTypes.AUTHOR]: { key: NodeTypes.AUTHOR, name: 'Autor' },
   [NodeTypes.BODY_ADDRESS]: { key: NodeTypes.BODY_ADDRESS, name: 'Adresse (Brief)' },
   [NodeTypes.BODY_GREETINGS_FORMULA]: {
