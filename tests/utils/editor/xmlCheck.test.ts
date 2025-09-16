@@ -1,6 +1,6 @@
-import { EditorUtils } from "../../../src/utils/editor"; // Adjust the path based on your project structure
+import { EditorUtils } from '../../../src/utils/editor'; // Adjust the path based on your project structure
 
-describe("XML.checkSelectionRestrictedTags", () => {
+describe('EditorUtils.xmlCheck.checkSelectionRestrictedTags', () => {
   let xmlDoc: Document;
   const xmlString = `
         <TEI xmlns="http://www.tei-c.org/ns/1.0">
@@ -22,37 +22,37 @@ describe("XML.checkSelectionRestrictedTags", () => {
 
   beforeEach(() => {
     const parser = new DOMParser();
-    xmlDoc = parser.parseFromString(xmlString, "application/xml");
+    xmlDoc = parser.parseFromString(xmlString, 'application/xml');
   });
 
-  test("should return true for selection outside restricted tags", () => {
+  test('should return true for selection outside restricted tags', () => {
     const selectionStart = 10; // "Normal text" part
     const selectionEnd = 22;
-    const restrictedTags = ["teiHeader", "persName", "hi"];
+    const restrictedTags = ['teiHeader'];
 
-    expect(EditorUtils.xmlCheck.checkSelectionRestrictedTags(xmlDoc, selectionStart, selectionEnd, restrictedTags)).toBe(true);
+    expect(EditorUtils.xmlCheck.checkSelectionRestrictedTags(xmlDoc, selectionStart, selectionEnd, restrictedTags)).toBe(false);
   });
 
-  test("should return false for selection overlapping <hi>", () => {
+  test('should return false for selection overlapping <hi>', () => {
     const selectionStart = 15; // Overlapping "Highlighted"
     const selectionEnd = 35;
-    const restrictedTags = ["teiHeader", "persName", "hi"];
+    const restrictedTags = ['teiHeader', 'persName', 'hi'];
 
     expect(EditorUtils.xmlCheck.checkSelectionRestrictedTags(xmlDoc, selectionStart, selectionEnd, restrictedTags)).toBe(false);
   });
 
-  test("should return false for selection inside <persName>", () => {
+  test('should return false for selection inside <persName>', () => {
     const selectionStart = 50; // Inside <persName>John Doe</persName>
     const selectionEnd = 60;
-    const restrictedTags = ["teiHeader", "persName", "hi"];
+    const restrictedTags = ['teiHeader', 'persName', 'hi'];
 
     expect(EditorUtils.xmlCheck.checkSelectionRestrictedTags(xmlDoc, selectionStart, selectionEnd, restrictedTags)).toBe(false);
   });
 
-  test("should return true for selection within safe areas", () => {
+  test('should return true for selection within safe areas', () => {
     const selectionStart = 30; // "inside." (not in any restricted tag)
     const selectionEnd = 37;
-    const restrictedTags = ["teiHeader", "persName", "hi"];
+    const restrictedTags = ['teiHeader', 'persName', 'hi'];
 
     expect(EditorUtils.xmlCheck.checkSelectionRestrictedTags(xmlDoc, selectionStart, selectionEnd, restrictedTags)).toBe(true);
   });

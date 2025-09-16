@@ -7,13 +7,7 @@ export enum EntityType {
   PROTAG_CREATION = 'PROTAG_CREATION',
 }
 
-export type EditorDateType =
-  | 'when'
-  | 'when-custom'
-  | 'notAfter'
-  | 'notBefore'
-  | 'from-to'
-  | 'notBefore-notAfter';
+export type EditorDateType = 'when' | 'when-custom' | 'notAfter' | 'notBefore' | 'from-to' | 'notBefore-notAfter';
 export type DateCertainty = 'high' | 'medium' | 'low';
 export type LetterState = {
   viewMode: 'CODE' | 'WYSIWYG' | null;
@@ -67,11 +61,7 @@ export type ContentAddrLine = {
   rendType: string | null;
 };
 
-export const validParagraphClasses = [
-  'PARAGRAPH_LEFT',
-  'PARAGRAPH_RIGHT',
-  'PARAGRAPH_CENTER',
-] as const;
+export const validParagraphClasses = ['PARAGRAPH_LEFT', 'PARAGRAPH_RIGHT', 'PARAGRAPH_CENTER'] as const;
 
 export type ParagraphClass = (typeof validParagraphClasses)[number];
 
@@ -114,12 +104,11 @@ const dialogTypes = {
   SOURCE_DESC_HANDWRITING: 'SOURCE_DESC_HANDWRITING',
 };
 
-export type TmpIdPrefix =
-  (typeof EditorConstants.tmpIdPrefixes)[keyof typeof EditorConstants.tmpIdPrefixes];
+export type TmpIdPrefix = (typeof EditorConstants.tmpIdPrefixes)[keyof typeof EditorConstants.tmpIdPrefixes];
 
 export const EditorConstants = {
   ALLOWED_PARENT_TAG: "div[type='act_of_writing']",
-  FORBIDDEN_PARENT_TAG: 'teiHeader',
+  FORBIDDEN_PARENT_TAG: 'teiheader',
   RESTRICTED_TAGS: ['persname', 'placename', 'date', 'hi'],
   ENTITY_TYPES: EntityType,
   LANGUAGES: languages,

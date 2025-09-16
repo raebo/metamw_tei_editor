@@ -10,18 +10,13 @@ export const stringHandling = {
     try {
       regex = new RegExp(escapeRegExp(query), 'gi'); // safely escape query
     } catch (e) {
-      console.warn('Invalid regex pattern:', e);
       return input;
     }
 
     const parts = input.split(regex);
 
     return parts
-      .map((part, i) =>
-        i < parts.length - 1
-          ? `${part}<span style="font-weight: 700; background-color: yellow;">${query}</span>`
-          : part,
-      )
+      .map((part, i) => (i < parts.length - 1 ? `${part}<span style="font-weight: 700; background-color: yellow;">${query}</span>` : part))
       .join('');
   },
 };
