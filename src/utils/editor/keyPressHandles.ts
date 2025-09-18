@@ -1,8 +1,11 @@
 import { EditorUtils } from './index';
 import { AppDispatch } from '@src/redux/redux.store';
-import { setDialogType } from '@src/redux/slices/editor.letter.slice';
+import { setDialogType, setEditorSelectedItem } from '@src/redux/slices/editor.letter.slice';
 
 export const keyPressHandles = {
+  openRightPanel(dispatch: AppDispatch, rightItem: string): void {
+    dispatch(setEditorSelectedItem({ selectedItem: { left: null, right: rightItem } }));
+  },
   openDialog(dispatch: AppDispatch, dialogType: string): void {
     dispatch(setDialogType({ dialogType: dialogType }));
   },
@@ -15,6 +18,7 @@ export const keyPressHandles = {
       const writingActNode = EditorUtils.xmlCheck.findNearestWritingActNode(markedNode);
 
       EditorUtils.writingActContent.moveActUp(xmlDoc, writingActNode);
+      EditorUtils.contentFlow.reorderExistingPageBreaks(xmlDoc);
       EditorUtils.xmlCheck.unwrapedMarkedSpan(xmlDoc);
     } catch (error) {
       throw error;
@@ -26,6 +30,7 @@ export const keyPressHandles = {
       const writingActNode = EditorUtils.xmlCheck.findNearestWritingActNode(markedNode);
 
       EditorUtils.writingActContent.moveActDown(xmlDoc, writingActNode);
+      EditorUtils.contentFlow.reorderExistingPageBreaks(xmlDoc);
       EditorUtils.xmlCheck.unwrapedMarkedSpan(xmlDoc);
     } catch (error) {
       throw error;

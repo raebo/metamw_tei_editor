@@ -298,7 +298,33 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
       return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_NOTE);
     },
   },
-
+  'ctrl+alt+o': {
+    key: 'ctrl+alt+o',
+    description: 'add place annotation to marked content',
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => {
+      return EditorUtils.keyPressHandles.openRightPanel(dispatch, EditorConstants.compMappingRight.ENT_PLACE);
+    },
+  },
+  'ctrl+alt+p': {
+    key: 'ctrl+alt+p',
+    description: 'add person annotation to marked content',
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => {
+      return EditorUtils.keyPressHandles.openRightPanel(dispatch, EditorConstants.compMappingRight.ENT_PERSON);
+    },
+  },
+  'ctrl+alt+w': {
+    key: 'ctrl+alt+w',
+    description: 'add creation annotation to marked content',
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => {
+      return EditorUtils.keyPressHandles.openRightPanel(dispatch, EditorConstants.compMappingRight.ENT_CREATION);
+    },
+  },
   'ctrl+alt+v': {
     key: 'ctrl+alt+v',
     description: 'letters to protagonist',

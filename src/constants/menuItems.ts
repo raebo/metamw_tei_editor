@@ -27,10 +27,7 @@ export const getMenuItemsNoMarking = (
         }
         if (!node) throw new Error('No node given as value');
 
-        const refNode = EditorUtils.xmlCheck.getNodeByPath(
-          currentDoc,
-          EditorUtils.xmlCheck.getNodePath(node),
-        );
+        const refNode = EditorUtils.xmlCheck.getNodeByPath(currentDoc, EditorUtils.xmlCheck.getNodePath(node));
         EditorUtils.textMarking.unwrapNode(refNode as Element);
 
         if (!refNode) throw new Error('No refNode found in current XML document');
@@ -73,6 +70,7 @@ export const getMenuItemsNoMarking = (
           return;
         }
         EditorUtils.writingActContent.moveActDown(currentDoc, node as Element);
+        EditorUtils.contentFlow.reorderExistingPageBreaks(currentDoc);
 
         const result = await EditorUtils.backendService.patchContent(
           new XMLSerializer().serializeToString(currentDoc),
@@ -103,6 +101,7 @@ export const getMenuItemsNoMarking = (
           return;
         }
         EditorUtils.writingActContent.moveActUp(currentDoc, node as Element);
+        EditorUtils.contentFlow.reorderExistingPageBreaks(currentDoc);
 
         const result = await EditorUtils.backendService.patchContent(
           new XMLSerializer().serializeToString(currentDoc),
@@ -133,9 +132,7 @@ export const getMenuItemsNoMarking = (
 
         if (!numberOfAct) throw new Error('No act number found on node');
 
-        dispatch(
-          setEditorLetterActOfWriting({ letter: { actOfWriting: { orderNumber: numberOfAct } } }),
-        );
+        dispatch(setEditorLetterActOfWriting({ letter: { actOfWriting: { orderNumber: numberOfAct } } }));
         dispatch(
           setDialogType({
             dialogType: EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER,
@@ -170,13 +167,9 @@ export const getMenuItemsNoMarking = (
         if (!addressType) throw new Error('No address type found on node');
 
         if (addressType === 'sender_address') {
-          dispatch(
-            setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER }),
-          );
+          dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER }));
         } else if (addressType === 'address') {
-          dispatch(
-            setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT }),
-          );
+          dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT }));
         } else {
           enqueueSnackbar('Address type is not valid', { variant: 'error' });
         }
@@ -196,10 +189,7 @@ export const getMenuItemsNoMarking = (
 
         if (!anchNode) throw new Error('No anchNode found with given path');
 
-        const xmlContent = EditorUtils.rightClickPathHandles.removeNode(
-          node,
-          anchNode.afterActionCallback,
-        );
+        const xmlContent = EditorUtils.rightClickPathHandles.removeNode(node, anchNode.afterActionCallback);
 
         if (!xmlContent) throw new Error('No xml content found');
 
@@ -227,9 +217,7 @@ export const getMenuItemsNoMarking = (
       try {
         if (!node) throw new Error('No node given as value');
 
-        dispatch(
-          setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER }),
-        );
+        dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER }));
       } catch (error) {
         enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       }
@@ -270,16 +258,10 @@ export const getMenuItemsNoMarking = (
 
         const xmlDoc = xmlDocRef.current;
         if (!xmlDoc) throw new Error('XML document not loaded');
-        EditorUtils.textMarking.addTmpIdToNode(
-          xmlDoc,
-          node as Element,
-          EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA,
-        );
+        EditorUtils.textMarking.addTmpIdToNode(xmlDoc, node as Element, EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA);
 
         const serializer = new XMLSerializer();
-        dispatch(
-          setXmlLetterContent({ content: { xmlContent: serializer.serializeToString(xmlDoc) } }),
-        );
+        dispatch(setXmlLetterContent({ content: { xmlContent: serializer.serializeToString(xmlDoc) } }));
 
         dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA }));
       } catch (error) {
@@ -299,13 +281,9 @@ export const getMenuItemsNoMarking = (
         EditorUtils.textMarking.addTmpIdToNode(xmlDoc, node as Element, 'MANAGE_GREETINGS_FORMULA');
 
         const serializer = new XMLSerializer();
-        dispatch(
-          setXmlLetterContent({ content: { xmlContent: serializer.serializeToString(xmlDoc) } }),
-        );
+        dispatch(setXmlLetterContent({ content: { xmlContent: serializer.serializeToString(xmlDoc) } }));
 
-        dispatch(
-          setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA }),
-        );
+        dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA }));
       } catch (error) {
         enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       }

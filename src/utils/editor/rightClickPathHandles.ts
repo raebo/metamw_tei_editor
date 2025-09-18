@@ -43,6 +43,21 @@ export namespace rightClickPathHandles {
       afterActionCallback: (xmlDoc: Document, _node: Node) => xmlCheck.serializeDocument(xmlDoc),
     },
     {
+      parentPath: ['tei text body div p seg', 'tei text body div seg', 'tei text body div seg seg'],
+      nodeType: nodeTypes.get(NodeTypes.BODY_NOTE),
+      checkElementDetails: (_nodeElement: Element): boolean => {
+        const pageBreak = _nodeElement.getAttribute('type');
+
+        if (!pageBreak) return false;
+        return pageBreak.toLowerCase() === 'pagebreak';
+      },
+      afterActionCallback: (xmlDoc: Document, _node: Node) => {
+        EditorUtils.contentFlow.reorderExistingPageBreaks(xmlDoc);
+
+        return xmlCheck.serializeDocument(xmlDoc);
+      },
+    },
+    {
       parentPath: 'tei text body div note',
       nodeType: nodeTypes.get(NodeTypes.BODY_NOTE),
       checkElementDetails: (_nodeElement: Element): boolean => {
@@ -58,10 +73,7 @@ export namespace rightClickPathHandles {
       nodeType: nodeTypes.get(NodeTypes.WRITING_ACT),
       checkElementDetails: (nodeElement: Element): boolean => {
         // console.log("Checking writing act for", nodeElement.nodeName.toLowerCase() === 'div' && nodeElement.getAttribute("type") === "act_of_writing");
-        return (
-          nodeElement.nodeName.toLowerCase() === 'div' &&
-          nodeElement.getAttribute('type') === 'act_of_writing'
-        );
+        return nodeElement.nodeName.toLowerCase() === 'div' && nodeElement.getAttribute('type') === 'act_of_writing';
       },
       afterActionCallback: (xmlDoc: Document, _node: Node) => xmlCheck.serializeDocument(xmlDoc),
     },
@@ -235,10 +247,7 @@ export namespace rightClickPathHandles {
     },
   ];
 
-  export const getNodeAncestorPath = (node: Node): string[] => [
-    node.nodeName,
-    ...xmlCheck.getAncestorNodeNames(node),
-  ];
+  export const getNodeAncestorPath = (node: Node): string[] => [node.nodeName, ...xmlCheck.getAncestorNodeNames(node)];
 
   export const findAncestorPathNode = (node: Node): NodeAncestorPath => {
     const path = getNodeAncestorPath(node).reverse().join(' ');
@@ -258,10 +267,7 @@ export namespace rightClickPathHandles {
     return ancestor;
   };
 
-  export const removeNode = (
-    node: Node,
-    callbackSuccess: (xmlDoc: Document, node: Node) => string,
-  ): string => {
+  export const removeNode = (node: Node, callbackSuccess: (xmlDoc: Document, node: Node) => string): string => {
     const parentNode = node.parentNode;
     if (!parentNode) throw new Error('No parent node found');
 
@@ -274,9 +280,7 @@ export namespace rightClickPathHandles {
     {
       paths: EditorUtils.rightClickPathHandles.removeAnnotationFromNOde(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.REMOVE_ANNOTATION,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.REMOVE_ANNOTATION);
         return item ? [item] : [];
       },
     },
@@ -284,82 +288,58 @@ export namespace rightClickPathHandles {
       paths: EditorUtils.rightClickPathHandles.manageWritingActPaths(),
       getMenuItems: (node: Node) =>
         [
-          menuItemsNoMarking.find(
-            (i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_AUTHOR_WRITER,
-          )!,
-          menuItemsNoMarking.find(
-            (i) =>
-              i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'MOVE_UP'),
-          )!,
-          menuItemsNoMarking.find(
-            (i) =>
-              i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'MOVE_DOWN'),
-          )!,
+          menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_AUTHOR_WRITER)!,
+          menuItemsNoMarking.find((i) => i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'MOVE_UP'))!,
+          menuItemsNoMarking.find((i) => i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'MOVE_DOWN'))!,
         ].filter(Boolean) as MenuItemType[],
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageGreetingsFormulaPaths(),
       getMenuItems: (node: Node) =>
         [
-          menuItemsNoMarking.find(
-            (i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.ADD_GREETINGS_FORMULA,
-          )!,
-          menuItemsNoMarking.find(
-            (i) => i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'SALUTE'),
-          )!,
+          menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.ADD_GREETINGS_FORMULA)!,
+          menuItemsNoMarking.find((i) => i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'SALUTE'))!,
         ].filter(Boolean) as MenuItemType[],
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageBodyNotePaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.EDIT_NOTE,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.EDIT_NOTE);
         return item ? [item] : [];
       },
     },
     {
       paths: EditorUtils.rightClickPathHandles.deletableAncestorPaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.DELETE_NODE,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.DELETE_NODE);
         return item ? [item] : [];
       },
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageAuthorWriterAncestorPaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_WRITER_AUTHOR_HEADER,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_WRITER_AUTHOR_HEADER);
         return item ? [item] : [];
       },
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageTextLetterAddressPaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_TEXT_ADDRESS,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_TEXT_ADDRESS);
         return item ? [item] : [];
       },
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageHeaderLanguagesPaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_HEADER_LANGUAGES,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_HEADER_LANGUAGES);
         return item ? [item] : [];
       },
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageReceiverAncestorPaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_RECEIVER,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_RECEIVER);
         return item ? [item] : [];
       },
     },

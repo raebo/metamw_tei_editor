@@ -73,4 +73,34 @@ export const contentFlow = {
     }
     markedNode.parentNode?.removeChild(markedNode);
   },
+  reorderExistingPageBreaks: (xmlDoc: Document) => {
+    // get all seg nodes with type="pagebreak"
+    const segNodes = xmlDoc.querySelectorAll('seg[type="pagebreak"]');
+
+    let counter = 1;
+    segNodes.forEach((seg) => {
+      // update the text node to |n|
+      if (seg.firstChild && seg.firstChild.nodeType === Node.TEXT_NODE) {
+        seg.firstChild.textContent = `|${counter}| `;
+      } else {
+        // if no text node, create one
+        const textNode = xmlDoc.createTextNode(`|${counter}| `);
+        seg.insertBefore(textNode, seg.firstChild);
+      }
+
+      // find the pb child and update its n attribute
+      const pb = seg.querySelector('pb');
+      if (pb) {
+        pb.setAttribute('n', counter.toString());
+      } else {
+        // if no pb child, create one
+        const newPb = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'pb');
+        newPb.setAttribute('n', counter.toString());
+        newPb.setAttribute('type', 'pagebreak');
+        seg.appendChild(newPb);
+      }
+
+      counter += 1;
+    });
+  },
 };

@@ -27,31 +27,38 @@ export function createContextMenuItems({ handleMenuItemClick, handleMenuItemDial
       label: 'Person Auszeichnen',
       action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PERSON),
       hasSubMenu: false,
+      keyShortcut: 'STRG+ALT+P',
     },
     {
       label: 'Ort Auszeichnen',
       action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_PLACE),
+      keyShortcut: 'STRG+ALT+O',
     },
     {
       label: 'Werk Auszeichnen',
       action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_CREATION),
+      keyShortcut: 'STRG+ALT+W',
     },
     {
       label: 'FMBC Werk Auszeichnen',
       action: () => handleMenuItemClick(null, EditorConstants.compMappingRight.ENT_FMBC_CREATION),
+      keyShortcut: 'STRG+SHIFT+M',
     },
     {
       label: 'Verweis FMB-Brief Auszeichnen',
       action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG),
+      keyShortcut: 'STRG+ALT+B',
     },
     {
       label: 'Verweis GB-Brief Auszeichnen',
       action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG),
+      keyShortcut: 'STRG+ALT+V',
     },
     { type: 'divider' },
     {
       label: 'Kommentar Auszeichnen',
       action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.ADD_NOTE),
+      keyShortcut: 'STRG+ALT+K',
     },
     {
       label: 'Auszeichnungen Datum',

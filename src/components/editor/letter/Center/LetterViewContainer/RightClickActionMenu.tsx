@@ -74,6 +74,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   }, [stateEditorLetter.xmlContent, dispatch]);
 
   /** DEBOUNCED SELECTION HANDLER */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleMouseUpMarkedElements = useCallback(
     debounce((_event: MouseEvent) => {
       const selection = window.getSelection();
@@ -129,7 +130,6 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         }
       });
     }, 100),
-    // },
     [dispatch, menuItemsMarked, props],
   );
 
@@ -201,7 +201,14 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
     };
   }, [props.xmlContentRef, handleMouseUpMarkedElements, handleNoMarkupRightClick, xmlContentRef]);
 
-  /** RENDER */
+  const SndMenuItemStylesSpan = {
+    fontSize: '0.575rem',
+    padding: '0px 12px',
+    minHeight: '15px',
+    color: 'grey',
+    cursor: 'pointer',
+  };
+
   return (
     <>
       <Menu
@@ -241,6 +248,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
                 }}
               >
                 <span>{item.label}</span>
+                {item.keyShortcut && <span style={SndMenuItemStylesSpan}>{item.keyShortcut}</span>}
                 {item.hasSubMenu && <span style={{ marginLeft: 'auto' }}>▶</span>}
               </Box>
             </MenuItem>
@@ -272,6 +280,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
                 }}
               >
                 <span>{subItem.label}</span>
+                {subItem.keyShortcut && <span style={SndMenuItemStylesSpan}>{subItem.keyShortcut}</span>}
               </Box>
             </MenuItem>
           ))}
