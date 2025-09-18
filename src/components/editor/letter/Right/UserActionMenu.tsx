@@ -1,14 +1,16 @@
 import { Box, Menu, MenuItem } from '@mui/material';
 import React, { useState } from 'react';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import { allTimesAvailableKeyHandleDefinitions, filterForKeyHandleDefinitions } from '../Center/lib/keyHandlerDefinitions';
-import { EditorKeyHandleItem } from '../../../../services/mappings/editorMappings';
+import {
+  allTimesAvailableKeyHandleDefinitions,
+  filterForKeyHandleDefinitions,
+  generateKeyHandleAction,
+} from '../Center/lib/keyHandlerDefinitions';
+import { EditorKeyHandleItem } from '@src/services/mappings/editorMappings';
 import { enqueueSnackbar } from 'notistack';
-import { EditorUtils } from '../../../../utils/editor';
-import { setReloadLetterContent } from '../../../../redux/slices/editor.letter.slice';
-import { useAppDispatch } from '../../../../redux/hooks';
+import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../redux/redux.store';
+import { RootState, store } from '../../../../redux/redux.store';
 
 interface UserActionMenuProps {
   anchorEl: HTMLElement | null;
@@ -45,7 +47,11 @@ const menuItems: MenuItem[] = [
     active: true,
     hasSubMenu: true,
     subMenu: [
-      { label: 'Brief Header Erstellen', keyHandleItem: filterKeyCombination('alt+c'), active: true },
+      {
+        label: 'Brief Header Erstellen',
+        keyHandleItem: filterKeyCombination('alt+c'),
+        active: true,
+      },
       { label: 'Brief Erstellen', keyHandleItem: filterKeyCombination('alt+n'), active: true },
     ],
   },
@@ -55,10 +61,18 @@ const menuItems: MenuItem[] = [
     active: true,
     hasSubMenu: true,
     subMenu: [
-			{ label: 'Brief Header Bearbeiten', keyHandleItem: filterKeyCombination('alt+c'), active: true },
-			{ label: 'Empfänger Bearbeiten', keyHandleItem: filterKeyCombination('alt+d'), active: true },
-			{ label: 'Beilage Hinzufügen', keyHandleItem: filterKeyCombination('ctrl+alt+6'), active: true }
-		],
+      {
+        label: 'Brief Header Bearbeiten',
+        keyHandleItem: filterKeyCombination('alt+c'),
+        active: true,
+      },
+      { label: 'Empfänger Bearbeiten', keyHandleItem: filterKeyCombination('alt+d'), active: true },
+      {
+        label: 'Beilage Hinzufügen',
+        keyHandleItem: filterKeyCombination('ctrl+alt+6'),
+        active: true,
+      },
+    ],
   },
   { label: 'Brief Text Erstellung', keyHandleItem: null, active: false },
   {
@@ -67,9 +81,21 @@ const menuItems: MenuItem[] = [
     hasSubMenu: true,
     keyHandleItem: null,
     subMenu: [
-      { label: 'Schreibakt Erstellen', keyHandleItem: filterKeyCombination('ctrl+shift+s'), active: true },
-			{ label: 'Adresse Empfänger', keyHandleItem: filterKeyCombination('ctrl+shift+a'), active: true },
-			{ label: 'Adresse Sender', keyHandleItem: filterKeyCombination('ctrl+shift+b'), active: true },
+      {
+        label: 'Schreibakt Erstellen',
+        keyHandleItem: filterKeyCombination('ctrl+shift+s'),
+        active: true,
+      },
+      {
+        label: 'Adresse Empfänger',
+        keyHandleItem: filterKeyCombination('ctrl+shift+a'),
+        active: true,
+      },
+      {
+        label: 'Adresse Sender',
+        keyHandleItem: filterKeyCombination('ctrl+shift+b'),
+        active: true,
+      },
       { label: 'Vermerk Hinzufügen', keyHandleItem: null, active: false },
     ],
   },
@@ -92,24 +118,9 @@ const UserActionMenu = (props: UserActionMenuProps) => {
       return;
     }
 
-    if (editorKeyHandleItem.action) {
-      editorKeyHandleItem
-        .action()
-        .then((xmlContent) => {
-          if (xmlContent) {
-            EditorUtils.backendService.patchContent(xmlContent, stateEditorLetter.id, 'CONTENT_FORMAT_CHANGED', null).then(() => {
-              dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-            });
-          }
-        })
-        .catch((error) => {
-          enqueueSnackbar(`Error during calling keybinding: '${editorKeyHandleItem.description} ${error.toString()}'`, {
-            variant: 'error',
-          });
-        });
-    } else if (editorKeyHandleItem.openDialogAction) {
-      editorKeyHandleItem.openDialogAction(dispatch);
-    }
+    const getState = () => store.getState();
+    const action = generateKeyHandleAction(editorKeyHandleItem);
+    action?.(dispatch, getState);
 
     props.handleClose();
     setSubMenuAnchorEl({});

@@ -4,51 +4,43 @@ import { Box, List, ListItemButton, ListItemIcon, Tooltip } from '@mui/material'
 import CodeIcon from '@mui/icons-material/Code';
 import SearchIcon from '@mui/icons-material/Search';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import SearchContainer from '../../editor/letter/Left/Search/SearchContainer';
-import FavouritesContainer from '../../editor/letter/Left/Favourites/FavouritesContainer';
-import AssignedContainer from '../../editor/letter/Right/Assigned/AssignedContainer';
-import { ComponentMappingItem } from '../../../services/mappings/editorMappings';
-import { handleFavouriteClick } from '../../editor/letter/Right/Favourite/LetterFavouriteHandling';
+import SearchContainer from '@src/components/editor/letter/Left/Search/SearchContainer';
+import FavouritesContainer from '@src/components/editor/letter/Left/Favourites/FavouritesContainer';
+import AssignedContainer from '@src/components/editor/letter/Right/Assigned/AssignedContainer';
+import { ComponentMappingItem } from '@src/services/mappings/editorMappings';
+import { handleFavouriteClick } from '@src/components/editor/letter/Right/Favourite/LetterFavouriteHandling';
 const LetterViewContainer = React.lazy(() =>
-  import('../../editor/letter/Center/LetterViewContainer').catch((err) => {
+  import('@src/components/editor/letter/Center/LetterViewContainer').catch((_err) => {
     window.location.reload(); // oder Redirect zur Startseite
     return new Promise(() => {});
   }),
 );
-import { letterExists } from '../../../services/editor/apiLetterRequest.service';
-import LetterTabs from '../../editor/letter/Center/LetterTabs';
-import {
-  setDialogType,
-  setEditorLetter,
-  setEditorPinnedLetters,
-  setEditorSelectedItem,
-} from '../../../redux/slices/editor.letter.slice';
-import { fetchPinnedLetters } from '../../../services/editor/apiPinnedLettersRequest.service';
-import { useAppDispatch } from '../../../redux/hooks';
-import { EditorConstants } from '../../../constants/editor';
+import { letterExists } from '@src/services/editor/apiLetterRequest.service';
+import LetterTabs from '@src/components/editor/letter/Center/LetterTabs';
+import { setDialogType, setEditorLetter, setEditorPinnedLetters, setEditorSelectedItem } from '@src/redux/slices/editor.letter.slice';
+import { fetchPinnedLetters } from '@src/services/editor/apiPinnedLettersRequest.service';
+import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../redux/redux.store';
-import EntityPersonContainer from '../../editor/letter/Right/EntityPerson/EntityPersonContainer';
-import EntityCreationContainer from '../../editor/letter/Right/EntityCreation/EntityCreationContainer';
-import EntityPlaceContainer from '../../editor/letter/Right/EntityPlace/EntityPlaceContainer';
-import EntityLetterContainer from '../../editor/letter/Right/EntityLetter/EntityLetterContainer';
-import EditorFormDialog from '../../editor/letter/Dialog/EditorFormDialog';
-import useNoteClickHandler from '../../editor/letter/Center/hooks/useNoteClickHandler';
-import {
-  setEditorDialogAndReferenceThunk,
-  setEditorPinnedLettersViewModeThunk,
-} from '../../../redux/thunks/editor.letter.thunk';
+import { RootState } from '@src/redux/redux.store';
+import EntityCreationContainer from '@src/components/editor/letter/Right/EntityCreation/EntityCreationContainer';
+import EntityPlaceContainer from '@src/components/editor/letter/Right/EntityPlace/EntityPlaceContainer';
+import EntityLetterContainer from '@src/components/editor/letter/Right/EntityLetter/EntityLetterContainer';
+import EditorFormDialog from '@src/components/editor/letter/Dialog/EditorFormDialog';
+import useNoteClickHandler from '@src/components/editor/letter/Center/hooks/useNoteClickHandler';
+import { setEditorDialogAndReferenceThunk, setEditorPinnedLettersViewModeThunk } from '@src/redux/thunks/editor.letter.thunk';
 import { enqueueSnackbar } from 'notistack';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import UserActionMenu from '../../editor/letter/Right/UserActionMenu';
-import EditorKeyHandle from '../../editor/letter/Center/EditorKeyHandle';
-import QuickContentFormatter from '../../editor/letter/Right/QuickContentFormatter';
+import UserActionMenu from '@src/components/editor/letter/Right/UserActionMenu';
+import EditorKeyHandle from '@src/components/editor/letter/Center/EditorKeyHandle';
+import QuickContentFormatter from '@src/components/editor/letter/Right/QuickContentFormatter';
 import LetterFontSizeHandle from '../../auto_anno/misc/LetterFontSizeHandle';
-import EntityProtagCreationContainer from '../../editor/letter/Right/EntityProtagCreation/EntityProtagCreationContainer';
+import EntityProtagCreationContainer from '@src/components/editor/letter/Right/EntityProtagCreation/EntityProtagCreationContainer';
+import { EditorConstants } from '@src/constants/editor';
+import EntityPersonContainer from '@src/components/editor/letter/Right/EntityPerson/EntityPersonContainer';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
@@ -70,12 +62,8 @@ const ShowEditor = () => {
 
   const [selectedItemLeft, setSelectedItemLeft] = useState<false | string>(false);
   const [selectedItemRight, setSelectedItemRight] = useState<false | string>(false);
-  const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem | null>(
-    null,
-  );
-  const [selectedComponentRight, setSelectedComponentRight] = useState<ComponentMappingItem | null>(
-    null,
-  );
+  const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem | null>(null);
+  const [selectedComponentRight, setSelectedComponentRight] = useState<ComponentMappingItem | null>(null);
 
   const [isCodeView, setIsCodeView] = useState<boolean>(false);
 
@@ -291,10 +279,7 @@ const ShowEditor = () => {
     dispatch(setDialogType({ dialogType: dialogType }));
   };
 
-  const valueForSide = (
-    newValue: string | null,
-    selectedComponent: { name: string } | null,
-  ): string | null => {
+  const valueForSide = (newValue: string | null, selectedComponent: { name: string } | null): string | null => {
     if (newValue === null || (selectedComponent !== null && selectedComponent.name === newValue)) {
       return null;
     }
@@ -358,12 +343,7 @@ const ShowEditor = () => {
         >
           <List component="nav" aria-label="handle edit labels">
             <ListItemButton
-              selected={
-                !(
-                  selectedItemLeft === false ||
-                  selectedItemLeft !== EditorConstants.compMappingLeft.SEARCH
-                )
-              }
+              selected={!(selectedItemLeft === false || selectedItemLeft !== EditorConstants.compMappingLeft.SEARCH)}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.SEARCH, null)}
             >
               <ListItemIcon>
@@ -371,12 +351,7 @@ const ShowEditor = () => {
               </ListItemIcon>
             </ListItemButton>
             <ListItemButton
-              selected={
-                !(
-                  selectedItemLeft === false ||
-                  selectedItemLeft !== EditorConstants.compMappingLeft.FAVOURITES
-                )
-              }
+              selected={!(selectedItemLeft === false || selectedItemLeft !== EditorConstants.compMappingLeft.FAVOURITES)}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.FAVOURITES, null)}
             >
               <ListItemIcon>
@@ -404,12 +379,7 @@ const ShowEditor = () => {
             maxWidth: '40vw',
             backgroundColor: '#ffffff',
             transition: 'width 0.3s',
-            width:
-              showLeftContainer && showRightContainer
-                ? '60%'
-                : showLeftContainer || showRightContainer
-                  ? '80%'
-                  : '90%',
+            width: showLeftContainer && showRightContainer ? '60%' : showLeftContainer || showRightContainer ? '80%' : '90%',
           }}
         >
           <div ref={xmlRefCenter}>
@@ -445,12 +415,7 @@ const ShowEditor = () => {
             <QuickContentFormatter />
             <Tooltip title={'Click for more actions'} placement={'right'}>
               <ListItemButton
-                selected={
-                  !(
-                    selectedItemRight === false ||
-                    selectedItemRight !== EditorConstants.compMappingRight.USER_ACTIONS
-                  )
-                }
+                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.USER_ACTIONS)}
                 onClick={(event) => handleButtonMenuClick(event)}
               >
                 <ListItemIcon>
@@ -460,12 +425,7 @@ const ShowEditor = () => {
             </Tooltip>
             <Tooltip title={'This button has currently no function'} placement={'right'}>
               <ListItemButton
-                selected={
-                  !(
-                    selectedItemRight === false ||
-                    selectedItemRight !== EditorConstants.compMappingRight.ASSIGNED
-                  )
-                }
+                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.ASSIGNED)}
                 onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
               >
                 <ListItemIcon>
@@ -475,15 +435,8 @@ const ShowEditor = () => {
             </Tooltip>
             <Tooltip title={'Add letter to favourite list'} placement={'right'}>
               <ListItemButton
-                selected={
-                  !(
-                    selectedItemRight === false ||
-                    selectedItemRight !== EditorConstants.compMappingRight.SET_FAVOURITE
-                  )
-                }
-                onClick={() =>
-                  setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)
-                }
+                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.SET_FAVOURITE)}
+                onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
               >
                 <ListItemIcon>
                   <StarOutlineIcon />
@@ -493,25 +446,15 @@ const ShowEditor = () => {
 
             <Tooltip title={'Publish letter to backend'} placement="right">
               <ListItemButton
-                selected={
-                  !(
-                    selectedItemRight === false ||
-                    selectedItemRight !== EditorConstants.compMappingRight.PUBLISH_LETTER
-                  )
-                }
-                onClick={() =>
-                  setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)
-                }
+                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.PUBLISH_LETTER)}
+                onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
               >
                 <ListItemIcon>
                   <CloudUploadOutlinedIcon />
                 </ListItemIcon>
               </ListItemButton>
             </Tooltip>
-            <Tooltip
-              title={isCodeView ? 'Switch to WYSIWYG view' : 'Switch to Code view'}
-              placement="right"
-            >
+            <Tooltip title={isCodeView ? 'Switch to WYSIWYG view' : 'Switch to Code view'} placement="right">
               <ListItemButton onClick={handleToggleCodeview} selected={isCodeView}>
                 <ListItemIcon>
                   <CodeIcon color={isCodeView ? 'primary' : 'action'} />
@@ -520,12 +463,7 @@ const ShowEditor = () => {
             </Tooltip>
             <Tooltip title={'Reset letter status'} placement="right">
               <ListItemButton
-                selected={
-                  !(
-                    selectedItemRight === false ||
-                    selectedItemRight !== EditorConstants.dialogTypes.RESET_LETTER
-                  )
-                }
+                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.dialogTypes.RESET_LETTER)}
                 onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
               >
                 <ListItemIcon>
@@ -537,11 +475,7 @@ const ShowEditor = () => {
         </Box>
       </Box>
       <EditorFormDialog xmlRef={xmlRefCenter} open={false} />i
-      <UserActionMenu
-        anchorEl={anchorEl}
-        open={anchorEl !== null}
-        handleClose={userActionMenuHandleClose}
-      />
+      <UserActionMenu anchorEl={anchorEl} open={anchorEl !== null} handleClose={userActionMenuHandleClose} />
       <EditorKeyHandle />
       <LetterFontSizeHandle />
     </>

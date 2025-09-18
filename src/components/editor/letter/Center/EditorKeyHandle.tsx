@@ -1,16 +1,14 @@
 import React, { useCallback, useEffect } from 'react';
-import { useAppDispatch } from '../../../../redux/hooks';
+import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../redux/redux.store';
+import { RootState, store } from '@src/redux/redux.store';
 import {
   allTimesAvailableKeyHandleDefinitions,
   contentMarkedKeyHandleDefinitions,
   findKeyHandleDefinition,
+  generateKeyHandleAction,
 } from './lib/keyHandlerDefinitions';
-import { setReloadLetterContent } from '../../../../redux/slices/editor.letter.slice';
-import { enqueueSnackbar } from 'notistack';
-import { EditorUtils } from '../../../../utils/editor';
-import { EditorKeyHandleItem } from '../../../../services/mappings/editorMappings';
+import { EditorKeyHandleItem } from '@src/services/mappings/editorMappings';
 
 function normalizeKeyEvent(event: KeyboardEvent): string {
   const keys: string[] = [];
@@ -27,59 +25,40 @@ function normalizeKeyEvent(event: KeyboardEvent): string {
 
 const EditorKeyHandle = () => {
   const dispatch = useAppDispatch();
-  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
   const stateLetterContent = useSelector((state: RootState) => state.editorLetter.content);
 
   const handleFunction = useCallback(
-    (event: KeyboardEvent, keyDefinitions: Record<string, EditorKeyHandleItem>) => {
+    async (event: KeyboardEvent, keyDefinitions: Record<string, EditorKeyHandleItem>) => {
       // ignore pure modifier presses
       if (['shift', 'alt', 'ctrl', 'meta'].includes(event.key.toLowerCase())) {
         return;
       }
 
+      const getState = () => store.getState();
       const combo = normalizeKeyEvent(event);
-      const definition = findKeyHandleDefinition(combo, keyDefinitions);
+      const keyHandleDefinition = findKeyHandleDefinition(combo, keyDefinitions);
 
-      if (definition) {
+      if (keyHandleDefinition) {
         event.preventDefault();
         event.stopPropagation();
 
-        if (definition.action) {
-          definition
-            .action()
-            .then((xmlContent) => {
-              if (xmlContent) {
-                EditorUtils.backendService
-                  .patchContent(xmlContent, stateEditorLetter.id, 'CONTENT_FORMAT_CHANGED', null)
-                  .then(() => {
-                    dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-                  });
-              }
-            })
-            .catch((error) => {
-              enqueueSnackbar(
-                `An error occurred during: '${definition.description} ${error.toString()}'`,
-                { variant: 'error' },
-              );
-            });
-        } else if (definition.openDialogAction) {
-          definition.openDialogAction(dispatch);
-        }
+        const action = generateKeyHandleAction(keyHandleDefinition);
+        action?.(dispatch, getState);
       }
     },
-    [stateEditorLetter],
+    [dispatch],
   );
 
   useEffect(() => {
-    const globalKeyListener = (event: KeyboardEvent) => {
-      handleFunction(event, allTimesAvailableKeyHandleDefinitions);
+    const globalKeyListener = async (event: KeyboardEvent) => {
+      await handleFunction(event, allTimesAvailableKeyHandleDefinitions);
     };
     document.addEventListener('keydown', globalKeyListener, false);
 
     let markedKeyListener: (event: KeyboardEvent) => void;
     if (stateLetterContent.textIsMarked) {
       markedKeyListener = (event: KeyboardEvent) => {
-        handleFunction(event, contentMarkedKeyHandleDefinitions);
+        void handleFunction(event, contentMarkedKeyHandleDefinitions);
       };
       document.addEventListener('keydown', markedKeyListener, false);
     }

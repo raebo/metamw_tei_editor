@@ -1,26 +1,21 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { Menu, MenuItem, Divider, Box } from '@mui/material';
 import { createContextMenuItems, MenuItemType } from '../../Util/ContextMenuLetterItems';
-import { useAppDispatch } from '../../../../../redux/hooks';
+import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../../redux/redux.store';
-import { LetterState } from '../../../../../constants/editor';
-import { EditorUtils } from '../../../../../utils/editor';
-import {
-  setDialogType,
-  setEditorSelectedItem,
-  setNodeClicked,
-  setReloadLetterContent,
-} from '../../../../../redux/slices/editor.letter.slice';
+import { RootState } from '@src/redux/redux.store';
+import { LetterState } from '@src/constants/editor';
+import { EditorUtils } from '@src/utils/editor';
+import { setDialogType, setEditorSelectedItem, setNodeClicked, setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { enqueueSnackbar } from 'notistack';
-import { MiscUtils } from '../../../../../utils/misc';
+import { MiscUtils } from '@src/utils/misc';
 import {
   setEditorMarkedAndContentLeftRightThunk,
   setEditorNodeClickedAndContentLeftRightThunk,
-} from '../../../../../redux/thunks/editor.letter.thunk';
-import { getMenuItemsNoMarking } from '../../../../../constants/menuItems';
+} from '@src/redux/thunks/editor.letter.thunk';
+import { getMenuItemsNoMarking } from '@src/constants/menuItems';
 import { debounce } from 'lodash-es';
-import { rightClickPathHandles } from '../../../../../utils/editor/rightClickPathHandles';
+import { rightClickPathHandles } from '@src/utils/editor/rightClickPathHandles';
 
 interface UserActionMenuProps {
   xmlContentRef: React.RefObject<HTMLDivElement>;
@@ -42,7 +37,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   const xmlDocRef = useRef<XMLDocument | null>(null);
 
   /** CACHE MENU ITEMS */
-  const menuItems = useMemo(
+  const menuItemsMarked = useMemo(
     () =>
       createContextMenuItems({
         handleMenuItemClick: (left, right) => {
@@ -62,10 +57,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
     [dispatch, stateEditorLetter],
   );
 
-  const pathHandlers = useMemo(
-    () => rightClickPathHandles.pathHandlerFactory(menuItemsNoMarking),
-    [menuItemsNoMarking],
-  );
+  const pathHandlers = useMemo(() => rightClickPathHandles.pathHandlerFactory(menuItemsNoMarking), [menuItemsNoMarking]);
 
   /** LOAD XML DOC ON LETTER CHANGE */
   useEffect(() => {
@@ -74,9 +66,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       return;
     }
     try {
-      xmlDocRef.current = EditorUtils.xmlCheck.extractTeiDocumentFromString(
-        stateEditorLetter.xmlContent,
-      );
+      xmlDocRef.current = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateEditorLetter.xmlContent);
     } catch (err) {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
       xmlDocRef.current = null;
@@ -114,7 +104,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
                 }),
               );
 
-              setDisplayMenuItems(menuItems);
+              setDisplayMenuItems(menuItemsMarked);
             },
             (message: string) => {
               EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current!);
@@ -140,7 +130,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       });
     }, 100),
     // },
-    [dispatch, menuItems, props],
+    [dispatch, menuItemsMarked, props],
   );
 
   const handleNoMarkupRightClick = useCallback(
@@ -218,11 +208,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         open={Boolean(props.anchorPosition)}
         onClose={handleCloseAll}
         anchorReference="anchorPosition"
-        anchorPosition={
-          props.anchorPosition
-            ? { top: props.anchorPosition.top, left: props.anchorPosition.left }
-            : undefined
-        }
+        anchorPosition={props.anchorPosition ? { top: props.anchorPosition.top, left: props.anchorPosition.left } : undefined}
       >
         {displayMenuItems.map((item, index) =>
           item.type === 'divider' ? (

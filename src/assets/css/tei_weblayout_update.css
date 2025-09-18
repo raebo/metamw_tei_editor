@@ -1,195 +1,200 @@
 .letter-xml {
-   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol" !important;
-   font-size: 70%;
-   font-weight: 200 !important;
-   line-height: 1.5 !important;
-   color: #212529 !important;
-   text-align: left !important;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol' !important;
+  font-size: 70%;
+  font-weight: 200 !important;
+  line-height: 1.5 !important;
+  color: #212529 !important;
+  text-align: left !important;
 
-   span.marked {
-      background: var(--marked-color) !important;
-   }
+  span.marked {
+    background: var(--marked-color) !important;
+  }
 }
 
 #letterXml {
-   overflow-y: scroll;
-   height: 80%;
+  overflow-y: scroll;
+  height: 80%;
 }
 
-div [type="act_of_writing"] {
-   docauthor {
-      display: none;
-   }
+div [type='act_of_writing'] {
+  docauthor {
+    display: none;
+  }
 
-   date {
-      color: var(--editor-entity-color);
-      font-weight: bolder;
-   }
-   date::before {
-      font-family: "Font Awesome 6 Free", sans-serif;
-      color: var(--secondary-color);
-      content: "\f054";
-      display: inline;
-      padding-right: 2px;
+  date {
+    color: var(--editor-entity-color);
+    font-weight: bolder;
+  }
+  date::before {
+    font-family: 'Font Awesome 6 Free', sans-serif;
+    color: var(--secondary-color);
+    content: '\f054';
+    display: inline;
+    padding-right: 2px;
+    vertical-align: middle;
+    font-weight: 900;
+    font-size: 70%;
+  }
+  date::after {
+    font-family: 'Font Awesome 6 Free', sans-serif;
+    color: var(--secondary-color);
+    content: '\f053';
+    display: inline;
+    padding-left: 2px;
+    vertical-align: middle;
+    font-weight: 900;
+    font-size: 70%;
+  }
+
+  p {
+    persName::before,
+    placeName::before,
+    name::before {
+      content: '';
+      display: inline-block;
+      width: 0;
+      height: 0;
+      margin-right: 8px;
       vertical-align: middle;
-      font-weight: 900;
-      font-size: 70%;
-   }
-   date::after {
-      font-family: "Font Awesome 6 Free", sans-serif;
-      color: var(--secondary-color);
-      content: "\f053";
-      display: inline;
-      padding-left: 2px;
-      vertical-align: middle;
-      font-weight: 900;
-      font-size: 70%;
-   }
 
-   p {
-      persName::before, placeName::before, name::before {
-         content: "";
-         display: inline-block;
-         width: 0;
-         height: 0;
-         margin-right: 8px;
-         vertical-align: middle;
+      /* Triangle pointing right */
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 6px solid black;
+    }
 
-         /* Triangle pointing right */
-         border-top: 5px solid transparent;
-         border-bottom: 5px solid transparent;
-         border-left: 6px solid black;
-      }
-
-      name {
-         margin-left: 5px;
-         padding-left: 5px;
-      }
-   }
+    name {
+      margin-left: 5px;
+      padding-left: 5px;
+    }
+  }
 }
-
-
 
 tei {
-    teiHeader {
-        fileDesc {
-            titleStmt {
-                author {
-                    display: block;
-                    font-weight: bold;
-                    cursor: pointer;
-                }
-                respStmt {
-                    display: block;
-                    name {
-                        display: inline-block;
-                        font-weight: bold;
-                        cursor: pointer;
-                    }
-                    resp {
-                        display: inline-block;
-                        font-style: italic;
-                    }
-                    persname {
-                        cursor: pointer;
-                    }
-                }
-            }
-            profileDesc {
-                correspDesc {
-                    correspAction {
-                        persName {
-                        }
-                    }
-                }
-            }
-            sourceDesc {
-                msDesc {
-                    physDesc {
-                        accMat {
-                            listBibl {
-                                bibl {
-                                    cursor: pointer;
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
+  teiHeader {
+    fileDesc {
+      titleStmt {
+        author {
+          display: block;
+          font-weight: bold;
+          cursor: pointer;
         }
-    }
-    profileDesc {
-        langusage {
+        respStmt {
+          display: block;
+          name {
+            display: inline-block;
+            font-weight: bold;
             cursor: pointer;
-            language {
-                cursor: pointer;
-            }
-            language:not(:first-child)::before {
-              padding-left: 5px;
-            }
-        }
-    }
-    body {
-        div {
-            p {
-                cursor: pointer;
-            }
-            salute {
-                cursor: pointer;
-            }
-            dateline {
-                date {
-                    cursor: pointer;
-                }
-            }
-            seg[type="closer"] {
-                cursor: pointer;
-            }
-            signed {
-                cursor: pointer;
-            }
-        }
-        div[type="address"], div[type="sender_address"] {
-            address {
-                cursor: pointer;
-            }
-        }
-        div[type="act_of_writing"]::before {
-            content: "▶";
-            font-size: 60%;
+          }
+          resp {
+            display: inline-block;
+            font-style: italic;
+          }
+          persname {
             cursor: pointer;
-            margin-right: 5px;
+          }
         }
-        div[type="act_of_writing"] {
-            counter-reset: authorCounter writerCounter;
-
-            docAuthor[resp="author"]::before {
-                counter-increment: authorCounter;
-                content: "Autor " counter(authorCounter) ". : ";
-                font-size: 100%;
-                font-weight: bold;
-                margin-right: 5px;
+      }
+      profileDesc {
+        correspDesc {
+          correspAction {
+            persName {
             }
-            docAuthor[resp="writer"]::before {
-                counter-increment: writerCounter;
-                content: "Schreiber " counter(writerCounter) ". : ";
-                font-size: 100%;
-                font-weight: bold;
-                margin-right: 5px;
-            }
-            docAuthor {
-                margin: 10px 5px;
-                display: block;
-                font-size: 60%;
-            }
+          }
         }
+      }
+      sourceDesc {
+        msDesc {
+          physDesc {
+            accMat {
+              listBibl {
+                bibl {
+                  cursor: pointer;
+                }
+              }
+            }
+          }
+        }
+      }
     }
+  }
+  profileDesc {
+    langusage {
+      cursor: pointer;
+      language {
+        cursor: pointer;
+      }
+      language:not(:first-child)::before {
+        padding-left: 5px;
+      }
+    }
+  }
+  body {
+    div {
+      p {
+        cursor: pointer;
+      }
+      salute {
+        cursor: pointer;
+      }
+      dateline {
+        date {
+          cursor: pointer;
+        }
+      }
+      seg[type='closer'] {
+        cursor: pointer;
+      }
+      seg[type='pagebreak'] {
+        color: var(--primary-color);
+      }
+      signed {
+        cursor: pointer;
+      }
+    }
+    div[type='address'],
+    div[type='sender_address'] {
+      address {
+        cursor: pointer;
+      }
+    }
+    div[type='act_of_writing']::before {
+      content: '▶';
+      font-size: 60%;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    div[type='act_of_writing'] {
+      counter-reset: authorCounter writerCounter;
+
+      docAuthor[resp='author']::before {
+        counter-increment: authorCounter;
+        content: 'Autor ' counter(authorCounter) '. : ';
+        font-size: 100%;
+        font-weight: bold;
+        margin-right: 5px;
+      }
+      docAuthor[resp='writer']::before {
+        counter-increment: writerCounter;
+        content: 'Schreiber ' counter(writerCounter) '. : ';
+        font-size: 100%;
+        font-weight: bold;
+        margin-right: 5px;
+      }
+      docAuthor {
+        margin: 10px 5px;
+        display: block;
+        font-size: 60%;
+      }
+    }
+  }
 }
 
-profileDesc correspDesc correspAction[type="received"] persName,
-profileDesc correspDesc correspAction[type="sent"] persName {
-    cursor: pointer;
+profileDesc correspDesc correspAction[type='received'] persName,
+profileDesc correspDesc correspAction[type='sent'] persName {
+  cursor: pointer;
 }
 
 /*.hidden {*/

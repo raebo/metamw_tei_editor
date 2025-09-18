@@ -21,6 +21,7 @@ const compat = new FlatCompat({
 
 export default defineConfig([
   {
+    ignores: ['webpack.config.js'],
     extends: fixupConfigRules(
       compat.extends(
         'eslint:recommended',

@@ -1,15 +1,14 @@
 const webpack = require('webpack');
 const path = require('path');
-const dotenv = require("dotenv");
+const dotenv = require('dotenv');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CopyPlugin = require("copy-webpack-plugin");
-const BundleAnalyzerPlugin =
-	require("webpack-bundle-analyzer").BundleAnalyzerPlugin
+const CopyPlugin = require('copy-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = (env, argv) => {
-  const isDev = argv.mode === "development";
+  const isDev = argv.mode === 'development';
   const isProd = env.mode === 'production';
   const envVars = dotenv.config({ path: '.env' }).parsed || {};
 
@@ -25,10 +24,10 @@ module.exports = (env, argv) => {
       path: path.resolve(__dirname, 'dist'),
       filename: isProd ? 'assets/js/[name].[contenthash].js' : 'assets/js/[name].js',
       assetModuleFilename: 'assets/[name].[contenthash][ext]',
-      publicPath: "/",
+      publicPath: '/',
       clean: true,
     },
-    devtool: isDev ? "eval-source-map" : false,
+    devtool: isDev ? 'eval-source-map' : false,
     optimization: {
       minimize: isProd,
       splitChunks: {
@@ -48,8 +47,10 @@ module.exports = (env, argv) => {
         process: require.resolve('process/browser.js'),
       },
       alias: {
-        'lodash': 'lodash-es',
-      }
+        lodash: 'lodash-es',
+        '@src': path.resolve(__dirname, 'src'),
+        '@test': path.resolve(__dirname, 'test'),
+      },
     },
     module: {
       rules: [
@@ -58,13 +59,10 @@ module.exports = (env, argv) => {
           use: {
             loader: 'babel-loader',
             options: {
-              presets: [
-                ['@babel/preset-react', { runtime: 'automatic' }],
-                '@babel/preset-typescript'
-              ]
-            }
+              presets: [['@babel/preset-react', { runtime: 'automatic' }], '@babel/preset-typescript'],
+            },
           },
-          exclude: /node_modules/
+          exclude: /node_modules/,
         },
         {
           test: /\.(woff(2)?|ttf|eot|otf)$/,
@@ -78,14 +76,11 @@ module.exports = (env, argv) => {
           type: 'asset/resource',
           generator: {
             filename: 'assets/images/[name].[contenthash][ext]',
-          }
+          },
         },
         {
           test: /\.css$/,
-          use: [
-            isProd ? MiniCssExtractPlugin.loader : 'style-loader',
-            'css-loader',
-            ]
+          use: [isProd ? MiniCssExtractPlugin.loader : 'style-loader', 'css-loader'],
         },
         {
           test: /\.(png|jpg|gif|svg)$/,
@@ -95,45 +90,44 @@ module.exports = (env, argv) => {
     },
     plugins: [
       new CopyPlugin({
-        patterns: [
-          { from: path.resolve(__dirname, "public/favicon.ico"), to: "favicon.ico" },
-        ],
+        patterns: [{ from: path.resolve(__dirname, 'public/favicon.ico'), to: 'favicon.ico' }],
       }),
       new HtmlWebpackPlugin({
         template: './public/index.html',
         minify: isProd
           ? {
-            collapseWhitespace: true,
-            removeComments: true,
-            removeRedundantAttributes: true,
-          }
+              collapseWhitespace: true,
+              removeComments: true,
+              removeRedundantAttributes: true,
+            }
           : false,
       }),
+      ...(isProd ? [new MiniCssExtractPlugin({ filename: '[name].[contenthash].css' })] : []),
       ...(isProd
-        ? [new MiniCssExtractPlugin({ filename: '[name].[contenthash].css' })]
+        ? [
+            new BundleAnalyzerPlugin({
+              analyzerMode: 'static', // generate a static HTML report
+              reportFilename: 'bundle-report.html', // optional, name of the HTML file
+              openAnalyzer: true, // open the report automatically after build
+              generateStatsFile: false, // optional, whether to create stats.json
+            }),
+          ]
         : []),
-	    ...(isProd
-	    ? [new BundleAnalyzerPlugin({
-		    analyzerMode: 'static',        // generate a static HTML report
-		    reportFilename: 'bundle-report.html', // optional, name of the HTML file
-		    openAnalyzer: true,            // open the report automatically after build
-		    generateStatsFile: false       // optional, whether to create stats.json
-	    })] : []),
       new webpack.DefinePlugin(envKeys),
       new webpack.ProvidePlugin({
         process: 'process/browser.js',
       }),
     ].filter(Boolean),
     devServer: isDev
-        ? {
+      ? {
           static: {
-            directory: path.resolve(__dirname, "dist"),
+            directory: path.resolve(__dirname, 'dist'),
           },
           historyApiFallback: true,
           hot: true,
           port: 5000,
           open: true,
         }
-        : undefined,
-  }
+      : undefined,
+  };
 };

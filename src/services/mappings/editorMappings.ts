@@ -1,70 +1,73 @@
-import { ReactNode } from "react";
-import { AppDispatch } from "../../redux/redux.store";
+import { ReactNode } from 'react';
+import { AppDispatch, RootState } from '@src/redux/redux.store';
 
 export type ComponentMappingItem = {
-  name: string,
-  showContainer: boolean
-  component?: ReactNode
-  action: (() => void)
+  name: string;
+  showContainer: boolean;
+  component?: ReactNode;
+  action: () => void;
 };
 
 export type EditorKeyHandleItem = {
-  description: string,
-  key: string,
-  component: ReactNode | null,
-  action: (() => Promise<string|null>) | null,
-  openDialogAction?: ((dispatch: AppDispatch) => void)
-}
+  description: string;
+  key: string;
+  component: ReactNode | null;
+  action?: (() => Promise<string | null>) | ((dispatch: AppDispatch, getState: () => RootState) => Promise<string | null>) | null;
+  xmlAction?: (xmlDoc: Document) => void;
+  operationType?: string; // e.g., 'INSERT_PAGEBREAK', 'ADD_PARAGRAPH'
+  successMessage?: string;
+  openDialogAction?: (dispatch: AppDispatch, getState: () => RootState) => void;
+};
 
 export interface EditorLetter {
-  id: number
-  name: string
-  title: string
-  lastUpdatedByName: string
-  lastUpdatedById: number
+  id: number;
+  name: string;
+  title: string;
+  lastUpdatedByName: string;
+  lastUpdatedById: number;
   updatedAt: Date;
 }
 export interface EditorEntity {
-  id: number
-  name: string
-  type: string
-  key: string
+  id: number;
+  name: string;
+  type: string;
+  key: string;
 }
 export interface PinnedLetter {
-  id: number,
-  name: string,
-  contentChanged: boolean,
-  isPinned: boolean,
-  xmlContentCurrent?: string | null,
-  viewMode: "CODE" | "WYSIWYG" | null
+  id: number;
+  name: string;
+  contentChanged: boolean;
+  isPinned: boolean;
+  xmlContentCurrent?: string | null;
+  viewMode: 'CODE' | 'WYSIWYG' | null;
 }
 export interface SearchLetter {
-  id: number
-  name: string
-  title: string
+  id: number;
+  name: string;
+  title: string;
 }
 
 export interface ApiPinnedLetter {
-  id: number,
-  name: string,
-  content_changed: boolean
-  xml_content_current?: string | null,
+  id: number;
+  name: string;
+  content_changed: boolean;
+  xml_content_current?: string | null;
 }
 
 export interface EditorLetterData {
-  id: number
-  name: string
-  title: string
-  xmlContent: string
+  id: number;
+  name: string;
+  title: string;
+  xmlContent: string;
 }
 
 export interface MarkupPersonData {
-  id: number | null,
-  key: string,
-  nameDisplay: string,
-  nameLast: string | null,
-  nameFirst: string | null,
-  isNewEntry: boolean
+  id: number | null;
+  key: string;
+  nameDisplay: string;
+  nameLast: string | null;
+  nameFirst: string | null;
+  isNewEntry: boolean;
 }
 
 export interface MarkupPlaceSettlement {
@@ -74,24 +77,24 @@ export interface MarkupPlaceSettlement {
 }
 
 export interface MarkupPlaceData {
-  key: string,
-  placeType: string,
-  name: string,
-  settlement: MarkupPlaceSettlement | null
-  country: CountryOption
-  kind: string | null,
-  kindOriginal: string | null,
-  isNewEntry: boolean,
+  key: string;
+  placeType: string;
+  name: string;
+  settlement: MarkupPlaceSettlement | null;
+  country: CountryOption;
+  kind: string | null;
+  kindOriginal: string | null;
+  isNewEntry: boolean;
 }
 
 export interface ProtagCreationCategory {
   id: number;
   name: string;
-  name_en: string
+  name_en: string;
   protagCreationCategoryId: number | null;
 }
 
-export interface ProtagCreation{
+export interface ProtagCreation {
   id: number;
   key: string;
   name: string;
@@ -101,39 +104,39 @@ export interface ProtagCreation{
 }
 
 export interface MarkupProtagCreationData {
-  key: string
-  name: string
-  mwv: string | null
-  opus: string  | null
-  isNewEntry: boolean
-  parentProtagCreations: ProtagCreationCategory[] | null
-  protagCreationCategory: ProtagCreationCategory
+  key: string;
+  name: string;
+  mwv: string | null;
+  opus: string | null;
+  isNewEntry: boolean;
+  parentProtagCreations: ProtagCreationCategory[] | null;
+  protagCreationCategory: ProtagCreationCategory;
 }
 
 export interface MarkupCreationData {
   author: {
-    key: string
-    firstName: string
-    lastName: string
-    isNewEntry: boolean
-  } | null,
+    key: string;
+    firstName: string;
+    lastName: string;
+    isNewEntry: boolean;
+  } | null;
   creation: {
-    key: string
-    name: string
-    kind: string
-    isNewEntry: boolean
-  } | null
+    key: string;
+    name: string;
+    kind: string;
+    isNewEntry: boolean;
+  } | null;
 }
 
 export type SelectCompleteOption = {
   label: string;
   value: string;
-}
+};
 
 export type CountryOption = {
   id: number | null;
   name: string | null;
-}
+};
 
 export const mapApiToEditorLetter = (apiLetter: any): EditorLetter => {
   return {
@@ -142,26 +145,26 @@ export const mapApiToEditorLetter = (apiLetter: any): EditorLetter => {
     title: apiLetter.title,
     lastUpdatedByName: apiLetter.last_updated_by_name,
     lastUpdatedById: apiLetter.last_updated_by_id,
-    updatedAt: new Date(apiLetter.updated_at)
-  }
-}
+    updatedAt: new Date(apiLetter.updated_at),
+  };
+};
 
 export const mapApiToLetterData = (apiLetter: any): SearchLetter => {
   return {
     id: apiLetter.id,
     name: apiLetter.name,
-    title: apiLetter.title
-  }
-}
+    title: apiLetter.title,
+  };
+};
 
 export const mapApiToEditorLetterData = (apiLetter: any): EditorLetterData => {
   return {
     id: apiLetter.id,
     name: apiLetter.name,
     title: apiLetter.title,
-    xmlContent: apiLetter.xml_content
-  }
-}
+    xmlContent: apiLetter.xml_content,
+  };
+};
 
 export const mapApiToPinnedLetter = (apiPinnedLetter: ApiPinnedLetter): PinnedLetter => {
   return {
@@ -170,14 +173,14 @@ export const mapApiToPinnedLetter = (apiPinnedLetter: ApiPinnedLetter): PinnedLe
     contentChanged: apiPinnedLetter.content_changed,
     xmlContentCurrent: apiPinnedLetter.xml_content_current ?? null,
     isPinned: true,
-    viewMode: 'WYSIWYG'
-  }
-}
+    viewMode: 'WYSIWYG',
+  };
+};
 
 export interface ActOfWritingElement {
-  role: "author" | "writer",
-  key: string,
-  name: string
+  role: 'author' | 'writer';
+  key: string;
+  name: string;
 }
 
 export interface PersonEntity {
@@ -192,7 +195,7 @@ export interface PersonEntity {
 
 export const mapRemotePersonToEntity = (raw: any): PersonEntity => {
   return {
-    fullName: raw.full_name?.split(" // ")[0] || "Unbekannt",
+    fullName: raw.full_name?.split(' // ')[0] || 'Unbekannt',
     birthDate: raw.birth_date ?? null,
     deathDate: raw.death_date ?? null,
     placeOfBirth: raw.place_of_birth ?? null,

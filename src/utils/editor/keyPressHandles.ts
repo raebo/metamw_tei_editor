@@ -1,63 +1,79 @@
-import { EditorUtils } from "./index";
-import { AppDispatch } from "../../redux/redux.store";
-import { setDialogType } from "../../redux/slices/editor.letter.slice";
+import { EditorUtils } from './index';
+import { AppDispatch } from '@src/redux/redux.store';
+import { setDialogType } from '@src/redux/slices/editor.letter.slice';
 
 export const keyPressHandles = {
-  openDialog(dispatch: AppDispatch, dialogType: string) : void {
+  openDialog(dispatch: AppDispatch, dialogType: string): void {
     dispatch(setDialogType({ dialogType: dialogType }));
   },
-  async baseHandling(
-    keyFunction: (xmlContent: string) => string,
-  ) : Promise<string> {
-    const xmlContent = EditorUtils.xmlCheck.letterXml()
-
-    if (!xmlContent) { throw new Error("No xml content found") }
-
-    return keyFunction(xmlContent)
+  async baseHandling(xmlDoc: Document, keyFunction: (xmlDoc: Document) => void) {
+    keyFunction(xmlDoc);
   },
-	moveWritingActUp(xmlContent: string) : string{
-		const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(xmlContent);
+  moveWritingActUp(xmlDoc: Document) {
+    try {
+      const markedNode = EditorUtils.xmlCheck.markedSpanNode(xmlDoc);
+      const writingActNode = EditorUtils.xmlCheck.findNearestWritingActNode(markedNode);
 
-		try {
-			const markedNode = EditorUtils.xmlCheck.markedSpanNode(xmlDoc);
-			const writingActNode = EditorUtils.xmlCheck.findNearestWritingActNode(markedNode);
-
-			EditorUtils.writingActContent.moveActUp(xmlDoc, writingActNode);
-			EditorUtils.xmlCheck.unwrapedMarkedSpan(xmlDoc);
-
-			return new XMLSerializer().serializeToString(xmlDoc)
-
-		} catch (error) {
-			throw error;
-		}
-	},
-	moveWritingActDown(xmlContent: string) : string{
-		const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(xmlContent);
-
-		try {
-			const markedNode = EditorUtils.xmlCheck.markedSpanNode(xmlDoc);
-			const writingActNode = EditorUtils.xmlCheck.findNearestWritingActNode(markedNode);
-
-			EditorUtils.writingActContent.moveActDown(xmlDoc, writingActNode);
-			EditorUtils.xmlCheck.unwrapedMarkedSpan(xmlDoc);
-
-			return new XMLSerializer().serializeToString(xmlDoc)
-
-		} catch (error) {
-			throw error;
-		}
-	},
-  markContentBold(xmlContent: string): string {
-    return xmlContent.replace(/<span class="marked">(.*?)<\/span>/g, '<hi rend="bold">$1</hi>');
+      EditorUtils.writingActContent.moveActUp(xmlDoc, writingActNode);
+      EditorUtils.xmlCheck.unwrapedMarkedSpan(xmlDoc);
+    } catch (error) {
+      throw error;
+    }
   },
-  markContentItalic(xmlContent: string) : string{
-    return xmlContent.replace(/<span class="marked">(.*?)<\/span>/g, '<hi rend="italic">$1</hi>');
+  moveWritingActDown(xmlDoc: Document) {
+    try {
+      const markedNode = EditorUtils.xmlCheck.markedSpanNode(xmlDoc);
+      const writingActNode = EditorUtils.xmlCheck.findNearestWritingActNode(markedNode);
+
+      EditorUtils.writingActContent.moveActDown(xmlDoc, writingActNode);
+      EditorUtils.xmlCheck.unwrapedMarkedSpan(xmlDoc);
+    } catch (error) {
+      throw error;
+    }
   },
-  markContentUnderline(xmlContent: string) : string{
-    return xmlContent.replace(/<span class="marked">(.*?)<\/span>/g, '<hi rend="underline" n="1">$1</hi>');
+  markContentBold(xmlDoc: Document) {
+    const markedNode = EditorUtils.xmlCheck.markedSpanNode(xmlDoc);
+
+    if (!markedNode.firstChild) {
+      throw new Error('No content found inside the marked span.');
+    }
+
+    const hi = xmlDoc.createElement('hi');
+    hi.setAttribute('rend', 'bold');
+    hi.appendChild(markedNode.firstChild);
+
+    markedNode.parentNode?.replaceChild(hi, markedNode);
   },
-  removeNode(node: Node | undefined) : string {
-    if (!node) { throw new Error("No node found") }
+  markContentItalic(xmlDoc: Document) {
+    const markedNode = EditorUtils.xmlCheck.markedSpanNode(xmlDoc);
+
+    if (!markedNode.firstChild) {
+      throw new Error('No content found inside the marked span.');
+    }
+
+    const hi = xmlDoc.createElement('hi');
+    hi.setAttribute('rend', 'italic');
+    hi.appendChild(markedNode.firstChild);
+
+    markedNode.parentNode?.replaceChild(hi, markedNode);
+  },
+  markContentUnderline(xmlDoc: Document) {
+    const markedNode = EditorUtils.xmlCheck.markedSpanNode(xmlDoc);
+
+    if (!markedNode.firstChild) {
+      throw new Error('No content found inside the marked span.');
+    }
+
+    const hi = xmlDoc.createElement('hi');
+    hi.setAttribute('rend', 'underline');
+    hi.appendChild(markedNode.firstChild);
+
+    markedNode.parentNode?.replaceChild(hi, markedNode);
+  },
+  removeNode(node: Node | undefined): string {
+    if (!node) {
+      throw new Error('No node found');
+    }
 
     const parent = node.parentNode;
 
@@ -72,9 +88,9 @@ export const keyPressHandles = {
     }
 
     if (!parentNode) {
-      throw new Error("No ancestor <tei> tag found");
+      throw new Error('No ancestor <tei> tag found');
     } else {
-      return parentNode.outerHTML
+      return parentNode.outerHTML;
     }
-  }
-}
+  },
+};
