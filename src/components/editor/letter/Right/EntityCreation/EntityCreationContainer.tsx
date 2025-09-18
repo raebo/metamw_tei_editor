@@ -71,10 +71,8 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
   });
   const [authorFormDisabled, setAuthorFormDisabled] = useState(true);
 
-  const [selectedAuthorOption, setSelectedAuthorOption] =
-    useState<SelectActionAuthorOption>('EXISTING_ENTRY');
-  const [selectedCreationOption, setSelectedCreationOption] =
-    useState<SelectActionCreationOption>(null);
+  const [selectedAuthorOption, setSelectedAuthorOption] = useState<SelectActionAuthorOption>('EXISTING_ENTRY');
+  const [selectedCreationOption, setSelectedCreationOption] = useState<SelectActionCreationOption>(null);
 
   const [authorAutocompleteDisabled, setAuthorAutocompleteDisabled] = useState(false);
   const [authorCreations, setAuthorCreations] = useState<SnippetEntity[]>([]); //creations of the selected author
@@ -162,10 +160,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
         setAuthorCreations(result);
       })
       .catch((error) => {
-        enqueueSnackbar(
-          `Could not fetch creations for author "${authorKey}": "${error.message}", please try again"`,
-          { variant: 'error' },
-        );
+        enqueueSnackbar(`Could not fetch creations for author "${authorKey}": "${error.message}", please try again"`, { variant: 'error' });
       });
   };
 
@@ -178,10 +173,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
         }));
       })
       .catch((error) => {
-        enqueueSnackbar(
-          `Could not fetch a valid new key for a Author: "${error.message}", please try again"`,
-          { variant: 'error' },
-        );
+        enqueueSnackbar(`Could not fetch a valid new key for a Author: "${error.message}", please try again"`, { variant: 'error' });
       });
   };
   const fetchAndSetNewCreationKey = () => {
@@ -194,10 +186,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
         }));
       })
       .catch((error) => {
-        enqueueSnackbar(
-          `Could not fetch a valid new key for a Creation: "${error.message}", please try again"`,
-          { variant: 'error' },
-        );
+        enqueueSnackbar(`Could not fetch a valid new key for a Creation: "${error.message}", please try again"`, { variant: 'error' });
       });
   };
 
@@ -222,11 +211,8 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
   const isValidFormData = (): boolean => {
     return (
       authorFormData.key !== null &&
-      ((authorFormData.isNewEntry &&
-        authorFormData.firstName !== null &&
-        authorFormData.lastName !== null) ||
-        (!authorFormData.isNewEntry &&
-          (authorFormData.firstName !== null || authorFormData.lastName !== null))) &&
+      ((authorFormData.isNewEntry && authorFormData.firstName !== null && authorFormData.lastName !== null) ||
+        (!authorFormData.isNewEntry && (authorFormData.firstName !== null || authorFormData.lastName !== null))) &&
       creationFormData.key !== null &&
       creationFormData.name !== null &&
       creationFormData.kind !== null
@@ -330,11 +316,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
                       {`${entry.author?.firstName ?? ''} ${entry.author?.lastName ?? ''} (${entry.author?.key})`}
                     </Typography>
                   </Box>
-                  <IconButton
-                    edge="end"
-                    onClick={() => removeExistingEntry(entry)}
-                    aria-label="delete"
-                  >
+                  <IconButton edge="end" onClick={() => removeExistingEntry(entry)} aria-label="delete">
                     <DeleteIcon />
                   </IconButton>
                 </Box>
@@ -348,11 +330,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
             value={selectedAuthorOption}
             onChange={(e) => handleAuthorOptionChange(e.target.value as SelectActionAuthorOption)}
           >
-            <FormControlLabel
-              value={'EXISTING_ENTRY'}
-              control={<Radio />}
-              label="Vorhandener Autor"
-            />
+            <FormControlLabel value={'EXISTING_ENTRY'} control={<Radio />} label="Vorhandener Autor" />
             <FormControlLabel value={'NEW_ENTRY'} control={<Radio />} label="Neuer Autor" />
           </RadioGroup>
         </FormControl>
@@ -429,9 +407,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
           <RadioGroup
             row
             value={selectedCreationOption}
-            onChange={(e) =>
-              handleCreationOptionChange(e.target.value as SelectActionCreationOption)
-            }
+            onChange={(e) => handleCreationOptionChange(e.target.value as SelectActionCreationOption)}
           >
             <FormControlLabel
               value={'EXISTING_ENTRY'}
@@ -439,12 +415,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
               disabled={selectCreationOptionDisabled}
               label="Vorhandene Werk"
             />
-            <FormControlLabel
-              value={'NEW_ENTRY'}
-              control={<Radio />}
-              disabled={selectCreationOptionDisabled}
-              label="Neues Werk"
-            />
+            <FormControlLabel value={'NEW_ENTRY'} control={<Radio />} disabled={selectCreationOptionDisabled} label="Neues Werk" />
           </RadioGroup>
         </FormControl>
 
@@ -497,12 +468,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
             Werk Hinzufügen
           </Button>
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmitButtonClick}
-            disabled={addedCreationEntries.length === 0}
-          >
+          <Button variant="contained" color="primary" onClick={handleSubmitButtonClick} disabled={addedCreationEntries.length === 0}>
             <Badge badgeContent={addedCreationEntries.length} color="secondary">
               Werk Auszeichnen
             </Badge>

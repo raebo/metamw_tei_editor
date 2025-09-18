@@ -17,12 +17,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
-import {
-  CountryOption,
-  MarkupPlaceData,
-  MarkupPlaceSettlement,
-  SelectCompleteOption,
-} from '@src/services/mappings/editorMappings';
+import { CountryOption, MarkupPlaceData, MarkupPlaceSettlement, SelectCompleteOption } from '@src/services/mappings/editorMappings';
 import EntityPlaceAutocomplete from './EntityPlaceAutocomplete';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
@@ -55,14 +50,9 @@ export interface PlaceFormData {
 }
 
 const requiredPlaceFormFields: (keyof PlaceFormData)[] = ['key', 'placeType', 'name', 'isNewEntry'];
-const allRequiredFieldsPresent = (
-  placeFormData: PlaceFormData,
-): placeFormData is Required<MarkupPlaceData> => {
+const allRequiredFieldsPresent = (placeFormData: PlaceFormData): placeFormData is Required<MarkupPlaceData> => {
   return requiredPlaceFormFields.every(
-    (field) =>
-      placeFormData[field] !== null &&
-      placeFormData[field] !== undefined &&
-      placeFormData[field] !== '',
+    (field) => placeFormData[field] !== null && placeFormData[field] !== undefined && placeFormData[field] !== '',
   );
 };
 
@@ -162,10 +152,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
         }));
       })
       .catch((error) => {
-        enqueueSnackbar(
-          `Could not fetch a valid new key for a Place: "${error.message}", please try again"`,
-          { variant: 'error' },
-        );
+        enqueueSnackbar(`Could not fetch a valid new key for a Place: "${error.message}", please try again"`, { variant: 'error' });
       });
   };
 
@@ -224,19 +211,14 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
   };
 
   const isValidFormData = (): boolean => {
-    const validKey =
-      placeFormData.key !== null && placeFormData.key !== undefined && placeFormData.key.length > 0;
-    const validName =
-      placeFormData.name !== null &&
-      placeFormData.name !== undefined &&
-      placeFormData.name.length > 0;
+    const validKey = placeFormData.key !== null && placeFormData.key !== undefined && placeFormData.key.length > 0;
+    const validName = placeFormData.name !== null && placeFormData.name !== undefined && placeFormData.name.length > 0;
     const validCountry =
       placeFormData.country !== null &&
       placeFormData.country !== undefined &&
       placeFormData.country.id !== null &&
       placeFormData.country.name !== null;
-    const validSettlement =
-      placeFormData.settlement !== null && placeFormData.settlement !== undefined;
+    const validSettlement = placeFormData.settlement !== null && placeFormData.settlement !== undefined;
 
     if (!validKey || !validName || !validCountry) {
       return false;
@@ -255,9 +237,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
   };
 
   const removeExistingEntry = (key: string) => {
-    setAddedPlaceEntries((prevEntries) =>
-      prevEntries.filter((entry: MarkupPlaceData) => entry.key !== key),
-    );
+    setAddedPlaceEntries((prevEntries) => prevEntries.filter((entry: MarkupPlaceData) => entry.key !== key));
   };
 
   const addNewPlaceEntry = (entry: MarkupPlaceData) => {
@@ -268,10 +248,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
     if (isValidFormData() && allRequiredFieldsPresent(placeFormData)) {
       let placeKey = placeFormData.key;
 
-      if (
-        selectedTypeOption === EntityType.INSTITUTION &&
-        placeFormData.kind !== placeFormData.kindOriginal
-      ) {
+      if (selectedTypeOption === EntityType.INSTITUTION && placeFormData.kind !== placeFormData.kindOriginal) {
         placeKey = await fetchEntityKey(selectedTypeOption);
       }
 
@@ -384,11 +361,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
                     {entry.name} {entry.kind ? `(${entry.kind})` : ''}
                   </Typography>
                 </Box>
-                <IconButton
-                  edge="end"
-                  onClick={() => removeExistingEntry(entry.key)}
-                  aria-label="delete"
-                >
+                <IconButton edge="end" onClick={() => removeExistingEntry(entry.key)} aria-label="delete">
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -404,16 +377,8 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
             onChange={(e) => handleSelectTypeOption(e.target.value as SelectTypeOption)}
           >
             <FormControlLabel value={EntityType.SETTLEMENT} control={<Radio />} label="Ortschaft" />
-            <FormControlLabel
-              value={EntityType.INSTITUTION}
-              control={<Radio />}
-              label="Institution"
-            />
-            <FormControlLabel
-              value={EntityType.SIGHT}
-              control={<Radio />}
-              label="Sehenswürdigkeit"
-            />
+            <FormControlLabel value={EntityType.INSTITUTION} control={<Radio />} label="Institution" />
+            <FormControlLabel value={EntityType.SIGHT} control={<Radio />} label="Sehenswürdigkeit" />
           </RadioGroup>
         </FormControl>
 
@@ -431,12 +396,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
               control={<Radio />}
               label="Vorhandener Eintrag"
             />
-            <FormControlLabel
-              disabled={selectedTypeOption === null}
-              value="NEW_ENTRY"
-              control={<Radio />}
-              label="Neuer Eintrag"
-            />
+            <FormControlLabel disabled={selectedTypeOption === null} value="NEW_ENTRY" control={<Radio />} label="Neuer Eintrag" />
           </RadioGroup>
         </FormControl>
 
@@ -535,9 +495,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
             <PlaceCountryAutocomplete
               isDisabled={autoCmplCountryDisabled}
               selectedOption={
-                placeFormData.country !== null && placeFormData.country !== undefined
-                  ? placeFormData.country
-                  : { id: null, name: null }
+                placeFormData.country !== null && placeFormData.country !== undefined ? placeFormData.country : { id: null, name: null }
               }
               allOptions={countryOptions}
               afterSelectHandler={(entry) => {
@@ -555,11 +513,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
                 variant="outlined"
                 fullWidth
                 slotProps={{ inputLabel: { shrink: true } }}
-                value={
-                  placeFormData.settlement !== null && placeFormData.settlement !== undefined
-                    ? placeFormData.settlement.name
-                    : ''
-                }
+                value={placeFormData.settlement !== null && placeFormData.settlement !== undefined ? placeFormData.settlement.name : ''}
                 disabled={true}
               />
             )}
@@ -585,11 +539,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
           <Divider sx={{ my: 2 }} />
 
           <FormControl component="fieldset" sx={{ mb: 3 }}>
-            <RadioGroup
-              row
-              value={selectedKindOption}
-              onChange={(e) => handleSelectKindOption(e.target.value as SelectActionOption)}
-            >
+            <RadioGroup row value={selectedKindOption} onChange={(e) => handleSelectKindOption(e.target.value as SelectActionOption)}>
               <FormControlLabel
                 disabled={selectedTypeOption !== EntityType.INSTITUTION}
                 value="EXISTING_ENTRY"
@@ -658,12 +608,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
             Ort Hinzufügen
           </Button>
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmitButtonClick}
-            disabled={addedPlaceEntries.length === 0}
-          >
+          <Button variant="contained" color="primary" onClick={handleSubmitButtonClick} disabled={addedPlaceEntries.length === 0}>
             <Badge badgeContent={addedPlaceEntries.length} color="secondary">
               Orte Auszeichnen
             </Badge>
