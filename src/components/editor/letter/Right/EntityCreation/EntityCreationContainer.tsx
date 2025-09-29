@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useAppDispatch } from '../../../../../redux/hooks';
+import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
-import { MarkupCreationData } from '../../../../../services/mappings/editorMappings';
-import { setEditorMarkedAndContentLeftRightThunk } from '../../../../../redux/thunks/editor.letter.thunk';
+import { MarkupCreationData } from '@src/services/mappings/editorMappings';
+import { setEditorMarkedAndContentLeftRightThunk } from '@src/redux/thunks/editor.letter.thunk';
 import {
   Badge,
   Box,
@@ -22,16 +22,17 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import EntityAuthorAutocomplete from './EntityAuthorAutocomplete';
-import { fetchEntityKey } from '../../../../../services/editor/apiLetterRequest.service';
+import { fetchEntityKey } from '@src/services/editor/apiLetterRequest.service';
 import { enqueueSnackbar } from 'notistack';
-import { EntityType } from '../../../../../constants/editor';
-import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
+import { EditorConstants, EntityType } from '@src/constants/editor';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import EntityExistingCreation from './EntityExistingCreation';
-import { backendService } from '../../../../../utils/editor/backendService';
+import { backendService } from '@src/utils/editor/backendService';
 import EntityNewCreation from './EntityNewCreation';
 import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
-import { setReloadLetterContent } from '../../../../../redux/slices/editor.letter.slice';
-import { EditorUtils } from '../../../../../utils/editor';
+import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
+import { EditorUtils } from '@src/utils/editor';
+import { MiscUtils } from '@src/utils/misc';
 
 type SelectActionAuthorOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 type SelectActionCreationOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
@@ -83,6 +84,24 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
   const [resetCreationCmp, setResetCreationCmp] = useState<number>(0); // used to reset the creation form when a new author is selected
   const [autocompleteAuthorResetKey, setAutocompleteAuthorResetKey] = useState(0);
   const [authorCreationResetKey, setAuthorCreationResetKey] = useState(0);
+
+  const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent);
+  const [xmlDoc, setXmlDoc] = React.useState<XMLDocument | null>(null);
+
+  useEffect(() => {
+    if (!stateTeiXml) {
+      dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+      return;
+    }
+
+    try {
+      const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
+      setXmlDoc(xmlDoc);
+    } catch (err) {
+      enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
+      setXmlDoc(null);
+    }
+  }, [stateTeiXml, dispatch]);
 
   useEffect(() => {
     backendService
@@ -248,23 +267,33 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
 
   const handleSubmitButtonClick = async () => {
     try {
-      if (props.xmlRef.current === null) {
-        throw new Error('XML reference is null');
-      }
-
-      const letterElement = props.xmlRef.current.querySelector('#letterXmlContent');
-      if (!letterElement) {
+      if (!xmlDoc) {
+        enqueueSnackbar('No valid XML document available, please try again', { variant: 'error' });
         throw new Error('No letter element found!');
       }
 
       if (stateEditorLetter.id === null || stateEditorLetter.name === null) {
+        enqueueSnackbar('No letter element found!', { variant: 'error' });
         throw new Error('No letter id or name found!');
       }
 
-      await EditorUtils.creationDataService.handleCreationDataEntries(
-        letterElement,
-        { id: stateEditorLetter.id!, name: stateEditorLetter.name },
-        addedCreationEntries,
+      const xmlId: string = await EditorUtils.creationDataService.handleCreationDataEntries(xmlDoc, addedCreationEntries);
+
+      await EditorUtils.backendOrchestrator.patchWithDispatch(
+        dispatch,
+        [new XMLSerializer().serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.creation.ADDED, xmlId],
+        {
+          actionsOnSuccess: [
+            setReloadLetterContent({ reloadLetterContent: true }),
+            setEditorMarkedAndContentLeftRightThunk({
+              textIsMarked: false,
+              contentLeft: null,
+              contentRight: null,
+            }),
+          ],
+          successMessage: 'Creation markup was added successfully',
+          errorMessage: 'Could not add creation markup, please try again',
+        },
       );
 
       enqueueSnackbar('Creation markup was added successfully', { variant: 'success' });
@@ -272,7 +301,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
       enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
         variant: 'error',
       });
-    } finally {
+
       dispatch(setReloadLetterContent({ reloadLetterContent: true }));
       dispatch(
         setEditorMarkedAndContentLeftRightThunk({

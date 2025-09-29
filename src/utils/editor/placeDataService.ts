@@ -1,7 +1,7 @@
 import { EditorUtils } from './index';
-import { CountryOption, MarkupPlaceData } from '../../services/mappings/editorMappings';
-import { EditorConstants, EntityType } from '../../constants/editor';
-import { SelectCompleteOption } from '../../schemas';
+import { CountryOption, MarkupPlaceData } from '@src/services/mappings/editorMappings';
+import { EditorConstants, EntityType } from '@src/constants/editor';
+import { SelectCompleteOption } from '@src/schemas';
 
 export const placeDataService = {
   fetchCountries: async (): Promise<CountryOption[]> => {
@@ -26,19 +26,15 @@ export const placeDataService = {
       throw new Error('No kinds found');
     }
   },
-  handlePlaceDataEntries: async (
-    letterElement: Element,
-    stateEditorLetter: { id: number; name: string },
-    markupPlaceData: MarkupPlaceData[],
-  ): Promise<any> => {
+  handlePlaceDataEntries: async (xmlDoc: Document, markupPlaceData: MarkupPlaceData[]): Promise<string> => {
     const newEntries = markupPlaceData.filter((placeData) => placeData.isNewEntry);
 
     for (const placeData of newEntries) {
       await EditorUtils.backendService.createEntity(placeData, placeData.placeType);
     }
 
-    const markedSpan = letterElement.querySelectorAll('span.marked')[0];
-    if (markedSpan === undefined) return { xmlId: '', contentChanged: false };
+    const markedSpan = xmlDoc.querySelectorAll('span.marked')[0];
+    if (markedSpan === undefined) throw new Error('No marked span found');
 
     const xmlId = EditorUtils.markupGeneration.generateXmlId('placeName');
     const placeNameNode = document.createElementNS(EditorConstants.TEI_NS, 'placeName');
@@ -62,15 +58,6 @@ export const placeDataService = {
 
     EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, placeNameNode);
 
-    const result = await EditorUtils.backendService.patchContent(
-      letterElement.innerHTML,
-      stateEditorLetter.id,
-      EditorConstants.changeTypes.place.ADDED,
-      xmlId,
-    );
-
-    if (!result) {
-      throw new Error(`Patch operation failed for  a new place data entry`);
-    }
+    return xmlId;
   },
 };

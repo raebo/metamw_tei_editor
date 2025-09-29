@@ -146,15 +146,15 @@ const LetterViewCode = ({ xmlString }: LetterViewCodeProps) => {
       }
 
       try {
-        await EditorUtils.backendService.patchContent(
-          content,
-          stateEditorLetter.id,
-          EditorConstants.changeTypes.MANUAL_CODE_CHANGE,
-          null,
+        await EditorUtils.backendOrchestrator.patchWithDispatch(
+          dispatch,
+          [content, stateEditorLetter.id, EditorConstants.changeTypes.MANUAL_CODE_CHANGE, null],
+          {
+            actionsOnSuccess: [setReloadLetterContent({ reloadLetterContent: true })],
+            successMessage: 'Änderungen wurden gespeichert',
+            errorMessage: 'Fehler beim Speichern der Änderungen',
+          },
         );
-
-        dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-        enqueueSnackbar('Änderungen wurden gespeichert', { variant: 'success' });
       } catch (error: any) {
         const response = error.response;
 
@@ -223,13 +223,7 @@ const LetterViewCode = ({ xmlString }: LetterViewCodeProps) => {
             {errorCount > 0 ? <ErrorIcon color="error" /> : <CheckCircleIcon color="success" />}
           </Badge>
 
-          <Button
-            variant="contained"
-            color="primary"
-            disabled={errorCount > 0}
-            onClick={handleSave}
-            sx={{ marginRight: '20px' }}
-          >
+          <Button variant="contained" color="primary" disabled={errorCount > 0} onClick={handleSave} sx={{ marginRight: '20px' }}>
             Inhalt Speichern
           </Button>
         </Box>

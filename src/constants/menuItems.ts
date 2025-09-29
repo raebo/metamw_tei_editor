@@ -32,18 +32,20 @@ export const getMenuItemsNoMarking = (
 
         if (!refNode) throw new Error('No refNode found in current XML document');
 
-        const result = await EditorUtils.backendService.patchContent(
-          new XMLSerializer().serializeToString(currentDoc),
-          stateEditorLetter.id,
-          EditorConstants.changeTypes.misc.BODY_ANNOTATION_REMOVED,
-          null,
+        await EditorUtils.backendOrchestrator.patchWithDispatch(
+          dispatch,
+          [
+            new XMLSerializer().serializeToString(currentDoc),
+            stateEditorLetter.id,
+            EditorConstants.changeTypes.misc.BODY_ANNOTATION_REMOVED,
+            null,
+          ],
+          {
+            actionsOnSuccess: [setReloadLetterContent({ reloadLetterContent: true })],
+            successMessage: 'Die Auszeichnung wurde entfernt',
+            errorMessage: 'Data could not be updated on backend side',
+          },
         );
-        if (result) {
-          dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-          enqueueSnackbar('Die Auszeichnung wurde entfernt', { variant: 'success' });
-        } else {
-          enqueueSnackbar('Data could not be updated on backend side', { variant: 'error' });
-        }
       } catch (error) {
         enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       }
@@ -72,19 +74,20 @@ export const getMenuItemsNoMarking = (
         EditorUtils.writingActContent.moveActDown(currentDoc, node as Element);
         EditorUtils.contentFlow.reorderExistingPageBreaks(currentDoc);
 
-        const result = await EditorUtils.backendService.patchContent(
-          new XMLSerializer().serializeToString(currentDoc),
-          stateEditorLetter.id,
-          EditorConstants.changeTypes.writing_act.CHANGED_ORDER,
-          null,
+        await EditorUtils.backendOrchestrator.patchWithDispatch(
+          dispatch,
+          [
+            new XMLSerializer().serializeToString(currentDoc),
+            stateEditorLetter.id,
+            EditorConstants.changeTypes.writing_act.CHANGED_ORDER,
+            null,
+          ],
+          {
+            actionsOnSuccess: [setReloadLetterContent({ reloadLetterContent: true })],
+            successMessage: 'Schreibakt wurde verschoben',
+            errorMessage: 'Data could not be updated on backend side',
+          },
         );
-
-        if (result) {
-          dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-          enqueueSnackbar('Schreibakt wurde verschoben', { variant: 'success' });
-        } else {
-          enqueueSnackbar('Data could not be updated on backend side', { variant: 'error' });
-        }
       } catch (error) {
         enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       }
@@ -103,19 +106,20 @@ export const getMenuItemsNoMarking = (
         EditorUtils.writingActContent.moveActUp(currentDoc, node as Element);
         EditorUtils.contentFlow.reorderExistingPageBreaks(currentDoc);
 
-        const result = await EditorUtils.backendService.patchContent(
-          new XMLSerializer().serializeToString(currentDoc),
-          stateEditorLetter.id,
-          EditorConstants.changeTypes.writing_act.CHANGED_ORDER,
-          null,
+        await EditorUtils.backendOrchestrator.patchWithDispatch(
+          dispatch,
+          [
+            new XMLSerializer().serializeToString(currentDoc),
+            stateEditorLetter.id,
+            EditorConstants.changeTypes.writing_act.CHANGED_ORDER,
+            null,
+          ],
+          {
+            actionsOnSuccess: [setReloadLetterContent({ reloadLetterContent: true })],
+            successMessage: 'Schreibakt wurde verschoben',
+            errorMessage: 'Data could not be updated on backend side',
+          },
         );
-
-        if (result) {
-          dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-          enqueueSnackbar('Schreibakt wurde verschoben', { variant: 'success' });
-        } else {
-          enqueueSnackbar('Data could not be updated on backend side', { variant: 'error' });
-        }
       } catch (error) {
         enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       }
@@ -193,18 +197,15 @@ export const getMenuItemsNoMarking = (
 
         if (!xmlContent) throw new Error('No xml content found');
 
-        const result = await EditorUtils.backendService.patchContent(
-          xmlContent,
-          stateEditorLetter.id,
-          EditorConstants.changeTypes.NODE_REMOVED,
-          null,
+        await EditorUtils.backendOrchestrator.patchWithDispatch(
+          dispatch,
+          [xmlContent, stateEditorLetter.id, EditorConstants.changeTypes.NODE_REMOVED, null],
+          {
+            actionsOnSuccess: [setReloadLetterContent({ reloadLetterContent: true })],
+            successMessage: `${anchNode.nodeType.name} wurde entfernt`,
+            errorMessage: 'Data could not be updated on backend side',
+          },
         );
-        if (result) {
-          dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-          enqueueSnackbar(`${anchNode.nodeType.name} wurde entfernt`, { variant: 'success' });
-        } else {
-          enqueueSnackbar('Data could not be updated on backend side', { variant: 'error' });
-        }
       } catch (error) {
         enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       }

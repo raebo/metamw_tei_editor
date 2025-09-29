@@ -29,6 +29,7 @@ import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
 import { EditorUtils } from '@src/utils/editor';
 import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
+import { MiscUtils } from '@src/utils/misc';
 
 type SelectOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 
@@ -43,6 +44,8 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
   const dispatch = useAppDispatch();
   const isMounted = useRef(false);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent);
+  const [xmlDoc, setXmlDoc] = React.useState<XMLDocument | null>(null);
 
   const [personFormData, setPersonFormData] = useState<PersonFormData>({
     key: null,
@@ -120,6 +123,20 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
   };
 
   useEffect(() => {
+    if (!stateTeiXml) {
+      dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+      return;
+    }
+
+    try {
+      const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
+      setXmlDoc(xmlDoc);
+    } catch (err) {
+      enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
+      setXmlDoc(null);
+    }
+  }, [stateTeiXml, dispatch]);
+  useEffect(() => {
     if (!isMounted.current) {
       handleSelectOption('EXISTING_ENTRY');
       isMounted.current = true;
@@ -148,52 +165,46 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
 
   const handleSubmitButtonClick = async () => {
     try {
-      if (props.xmlRef.current === null) {
-        throw new Error('XML reference is null');
-      }
-
-      const letterElement = props.xmlRef.current.querySelector('#letterXmlContent');
-
-      if (!letterElement) {
-        throw new Error('No letter element found!');
-      }
-
       for (const person of addedPersonEntries.filter((entry) => entry.isNewEntry)) {
         await EditorUtils.backendService.createEntity(person, EditorConstants.ENTITY_TYPES.PERSON);
       }
 
-      const { xmlId, contentChanged } = EditorUtils.markupGeneration.addPersonMarkup(letterElement, addedPersonEntries);
-
-      if (!contentChanged) {
-        enqueueSnackbar('No changes were made to the letter content', { variant: 'info' });
-        return;
+      if (xmlDoc === null) {
+        enqueueSnackbar('No valid XML document available', { variant: 'error' });
+        throw new Error();
       }
 
-      const response = await EditorUtils.backendService.patchContent(
-        letterElement.innerHTML,
-        stateEditorLetter.id,
-        EditorConstants.changeTypes.person.ADDED,
-        xmlId,
+      const xmlId = EditorUtils.markupGeneration.addPersonMarkup(xmlDoc, addedPersonEntries);
+
+      await EditorUtils.backendOrchestrator.patchWithDispatch(
+        dispatch,
+        [new XMLSerializer().serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.person.ADDED, xmlId],
+        {
+          actionsOnSuccess: [
+            setReloadLetterContent({ reloadLetterContent: true }),
+            setEditorMarkedAndContentLeftRightThunk({
+              textIsMarked: false,
+              contentLeft: null,
+              contentRight: null,
+            }),
+          ],
+          successMessage: 'Person markup was added successfully',
+          errorMessage: 'Failed to add person markup',
+        },
       );
-
-      if (response) {
-        dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-        dispatch(
-          setEditorMarkedAndContentLeftRightThunk({
-            textIsMarked: false,
-            contentLeft: null,
-            contentRight: null,
-          }),
-        );
-
-        const newPeopleCount = addedPersonEntries.filter((entry) => entry.isNewEntry).length;
-
-        enqueueSnackbar(`Person markup was added successfully. ${newPeopleCount} new people has been created`, { variant: 'success' });
-      }
     } catch (err) {
       enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
         variant: 'error',
       });
+
+      dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+      dispatch(
+        setEditorMarkedAndContentLeftRightThunk({
+          textIsMarked: false,
+          contentLeft: null,
+          contentRight: null,
+        }),
+      );
     }
   };
 

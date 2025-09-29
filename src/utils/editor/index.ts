@@ -13,21 +13,49 @@ import { teiHeaderContent } from '@src/utils/editor/teiHeaderContent';
 import { writingActContent } from '@src/utils/editor/writingActContent';
 import { miscContentCheck } from '@src/utils/editor/miscContentCheck';
 import { contentFlow } from '@src/utils/editor/contentFlow';
+import { undoRedo } from '@src/utils/editor/undoRedo';
+import { backendOrchestrator } from '@src/utils/editor/backendOrchestrator';
 
-export const EditorUtils = {
-  backendService,
-  creationDataService,
-  contentFlow,
-  pinnedLetters,
-  placeDataService,
-  protagCreationDataService,
-  keyPressHandles,
-  markupGeneration,
-  miscContentCheck,
-  nodeTypes,
-  rightClickPathHandles,
-  teiHeaderContent,
-  textMarking,
-  writingActContent,
-  xmlCheck,
+export type EditorUtilsType = {
+  backendService: typeof backendService;
+  backendOrchestrator: typeof backendOrchestrator;
+  creationDataService: typeof creationDataService;
+  contentFlow: typeof contentFlow;
+  pinnedLetters: typeof pinnedLetters;
+  placeDataService: typeof placeDataService;
+  protagCreationDataService: typeof protagCreationDataService;
+  keyPressHandles: typeof keyPressHandles;
+  markupGeneration: typeof markupGeneration;
+  miscContentCheck: typeof miscContentCheck;
+  nodeTypes: typeof nodeTypes;
+  rightClickPathHandles: typeof rightClickPathHandles;
+  teiHeaderContent: typeof teiHeaderContent;
+  textMarking: typeof textMarking;
+  undoRedo: typeof undoRedo;
+  writingActContent: typeof writingActContent;
+  xmlCheck: typeof xmlCheck;
 };
+
+function createEditorUtils(): EditorUtilsType {
+  return {
+    backendService,
+    backendOrchestrator,
+    creationDataService,
+    contentFlow,
+    pinnedLetters,
+    placeDataService,
+    protagCreationDataService,
+    keyPressHandles,
+    markupGeneration,
+    miscContentCheck,
+    nodeTypes,
+    rightClickPathHandles,
+    teiHeaderContent,
+    textMarking,
+    undoRedo,
+    writingActContent,
+    xmlCheck,
+  };
+}
+
+export const EditorUtils = createEditorUtils();

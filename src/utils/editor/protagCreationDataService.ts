@@ -1,11 +1,8 @@
-import { initApi } from '../../services/apiRequest.service';
-import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
-import {
-  MarkupProtagCreationData,
-  ProtagCreationCategory,
-} from '../../services/mappings/editorMappings';
+import { initApi } from '@src/services/apiRequest.service';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
+import { MarkupProtagCreationData, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
 import { EditorUtils } from './index';
-import { EditorConstants, EntityType } from '../../constants/editor';
+import { EditorConstants, EntityType } from '@src/constants/editor';
 
 export const protagCreationDataService = {
   fetchProtagPersonData: async (): Promise<SnippetEntity> => {
@@ -37,11 +34,7 @@ export const protagCreationDataService = {
       }
     }
   },
-  handleProtagCreationDataEntries: async (
-    letterElement: Element,
-    stateEditorLetter: { id: number; name: string },
-    markupProtagCreationData: MarkupProtagCreationData[],
-  ): Promise<any> => {
+  handleProtagCreationDataEntries: async (xmlDoc: Document, markupProtagCreationData: MarkupProtagCreationData[]): Promise<string> => {
     const protagData = await EditorUtils.protagCreationDataService.fetchProtagPersonData();
 
     const newEntries = markupProtagCreationData.filter((protagData) => protagData.isNewEntry);
@@ -61,8 +54,8 @@ export const protagCreationDataService = {
       );
     }
 
-    const markedSpan = letterElement.querySelectorAll('span.marked')[0];
-    if (markedSpan === undefined) return { xmlId: '', contentChanged: false };
+    const markedSpan = xmlDoc.querySelector('span.marked');
+    if (!markedSpan) throw new Error('No marked span found in the document');
 
     const xmlId = EditorUtils.markupGeneration.generateXmlId('title');
     const titleNameNode = document.createElementNS(EditorConstants.TEI_NS, 'title');
@@ -119,15 +112,6 @@ export const protagCreationDataService = {
 
     EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNameNode);
 
-    const result = await EditorUtils.backendService.patchContent(
-      letterElement.innerHTML,
-      stateEditorLetter.id,
-      EditorConstants.changeTypes.protag_creation.ADDED,
-      xmlId,
-    );
-
-    if (!result) {
-      throw new Error(`Patch operation failed for  a new place data entry`);
-    }
+    return xmlId;
   },
 };

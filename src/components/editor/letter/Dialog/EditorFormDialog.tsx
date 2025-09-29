@@ -189,15 +189,14 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
       const xmlSerializer = new XMLSerializer();
       const xmlString = xmlSerializer.serializeToString(updatedXmlDoc);
 
-      const result = await EditorUtils.backendService.patchContent(xmlString, stateEditorLetter.id, changeType, null);
-
-      if (result) {
-        dispatch(setXmlLetterContent({ content: { xmlContent: xmlString } }));
-        dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-        enqueueSnackbar(successMessage, { variant: 'success' });
-      } else {
-        enqueueSnackbar('Data could not be updated on backend side', { variant: 'error' });
-      }
+      await EditorUtils.backendOrchestrator.patchWithDispatch(dispatch, [xmlString, stateEditorLetter.id, changeType, null], {
+        actionsOnSuccess: [
+          setXmlLetterContent({ content: { xmlContent: xmlString } }),
+          setReloadLetterContent({ reloadLetterContent: true }),
+        ],
+        successMessage,
+        errorMessage: 'Data could not be updated on backend side',
+      });
     } catch (err) {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
     }

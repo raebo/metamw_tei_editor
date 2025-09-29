@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { backendService } from '../../../../../utils/editor/backendService';
+import { backendService } from '@src/utils/editor/backendService';
 import { enqueueSnackbar } from 'notistack';
-import { MarkupProtagCreationData, ProtagCreation, ProtagCreationCategory } from '../../../../../services/mappings/editorMappings';
+import { MarkupProtagCreationData, ProtagCreation, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
 import { Badge, Box, Divider, FormControl, FormControlLabel, IconButton, Radio, RadioGroup, Stack, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import ProtagCrtCatSelector from './ProtagCrtCatSelector';
 import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
-import { setEditorMarkedAndContentLeftRightThunk } from '../../../../../redux/thunks/editor.letter.thunk';
-import { useAppDispatch } from '../../../../../redux/hooks';
+import { setEditorMarkedAndContentLeftRightThunk } from '@src/redux/thunks/editor.letter.thunk';
+import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import EntityExistingProtagCreation from './EntityExistingProtagCreation';
 import EntityNewProtagCreation, { ProtagCreationDetail } from './EntityNewProtagCreation';
-import { fetchEntityKey } from '../../../../../services/editor/apiLetterRequest.service';
-import { EntityType } from '../../../../../constants/editor';
-import { setReloadLetterContent } from '../../../../../redux/slices/editor.letter.slice';
+import { fetchEntityKey } from '@src/services/editor/apiLetterRequest.service';
+import { EditorConstants, EntityType } from '@src/constants/editor';
+import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { EditorUtils } from '../../../../../utils/editor';
+import { EditorUtils } from '@src/utils/editor';
+import { MiscUtils } from '@src/utils/misc';
 
 type SelectActionProtagCreationOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 
@@ -41,6 +42,8 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
   const [protagCreationCategories, setProtagCreationCategories] = React.useState<ProtagCreationCategory[]>([]);
 
   const [selectedProtagCreationOption, setSelectedProtagCreationOption] = useState<SelectActionProtagCreationOption>('EXISTING_ENTRY');
+  const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent);
+  const [xmlDoc, setXmlDoc] = React.useState<XMLDocument | null>(null);
 
   const [resetProtagCreationCmp, setResetProtagCreationCmp] = useState<number>(0); // used to reset the creation form when a new author is selected
 
@@ -53,6 +56,21 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
     parentProtagCreationCategories: null,
     protagCreationCategory: null,
   });
+
+  useEffect(() => {
+    if (!stateTeiXml) {
+      dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+      return;
+    }
+
+    try {
+      const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
+      setXmlDoc(xmlDoc);
+    } catch (err) {
+      enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
+      setXmlDoc(null);
+    }
+  }, [stateTeiXml, dispatch]);
 
   useEffect(() => {
     backendService
@@ -120,31 +138,42 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
 
   const handleSubmitButtonClick = async () => {
     try {
-      if (props.xmlRef.current === null) {
-        throw new Error('XML reference is null');
-      }
-
-      const letterElement = props.xmlRef.current.querySelector('#letterXmlContent');
-      if (!letterElement) {
-        throw new Error('No letter element found!');
+      if (!xmlDoc) {
+        enqueueSnackbar("No valid TEI XML content found, can't add ProtagCreation markup", {
+          variant: 'error',
+        });
+        throw new Error();
       }
 
       if (stateEditorLetter.id === null || stateEditorLetter.name === null) {
-        throw new Error('No letter id or name found!');
+        enqueueSnackbar('No valid letter id or name found, can not add ProtagCreation markup', {
+          variant: 'error',
+        });
+        throw new Error();
       }
 
-      await EditorUtils.protagCreationDataService.handleProtagCreationDataEntries(
-        letterElement,
-        { id: stateEditorLetter.id!, name: stateEditorLetter.name },
-        addedProtagCreations,
-      );
+      const xmlId: string = await EditorUtils.protagCreationDataService.handleProtagCreationDataEntries(xmlDoc, addedProtagCreations);
 
-      enqueueSnackbar('ProtagCreation markup was added successfully', { variant: 'success' });
+      await EditorUtils.backendOrchestrator.patchWithDispatch(
+        dispatch,
+        [new XMLSerializer().serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.protag_creation.ADDED, xmlId],
+        {
+          actionsOnSuccess: [
+            setReloadLetterContent({ reloadLetterContent: true }),
+            setEditorMarkedAndContentLeftRightThunk({
+              textIsMarked: false,
+              contentLeft: null,
+              contentRight: null,
+            }),
+          ],
+          successMessage: 'ProtagCreation markup was added successfully',
+          errorMessage: 'Failed to add ProtagCreation markup, please try again',
+        },
+      );
     } catch (err) {
       enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
         variant: 'error',
       });
-    } finally {
       dispatch(setReloadLetterContent({ reloadLetterContent: true }));
       dispatch(
         setEditorMarkedAndContentLeftRightThunk({
@@ -220,7 +249,6 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
 
     callResetProtagCreationCmp();
     setSelectedProtagCreationOption('EXISTING_ENTRY');
-    console.log('Added protag creation entry: ', {});
     resetProtagFormData();
   };
 

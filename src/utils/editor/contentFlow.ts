@@ -103,4 +103,30 @@ export const contentFlow = {
       counter += 1;
     });
   },
+  insertColumnBreak: (xmlDoc: Document) => {
+    const markedNode = EditorUtils.xmlCheck.markedSpanNode(xmlDoc);
+    if (!markedNode) return;
+
+    const breakNode = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'cb');
+    breakNode.setAttribute('type', 'column_break');
+    breakNode.setAttribute('n', '1');
+
+    markedNode.parentNode?.insertBefore(breakNode, markedNode);
+
+    const parentDiv = markedNode.closest('div[type="act_of_writing"]');
+
+    const columnBreakNodes = parentDiv ? Array.from(parentDiv.getElementsByTagName('cb')) : [];
+
+    let counter = 1;
+    columnBreakNodes.forEach((breakNode: Element) => {
+      const newPos = counter;
+      breakNode.setAttribute('n', newPos.toString());
+      counter++;
+    });
+
+    while (markedNode.firstChild) {
+      markedNode.parentNode?.insertBefore(markedNode.firstChild, markedNode);
+    }
+    markedNode.parentNode?.removeChild(markedNode);
+  },
 };

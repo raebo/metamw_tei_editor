@@ -9,6 +9,7 @@ import {
   generateKeyHandleAction,
 } from './lib/keyHandlerDefinitions';
 import { EditorKeyHandleItem } from '@src/services/mappings/editorMappings';
+import { enqueueSnackbar } from 'notistack';
 
 function normalizeKeyEvent(event: KeyboardEvent): string {
   const keys: string[] = [];
@@ -34,16 +35,31 @@ const EditorKeyHandle = () => {
         return;
       }
 
-      const getState = () => store.getState();
-      const combo = normalizeKeyEvent(event);
-      const keyHandleDefinition = findKeyHandleDefinition(combo, keyDefinitions);
+      try {
+        const getState = () => store.getState();
+        const combo = normalizeKeyEvent(event);
+        const keyHandleDefinition = findKeyHandleDefinition(combo, keyDefinitions);
 
-      if (keyHandleDefinition) {
-        event.preventDefault();
-        event.stopPropagation();
+        if (keyHandleDefinition) {
+          event.preventDefault();
+          event.stopPropagation();
 
-        const action = generateKeyHandleAction(keyHandleDefinition);
-        action?.(dispatch, getState);
+          // console.log('keyHandleDefinition', keyHandleDefinition);
+
+          const action = generateKeyHandleAction(keyHandleDefinition);
+
+          if (!action) {
+            enqueueSnackbar('Fehler bei der Tastenkombination: Aktion nicht gefunden', {
+              variant: 'error',
+            });
+            return;
+          }
+          action(dispatch, getState);
+        }
+      } catch (error) {
+        enqueueSnackbar('Fehler bei der Tastenkombination: ' + (error as Error).message, {
+          variant: 'error',
+        });
       }
     },
     [dispatch],

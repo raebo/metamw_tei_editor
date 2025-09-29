@@ -135,6 +135,21 @@ tei {
     div {
       p {
         cursor: pointer;
+
+        cb[type="column_break"] {
+            display: inline;
+            font-size: 80%;
+            text-align: center;
+        }
+        cb[type="column_break"]::before {
+          content: "|\25B8" attr(n) "\25C2|" !important;
+          font-weight: normal;
+          font-size: 80%;
+        }
+        cb[type="column_break"]::after {
+          content: "" !important;
+        }
+
       }
       salute {
         cursor: pointer;

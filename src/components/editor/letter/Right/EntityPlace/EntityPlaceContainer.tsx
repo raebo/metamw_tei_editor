@@ -24,7 +24,7 @@ import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import { setEditorMarkedAndContentLeftRightThunk } from '@src/redux/thunks/editor.letter.thunk';
 import { enqueueSnackbar } from 'notistack';
-import { EntityType } from '@src/constants/editor';
+import { EditorConstants, EntityType } from '@src/constants/editor';
 import PlaceCountryAutocomplete from './PlaceCountryAutocomplete';
 import { EditorUtils } from '@src/utils/editor';
 import { MiscUtils } from '@src/utils/misc';
@@ -95,12 +95,29 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
   const [selectedActionOption, setSelectedActionOption] = useState<SelectActionOption>(null);
 
   const [addedPlaceEntries, setAddedPlaceEntries] = useState<MarkupPlaceData[]>([]);
+  const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent);
+  const [xmlDoc, setXmlDoc] = React.useState<XMLDocument | null>(null);
 
   const [countryOptions, setCountryOptions] = useState<CountryOption[]>([]);
   const [kindOptions, setKindOptions] = useState<SelectCompleteOption[]>([]);
   const [selectedKindOption, setSelectedKindOption] = useState<SelectActionOption>(null);
 
   const radioGroupRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!stateTeiXml) {
+      dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+      return;
+    }
+
+    try {
+      const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateTeiXml);
+      setXmlDoc(xmlDoc);
+    } catch (err) {
+      enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
+      setXmlDoc(null);
+    }
+  }, [stateTeiXml, dispatch]);
 
   useEffect(() => {
     if (!radioGroupRef.current) {
@@ -293,34 +310,37 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
 
   const handleSubmitButtonClick = async () => {
     try {
-      if (props.xmlRef.current === null) {
-        throw new Error('XML reference is null');
-      }
-
-      const letterElement = props.xmlRef.current.querySelector('#letterXmlContent');
-      if (!letterElement) {
-        throw new Error('No letter element found!');
+      if (!xmlDoc) {
+        enqueueSnackbar('No valid XML document found!', { variant: 'error' });
+        throw new Error('No valid XML document found!');
       }
 
       if (stateEditorLetter.id === null || stateEditorLetter.name === null) {
         throw new Error('No letter id or name found!');
       }
 
-      await EditorUtils.placeDataService.handlePlaceDataEntries(
-        letterElement,
-        {
-          id: stateEditorLetter.id!, // ← assert non-null
-          name: stateEditorLetter.name!,
-        },
-        addedPlaceEntries,
-      );
+      const xmlId = await EditorUtils.placeDataService.handlePlaceDataEntries(xmlDoc, addedPlaceEntries);
 
-      enqueueSnackbar('Place markup was added successfully', { variant: 'success' });
+      await EditorUtils.backendOrchestrator.patchWithDispatch(
+        dispatch,
+        [new XMLSerializer().serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.place.ADDED, xmlId],
+        {
+          actionsOnSuccess: [
+            setReloadLetterContent({ reloadLetterContent: true }),
+            setEditorMarkedAndContentLeftRightThunk({
+              textIsMarked: false,
+              contentLeft: null,
+              contentRight: null,
+            }),
+          ],
+          successMessage: 'Place markup was added successfully',
+          errorMessage: 'Error adding place markup',
+        },
+      );
     } catch (err) {
       enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
         variant: 'error',
       });
-    } finally {
       dispatch(setReloadLetterContent({ reloadLetterContent: true }));
       dispatch(
         setEditorMarkedAndContentLeftRightThunk({

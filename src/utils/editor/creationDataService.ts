@@ -1,17 +1,16 @@
-import { MarkupCreationData } from '../../services/mappings/editorMappings';
+import { MarkupCreationData } from '@src/services/mappings/editorMappings';
 import { EditorUtils } from './index';
-import { EditorConstants, EntityType } from '../../constants/editor';
-import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
-import { initApi } from '../../services/apiRequest.service';
+import { EditorConstants, EntityType } from '@src/constants/editor';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
+import { initApi } from '@src/services/apiRequest.service';
+import { xml } from 'vkbeautify';
 
 interface EnrichedCreation {
   creation: { key: string; name: string; kind: string; isNewEntry: boolean };
   authors: SnippetEntity[];
 }
 
-async function loadEnrichedCreations(
-  markupCreations: MarkupCreationData[],
-): Promise<EnrichedCreation[]> {
+async function loadEnrichedCreations(markupCreations: MarkupCreationData[]): Promise<EnrichedCreation[]> {
   return Promise.all(
     markupCreations.map(async (markupCreation) => {
       const creation = markupCreation.creation;
@@ -53,15 +52,9 @@ export const creationDataService = {
       }
     }
   },
-  handleCreationDataEntries: async (
-    letterElement: Element,
-    stateEditorLetter: { id: number; name: string },
-    markupCreationData: MarkupCreationData[],
-  ): Promise<any> => {
+  handleCreationDataEntries: async (xmlDoc: Document, markupCreationData: MarkupCreationData[]): Promise<string> => {
     const newAuthors = markupCreationData.filter((creationData) => creationData.author?.isNewEntry);
-    const newCreations = markupCreationData.filter(
-      (creationData) => creationData.creation?.isNewEntry,
-    );
+    const newCreations = markupCreationData.filter((creationData) => creationData.creation?.isNewEntry);
 
     for (const authorData of newAuthors) {
       await EditorUtils.backendService.createEntity(
@@ -88,8 +81,8 @@ export const creationDataService = {
 
     const enrichedCreations = await loadEnrichedCreations(markupCreationData); // All ASYNC operations should take place before DOM manipulation!!!!!
 
-    const markedSpan = letterElement.querySelectorAll('span.marked')[0];
-    if (markedSpan === undefined) return { xmlId: '', contentChanged: false };
+    const markedSpan = xmlDoc.querySelector('span.marked');
+    if (!markedSpan) throw new Error('No marked span found in the document');
 
     const xmlId = EditorUtils.markupGeneration.generateXmlId('title');
     const titleNameNode = document.createElementNS(EditorConstants.TEI_NS, 'title');
@@ -108,15 +101,6 @@ export const creationDataService = {
 
     EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNameNode);
 
-    const result = await EditorUtils.backendService.patchContent(
-      letterElement.innerHTML,
-      stateEditorLetter.id,
-      EditorConstants.changeTypes.creation.ADDED,
-      xmlId,
-    );
-
-    if (!result) {
-      throw new Error(`Patch operation failed for  a new place data entry`);
-    }
+    return xmlId;
   },
 };

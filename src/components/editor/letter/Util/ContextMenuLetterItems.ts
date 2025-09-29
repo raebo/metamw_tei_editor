@@ -21,7 +21,10 @@ type MenuHandlers = {
   handleMenuItemDialogClick: (dialogType: string) => void;
 };
 
-export function createContextMenuItems({ handleMenuItemClick, handleMenuItemDialogClick }: MenuHandlers): MenuItemType[] {
+export function createContextMenuItems({
+  handleMenuItemClick,
+  handleMenuItemDialogClick,
+}: MenuHandlers): MenuItemType[] {
   return [
     {
       label: 'Person Auszeichnen',
@@ -91,7 +94,8 @@ export function createContextMenuItems({ handleMenuItemClick, handleMenuItemDial
         },
         {
           label: 'Datum-NotBefore-NotAfter',
-          action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD),
+          action: () =>
+            handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD),
           keyShortcut: 'Alt+SHIFT+6',
         },
       ],
@@ -104,15 +108,29 @@ export function createContextMenuItems({ handleMenuItemClick, handleMenuItemDial
           label: 'Seitenumbruch',
           action: (_node) => {
             const event = new KeyboardEvent('keydown', {
-              key: 'v',
-              code: 'KeyV',
+              key: 'H',
+              code: 'KeyH',
               ctrlKey: true,
               shiftKey: true,
               altKey: false,
             });
             document.dispatchEvent(event);
           },
-          keyShortcut: 'CTRL+SHIFT+V',
+          keyShortcut: 'CTRL+SHIFT+H',
+        },
+        {
+          label: 'Spaltenumbruch',
+          action: (_node) => {
+            const event = new KeyboardEvent('keydown', {
+              key: 'I',
+              code: 'KeyI',
+              ctrlKey: true,
+              shiftKey: true,
+              altKey: false,
+            });
+            document.dispatchEvent(event);
+          },
+          keyShortcut: 'CTRL+SHIFT+I',
         },
       ],
     },
