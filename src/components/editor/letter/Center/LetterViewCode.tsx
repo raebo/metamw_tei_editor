@@ -1,5 +1,6 @@
 import React, { Suspense, useMemo, useRef, useState } from 'react';
-import { RootState } from '../../../../redux/redux.store';
+import { RootState } from '@src/redux/redux.store';
+import '@src/utils/MonacoEditorSetup'; // <-- make sure this runs before mounting the editor
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
 import vkbeautify from 'vkbeautify';
 import { XMLParser } from 'fast-xml-parser';
@@ -8,10 +9,10 @@ import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Button from '@mui/material/Button';
 import { useDispatch, useSelector } from 'react-redux';
-import { EditorUtils } from '../../../../utils/editor';
-import { EditorConstants } from '../../../../constants/editor';
+import { EditorUtils } from '@src/utils/editor';
+import { EditorConstants } from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
-import { setReloadLetterContent } from '../../../../redux/slices/editor.letter.slice';
+import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { debounce } from 'lodash-es';
 import { OnMount } from '@monaco-editor/react';
 
@@ -21,10 +22,10 @@ type LetterViewCodeProps = {
 
 const validateXml = (xmlString: string): { line: number; column: number; message: string }[] => {
   const parser = new XMLParser({
-    ignoreAttributes: false, // Don't ignore attributes (keep them for parsing)
-    parseTagValue: false, // Disable parsing tag values
-    parseAttributeValue: true, // Disable parsing attribute values
-    //stopAtFirstError: true // Stop on first error to capture it
+    ignoreAttributes: false,
+    parseTagValue: false,
+    parseAttributeValue: true,
+    //stopAtFirstError: true
   });
 
   try {
@@ -64,6 +65,8 @@ interface IPositionState {
   lineNumber: number | null;
   column: number | null;
 }
+
+const MonacoEditor = React.lazy(() => import('@monaco-editor/react'));
 
 const LetterViewCode = ({ xmlString }: LetterViewCodeProps) => {
   const dispatch = useDispatch();
@@ -166,8 +169,6 @@ const LetterViewCode = ({ xmlString }: LetterViewCodeProps) => {
       }
     }
   };
-
-  const MonacoEditor = React.lazy(() => import('@monaco-editor/react'));
 
   return (
     <>
