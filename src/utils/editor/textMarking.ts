@@ -90,22 +90,29 @@ export const textMarking = {
     });
   },
   unwrapNode: (node: Element): void => {
-    const parent = node.parentNode;
-    if (!parent) return;
+    if (!node.parentNode) return;
 
-    Array.from(node.childNodes).forEach((child) => {
+    const fragment = document.createDocumentFragment();
+
+    node.childNodes.forEach((child) => {
       if (child.nodeType === Node.ELEMENT_NODE) {
-        const el = child as Element;
+        const el = child as HTMLElement;
 
-        if (el.getAttribute('style') === 'hidden') return;
+        // Skip hidden elements entirely
+        if (el.getAttribute('style')?.includes('hidden')) {
+          return;
+        }
 
-        EditorUtils.textMarking.unwrapNode(el);
-        parent.insertBefore(el, node);
-      } else {
-        parent.insertBefore(child, node);
+        // Otherwise, recursively keep its visible text
+        fragment.appendChild(document.createTextNode(el.textContent ?? ''));
+      } else if (child.nodeType === Node.TEXT_NODE) {
+        // Keep plain text
+        fragment.appendChild(child.cloneNode());
       }
     });
-    parent.removeChild(node);
+
+    // Replace the original node with the filtered fragment
+    node.replaceWith(fragment);
   },
   addTmpIdToNode(xmlDoc: Document, node: Element, tmpIdPrefix: string): void {
     if (!xmlDoc) throw new Error('No XML document provided.');

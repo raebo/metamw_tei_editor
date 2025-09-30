@@ -1,6 +1,6 @@
 import { textMarking } from '@src/utils/editor/textMarking';
-import { EditorConstants } from '@src/constants/editor';
 import { EditorUtils } from '@src/utils/editor';
+import { EditorConstants } from '@src/constants/editor';
 
 describe('textMarking.isValidSelection', () => {
   let rootElement: HTMLElement;
@@ -80,7 +80,7 @@ describe('textMarking.isValidSelection', () => {
     expect(onValid).toHaveBeenCalledWith(selection);
   });
 
-  test.only('returns false if selection is inside forbidden parent', () => {
+  test('returns false if selection is inside forbidden parent', () => {
     const textNode = rootElement.querySelector('tei teiheader title')!.firstChild!;
     const selection = createSelection(textNode, 0, 5);
 
@@ -127,3 +127,82 @@ describe('textMarking.isValidSelection', () => {
     expect(onInvalid).toHaveBeenCalledWith('No offsets');
   });
 });
+
+describe('unwrapNode', () => {
+  beforeEach(() => {
+    // Mock the recursive unwrapNode call
+    // jest.spyOn(EditorUtils.textMarking, 'unwrapNode').mockImplementation((node: Element) => {
+    //   // just call the original unwrapNode if needed or noop
+    // });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('unwraps the node and removes hidden items correctly', () => {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(
+      `
+  <TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiBody>
+      <text>
+        <div>
+          <p>
+            <seg type="pagebreak">|2| 
+              <pb n="2" type="pagebreak"/>
+            </seg> geht es weiter nach einem 
+            <title>Seitenumbruch
+              <list>
+                <item style="hidden"/>
+              </list>
+              <name style="hidden">Mendelssohn</name>
+            </title>
+          </p>
+        </div>
+      </text>
+    </teiBody>
+  </TEI>
+`,
+      'application/xml',
+    );
+
+    const p = xmlDoc.querySelector('p')!;
+    expect(p).not.toBeNull();
+
+    expect(p).not.toBeNull();
+
+    if (!p) return;
+    const titleNode = p.querySelector('title');
+    expect(titleNode).not.toBeNull();
+
+    if (!titleNode) return;
+
+    // Call unwrapNode
+    textMarking.unwrapNode(titleNode);
+
+    // Assert the title node is removed
+    expect(p.querySelector('title')).toBeNull();
+
+    // Assert that the remaining HTML matches expected
+    const expectedHTML = `
+      <seg type="pagebreak">|2| 
+        <pb n="2" type="pagebreak"></pb>
+      </seg> geht es weiter nach einem Seitenumbruch
+    `
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const actualHTML = normalize(p.innerHTML);
+
+    expect(actualHTML).toBe(expectedHTML);
+  });
+});
+
+function normalize(html: string): string {
+  return html
+    .replace(/\s+xmlns="[^"]*"/g, '') // remove xmlns
+    .replace(/\/>/g, '></pb>') // normalize self-closing pb
+    .replace(/\s+/g, ' ')
+    .trim();
+}
