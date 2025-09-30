@@ -1,46 +1,34 @@
-import {
-  EditorLetterData,
-  mapApiToEditorLetterData,
-  mapApiToPinnedLetter,
-  PinnedLetter
-} from "../mappings/editorMappings";
-import initApi from "../apiRequest.service";
+import { EditorLetterData, mapApiToEditorLetterData, mapApiToPinnedLetter, PinnedLetter } from '../mappings/editorMappings';
+import initApi from '../apiRequest.service';
 
 export const fetchPinnedLetters = async (): Promise<PinnedLetter[]> => {
   try {
     const response = await initApi.initApi().get(`/jwt/editor/pinned_letters`);
 
-    const result = response.data.map((result: any) => { return mapApiToPinnedLetter(result) });
-
-    if (result) {
-      return result
-    } else {
-      return []
-    }
+    return response.data.map((result: any) => {
+      return mapApiToPinnedLetter(result);
+    });
   } catch (err) {
-    return []
+    throw new Error('Failed to fetch pinned letters: ' + err);
   }
-}
+};
 
 export const setLetterPinStatus = async (pinnedLetter: PinnedLetter, isPinned: boolean): Promise<boolean> => {
   const response = await initApi.initApi().patch(`/jwt/editor/pinned_letters/${pinnedLetter.id}/pinned`, { isPinned: isPinned });
 
   if (response.status === 200) {
-    return true
+    return true;
   } else {
-    throw new Error("Failed to set pin status: " + response.data.error)
+    throw new Error('Failed to set pin status: ' + response.data.error);
   }
-}
+};
 
-export const fetchPinnedLetterData = async (letterId: number): Promise<EditorLetterData | undefined> => {
+export const fetchPinnedLetterData = async (letterId: number): Promise<EditorLetterData> => {
   try {
     const response = await initApi.initApi().get(`/jwt/editor/pinned_letters/${letterId}`);
 
     return mapApiToEditorLetterData(response.data);
-
   } catch (err) {
-    console.error(err);
+    throw new Error('Failed to set pin status: ' + err);
   }
-}
-
-
+};

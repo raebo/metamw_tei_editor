@@ -57,16 +57,10 @@ const App = () => {
                     <Route path="about" element={<AboutPage />} />
                     <Route path="login" element={<Login />} />
                     <Route path={'/automatic_annotations/:id?'} element={<AutoAnnoList />} />
-                    <Route
-                      path={'/automatic_annotations/:job_id/letters/:id'}
-                      element={<AutoAnnoLetters />}
-                    />
+                    <Route path={'/automatic_annotations/:job_id/letters/:id'} element={<AutoAnnoLetters />} />
                     <Route path={'/editor/letters'} element={<IndexLetters />} />
                     <Route path={'/editor/'} element={<ShowEditor />} />
-                    <Route
-                      path={'/editor/letters/:letterId/:letterName'}
-                      element={<ShowEditor />}
-                    />
+                    <Route path={'/editor/letters/:letterId/:letterName'} element={<ShowEditor />} />
                   </Route>
                   <Route element={<AutoAnnoLayout />}>
                     {/*<GuardedRoute path="/dashboard" component={Dashboard} auth={isAuthenticated} />*/}

@@ -1,4 +1,4 @@
-import { EditorConstants } from '../../../../constants/editor';
+import { EditorConstants } from '@src/constants/editor';
 
 type NodeActionCallback = (args: { node?: Node }) => void;
 
@@ -21,10 +21,7 @@ type MenuHandlers = {
   handleMenuItemDialogClick: (dialogType: string) => void;
 };
 
-export function createContextMenuItems({
-  handleMenuItemClick,
-  handleMenuItemDialogClick,
-}: MenuHandlers): MenuItemType[] {
+export function createContextMenuItems({ handleMenuItemClick, handleMenuItemDialogClick }: MenuHandlers): MenuItemType[] {
   return [
     {
       label: 'Person Auszeichnen',
@@ -94,8 +91,7 @@ export function createContextMenuItems({
         },
         {
           label: 'Datum-NotBefore-NotAfter',
-          action: () =>
-            handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD),
+          action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD),
           keyShortcut: 'Alt+SHIFT+6',
         },
       ],

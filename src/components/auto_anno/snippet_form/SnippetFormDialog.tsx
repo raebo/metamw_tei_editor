@@ -1,12 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { SnippetDialogType } from "../../../services/mappings/autoAnnoMappings";
-
+import { SnippetDialogType } from '@src/services/mappings/autoAnnoMappings';
 
 interface SnippetFormDialogProps {
   open: boolean;
@@ -18,59 +17,63 @@ interface SnippetFormDialogProps {
 export default function SnippetFormDialog(props: SnippetFormDialogProps) {
   const { dialogType } = props;
 
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+
   const [submitDisabled, setSubmitDisabled] = React.useState(false);
 
-  let dialogTitle = ""; let dialogContent = ""; let dialogSubmit = "";
+  useEffect(() => {
+    if (props.open && submitButtonRef.current) {
+      submitButtonRef.current.focus();
+    }
+  }, [props.open]);
 
-  if (dialogType === "REJECT") {
-    dialogTitle = "Auszeichnung Löschen";
-    dialogContent = "Sind Sie sicher, dass Sie diese Auszeichnung löschen möchten?";
-    dialogSubmit = "Löschen";
+  let dialogTitle = '';
+  let dialogContent = '';
+  let dialogSubmit = '';
+
+  if (dialogType === 'REJECT') {
+    dialogTitle = 'Auszeichnung Löschen';
+    dialogContent = 'Sind Sie sicher, dass Sie diese Auszeichnung löschen möchten?';
+    dialogSubmit = 'Löschen';
   }
 
-  if (dialogType === "ACCEPT") {
-    dialogTitle = "Auszeichnung Übernehmen";
-    dialogContent = "Sind Sie sicher, dass Sie diese Auszeichnung speichern möchten?";
-    dialogSubmit = "Speichern";
+  if (dialogType === 'ACCEPT') {
+    dialogTitle = 'Auszeichnung Übernehmen';
+    dialogContent = 'Sind Sie sicher, dass Sie diese Auszeichnung speichern möchten?';
+    dialogSubmit = 'Speichern';
   }
 
-  if (dialogType === "RESET_LETTER") {
-    dialogTitle = "Alle Anpassungen verwerfen";
-    dialogContent = "Sind Sie sicher, dass Sie alle gemachten Anpassungen verwerfen möchten?";
-    dialogSubmit = "Zurücksetzen";
+  if (dialogType === 'RESET_LETTER') {
+    dialogTitle = 'Alle Anpassungen verwerfen';
+    dialogContent = 'Sind Sie sicher, dass Sie alle gemachten Anpassungen verwerfen möchten?';
+    dialogSubmit = 'Zurücksetzen';
   }
 
-  if (dialogType === "WRITE_LETTER") {
-    dialogTitle = "Brief in Datei Speichern";
-    dialogContent = "Sind Sie sicher, dass Sie den angepassten Inhalt in einer Datei speichern möchten?";
-    dialogSubmit = "Speichern/Schreiben";
+  if (dialogType === 'WRITE_LETTER') {
+    dialogTitle = 'Brief in Datei Speichern';
+    dialogContent = 'Sind Sie sicher, dass Sie den angepassten Inhalt in einer Datei speichern möchten?';
+    dialogSubmit = 'Speichern/Schreiben';
   }
 
   const componentClickSubmit = () => {
     setSubmitDisabled(true);
     props.handleClickSubmit();
-    setSubmitDisabled(false)
-  }
+    setSubmitDisabled(false);
+  };
 
   return (
     <React.Fragment>
-      <Dialog
-        open={props.open}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          { dialogTitle }
-        </DialogTitle>
+      <Dialog open={props.open} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+        <DialogTitle id="alert-dialog-title">{dialogTitle}</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            { dialogContent }
-          </DialogContentText>
+          <DialogContentText id="alert-dialog-description">{dialogContent}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button variant="outlined" onClick={props.handleClose}>Abbrechen</Button>
-          <Button variant="contained" disabled={submitDisabled} onClick={() => componentClickSubmit()} autoFocus>
-            { dialogSubmit }
+          <Button variant="outlined" onClick={props.handleClose}>
+            Abbrechen
+          </Button>
+          <Button ref={submitButtonRef} variant="contained" disabled={submitDisabled} onClick={() => componentClickSubmit()}>
+            {dialogSubmit}
           </Button>
         </DialogActions>
       </Dialog>

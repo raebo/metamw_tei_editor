@@ -357,7 +357,6 @@ export const backendService = {
     }
 
     try {
-      console.log('Patching content for letterId:', letterId, 'with xmlId:', xmlId, 'and changeType:', changeType);
       await initApi().patch(`/jwt/editor/pinned_letters/${letterId}/set_content/`, {
         changes: {
           new_content: MiscUtils.misc.pipeFunctions(content, replaceWithCamelCase, replaceDataKeys, removeTmpIds),
@@ -403,6 +402,36 @@ export const backendService = {
         throw new Error(response.data.error);
       } else {
         throw new Error('Error publishing letter content: ' + err);
+      }
+    }
+  },
+  undoLetterChange: async (letterId: number): Promise<boolean> => {
+    try {
+      await initApi().post(`/jwt/editor/letters/${letterId}/letter_changes/undo/`);
+
+      return true;
+    } catch (err: any) {
+      const response = err.response;
+
+      if (response !== undefined) {
+        throw new Error(response.data.error);
+      } else {
+        throw new Error('Error undoing letter change: ' + err);
+      }
+    }
+  },
+  redoLetterChange: async (letterId: number): Promise<boolean> => {
+    try {
+      await initApi().post(`/jwt/editor/letters/${letterId}/letter_changes/redo/`);
+
+      return true;
+    } catch (err: any) {
+      const response = err.response;
+
+      if (response !== undefined) {
+        throw new Error(response.data.error);
+      } else {
+        throw new Error('Error redoing letter change: ' + err);
       }
     }
   },

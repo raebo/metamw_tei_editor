@@ -2,33 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Tabs, Tab, Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
-import {
-  fetchPinnedLetters,
-  setLetterPinStatus,
-} from '../../../../services/editor/apiPinnedLettersRequest.service';
+import { fetchPinnedLetters, setLetterPinStatus } from '@src/services/editor/apiPinnedLettersRequest.service';
 import { useSelector } from 'react-redux';
-import {
-  setEditorLetter,
-  setEditorPinnedLetters,
-} from '../../../../redux/slices/editor.letter.slice';
-import { RootState } from '../../../../redux/redux.store';
+import { setEditorLetter, setEditorPinnedLetters } from '@src/redux/slices/editor.letter.slice';
+import { RootState } from '@src/redux/redux.store';
 import { enqueueSnackbar } from 'notistack';
-import { PinnedLetter } from '../../../../services/mappings/editorMappings';
-import {
-  setEditorTabAndPinnedLettersThunk,
-  setEditorTabAndPinnedLetterThunk,
-} from '../../../../redux/thunks/editor.letter.thunk';
-import { useAppDispatch } from '../../../../redux/hooks';
-import { fetchLetterData } from '../../../../services/editor/apiLettersRequest.service';
+import { PinnedLetter } from '@src/services/mappings/editorMappings';
+import { setEditorTabAndPinnedLettersThunk, setEditorTabAndPinnedLetterThunk } from '@src/redux/thunks/editor.letter.thunk';
+import { useAppDispatch } from '@src/redux/hooks';
+import { fetchLetterData } from '@src/services/editor/apiLettersRequest.service';
+import { MiscUtils } from '@src/utils/misc';
 
-const updatePinnedLetterStatus = (
-  pinnedLetters: PinnedLetter[],
-  letterId: number,
-  isPinned: boolean,
-): PinnedLetter[] => {
-  return pinnedLetters.map((letter) =>
-    letter.id === letterId ? { ...letter, isPinned: isPinned } : letter,
-  );
+const updatePinnedLetterStatus = (pinnedLetters: PinnedLetter[], letterId: number, isPinned: boolean): PinnedLetter[] => {
+  return pinnedLetters.map((letter) => (letter.id === letterId ? { ...letter, isPinned: isPinned } : letter));
 };
 
 const removePinnedLetter = (pinnedLetters: PinnedLetter[], letterId: number): PinnedLetter[] => {
@@ -42,20 +28,23 @@ const newTabNumber = (tabNumber: number): number => {
 const LetterTabs = () => {
   const dispatch = useAppDispatch();
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
-  const changeLetterViewMode = useSelector(
-    (state: RootState) => state.editorLetter.changeLetterViewMode,
-  );
+  const changeLetterViewMode = useSelector((state: RootState) => state.editorLetter.changeLetterViewMode);
   const stateActiveTab = useSelector((state: RootState) => state.editorLetter.tabNumber);
   const [activeTab, setActiveTab] = useState<number>(0);
 
   useEffect(() => {
     if (statePinnedLetters.length === 0) {
-      fetchPinnedLetters().then((pinnedLetters) => {
-        dispatch(setEditorPinnedLetters({ pinnedLetters }));
-      });
+      try {
+        fetchPinnedLetters().then((pinnedLetters) => {
+          dispatch(setEditorPinnedLetters({ pinnedLetters }));
+        });
+      } catch (err) {
+        enqueueSnackbar(`Failed to fetch pinned letters: ${MiscUtils.misc.getErrorMessage(err)}`, {
+          variant: 'error',
+        });
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch, statePinnedLetters.length]);
 
   useEffect(() => {
     if (statePinnedLetters.length > 0 && !changeLetterViewMode) {
@@ -82,16 +71,21 @@ const LetterTabs = () => {
     const newPinnedLetter = statePinnedLetters[newTabValue];
     let newXmlContent: string | null = null;
 
-    fetchLetterData(newPinnedLetter.id).then((letter) => {
-      if (!letter) {
-        enqueueSnackbar(`Failed to fetch letter data for letter ID: ${newPinnedLetter.id}`, {
+    fetchLetterData(newPinnedLetter.id)
+      .then((letter) => {
+        if (!letter) {
+          enqueueSnackbar(`Failed to fetch letter data for letter ID: ${newPinnedLetter.id}`, {
+            variant: 'error',
+          });
+          return;
+        }
+        newXmlContent = letter.xmlContent;
+      })
+      .catch((err) => {
+        enqueueSnackbar(`Failed to fetch letter data: ${MiscUtils.misc.getErrorMessage(err)}`, {
           variant: 'error',
         });
-        return;
-      }
-
-      newXmlContent = letter.xmlContent;
-    });
+      });
 
     dispatch(
       setEditorTabAndPinnedLetterThunk({

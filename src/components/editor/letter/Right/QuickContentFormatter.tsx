@@ -9,28 +9,33 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState, store } from '@src/redux/redux.store';
 import {
+  allTimesAvailableKeyHandleDefinitions,
   contentMarkedKeyHandleDefinitions,
   generateKeyHandleAction,
 } from '../Center/lib/keyHandlerDefinitions';
 import { enqueueSnackbar } from 'notistack';
 import { useAppDispatch } from '@src/redux/hooks';
 import { ToolbarButton } from '@src/components/editor/letter/Util/ToolbarButton';
+import type { EditorKeyHandleItem } from '@src/services/mappings/editorMappings';
+import { runOncePerAction } from '@src/utils/misc/stateHandling';
 
 const QuickContentFormatter = () => {
   const dispatch = useAppDispatch();
-  const [iconsAreActive, setIconsAreActive] = useState<boolean>(false);
-  const contentTextIsMarked = useSelector(
-    (state: RootState) => state.editorLetter.content.textIsMarked,
-  );
+  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const contentTextIsMarked = useSelector((state: RootState) => state.editorLetter.content.textIsMarked);
 
-  const [undeActive, setUndoActive] = useState<boolean>(false);
-  const [redoActive, setRedoActive] = useState<boolean>(false);
-  // const undoStackLength = useSelector((state: RootState) => state.editorLetter.content.undoStack.length);
-  // const redoStackLength = useSelector((state: RootState) => state.editorLetter.content.redoStack.length);
+  const [undoActive, setUndoActive] = useState<boolean>(stateEditorLetter.undoAvailable);
+  const [redoActive, setRedoActive] = useState<boolean>(stateEditorLetter.redoAvailable);
+  const [iconsAreActive, setIconsAreActive] = useState<boolean>(false);
 
   useEffect(() => {
     setIconsAreActive(!!contentTextIsMarked);
   }, [contentTextIsMarked]);
+
+  useEffect(() => {
+    setUndoActive(!!stateEditorLetter.undoAvailable);
+    setRedoActive(!!stateEditorLetter.redoAvailable);
+  }, [stateEditorLetter.undoAvailable, stateEditorLetter.redoAvailable]);
 
   const getToolbarButtonStyle = (active: boolean) => ({
     bgcolor: active ? 'primary.light' : 'toolbarButton.inactiveBg',
@@ -42,10 +47,8 @@ const QuickContentFormatter = () => {
     },
   });
 
-  const onClickButton = (keyCombination: string) => {
-    const editorKeyHandleItem = Object.values(contentMarkedKeyHandleDefinitions).filter(
-      (item) => item.key === keyCombination,
-    )[0];
+  const handleEditorKeyHandle = (keyCombination: string, editorKeyHandleItems: Record<string, EditorKeyHandleItem>) => {
+    const editorKeyHandleItem = Object.values(editorKeyHandleItems).filter((item) => item.key === keyCombination)[0];
 
     if (!editorKeyHandleItem) {
       enqueueSnackbar(`Keybinding '${keyCombination}' not found`, { variant: 'error' });
@@ -54,7 +57,18 @@ const QuickContentFormatter = () => {
 
     const getState = () => store.getState();
     const action = generateKeyHandleAction(editorKeyHandleItem);
-    action?.(dispatch, getState);
+
+    runOncePerAction(editorKeyHandleItem.key, async () => {
+      action?.(dispatch, getState);
+    });
+  };
+
+  const onClickButton = (keyCombination: string) => {
+    handleEditorKeyHandle(keyCombination, contentMarkedKeyHandleDefinitions);
+  };
+
+  const onClickNoMarkedButton = (keyCombination: string) => {
+    handleEditorKeyHandle(keyCombination, allTimesAvailableKeyHandleDefinitions);
   };
 
   return (
@@ -66,11 +80,7 @@ const QuickContentFormatter = () => {
         }}
       >
         <ListItemIcon>
-          <ToolbarButton
-            title="Bold (Ctrl+B)"
-            active={iconsAreActive}
-            onClick={() => onClickButton('ctrl+b')}
-          >
+          <ToolbarButton title="Bold (Ctrl+B)" active={iconsAreActive} onClick={() => onClickButton('ctrl+b')}>
             <FormatBoldIcon />
           </ToolbarButton>
         </ListItemIcon>
@@ -81,11 +91,7 @@ const QuickContentFormatter = () => {
           ...getToolbarButtonStyle(iconsAreActive),
         }}
       >
-        <ToolbarButton
-          title="Italic (Ctrl+I)"
-          active={iconsAreActive}
-          onClick={() => onClickButton('ctrl+i')}
-        >
+        <ToolbarButton title="Italic (Ctrl+I)" active={iconsAreActive} onClick={() => onClickButton('ctrl+i')}>
           <FormatItalicIcon />
         </ToolbarButton>
       </ListItemButton>
@@ -95,40 +101,30 @@ const QuickContentFormatter = () => {
           ...getToolbarButtonStyle(iconsAreActive),
         }}
       >
-        <ToolbarButton
-          title="Underline (Ctrl+U)"
-          active={iconsAreActive}
-          onClick={() => onClickButton('ctrl+u')}
-        >
+        <ToolbarButton title="Underline (Ctrl+U)" active={iconsAreActive} onClick={() => onClickButton('ctrl+u')}>
           <FormatUnderlinedIcon />
         </ToolbarButton>
       </ListItemButton>
       <ListItemButton
-        onClick={() => onClickButton('ctrl+z')}
+        onClick={() => onClickNoMarkedButton('ctrl+z')}
         sx={{
-          ...getToolbarButtonStyle(undeActive),
+          ...getToolbarButtonStyle(undoActive),
         }}
       >
-        <ToolbarButton
-          title="Undo (Ctrl+Z)"
-          onClick={() => onClickButton('ctrl+z')}
-          active={undeActive}
-        >
+        <ToolbarButton title="Undo (Ctrl+Z)" onClick={() => onClickNoMarkedButton('ctrl+z')} active={undoActive}>
+          {undoActive}
           <UndoIcon />
         </ToolbarButton>
       </ListItemButton>
       <ListItemButton
-        onClick={() => onClickButton('ctrl+shift+z')}
+        onClick={() => onClickNoMarkedButton('ctrl+shift+z')}
         sx={{
           ...getToolbarButtonStyle(redoActive),
         }}
       >
         <ListItemIcon>
-          <ToolbarButton
-            title="Redo (Ctrl+SHIFT+Z)"
-            onClick={() => onClickButton('ctrl+shift+z')}
-            active={redoActive}
-          >
+          <ToolbarButton title="Redo (Ctrl+SHIFT+Z)" onClick={() => onClickNoMarkedButton('ctrl+shift+z')} active={redoActive}>
+            {redoActive}
             <RedoIcon color={'action'} />
           </ToolbarButton>
         </ListItemIcon>

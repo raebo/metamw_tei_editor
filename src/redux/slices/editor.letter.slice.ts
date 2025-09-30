@@ -10,6 +10,8 @@ interface EditorLetterSlice {
     actOfWriting: {
       orderNumber: number | null;
     };
+    undoAvailable: boolean;
+    redoAvailable: boolean;
   };
   tabLetter: {
     //PinnedLetter
@@ -50,6 +52,8 @@ const initialState: EditorLetterSlice = {
     actOfWriting: {
       orderNumber: null,
     },
+    undoAvailable: false,
+    redoAvailable: false,
   },
   tabLetter: {
     id: null,
@@ -112,10 +116,7 @@ const EditorLetterSlice = createSlice({
     setEditorPinnedLetters(state, action) {
       state.pinnedLetters = [...action.payload.pinnedLetters];
     },
-    setEditorPinnedLetterViewMode(
-      state,
-      action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>,
-    ) {
+    setEditorPinnedLetterViewMode(state, action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>) {
       const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
       if (letter) {
         letter.viewMode = action.payload.viewMode;
@@ -141,6 +142,13 @@ const EditorLetterSlice = createSlice({
     setLetterReference(state, action) {
       state.letterReference = { ...action.payload.letterReference };
     },
+    setEditorLetterUndoRedo(state, action) {
+      state.letter = {
+        ...state.letter,
+        undoAvailable: action.payload.letter.undoAvailable,
+        redoAvailable: action.payload.letter.redoAvailable,
+      };
+    },
     setEditorLetterActOfWriting(state, action) {
       state.letter = {
         ...state.letter,
@@ -158,6 +166,7 @@ export const {
   disableChangeLetterViewMode,
   setContentTextIsMarked,
   setEditorLetter,
+  setEditorLetterUndoRedo,
   setEditorLetterActOfWriting,
   setEditorPinnedLetters,
   setEditorPinnedLetterViewMode,

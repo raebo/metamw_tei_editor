@@ -112,6 +112,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
               props.setLetterState({
                 viewMode: 'WYSIWYG',
                 xmlContent: xmlContentRef.current?.innerHTML ?? '',
+                undoAvailable: stateEditorLetter.undoAvailable,
+                redoAvailable: stateEditorLetter.redoAvailable,
               });
 
               dispatch(

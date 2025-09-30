@@ -5,6 +5,7 @@ import {
   setContentTextIsMarked,
   setDialogType,
   setEditorLetter,
+  setEditorLetterUndoRedo,
   setEditorPinnedLetters,
   setEditorPinnedLetterViewMode,
   setEditorSelectedItem,
@@ -14,14 +15,11 @@ import {
   setReloadLetterContent,
   setXmlLetterContent,
 } from '../slices/editor.letter.slice';
-import { PinnedLetter } from '../../services/mappings/editorMappings';
+import { PinnedLetter } from '@src/services/mappings/editorMappings';
 
 export const setEditorTabAndPinnedLettersThunk = createAsyncThunk(
   'editor/setEditorTabAndPinnedLetters',
-  async (
-    { pinnedLetters, tabNumber }: { pinnedLetters: PinnedLetter[]; tabNumber: number },
-    { dispatch },
-  ) => {
+  async ({ pinnedLetters, tabNumber }: { pinnedLetters: PinnedLetter[]; tabNumber: number }, { dispatch }) => {
     dispatch(setEditorPinnedLetters({ pinnedLetters }));
     dispatch(setEditorTabNumber({ tabNumber }));
     if (tabNumber === -1) {
@@ -170,13 +168,22 @@ export const setReloadXmlContentLetterThunk = createAsyncThunk(
     {
       reloadLetterContent,
       xmlContent,
+      undoAvailable,
+      redoAvailable,
     }: {
       reloadLetterContent: boolean;
       xmlContent: string | null;
+      undoAvailable?: boolean;
+      redoAvailable?: boolean;
     },
     { dispatch },
   ) => {
     dispatch(setReloadLetterContent({ reloadLetterContent: reloadLetterContent }));
     dispatch(setXmlLetterContent({ content: { xmlContent: xmlContent } }));
+    dispatch(
+      setEditorLetterUndoRedo({
+        letter: { undoAvailable: undoAvailable, redoAvailable: redoAvailable },
+      }),
+    );
   },
 );

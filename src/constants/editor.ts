@@ -12,6 +12,8 @@ export type DateCertainty = 'high' | 'medium' | 'low';
 export type LetterState = {
   viewMode: 'CODE' | 'WYSIWYG' | null;
   xmlContent: string | null;
+  undoAvailable: boolean;
+  redoAvailable: boolean;
 };
 
 export type HeaderPerson = {

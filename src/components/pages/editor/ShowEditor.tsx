@@ -7,7 +7,7 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SearchContainer from '@src/components/editor/letter/Left/Search/SearchContainer';
 import FavouritesContainer from '@src/components/editor/letter/Left/Favourites/FavouritesContainer';
 import AssignedContainer from '@src/components/editor/letter/Right/Assigned/AssignedContainer';
-import { ComponentMappingItem } from '@src/services/mappings/editorMappings';
+import { ComponentMappingItem, type PinnedLetter } from '@src/services/mappings/editorMappings';
 import { handleFavouriteClick } from '@src/components/editor/letter/Right/Favourite/LetterFavouriteHandling';
 const LetterViewContainer = React.lazy(() =>
   import('@src/components/editor/letter/Center/LetterViewContainer').catch((_err) => {
@@ -41,6 +41,7 @@ import LetterFontSizeHandle from '../../auto_anno/misc/LetterFontSizeHandle';
 import EntityProtagCreationContainer from '@src/components/editor/letter/Right/EntityProtagCreation/EntityProtagCreationContainer';
 import { EditorConstants } from '@src/constants/editor';
 import EntityPersonContainer from '@src/components/editor/letter/Right/EntityPerson/EntityPersonContainer';
+import { MiscUtils } from '@src/utils/misc';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
@@ -68,28 +69,37 @@ const ShowEditor = () => {
   const [isCodeView, setIsCodeView] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!isMounted.current) {
-      fetchPinnedLetters().then((pinnedLetters) => {
-        if (letterId && letterName) {
-          pinnedLetters.unshift({
-            id: parseInt(letterId),
-            name: letterName,
-            contentChanged: false,
-            isPinned: false,
-            viewMode: 'WYSIWYG',
-          });
-        }
-        dispatch(setEditorPinnedLetters({ pinnedLetters }));
-      });
-
-      if (letterId !== undefined && letterId !== null && !isNaN(parseInt(letterId))) {
-        dispatch(
-          setEditorLetter({
-            letter: { id: parseInt(letterId), name: letterName, viewMode: 'WYSIWYG' },
-          }),
-        );
+    const setPinnedLetters = async () => {
+      let pinnedLetters: PinnedLetter[] = [];
+      if (letterId && letterName) {
+        pinnedLetters = await fetchPinnedLetters();
+        pinnedLetters.unshift({
+          id: parseInt(letterId),
+          name: letterName,
+          contentChanged: false,
+          isPinned: false,
+          viewMode: 'WYSIWYG',
+        });
       }
-      isMounted.current = true;
+      dispatch(setEditorPinnedLetters({ pinnedLetters }));
+    };
+
+    if (!isMounted.current) {
+      try {
+        setPinnedLetters();
+        if (letterId !== undefined && letterId !== null && !isNaN(parseInt(letterId))) {
+          dispatch(
+            setEditorLetter({
+              letter: { id: parseInt(letterId), name: letterName, viewMode: 'WYSIWYG' },
+            }),
+          );
+        }
+        isMounted.current = true;
+      } catch (error) {
+        enqueueSnackbar(`Failed to fetch pinned letters: ${MiscUtils.misc.getErrorMessage(error)}`, {
+          variant: 'error',
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

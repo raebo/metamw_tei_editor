@@ -12,10 +12,7 @@ export type EditorKeyHandleItem = {
   description: string;
   key: string;
   component: ReactNode | null;
-  action?:
-    | (() => Promise<string | null>)
-    | ((dispatch: AppDispatch, getState: () => RootState) => Promise<string | null>)
-    | null;
+  action?: (() => Promise<string | null>) | ((dispatch: AppDispatch, getState: () => RootState) => Promise<string | null>) | null;
   xmlAction?: (xmlDoc: Document) => void;
   operationType?: string; // e.g., 'INSERT_PAGEBREAK', 'ADD_PARAGRAPH'
   successMessage?: string;
@@ -62,6 +59,8 @@ export interface EditorLetterData {
   name: string;
   title: string;
   xmlContent: string;
+  undoAvailable: boolean;
+  redoAvailable: boolean;
 }
 
 export interface MarkupPersonData {
@@ -166,6 +165,8 @@ export const mapApiToEditorLetterData = (apiLetter: any): EditorLetterData => {
     name: apiLetter.name,
     title: apiLetter.title,
     xmlContent: apiLetter.xml_content,
+    undoAvailable: apiLetter.undo_available,
+    redoAvailable: apiLetter.redo_available,
   };
 };
 

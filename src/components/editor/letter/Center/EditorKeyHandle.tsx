@@ -10,6 +10,7 @@ import {
 } from './lib/keyHandlerDefinitions';
 import { EditorKeyHandleItem } from '@src/services/mappings/editorMappings';
 import { enqueueSnackbar } from 'notistack';
+import { runOncePerAction } from '@src/utils/misc/stateHandling';
 
 function normalizeKeyEvent(event: KeyboardEvent): string {
   const keys: string[] = [];
@@ -44,8 +45,6 @@ const EditorKeyHandle = () => {
           event.preventDefault();
           event.stopPropagation();
 
-          // console.log('keyHandleDefinition', keyHandleDefinition);
-
           const action = generateKeyHandleAction(keyHandleDefinition);
 
           if (!action) {
@@ -54,7 +53,9 @@ const EditorKeyHandle = () => {
             });
             return;
           }
-          action(dispatch, getState);
+          runOncePerAction(keyHandleDefinition.key, async () => {
+            action(dispatch, getState);
+          });
         }
       } catch (error) {
         enqueueSnackbar('Fehler bei der Tastenkombination: ' + (error as Error).message, {
