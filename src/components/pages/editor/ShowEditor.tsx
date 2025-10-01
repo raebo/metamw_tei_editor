@@ -42,6 +42,8 @@ import EntityProtagCreationContainer from '@src/components/editor/letter/Right/E
 import { EditorConstants } from '@src/constants/editor';
 import EntityPersonContainer from '@src/components/editor/letter/Right/EntityPerson/EntityPersonContainer';
 import { MiscUtils } from '@src/utils/misc';
+import { ToolbarButton } from '@src/components/editor/letter/Util/ToolbarButton';
+import { ToolbarMenuButton } from '@src/components/editor/letter/Util/ToolbarMenuButton';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
@@ -423,64 +425,52 @@ const ShowEditor = () => {
         >
           <List component="nav" aria-label="handle edit labels">
             <QuickContentFormatter />
-            <Tooltip title={'Click for more actions'} placement={'right'}>
-              <ListItemButton
-                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.USER_ACTIONS)}
-                onClick={(event) => handleButtonMenuClick(event)}
-              >
-                <ListItemIcon>
-                  <MoreHorizIcon />
-                </ListItemIcon>
-              </ListItemButton>
-            </Tooltip>
-            <Tooltip title={'This button has currently no function'} placement={'right'}>
-              <ListItemButton
-                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.ASSIGNED)}
-                onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
-              >
-                <ListItemIcon>
-                  <AssignmentIcon />
-                </ListItemIcon>
-              </ListItemButton>
-            </Tooltip>
-            <Tooltip title={'Add letter to favourite list'} placement={'right'}>
-              <ListItemButton
-                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.SET_FAVOURITE)}
-                onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
-              >
-                <ListItemIcon>
-                  <StarOutlineIcon />
-                </ListItemIcon>
-              </ListItemButton>
-            </Tooltip>
+            <ToolbarMenuButton
+              title="Click for more actions"
+              selected={selectedItemRight === EditorConstants.compMappingRight.USER_ACTIONS}
+              onClick={(event) => handleButtonMenuClick(event)}
+            >
+              <MoreHorizIcon />
+            </ToolbarMenuButton>
+            <ToolbarMenuButton
+              title="This button has currently no function"
+              selected={selectedItemRight === EditorConstants.compMappingRight.ASSIGNED}
+              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
+            >
+              <AssignmentIcon />
+            </ToolbarMenuButton>
 
-            <Tooltip title={'Publish letter to backend'} placement="right">
-              <ListItemButton
-                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.compMappingRight.PUBLISH_LETTER)}
-                onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
-              >
-                <ListItemIcon>
-                  <CloudUploadOutlinedIcon />
-                </ListItemIcon>
-              </ListItemButton>
-            </Tooltip>
-            <Tooltip title={isCodeView ? 'Switch to WYSIWYG view' : 'Switch to Code view'} placement="right">
-              <ListItemButton onClick={handleToggleCodeview} selected={isCodeView}>
-                <ListItemIcon>
-                  <CodeIcon color={isCodeView ? 'primary' : 'action'} />
-                </ListItemIcon>
-              </ListItemButton>
-            </Tooltip>
-            <Tooltip title={'Reset letter status'} placement="right">
-              <ListItemButton
-                selected={!(selectedItemRight === false || selectedItemRight !== EditorConstants.dialogTypes.RESET_LETTER)}
-                onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
-              >
-                <ListItemIcon>
-                  <RestartAltIcon />
-                </ListItemIcon>
-              </ListItemButton>
-            </Tooltip>
+            <ToolbarMenuButton
+              title="Add letter to favourite list"
+              selected={selectedItemRight === EditorConstants.compMappingRight.SET_FAVOURITE}
+              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
+            >
+              <StarOutlineIcon />
+            </ToolbarMenuButton>
+
+            <ToolbarMenuButton
+              title="Publish letter to backend"
+              selected={selectedItemRight === EditorConstants.compMappingRight.PUBLISH_LETTER}
+              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
+            >
+              <CloudUploadOutlinedIcon />
+            </ToolbarMenuButton>
+
+            <ToolbarMenuButton
+              title={isCodeView ? 'Switch to WYSIWYG view' : 'Switch to Code view'}
+              selected={isCodeView}
+              onClick={handleToggleCodeview}
+            >
+              <CodeIcon color={isCodeView ? 'primary' : 'action'} />
+            </ToolbarMenuButton>
+
+            <ToolbarMenuButton
+              title="Reset letter status"
+              selected={selectedItemRight === EditorConstants.dialogTypes.RESET_LETTER}
+              onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
+            >
+              <RestartAltIcon />
+            </ToolbarMenuButton>
           </List>
         </Box>
       </Box>
