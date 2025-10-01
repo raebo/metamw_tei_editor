@@ -54,7 +54,13 @@ const EditorKeyHandle = () => {
             return;
           }
           runOncePerAction(keyHandleDefinition.key, async () => {
-            action(dispatch, getState);
+            try {
+              await action(dispatch, getState);
+            } catch (error) {
+              enqueueSnackbar('Fehler bei der Tastenkombination: ' + (error as Error).message, {
+                variant: 'error',
+              });
+            }
           });
         }
       } catch (error) {
