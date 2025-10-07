@@ -17,7 +17,9 @@ import type { EditorLetterData } from '@src/services/mappings/editorMappings';
 
 const LetterViewContainer = () => {
   const dispatch = useAppDispatch();
-  const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize);
+  const stateLetterFontSize = useSelector(
+    (state: RootState) => state.auth.settings?.letterFontSize,
+  );
   const containerRef = React.useRef<HTMLDivElement>(null);
   const xmlContentRef = useRef<HTMLDivElement | null>(null);
   const [anchorPosition, setAnchorPosition] = useState<null | { top: number; left: number }>(null);
@@ -32,7 +34,9 @@ const LetterViewContainer = () => {
     redoAvailable: false,
   });
 
-  const reloadLetterContent = useSelector((state: RootState) => state.editorLetter.reloadLetterContent);
+  const reloadLetterContent = useSelector(
+    (state: RootState) => state.editorLetter.reloadLetterContent,
+  );
   const isDebugMode = process.env.REACT_DEBUG_MODE === 'true';
 
   useEffect(() => {
@@ -47,10 +51,13 @@ const LetterViewContainer = () => {
         });
         return;
       }
-      const hasPinnedLetters = statePinnedLetters.some((letter) => letter.id === stateEditorLetter.id && letter.isPinned);
+      const hasPinnedLetters = statePinnedLetters.some(
+        (letter) => letter.id === stateEditorLetter.id && letter.isPinned == true,
+      );
 
       let letterData: EditorLetterData | null = null;
 
+      //TODO optimize: if letter is pinned, fetch from pinned endpoint, else from normal endpoint
       if (hasPinnedLetters) {
         letterData = await fetchPinnedLetterData(letterId);
       } else {
@@ -65,18 +72,28 @@ const LetterViewContainer = () => {
       });
     };
 
-    try {
-      void loadLetterData();
-    } catch (error) {
-      enqueueSnackbar('Fehler beim Laden des Briefinhalts: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
-    }
+    loadLetterData().catch((error) => {
+      enqueueSnackbar(
+        'Fehler beim Laden des Briefinhalts: ' + MiscUtils.misc.getErrorMessage(error),
+        { variant: 'error' },
+      );
+    });
   }, [stateEditorLetter.id, stateEditorLetter.viewMode, statePinnedLetters]);
 
   useEffect(() => {
     const reloadNewData = async () => {
+      let letterData: EditorLetterData | null = null;
       if (stateEditorLetter.id === null) return;
 
-      const letterData = await fetchPinnedLetterData(stateEditorLetter.id);
+      const hasPinnedLetters = statePinnedLetters.some(
+        (letter) => letter.id === stateEditorLetter.id && letter.isPinned == true,
+      );
+
+      if (hasPinnedLetters) {
+        letterData = await fetchPinnedLetterData(stateEditorLetter.id);
+      } else {
+        letterData = await fetchLetterData(stateEditorLetter.id);
+      }
 
       setLetterState({
         viewMode: stateEditorLetter.viewMode,
@@ -96,11 +113,12 @@ const LetterViewContainer = () => {
     };
 
     if (reloadLetterContent && stateEditorLetter?.id !== null) {
-      try {
-        void reloadNewData();
-      } catch (error) {
-        enqueueSnackbar('Fehler beim Neuladen des Briefinhalts: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
-      }
+      void reloadNewData().catch((error) => {
+        enqueueSnackbar(
+          'Fehler beim Neuladen des Briefinhalts: ' + MiscUtils.misc.getErrorMessage(error),
+          { variant: 'error' },
+        );
+      });
     }
   }, [dispatch, reloadLetterContent, stateEditorLetter]);
 
@@ -126,7 +144,12 @@ const LetterViewContainer = () => {
           {letterState.xmlContent ? (
             <>
               {letterState.viewMode === 'WYSIWYG' && (
-                <div className="letter-xml" id="letterXml" ref={containerRef} style={{ fontSize: `${stateLetterFontSize}%` }}>
+                <div
+                  className="letter-xml"
+                  id="letterXml"
+                  ref={containerRef}
+                  style={{ fontSize: `${stateLetterFontSize}%` }}
+                >
                   <div ref={xmlContentRef} id="letterXmlContent" style={{ padding: 20 }}>
                     {letterState.xmlContent && parserXmlMemo}
                   </div>
@@ -140,11 +163,15 @@ const LetterViewContainer = () => {
                   />
                 </div>
               )}
-              {letterState.viewMode === 'CODE' && letterState.xmlContent && <LetterViewCode xmlString={letterState.xmlContent} />}
+              {letterState.viewMode === 'CODE' && letterState.xmlContent && (
+                <LetterViewCode xmlString={letterState.xmlContent} />
+              )}
             </>
           ) : (
             <p>
-              <Alert severity="warning">Kein Brief zur Anzeige vorhanden, bitte wählen Sie einen Brief über die Suche aus.</Alert>
+              <Alert severity="warning">
+                Kein Brief zur Anzeige vorhanden, bitte wählen Sie einen Brief über die Suche aus.
+              </Alert>
             </p>
           )}
         </div>
