@@ -4,7 +4,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import { fetchPinnedLetters, setLetterPinStatus } from '@src/services/editor/apiPinnedLettersRequest.service';
 import { useSelector } from 'react-redux';
-import { setEditorLetter, setEditorPinnedLetters } from '@src/redux/slices/editor.letter.slice';
+import { setDialogType, setEditorLetter, setEditorPinnedLetters, setTabToCloseId } from '@src/redux/slices/editor.letter.slice';
 import { RootState } from '@src/redux/redux.store';
 import { enqueueSnackbar } from 'notistack';
 import { PinnedLetter } from '@src/services/mappings/editorMappings';
@@ -12,17 +12,11 @@ import { setEditorTabAndPinnedLettersThunk, setEditorTabAndPinnedLetterThunk } f
 import { useAppDispatch } from '@src/redux/hooks';
 import { fetchLetterData } from '@src/services/editor/apiLettersRequest.service';
 import { MiscUtils } from '@src/utils/misc';
+import { EditorUtils } from '@src/utils/editor';
+import { EditorConstants } from '@src/constants/editor';
 
 const updatePinnedLetterStatus = (pinnedLetters: PinnedLetter[], letterId: number, isPinned: boolean): PinnedLetter[] => {
   return pinnedLetters.map((letter) => (letter.id === letterId ? { ...letter, isPinned: isPinned } : letter));
-};
-
-const removePinnedLetter = (pinnedLetters: PinnedLetter[], letterId: number): PinnedLetter[] => {
-  return pinnedLetters.filter((letter) => letter.id !== letterId);
-};
-
-const newTabNumber = (tabNumber: number): number => {
-  return tabNumber - 1;
 };
 
 const LetterTabs = () => {
@@ -101,20 +95,26 @@ const LetterTabs = () => {
     setActiveTab(newTabValue);
   };
 
-  const handleCloseTab = async (pinnedLetter: PinnedLetter, tabIndex: number) => {
+  const handleCloseTab = async (tabPinnedLetter: PinnedLetter, tabIndex: number) => {
+    const openCommitCloseTabPanel = (tabLetterId: number): void => {
+      dispatch(setTabToCloseId({ tabToCloseId: tabLetterId }));
+      dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT }));
+      return;
+    };
+
     try {
-      const success = await setLetterPinStatus(pinnedLetter, false);
+      if (EditorUtils.letterTabs.hasUnsavedChanges(tabPinnedLetter)) {
+        openCommitCloseTabPanel(tabPinnedLetter.id);
+        return;
+      }
+
+      const success = await setLetterPinStatus(tabPinnedLetter, false);
 
       if (success) {
-        dispatch(
-          setEditorTabAndPinnedLettersThunk({
-            pinnedLetters: removePinnedLetter(statePinnedLetters, pinnedLetter.id),
-            tabNumber: newTabNumber(tabIndex),
-          }),
-        );
+        EditorUtils.letterTabs.removeStateTab(dispatch, statePinnedLetters, tabPinnedLetter, tabIndex);
       }
     } catch (err) {
-      enqueueSnackbar(`Failed to pin letter: ${err}`, { variant: 'error' });
+      enqueueSnackbar(`Failed to close pinned letter: ${err}`, { variant: 'error' });
     }
   };
 
@@ -164,11 +164,11 @@ const LetterTabs = () => {
                   <IconButton
                     size="small"
                     onClick={(e) => {
-                      e.stopPropagation(); // Prevent triggering the tab click event
+                      e.stopPropagation();
                       if (pinnedLetter.isPinned) {
-                        handleCloseTab(pinnedLetter, index); // Call handleCloseTab if pinned
+                        void handleCloseTab(pinnedLetter, index);
                       } else {
-                        addToPinned(pinnedLetter); // Call addToPinned if not pinned
+                        void addToPinned(pinnedLetter);
                       }
                     }}
                     sx={{ ml: 1 }}

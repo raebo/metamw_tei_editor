@@ -3,10 +3,7 @@ import { EditorUtils } from '@src/utils/editor/index';
 import type { AppDispatch } from '@src/redux/redux.store';
 import type { Action, ThunkAction } from '@reduxjs/toolkit';
 import { RootState } from '@src/redux/redux.store';
-import {
-  setEditorLetterUndoRedo,
-  setEditorPinnedLetterContentChanged,
-} from '@src/redux/slices/editor.letter.slice';
+import { setEditorLetterUndoRedo, setEditorPinnedLetterContentChanged } from '@src/redux/slices/editor.letter.slice';
 
 // Accepts either:
 // 1. Plain actions (`Action`)

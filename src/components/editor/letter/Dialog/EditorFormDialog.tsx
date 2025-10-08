@@ -29,6 +29,7 @@ import GreetingsFormulaDialog from './Components/Misc/GreetingsFormulaDialog';
 import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
+import CloseTabWithContent from '@src/components/editor/letter/Dialog/Components/CloseTabWithContentDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -49,17 +50,6 @@ export interface DefaultDialogProps {
 }
 
 const DialogTitles: Record<string, string> = {
-  [EditorConstants.dialogTypes.EDIT_LANGUAGES]: 'Sprachen Verwalten',
-  [EditorConstants.dialogTypes.EDIT_NOTE]: 'Kommentar Bearbeiten/Löschen',
-  [EditorConstants.dialogTypes.RESET_LETTER]: 'Brief Zurücksetzen',
-  [EditorConstants.dialogTypes.PUBLISH_LETTER]: 'Brief Veröffentlichen',
-  [EditorConstants.dialogTypes.DATE_WHEN_ADD]: "Datum 'WHEN' Auszeichnen",
-  [EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD]: "Datum 'WHEN CUSTOM' Auszeichnen",
-  [EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD]: "Datum 'Not After' Auszeichnen",
-  [EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD]: "Datum 'Not Before' Auszeichnen",
-  [EditorConstants.dialogTypes.DATE_FROM_TO_ADD]: "Datum 'From To' Auszeichnen",
-  [EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD]: "Datum 'NotBefore NotAfter' Auszeichnen",
-  [EditorConstants.dialogTypes.ATTACHMENT_ADD]: 'Beilage Hinzufügen',
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: 'Begrüßungsformel Hinzufügen',
   [EditorConstants.dialogTypes.ADD_NEW_LETTER]: 'Neuen Brief Hinzufügen',
   [EditorConstants.dialogTypes.ADD_NOTE]: 'Kommentar Hinzufügen',
@@ -67,12 +57,24 @@ const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: 'Verweis an einen Brief an den Protagonisten Hinzufügen',
   [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: 'Verweis an einen Brief vom Protagonisten Hinzufügen',
   [EditorConstants.dialogTypes.ADD_WRITING_PART]: 'Schreibakt Hinzufügen',
+  [EditorConstants.dialogTypes.ATTACHMENT_ADD]: 'Beilage Hinzufügen',
+  [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: 'Tab mit Inhalt Schließen?',
+  [EditorConstants.dialogTypes.DATE_WHEN_ADD]: "Datum 'WHEN' Auszeichnen",
+  [EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD]: "Datum 'WHEN CUSTOM' Auszeichnen",
+  [EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD]: "Datum 'Not After' Auszeichnen",
+  [EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD]: "Datum 'Not Before' Auszeichnen",
+  [EditorConstants.dialogTypes.DATE_FROM_TO_ADD]: "Datum 'From To' Auszeichnen",
+  [EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD]: "Datum 'NotBefore NotAfter' Auszeichnen",
+  [EditorConstants.dialogTypes.EDIT_LANGUAGES]: 'Sprachen Verwalten',
+  [EditorConstants.dialogTypes.EDIT_NOTE]: 'Kommentar Bearbeiten/Löschen',
   [EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA]: 'Begrüßungsformel Verwalten',
   [EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER]: 'Autoren/Schreiber Verwalten',
   [EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER]: 'Autoren/Schreiber Verwalten',
   [EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: 'Empfänger Verwalten',
   [EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER]: 'Adresse Sender Verwalten',
   [EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT]: 'Adresse Empfänger Verwalten',
+  [EditorConstants.dialogTypes.PUBLISH_LETTER]: 'Brief Veröffentlichen',
+  [EditorConstants.dialogTypes.RESET_LETTER]: 'Brief Zurücksetzen',
 };
 
 const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) => React.ReactNode> = {
@@ -86,6 +88,7 @@ const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) 
   [EditorConstants.dialogTypes.ADD_WRITING_PART]: (props) => <AddWritingActDialog {...props} />,
   [EditorConstants.dialogTypes.ADD_TEI_HEADER]: (props) => <ManageTeiHeaderDialog {...props} />,
   [EditorConstants.dialogTypes.ATTACHMENT_ADD]: (props) => <AttachmentAddDialog {...props} />,
+  [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: (props) => <CloseTabWithContent {...props} />,
   [EditorConstants.dialogTypes.DATE_WHEN_ADD]: (props) => <DateAddDialog {...props} dateType={EditorConstants.dateDialog.dateTypes.WHEN} />,
   [EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD]: (props) => (
     <DateAddDialog {...props} dateType={EditorConstants.dateDialog.dateTypes.WHEN_CUSTOM} />

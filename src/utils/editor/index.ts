@@ -15,6 +15,7 @@ import { miscContentCheck } from '@src/utils/editor/miscContentCheck';
 import { contentFlow } from '@src/utils/editor/contentFlow';
 import { undoRedo } from '@src/utils/editor/undoRedo';
 import { backendOrchestrator } from '@src/utils/editor/backendOrchestrator';
+import { letterTabs } from '@src/utils/editor/letterTabs';
 
 export type EditorUtilsType = {
   backendService: typeof backendService;
@@ -25,6 +26,7 @@ export type EditorUtilsType = {
   placeDataService: typeof placeDataService;
   protagCreationDataService: typeof protagCreationDataService;
   keyPressHandles: typeof keyPressHandles;
+  letterTabs: typeof letterTabs;
   markupGeneration: typeof markupGeneration;
   miscContentCheck: typeof miscContentCheck;
   nodeTypes: typeof nodeTypes;
@@ -46,6 +48,7 @@ function createEditorUtils(): EditorUtilsType {
     placeDataService,
     protagCreationDataService,
     keyPressHandles,
+    letterTabs,
     markupGeneration,
     miscContentCheck,
     nodeTypes,

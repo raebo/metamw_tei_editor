@@ -118,19 +118,13 @@ const EditorLetterSlice = createSlice({
     setEditorPinnedLetters(state, action) {
       state.pinnedLetters = [...action.payload.pinnedLetters];
     },
-    setEditorPinnedLetterViewMode(
-      state,
-      action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>,
-    ) {
+    setEditorPinnedLetterViewMode(state, action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>) {
       const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
       if (letter) {
         letter.viewMode = action.payload.viewMode;
       }
     },
-    setEditorPinnedLetterContentChanged(
-      state,
-      action: PayloadAction<{ id: number; contentChanged: boolean }>,
-    ) {
+    setEditorPinnedLetterContentChanged(state, action: PayloadAction<{ id: number; contentChanged: boolean }>) {
       const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
       if (letter) {
         letter.contentChanged = action.payload.contentChanged;

@@ -1,9 +1,4 @@
-import {
-  EditorLetterData,
-  mapApiToEditorLetterData,
-  mapApiToPinnedLetter,
-  PinnedLetter,
-} from '../mappings/editorMappings';
+import { EditorLetterData, mapApiToEditorLetterData, mapApiToPinnedLetter, PinnedLetter } from '../mappings/editorMappings';
 import initApi from '../apiRequest.service';
 
 export const fetchPinnedLetters = async (): Promise<PinnedLetter[]> => {
@@ -18,13 +13,8 @@ export const fetchPinnedLetters = async (): Promise<PinnedLetter[]> => {
   }
 };
 
-export const setLetterPinStatus = async (
-  pinnedLetter: PinnedLetter,
-  isPinned: boolean,
-): Promise<boolean> => {
-  const response = await initApi
-    .initApi()
-    .patch(`/jwt/editor/pinned_letters/${pinnedLetter.id}/pinned`, { isPinned: isPinned });
+export const setLetterPinStatus = async (pinnedLetter: PinnedLetter, isPinned: boolean): Promise<boolean> => {
+  const response = await initApi.initApi().patch(`/jwt/editor/pinned_letters/${pinnedLetter.id}/pinned`, { isPinned: isPinned });
 
   if (response.status === 200) {
     return true;
