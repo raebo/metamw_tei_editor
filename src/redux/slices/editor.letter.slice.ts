@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { PinnedLetter } from '../../services/mappings/editorMappings';
+import { PinnedLetter } from '@src/services/mappings/editorMappings';
 
 interface EditorLetterSlice {
   letter: {
@@ -13,6 +13,7 @@ interface EditorLetterSlice {
     undoAvailable: boolean;
     redoAvailable: boolean;
   };
+  tabToCloseId: number | null;
   tabLetter: {
     //PinnedLetter
     id: number | null;
@@ -55,6 +56,7 @@ const initialState: EditorLetterSlice = {
     undoAvailable: false,
     redoAvailable: false,
   },
+  tabToCloseId: null, // letter id of the tab to close
   tabLetter: {
     id: null,
     name: null,
@@ -116,10 +118,22 @@ const EditorLetterSlice = createSlice({
     setEditorPinnedLetters(state, action) {
       state.pinnedLetters = [...action.payload.pinnedLetters];
     },
-    setEditorPinnedLetterViewMode(state, action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>) {
+    setEditorPinnedLetterViewMode(
+      state,
+      action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>,
+    ) {
       const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
       if (letter) {
         letter.viewMode = action.payload.viewMode;
+      }
+    },
+    setEditorPinnedLetterContentChanged(
+      state,
+      action: PayloadAction<{ id: number; contentChanged: boolean }>,
+    ) {
+      const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
+      if (letter) {
+        letter.contentChanged = action.payload.contentChanged;
       }
     },
     addLetterToPinned(state, action) {
@@ -158,6 +172,9 @@ const EditorLetterSlice = createSlice({
         },
       };
     },
+    setTabToCloseId(state, action: PayloadAction<{ tabToCloseId: number | null }>) {
+      state.tabToCloseId = action.payload.tabToCloseId;
+    },
   },
 });
 
@@ -170,6 +187,7 @@ export const {
   setEditorLetterActOfWriting,
   setEditorPinnedLetters,
   setEditorPinnedLetterViewMode,
+  setEditorPinnedLetterContentChanged,
   setEditorSearchValue,
   setEditorSelectedItem,
   setEditorTabNumber,
@@ -178,6 +196,7 @@ export const {
   setDialogType,
   setLetterReference,
   setNodeClicked,
+  setTabToCloseId,
 } = EditorLetterSlice.actions;
 
 export default EditorLetterSlice.reducer;
