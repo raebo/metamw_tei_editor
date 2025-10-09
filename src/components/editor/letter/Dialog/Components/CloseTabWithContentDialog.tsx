@@ -71,7 +71,7 @@ const CloseTabWithContent = (props: DefaultDialogProps) => {
           Abbrechen
         </Button>
         <Button size={EditorConstants.styles.panel.buttonSize} variant="contained" onClick={() => closeTab()} color="primary">
-          Zurücksetzen
+          Brief Schließen
         </Button>
       </DialogActions>
     </>

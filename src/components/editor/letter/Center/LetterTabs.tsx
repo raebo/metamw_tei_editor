@@ -1,23 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs, Tab, Box, IconButton } from '@mui/material';
+import { Tabs, Tab, Box, Tooltip, IconButton, Typography, type Theme } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import AddIcon from '@mui/icons-material/Add';
+import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { fetchPinnedLetters, setLetterPinStatus } from '@src/services/editor/apiPinnedLettersRequest.service';
 import { useSelector } from 'react-redux';
 import { setDialogType, setEditorLetter, setEditorPinnedLetters, setTabToCloseId } from '@src/redux/slices/editor.letter.slice';
 import { RootState } from '@src/redux/redux.store';
 import { enqueueSnackbar } from 'notistack';
 import { PinnedLetter } from '@src/services/mappings/editorMappings';
-import { setEditorTabAndPinnedLettersThunk, setEditorTabAndPinnedLetterThunk } from '@src/redux/thunks/editor.letter.thunk';
+import { setEditorTabAndPinnedLetterThunk } from '@src/redux/thunks/editor.letter.thunk';
 import { useAppDispatch } from '@src/redux/hooks';
 import { fetchLetterData } from '@src/services/editor/apiLettersRequest.service';
 import { MiscUtils } from '@src/utils/misc';
 import { EditorUtils } from '@src/utils/editor';
 import { EditorConstants } from '@src/constants/editor';
+import theme from '@src/utils/theme/theme';
 
-const updatePinnedLetterStatus = (pinnedLetters: PinnedLetter[], letterId: number, isPinned: boolean): PinnedLetter[] => {
-  return pinnedLetters.map((letter) => (letter.id === letterId ? { ...letter, isPinned: isPinned } : letter));
-};
+function getTabTextColor(theme: Theme, { isPinned, isActive }: { isPinned: boolean; isActive: boolean }) {
+  const tabGroup = isPinned ? theme.palette.editorTabs.savedTab : theme.palette.editorTabs.unsavedTab;
+  return isActive ? tabGroup.active.color : tabGroup.inactive.color;
+}
 
 const LetterTabs = () => {
   const dispatch = useAppDispatch();
@@ -125,7 +128,7 @@ const LetterTabs = () => {
       if (success) {
         dispatch(
           setEditorPinnedLetters({
-            pinnedLetters: updatePinnedLetterStatus(statePinnedLetters, pinnedLetter.id, true),
+            pinnedLetters: EditorUtils.letterTabs.updatePinnedLetterStatus(statePinnedLetters, pinnedLetter.id, true),
           }),
         );
       }
@@ -143,14 +146,14 @@ const LetterTabs = () => {
           variant="scrollable"
           scrollButtons="auto"
           allowScrollButtonsMobile
-          aria-label="scrollable force tabs example"
+          aria-label="file tabs"
           sx={{
             '& .MuiTabs-scrollButtons': {
-              backgroundColor: '#f0f0f0', // Background color of the scroll buttons
-              fontWeight: 'bold', // Font weight of the scroll buttons
-              color: '#2639d0', // Color of the arrow icons
+              backgroundColor: '#f0f0f0',
+              fontWeight: 'bold',
+              color: '#2639d0',
               '&.Mui-disabled': {
-                opacity: 0.3, // Style for disabled scroll buttons
+                opacity: 0.3,
               },
             },
           }}
@@ -159,28 +162,61 @@ const LetterTabs = () => {
             <Tab
               key={pinnedLetter.id}
               label={
-                <Box display="flex" alignItems="center">
-                  {pinnedLetter.name}
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (pinnedLetter.isPinned) {
-                        void handleCloseTab(pinnedLetter, index);
-                      } else {
-                        void addToPinned(pinnedLetter);
-                      }
-                    }}
-                    sx={{ ml: 1 }}
-                  >
-                    {pinnedLetter.isPinned ? (
-                      <CloseIcon fontSize="small" /> // Show CloseIcon if pinned
-                    ) : (
-                      <AddIcon fontSize="small" /> // Show AddIcon if not pinned
-                    )}
-                  </IconButton>
-                </Box>
+                <Tooltip title={pinnedLetter.name} arrow>
+                  <Box display="flex" alignItems="center">
+                    {!pinnedLetter.isPinned && <RadioButtonUncheckedIcon fontSize="small" sx={{ mr: 0.5, color: 'warning.main' }} />}
+
+                    <Typography
+                      variant="body2"
+                      sx={(theme) => ({
+                        maxWidth: 120,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        fontStyle: pinnedLetter.isPinned ? 'normal' : 'italic',
+                        color: getTabTextColor(theme, {
+                          isPinned: pinnedLetter.isPinned,
+                          isActive: index === activeTab,
+                        }),
+                        fontWeight: index === activeTab ? 'bold' : 'normal',
+                      })}
+                    >
+                      {pinnedLetter.name}
+                    </Typography>
+
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (pinnedLetter.isPinned) {
+                          void handleCloseTab(pinnedLetter, index);
+                        } else {
+                          void addToPinned(pinnedLetter);
+                        }
+                      }}
+                      sx={{ ml: 0.5 }}
+                      title={pinnedLetter.isPinned ? 'Close tab' : 'Save to workspace'}
+                    >
+                      {pinnedLetter.isPinned ? (
+                        <CloseIcon fontSize="small" />
+                      ) : (
+                        <BookmarkAddIcon
+                          fontSize="small"
+                          sx={(theme) => ({
+                            color: theme.palette.editorTabs.unsavedTab.bookmarkIconColor,
+                          })}
+                        />
+                      )}
+                    </IconButton>
+                  </Box>
+                </Tooltip>
               }
+              sx={{
+                backgroundColor: pinnedLetter.isPinned ? 'transparent' : (theme) => theme.palette.editorTabs.unsavedTab.background,
+                borderBottom: pinnedLetter.isPinned
+                  ? '2px solid transparent'
+                  : (theme) => `2px solid ${theme.palette.editorTabs.unsavedTab.border}`,
+              }}
             />
           ))}
         </Tabs>

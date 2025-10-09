@@ -1,10 +1,10 @@
 import React from 'react';
-import { ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import EditNote from "@mui/icons-material/EditNote";
+import { ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import EditNote from '@mui/icons-material/EditNote';
 
 interface SearchResultEntryProps {
   letter: {
-    id: number
+    id: number;
     name: string;
   };
   clickHandler: (letterId: number, letterName: string) => void;
@@ -19,6 +19,6 @@ const SearchResultEntry = ({ letter, clickHandler }: SearchResultEntryProps) => 
       <ListItemText primary={letter.name} />
     </ListItemButton>
   );
-}
+};
 
-export default SearchResultEntry
+export default SearchResultEntry;

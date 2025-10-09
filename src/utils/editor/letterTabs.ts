@@ -59,4 +59,7 @@ export const letterTabs = {
       }),
     );
   },
+  updatePinnedLetterStatus: (pinnedLetters: PinnedLetter[], letterId: number, isPinned: boolean): PinnedLetter[] => {
+    return pinnedLetters.map((letter) => (letter.id === letterId ? { ...letter, isPinned: isPinned } : letter));
+  },
 };

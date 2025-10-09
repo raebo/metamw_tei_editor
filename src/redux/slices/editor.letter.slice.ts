@@ -128,6 +128,7 @@ const EditorLetterSlice = createSlice({
       const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
       if (letter) {
         letter.contentChanged = action.payload.contentChanged;
+        letter.isPinned = true; // This will trigger a re-render
       }
     },
     addLetterToPinned(state, action) {
