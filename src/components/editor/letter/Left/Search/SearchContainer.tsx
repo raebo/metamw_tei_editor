@@ -50,15 +50,12 @@ const SearchContainer = () => {
 
   const handleClick = useCallback(
     (letterId: number, letterName: string) => {
-      const newPinnedLetters = EditorUtils.pinnedLetters.computeNewPinnedLetters(
-        statePinnedLetters,
-        {
-          id: letterId,
-          name: letterName,
-          isPinned: null,
-          viewMode: 'WYSIWYG',
-        },
-      );
+      const newPinnedLetters = EditorUtils.pinnedLetters.computeNewPinnedLetters(statePinnedLetters, {
+        id: letterId,
+        name: letterName,
+        isPinned: null,
+        viewMode: 'WYSIWYG',
+      });
 
       dispatch(setEditorPinnedLetters({ pinnedLetters: newPinnedLetters }));
       dispatch(

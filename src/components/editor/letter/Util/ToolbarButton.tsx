@@ -9,12 +9,7 @@ type ToolbarButtonProps = {
   onClick: (() => void) | ((event: React.MouseEvent<HTMLDivElement>) => void);
 };
 
-export const ToolbarButton: React.FC<ToolbarButtonProps> = ({
-  title,
-  active = false,
-  onClick,
-  icon,
-}) => {
+export const ToolbarButton: React.FC<ToolbarButtonProps> = ({ title, active = false, onClick, icon }) => {
   const theme = useTheme<Theme>();
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -39,12 +34,8 @@ export const ToolbarButton: React.FC<ToolbarButtonProps> = ({
         onClick={handleClick}
         sx={{
           border: `1px solid ${theme.palette.toolbarButton.borderColor}`,
-          bgcolor: active
-            ? theme.palette.toolbarButton.activeBg
-            : theme.palette.toolbarButton.inactiveBg,
-          color: active
-            ? theme.palette.toolbarButton.activeColor
-            : theme.palette.toolbarButton.inactiveColor,
+          bgcolor: active ? theme.palette.toolbarButton.activeBg : theme.palette.toolbarButton.inactiveBg,
+          color: active ? theme.palette.toolbarButton.activeColor : theme.palette.toolbarButton.inactiveColor,
           border: '1px solid',
           borderColor: active ? theme.palette.toolbarButton.activeBg : '#ccc',
           borderRadius: 1,

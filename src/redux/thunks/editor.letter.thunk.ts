@@ -19,10 +19,7 @@ import { PinnedLetter } from '@src/services/mappings/editorMappings';
 
 export const setEditorTabAndPinnedLettersThunk = createAsyncThunk(
   'editor/setEditorTabAndPinnedLetters',
-  async (
-    { pinnedLetters, tabNumber }: { pinnedLetters: PinnedLetter[]; tabNumber: number },
-    { dispatch },
-  ) => {
+  async ({ pinnedLetters, tabNumber }: { pinnedLetters: PinnedLetter[]; tabNumber: number }, { dispatch }) => {
     dispatch(setEditorPinnedLetters({ pinnedLetters }));
     dispatch(setEditorTabNumber({ tabNumber }));
     if (tabNumber === -1) {

@@ -118,6 +118,9 @@
   },
   "packageManager": "yarn@4.9.1",
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": "eslint"
+    "*.{js,ts,tsx}": [
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ]
   }
 }

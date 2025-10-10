@@ -8,12 +8,7 @@ type ToolbarMenuButtonProps = {
   icon?: React.ReactNode;
 };
 
-export const ToolbarMenuButton: React.FC<ToolbarMenuButtonProps> = ({
-  title,
-  selected = false,
-  onClick,
-  icon,
-}) => {
+export const ToolbarMenuButton: React.FC<ToolbarMenuButtonProps> = ({ title, selected = false, onClick, icon }) => {
   const theme = useTheme();
 
   return (
@@ -23,16 +18,10 @@ export const ToolbarMenuButton: React.FC<ToolbarMenuButtonProps> = ({
         onClick={onClick}
         sx={{
           border: `1px solid ${theme.palette.toolbarButton.borderColor}`,
-          bgcolor: selected
-            ? theme.palette.toolbarButton.activeBg
-            : theme.palette.toolbarButton.inactiveBg,
-          color: selected
-            ? theme.palette.toolbarButton.activeColor
-            : theme.palette.toolbarButton.inactiveColor,
+          bgcolor: selected ? theme.palette.toolbarButton.activeBg : theme.palette.toolbarButton.inactiveBg,
+          color: selected ? theme.palette.toolbarButton.activeColor : theme.palette.toolbarButton.inactiveColor,
           borderRadius: 1,
-          '&:hover': selected
-            ? { bgcolor: theme.palette.toolbarButton.hoverBg }
-            : { bgcolor: theme.palette.toolbarButton.hoverBg },
+          '&:hover': selected ? { bgcolor: theme.palette.toolbarButton.hoverBg } : { bgcolor: theme.palette.toolbarButton.hoverBg },
         }}
       >
         <ListItemIcon>{icon}</ListItemIcon>

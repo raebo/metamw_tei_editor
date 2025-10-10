@@ -9,9 +9,7 @@ import { EditorConstants } from '@src/constants/editor';
 import { DialogActionButton } from './DialogActionButton';
 
 export interface GreetingsFormulaProps extends DefaultDialogProps {
-  formulaType:
-    | typeof EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA
-    | typeof EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA;
+  formulaType: typeof EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA | typeof EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA;
 }
 
 type GreetingFormData = {
@@ -49,8 +47,7 @@ const GreetingsFormulaDialog = (props: GreetingsFormulaProps) => {
       if (props.formulaType === 'ADD_NEW_GREETING') {
         updateFormData({ greetingIsNew: true });
       } else if (props.formulaType === 'MANAGE_GREETINGS_FORMULA') {
-        const greetingPos =
-          (greetingNode.getAttribute('rend') as 'center' | 'left' | 'right') || 'center';
+        const greetingPos = (greetingNode.getAttribute('rend') as 'center' | 'left' | 'right') || 'center';
         updateFormData({
           greetingIsNew: false,
           greetingPosition: greetingPos,
@@ -141,11 +138,7 @@ const GreetingsFormulaDialog = (props: GreetingsFormulaProps) => {
           </div>
         </div>
       </DialogContent>
-      <DialogActionButton
-        label={'Grußformel Speichern'}
-        onClick={handleSave}
-        disabled={!validFormData}
-      />
+      <DialogActionButton label={'Grußformel Speichern'} onClick={handleSave} disabled={!validFormData} />
     </>
   );
 };

@@ -18,12 +18,7 @@ const LetterViewContainer = React.lazy(() =>
 );
 import { letterExists } from '@src/services/editor/apiLetterRequest.service';
 import LetterTabs from '@src/components/editor/letter/Center/LetterTabs';
-import {
-  setDialogType,
-  setEditorLetter,
-  setEditorPinnedLetters,
-  setEditorSelectedItem,
-} from '@src/redux/slices/editor.letter.slice';
+import { setDialogType, setEditorLetter, setEditorPinnedLetters, setEditorSelectedItem } from '@src/redux/slices/editor.letter.slice';
 import { fetchPinnedLetters } from '@src/services/editor/apiPinnedLettersRequest.service';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
@@ -33,10 +28,7 @@ import EntityPlaceContainer from '@src/components/editor/letter/Right/EntityPlac
 import EntityLetterContainer from '@src/components/editor/letter/Right/EntityLetter/EntityLetterContainer';
 import EditorFormDialog from '@src/components/editor/letter/Dialog/EditorFormDialog';
 import useNoteClickHandler from '@src/components/editor/letter/Center/hooks/useNoteClickHandler';
-import {
-  setEditorDialogAndReferenceThunk,
-  setEditorPinnedLettersViewModeThunk,
-} from '@src/redux/thunks/editor.letter.thunk';
+import { setEditorDialogAndReferenceThunk, setEditorPinnedLettersViewModeThunk } from '@src/redux/thunks/editor.letter.thunk';
 import { enqueueSnackbar } from 'notistack';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
@@ -76,12 +68,8 @@ const ShowEditor = () => {
 
   const [selectedItemLeft, setSelectedItemLeft] = useState<false | string>(false);
   const [selectedItemRight, setSelectedItemRight] = useState<false | string>(false);
-  const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem | null>(
-    null,
-  );
-  const [selectedComponentRight, setSelectedComponentRight] = useState<ComponentMappingItem | null>(
-    null,
-  );
+  const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem | null>(null);
+  const [selectedComponentRight, setSelectedComponentRight] = useState<ComponentMappingItem | null>(null);
 
   const [isCodeView, setIsCodeView] = useState<boolean>(false);
 
@@ -113,12 +101,9 @@ const ShowEditor = () => {
         }
         isMounted.current = true;
       } catch (error) {
-        enqueueSnackbar(
-          `Failed to fetch pinned letters: ${MiscUtils.misc.getErrorMessage(error)}`,
-          {
-            variant: 'error',
-          },
-        );
+        enqueueSnackbar(`Failed to fetch pinned letters: ${MiscUtils.misc.getErrorMessage(error)}`, {
+          variant: 'error',
+        });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -309,10 +294,7 @@ const ShowEditor = () => {
     dispatch(setDialogType({ dialogType: dialogType }));
   };
 
-  const valueForSide = (
-    newValue: string | null,
-    selectedComponent: { name: string } | null,
-  ): string | null => {
+  const valueForSide = (newValue: string | null, selectedComponent: { name: string } | null): string | null => {
     if (newValue === null || (selectedComponent !== null && selectedComponent.name === newValue)) {
       return null;
     }
@@ -414,12 +396,7 @@ const ShowEditor = () => {
             maxWidth: '40vw',
             backgroundColor: '#ffffff',
             transition: 'width 0.3s',
-            width:
-              showLeftContainer && showRightContainer
-                ? '60%'
-                : showLeftContainer || showRightContainer
-                  ? '80%'
-                  : '90%',
+            width: showLeftContainer && showRightContainer ? '60%' : showLeftContainer || showRightContainer ? '80%' : '90%',
           }}
         >
           <div ref={xmlRefCenter}>
@@ -497,11 +474,7 @@ const ShowEditor = () => {
         </Box>
       </Box>
       <EditorFormDialog xmlRef={xmlRefCenter} open={false} />i
-      <UserActionMenu
-        anchorEl={anchorEl}
-        open={anchorEl !== null}
-        handleClose={userActionMenuHandleClose}
-      />
+      <UserActionMenu anchorEl={anchorEl} open={anchorEl !== null} handleClose={userActionMenuHandleClose} />
       <EditorKeyHandle />
       <LetterFontSizeHandle />
     </>
