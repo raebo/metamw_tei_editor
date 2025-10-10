@@ -6,7 +6,11 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import { useAppDispatch } from '@src/redux/hooks';
 import { EditorUtils } from '@src/utils/editor';
-import { setEditorPinnedLetterContentChanged, setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
+import {
+  setEditorPinnedLetterContentChanged,
+  setEditorSelectedItem,
+  setReloadLetterContent,
+} from '@src/redux/slices/editor.letter.slice';
 import { enqueueSnackbar } from 'notistack';
 import { EditorConstants } from '@src/constants/editor';
 import { DefaultDialogProps } from '../EditorFormDialog';
@@ -15,12 +19,24 @@ import { MiscUtils } from '@src/utils/misc';
 const ResetLetterDialog = (props: DefaultDialogProps) => {
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const selectedItem = useSelector((state: RootState) => state.editorLetter.selectedItem);
 
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (cancelButtonRef.current) {
       cancelButtonRef.current.focus();
+    }
+
+    if (selectedItem.right) {
+      dispatch(
+        setEditorSelectedItem({
+          selectedItem: {
+            left: selectedItem.left,
+            right: null,
+          },
+        }),
+      );
     }
   }, [props]);
 
@@ -36,7 +52,9 @@ const ResetLetterDialog = (props: DefaultDialogProps) => {
     try {
       await EditorUtils.backendService.resetLetter(stateEditorLetter.id);
       dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-      dispatch(setEditorPinnedLetterContentChanged({ id: stateEditorLetter.id, contentChanged: false }));
+      dispatch(
+        setEditorPinnedLetterContentChanged({ id: stateEditorLetter.id, contentChanged: false }),
+      );
 
       enqueueSnackbar(`Der Brief '${stateEditorLetter.name}' wurde zurückgesetzt!`, {
         variant: 'success',
@@ -51,7 +69,9 @@ const ResetLetterDialog = (props: DefaultDialogProps) => {
 
   return (
     <>
-      <DialogContent>Sind Sie sicher, dass Sie alle bisherigen Anpassungen verwerfen möchten?</DialogContent>
+      <DialogContent>
+        Sind Sie sicher, dass Sie alle bisherigen Anpassungen verwerfen möchten?
+      </DialogContent>
       <DialogActions>
         <Button
           ref={cancelButtonRef}
@@ -62,7 +82,12 @@ const ResetLetterDialog = (props: DefaultDialogProps) => {
         >
           Abbrechen
         </Button>
-        <Button size={EditorConstants.styles.panel.buttonSize} variant="contained" onClick={() => resetLetter()} color="primary">
+        <Button
+          size={EditorConstants.styles.panel.buttonSize}
+          variant="contained"
+          onClick={() => resetLetter()}
+          color="primary"
+        >
           Zurücksetzen
         </Button>
       </DialogActions>

@@ -3,9 +3,17 @@ import { Tabs, Tab, Box, Tooltip, IconButton, Typography, type Theme } from '@mu
 import CloseIcon from '@mui/icons-material/Close';
 import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import { fetchPinnedLetters, setLetterPinStatus } from '@src/services/editor/apiPinnedLettersRequest.service';
+import {
+  fetchPinnedLetters,
+  setLetterPinStatus,
+} from '@src/services/editor/apiPinnedLettersRequest.service';
 import { useSelector } from 'react-redux';
-import { setDialogType, setEditorLetter, setEditorPinnedLetters, setTabToCloseId } from '@src/redux/slices/editor.letter.slice';
+import {
+  setDialogType,
+  setEditorLetter,
+  setEditorPinnedLetters,
+  setTabToCloseId,
+} from '@src/redux/slices/editor.letter.slice';
 import { RootState } from '@src/redux/redux.store';
 import { enqueueSnackbar } from 'notistack';
 import { PinnedLetter } from '@src/services/mappings/editorMappings';
@@ -15,17 +23,23 @@ import { fetchLetterData } from '@src/services/editor/apiLettersRequest.service'
 import { MiscUtils } from '@src/utils/misc';
 import { EditorUtils } from '@src/utils/editor';
 import { EditorConstants } from '@src/constants/editor';
-import theme from '@src/utils/theme/theme';
 
-function getTabTextColor(theme: Theme, { isPinned, isActive }: { isPinned: boolean; isActive: boolean }) {
-  const tabGroup = isPinned ? theme.palette.editorTabs.savedTab : theme.palette.editorTabs.unsavedTab;
+function getTabTextColor(
+  theme: Theme,
+  { isPinned, isActive }: { isPinned: boolean; isActive: boolean },
+) {
+  const tabGroup = isPinned
+    ? theme.palette.editorTabs.savedTab
+    : theme.palette.editorTabs.unsavedTab;
   return isActive ? tabGroup.active.color : tabGroup.inactive.color;
 }
 
 const LetterTabs = () => {
   const dispatch = useAppDispatch();
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
-  const changeLetterViewMode = useSelector((state: RootState) => state.editorLetter.changeLetterViewMode);
+  const changeLetterViewMode = useSelector(
+    (state: RootState) => state.editorLetter.changeLetterViewMode,
+  );
   const stateActiveTab = useSelector((state: RootState) => state.editorLetter.tabNumber);
   const [activeTab, setActiveTab] = useState<number>(0);
 
@@ -93,6 +107,7 @@ const LetterTabs = () => {
           xmlContent: newXmlContent,
         },
         tabNumber: newTabValue,
+        textIsMarked: false,
       }),
     );
     setActiveTab(newTabValue);
@@ -114,7 +129,12 @@ const LetterTabs = () => {
       const success = await setLetterPinStatus(tabPinnedLetter, false);
 
       if (success) {
-        EditorUtils.letterTabs.removeStateTab(dispatch, statePinnedLetters, tabPinnedLetter, tabIndex);
+        EditorUtils.letterTabs.removeStateTab(
+          dispatch,
+          statePinnedLetters,
+          tabPinnedLetter,
+          tabIndex,
+        );
       }
     } catch (err) {
       enqueueSnackbar(`Failed to close pinned letter: ${err}`, { variant: 'error' });
@@ -128,7 +148,11 @@ const LetterTabs = () => {
       if (success) {
         dispatch(
           setEditorPinnedLetters({
-            pinnedLetters: EditorUtils.letterTabs.updatePinnedLetterStatus(statePinnedLetters, pinnedLetter.id, true),
+            pinnedLetters: EditorUtils.letterTabs.updatePinnedLetterStatus(
+              statePinnedLetters,
+              pinnedLetter.id,
+              true,
+            ),
           }),
         );
       }
@@ -164,7 +188,12 @@ const LetterTabs = () => {
               label={
                 <Tooltip title={pinnedLetter.name} arrow>
                   <Box display="flex" alignItems="center">
-                    {!pinnedLetter.isPinned && <RadioButtonUncheckedIcon fontSize="small" sx={{ mr: 0.5, color: 'warning.main' }} />}
+                    {!pinnedLetter.isPinned && (
+                      <RadioButtonUncheckedIcon
+                        fontSize="small"
+                        sx={{ mr: 0.5, color: 'warning.main' }}
+                      />
+                    )}
 
                     <Typography
                       variant="body2"
@@ -212,7 +241,9 @@ const LetterTabs = () => {
                 </Tooltip>
               }
               sx={{
-                backgroundColor: pinnedLetter.isPinned ? 'transparent' : (theme) => theme.palette.editorTabs.unsavedTab.background,
+                backgroundColor: pinnedLetter.isPinned
+                  ? 'transparent'
+                  : (theme) => theme.palette.editorTabs.unsavedTab.background,
                 borderBottom: pinnedLetter.isPinned
                   ? '2px solid transparent'
                   : (theme) => `2px solid ${theme.palette.editorTabs.unsavedTab.border}`,

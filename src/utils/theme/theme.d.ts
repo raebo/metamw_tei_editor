@@ -10,6 +10,7 @@ declare module '@mui/material/styles' {
       inactiveBg: string;
       inactiveColor: string;
       hoverBg: string;
+      borderColor: string;
     };
   }
   interface PaletteOptions {
@@ -21,6 +22,7 @@ declare module '@mui/material/styles' {
       inactiveBg?: string;
       inactiveColor?: string;
       hoverBg?: string;
+      borderColor: string;
     };
     unsavedTab?: {
       main: string;
@@ -38,3 +40,4 @@ declare module '@mui/material/styles' {
     };
   }
 }
+

@@ -1,9 +1,10 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, List, ListItemButton, ListItemIcon, Tooltip } from '@mui/material';
+import { Box, List, ListItemButton, ListItemIcon, Stack, Tooltip } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import SearchIcon from '@mui/icons-material/Search';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import KeyboardOutlinedIcon from '@mui/icons-material/KeyboardOutlined';
 import SearchContainer from '@src/components/editor/letter/Left/Search/SearchContainer';
 import FavouritesContainer from '@src/components/editor/letter/Left/Favourites/FavouritesContainer';
 import AssignedContainer from '@src/components/editor/letter/Right/Assigned/AssignedContainer';
@@ -17,7 +18,12 @@ const LetterViewContainer = React.lazy(() =>
 );
 import { letterExists } from '@src/services/editor/apiLetterRequest.service';
 import LetterTabs from '@src/components/editor/letter/Center/LetterTabs';
-import { setDialogType, setEditorLetter, setEditorPinnedLetters, setEditorSelectedItem } from '@src/redux/slices/editor.letter.slice';
+import {
+  setDialogType,
+  setEditorLetter,
+  setEditorPinnedLetters,
+  setEditorSelectedItem,
+} from '@src/redux/slices/editor.letter.slice';
 import { fetchPinnedLetters } from '@src/services/editor/apiPinnedLettersRequest.service';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
@@ -27,7 +33,10 @@ import EntityPlaceContainer from '@src/components/editor/letter/Right/EntityPlac
 import EntityLetterContainer from '@src/components/editor/letter/Right/EntityLetter/EntityLetterContainer';
 import EditorFormDialog from '@src/components/editor/letter/Dialog/EditorFormDialog';
 import useNoteClickHandler from '@src/components/editor/letter/Center/hooks/useNoteClickHandler';
-import { setEditorDialogAndReferenceThunk, setEditorPinnedLettersViewModeThunk } from '@src/redux/thunks/editor.letter.thunk';
+import {
+  setEditorDialogAndReferenceThunk,
+  setEditorPinnedLettersViewModeThunk,
+} from '@src/redux/thunks/editor.letter.thunk';
 import { enqueueSnackbar } from 'notistack';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
@@ -44,6 +53,8 @@ import EntityPersonContainer from '@src/components/editor/letter/Right/EntityPer
 import { MiscUtils } from '@src/utils/misc';
 import { ToolbarButton } from '@src/components/editor/letter/Util/ToolbarButton';
 import { ToolbarMenuButton } from '@src/components/editor/letter/Util/ToolbarMenuButton';
+import HelpShortcutsContainer from '@src/components/editor/letter/Left/HelpShortcuts/HelpShortcutsContainer';
+import { QuestionMark } from '@mui/icons-material';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
@@ -65,8 +76,12 @@ const ShowEditor = () => {
 
   const [selectedItemLeft, setSelectedItemLeft] = useState<false | string>(false);
   const [selectedItemRight, setSelectedItemRight] = useState<false | string>(false);
-  const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem | null>(null);
-  const [selectedComponentRight, setSelectedComponentRight] = useState<ComponentMappingItem | null>(null);
+  const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem | null>(
+    null,
+  );
+  const [selectedComponentRight, setSelectedComponentRight] = useState<ComponentMappingItem | null>(
+    null,
+  );
 
   const [isCodeView, setIsCodeView] = useState<boolean>(false);
 
@@ -98,9 +113,12 @@ const ShowEditor = () => {
         }
         isMounted.current = true;
       } catch (error) {
-        enqueueSnackbar(`Failed to fetch pinned letters: ${MiscUtils.misc.getErrorMessage(error)}`, {
-          variant: 'error',
-        });
+        enqueueSnackbar(
+          `Failed to fetch pinned letters: ${MiscUtils.misc.getErrorMessage(error)}`,
+          {
+            variant: 'error',
+          },
+        );
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -223,6 +241,12 @@ const ShowEditor = () => {
       component: <FavouritesContainer />,
       action: () => true,
     },
+    [EditorConstants.compMappingLeft.HELP_SHORTCUTS]: {
+      name: EditorConstants.compMappingLeft.HELP_SHORTCUTS,
+      showContainer: true,
+      component: <HelpShortcutsContainer />,
+      action: () => true,
+    },
   };
 
   const componentMappingRight: Record<string, ComponentMappingItem> = {
@@ -285,7 +309,10 @@ const ShowEditor = () => {
     dispatch(setDialogType({ dialogType: dialogType }));
   };
 
-  const valueForSide = (newValue: string | null, selectedComponent: { name: string } | null): string | null => {
+  const valueForSide = (
+    newValue: string | null,
+    selectedComponent: { name: string } | null,
+  ): string | null => {
     if (newValue === null || (selectedComponent !== null && selectedComponent.name === newValue)) {
       return null;
     }
@@ -347,24 +374,26 @@ const ShowEditor = () => {
             justifyContent: 'center',
           }}
         >
-          <List component="nav" aria-label="handle edit labels">
-            <ListItemButton
-              selected={!(selectedItemLeft === false || selectedItemLeft !== EditorConstants.compMappingLeft.SEARCH)}
+          <Stack direction="column" spacing={1}>
+            <ToolbarMenuButton
+              title="Suche nach Briefen"
+              selected={selectedItemRight === EditorConstants.compMappingLeft.SEARCH}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.SEARCH, null)}
-            >
-              <ListItemIcon>
-                <SearchIcon />
-              </ListItemIcon>
-            </ListItemButton>
-            <ListItemButton
-              selected={!(selectedItemLeft === false || selectedItemLeft !== EditorConstants.compMappingLeft.FAVOURITES)}
+              icon=<SearchIcon />
+            />
+            <ToolbarMenuButton
+              title="Übersicht Favoriten"
+              selected={selectedItemRight === EditorConstants.compMappingLeft.FAVOURITES}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.FAVOURITES, null)}
-            >
-              <ListItemIcon>
-                <AutoAwesomeIcon />
-              </ListItemIcon>
-            </ListItemButton>
-          </List>
+              icon=<AutoAwesomeIcon />
+            />
+            <ToolbarMenuButton
+              title="Übersicht der Tastenkombinationen"
+              selected={selectedItemRight === EditorConstants.compMappingLeft.HELP_SHORTCUTS}
+              onClick={() => setSelectedItem(EditorConstants.compMappingLeft.HELP_SHORTCUTS, null)}
+              icon=<KeyboardOutlinedIcon />
+            />
+          </Stack>
         </Box>
 
         {showLeftContainer && (
@@ -385,7 +414,12 @@ const ShowEditor = () => {
             maxWidth: '40vw',
             backgroundColor: '#ffffff',
             transition: 'width 0.3s',
-            width: showLeftContainer && showRightContainer ? '60%' : showLeftContainer || showRightContainer ? '80%' : '90%',
+            width:
+              showLeftContainer && showRightContainer
+                ? '60%'
+                : showLeftContainer || showRightContainer
+                  ? '80%'
+                  : '90%',
           }}
         >
           <div ref={xmlRefCenter}>
@@ -417,59 +451,57 @@ const ShowEditor = () => {
             justifyContent: 'center',
           }}
         >
-          <List component="nav" aria-label="handle edit labels">
+          <Stack direction="column" spacing={1}>
             <QuickContentFormatter />
             <ToolbarMenuButton
               title="Click for more actions"
               selected={selectedItemRight === EditorConstants.compMappingRight.USER_ACTIONS}
               onClick={(event) => handleButtonMenuClick(event)}
-            >
-              <MoreHorizIcon />
-            </ToolbarMenuButton>
+              icon=<MoreHorizIcon />
+            />
             <ToolbarMenuButton
               title="This button has currently no function"
               selected={selectedItemRight === EditorConstants.compMappingRight.ASSIGNED}
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
-            >
-              <AssignmentIcon />
-            </ToolbarMenuButton>
+              icon=<AssignmentIcon />
+            />
 
             <ToolbarMenuButton
               title="Add letter to favourite list"
               selected={selectedItemRight === EditorConstants.compMappingRight.SET_FAVOURITE}
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
-            >
-              <StarOutlineIcon />
-            </ToolbarMenuButton>
+              icon=<StarOutlineIcon />
+            />
 
             <ToolbarMenuButton
               title="Publish letter to backend"
               selected={selectedItemRight === EditorConstants.compMappingRight.PUBLISH_LETTER}
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
-            >
-              <CloudUploadOutlinedIcon />
-            </ToolbarMenuButton>
+              icon=<CloudUploadOutlinedIcon />
+            />
 
             <ToolbarMenuButton
               title={isCodeView ? 'Switch to WYSIWYG view' : 'Switch to Code view'}
               selected={isCodeView}
               onClick={handleToggleCodeview}
-            >
-              <CodeIcon color={isCodeView ? 'primary' : 'action'} />
-            </ToolbarMenuButton>
+              icon={<CodeIcon color={isCodeView ? 'primary' : 'action'} />}
+            />
 
             <ToolbarMenuButton
               title="Reset letter status"
-              selected={selectedItemRight === EditorConstants.dialogTypes.RESET_LETTER}
+              selected={stateEditorLetter.undoAvailable || stateEditorLetter.redoAvailable}
               onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
-            >
-              <RestartAltIcon />
-            </ToolbarMenuButton>
-          </List>
+              icon=<RestartAltIcon />
+            />
+          </Stack>
         </Box>
       </Box>
       <EditorFormDialog xmlRef={xmlRefCenter} open={false} />i
-      <UserActionMenu anchorEl={anchorEl} open={anchorEl !== null} handleClose={userActionMenuHandleClose} />
+      <UserActionMenu
+        anchorEl={anchorEl}
+        open={anchorEl !== null}
+        handleClose={userActionMenuHandleClose}
+      />
       <EditorKeyHandle />
       <LetterFontSizeHandle />
     </>

@@ -22,7 +22,9 @@ import { runOncePerAction } from '@src/utils/misc/stateHandling';
 const QuickContentFormatter = () => {
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
-  const contentTextIsMarked = useSelector((state: RootState) => state.editorLetter.content.textIsMarked);
+  const contentTextIsMarked = useSelector(
+    (state: RootState) => state.editorLetter.content.textIsMarked,
+  );
 
   const [undoActive, setUndoActive] = useState<boolean>(stateEditorLetter.undoAvailable);
   const [redoActive, setRedoActive] = useState<boolean>(stateEditorLetter.redoAvailable);
@@ -47,18 +49,23 @@ const QuickContentFormatter = () => {
     },
   });
 
-  const handleEditorKeyHandle = (keyCombination: string, editorKeyHandleItems: Record<string, EditorKeyHandleItem>) => {
-    const editorKeyHandleItem = Object.values(editorKeyHandleItems).filter((item) => item.key === keyCombination)[0];
-
-    if (!editorKeyHandleItem) {
-      enqueueSnackbar(`Keybinding '${keyCombination}' not found`, { variant: 'error' });
-      return;
-    }
-
-    const getState = () => store.getState();
-    const action = generateKeyHandleAction(editorKeyHandleItem);
+  const handleEditorKeyHandle = async (
+    keyCombination: string,
+    editorKeyHandleItems: Record<string, EditorKeyHandleItem>,
+  ) => {
+    const editorKeyHandleItem = Object.values(editorKeyHandleItems).filter(
+      (item) => item.key === keyCombination,
+    )[0];
 
     runOncePerAction(editorKeyHandleItem.key, async () => {
+      if (!editorKeyHandleItem) {
+        enqueueSnackbar(`Keybinding '${keyCombination}' not found`, { variant: 'error' });
+        return;
+      }
+
+      const getState = () => store.getState();
+      const action = generateKeyHandleAction(editorKeyHandleItem);
+
       try {
         await action?.(dispatch, getState);
       } catch (error) {
@@ -80,15 +87,17 @@ const QuickContentFormatter = () => {
   return (
     <>
       <ListItemButton
-        onClick={() => onClickButton('ctrl+b')}
         sx={{
           ...getToolbarButtonStyle(iconsAreActive),
         }}
       >
         <ListItemIcon>
-          <ToolbarButton title="Bold (Ctrl+B)" active={iconsAreActive} onClick={() => onClickButton('ctrl+b')}>
-            <FormatBoldIcon />
-          </ToolbarButton>
+          <ToolbarButton
+            title="Bold (Ctrl+B)"
+            active={iconsAreActive}
+            onClick={() => onClickButton('ctrl+b')}
+            icon=<FormatBoldIcon />
+          />
         </ListItemIcon>
       </ListItemButton>
       <ListItemButton
@@ -97,9 +106,12 @@ const QuickContentFormatter = () => {
           ...getToolbarButtonStyle(iconsAreActive),
         }}
       >
-        <ToolbarButton title="Italic (Ctrl+I)" active={iconsAreActive} onClick={() => onClickButton('ctrl+i')}>
-          <FormatItalicIcon />
-        </ToolbarButton>
+        <ToolbarButton
+          title="Italic (Ctrl+I)"
+          active={iconsAreActive}
+          onClick={() => onClickButton('ctrl+i')}
+          icon=<FormatItalicIcon />
+        />
       </ListItemButton>
       <ListItemButton
         onClick={() => onClickButton('ctrl+u')}
@@ -107,9 +119,12 @@ const QuickContentFormatter = () => {
           ...getToolbarButtonStyle(iconsAreActive),
         }}
       >
-        <ToolbarButton title="Underline (Ctrl+U)" active={iconsAreActive} onClick={() => onClickButton('ctrl+u')}>
-          <FormatUnderlinedIcon />
-        </ToolbarButton>
+        <ToolbarButton
+          title="Underline (Ctrl+U)"
+          active={iconsAreActive}
+          onClick={() => onClickButton('ctrl+u')}
+          icon=<FormatUnderlinedIcon />
+        />
       </ListItemButton>
       <ListItemButton
         onClick={() => onClickNoMarkedButton('ctrl+z')}
@@ -117,10 +132,12 @@ const QuickContentFormatter = () => {
           ...getToolbarButtonStyle(undoActive),
         }}
       >
-        <ToolbarButton title="Undo (Ctrl+Z)" onClick={() => onClickNoMarkedButton('ctrl+z')} active={undoActive}>
-          {undoActive}
-          <UndoIcon />
-        </ToolbarButton>
+        <ToolbarButton
+          title="Undo (Ctrl+Z)"
+          onClick={() => onClickNoMarkedButton('ctrl+z')}
+          active={undoActive}
+          icon=<UndoIcon />
+        />
       </ListItemButton>
       <ListItemButton
         onClick={() => onClickNoMarkedButton('ctrl+shift+z')}
@@ -129,10 +146,12 @@ const QuickContentFormatter = () => {
         }}
       >
         <ListItemIcon>
-          <ToolbarButton title="Redo (Ctrl+SHIFT+Z)" onClick={() => onClickNoMarkedButton('ctrl+shift+z')} active={redoActive}>
-            {redoActive}
-            <RedoIcon color={'action'} />
-          </ToolbarButton>
+          <ToolbarButton
+            title="Redo (Ctrl+SHIFT+Z)"
+            onClick={() => onClickNoMarkedButton('ctrl+shift+z')}
+            active={redoActive}
+            icon={<RedoIcon color={redoActive ? 'primary' : 'action'} />}
+          />
         </ListItemIcon>
       </ListItemButton>
     </>

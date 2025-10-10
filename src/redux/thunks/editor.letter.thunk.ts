@@ -19,7 +19,10 @@ import { PinnedLetter } from '@src/services/mappings/editorMappings';
 
 export const setEditorTabAndPinnedLettersThunk = createAsyncThunk(
   'editor/setEditorTabAndPinnedLetters',
-  async ({ pinnedLetters, tabNumber }: { pinnedLetters: PinnedLetter[]; tabNumber: number }, { dispatch }) => {
+  async (
+    { pinnedLetters, tabNumber }: { pinnedLetters: PinnedLetter[]; tabNumber: number },
+    { dispatch },
+  ) => {
     dispatch(setEditorPinnedLetters({ pinnedLetters }));
     dispatch(setEditorTabNumber({ tabNumber }));
     if (tabNumber === -1) {
@@ -34,6 +37,7 @@ export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
     {
       letter,
       tabNumber,
+      textIsMarked,
     }: {
       letter: {
         id: number;
@@ -42,6 +46,7 @@ export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
         xmlContent: string | null;
       };
       tabNumber: number;
+      textIsMarked: boolean;
     },
     { dispatch },
   ) => {
@@ -52,6 +57,7 @@ export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
     if (tabNumber === -1) {
       dispatch(setEditorLetter({ letter: { id: null, name: null } }));
     }
+    dispatch(setContentTextIsMarked({ textIsMarked: textIsMarked }));
   },
 );
 

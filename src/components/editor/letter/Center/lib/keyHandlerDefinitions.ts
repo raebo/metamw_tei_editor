@@ -4,10 +4,20 @@ import { AppDispatch, RootState } from '@src/redux/redux.store';
 import { EditorConstants } from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
-import { setContentTextIsMarked, setReloadLetterContent, setXmlLetterContent } from '@src/redux/slices/editor.letter.slice';
+import {
+  setContentTextIsMarked,
+  setReloadLetterContent,
+  setXmlLetterContent,
+} from '@src/redux/slices/editor.letter.slice';
+import { undefined } from 'zod';
 
-export const filterForKeyHandleDefinitions = (keyHandleDefinitions: Record<string, EditorKeyHandleItem>, keyCombination: string) => {
-  const filteredKeyHandle = Object.values(keyHandleDefinitions).filter((item) => item.key === keyCombination)[0];
+export const filterForKeyHandleDefinitions = (
+  keyHandleDefinitions: Record<string, EditorKeyHandleItem>,
+  keyCombination: string,
+) => {
+  const filteredKeyHandle = Object.values(keyHandleDefinitions).filter(
+    (item) => item.key === keyCombination,
+  )[0];
 
   if (!filteredKeyHandle) {
     throw new Error('Keybinding not found: for' + keyCombination);
@@ -68,15 +78,19 @@ async function runXmlAction(
   try {
     const xmlString = new XMLSerializer().serializeToString(xmlDoc);
 
-    await EditorUtils.backendOrchestrator.patchWithDispatch(dispatch, [xmlString, stateEditorLetter.id, operationType, null], {
-      actionsOnSuccess: [
-        setXmlLetterContent({ content: { xmlContent: xmlString } }),
-        setReloadLetterContent({ reloadLetterContent: true }),
-        setContentTextIsMarked({ contentTextIsMarked: false }),
-      ],
-      successMessage: successMessage,
-      errorMessage: 'Error during backend update.',
-    });
+    await EditorUtils.backendOrchestrator.patchWithDispatch(
+      dispatch,
+      [xmlString, stateEditorLetter.id, operationType, null],
+      {
+        actionsOnSuccess: [
+          setXmlLetterContent({ content: { xmlContent: xmlString } }),
+          setReloadLetterContent({ reloadLetterContent: true }),
+          setContentTextIsMarked({ contentTextIsMarked: false }),
+        ],
+        successMessage: successMessage,
+        errorMessage: 'Error during backend update.',
+      },
+    );
 
     return operationType;
   } catch (error) {
@@ -109,7 +123,10 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_TEI_HEADER);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.ADD_TEI_HEADER,
+      );
     },
   },
   'alt+d': {
@@ -118,7 +135,10 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER,
+      );
     },
   },
   'alt+j': {
@@ -127,8 +147,22 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.EDIT_LANGUAGES);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.EDIT_LANGUAGES,
+      );
     },
+  },
+  'alt+k': {
+    key: 'alt+k',
+    description: 'Zeige Hilfsmenü der Shortcuts',
+    action: async (dispatch: AppDispatch, _getState: () => RootState) => {
+      return EditorUtils.keyPressHandles.openLeftPanel(
+        dispatch,
+        EditorConstants.compMappingLeft.HELP_SHORTCUTS,
+      );
+    },
+    skipForHelp: true,
   },
   'alt+n': {
     key: 'alt+n',
@@ -136,8 +170,22 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_NEW_LETTER);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.ADD_NEW_LETTER,
+      );
     },
+  },
+  'alt+s': {
+    key: 'alt+s',
+    description: 'Suche nach Briefen',
+    action: async (dispatch: AppDispatch, _getState: () => RootState) => {
+      return EditorUtils.keyPressHandles.openLeftPanel(
+        dispatch,
+        EditorConstants.compMappingLeft.SEARCH,
+      );
+    },
+    skipForHelp: true,
   },
   'alt+ctrl+f': {
     key: 'alt+ctrl+f',
@@ -145,8 +193,12 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR,
+      );
     },
+    skipForHelp: true,
   },
   'ctrl+t': {
     key: 'ctrl+t',
@@ -154,12 +206,16 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.SOURCE_DESC_HANDWRITING);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.SOURCE_DESC_HANDWRITING,
+      );
     },
+    skipForHelp: true,
   },
   'ctrl+z': {
     key: 'ctrl+z',
-    description: 'undo last change',
+    description: 'Historie -> Zurück',
     component: null,
     action: async (dispatch: AppDispatch, getState: () => RootState) => {
       const stateEditorLetter = getState().editorLetter.letter;
@@ -179,47 +235,58 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
 
       return null;
     },
-    operationType: undefined,
   },
   'ctrl+alt+6': {
     key: 'ctrl+alt+6',
-    description: 'add attachment to letter header',
+    description: 'Beilage Hinzufügen',
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ATTACHMENT_ADD);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.ATTACHMENT_ADD,
+      );
     },
   },
   'ctrl+shift+a': {
     key: 'ctrl+shift+a',
-    description: 'manage address line for recipient',
+    description: 'Adresse Empfänger verwalten',
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT,
+      );
     },
   },
   'ctrl+shift+b': {
     key: 'ctrl+shift+b',
-    description: 'manage address line for sender',
+    description: 'Adresse Sender verwalten',
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER,
+      );
     },
   },
   'ctrl+shift+s': {
     key: 'ctrl+shift+s',
-    description: 'Schreibakt Hinzufügen',
+    description: 'Schreibakt hinzufügen',
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_WRITING_PART);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.ADD_WRITING_PART,
+      );
     },
   },
   'ctrl+shift+z': {
     key: 'ctrl+shift+z',
-    description: 'redo last change',
+    description: 'Historie -> Vorwärts',
     component: null,
     action: async (dispatch: AppDispatch, getState: () => RootState) => {
       const stateEditorLetter = getState().editorLetter.letter;
@@ -246,111 +313,142 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {
   'alt+1': {
     key: 'alt+1',
-    description: 'insert line of date on top of the current element',
+    description: 'Datum oberhalb einfügen',
     component: null,
     action: null,
     openDialogAction: (_dispatch: AppDispatch) => {},
   },
   'alt+v': {
     key: 'alt+v',
-    description: 'move current writing act up',
+    description: 'Schreibakt nach oben verschieben',
     component: null,
     xmlAction: (xmlDoc) => {
-      return EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.moveWritingActUp);
+      return EditorUtils.keyPressHandles.baseHandling(
+        xmlDoc,
+        EditorUtils.keyPressHandles.moveWritingActUp,
+      );
     },
     operationType: EditorConstants.changeTypes.writing_act.CHANGED_ORDER,
   },
   'alt+shift+!': {
     key: 'alt+shift+!',
-    description: 'date when marking content',
+    description: 'Datum "when" einfügen',
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_ADD);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.DATE_WHEN_ADD,
+      );
     },
   },
   'alt+shift+"': {
     key: 'alt+shift+"',
-    description: "date 'when-custom' marking content",
+    description: "Datum'when-custom' einfügen",
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD,
+      );
     },
   },
   'alt+shift+§': {
     key: 'alt+shift+§',
-    description: "date 'notAfter' marking content",
+    description: "Datum 'notAfter' einfügen",
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD,
+      );
     },
   },
   'alt+shift+$': {
     key: 'alt+shift+$',
-    description: "date 'notBefore' marking content",
+    description: "Datum 'notBefore' einfügen",
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD,
+      );
     },
   },
   'alt+shift+%': {
     key: 'alt+shift+%',
-    description: "date 'From-To' marking content",
+    description: "Datum 'From-To' einfügen",
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_FROM_TO_ADD);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.DATE_FROM_TO_ADD,
+      );
     },
   },
   'alt+shift+&': {
     key: 'alt+shift+&',
-    description: "date 'notBefore-notAfter' marking content",
+    description: "Datum 'notBefore-notAfter' einfügen",
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD,
+      );
     },
   },
   'alt+shift+v': {
     key: 'alt+shift+v',
-    description: 'move current writing act down',
+    description: 'Schreibakt nach unten verschieben',
     component: null,
     xmlAction: (xmlDoc) => {
-      EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.moveWritingActDown);
+      EditorUtils.keyPressHandles.baseHandling(
+        xmlDoc,
+        EditorUtils.keyPressHandles.moveWritingActDown,
+      );
     },
     operationType: EditorConstants.changeTypes.writing_act.CHANGED_ORDER,
   },
   'ctrl+b': {
     key: 'ctrl+b',
-    description: 'mark content bold',
+    description: 'Inhalt fett markieren',
     component: null,
-    xmlAction: (xmlDoc) => EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.markContentBold),
+    xmlAction: (xmlDoc) =>
+      EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.markContentBold),
     operationType: EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED,
   },
   'ctrl+i': {
     key: 'ctrl+i',
-    description: 'mark content underline',
+    description: 'Inhalt kursiv markieren',
     component: null,
     xmlAction: (xmlDoc) => {
-      return EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.markContentItalic);
+      return EditorUtils.keyPressHandles.baseHandling(
+        xmlDoc,
+        EditorUtils.keyPressHandles.markContentItalic,
+      );
     },
     operationType: EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED,
   },
   'ctrl+u': {
     key: 'ctrl+u',
-    description: 'mark content underline',
+    description: 'Inhalt mit Unterstrich markieren.',
     component: null,
     xmlAction: (xmlDoc) => {
-      return EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.markContentUnderline);
+      return EditorUtils.keyPressHandles.baseHandling(
+        xmlDoc,
+        EditorUtils.keyPressHandles.markContentUnderline,
+      );
     },
     operationType: EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED,
   },
   'ctrl+alt+k': {
     key: 'ctrl+alt+k',
-    description: 'add note to content',
+    description: 'Kommentar einfügen',
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
@@ -359,52 +457,67 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
   },
   'ctrl+alt+o': {
     key: 'ctrl+alt+o',
-    description: 'add place annotation to marked content',
+    description: 'Markierung mit Ort auszeichnen',
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openRightPanel(dispatch, EditorConstants.compMappingRight.ENT_PLACE);
+      return EditorUtils.keyPressHandles.openRightPanel(
+        dispatch,
+        EditorConstants.compMappingRight.ENT_PLACE,
+      );
     },
   },
   'ctrl+alt+p': {
     key: 'ctrl+alt+p',
-    description: 'add person annotation to marked content',
+    description: 'Markierung mit Person auszeichnen',
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openRightPanel(dispatch, EditorConstants.compMappingRight.ENT_PERSON);
+      return EditorUtils.keyPressHandles.openRightPanel(
+        dispatch,
+        EditorConstants.compMappingRight.ENT_PERSON,
+      );
     },
   },
   'ctrl+alt+w': {
     key: 'ctrl+alt+w',
-    description: 'add creation annotation to marked content',
+    description: 'Markierung mit Werk auszeichnen',
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openRightPanel(dispatch, EditorConstants.compMappingRight.ENT_CREATION);
+      return EditorUtils.keyPressHandles.openRightPanel(
+        dispatch,
+        EditorConstants.compMappingRight.ENT_CREATION,
+      );
     },
   },
   'ctrl+alt+v': {
     key: 'ctrl+alt+v',
-    description: 'letters to protagonist',
+    description: 'Markierung mit Werk Protagonist auszeichnen',
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG,
+      );
     },
   },
   'ctrl+alt+b': {
     key: 'ctrl+alt+b',
-    description: 'letters from protagonist',
+    description: 'Markierung mit Briefe Protagonist auszeichnen',
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG);
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG,
+      );
     },
   },
   'ctrl+shift+h': {
     key: 'ctrl+shift+h',
-    description: 'insert a pagebreak at the current position',
+    description: 'Seitenumbruch an der aktuellen Position einfügen',
     component: null,
     xmlAction: (xmlDoc) => EditorUtils.contentFlow.insertPageBreak(xmlDoc),
     operationType: EditorConstants.changeTypes.misc.BODY_PAGEBREAK_ADDED,
@@ -412,7 +525,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
   },
   'ctrl+shift+i': {
     key: 'ctrl+shift+i',
-    description: 'insert a columnbreak at the current position',
+    description: 'Spaltenumbruch an der aktuellen Position einfügen',
     component: null,
     xmlAction: (xmlDoc) => EditorUtils.contentFlow.insertColumnBreak(xmlDoc),
     operationType: EditorConstants.changeTypes.misc.BODY_COLUMNBREAK_ADDED,

@@ -3,6 +3,9 @@ import { AppDispatch } from '@src/redux/redux.store';
 import { setDialogType, setEditorSelectedItem } from '@src/redux/slices/editor.letter.slice';
 
 export const keyPressHandles = {
+  openLeftPanel(dispatch: AppDispatch, leftItem: string): void {
+    dispatch(setEditorSelectedItem({ selectedItem: { left: leftItem, right: null } }));
+  },
   openRightPanel(dispatch: AppDispatch, rightItem: string): void {
     dispatch(setEditorSelectedItem({ selectedItem: { left: null, right: rightItem } }));
   },
@@ -88,7 +91,10 @@ export const keyPressHandles = {
 
     let parentNode: Node | null = parent;
 
-    while (parentNode && !(parentNode instanceof Element && parentNode.tagName.toLowerCase() === 'tei')) {
+    while (
+      parentNode &&
+      !(parentNode instanceof Element && parentNode.tagName.toLowerCase() === 'tei')
+    ) {
       parentNode = parentNode.parentNode;
     }
 

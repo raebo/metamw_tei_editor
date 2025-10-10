@@ -12,30 +12,28 @@ const baseTheme = createTheme({
   },
 });
 
-const theme = createTheme(baseTheme, {
+export const theme = createTheme({
+  ...baseTheme,
   palette: {
-    primary: {
-      main: baseTheme.palette.primary.main,
-      light: baseTheme.palette.primary.light,
-      dark: baseTheme.palette.primary.dark,
-      contrastText: baseTheme.palette.primary.contrastText,
-    },
+    ...baseTheme.palette,
     toolbarButton: {
-      primaryColor: '#1976d2',
-      secondaryColor: '#63a4ff',
-      activeBg: '#1976d2', // active background
-      activeColor: '#fff', // active icon/text color
-      inactiveBg: '#f5f5f5', // inactive background
-      inactiveColor: '#555', // inactive icon/text color
-      // hoverBg: '#e0e0e0', // hover background
-      hoverBg: '#63a4ff', // active background
+      primaryColor: baseTheme.palette.primary.main,
+      secondaryColor: baseTheme.palette.primary.light,
+      activeBg: baseTheme.palette.primary.light,
+      activeColor: '#fff',
+      inactiveBg: '#f5f5f5',
+      inactiveColor: '#555',
+      hoverBg: baseTheme.palette.primary.light,
+      borderColor: '#555',
     },
+
+    // Editor tabs custom palette
     editorTabs: {
       savedTab: {
-        main: '#1976d2',
+        main: baseTheme.palette.primary.main,
         border: 'transparent',
         background: 'transparent',
-        iconColor: '#1976d2',
+        iconColor: baseTheme.palette.primary.main,
         inactive: {
           color: '#555',
         },
@@ -44,9 +42,9 @@ const theme = createTheme(baseTheme, {
         },
       },
       unsavedTab: {
-        main: '#ffa726', // or any color you prefer
+        main: '#ffa726',
         border: '#ffa726',
-        background: 'rgba(255, 167, 38, 0.08)', // subtle background
+        background: 'rgba(255, 167, 38, 0.08)',
         bookmarkIconColor: '#ffa726',
         inactive: {
           color: '#555',
@@ -59,4 +57,5 @@ const theme = createTheme(baseTheme, {
   },
 });
 
+export type AppTheme = typeof theme;
 export default theme;

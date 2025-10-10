@@ -12,11 +12,15 @@ export type EditorKeyHandleItem = {
   description: string;
   key: string;
   component: ReactNode | null;
-  action?: (() => Promise<string | null>) | ((dispatch: AppDispatch, getState: () => RootState) => Promise<string | null>) | null;
+  action?:
+    | (() => Promise<string | null>)
+    | ((dispatch: AppDispatch, getState: () => RootState) => Promise<string | null>)
+    | null;
   xmlAction?: (xmlDoc: Document) => void;
   operationType?: string; // e.g., 'INSERT_PAGEBREAK', 'ADD_PARAGRAPH'
   successMessage?: string;
   openDialogAction?: (dispatch: AppDispatch, getState: () => RootState) => void;
+  skipForHelp?: boolean; // optional, used to hide entry in help dialog
 };
 
 export interface EditorLetter {
