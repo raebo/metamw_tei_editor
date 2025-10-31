@@ -4,10 +4,14 @@ import { initApi } from '@src/services/apiRequest.service';
 
 export const AuthService = {
   async getMe() {
-    const response = await initApi().get(`${API_ENDPOINTS.AUTH}/me`, {
-      withCredentials: true,
-    });
-    return response.data;
+    try {
+      const response = await initApi().get(`${API_ENDPOINTS.AUTH}/me`, {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch {
+      return null;
+    }
   },
 
   async login(email: string, password: string) {
@@ -19,7 +23,11 @@ export const AuthService = {
     return response.data;
   },
 
-  async logout() {
+  async logout(isAuthenticated: boolean) {
+    if (!isAuthenticated) {
+      return;
+    }
+
     const response = await axios.delete(`${API_ENDPOINTS.AUTH}/logout`, {
       withCredentials: true,
     });
@@ -27,12 +35,20 @@ export const AuthService = {
     return response.data;
   },
 
-  async refresh() {
-    const response = await axios.post(
-      `${API_ENDPOINTS.AUTH}/refresh`,
-      {},
-      { withCredentials: true },
-    );
-    return response.data;
+  async refresh(isAuthenticated: boolean) {
+    if (!isAuthenticated) {
+      return null;
+    }
+
+    try {
+      const response = await axios.post(
+        `${API_ENDPOINTS.AUTH}/refresh`,
+        {},
+        { withCredentials: true },
+      );
+      return response.data;
+    } catch {
+      return null;
+    }
   },
 };

@@ -3,6 +3,7 @@ import authReducer from './slices/authentication.slice';
 import spinnerLoadingReducer from './slices/spinner.loading.slice';
 import autoLetterSnippetReducer from './slices/auto.letter.snippet.slice';
 import editorLetterSliceReducer from './slices/editor.letter.slice';
+import routeSliceReducer from '@src/redux/slices/route.slice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     spinnerLoading: spinnerLoadingReducer,
     autoLetterSnippet: autoLetterSnippetReducer,
     editorLetter: editorLetterSliceReducer,
+    route: routeSliceReducer,
   },
 });
 

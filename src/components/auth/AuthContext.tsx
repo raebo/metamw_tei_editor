@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { setLoginState, setLogoutState } from '@src/redux/slices/authentication.slice';
 import { AuthService } from '@src/services/authentication.service';
 import type { AuthContextType, AuthUser } from '@src/services/mappings/authMappings';
+import { clearPath } from '@src/redux/slices/route.slice';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@src/redux/redux.store';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -13,6 +16,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const currentPath = useSelector((state: RootState) => state.route.currentPath);
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -21,7 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(user);
         dispatch(setLoginState({ user }));
         navigate('/');
-      } catch (_err) {
+      } catch {
         // 401 means not logged in, so clear state
         setUser(null);
         dispatch(setLogoutState());
@@ -30,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     void fetchUser();
-  }, [dispatch]);
+  }, [navigate, dispatch]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -47,7 +52,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           },
         }),
       );
-      navigate('/');
+
+      if (currentPath && currentPath !== '/login') {
+        navigate(currentPath, { replace: true });
+      }
+      navigate('/', { replace: true });
     } catch (error) {
       throw error;
     }
@@ -55,22 +64,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await AuthService.logout();
+      await AuthService.logout(isAuthenticated);
     } catch (error) {
       throw error;
     } finally {
       setUser(null);
       dispatch(setLogoutState());
+      dispatch(clearPath());
       navigate('/login');
     }
   };
 
   const refreshUser = async () => {
     try {
-      await AuthService.refresh();
+      await AuthService.refresh(isAuthenticated);
       const data = await AuthService.getMe();
       setUser(data.user);
-    } catch (err) {
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
