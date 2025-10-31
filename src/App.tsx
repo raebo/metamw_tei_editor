@@ -36,37 +36,34 @@ const App = () => {
     <ErrorBoundary>
       <ThemeProvider theme={theme}>
         <Router>
-          <PathRestorer>
-            <RouteTracker />
-            <AuthProvider>
-              <Routes>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Navigate to={currentPath} replace />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route element={<ProtectedRoute />}>
-                    <Route index element={<HomePage />} />
-                    <Route path="about" element={<AboutPage />} />
-                    <Route path="logout" element={<LogoutPage />} />
-                    <Route path={'/automatic_annotations/:id?'} element={<AutoAnnoList />} />
-                    <Route
-                      path={'/automatic_annotations/:job_id/letters/:id'}
-                      element={<AutoAnnoLetters />}
-                    />
-                    <Route path={'/editor/letters'} element={<IndexLetters />} />
-                    <Route path={'/editor/'} element={<ShowEditor />} />
-                    <Route
-                      path={'/editor/letters/:letterId/:letterName'}
-                      element={<ShowEditor />}
-                    />
-                  </Route>
+          {/*<PathRestorer>*/}
+          <RouteTracker />
+          <AuthProvider>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Navigate to={currentPath} replace />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route index element={<HomePage />} />
+                  <Route path="about" element={<AboutPage />} />
+                  <Route path="logout" element={<LogoutPage />} />
+                  <Route path={'/automatic_annotations/:id?'} element={<AutoAnnoList />} />
+                  <Route
+                    path={'/automatic_annotations/:job_id/letters/:id'}
+                    element={<AutoAnnoLetters />}
+                  />
+                  <Route path={'/editor/letters'} element={<IndexLetters />} />
+                  <Route path={'/editor/'} element={<ShowEditor />} />
+                  <Route path={'/editor/letters/:letterId/:letterName'} element={<ShowEditor />} />
                 </Route>
-                <Route element={<AutoAnnoLayout />}>
-                  {/*<GuardedRoute path="/dashboard" component={Dashboard} auth={isAuthenticated} />*/}
-                </Route>
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </AuthProvider>
-          </PathRestorer>
+              </Route>
+              <Route element={<AutoAnnoLayout />}>
+                {/*<GuardedRoute path="/dashboard" component={Dashboard} auth={isAuthenticated} />*/}
+              </Route>
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </AuthProvider>
+          {/*</PathRestorer>*/}
         </Router>
         {isLoading && <CircularIndeterminate />}
         <StateMessages />

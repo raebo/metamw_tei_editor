@@ -25,7 +25,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { user } = await AuthService.getMe();
         setUser(user);
         dispatch(setLoginState({ user }));
-        navigate('/');
       } catch {
         // 401 means not logged in, so clear state
         setUser(null);
@@ -54,9 +53,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       );
 
       if (currentPath && currentPath !== '/login') {
-        navigate(currentPath, { replace: true });
+        navigate(currentPath);
+      } else {
+        navigate('/');
       }
-      navigate('/', { replace: true });
     } catch (error) {
       throw error;
     }

@@ -21,6 +21,7 @@ const routeSlice = createSlice({
     clearPath: (state) => {
       state.currentPath = '/';
       state.previousPath = '/';
+      localStorage.removeItem('lastVisitedPath');
     },
   },
 });
