@@ -1,11 +1,10 @@
 import React from 'react';
-import { Avatar } from "@mui/material";
+import { Avatar } from '@mui/material';
 
-function stringToColor(string: String) {
+function stringToColor(string: string) {
   let hash = 0;
   let i;
 
-  /* eslint-disable no-bitwise */
   for (i = 0; i < string.length; i += 1) {
     hash = string.charCodeAt(i) + ((hash << 5) - hash);
   }
@@ -16,12 +15,11 @@ function stringToColor(string: String) {
     const value = (hash >> (i * 8)) & 0xff;
     color += `00${value.toString(16)}`.slice(-2);
   }
-  /* eslint-enable no-bitwise */
 
   return color;
 }
 
-function stringAvatar(name: String) {
+function stringAvatar(name: string) {
   return {
     sx: {
       bgcolor: stringToColor(name),
@@ -32,17 +30,21 @@ function stringAvatar(name: String) {
 
 interface SettingsAvatarProps {
   nameUser: {
-    first_name: String;
-    last_name: String;
-  } | null
+    first_name: string;
+    last_name: string;
+  } | null;
 }
 
-const SettingsAvatar = ( { nameUser }: SettingsAvatarProps) => {
-  const _nameUser = nameUser !== null ? nameUser : { first_name: new String(), last_name: new String() }
+const SettingsAvatar = ({ nameUser }: SettingsAvatarProps) => {
+  const _nameUser =
+    nameUser !== null ? nameUser : { first_name: new String(), last_name: new String() };
   return (
     <>
-      <Avatar alt="Remy Sharp" src="" { ...stringAvatar(`${_nameUser.first_name} ${_nameUser.last_name}` )}  >
-      </Avatar>
+      <Avatar
+        alt="Remy Sharp"
+        src=""
+        {...stringAvatar(`${_nameUser.first_name} ${_nameUser.last_name}`)}
+      ></Avatar>
       {/*<p>*/}
       {/*  {`${_user.firstName} ${_user.lastName}`}*/}
       {/*</p>*/}
@@ -51,7 +53,7 @@ const SettingsAvatar = ( { nameUser }: SettingsAvatarProps) => {
       {/*</p>*/}
     </>
     // <Avatar alt="Remy Sharp" src="" { ...stringAvatar(`${_nameUser.first_name} ${_nameUser.last_name}` )}  />
-  )
-}
+  );
+};
 
 export default SettingsAvatar;

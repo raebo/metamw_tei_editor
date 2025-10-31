@@ -1,28 +1,38 @@
-import { useEffect, useState } from "react";
-import { AUTH_TOKEN_NAME } from "../utils/auth";
+import { API_ENDPOINTS } from '@src/constants/url';
+import axios from 'axios';
+import { initApi } from '@src/services/apiRequest.service';
 
-export const getToken = () => localStorage.getItem(AUTH_TOKEN_NAME);
+export const AuthService = {
+  async getMe() {
+    const response = await initApi().get(`${API_ENDPOINTS.AUTH}/me`, {
+      withCredentials: true,
+    });
+    return response.data;
+  },
 
-export const setToken = (token: string) => {
-  localStorage.setItem(AUTH_TOKEN_NAME, token);
-}
+  async login(email: string, password: string) {
+    const response = await axios.post(
+      `${API_ENDPOINTS.AUTH}/login`,
+      { email, password },
+      { withCredentials: true },
+    );
+    return response.data;
+  },
 
-export const removeToken = () => {
-  localStorage.removeItem(AUTH_TOKEN_NAME);
-}
+  async logout() {
+    const response = await axios.delete(`${API_ENDPOINTS.AUTH}/logout`, {
+      withCredentials: true,
+    });
 
-export const useAuthToken = () => {
-  const [isTokenAvailable, setIsTokenAvailable] = useState(false);
+    return response.data;
+  },
 
-  useEffect(() => {
-    const token = localStorage.getItem(AUTH_TOKEN_NAME);
-    if (token) {
-      setIsTokenAvailable(true);
-
-    } else {
-      setIsTokenAvailable(false);
-    }
-  }, [setIsTokenAvailable]); // Run this only once when the component mounts
-
-  return isTokenAvailable;
+  async refresh() {
+    const response = await axios.post(
+      `${API_ENDPOINTS.AUTH}/refresh`,
+      {},
+      { withCredentials: true },
+    );
+    return response.data;
+  },
 };

@@ -9,7 +9,6 @@ import {
   setReloadLetterContent,
   setXmlLetterContent,
 } from '@src/redux/slices/editor.letter.slice';
-import { undefined } from 'zod';
 
 export const filterForKeyHandleDefinitions = (
   keyHandleDefinitions: Record<string, EditorKeyHandleItem>,
@@ -155,6 +154,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
   },
   'alt+k': {
     key: 'alt+k',
+    component: null,
     description: 'Zeige Hilfsmenü der Shortcuts',
     action: async (dispatch: AppDispatch, _getState: () => RootState) => {
       return EditorUtils.keyPressHandles.openLeftPanel(
@@ -178,6 +178,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
   },
   'alt+s': {
     key: 'alt+s',
+    component: null,
     description: 'Suche nach Briefen',
     action: async (dispatch: AppDispatch, _getState: () => RootState) => {
       return EditorUtils.keyPressHandles.openLeftPanel(

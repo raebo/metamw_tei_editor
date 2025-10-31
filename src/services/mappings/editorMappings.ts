@@ -12,7 +12,10 @@ export type EditorKeyHandleItem = {
   description: string;
   key: string;
   component: ReactNode | null;
-  action?: (() => Promise<string | null>) | ((dispatch: AppDispatch, getState: () => RootState) => Promise<string | null>) | null;
+  action?:
+    | (() => Promise<string | null>)
+    | ((dispatch: AppDispatch, getState: () => RootState) => Promise<string | null | void>)
+    | null;
   xmlAction?: (xmlDoc: Document) => void;
   operationType?: string | undefined; // e.g., 'INSERT_PAGEBREAK', 'ADD_PARAGRAPH'
   successMessage?: string;

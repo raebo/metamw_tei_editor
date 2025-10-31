@@ -1,12 +1,14 @@
 export interface AuthUser {
-  id: number
-  login: string
-  first_name: string
-  last_name: string
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
 }
 
-export type AuthContextType = {
-  isAuthenticated: boolean;
-  user: AuthUser | null;  // or whatever type you use for the user
-  refreshUser: () => void;
-};
+export interface AuthContextType {
+  user: AuthUser | null;
+  login: (email: string, password: string) => Promise<void>;
+  refreshUser: () => Promise<void>;
+  loading: boolean;
+  logout: () => Promise<void>;
+}

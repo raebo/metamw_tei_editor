@@ -1,16 +1,15 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import React, { startTransition } from "react";
-import { Page } from "../../interfaces/page.interface";
-import { useNavigate } from "react-router-dom";
-
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import React, { startTransition } from 'react';
+import { Page } from '@src/interfaces/page.interface';
+import { useNavigate } from 'react-router-dom';
 
 interface NavigationProps {
   pages: Page[];
 }
 
-const Navigation = ( { pages } : NavigationProps) => {
-  const navigate = useNavigate()
+const Navigation = ({ pages }: NavigationProps) => {
+  const navigate = useNavigate();
 
   return (
     <>
@@ -30,7 +29,7 @@ const Navigation = ( { pages } : NavigationProps) => {
         ))}
       </Box>
     </>
-  )
-}
+  );
+};
 
 export default Navigation;

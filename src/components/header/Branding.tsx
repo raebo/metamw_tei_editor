@@ -1,14 +1,13 @@
-import Typography from "@mui/material/Typography";
+import Typography from '@mui/material/Typography';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import useReactiveVar from "../../utils/makeReactiveVar";
-import { authenticatedVar } from "../../constants/authenticated";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '@src/redux/redux.store';
 
 const Branding = () => {
-
-  const isAuthenticated = useReactiveVar(authenticatedVar).get()
-  const navigate = useNavigate()
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -17,7 +16,7 @@ const Branding = () => {
         variant="h6"
         noWrap
         component="a"
-        onClick={ () => navigate("/") }
+        onClick={() => navigate('/')}
         sx={{
           mr: 2,
           display: { xs: 'none', md: 'flex' },
@@ -28,11 +27,11 @@ const Branding = () => {
           color: 'inherit',
           textDecoration: 'none',
         }}
-        >
-        {`${isAuthenticated.get() ? 'MetaMw - Editor' : 'MetaMw - Editor'}`}
+      >
+        {`${isAuthenticated ? 'MetaMw - Editor' : 'MetaMw - Editor'}`}
       </Typography>
     </>
-  )
-}
+  );
+};
 
 export default Branding;
