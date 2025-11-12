@@ -103,7 +103,10 @@ export const backendService = {
       }
     }
   },
-  fetchLetterAuthorsSenders: async (searchValue: string | null, senderType: 'RECEIVER' | 'WRITER'): Promise<SnippetEntity[]> => {
+  fetchLetterAuthorsSenders: async (
+    searchValue: string | null,
+    senderType: 'RECEIVER' | 'WRITER',
+  ): Promise<SnippetEntity[]> => {
     const requestBody = {
       sender_type: senderType,
       ...(searchValue !== null && { search_value: searchValue }),
@@ -135,22 +138,33 @@ export const backendService = {
       }
     }
   },
-  fetchCategoriesForProtagCreation: async (protagCreationId: number): Promise<ProtagCreationCategory[]> => {
+  fetchCategoriesForProtagCreation: async (
+    protagCreationId: number,
+  ): Promise<ProtagCreationCategory[]> => {
     try {
-      const response = await initApi().get(`/jwt/misc/categories_for_protag_creation/${protagCreationId}`);
+      const response = await initApi().get(
+        `/jwt/misc/categories_for_protag_creation/${protagCreationId}`,
+      );
 
       if (!response) {
         throw new Error('No response from server for protag creation categories');
       }
 
-      return response.data.map((protag: { id: number; name: string; name_en: string; protag_creation_category_id: number }) => {
-        return {
-          id: protag.id,
-          name: protag.name,
-          name_en: protag.name_en,
-          protagCreationCategoryId: protag.protag_creation_category_id,
-        } as ProtagCreationCategory;
-      });
+      return response.data.map(
+        (protag: {
+          id: number;
+          name: string;
+          name_en: string;
+          protag_creation_category_id: number;
+        }) => {
+          return {
+            id: protag.id,
+            name: protag.name,
+            name_en: protag.name_en,
+            protagCreationCategoryId: protag.protag_creation_category_id,
+          } as ProtagCreationCategory;
+        },
+      );
     } catch (error: any) {
       const response = error.response;
 
@@ -189,7 +203,9 @@ export const backendService = {
     }
   },
 
-  fetchProtagCreationEntries: async (protagCreationCategory: ProtagCreationCategory | null): Promise<ProtagCreation[]> => {
+  fetchProtagCreationEntries: async (
+    protagCreationCategory: ProtagCreationCategory | null,
+  ): Promise<ProtagCreation[]> => {
     try {
       const url =
         protagCreationCategory !== null
@@ -203,7 +219,14 @@ export const backendService = {
       }
 
       return response.data.map(
-        (protag: { id: number; key: string; name: string; protag_creation_category_id: number; mwv: string | null; op: string | null }) => {
+        (protag: {
+          id: number;
+          key: string;
+          name: string;
+          protag_creation_category_id: number;
+          mwv: string | null;
+          op: string | null;
+        }) => {
           return {
             id: protag.id,
             key: protag.key,
@@ -224,7 +247,9 @@ export const backendService = {
       }
     }
   },
-  fetchProtagCreationCategories: async (categoryId: number | null): Promise<ProtagCreationCategory[]> => {
+  fetchProtagCreationCategories: async (
+    categoryId: number | null,
+  ): Promise<ProtagCreationCategory[]> => {
     try {
       const response = await initApi().get(`/jwt/misc/protag_creation_categories`, {
         params: {
@@ -236,14 +261,21 @@ export const backendService = {
         throw new Error('No response from server for protag creation categories');
       }
 
-      return response.data.map((protag: { id: number; name: string; name_en: string; protag_creation_category_id: number }) => {
-        return {
-          id: protag.id,
-          name: protag.name,
-          name_en: protag.name_en,
-          protagCreationCategoryId: protag.protag_creation_category_id,
-        } as ProtagCreationCategory;
-      });
+      return response.data.map(
+        (protag: {
+          id: number;
+          name: string;
+          name_en: string;
+          protag_creation_category_id: number;
+        }) => {
+          return {
+            id: protag.id,
+            name: protag.name,
+            name_en: protag.name_en,
+            protagCreationCategoryId: protag.protag_creation_category_id,
+          } as ProtagCreationCategory;
+        },
+      );
     } catch (error: any) {
       const response = error.response;
 
@@ -378,7 +410,12 @@ export const backendService = {
       }
     }
   },
-  patchContent: async (content: string, letterId: number | null, changeType: string, xmlId: string | null): Promise<boolean> => {
+  patchContent: async (
+    content: string,
+    letterId: number | null,
+    changeType: string,
+    xmlId: string | null,
+  ): Promise<boolean> => {
     if (!letterId) {
       throw new Error('No letter id provided');
     }
@@ -386,7 +423,12 @@ export const backendService = {
     try {
       await initApi().patch(`/jwt/editor/pinned_letters/${letterId}/set_content/`, {
         changes: {
-          new_content: MiscUtils.misc.pipeFunctions(content, replaceWithCamelCase, replaceDataKeys, removeTmpIds),
+          new_content: MiscUtils.misc.pipeFunctions(
+            content,
+            replaceWithCamelCase,
+            replaceDataKeys,
+            removeTmpIds,
+          ),
           xml_id: xmlId,
           change_type: changeType,
         },

@@ -7,7 +7,13 @@ export enum EntityType {
   PROTAG_CREATION = 'PROTAG_CREATION',
 }
 
-export type EditorDateType = 'when' | 'when-custom' | 'notAfter' | 'notBefore' | 'from-to' | 'notBefore-notAfter';
+export type EditorDateType =
+  | 'when'
+  | 'when-custom'
+  | 'notAfter'
+  | 'notBefore'
+  | 'from-to'
+  | 'notBefore-notAfter';
 export type DateCertainty = 'high' | 'medium' | 'low';
 export type LetterState = {
   viewMode: 'CODE' | 'WYSIWYG' | null;
@@ -63,7 +69,11 @@ export type ContentAddrLine = {
   rendType: string | null;
 };
 
-export const validParagraphClasses = ['PARAGRAPH_LEFT', 'PARAGRAPH_RIGHT', 'PARAGRAPH_CENTER'] as const;
+export const validParagraphClasses = [
+  'PARAGRAPH_LEFT',
+  'PARAGRAPH_RIGHT',
+  'PARAGRAPH_CENTER',
+] as const;
 
 export type ParagraphClass = (typeof validParagraphClasses)[number];
 
@@ -82,6 +92,7 @@ const dialogTypes = {
   ADD_GREETINGS_FORMULA: 'ADD_GREETINGS_FORMULA',
   ADD_LETTER_TO_PROTAG: 'ADD_LETTER_TO_PROTAG',
   ADD_LETTER_FROM_PROTAG: 'ADD_LETTER_FROM_PROTAG',
+  ADD_RISM_ENTRY: 'ADD_RISM_ENTRY',
   ADD_NEW_LETTER: 'ADD_NEW_LETTER',
   ADD_NOTE: 'ADD_NOTE',
   ADD_TEI_HEADER: 'ADD_TEI_HEADER',
@@ -107,7 +118,8 @@ const dialogTypes = {
   SOURCE_DESC_HANDWRITING: 'SOURCE_DESC_HANDWRITING',
 };
 
-export type TmpIdPrefix = (typeof EditorConstants.tmpIdPrefixes)[keyof typeof EditorConstants.tmpIdPrefixes];
+export type TmpIdPrefix =
+  (typeof EditorConstants.tmpIdPrefixes)[keyof typeof EditorConstants.tmpIdPrefixes];
 
 export const EditorConstants = {
   ALLOWED_PARENT_TAG: "div[type='act_of_writing']",
@@ -196,6 +208,7 @@ export const EditorConstants = {
       DATE_REMOVED: 'DATE_REMOVED',
       GB_LETTER_ADDED: 'GB_LETTER_ADDED',
       HEADER_LANGUAGES_UPDATED: 'HEADER_LANGUAGES_UPDATED',
+      HEADER_RISM_ENTRY_ADDED: 'HEADER_RISM_ENTRY_ADDED',
       HEADER_UPDATED: 'HEADER_UPDATED',
       PROTAG_LETTER_ADDED: 'PROTAG_LETTER_ADDED',
     },
