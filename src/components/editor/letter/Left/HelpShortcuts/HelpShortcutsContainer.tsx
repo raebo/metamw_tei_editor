@@ -3,7 +3,16 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { type AppDispatch, store } from '@src/redux/redux.store';
 import { RootState } from '@src/redux/redux.store';
-import { Box, Divider, Typography, List, ListItemButton, ListItemText, TextField, InputAdornment } from '@mui/material';
+import {
+  Box,
+  Divider,
+  Typography,
+  List,
+  ListItemButton,
+  ListItemText,
+  TextField,
+  InputAdornment,
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import {
   allTimesAvailableKeyHandleDefinitions,
@@ -14,8 +23,12 @@ import { enqueueSnackbar } from 'notistack';
 import { runOncePerAction } from '@src/utils/misc/stateHandling';
 
 const HelpShortcutsContainer = () => {
-  const allShortcutsArray: EditorKeyHandleItem[] = Object.values(allTimesAvailableKeyHandleDefinitions);
-  const markedShortcutsArray: EditorKeyHandleItem[] = Object.values(contentMarkedKeyHandleDefinitions);
+  const allShortcutsArray: EditorKeyHandleItem[] = Object.values(
+    allTimesAvailableKeyHandleDefinitions,
+  );
+  const markedShortcutsArray: EditorKeyHandleItem[] = Object.values(
+    contentMarkedKeyHandleDefinitions,
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const dispatch = useDispatch<AppDispatch>();
   const stateLetterContent = useSelector((state: RootState) => state.editorLetter.content);
@@ -31,12 +44,16 @@ const HelpShortcutsContainer = () => {
   const activeShortcuts = useMemo(() => {
     const all = [...allShortcutsArray, ...(textIsMarked ? markedShortcutsArray : [])];
     return all.sort((a, b) => a.description.localeCompare(b.description));
-  }, [textIsMarked]);
+  }, [allShortcutsArray, markedShortcutsArray, textIsMarked]);
+
+  console.log('Active Shortcuts:', activeShortcuts);
 
   const filteredShortcuts = useMemo(() => {
     const term = searchTerm.toLowerCase();
     return activeShortcuts.filter(
-      (s) => (s.description.toLowerCase().includes(term) || s.key.toLowerCase().includes(term)) && s.skipForHelp !== true,
+      (s) =>
+        (s.description.toLowerCase().includes(term) || s.key.toLowerCase().includes(term)) &&
+        s.skipForHelp !== true,
     );
   }, [searchTerm, activeShortcuts]);
 
@@ -60,7 +77,9 @@ const HelpShortcutsContainer = () => {
         }
       });
     } catch (e) {
-      enqueueSnackbar('Fehler bei der Ausführung der Tastenkombination.', { variant: 'error' });
+      enqueueSnackbar(`Fehler bei der Ausführung der Tastenkombination.${(e as Error).message}`, {
+        variant: 'error',
+      });
     }
   };
 

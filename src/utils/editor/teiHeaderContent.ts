@@ -1,6 +1,6 @@
 import { EditorConstants, HeaderPerson, LanguageOption } from '../../constants/editor';
 import { EditorLetter } from '../../services/mappings/editorMappings';
-import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
+import { type RismFormEntry, SnippetEntity } from '../../services/mappings/autoAnnoMappings';
 import { EditorUtils } from './index';
 
 export const teiHeaderContent = {
@@ -501,6 +501,50 @@ export const teiHeaderContent = {
       nameNode.setAttribute('resp', respStmtType);
       nameNode.textContent = newName;
       lastElement.parentElement?.appendChild(nameNode);
+    }
+  },
+  addMsIdentifer: (teiHeader: Element | null, rismFormEntry: RismFormEntry): void => {
+    if (!teiHeader || !rismFormEntry) {
+      return;
+    }
+
+    const msDescWrapper = EditorUtils.xmlCheck.queryPath(
+      teiHeader,
+      'fileDesc > sourceDesc > msDesc',
+    )[0];
+    if (!msDescWrapper) return;
+
+    const msIdentifier = document.createElementNS(EditorConstants.TEI_NS, 'msIdentifier');
+    const country = document.createElementNS(EditorConstants.TEI_NS, 'country');
+    country.innerHTML = rismFormEntry.country;
+    msIdentifier.appendChild(country);
+
+    const settlement = document.createElementNS(EditorConstants.TEI_NS, 'settlement');
+    settlement.innerHTML = rismFormEntry.settlement;
+    msIdentifier.appendChild(settlement);
+
+    const institution = document.createElementNS(EditorConstants.TEI_NS, 'institution');
+    institution.setAttribute('data-key', 'RISM');
+    institution.innerHTML = rismFormEntry.institution;
+    msIdentifier.appendChild(institution);
+
+    const repository = document.createElementNS(EditorConstants.TEI_NS, 'repository');
+    repository.innerHTML = rismFormEntry.repository;
+    msIdentifier.appendChild(repository);
+
+    const collection = document.createElementNS(EditorConstants.TEI_NS, 'collection');
+    collection.innerHTML = rismFormEntry.collection;
+    msIdentifier.appendChild(collection);
+
+    const idno = document.createElementNS(EditorConstants.TEI_NS, 'idno');
+    idno.setAttribute('type', 'signatur');
+    idno.innerHTML = rismFormEntry.idNo;
+    msIdentifier.appendChild(idno);
+
+    if (msDescWrapper.firstChild) {
+      msDescWrapper.insertBefore(msIdentifier, msDescWrapper.firstChild);
+    } else {
+      msDescWrapper.appendChild(msIdentifier);
     }
   },
 };

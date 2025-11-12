@@ -2,11 +2,38 @@ import { initApi } from '@src/services/apiRequest.service';
 import { removeTmpIds, replaceDataKeys, replaceWithCamelCase } from '../auto_anno/domHandling';
 import { EntityType } from '@src/constants/editor';
 import { MiscUtils } from '../misc';
-import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
+import { type RismEntry, SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { ProtagCreation, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
 
 export const backendService = {
-  searchSenderReceiverLetters: async (searchValue: string | null, senderType: 'RECEIVER' | 'WRITER'): Promise<SnippetEntity[]> => {
+  searchRismEntries: async (searchValue: string): Promise<RismEntry[]> => {
+    const requestBody = {
+      search_value: searchValue,
+    };
+
+    const response = await initApi().post('/jwt/misc/rism_entries/search', requestBody);
+
+    if (!response) {
+      throw new Error('No response from server for RISM entries');
+    }
+
+    const rismEntries: RismEntry[] = response.data.map((item: any) => {
+      return {
+        id: item.id,
+        title: item.title,
+        name: item.name,
+        city: item.city,
+        country: item.country,
+        code: item.code,
+      } as RismEntry;
+    });
+
+    return rismEntries;
+  },
+  searchSenderReceiverLetters: async (
+    searchValue: string | null,
+    senderType: 'RECEIVER' | 'WRITER',
+  ): Promise<SnippetEntity[]> => {
     const requestBody = {
       sender_type: senderType,
       ...(searchValue !== null && { search_value: searchValue }),

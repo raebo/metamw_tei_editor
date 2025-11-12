@@ -6,7 +6,11 @@ import { Divider, Typography } from '@mui/material';
 import DialogActions from '@mui/material/DialogActions';
 import { EditorConstants } from '@src/constants/editor';
 import AddNoteDialog from './Components/AddNoteDialog';
-import { setDialogType, setReloadLetterContent, setXmlLetterContent } from '@src/redux/slices/editor.letter.slice';
+import {
+  setDialogType,
+  setReloadLetterContent,
+  setXmlLetterContent,
+} from '@src/redux/slices/editor.letter.slice';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
@@ -30,6 +34,7 @@ import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
 import CloseTabWithContent from '@src/components/editor/letter/Dialog/Components/CloseTabWithContentDialog';
+import AddRismEntryDialog from '@src/components/editor/letter/Dialog/Components/RismEntries/AddRismEntryDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -53,9 +58,12 @@ const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: 'Begrüßungsformel Hinzufügen',
   [EditorConstants.dialogTypes.ADD_NEW_LETTER]: 'Neuen Brief Hinzufügen',
   [EditorConstants.dialogTypes.ADD_NOTE]: 'Kommentar Hinzufügen',
+  [EditorConstants.dialogTypes.ADD_RISM_ENTRY]: 'RISM Eintrag Hinzufügen',
   [EditorConstants.dialogTypes.ADD_TEI_HEADER]: 'Header des Briefes Hinzufügen/Bearbeiten',
-  [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: 'Verweis an einen Brief an den Protagonisten Hinzufügen',
-  [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: 'Verweis an einen Brief vom Protagonisten Hinzufügen',
+  [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]:
+    'Verweis an einen Brief an den Protagonisten Hinzufügen',
+  [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]:
+    'Verweis an einen Brief vom Protagonisten Hinzufügen',
   [EditorConstants.dialogTypes.ADD_WRITING_PART]: 'Schreibakt Hinzufügen',
   [EditorConstants.dialogTypes.ATTACHMENT_ADD]: 'Beilage Hinzufügen',
   [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: 'Tab mit Inhalt Schließen?',
@@ -77,19 +85,34 @@ const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.RESET_LETTER]: 'Brief Zurücksetzen',
 };
 
-const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) => React.ReactNode> = {
+const DialogContentComponents: Record<
+  string,
+  (props: DefaultDialogProps & any) => React.ReactNode
+> = {
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: (props) => (
-    <GreetingsFormulaDialog {...props} formulaType={EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA} />
+    <GreetingsFormulaDialog
+      {...props}
+      formulaType={EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA}
+    />
   ),
-  [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: (props) => <ChooseProtagLetterDialog {...props} />,
-  [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: (props) => <ChooseGbLetterDialog {...props} />,
+  [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: (props) => (
+    <ChooseProtagLetterDialog {...props} />
+  ),
+  [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: (props) => (
+    <ChooseGbLetterDialog {...props} />
+  ),
   [EditorConstants.dialogTypes.ADD_NEW_LETTER]: (props) => <AddNewLetterDialog {...props} />,
   [EditorConstants.dialogTypes.ADD_NOTE]: (props) => <AddNoteDialog {...props} />,
+  [EditorConstants.dialogTypes.ADD_RISM_ENTRY]: (props) => <AddRismEntryDialog {...props} />,
   [EditorConstants.dialogTypes.ADD_WRITING_PART]: (props) => <AddWritingActDialog {...props} />,
   [EditorConstants.dialogTypes.ADD_TEI_HEADER]: (props) => <ManageTeiHeaderDialog {...props} />,
   [EditorConstants.dialogTypes.ATTACHMENT_ADD]: (props) => <AttachmentAddDialog {...props} />,
-  [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: (props) => <CloseTabWithContent {...props} />,
-  [EditorConstants.dialogTypes.DATE_WHEN_ADD]: (props) => <DateAddDialog {...props} dateType={EditorConstants.dateDialog.dateTypes.WHEN} />,
+  [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: (props) => (
+    <CloseTabWithContent {...props} />
+  ),
+  [EditorConstants.dialogTypes.DATE_WHEN_ADD]: (props) => (
+    <DateAddDialog {...props} dateType={EditorConstants.dateDialog.dateTypes.WHEN} />
+  ),
   [EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD]: (props) => (
     <DateAddDialog {...props} dateType={EditorConstants.dateDialog.dateTypes.WHEN_CUSTOM} />
   ),
@@ -103,18 +126,34 @@ const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) 
     <DateAddDialog {...props} dateType={EditorConstants.dateDialog.dateTypes.FROM_TO} />
   ),
   [EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD]: (props) => (
-    <DateAddDialog {...props} dateType={EditorConstants.dateDialog.dateTypes.NOT_BEFORE_NOT_AFTER} />
+    <DateAddDialog
+      {...props}
+      dateType={EditorConstants.dateDialog.dateTypes.NOT_BEFORE_NOT_AFTER}
+    />
   ),
   [EditorConstants.dialogTypes.EDIT_LANGUAGES]: (props) => <EditLanguagesDialog {...props} />,
   [EditorConstants.dialogTypes.EDIT_NOTE]: (props) => <EditNoteDialog {...props} />,
-  [EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT]: (props) => <ManageTextAddress {...props} addressType={'RECIPIENT'} />,
-  [EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER]: (props) => <ManageTextAddress {...props} addressType={'SENDER'} />,
-  [EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA]: (props) => (
-    <GreetingsFormulaDialog {...props} formulaType={EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA} />
+  [EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT]: (props) => (
+    <ManageTextAddress {...props} addressType={'RECIPIENT'} />
   ),
-  [EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER]: (props) => <ManageTeiHeaderAuthorWriterDialog {...props} />,
-  [EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: (props) => <ManageTeiHeaderReceiverDialog {...props} />,
-  [EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER]: (props) => <ManageWritingActAuthorWriterDialog {...props} />,
+  [EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER]: (props) => (
+    <ManageTextAddress {...props} addressType={'SENDER'} />
+  ),
+  [EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA]: (props) => (
+    <GreetingsFormulaDialog
+      {...props}
+      formulaType={EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA}
+    />
+  ),
+  [EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER]: (props) => (
+    <ManageTeiHeaderAuthorWriterDialog {...props} />
+  ),
+  [EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: (props) => (
+    <ManageTeiHeaderReceiverDialog {...props} />
+  ),
+  [EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER]: (props) => (
+    <ManageWritingActAuthorWriterDialog {...props} />
+  ),
   [EditorConstants.dialogTypes.PUBLISH_LETTER]: (props) => <PublishLetterDialog {...props} />,
   [EditorConstants.dialogTypes.RESET_LETTER]: (props) => <ResetLetterDialog {...props} />,
 };
@@ -190,14 +229,18 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
       const xmlSerializer = new XMLSerializer();
       const xmlString = xmlSerializer.serializeToString(updatedXmlDoc);
 
-      await EditorUtils.backendOrchestrator.patchWithDispatch(dispatch, [xmlString, stateEditorLetter.id, changeType, null], {
-        actionsOnSuccess: [
-          setXmlLetterContent({ content: { xmlContent: xmlString } }),
-          setReloadLetterContent({ reloadLetterContent: true }),
-        ],
-        successMessage,
-        errorMessage: 'Data could not be updated on backend side',
-      });
+      await EditorUtils.backendOrchestrator.patchWithDispatch(
+        dispatch,
+        [xmlString, stateEditorLetter.id, changeType, null],
+        {
+          actionsOnSuccess: [
+            setXmlLetterContent({ content: { xmlContent: xmlString } }),
+            setReloadLetterContent({ reloadLetterContent: true }),
+          ],
+          successMessage,
+          errorMessage: 'Data could not be updated on backend side',
+        },
+      );
     } catch (err) {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
     }

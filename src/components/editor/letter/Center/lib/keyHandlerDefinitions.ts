@@ -309,6 +309,18 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     },
     operationType: undefined,
   },
+  'ctrl+m': {
+    key: 'ctrl+m',
+    description: 'Standort Hinzufügen',
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => {
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.ADD_RISM_ENTRY,
+      );
+    },
+  },
 };
 
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {

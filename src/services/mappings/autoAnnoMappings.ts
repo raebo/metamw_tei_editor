@@ -57,6 +57,23 @@ export interface SnippetEntity {
   entityPlaceCountryName?: string
   entityKind?: string
   extraData: {}
+
+export interface RismEntry {
+  id: number | null;
+  name: string;
+  title: string;
+  city: string;
+  country: string;
+  code: string;
+}
+
+export interface RismFormEntry {
+  country: string;
+  settlement: string;
+  institution: string;
+  repository: string;
+  collection: string;
+  idNo: string;
 }
 
 export interface SnippetApiEntity {
