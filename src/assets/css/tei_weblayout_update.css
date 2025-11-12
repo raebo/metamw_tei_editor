@@ -211,6 +211,10 @@ profileDesc correspDesc correspAction[type='sent'] persName {
   cursor: pointer;
 }
 
+teiHeader fileDesc sourceDesc msDesc msIdentifier * {
+  cursor: pointer;
+}
+
 /*.hidden {*/
 /*    display: none;*/
 /*}*/

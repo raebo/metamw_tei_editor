@@ -9,6 +9,7 @@ export enum NodeTypes {
   PERSON = 'PERSON',
   WRITER = 'WRITER',
   WRITING_ACT = 'WRITING_ACT',
+  RISM_ENTRY = 'RISM_ENTRY',
 }
 
 export interface NodeType {
@@ -30,6 +31,7 @@ export const nodeTypesMap: Record<NodeTypes, NodeType> = {
   [NodeTypes.WRITING_ACT]: { key: NodeTypes.WRITING_ACT, name: 'Schreibakt' },
   [NodeTypes.WRITER]: { key: NodeTypes.WRITER, name: 'Schreiber' },
   [NodeTypes.LANGUAGE]: { key: NodeTypes.LANGUAGE, name: 'Sprache' },
+  [NodeTypes.RISM_ENTRY]: { key: NodeTypes.RISM_ENTRY, name: 'Standort' },
 };
 
 export const nodeTypes = {
