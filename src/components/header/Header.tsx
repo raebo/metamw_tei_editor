@@ -2,13 +2,13 @@ import React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
-import Branding from "./Branding";
-import Navigation from "./Navigation";
-import Settings from "./Settings";
-import { Page } from "../../interfaces/page.interface";
+import Branding from './Branding';
+import Navigation from './Navigation';
+import Settings from './Settings';
+import { Page } from '@src/interfaces/page.interface';
 
 interface HeaderProps {
-  isAuthenticated: boolean
+  isAuthenticated: boolean;
 }
 
 const pages: Page[] = [
@@ -25,7 +25,7 @@ const unauthenticatedPages: Page[] = [
   { title: 'Login', path: '/login' },
 ];
 
-const Header = ( { isAuthenticated } : HeaderProps) => {
+const Header = ({ isAuthenticated }: HeaderProps) => {
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
@@ -34,10 +34,10 @@ const Header = ( { isAuthenticated } : HeaderProps) => {
           {/*<MobileNavigation pages={authenticated ? pages : unauthenticatedPages} />*/}
           {/*<MobileBranding />*/}
           <Navigation pages={isAuthenticated ? pages : unauthenticatedPages} />
-          { isAuthenticated && <Settings /> }
+          {isAuthenticated && <Settings />}
         </Toolbar>
       </Container>
     </AppBar>
   );
-}
+};
 export default Header;

@@ -6,6 +6,13 @@ import { type RismEntry, SnippetEntity } from '@src/services/mappings/autoAnnoMa
 import { ProtagCreation, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
 
 export const backendService = {
+  updateUserLanguage: async (langCode: 'de' | 'en') => {
+    const response = await initApi().put(`jwt/misc/user/language/${langCode}`);
+
+    if (!response) {
+      throw new Error(`Could not update language to ${langCode} `);
+    }
+  },
   searchRismEntries: async (searchValue: string): Promise<RismEntry[]> => {
     const requestBody = {
       search_value: searchValue,
@@ -17,7 +24,7 @@ export const backendService = {
       throw new Error('No response from server for RISM entries');
     }
 
-    const rismEntries: RismEntry[] = response.data.map((item: any) => {
+    return response.data.map((item: any) => {
       return {
         id: item.id,
         title: item.title,
@@ -27,8 +34,6 @@ export const backendService = {
         code: item.code,
       } as RismEntry;
     });
-
-    return rismEntries;
   },
   searchSenderReceiverLetters: async (
     searchValue: string | null,

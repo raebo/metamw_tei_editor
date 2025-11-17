@@ -1,0 +1,22 @@
+{
+  "login": {
+    "headline": "Login Benutzer",
+    "btn_signing": "Einloggen",
+    "labels" : {
+      "email": "E-Mail-Adresse",
+      "password": "Passwort"
+    },
+    "errors": {
+      "email": "Ungültige E-Mail-Adresse oder Passwort",
+      "password": "Ungültige E-Mail-Adresse oder Passwort"
+    }
+  },
+  "logout": {
+    "error_msg": "Error logging out with {{reason}}",
+    "link": "Benutzer Ausloggen"
+  },
+  "settings": {
+    "lang_german": "Deutsch",
+    "lang_english": "Englisch"
+  }
+}

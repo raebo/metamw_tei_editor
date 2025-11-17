@@ -27,6 +27,7 @@ import IndexLetters from '@src/components/pages/editor/IndexLetters';
 import ShowEditor from '@src/components/pages/editor/ShowEditor';
 import PathRestorer from '@src/components/misc/routes/PathRestorer';
 import RouteTracker from '@src/components/misc/routes/RouteTracker';
+import './i18n';
 
 const App = () => {
   const isLoading = useSelector((state: RootState) => state.spinnerLoading.isLoading);

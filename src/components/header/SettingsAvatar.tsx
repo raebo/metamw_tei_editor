@@ -45,14 +45,7 @@ const SettingsAvatar = ({ nameUser }: SettingsAvatarProps) => {
         src=""
         {...stringAvatar(`${_nameUser.first_name} ${_nameUser.last_name}`)}
       ></Avatar>
-      {/*<p>*/}
-      {/*  {`${_user.firstName} ${_user.lastName}`}*/}
-      {/*</p>*/}
-      {/*<p>*/}
-      {/*  {`${_nameUser.first_name} ${_nameUser.last_name}`}*/}
-      {/*</p>*/}
     </>
-    // <Avatar alt="Remy Sharp" src="" { ...stringAvatar(`${_nameUser.first_name} ${_nameUser.last_name}` )}  />
   );
 };
 

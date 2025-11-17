@@ -7,6 +7,7 @@ import type { AuthContextType, AuthUser } from '@src/services/mappings/authMappi
 import { clearPath } from '@src/redux/slices/route.slice';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@src/redux/redux.store';
+import i18n from '@src/i18n';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -48,8 +49,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             email: data.user.email,
             firstName: data.user.first_name,
             lastName: data.user.last_name,
+            language: data.user.language,
           },
         }),
+        await i18n.changeLanguage(data.user.language),
       );
 
       if (currentPath && currentPath !== '/login') {
