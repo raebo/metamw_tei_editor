@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -35,6 +35,7 @@ import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
 import CloseTabWithContent from '@src/components/editor/letter/Dialog/Components/CloseTabWithContentDialog';
 import AddRismEntryDialog from '@src/components/editor/letter/Dialog/Components/RismEntries/AddRismEntryDialog';
+import ManageRismEntryDialog from '@src/components/editor/letter/Dialog/Components/RismEntries/ManageRismEntryDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -81,6 +82,7 @@ const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: 'Empfänger Verwalten',
   [EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER]: 'Adresse Sender Verwalten',
   [EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT]: 'Adresse Empfänger Verwalten',
+  [EditorConstants.dialogTypes.MANAGE_RISM_ENTRY]: 'RISM Eintrag Verwalten',
   [EditorConstants.dialogTypes.PUBLISH_LETTER]: 'Brief Veröffentlichen',
   [EditorConstants.dialogTypes.RESET_LETTER]: 'Brief Zurücksetzen',
 };
@@ -151,6 +153,7 @@ const DialogContentComponents: Record<
   [EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: (props) => (
     <ManageTeiHeaderReceiverDialog {...props} />
   ),
+  [EditorConstants.dialogTypes.MANAGE_RISM_ENTRY]: (props) => <ManageRismEntryDialog {...props} />,
   [EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER]: (props) => (
     <ManageWritingActAuthorWriterDialog {...props} />
   ),

@@ -5,6 +5,7 @@ import {
   setDialogType,
   setEditorLetterActOfWriting,
   setReloadLetterContent,
+  setSelectedMsiIdentifier,
   setXmlLetterContent,
 } from '../redux/slices/editor.letter.slice';
 import { MiscUtils } from '../utils/misc';
@@ -15,6 +16,44 @@ export const getMenuItemsNoMarking = (
   stateEditorLetter: any,
   xmlDocRef: React.MutableRefObject<XMLDocument | null>,
 ): MenuItem[] => [
+  {
+    identifier: EditorConstants.menuItemTypes.MANAGE_RISM_ENTRY,
+    label: 'RISM Eintrag Bearbeiten',
+    action: async ({ node }: { node?: Node }) => {
+      if (!node) {
+        enqueueSnackbar('The given node is undefined', { variant: 'error' });
+        return;
+      }
+
+      const msIdentifierNode = node.parentNode as Element | null;
+
+      if (!msIdentifierNode || msIdentifierNode.tagName.toUpperCase() !== 'MSIDENTIFIER') {
+        enqueueSnackbar('Parent is not an <msIdentifier> node', { variant: 'error' });
+        return;
+      }
+
+      const msDescNode = msIdentifierNode.parentNode as Element | null;
+      if (!msDescNode || msDescNode.tagName.toUpperCase() !== 'MSDESC') {
+        enqueueSnackbar('Parent is not an <msDesc> node', { variant: 'error' });
+        return;
+      }
+
+      const children = Array.from(msDescNode.childNodes).filter(
+        (n): n is Element =>
+          n.nodeType === 1 && (n as Element).tagName.toUpperCase() === 'MSIDENTIFIER',
+      );
+
+      const index = children.indexOf(msIdentifierNode);
+
+      if (index === -1 || index >= children.length) {
+        enqueueSnackbar('Children is not an <msIdentifier> node', { variant: 'error' });
+        return;
+      }
+
+      dispatch(setSelectedMsiIdentifier({ selectedMsiIdentifier: index }));
+      dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_RISM_ENTRY }));
+    },
+  },
   {
     identifier: EditorConstants.menuItemTypes.REMOVE_ANNOTATION,
     label: 'Auszeichnung Entfernen',

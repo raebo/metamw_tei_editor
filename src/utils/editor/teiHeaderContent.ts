@@ -1,6 +1,6 @@
-import { EditorConstants, HeaderPerson, LanguageOption } from '../../constants/editor';
-import { EditorLetter } from '../../services/mappings/editorMappings';
-import { type RismFormEntry, SnippetEntity } from '../../services/mappings/autoAnnoMappings';
+import { EditorConstants, HeaderPerson, LanguageOption } from '@src/constants/editor';
+import { EditorLetter } from '@src/services/mappings/editorMappings';
+import { type RismFormEntry, SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { EditorUtils } from './index';
 
 export const teiHeaderContent = {
@@ -546,5 +546,35 @@ export const teiHeaderContent = {
     } else {
       msDescWrapper.appendChild(msIdentifier);
     }
+  },
+  updateMsIdentifier: (
+    teiHeader: Element | null,
+    numberOfIdentifier: number,
+    rismFormEntry: RismFormEntry,
+  ): void => {
+    if (!teiHeader || !rismFormEntry) {
+      return;
+    }
+
+    const selectedMsIdentifier = EditorUtils.xmlExtraction.extractMsIdentifierNode(
+      teiHeader,
+      numberOfIdentifier,
+    );
+
+    const set = (tag: string, value: string) => {
+      if (!selectedMsIdentifier) return;
+
+      const child = selectedMsIdentifier.getElementsByTagNameNS(EditorConstants.TEI_NS, tag)[0];
+      if (child) {
+        child.textContent = value;
+      }
+    };
+
+    set('country', rismFormEntry.country);
+    set('settlement', rismFormEntry.settlement);
+    set('institution', rismFormEntry.institution);
+    set('repository', rismFormEntry.repository);
+    set('collection', rismFormEntry.collection);
+    set('idno', rismFormEntry.idNo);
   },
 };

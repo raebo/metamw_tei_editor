@@ -16,6 +16,7 @@ import { contentFlow } from '@src/utils/editor/contentFlow';
 import { undoRedo } from '@src/utils/editor/undoRedo';
 import { backendOrchestrator } from '@src/utils/editor/backendOrchestrator';
 import { letterTabs } from '@src/utils/editor/letterTabs';
+import { xmlExtraction } from '@src/utils/editor/xmlExtraction';
 
 export type EditorUtilsType = {
   backendService: typeof backendService;
@@ -36,6 +37,7 @@ export type EditorUtilsType = {
   undoRedo: typeof undoRedo;
   writingActContent: typeof writingActContent;
   xmlCheck: typeof xmlCheck;
+  xmlExtraction: typeof xmlExtraction;
 };
 
 function createEditorUtils(): EditorUtilsType {
@@ -58,6 +60,7 @@ function createEditorUtils(): EditorUtilsType {
     undoRedo,
     writingActContent,
     xmlCheck,
+    xmlExtraction,
   };
 }
 

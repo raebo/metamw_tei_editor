@@ -1,38 +1,80 @@
-import React, { useMemo, useState } from 'react';
-import { Box, Button, Divider, Grid, TextField, Typography } from '@mui/material';
-import { Autocomplete, DialogActions, DialogContent } from '@mui/material';
-import type { RismEntry, RismFormEntry } from '@src/services/mappings/autoAnnoMappings';
-import { EditorConstants } from '@src/constants/editor';
-import { backendService } from '@src/utils/editor/backendService';
-import { debounce } from 'lodash-es';
-import { MiscUtils } from '@src/utils/misc';
 import type { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
+import React, { useMemo, useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
 import { EditorUtils } from '@src/utils/editor';
+import { backendService } from '@src/utils/editor/backendService';
+import { EditorConstants } from '@src/constants/editor';
+import { useAppDispatch } from '@src/redux/hooks';
+import { clearSelectedMsiIdentifier } from '@src/redux/slices/editor.letter.slice';
+import { useSelector } from 'react-redux';
+import { RootState } from '@src/redux/redux.store';
+import type { RismEntry, RismFormEntry } from '@src/services/mappings/autoAnnoMappings';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  DialogActions,
+  DialogContent,
+  Divider,
+  Grid,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { MiscUtils } from '@src/utils/misc';
+import { debounce } from 'lodash-es';
+
+interface RismFields {
+  country: string;
+  settlement: string;
+  institution: string;
+  repository: string;
+  collection: string;
+  idNo: string;
+}
+
+const mapDataToFields = (data: any): RismFields => ({
+  country: data.country,
+  settlement: data.city,
+  institution: data.code,
+  repository: data.name,
+  collection: data.title,
+  idNo: data.idNo ?? '',
+});
 
 const INITIAL_RISM_SEARCH_VALUE = 'Berlin';
 
-const AddRismEntryDialog = (props: DefaultDialogProps) => {
-  const [rismEntries, setRismEntries] = useState<RismEntry[]>([]);
-  const [country, setCountry] = useState('');
-  const [settlement, setSettlement] = useState('');
-  const [institution, setInstitution] = useState('');
-  const [repository, setRepository] = useState('');
-  const [collection, setCollection] = useState('');
-  const [idNo, setIdNo] = useState('');
-
+const ManageRismEntryDialog = (props: DefaultDialogProps) => {
+  const dispatch = useAppDispatch();
+  const selectedMsIdentifier = useSelector(
+    (state: RootState) => state.editorLetter.letter.selectedMsiIdentifier,
+  );
   const [docData, setDocData] = React.useState<{
     xmlDoc: XMLDocument | null;
     teiHeader: Element | null;
   }>({ xmlDoc: props.xmlDoc, teiHeader: null });
 
+  const [dataChanged, setDataChanged] = React.useState<boolean>(false);
+  const [rismEntries, setRismEntries] = useState<RismEntry[]>([]);
+
+  const [rismFields, setRismFields] = useState<RismFields>({
+    country: '',
+    settlement: '',
+    institution: '',
+    repository: '',
+    collection: '',
+    idNo: '',
+  });
+
   React.useEffect(() => {
-    if (!docData.xmlDoc) {
+    const xmlDoc = props.xmlDoc;
+    const msId = selectedMsIdentifier;
+
+    if (!xmlDoc) {
       enqueueSnackbar('Kein XML-Dokument zum Parsen vorhanden', { variant: 'error' });
       setDocData({ xmlDoc: null, teiHeader: null });
       return;
     }
-    const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(props.xmlDoc);
+    const teiHeader = EditorUtils.teiHeaderContent.extractTeiHeader(xmlDoc);
     setDocData((prevState) => ({ ...prevState, teiHeader }));
 
     if (!teiHeader) {
@@ -40,10 +82,55 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
       setDocData({ xmlDoc: null, teiHeader: null });
       return;
     }
+
+    if (msId === null) {
+      enqueueSnackbar('Der MsIdentifier konnte nicht ausgelesen werden', { variant: 'error' });
+      return;
+    }
+
+    EditorUtils.xmlExtraction.extractMsIdentifierData(teiHeader, msId, (data) =>
+      setRismFields(mapDataToFields(data)),
+    );
+
     backendService.searchRismEntries(INITIAL_RISM_SEARCH_VALUE).then((result) => {
       setRismEntries(result);
     });
-  }, [props.xmlDoc, docData.xmlDoc]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleFieldChange = (field: keyof RismFields, value: string) => {
+    setDataChanged(true);
+    setRismFields((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    if (!docData.xmlDoc || !docData.teiHeader || selectedMsIdentifier === null) {
+      enqueueSnackbar('TEI-Header ist nicht verfügbar', { variant: 'error' });
+      return false;
+    }
+
+    EditorUtils.teiHeaderContent.updateMsIdentifier(docData.teiHeader, selectedMsIdentifier, {
+      country: rismFields.country,
+      settlement: rismFields.settlement,
+      institution: rismFields.institution,
+      repository: rismFields.repository,
+      collection: rismFields.collection ? rismFields.collection : '-',
+      idNo: rismFields.idNo ? rismFields.idNo : '-',
+    } as RismFormEntry);
+
+    props.onSave(
+      docData.xmlDoc,
+      EditorConstants.changeTypes.misc.HEADER_RISM_ENTRY_CHANGED,
+      'RISM Eintrag aktualisiert',
+      null,
+      () => {
+        dispatch(clearSelectedMsiIdentifier());
+      },
+    );
+  };
 
   const searchRismEntries = async (term: string) => {
     try {
@@ -60,43 +147,28 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
 
   const rismEntryChanged = (entry: RismEntry | null) => {
     if (entry) {
-      setCountry(entry.country || '');
-      setSettlement(entry.city || '');
-      setInstitution(entry.code || '');
-      setRepository(entry.name || '');
+      setRismFields(mapDataToFields(entry));
+
+      if (!dataChanged) {
+        setDataChanged(true);
+      }
     }
   };
 
-  const handleSubmit = () => {
-    if (!docData.xmlDoc || !docData.teiHeader) {
-      enqueueSnackbar('TEI-Header ist nicht verfügbar', { variant: 'error' });
-      return false;
-    }
-
-    EditorUtils.teiHeaderContent.addMsIdentifer(docData.teiHeader, {
-      country: country,
-      settlement: settlement,
-      institution: institution,
-      repository: repository,
-      collection: collection ? collection : '-',
-      idNo: idNo ? idNo : '-',
-    } as RismFormEntry);
-
-    props.onSave(
-      docData.xmlDoc,
-      EditorConstants.changeTypes.misc.HEADER_RISM_ENTRY_ADDED,
-      'RISM Eintrag hinzugefügt',
-      null,
-    );
-  };
+  const validDocData = (): boolean =>
+    docData !== null && docData.teiHeader !== null && selectedMsIdentifier !== null;
 
   const handleReset = () => {
-    setCountry('');
-    setSettlement('');
-    setInstitution('');
-    setRepository('');
-    setCollection('');
-    setIdNo('');
+    if (!validDocData()) {
+      return;
+    }
+
+    EditorUtils.xmlExtraction.extractMsIdentifierData(
+      docData!.teiHeader!, //asset this is not null
+      selectedMsIdentifier!,
+      (data) => setRismFields(mapDataToFields(data)),
+    );
+    setDataChanged(false);
   };
 
   return (
@@ -104,7 +176,7 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
       <DialogContent>
         <Box sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
           <Typography variant="h6" gutterBottom>
-            Vorhandenen Eintrag suchen und auswählen
+            Eintrag ersetzten
           </Typography>
 
           <Grid container spacing={2}>
@@ -168,14 +240,19 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
                 fullWidth
               />
             </Grid>
+          </Grid>
 
-            {/* Metadata Fields */}
+          <Typography variant="h6" gutterBottom sx={{ marginTop: '3%', marginBottom: '2%' }}>
+            Daten aktualisieren
+          </Typography>
+
+          <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Country"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
+                value={rismFields.country}
+                onChange={(e) => handleFieldChange('country', e.target.value)}
               />
             </Grid>
 
@@ -183,8 +260,8 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
               <TextField
                 fullWidth
                 label="Settlement"
-                value={settlement}
-                onChange={(e) => setSettlement(e.target.value)}
+                value={rismFields.settlement}
+                onChange={(e) => handleFieldChange('settlement', e.target.value)}
               />
             </Grid>
 
@@ -192,8 +269,8 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
               <TextField
                 fullWidth
                 label="Institution"
-                value={institution}
-                onChange={(e) => setInstitution(e.target.value)}
+                value={rismFields.institution}
+                onChange={(e) => handleFieldChange('institution', e.target.value)}
               />
             </Grid>
 
@@ -201,8 +278,8 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
               <TextField
                 fullWidth
                 label="Collection"
-                value={collection}
-                onChange={(e) => setCollection(e.target.value)}
+                value={rismFields.collection}
+                onChange={(e) => handleFieldChange('collection', e.target.value)}
               />
             </Grid>
 
@@ -210,8 +287,8 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
               <TextField
                 fullWidth
                 label="Repository"
-                value={repository}
-                onChange={(e) => setRepository(e.target.value)}
+                value={rismFields.repository}
+                onChange={(e) => handleFieldChange('repository', e.target.value)}
               />
             </Grid>
 
@@ -219,8 +296,8 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
               <TextField
                 fullWidth
                 label="ID No."
-                value={idNo}
-                onChange={(e) => setIdNo(e.target.value)}
+                value={rismFields.idNo}
+                onChange={(e) => handleFieldChange('idNo', e.target.value)}
               />
             </Grid>
           </Grid>
@@ -229,11 +306,21 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
       <Divider />
       <DialogActions>
         <Grid size={{ xs: 12 }} display="flex" justifyContent="flex-end" gap={2}>
-          <Button variant="outlined" color="secondary" onClick={handleReset}>
-            Zurücksetzen
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handleReset}
+            disabled={!dataChanged}
+          >
+            Wiederherstellen
           </Button>
-          <Button variant="contained" color="primary" onClick={handleSubmit}>
-            Eintrag hinzufügen
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={!dataChanged}
+            onClick={handleSubmit}
+          >
+            Eintrag Anpassen
           </Button>
         </Grid>
       </DialogActions>
@@ -241,4 +328,4 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
   );
 };
 
-export default AddRismEntryDialog;
+export default ManageRismEntryDialog;

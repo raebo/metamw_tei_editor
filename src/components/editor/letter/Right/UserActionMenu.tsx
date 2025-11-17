@@ -9,8 +9,8 @@ import {
 import { EditorKeyHandleItem } from '@src/services/mappings/editorMappings';
 import { enqueueSnackbar } from 'notistack';
 import { useAppDispatch } from '@src/redux/hooks';
-import { useSelector } from 'react-redux';
-import { RootState, store } from '../../../../redux/redux.store';
+import { MiscUtils } from '@src/utils/misc';
+import store from '@src/redux/redux.store';
 
 interface UserActionMenuProps {
   anchorEl: HTMLElement | null;
@@ -34,7 +34,10 @@ const filterKeyCombination = (key: string): EditorKeyHandleItem | null => {
   try {
     return filterForKeyHandleDefinitions(allTimesAvailableKeyHandleDefinitions, key);
   } catch (error) {
-    enqueueSnackbar('Error while filtering key combination: ' + key, { variant: 'error' });
+    enqueueSnackbar(
+      `Error while filtering key combination "${key} error: ${MiscUtils.misc.getErrorMessage(error)}`,
+      { variant: 'error' },
+    );
   }
 
   return null;
@@ -72,6 +75,11 @@ const menuItems: MenuItem[] = [
         keyHandleItem: filterKeyCombination('ctrl+alt+6'),
         active: true,
       },
+      {
+        label: 'RISM Eintrag Hinzufügen',
+        keyHandleItem: filterKeyCombination('ctrl+m'),
+        active: true,
+      },
     ],
   },
   { label: 'Brief Text Erstellung', keyHandleItem: null, active: false },
@@ -103,7 +111,6 @@ const menuItems: MenuItem[] = [
 
 const UserActionMenu = (props: UserActionMenuProps) => {
   const dispatch = useAppDispatch();
-  const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
 
   const [subMenuAnchorEl, setSubMenuAnchorEl] = useState<{ [key: string]: HTMLElement | null }>({});
 
@@ -166,7 +173,9 @@ const UserActionMenu = (props: UserActionMenuProps) => {
             <MenuItem
               key={index}
               component="div"
-              onMouseEnter={(e: React.MouseEvent<HTMLElement>) => item.hasSubMenu && handleSubMenuOpen(e, item.label)}
+              onMouseEnter={(e: React.MouseEvent<HTMLElement>) =>
+                item.hasSubMenu && handleSubMenuOpen(e, item.label)
+              }
               onClick={(e: React.MouseEvent<HTMLElement>) => handleSubMenuOpen(e, item.label)}
               sx={getMenuItemStyles(item.active)}
             >
@@ -179,7 +188,12 @@ const UserActionMenu = (props: UserActionMenuProps) => {
               <ArrowRightIcon fontSize="small" />
             </MenuItem>
           ) : (
-            <MenuItem key={index} onClick={props.handleClose} className="custom-tool-menu-item" sx={getMenuItemStyles(item.active)}>
+            <MenuItem
+              key={index}
+              onClick={props.handleClose}
+              className="custom-tool-menu-item"
+              sx={getMenuItemStyles(item.active)}
+            >
               <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                 <span>{item.label}</span>
                 {item.keyHandleItem && 'key' in item.keyHandleItem ? (

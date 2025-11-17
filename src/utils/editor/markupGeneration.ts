@@ -1,10 +1,18 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EditorUtils } from './index';
-import { ActOfWritingElement, MarkupPersonData, MarkupPlaceData } from '../../services/mappings/editorMappings';
-import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
-import { EditorConstants } from '../../constants/editor';
+import {
+  ActOfWritingElement,
+  MarkupPersonData,
+  MarkupPlaceData,
+} from '@src/services/mappings/editorMappings';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
+import { EditorConstants } from '@src/constants/editor';
 
-const generateSettlementNode = (data: { key: string | null; name: string | null; type: string | null }): Element => {
+const generateSettlementNode = (data: {
+  key: string | null;
+  name: string | null;
+  type: string | null;
+}): Element => {
   if (data.key === null || data.name === null || data.type === null) {
     throw new Error('generateSettlementNode missing key name or type is null');
   }
@@ -47,13 +55,20 @@ export const markupGeneration = {
     // Replace the marked span with the enriched replacement node
     spanNode.parentNode?.replaceChild(clonedReplacement, spanNode);
   },
-  addAttachmentMarkup: (xmlDoc: XMLDocument, attachmentType: string, attachmentName: string): { contentChanged: boolean } => {
-    const listBibl = xmlDoc.querySelector('msdesc accmat listbibl');
+  addAttachmentMarkup: (
+    xmlDoc: XMLDocument,
+    attachmentType: string,
+    attachmentName: string,
+  ): { contentChanged: boolean } => {
+    const listBibl = xmlDoc.querySelector('teiHeader sourceDesc msDesc physDesc accMat listBibl');
     if (!listBibl) return { contentChanged: false };
 
     const existingBiblEntries = listBibl.querySelectorAll('bibl');
 
-    if (existingBiblEntries.length === 1 && existingBiblEntries[0].getAttribute('type') === 'none') {
+    if (
+      existingBiblEntries.length === 1 &&
+      existingBiblEntries[0].getAttribute('type') === 'none'
+    ) {
       existingBiblEntries[0].setAttribute('type', attachmentType);
       existingBiblEntries[0].textContent = attachmentName;
     } else {
@@ -176,7 +191,10 @@ export const markupGeneration = {
 
     EditorUtils.markupGeneration.replaceMarkedNode(nodeToUpdate, titleNode);
   },
-  addGbLetterMarkup: (nodeToUpdate: Element, markupLetterData: [{ letterKey: string; letterName: string; authors: SnippetEntity[] }]) => {
+  addGbLetterMarkup: (
+    nodeToUpdate: Element,
+    markupLetterData: [{ letterKey: string; letterName: string; authors: SnippetEntity[] }],
+  ) => {
     const titleNode = document.createElementNS(EditorConstants.TEI_NS, 'title');
     titleNode.setAttribute('xml:id', EditorUtils.markupGeneration.generateXmlId('title'));
 
@@ -225,7 +243,12 @@ export const markupGeneration = {
 
     return xmlId;
   },
-  noteMarkup: (xmlDoc: XMLDocument | null, userLogin: string, noteContent: string, commentType: string): { xmlId: string } => {
+  noteMarkup: (
+    xmlDoc: XMLDocument | null,
+    userLogin: string,
+    noteContent: string,
+    commentType: string,
+  ): { xmlId: string } => {
     if (!xmlDoc) {
       throw new Error('No xml document provided');
     }
@@ -233,7 +256,8 @@ export const markupGeneration = {
     const xmlId = EditorUtils.markupGeneration.generateXmlId('note');
     const markedSpan = xmlDoc.querySelector('span.marked');
 
-    if (!markedSpan || !markedSpan.parentNode) throw new Error('no markedSpan found in markupGeneration');
+    if (!markedSpan || !markedSpan.parentNode)
+      throw new Error('no markedSpan found in markupGeneration');
 
     const content = markedSpan.textContent || '';
 
@@ -310,7 +334,8 @@ export const markupGeneration = {
       writer: 1,
     };
     const sortedAuthorWriters = authorWriters.sort(
-      (a, b) => rolePriority[a.role as 'author' | 'writer'] - rolePriority[b.role as 'author' | 'writer'],
+      (a, b) =>
+        rolePriority[a.role as 'author' | 'writer'] - rolePriority[b.role as 'author' | 'writer'],
     );
 
     sortedAuthorWriters.forEach((authorWriter) => {
@@ -325,7 +350,10 @@ export const markupGeneration = {
     const paragraph = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'p');
     paragraph.setAttribute('style', 'paragraph_without_indent');
 
-    const startPI = xmlDoc.createProcessingInstruction('oxy_custom_start', 'type="oxy_content_highlight" color="235,192,230"');
+    const startPI = xmlDoc.createProcessingInstruction(
+      'oxy_custom_start',
+      'type="oxy_content_highlight" color="235,192,230"',
+    );
     const endPI = xmlDoc.createProcessingInstruction('oxy_custom_end', '');
 
     paragraph.appendChild(startPI);

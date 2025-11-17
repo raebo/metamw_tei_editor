@@ -1,9 +1,9 @@
 import { xmlCheck } from './xmlCheck';
 import { markupGeneration } from './markupGeneration';
 import { NodeType, nodeTypes, NodeTypes } from './nodeTypes';
-import { MenuItemType } from '../../components/editor/letter/Util/ContextMenuLetterItems';
+import { MenuItemType } from '@src/components/editor/letter/Util/ContextMenuLetterItems';
 import { EditorUtils } from './index';
-import { EditorConstants } from '../../constants/editor';
+import { EditorConstants } from '@src/constants/editor';
 
 export interface NodeAncestorPath {
   parentPath: string | string[];
@@ -99,6 +99,24 @@ export namespace rightClickPathHandles {
           nodeElement.nodeName.toLowerCase() === 'div' &&
           nodeElement.getAttribute('type') === 'act_of_writing'
         );
+      },
+      afterActionCallback: (xmlDoc: Document, _node: Node) => xmlCheck.serializeDocument(xmlDoc),
+    },
+  ];
+
+  export const manageRismEntryPaths = (): NodeAncestorPath[] => [
+    {
+      parentPath: [
+        'tei teiheader filedesc sourcedesc msDesc msIdentifier country',
+        'tei teiheader filedesc sourcedesc msDesc msIdentifier settlement',
+        'tei teiheader filedesc sourcedesc msDesc msIdentifier institution',
+        'tei teiheader filedesc sourcedesc msDesc msIdentifier repository',
+        'tei teiheader filedesc sourcedesc msDesc msIdentifier collection',
+        'tei teiheader filedesc sourcedesc msDesc msIdentifier idno',
+      ],
+      nodeType: nodeTypes.get(NodeTypes.LANGUAGE),
+      checkElementDetails: (_nodeElement: Element): boolean => {
+        return true;
       },
       afterActionCallback: (xmlDoc: Document, _node: Node) => xmlCheck.serializeDocument(xmlDoc),
     },
@@ -316,6 +334,14 @@ export namespace rightClickPathHandles {
         );
         return item ? [item] : [];
       },
+    },
+    {
+      paths: EditorUtils.rightClickPathHandles.manageRismEntryPaths(),
+      getMenuItems: (_node: Node) => [
+        menuItemsNoMarking.find(
+          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_RISM_ENTRY,
+        ),
+      ],
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageWritingActPaths(),

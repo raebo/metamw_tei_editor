@@ -56,25 +56,7 @@ export interface SnippetEntity {
   entityParentName?: string;
   entityPlaceCountryName?: string;
   entityKind?: string;
-  extraData: {};
-}
-
-export interface RismEntry {
-  id: number | null;
-  name: string;
-  title: string;
-  city: string;
-  country: string;
-  code: string;
-}
-
-export interface RismFormEntry {
-  country: string;
-  settlement: string;
-  institution: string;
-  repository: string;
-  collection: string;
-  idNo: string;
+  extraData: Record<string, unknown>;
 }
 
 export interface SnippetApiEntity {
@@ -87,7 +69,26 @@ export interface SnippetApiEntity {
   entity_parent_name?: string;
   entity_place_country_name?: string;
   entity_kind?: string;
-  extra_data: {};
+  extra_data: Record<string, unknown>;
+}
+
+export interface RismEntry {
+  id: number | null;
+  name: string;
+  title: string;
+  city: string;
+  country: string;
+  code: string;
+  idNo: string;
+}
+
+export interface RismFormEntry {
+  country: string;
+  settlement: string;
+  institution: string;
+  repository: string;
+  collection: string;
+  idNo: string;
 }
 
 export type SnippetDialogType = 'REJECT' | 'ACCEPT' | 'RESET_LETTER' | 'WRITE_LETTER';

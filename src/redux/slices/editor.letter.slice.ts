@@ -12,6 +12,7 @@ interface EditorLetterSlice {
     };
     undoAvailable: boolean;
     redoAvailable: boolean;
+    selectedMsiIdentifier: number | null;
   };
   tabToCloseId: number | null;
   tabLetter: {
@@ -55,6 +56,7 @@ const initialState: EditorLetterSlice = {
     },
     undoAvailable: false,
     redoAvailable: false,
+    selectedMsiIdentifier: null,
   },
   tabToCloseId: null, // letter id of the tab to close
   tabLetter: {
@@ -118,13 +120,25 @@ const EditorLetterSlice = createSlice({
     setEditorPinnedLetters(state, action) {
       state.pinnedLetters = [...action.payload.pinnedLetters];
     },
-    setEditorPinnedLetterViewMode(state, action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>) {
+    setEditorPinnedLetterViewMode(
+      state,
+      action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>,
+    ) {
       const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
       if (letter) {
         letter.viewMode = action.payload.viewMode;
       }
     },
-    setEditorPinnedLetterContentChanged(state, action: PayloadAction<{ id: number; contentChanged: boolean }>) {
+    setSelectedMsiIdentifier(state, action: PayloadAction<{ selectedMsiIdentifier: number }>) {
+      state.letter.selectedMsiIdentifier = action.payload.selectedMsiIdentifier;
+    },
+    clearSelectedMsiIdentifier(state) {
+      state.letter.selectedMsiIdentifier = null;
+    },
+    setEditorPinnedLetterContentChanged(
+      state,
+      action: PayloadAction<{ id: number; contentChanged: boolean }>,
+    ) {
       const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
       if (letter) {
         letter.contentChanged = action.payload.contentChanged;
@@ -174,6 +188,7 @@ const EditorLetterSlice = createSlice({
 });
 
 export const {
+  clearSelectedMsiIdentifier,
   enableChangeLetterViewMode,
   disableChangeLetterViewMode,
   setContentTextIsMarked,
@@ -187,6 +202,7 @@ export const {
   setEditorSelectedItem,
   setEditorTabNumber,
   setReloadLetterContent,
+  setSelectedMsiIdentifier,
   setXmlLetterContent,
   setDialogType,
   setLetterReference,

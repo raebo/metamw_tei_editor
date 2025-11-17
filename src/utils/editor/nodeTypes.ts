@@ -15,23 +15,25 @@ export enum NodeTypes {
 export interface NodeType {
   key: NodeTypes;
   name: string;
+  tagName: string;
 }
 
 export const nodeTypesMap: Record<NodeTypes, NodeType> = {
-  [NodeTypes.ATTACHMENT]: { key: NodeTypes.ATTACHMENT, name: 'Beilage' },
-  [NodeTypes.ANNOTATION]: { key: NodeTypes.ANNOTATION, name: 'Auszeichnung' },
-  [NodeTypes.AUTHOR]: { key: NodeTypes.AUTHOR, name: 'Autor' },
-  [NodeTypes.BODY_ADDRESS]: { key: NodeTypes.BODY_ADDRESS, name: 'Adresse (Brief)' },
+  [NodeTypes.ATTACHMENT]: { key: NodeTypes.ATTACHMENT, name: 'Beilage', tagName: 'bibl' },
+  [NodeTypes.ANNOTATION]: { key: NodeTypes.ANNOTATION, name: 'Auszeichnung', tagName: '' },
+  [NodeTypes.AUTHOR]: { key: NodeTypes.AUTHOR, name: 'Autor', tagName: '' },
+  [NodeTypes.BODY_ADDRESS]: { key: NodeTypes.BODY_ADDRESS, name: 'Adresse (Brief)', tagName: '' },
   [NodeTypes.BODY_GREETINGS_FORMULA]: {
     key: NodeTypes.BODY_GREETINGS_FORMULA,
     name: 'Begrüßungsformel',
+    tagName: '',
   },
-  [NodeTypes.BODY_NOTE]: { key: NodeTypes.BODY_NOTE, name: 'Kommentar (Brief)' },
-  [NodeTypes.PERSON]: { key: NodeTypes.PERSON, name: 'Person' },
-  [NodeTypes.WRITING_ACT]: { key: NodeTypes.WRITING_ACT, name: 'Schreibakt' },
-  [NodeTypes.WRITER]: { key: NodeTypes.WRITER, name: 'Schreiber' },
-  [NodeTypes.LANGUAGE]: { key: NodeTypes.LANGUAGE, name: 'Sprache' },
-  [NodeTypes.RISM_ENTRY]: { key: NodeTypes.RISM_ENTRY, name: 'Standort' },
+  [NodeTypes.BODY_NOTE]: { key: NodeTypes.BODY_NOTE, name: 'Kommentar (Brief)', tagName: '' },
+  [NodeTypes.PERSON]: { key: NodeTypes.PERSON, name: 'Person', tagName: '' },
+  [NodeTypes.WRITING_ACT]: { key: NodeTypes.WRITING_ACT, name: 'Schreibakt', tagName: '' },
+  [NodeTypes.WRITER]: { key: NodeTypes.WRITER, name: 'Schreiber', tagName: '' },
+  [NodeTypes.LANGUAGE]: { key: NodeTypes.LANGUAGE, name: 'Sprache', tagName: '' },
+  [NodeTypes.RISM_ENTRY]: { key: NodeTypes.RISM_ENTRY, name: 'Standort', tagName: '' },
 };
 
 export const nodeTypes = {
