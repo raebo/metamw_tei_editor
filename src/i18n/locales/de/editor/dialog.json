@@ -1,1 +1,31 @@
-{}
+{
+  "assignLetterDialog": {
+
+  },
+  "rismEntries": {
+    "addRismEntryDialog": {
+      "headline": "Vorhandenen Eintrag suchen und auswählen",
+      "label": {
+        "autocomplete": "RISM Sigel auswählen",
+        "country": "Land",
+        "settlement": "Ort",
+        "institution": "Institution",
+        "collection": "Sammlung",
+        "repository": "Verzeichnis",
+        "idno": "ID No."
+      },
+      "button": {
+        "reset": "Zurücksetzen",
+        "submit": "Eintrag Hinzufügen"
+      }
+
+    },
+    "manageRismEntryDialog": {
+      "headline": "RISM Sigel Ersetzen",
+      "button": {
+        "reset": "Wiederherstellen",
+        "submit": "Eintrag Anpassen"
+      }
+    }
+  }
+}
