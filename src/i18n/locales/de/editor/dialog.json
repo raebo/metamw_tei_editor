@@ -1,4 +1,36 @@
 {
+  "titles": {
+    "addGreetingsFormula": "Begrüßungsformel Hinzufügen",
+    "manageRismEntry": "RISM Eintrag Verwalten",
+    "addNewLetter": "Neuen Brief Hinzufügen",
+    "addNote": "Kommentar Hinzufügen",
+    "addRismEntry": "RISM Eintrag Hinzufügen",
+    "addTeiHeader": "Header des Briefes Hinzufügen/Bearbeiten",
+    "addLetterToProtag": "Verweis an einen Brief an den Protagonisten Hinzufügen",
+    "addLetterFromProtag": "Verweis an einen Brief vom Protagonisten Hinzufügen",
+    "addWritingPart": "Schreibakt Hinzufügen",
+    "attachmentAdd": "Beilage Hinzufügen",
+    "closeTabWithContent": "Tab mit Inhalt Schließen?",
+    "dateWhenAdd": "Datum 'WHEN' Auszeichnen",
+    "dateWhenCustomAdd": "Datum 'WHEN CUSTOM' Auszeichnen",
+    "dateNotAfterAdd": "Datum 'Not After' Auszeichnen",
+    "dateNotBeforeAdd": "Datum 'Not Before' Auszeichnen",
+    "dateFromToAdd": "Datum 'From To' Auszeichnen",
+    "dateNotBeforeAfterAdd": "Datum 'NotBefore NotAfter' Auszeichnen",
+    "editLanguages": "Sprachen Verwalten",
+    "editNote": "Kommentar Bearbeiten/Löschen",
+    "manageGreetingsFormula": "Begrüßungsformel Verwalten",
+    "manageHeaderAuthorWriter": "Autoren/Schreiber Verwalten",
+    "manageWritingActAuthorWriter": "Autoren/Schreiber Verwalten",
+    "manageHeaderReceiver": "Empfänger Verwalten",
+    "manageAddressSender": "Adresse Sender Verwalten",
+    "manageAddressRecipient": "Adresse Empfänger Verwalten",
+    "publishLetter": "Brief Veröffentlichen",
+    "resetLetter": "Brief Zurücksetzen"
+  },
+  "hints": {
+    "closing":  "Zum Schließen auf den Hintergrund klicken oder ESC drücken"
+  },
   "assignLetterDialog": {
 
   },

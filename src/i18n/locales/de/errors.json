@@ -3,6 +3,7 @@
     "dialog": {
       "noXmlDocument": "Kein XML-Dokument zum Parsen vorhanden",
       "noTeiHeader": "Kein TEI-HEADER im XML-Dokument gefunden",
+      "failedToPatchContent": "Änderungen des Briefes konnten nicht im Backend gespeichert werden",
       "rismEntries":{
         "noBackendRismEntries": "Keine RISM Einträge im Backend verfügbar %{reaon}",
         "noMsIdentifier": "Der MSIdentifier konnten nicht ausgelesen werden"

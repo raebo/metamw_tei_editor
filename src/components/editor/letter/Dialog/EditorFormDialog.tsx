@@ -36,6 +36,8 @@ import { MiscUtils } from '@src/utils/misc';
 import CloseTabWithContent from '@src/components/editor/letter/Dialog/Components/CloseTabWithContentDialog';
 import AddRismEntryDialog from '@src/components/editor/letter/Dialog/Components/RismEntries/AddRismEntryDialog';
 import ManageRismEntryDialog from '@src/components/editor/letter/Dialog/Components/RismEntries/ManageRismEntryDialog';
+import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -56,35 +58,53 @@ export interface DefaultDialogProps {
 }
 
 const DialogTitles: Record<string, string> = {
-  [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: 'Begrüßungsformel Hinzufügen',
-  [EditorConstants.dialogTypes.ADD_NEW_LETTER]: 'Neuen Brief Hinzufügen',
-  [EditorConstants.dialogTypes.ADD_NOTE]: 'Kommentar Hinzufügen',
-  [EditorConstants.dialogTypes.ADD_RISM_ENTRY]: 'RISM Eintrag Hinzufügen',
-  [EditorConstants.dialogTypes.ADD_TEI_HEADER]: 'Header des Briefes Hinzufügen/Bearbeiten',
-  [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]:
-    'Verweis an einen Brief an den Protagonisten Hinzufügen',
-  [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]:
-    'Verweis an einen Brief vom Protagonisten Hinzufügen',
-  [EditorConstants.dialogTypes.ADD_WRITING_PART]: 'Schreibakt Hinzufügen',
-  [EditorConstants.dialogTypes.ATTACHMENT_ADD]: 'Beilage Hinzufügen',
-  [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: 'Tab mit Inhalt Schließen?',
-  [EditorConstants.dialogTypes.DATE_WHEN_ADD]: "Datum 'WHEN' Auszeichnen",
-  [EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD]: "Datum 'WHEN CUSTOM' Auszeichnen",
-  [EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD]: "Datum 'Not After' Auszeichnen",
-  [EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD]: "Datum 'Not Before' Auszeichnen",
-  [EditorConstants.dialogTypes.DATE_FROM_TO_ADD]: "Datum 'From To' Auszeichnen",
-  [EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD]: "Datum 'NotBefore NotAfter' Auszeichnen",
-  [EditorConstants.dialogTypes.EDIT_LANGUAGES]: 'Sprachen Verwalten',
-  [EditorConstants.dialogTypes.EDIT_NOTE]: 'Kommentar Bearbeiten/Löschen',
-  [EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA]: 'Begrüßungsformel Verwalten',
-  [EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER]: 'Autoren/Schreiber Verwalten',
-  [EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER]: 'Autoren/Schreiber Verwalten',
-  [EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: 'Empfänger Verwalten',
-  [EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER]: 'Adresse Sender Verwalten',
-  [EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT]: 'Adresse Empfänger Verwalten',
-  [EditorConstants.dialogTypes.MANAGE_RISM_ENTRY]: 'RISM Eintrag Verwalten',
-  [EditorConstants.dialogTypes.PUBLISH_LETTER]: 'Brief Veröffentlichen',
-  [EditorConstants.dialogTypes.RESET_LETTER]: 'Brief Zurücksetzen',
+  [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: t(
+    'editor:dialog.titles.addGreetingsFormula',
+  ),
+  [EditorConstants.dialogTypes.ADD_NEW_LETTER]: t('editor:dialog.titles.addNewLetter'),
+  [EditorConstants.dialogTypes.ADD_NOTE]: t('editor:dialog.titles.addNote'),
+  [EditorConstants.dialogTypes.ADD_RISM_ENTRY]: t('editor:dialog.titles.addRismEntry'),
+  [EditorConstants.dialogTypes.ADD_TEI_HEADER]: t('editor:dialog.titles.addTeiHeader'),
+  [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: t('editor:dialog.titles.addLetterToProtag'),
+  [EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG]: t(
+    'editor:dialog.titles.addLetterFromProtag',
+  ),
+  [EditorConstants.dialogTypes.ADD_WRITING_PART]: t('editor:dialog.titles.addWritingPart'),
+  [EditorConstants.dialogTypes.ATTACHMENT_ADD]: t('editor:dialog.titles.attachmentAdd'),
+  [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: t(
+    'editor:dialog.titles.closeTabWithContent',
+  ),
+  [EditorConstants.dialogTypes.DATE_WHEN_ADD]: t('editor:dialog.titles.dateWhenAdd'),
+  [EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD]: t('editor:dialog.titles.dateWhenCustomAdd'),
+  [EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD]: t('editor:dialog.titles.dateNotAfterAdd'),
+  [EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD]: t('editor:dialog.titles.dateNotBeforeAdd'),
+  [EditorConstants.dialogTypes.DATE_FROM_TO_ADD]: t('editor:dialog.titles.dateFromToAdd'),
+  [EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD]: t(
+    'editor:dialog.titles.dateNotBeforeAfterAdd',
+  ),
+  [EditorConstants.dialogTypes.EDIT_LANGUAGES]: t('editor:dialog.titles.editLanguages'),
+  [EditorConstants.dialogTypes.EDIT_NOTE]: t('editor:dialog.titles.editNote'),
+  [EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA]: t(
+    'editor:dialog.titles.manageGreetingsFormula',
+  ),
+  [EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER]: t(
+    'editor:dialog.titles.manageHeaderAuthorWriter',
+  ),
+  [EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER]: t(
+    'editor:dialog.titles.manageWritingActAuthorWriter',
+  ),
+  [EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: t(
+    'editor:dialog.titles.manageHeaderReceiver',
+  ),
+  [EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER]: t(
+    'editor:dialog.titles.manageAddressSender',
+  ),
+  [EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT]: t(
+    'editor:dialog.titles.manageAddressRecipient',
+  ),
+  [EditorConstants.dialogTypes.MANAGE_RISM_ENTRY]: t('editor:dialog.titles.manageRismEntry'),
+  [EditorConstants.dialogTypes.PUBLISH_LETTER]: t('editor:dialog.titles.publishLetter'),
+  [EditorConstants.dialogTypes.RESET_LETTER]: t('editor:dialog.titles.resetLetter'),
 };
 
 const DialogContentComponents: Record<
@@ -162,6 +182,7 @@ const DialogContentComponents: Record<
 };
 
 const EditorFormDialog = (props: EditorFormDialogProps) => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
 
   const dialogType = useSelector((state: RootState) => state.editorLetter.dialogType);
@@ -241,7 +262,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
             setReloadLetterContent({ reloadLetterContent: true }),
           ],
           successMessage,
-          errorMessage: 'Data could not be updated on backend side',
+          errorMessage: t('error:editor.dialog.failedToPatchContent'),
         },
       );
     } catch (err) {
@@ -278,7 +299,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
         <DialogActions>
           <Divider sx={{ my: 2 }} />
           <Typography variant="caption" color="textSecondary">
-            Zum Schließen auf den Hintergrund klicken oder ESC drücken
+            {t('editor:dialog.hints.closing')}
           </Typography>
         </DialogActions>
       </Dialog>
