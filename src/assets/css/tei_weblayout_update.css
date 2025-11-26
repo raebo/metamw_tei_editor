@@ -215,6 +215,10 @@ teiHeader fileDesc sourceDesc msDesc msIdentifier * {
   cursor: pointer;
 }
 
+teiHeader fileDesc sourceDesc msDesc history provenance {
+  cursor: pointer;
+}
+
 /*.hidden {*/
 /*    display: none;*/
 /*}*/

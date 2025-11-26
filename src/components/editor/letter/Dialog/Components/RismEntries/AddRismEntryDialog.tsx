@@ -102,7 +102,7 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
     props.onSave(
       docData.xmlDoc,
       EditorConstants.changeTypes.misc.HEADER_RISM_ENTRY_ADDED,
-      'RISM Eintrag hinzugefügt',
+      t('editor:dialog.rismEntries.addRismEntryDialog.success'),
       null,
     );
   };

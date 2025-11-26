@@ -1,7 +1,7 @@
 import { EditorUtils } from './index';
 import React from 'react';
 import { NodeAncestorPath } from './rightClickPathHandles';
-import { EditorConstants, TmpIdPrefix } from '../../constants/editor';
+import { EditorConstants, TmpIdPrefix } from '@src/constants/editor';
 
 export const xmlCheck = {
   // be careful with the path syntax: When giving an attribute, do not forget the @ before the attribute name
@@ -228,10 +228,17 @@ export const xmlCheck = {
       .reverse()
       .join(' ');
 
-    // console.log("Checking node path:", ancestorNodeNames);
+    //console.log(' + ++ + + + ++ ++ + + Checking node path:', ancestorNodeNames);
 
     const matchingEntry = nodeAncestorPaths.find((entry) => {
       const paths = Array.isArray(entry.parentPath) ? entry.parentPath : [entry.parentPath];
+
+      // if (
+      //   paths.includes('tei teiheader filedesc sourcedesc msDesc msIdentifier history provenance')
+      // ) {
+      //   console.log('parent path: ', paths.toString());
+      //   console.log('ancestorNodeNames: ', ancestorNodeNames);
+      // }
 
       const pathMatches = paths.some((path) => path.toLowerCase() === ancestorNodeNames);
       const attributesMatch = entry.checkAttributes ? entry.checkAttributes(node as Element) : true;

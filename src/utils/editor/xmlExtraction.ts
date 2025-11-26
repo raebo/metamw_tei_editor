@@ -13,6 +13,17 @@ export const xmlExtraction = {
     const msIdentifiers = msDescNode.getElementsByTagNameNS(EditorConstants.TEI_NS, 'msIdentifier');
     return msIdentifiers[numberOfEntry];
   },
+  extractProvenanceData(teiHeader: Element, numberOfEntry: number): string {
+    const provenanceData = teiHeader.getElementsByTagNameNS(EditorConstants.TEI_NS, 'provenance')[
+      numberOfEntry
+    ];
+
+    if (!provenanceData || !provenanceData.textContent) {
+      throw new Error('No provenanceNode with data found');
+    }
+
+    return provenanceData.textContent?.trim();
+  },
   extractMsIdentifierData(
     teiHeader: Element,
     numberOfEntry: number,

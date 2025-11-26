@@ -503,6 +503,59 @@ export const teiHeaderContent = {
       lastElement.parentElement?.appendChild(nameNode);
     }
   },
+  updateProvenanceEntry: (
+    teiHeader: Element | null,
+    provenanceData: string | null,
+    numberOfEntry: number | null,
+  ): void => {
+    if (!teiHeader || !provenanceData || numberOfEntry === null) return;
+
+    const provenanceNode = teiHeader.getElementsByTagNameNS(EditorConstants.TEI_NS, 'provenance')[
+      numberOfEntry
+    ];
+
+    if (!provenanceNode || !provenanceNode.textContent) {
+      throw new Error('No provenanceNode with data found');
+    }
+
+    const firstChild = provenanceNode.children[0];
+
+    if (!firstChild) throw new Error('provenanceNode has no child elements');
+
+    if (firstChild.tagName !== 'p')
+      throw new Error(`Expected <p> as first child, but found <${firstChild.tagName}>`);
+
+    firstChild.textContent = provenanceData.trim();
+  },
+  addProvenanceEntry: (teiHeader: Element | null, provenance: string): void => {
+    if (!teiHeader || !provenance) return;
+
+    let historyNode = EditorUtils.xmlCheck.queryPath(
+      teiHeader,
+      'fileDesc > sourceDesc > msDesc > history',
+    )[0];
+
+    if (!historyNode) {
+      const msDesc = EditorUtils.xmlCheck.queryPath(
+        teiHeader,
+        'fileDesc > sourceDesc > msDesc',
+      )[0] as Element | undefined;
+
+      if (!msDesc) {
+        throw new Error('Missing msDesc node in TEI-Header');
+      }
+
+      historyNode = document.createElementNS(EditorConstants.TEI_NS, 'history');
+      msDesc.appendChild(historyNode);
+    }
+
+    const provenanceNode = document.createElementNS(EditorConstants.TEI_NS, 'provenance');
+    const pNode = document.createElementNS(EditorConstants.TEI_NS, 'p');
+    pNode.innerHTML = provenance;
+    provenanceNode.appendChild(pNode);
+
+    historyNode.appendChild(provenanceNode);
+  },
   addMsIdentifer: (teiHeader: Element | null, rismFormEntry: RismFormEntry): void => {
     if (!teiHeader || !rismFormEntry) {
       return;

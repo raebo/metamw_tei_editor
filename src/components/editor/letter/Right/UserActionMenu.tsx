@@ -80,6 +80,11 @@ const menuItems: MenuItem[] = [
         keyHandleItem: filterKeyCombination('ctrl+m'),
         active: true,
       },
+      {
+        label: 'Provenienz Hinzufügen',
+        keyHandleItem: filterKeyCombination('ctrl+shift+n'),
+        active: true,
+      },
     ],
   },
   { label: 'Brief Text Erstellung', keyHandleItem: null, active: false },

@@ -38,6 +38,8 @@ import AddRismEntryDialog from '@src/components/editor/letter/Dialog/Components/
 import ManageRismEntryDialog from '@src/components/editor/letter/Dialog/Components/RismEntries/ManageRismEntryDialog';
 import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
+import AddProvenanceDialog from '@src/components/editor/letter/Dialog/Components/Provenance/AddProvenanceDialog';
+import ManageProvenanceDialog from '@src/components/editor/letter/Dialog/Components/Provenance/ManageProvenanceDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -63,6 +65,7 @@ const DialogTitles: Record<string, string> = {
   ),
   [EditorConstants.dialogTypes.ADD_NEW_LETTER]: t('editor:dialog.titles.addNewLetter'),
   [EditorConstants.dialogTypes.ADD_NOTE]: t('editor:dialog.titles.addNote'),
+  [EditorConstants.dialogTypes.ADD_PROVENANCE_ENTRY]: t('editor:dialog.titles.addProvenanceEntry'),
   [EditorConstants.dialogTypes.ADD_RISM_ENTRY]: t('editor:dialog.titles.addRismEntry'),
   [EditorConstants.dialogTypes.ADD_TEI_HEADER]: t('editor:dialog.titles.addTeiHeader'),
   [EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG]: t('editor:dialog.titles.addLetterToProtag'),
@@ -86,6 +89,9 @@ const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.EDIT_NOTE]: t('editor:dialog.titles.editNote'),
   [EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA]: t(
     'editor:dialog.titles.manageGreetingsFormula',
+  ),
+  [EditorConstants.dialogTypes.MANAGE_PROVENANCE_ENTRY]: t(
+    'editor:dialog.titles.manageProvenanceEntry',
   ),
   [EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER]: t(
     'editor:dialog.titles.manageHeaderAuthorWriter',
@@ -125,6 +131,7 @@ const DialogContentComponents: Record<
   ),
   [EditorConstants.dialogTypes.ADD_NEW_LETTER]: (props) => <AddNewLetterDialog {...props} />,
   [EditorConstants.dialogTypes.ADD_NOTE]: (props) => <AddNoteDialog {...props} />,
+  [EditorConstants.dialogTypes.ADD_PROVENANCE_ENTRY]: (props) => <AddProvenanceDialog {...props} />,
   [EditorConstants.dialogTypes.ADD_RISM_ENTRY]: (props) => <AddRismEntryDialog {...props} />,
   [EditorConstants.dialogTypes.ADD_WRITING_PART]: (props) => <AddWritingActDialog {...props} />,
   [EditorConstants.dialogTypes.ADD_TEI_HEADER]: (props) => <ManageTeiHeaderDialog {...props} />,
@@ -172,6 +179,9 @@ const DialogContentComponents: Record<
   ),
   [EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER]: (props) => (
     <ManageTeiHeaderReceiverDialog {...props} />
+  ),
+  [EditorConstants.dialogTypes.MANAGE_PROVENANCE_ENTRY]: (props) => (
+    <ManageProvenanceDialog {...props} />
   ),
   [EditorConstants.dialogTypes.MANAGE_RISM_ENTRY]: (props) => <ManageRismEntryDialog {...props} />,
   [EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER]: (props) => (
