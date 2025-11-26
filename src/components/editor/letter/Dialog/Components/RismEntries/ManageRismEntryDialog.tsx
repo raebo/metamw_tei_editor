@@ -5,7 +5,7 @@ import { EditorUtils } from '@src/utils/editor';
 import { backendService } from '@src/utils/editor/backendService';
 import { EditorConstants } from '@src/constants/editor';
 import { useAppDispatch } from '@src/redux/hooks';
-import { clearSelectedMsiIdentifier } from '@src/redux/slices/editor.letter.slice';
+import { clearSelectedIdentifier } from '@src/redux/slices/editor.letter.slice';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import type { RismEntry, RismFormEntry } from '@src/services/mappings/autoAnnoMappings';
@@ -48,7 +48,7 @@ const ManageRismEntryDialog = (props: DefaultDialogProps) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const selectedMsIdentifier = useSelector(
-    (state: RootState) => state.editorLetter.letter.selectedMsiIdentifier,
+    (state: RootState) => state.editorLetter.letter.selectedIdentifier,
   );
   const [docData, setDocData] = React.useState<{
     xmlDoc: XMLDocument | null;
@@ -87,7 +87,6 @@ const ManageRismEntryDialog = (props: DefaultDialogProps) => {
 
     if (msId === null) {
       enqueueSnackbar(t('errors:editor.dialog.rismEntries.noMsIdentifier'), { variant: 'error' });
-      enqueueSnackbar('Der MsIdentifier konnte nicht ausgelesen werden', { variant: 'error' });
       return;
     }
 
@@ -139,7 +138,7 @@ const ManageRismEntryDialog = (props: DefaultDialogProps) => {
       'RISM Eintrag aktualisiert',
       null,
       () => {
-        dispatch(clearSelectedMsiIdentifier());
+        dispatch(clearSelectedIdentifier());
       },
     );
   };

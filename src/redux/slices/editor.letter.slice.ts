@@ -12,7 +12,7 @@ interface EditorLetterSlice {
     };
     undoAvailable: boolean;
     redoAvailable: boolean;
-    selectedMsiIdentifier: number | null;
+    selectedIdentifier: number | null;
   };
   tabToCloseId: number | null;
   tabLetter: {
@@ -56,7 +56,7 @@ const initialState: EditorLetterSlice = {
     },
     undoAvailable: false,
     redoAvailable: false,
-    selectedMsiIdentifier: null,
+    selectedIdentifier: null,
   },
   tabToCloseId: null, // letter id of the tab to close
   tabLetter: {
@@ -129,11 +129,11 @@ const EditorLetterSlice = createSlice({
         letter.viewMode = action.payload.viewMode;
       }
     },
-    setSelectedMsiIdentifier(state, action: PayloadAction<{ selectedMsiIdentifier: number }>) {
-      state.letter.selectedMsiIdentifier = action.payload.selectedMsiIdentifier;
+    setSelectedIdentifier(state, action: PayloadAction<{ selectedIdentifier: number }>) {
+      state.letter.selectedIdentifier = action.payload.selectedIdentifier;
     },
-    clearSelectedMsiIdentifier(state) {
-      state.letter.selectedMsiIdentifier = null;
+    clearSelectedIdentifier(state) {
+      state.letter.selectedIdentifier = null;
     },
     setEditorPinnedLetterContentChanged(
       state,
@@ -188,7 +188,7 @@ const EditorLetterSlice = createSlice({
 });
 
 export const {
-  clearSelectedMsiIdentifier,
+  clearSelectedIdentifier,
   enableChangeLetterViewMode,
   disableChangeLetterViewMode,
   setContentTextIsMarked,
@@ -202,7 +202,7 @@ export const {
   setEditorSelectedItem,
   setEditorTabNumber,
   setReloadLetterContent,
-  setSelectedMsiIdentifier,
+  setSelectedIdentifier,
   setXmlLetterContent,
   setDialogType,
   setLetterReference,
