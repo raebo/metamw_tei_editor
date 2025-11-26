@@ -9,6 +9,7 @@ export interface NodeAncestorPath {
   parentPath: string | string[];
   nodeType: NodeType;
   checkElementDetails: (node: Element) => boolean;
+  deleteNodeCallback?: (node: Element) => Node;
   afterActionCallback: (xmlDoc: Document, node: Node) => string;
   checkAttributes?: (node: Element) => boolean;
 }
@@ -29,13 +30,50 @@ export namespace rightClickPathHandles {
       checkElementDetails: (_nodeElement: Element): boolean => {
         return true;
       },
-      afterActionCallback: (xmlDoc: Document, node: Node) => {
-        const parentNode = node.parentNode;
-        if (!parentNode) throw new Error('No parent node found');
-        parentNode.removeChild(node);
+      deleteNodeCallback: (node: Element): Node => {
+        const nodeToDelete = node.parentNode;
+        const baseNode = nodeToDelete?.parentNode;
 
-        const newXmlDoc = xmlCheck.createDocumentFromNodeToTeiRoot(parentNode);
-        return xmlCheck.serializeDocument(newXmlDoc);
+        if (!nodeToDelete || !baseNode)
+          throw new Error('rightClickPathHandles nodeToDelete or baseNode cannot be null');
+
+        baseNode.removeChild(nodeToDelete);
+
+        return baseNode;
+      },
+      afterActionCallback: (xmlDoc: Document, _node: Node) => {
+        return xmlCheck.serializeDocument(xmlDoc);
+      },
+    },
+    {
+      parentPath: ['tei teiheader filedesc sourcedesc msDesc history provenance p'],
+      nodeType: nodeTypes.get(NodeTypes.PROVENANCE_ENTRY),
+      checkElementDetails: (nodeElement: Element): boolean => {
+        return true;
+      },
+      deleteNodeCallback: (node: Element): Node => {
+        let baseParentNode: Node | undefined | null = null;
+        let nodeToDelete: Node | undefined | null = null;
+
+        if (node.tagName.toLowerCase() === 'p') {
+          baseParentNode = node.parentNode?.parentNode;
+          nodeToDelete = node.parentNode;
+        } else if (node.tagName.toLowerCase() === 'provenance') {
+          baseParentNode = node.parentNode;
+          nodeToDelete = node;
+        }
+
+        if (!baseParentNode)
+          throw new Error('rightClickPathHandles deleteNodeCallback No parent node found');
+        if (!nodeToDelete)
+          throw new Error('rightClickPathHandles deleteNodeCallback No node to delete found');
+
+        baseParentNode.removeChild(nodeToDelete);
+
+        return baseParentNode;
+      },
+      afterActionCallback: (xmlDoc: Document, node: Node) => {
+        return xmlCheck.serializeDocument(xmlDoc);
       },
     },
     {
@@ -115,6 +153,20 @@ export namespace rightClickPathHandles {
         'tei teiheader filedesc sourcedesc msDesc msIdentifier idno',
       ],
       nodeType: nodeTypes.get(NodeTypes.LANGUAGE),
+      checkElementDetails: (_nodeElement: Element): boolean => {
+        return true;
+      },
+      afterActionCallback: (xmlDoc: Document, _node: Node) => xmlCheck.serializeDocument(xmlDoc),
+    },
+  ];
+
+  export const manageProvenanceEntryPaths = (): NodeAncestorPath[] => [
+    {
+      parentPath: [
+        'tei teiheader filedesc sourcedesc msDesc history provenance',
+        'tei teiheader filedesc sourcedesc msDesc history provenance p',
+      ],
+      nodeType: nodeTypes.get(NodeTypes.PROVENANCE_ENTRY),
       checkElementDetails: (_nodeElement: Element): boolean => {
         return true;
       },
@@ -315,14 +367,17 @@ export namespace rightClickPathHandles {
 
   export const removeNode = (
     node: Node,
-    callbackSuccess: (xmlDoc: Document, node: Node) => string,
+    onSuccess: (xmlDoc: Document, node: Node) => string,
+    deleteStrategy: (node: Element) => Node = (n) => {
+      const parent = n.parentNode;
+      if (!parent) throw new Error('No parent node found');
+      parent.removeChild(n);
+      return parent;
+    },
   ): string => {
-    const parentNode = node.parentNode;
-    if (!parentNode) throw new Error('No parent node found');
+    const baseNode = deleteStrategy(node as Element);
 
-    parentNode.removeChild(node);
-
-    return callbackSuccess(xmlCheck.createDocumentFromNodeToTeiRoot(parentNode), parentNode);
+    return onSuccess(xmlCheck.createDocumentFromNodeToTeiRoot(baseNode), baseNode);
   };
 
   export const pathHandlerFactory = (menuItemsNoMarking: MenuItemType[]) => [
@@ -340,6 +395,14 @@ export namespace rightClickPathHandles {
       getMenuItems: (_node: Node) => [
         menuItemsNoMarking.find(
           (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_RISM_ENTRY,
+        ),
+      ],
+    },
+    {
+      paths: EditorUtils.rightClickPathHandles.manageProvenanceEntryPaths(),
+      getMenuItems: (_node: Node) => [
+        menuItemsNoMarking.find(
+          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_PROVENANCE_ENTRY,
         ),
       ],
     },

@@ -321,6 +321,18 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
       );
     },
   },
+  'ctrl+shift+n': {
+    key: 'ctrl+shift+n',
+    description: 'Provenienz Eintrag Hinzufügen',
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => {
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.ADD_PROVENANCE_ENTRY,
+      );
+    },
+  },
 };
 
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {

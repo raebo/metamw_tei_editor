@@ -5,7 +5,7 @@ import {
   setDialogType,
   setEditorLetterActOfWriting,
   setReloadLetterContent,
-  setSelectedMsiIdentifier,
+  setSelectedIdentifier,
   setXmlLetterContent,
 } from '../redux/slices/editor.letter.slice';
 import { MiscUtils } from '../utils/misc';
@@ -50,8 +50,66 @@ export const getMenuItemsNoMarking = (
         return;
       }
 
-      dispatch(setSelectedMsiIdentifier({ selectedMsiIdentifier: index }));
+      dispatch(setSelectedIdentifier({ selectedIdentifier: index }));
       dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_RISM_ENTRY }));
+    },
+  },
+  {
+    identifier: EditorConstants.menuItemTypes.MANAGE_PROVENANCE_ENTRY,
+    label: 'Provenienz Eintrag Bearbeiten',
+    action: async ({ node }: { node?: Node }) => {
+      if (!node) {
+        enqueueSnackbar('The given node is undefined', { variant: 'error' });
+        return;
+      }
+
+      console.log('clicked node tag name: ', (node as Element).tagName);
+
+      // 1. Walk up until we find <history>
+      let current: Node | null = node;
+      let historyNode: Element | null = null;
+
+      while (current) {
+        if (current instanceof Element && current.tagName.toUpperCase() === 'HISTORY') {
+          historyNode = current;
+          break;
+        }
+        current = current.parentNode;
+      }
+
+      if (!historyNode) {
+        enqueueSnackbar('Could not locate <history> node', { variant: 'error' });
+        return;
+      }
+
+      // 2. Get all <provenance> children
+      const provenanceNodes = Array.from(historyNode.children).filter(
+        (child): child is Element => child.tagName.toUpperCase() === 'PROVENANCE',
+      );
+
+      if (provenanceNodes.length === 0) {
+        enqueueSnackbar('No <provenance> entries found', { variant: 'error' });
+        return;
+      }
+
+      // Normalize comparison text
+      const target = (node.textContent || '').trim();
+
+      // 3. Find first provenance node with matching textContent
+      const index = provenanceNodes.findIndex((prov) => (prov.textContent || '').trim() === target);
+
+      if (index === -1) {
+        enqueueSnackbar('No matching provenance entry found', { variant: 'error' });
+        return;
+      }
+
+      // 4. Done
+      dispatch(setSelectedIdentifier({ selectedIdentifier: index }));
+      dispatch(
+        setDialogType({
+          dialogType: EditorConstants.dialogTypes.MANAGE_PROVENANCE_ENTRY,
+        }),
+      );
     },
   },
   {
@@ -235,25 +293,37 @@ export const getMenuItemsNoMarking = (
     label: 'Eintrag Entfernen',
     action: async ({ node }: { node?: Node }) => {
       try {
-        if (!node) throw new Error('No node given as value');
+        if (!node) {
+          enqueueSnackbar('menuItems: No node given as value', { variant: 'error' });
+          return;
+        }
 
-        const anchNode = EditorUtils.rightClickPathHandles.findAncestorPathNode(node);
+        const ancNode = EditorUtils.rightClickPathHandles.findAncestorPathNode(node);
 
-        if (!anchNode) throw new Error('No anchNode found with given path');
+        if (!ancNode) {
+          enqueueSnackbar('menuItems "Eintrag Entfernen" No anchNode found with given path', {
+            variant: 'error',
+          });
+          return;
+        }
 
         const xmlContent = EditorUtils.rightClickPathHandles.removeNode(
           node,
-          anchNode.afterActionCallback,
+          ancNode.afterActionCallback,
+          ancNode.deleteNodeCallback,
         );
 
-        if (!xmlContent) throw new Error('No xml content found');
+        if (!xmlContent) {
+          enqueueSnackbar('menuItems removeNode: No xml content found', { variant: 'error' });
+          return;
+        }
 
         await EditorUtils.backendOrchestrator.patchWithDispatch(
           dispatch,
           [xmlContent, stateEditorLetter.id, EditorConstants.changeTypes.NODE_REMOVED, null],
           {
             actionsOnSuccess: [setReloadLetterContent({ reloadLetterContent: true })],
-            successMessage: `${anchNode.nodeType.name} wurde entfernt`,
+            successMessage: `${ancNode.nodeType.name} wurde entfernt`,
             errorMessage: 'Data could not be updated on backend side',
           },
         );
