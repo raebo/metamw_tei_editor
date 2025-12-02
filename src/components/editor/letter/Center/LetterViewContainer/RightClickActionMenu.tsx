@@ -6,7 +6,12 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import { LetterState } from '@src/constants/editor';
 import { EditorUtils } from '@src/utils/editor';
-import { setDialogType, setEditorSelectedItem, setNodeClicked, setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
+import {
+  setDialogType,
+  setEditorSelectedItem,
+  setNodeClicked,
+  setReloadLetterContent,
+} from '@src/redux/slices/editor.letter.slice';
 import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
 import {
@@ -57,7 +62,10 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
     [dispatch, stateEditorLetter],
   );
 
-  const pathHandlers = useMemo(() => rightClickPathHandles.pathHandlerFactory(menuItemsNoMarking), [menuItemsNoMarking]);
+  const pathHandlers = useMemo(
+    () => rightClickPathHandles.pathHandlerFactory(menuItemsNoMarking),
+    [menuItemsNoMarking],
+  );
 
   /** LOAD XML DOC ON LETTER CHANGE */
   useEffect(() => {
@@ -66,7 +74,9 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       return;
     }
     try {
-      xmlDocRef.current = EditorUtils.xmlCheck.extractTeiDocumentFromString(stateEditorLetter.xmlContent);
+      xmlDocRef.current = EditorUtils.xmlCheck.extractTeiDocumentFromString(
+        stateEditorLetter.xmlContent,
+      );
     } catch (err) {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
       xmlDocRef.current = null;
@@ -217,7 +227,11 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         open={Boolean(props.anchorPosition)}
         onClose={handleCloseAll}
         anchorReference="anchorPosition"
-        anchorPosition={props.anchorPosition ? { top: props.anchorPosition.top, left: props.anchorPosition.left } : undefined}
+        anchorPosition={
+          props.anchorPosition
+            ? { top: props.anchorPosition.top, left: props.anchorPosition.left }
+            : undefined
+        }
       >
         {displayMenuItems.map((item, index) =>
           item.type === 'divider' ? (
@@ -282,7 +296,9 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
                 }}
               >
                 <span>{subItem.label}</span>
-                {subItem.keyShortcut && <span style={SndMenuItemStylesSpan}>{subItem.keyShortcut}</span>}
+                {subItem.keyShortcut && (
+                  <span style={SndMenuItemStylesSpan}>{subItem.keyShortcut}</span>
+                )}
               </Box>
             </MenuItem>
           ))}
