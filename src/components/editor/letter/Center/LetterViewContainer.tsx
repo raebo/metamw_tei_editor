@@ -14,6 +14,7 @@ import RightClickActionMenu from './LetterViewContainer/RightClickActionMenu';
 import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
 import type { EditorLetterData } from '@src/services/mappings/editorMappings';
+import LeftClickAnnotationAction from '@src/components/editor/letter/Center/LetterViewContainer/LeftClickAnnotationAction';
 
 const LetterViewContainer = () => {
   const dispatch = useAppDispatch();
@@ -160,6 +161,12 @@ const LetterViewContainer = () => {
                     }}
                     anchorPosition={anchorPosition}
                     setAnchorPosition={(pos) => setAnchorPosition(pos)}
+                  />
+                  <LeftClickAnnotationAction
+                    xmlContentRef={xmlContentRef}
+                    setLetterState={(letterState: LetterState) => {
+                      setLetterState(letterState);
+                    }}
                   />
                 </div>
               )}

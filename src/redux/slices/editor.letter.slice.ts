@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { PinnedLetter } from '@src/services/mappings/editorMappings';
+import type { ValidLeftClickNodeType } from '@src/constants/editor';
 
 interface EditorLetterSlice {
   letter: {
@@ -13,6 +14,11 @@ interface EditorLetterSlice {
     undoAvailable: boolean;
     redoAvailable: boolean;
     selectedIdentifier: number | null;
+    clickedEntityNode: {
+      xmlId: string | null;
+      nodeType: string | null;
+      nodeTypeValue: string | null;
+    };
   };
   tabToCloseId: number | null;
   tabLetter: {
@@ -53,6 +59,11 @@ const initialState: EditorLetterSlice = {
     xmlContent: null,
     actOfWriting: {
       orderNumber: null,
+    },
+    clickedEntityNode: {
+      xmlId: null,
+      nodeType: null,
+      nodeTypeValue: null,
     },
     undoAvailable: false,
     redoAvailable: false,
@@ -129,6 +140,27 @@ const EditorLetterSlice = createSlice({
         letter.viewMode = action.payload.viewMode;
       }
     },
+    setClickedEntityNode(
+      state,
+      action: PayloadAction<{
+        xmlId: string;
+        nodeType: ValidLeftClickNodeType;
+        nodeTypeValue: string;
+      }>,
+    ) {
+      state.letter.clickedEntityNode = {
+        xmlId: action.payload.xmlId,
+        nodeType: action.payload.nodeType,
+        nodeTypeValue: action.payload.nodeTypeValue,
+      };
+    },
+    clearClickedEntityNode(state) {
+      state.letter.clickedEntityNode = {
+        xmlId: null,
+        nodeType: null,
+        nodeTypeValue: null,
+      };
+    },
     setSelectedIdentifier(state, action: PayloadAction<{ selectedIdentifier: number }>) {
       state.letter.selectedIdentifier = action.payload.selectedIdentifier;
     },
@@ -192,6 +224,8 @@ export const {
   enableChangeLetterViewMode,
   disableChangeLetterViewMode,
   setContentTextIsMarked,
+  setClickedEntityNode,
+  clearClickedEntityNode,
   setEditorLetter,
   setEditorLetterUndoRedo,
   setEditorLetterActOfWriting,

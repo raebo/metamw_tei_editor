@@ -7,6 +7,16 @@ export enum EntityType {
   PROTAG_CREATION = 'PROTAG_CREATION',
 }
 
+export type ValidLeftClickNodeType =
+  | 'person'
+  | 'settlement'
+  | 'sight'
+  | 'institution'
+  | 'fmbLetter'
+  | 'gbLetter'
+  | 'creation'
+  | 'protagCreation';
+
 export type EditorDateType =
   | 'when'
   | 'when-custom'
@@ -150,6 +160,7 @@ export const EditorConstants = {
     ENT_LETTER: 'ENT_LETTER',
     ENT_CREATION: 'ENT_CREATION',
     ENT_FMBC_CREATION: 'ENT_FMBC_CREATION',
+    ENT_NODE_INFO: 'ENT_NODE_INFO',
     ADD_SPECIAL_ANNOTATION: 'ADD_SPECIAL_ANNOTATION',
   },
   dialogTypes,
