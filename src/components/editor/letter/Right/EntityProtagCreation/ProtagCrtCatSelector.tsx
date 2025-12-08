@@ -1,25 +1,27 @@
 import React, { useState } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { ProtagCreationCategory } from '../../../../../services/mappings/editorMappings';
+import { ProtagCreationCategory } from '@src/services/mappings/editorMappings';
+import { useTranslation } from 'react-i18next';
 
 interface CategorySelectorProps {
   categories: ProtagCreationCategory[];
-  handleCategorySelected: (category: ProtagCreationCategory, parentCategoryChain: ProtagCreationCategory[]) => void;
+  handleCategorySelected: (
+    category: ProtagCreationCategory,
+    parentCategoryChain: ProtagCreationCategory[],
+  ) => void;
 }
 
 function getParentChain(
   category: ProtagCreationCategory,
-  allCategories: ProtagCreationCategory[]
+  allCategories: ProtagCreationCategory[],
 ): ProtagCreationCategory[] {
   const parents: ProtagCreationCategory[] = [];
   let current = category;
 
   while (current.protagCreationCategoryId !== null) {
-    const parent = allCategories.find(
-      (c) => c.id === current.protagCreationCategoryId
-    );
-    if (!parent) break
+    const parent = allCategories.find((c) => c.id === current.protagCreationCategoryId);
+    if (!parent) break;
     parents.push(parent);
     current = parent;
   }
@@ -27,15 +29,16 @@ function getParentChain(
   return parents;
 }
 
-const ProtagCrtCatSelector= (props: CategorySelectorProps) => {
+const ProtagCrtCatSelector = (props: CategorySelectorProps) => {
+  const { t } = useTranslation();
   const [level1, setLevel1] = useState<ProtagCreationCategory | null>(null);
   const [level2, setLevel2] = useState<ProtagCreationCategory | null>(null);
   const [level3, setLevel3] = useState<ProtagCreationCategory | null>(null);
   const [level4, setLevel4] = useState<ProtagCreationCategory | null>(null);
 
   const getChildren = (parentId: number | null) => {
-    return props.categories.filter(cat => cat.protagCreationCategoryId === parentId);
-  }
+    return props.categories.filter((cat) => cat.protagCreationCategoryId === parentId);
+  };
 
   const level1Options = getChildren(null);
   const level2Options = level1 ? getChildren(level1.id) : [];
@@ -71,9 +74,18 @@ const ProtagCrtCatSelector= (props: CategorySelectorProps) => {
         <Autocomplete
           options={level1Options}
           value={level1}
-          getOptionLabel={opt => opt.name}
+          getOptionLabel={(opt) => opt.name}
           onChange={(e, val) => handleSelect(1, val)}
-          renderInput={params => <TextField {...params} label="Kategorie 1" />}
+          renderInput={(params) => {
+            return (
+              <TextField
+                {...params}
+                label={t(
+                  'editor:dialog.protagCreationContainer.addProtagCreationDialog.label.catOne',
+                )}
+              />
+            );
+          }}
         />
       </Grid>
 
@@ -81,9 +93,18 @@ const ProtagCrtCatSelector= (props: CategorySelectorProps) => {
         <Autocomplete
           options={level2Options}
           value={level2}
-          getOptionLabel={opt => opt.name}
+          getOptionLabel={(opt) => opt.name}
           onChange={(e, val) => handleSelect(2, val)}
-          renderInput={params => <TextField {...params} label="Kategorie 2" />}
+          renderInput={(params) => {
+            return (
+              <TextField
+                {...params}
+                label={t(
+                  'editor:dialog.protagCreationContainer.addProtagCreationDialog.label.catTwo',
+                )}
+              />
+            );
+          }}
           disabled={!level1}
         />
       </Grid>
@@ -92,9 +113,18 @@ const ProtagCrtCatSelector= (props: CategorySelectorProps) => {
         <Autocomplete
           options={level3Options}
           value={level3}
-          getOptionLabel={opt => opt.name}
+          getOptionLabel={(opt) => opt.name}
           onChange={(e, val) => handleSelect(3, val)}
-          renderInput={params => <TextField {...params} label="Kategorie 3" />}
+          renderInput={(params) => {
+            return (
+              <TextField
+                {...params}
+                label={t(
+                  'editor:dialog.protagCreationContainer.addProtagCreationDialog.label.catThree',
+                )}
+              />
+            );
+          }}
           disabled={!level2}
         />
       </Grid>
@@ -103,9 +133,18 @@ const ProtagCrtCatSelector= (props: CategorySelectorProps) => {
         <Autocomplete
           options={level4Options}
           value={level4}
-          getOptionLabel={opt => opt.name}
+          getOptionLabel={(opt) => opt.name}
           onChange={(e, val) => handleSelect(4, val)}
-          renderInput={params => <TextField {...params} label="Kategorie 4" />}
+          renderInput={(params) => {
+            return (
+              <TextField
+                {...params}
+                label={t(
+                  'editor:dialog.protagCreationContainer.addProtagCreationDialog.label.catFour',
+                )}
+              />
+            );
+          }}
           disabled={!level3}
         />
       </Grid>

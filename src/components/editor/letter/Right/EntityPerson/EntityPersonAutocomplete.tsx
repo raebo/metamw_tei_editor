@@ -1,12 +1,13 @@
-import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { searchEditortEntities } from '../../../../../services/editor/apiLetterRequest.service';
-import { EditorConstants, EntityType } from '../../../../../constants/editor';
+import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
+import { EditorConstants, EntityType } from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
 import { Autocomplete, TextField } from '@mui/material';
-import { MiscUtils } from '../../../../../utils/misc';
-import { MarkupPersonData } from '../../../../../services/mappings/editorMappings';
+import { MiscUtils } from '@src/utils/misc';
+import { MarkupPersonData } from '@src/services/mappings/editorMappings';
+import { useTranslation } from 'react-i18next';
 
 interface EntityPersonAutocompleteProps {
   isDisabled: boolean;
@@ -15,68 +16,81 @@ interface EntityPersonAutocompleteProps {
 }
 
 const EntityPersonAutocomplete = (props: EntityPersonAutocompleteProps) => {
-
+  const { t } = useTranslation();
   const [autocompletePeople, setAutocompletePeople] = useState<SnippetEntity[]>([]);
   const entriesToExclude = useMemo(() => {
-    return new Set(props.addedPersonEntries.map(item => item.key));
+    return new Set(props.addedPersonEntries.map((item) => item.key));
   }, [props.addedPersonEntries]);
 
   useEffect(() => {
     const fetchDefaultPeople = async () => {
       try {
-        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.PERSON)
+        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(
+          null,
+          EntityType.PERSON,
+        );
 
         if (defaultPeople === undefined) {
-          enqueueSnackbar("No people found", { variant:"error" });
+          enqueueSnackbar('No people found', { variant: 'error' });
         } else {
-          setAutocompletePeople(defaultPeople.filter(item => !entriesToExclude.has(item.entityKey)));
+          setAutocompletePeople(
+            defaultPeople.filter((item) => !entriesToExclude.has(item.entityKey)),
+          );
         }
       } catch (error) {
-        enqueueSnackbar("Error fetching people", { variant:"error" });
+        enqueueSnackbar(`Error fetching people: ${(error as Error).message}`, { variant: 'error' });
       }
     };
 
     fetchDefaultPeople();
-  }, []);
+  }, [entriesToExclude]);
 
   const searchForPeople = useCallback(
     debounce(async (inputValue: string) => {
       try {
-        const responsePeoples: SnippetEntity[] | undefined = await searchEditortEntities(inputValue, EntityType.PERSON);
+        const responsePeoples: SnippetEntity[] | undefined = await searchEditortEntities(
+          inputValue,
+          EntityType.PERSON,
+        );
 
         if (responsePeoples) {
-          const excludeKeys = new Set(props.addedPersonEntries.map(item => item.key));
-          setAutocompletePeople(responsePeoples.filter(item => !excludeKeys.has(item.entityKey)));
+          const excludeKeys = new Set(props.addedPersonEntries.map((item) => item.key));
+          setAutocompletePeople(responsePeoples.filter((item) => !excludeKeys.has(item.entityKey)));
         }
       } catch (err) {
-        enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
+        enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
+          variant: 'error',
+        });
       }
     }, 300),
-    [props.addedPersonEntries]
+    [props.addedPersonEntries],
   );
 
   const setAutoCompletePerson = (entry: SnippetEntity | null) => {
     if (entry) {
-      props.afterSelectHandler(entry)
+      props.afterSelectHandler(entry);
     }
-  }
+  };
 
   return (
     <>
       <Autocomplete
-        disabled={ props.isDisabled }
-        options={ autocompletePeople }
-        isOptionEqualToValue={(option, value) => option.entityId === value.entityId }
+        disabled={props.isDisabled}
+        options={autocompletePeople}
+        isOptionEqualToValue={(option, value) => option.entityId === value.entityId}
         onChange={(_, newValue) => setAutoCompletePerson(newValue)}
         onInputChange={(_, inputValue, reason) => {
-          if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
-            searchForPeople(inputValue)
+          if (
+            inputValue &&
+            reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
+          ) {
+            searchForPeople(inputValue);
           }
         }}
         getOptionLabel={() => ''}
         filterOptions={(options, { inputValue }) =>
           options.filter((option) =>
-            option.entityName.toLowerCase().includes(inputValue.toLowerCase())
+            option.entityName.toLowerCase().includes(inputValue.toLowerCase()),
           )
         }
         renderOption={(props, option, { inputValue }) => {
@@ -85,7 +99,7 @@ const EntityPersonAutocomplete = (props: EntityPersonAutocompleteProps) => {
               <div>
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: MiscUtils.stringHandling.highlightText(option.entityName, inputValue)
+                    __html: MiscUtils.stringHandling.highlightText(option.entityName, inputValue),
                   }}
                 />
               </div>
@@ -93,12 +107,16 @@ const EntityPersonAutocomplete = (props: EntityPersonAutocompleteProps) => {
           );
         }}
         renderInput={(params) => (
-          <TextField {...params} label={ "Eintrag Auswählen"} variant="outlined" />
+          <TextField
+            {...params}
+            label={t('editor:dialog.personContainer.addPersonDialog.label.chooseEntry')}
+            variant="outlined"
+          />
         )}
         fullWidth
       />
-   </>
+    </>
   );
-}
+};
 
 export default EntityPersonAutocomplete;

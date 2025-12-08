@@ -1,12 +1,13 @@
-import { ProtagCreation } from '../../../../../services/mappings/editorMappings';
+import { type ProtagCreation } from '@src/services/mappings/editorMappings';
 import { Autocomplete, TextField } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import Grid from '@mui/material/Grid';
+import { useTranslation } from 'react-i18next';
 
 interface PropsExisitingProtagCreation {
-  resetSignal: number,
-  protagCreations: ProtagCreation[],
-  handleProtagCreationChange: (protagCreation: ProtagCreation) => void,
+  resetSignal: number;
+  protagCreations: ProtagCreation[];
+  handleProtagCreationChange: (protagCreation: ProtagCreation) => void;
 }
 
 interface ProtagCreationDetail {
@@ -15,16 +16,17 @@ interface ProtagCreationDetail {
   opus: string | null;
 }
 
-
 const EntityExistingProtagCreation = (props: PropsExisitingProtagCreation) => {
-
+  const { t } = useTranslation();
   const [protagCreationDetail, setProtagCreationDetail] = React.useState<ProtagCreationDetail>({
     key: null,
     mwv: null,
     opus: null,
   } as ProtagCreationDetail);
 
-  const [selectedProtagCreation, setSelectedProtagCreation] = React.useState<ProtagCreation | undefined>(undefined);
+  const [selectedProtagCreation, setSelectedProtagCreation] = React.useState<
+    ProtagCreation | undefined
+  >(undefined);
 
   React.useEffect(() => {
     setProtagCreationDetail({
@@ -40,12 +42,12 @@ const EntityExistingProtagCreation = (props: PropsExisitingProtagCreation) => {
       key: protagCreation?.key ?? null,
       mwv: protagCreation?.mwv ?? null,
       opus: protagCreation?.opus ?? null,
-    })
+    });
 
     if (protagCreation !== null) {
-      props.handleProtagCreationChange(protagCreation)
+      props.handleProtagCreationChange(protagCreation);
     }
-  }
+  };
 
   return (
     <>
@@ -58,9 +60,17 @@ const EntityExistingProtagCreation = (props: PropsExisitingProtagCreation) => {
           getOptionLabel={(protagCreation: ProtagCreation) => protagCreation.name ?? ''}
           onChange={(event, protagCreation) => handleProtagCreationChange(protagCreation)}
           isOptionEqualToValue={(option, value) => {
-            return option.id === value.id
+            return option.id === value.id;
           }}
-          renderInput={(params) => <TextField {...params} label="Auswahl Werk" variant="outlined" />}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={t(
+                'editor:dialog.protagCreationContainer.addProtagCreationDialog.label.chooseProtagCreation',
+              )}
+              variant="outlined"
+            />
+          )}
           disableClearable
         />
       </Grid>
@@ -68,34 +78,39 @@ const EntityExistingProtagCreation = (props: PropsExisitingProtagCreation) => {
         <TextField
           key={`protag-creation-key-${props.resetSignal}`} // forces remount on reset
           variant="outlined"
-          label="Schlüssel Werk"
+          label={t(
+            'editor:dialog.protagCreationContainer.addProtagCreationDialog.label.identifier',
+          )}
           value={protagCreationDetail.key ?? ''}
           fullWidth
           slotProps={{ inputLabel: { shrink: true } }}
-          disabled={true} />
+          disabled={true}
+        />
       </Grid>
       <Grid size={{ xs: 4, md: 4, lg: 4 }}>
         <TextField
           key={`protag-creation-mwv-${props.resetSignal}`} // forces remount on reset
           variant="outlined"
-          label="MWV Werk"
+          label={t('editor:dialog.protagCreationContainer.addProtagCreationDialog.label.mwv')}
           value={protagCreationDetail.mwv ?? ''}
           fullWidth
           slotProps={{ inputLabel: { shrink: true } }}
-          disabled={true} />
+          disabled={true}
+        />
       </Grid>
       <Grid size={{ xs: 4, md: 4, lg: 4 }}>
         <TextField
           key={`protag-creation-opus-${props.resetSignal}`} // forces remount on reset
           variant="outlined"
-          label="Opus Werk"
+          label={t('editor:dialog.protagCreationContainer.addProtagCreationDialog.label.opus')}
           value={protagCreationDetail.opus ?? ''}
           fullWidth
           slotProps={{ inputLabel: { shrink: true } }}
-          disabled={true} />
+          disabled={true}
+        />
       </Grid>
     </>
-  )
-}
+  );
+};
 
-export default EntityExistingProtagCreation
+export default EntityExistingProtagCreation;

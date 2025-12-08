@@ -33,6 +33,12 @@
   "hints": {
     "closing":  "Zum Schließen auf den Hintergrund klicken oder ESC drücken"
   },
+  "buttons": {
+    "cancel": "Abbrechen"
+  },
+  "autocomplete": {
+    "chooseEntry": "Eintrag Auswählen"
+  },
   "assignLetterDialog": {
 
   },
@@ -73,7 +79,8 @@
       },
       "button": {
         "reset": "Zurücksetzen",
-        "submit": "Eintrag Hinzufügen"
+        "submit": "Eintrag Hinzufügen",
+        "cancel": "Abbrechen"
       }
 
     },
@@ -82,6 +89,99 @@
       "button": {
         "reset": "Wiederherstellen",
         "submit": "Eintrag Anpassen"
+      }
+    }
+  },
+  "creationContainer" : {
+    "addCreationDialog": {
+      "headline": "Werk Auszeichnen und Hinzufügen",
+      "success": "Das Werk wurde erfolgreich ausgezeichnet",
+      "errorSubmit": "Beim Auszeichnen des Werkes trat ein Fehler auf",
+      "label" : {
+        "latintype": "Latintype Buchstaben",
+        "existingAuthor": "Vorhandener Autor",
+        "newAuthor": "Neuer Autor",
+        "existingCreation": "Vorhandenes Werk",
+        "newCreation": "Neues Werk",
+        "chooseCategory": "Auswahl Kategorie",
+        "chooseCreation": "Auswahl Werk",
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "key": "Schlüssel",
+        "newNameCreation": "Name des Werkes",
+        "newIdentifierCreation": "Schlüssel des Werkes"
+      },
+      "button": {
+        "annotate": "Werk Auszeichnen",
+        "addCreation": "Werk Hinzufügen"
+      }
+    }
+  },
+  "personContainer": {
+    "addPersonDialog": {
+      "headline" : "Person Auszeichnen und Hinzufügen",
+      "success": "Person wurde erfolgreich ausgezeichnet",
+      "error": "Beim Hinzufügen trat ein Fehler auf",
+      "button": {
+        "add": "Hinzufügen",
+        "annotate": "Auszeichnen",
+        "cancel": "Abbrechen"
+      },
+      "label": {
+        "chooseEntry": "Eintrag Auswählen",
+        "lastName": "Nachname",
+        "firstName": "Vorname",
+        "newEntry": "Neuer Eintrag",
+        "existingEntry": "Vorhandener Eintrag"
+      }
+    }
+  },
+  "placeContainer": {
+    "addPlaceDialog": {
+      "headline": "Ortschaften/Instit./Sehenswürd. Auszeichnen und Hinzufügen",
+      "success": "Ort wurde erfolgreich ausgezeichnet",
+      "error": "Beim Hinzufügen trat ein Fehler auf",
+      "button": {
+        "add": "Ort Hinzufügen",
+        "annotate": "Orte Auszeichnen"
+      },
+      "label": {
+        "chooseCountry": "Auswahl Land",
+        "chooseReference": "Auswahl Referenz",
+        "existingType": "Vorhandene Referenz",
+        "newType": "Neue Referenz",
+        "settlement": "Ortschaft",
+        "sight": "Sehenswürdigkeit",
+        "identifier": "Key",
+        "referenceName": "Referenz (Name)",
+        "name": "Name",
+        "newEntry": "Neuer Eintrag",
+        "existingEntry": "Vorhandener Eintrag",
+        "institution": "Institution"
+      }
+    }
+  },
+  "protagCreationContainer": {
+    "addProtagCreationDialog": {
+      "headline": "FMB Werk Auszeichnen und Hinzufügen",
+      "success": "FMB Werk wurde erfolgreich ausgezeichnet",
+      "error": "Beim Hinzufügen des FMB Werkes trat ein Fehler auf",
+      "button": {
+        "add": "FMB Werk Hinzufügen",
+        "annotate": "Auszeichnen"
+      },
+      "label": {
+        "name": "Name",
+        "chooseProtagCreation": "Auswahl FMB Werk",
+        "opus": "Opus Werk",
+        "mwv": "MWV Werk",
+        "identifier": "Schlüssel Werk",
+        "newProtagCreation": "Neues Werk",
+        "existingProtagCreation": "Vorhandenes FMB Werk",
+        "catOne": "Kategorie 1",
+        "catTwo": "Kategorie 2",
+        "catThree": "Kategorie 3",
+        "catFour": "Kategorie 4"
       }
     }
   }

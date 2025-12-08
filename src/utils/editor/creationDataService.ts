@@ -1,4 +1,4 @@
-import { MarkupCreationData } from '@src/services/mappings/editorMappings';
+import { type HiRendType, MarkupCreationData } from '@src/services/mappings/editorMappings';
 import { EditorUtils } from './index';
 import { EditorConstants, EntityType } from '@src/constants/editor';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
@@ -10,7 +10,9 @@ interface EnrichedCreation {
   authors: SnippetEntity[];
 }
 
-async function loadEnrichedCreations(markupCreations: MarkupCreationData[]): Promise<EnrichedCreation[]> {
+async function loadEnrichedCreations(
+  markupCreations: MarkupCreationData[],
+): Promise<EnrichedCreation[]> {
   return Promise.all(
     markupCreations.map(async (markupCreation) => {
       const creation = markupCreation.creation;
@@ -52,9 +54,15 @@ export const creationDataService = {
       }
     }
   },
-  handleCreationDataEntries: async (xmlDoc: Document, markupCreationData: MarkupCreationData[]): Promise<string> => {
+  handleCreationDataEntries: async (
+    xmlDoc: Document,
+    markupCreationData: MarkupCreationData[],
+    rendType: HiRendType,
+  ): Promise<string> => {
     const newAuthors = markupCreationData.filter((creationData) => creationData.author?.isNewEntry);
-    const newCreations = markupCreationData.filter((creationData) => creationData.creation?.isNewEntry);
+    const newCreations = markupCreationData.filter(
+      (creationData) => creationData.creation?.isNewEntry,
+    );
 
     for (const authorData of newAuthors) {
       await EditorUtils.backendService.createEntity(
@@ -99,7 +107,15 @@ export const creationDataService = {
       titleNameNode.appendChild(creationNode);
     }
 
-    EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNameNode);
+    if (rendType) {
+      const hiNode = document.createElementNS(EditorConstants.TEI_NS, 'hi');
+      hiNode.setAttribute('rend', rendType);
+      hiNode.appendChild(titleNameNode);
+
+      EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, hiNode);
+    } else {
+      EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNameNode);
+    }
 
     return xmlId;
   },

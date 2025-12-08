@@ -1,8 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { backendService } from '@src/utils/editor/backendService';
 import { enqueueSnackbar } from 'notistack';
-import { MarkupProtagCreationData, ProtagCreation, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
-import { Badge, Box, Divider, FormControl, FormControlLabel, IconButton, Radio, RadioGroup, Stack, Typography } from '@mui/material';
+import {
+  type HiRendType,
+  MarkupProtagCreationData,
+  ProtagCreation,
+  ProtagCreationCategory,
+} from '@src/services/mappings/editorMappings';
+import {
+  Badge,
+  Box,
+  Checkbox,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  IconButton,
+  Radio,
+  RadioGroup,
+  Stack,
+  Typography,
+} from '@mui/material';
 import Grid from '@mui/material/Grid';
 import ProtagCrtCatSelector from './ProtagCrtCatSelector';
 import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
@@ -20,6 +37,7 @@ import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { EditorUtils } from '@src/utils/editor';
 import { MiscUtils } from '@src/utils/misc';
+import { useTranslation } from 'react-i18next';
 
 type SelectActionProtagCreationOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 
@@ -35,13 +53,20 @@ interface ProtagFormData {
 
 const EntityProtagCreationContainer = (props: EditorContainerProps) => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
+  const [hiRendMarkup, setHiRendMarkup] = useState<HiRendType>(null);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
 
-  const [addedProtagCreations, setAddedProtagCreations] = React.useState<MarkupProtagCreationData[]>([]);
+  const [addedProtagCreations, setAddedProtagCreations] = React.useState<
+    MarkupProtagCreationData[]
+  >([]);
   const [protagCreations, setProtagCreations] = React.useState<ProtagCreation[]>([]);
-  const [protagCreationCategories, setProtagCreationCategories] = React.useState<ProtagCreationCategory[]>([]);
+  const [protagCreationCategories, setProtagCreationCategories] = React.useState<
+    ProtagCreationCategory[]
+  >([]);
 
-  const [selectedProtagCreationOption, setSelectedProtagCreationOption] = useState<SelectActionProtagCreationOption>('EXISTING_ENTRY');
+  const [selectedProtagCreationOption, setSelectedProtagCreationOption] =
+    useState<SelectActionProtagCreationOption>('EXISTING_ENTRY');
   const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent);
   const [xmlDoc, setXmlDoc] = React.useState<XMLDocument | null>(null);
 
@@ -79,9 +104,12 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
         setProtagCreationCategories(result);
       })
       .catch((error) => {
-        enqueueSnackbar(`Could not fetch protag creation categories: "${error.message}", please try again`, {
-          variant: 'error',
-        });
+        enqueueSnackbar(
+          `Could not fetch protag creation categories: "${error.message}", please try again`,
+          {
+            variant: 'error',
+          },
+        );
       });
     backendService
       .fetchProtagCreationEntries(null)
@@ -89,9 +117,12 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
         setProtagCreations(entries);
       })
       .catch((error) => {
-        enqueueSnackbar(`Could not fetch protag creation entries: "${error instanceof Error ? error.message : error}", please try again`, {
-          variant: 'error',
-        });
+        enqueueSnackbar(
+          `Could not fetch protag creation entries: "${error instanceof Error ? error.message : error}", please try again`,
+          {
+            variant: 'error',
+          },
+        );
       });
   }, []); // empty array = run once on mount
 
@@ -102,9 +133,12 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
         setProtagCreations(entries);
       })
       .catch((error) => {
-        enqueueSnackbar(`Could not fetch protag creation entries: "${error instanceof Error ? error.message : error}", please try again`, {
-          variant: 'error',
-        });
+        enqueueSnackbar(
+          `Could not fetch protag creation entries: "${error instanceof Error ? error.message : error}", please try again`,
+          {
+            variant: 'error',
+          },
+        );
       });
   };
 
@@ -118,7 +152,10 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
         }));
       })
       .catch((error) => {
-        enqueueSnackbar(`Could not fetch a valid new key for  ProtagCreation: "${error.message}", please try again"`, { variant: 'error' });
+        enqueueSnackbar(
+          `Could not fetch a valid new key for  ProtagCreation: "${error.message}", please try again"`,
+          { variant: 'error' },
+        );
       });
   };
 
@@ -152,11 +189,21 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
         throw new Error();
       }
 
-      const xmlId: string = await EditorUtils.protagCreationDataService.handleProtagCreationDataEntries(xmlDoc, addedProtagCreations);
+      const xmlId: string =
+        await EditorUtils.protagCreationDataService.handleProtagCreationDataEntries(
+          xmlDoc,
+          addedProtagCreations,
+          hiRendMarkup,
+        );
 
       await EditorUtils.backendOrchestrator.patchWithDispatch(
         dispatch,
-        [new XMLSerializer().serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.protag_creation.ADDED, xmlId],
+        [
+          new XMLSerializer().serializeToString(xmlDoc),
+          stateEditorLetter.id,
+          EditorConstants.changeTypes.protag_creation.ADDED,
+          xmlId,
+        ],
         {
           actionsOnSuccess: [
             setReloadLetterContent({ reloadLetterContent: true }),
@@ -166,8 +213,12 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
               contentRight: null,
             }),
           ],
-          successMessage: 'ProtagCreation markup was added successfully',
-          errorMessage: 'Failed to add ProtagCreation markup, please try again',
+          successMessage: t(
+            'editor:dialog.protagCreationContainer.addProtagCreationDialog.success',
+          ),
+          errorMessage: t(
+            'editor:dialog.protagCreationContainer.addProtagCreationDialog.errorSubmit',
+          ),
         },
       );
     } catch (err) {
@@ -186,7 +237,11 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
   };
 
   const isValidFormData = (): boolean => {
-    return protagFormData.key !== null && protagFormData.name !== null && protagFormData.protagCreationCategory !== null;
+    return (
+      protagFormData.key !== null &&
+      protagFormData.name !== null &&
+      protagFormData.protagCreationCategory !== null
+    );
   };
 
   const resetProtagFormData = () => {
@@ -223,14 +278,26 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
         ...categoryUpdate,
       }));
     } catch (error) {
-      enqueueSnackbar('Error fetching protag creation data: ' + (error instanceof Error ? error.message : String(error)), {
-        variant: 'error',
-      });
+      enqueueSnackbar(
+        'Error fetching protag creation data: ' +
+          (error instanceof Error ? error.message : String(error)),
+        {
+          variant: 'error',
+        },
+      );
     }
   }
 
   const buttonAddNewProtagEntry = () => {
-    const { key, name, mwv, opus, isNewEntry, parentProtagCreationCategories, protagCreationCategory } = protagFormData;
+    const {
+      key,
+      name,
+      mwv,
+      opus,
+      isNewEntry,
+      parentProtagCreationCategories,
+      protagCreationCategory,
+    } = protagFormData;
 
     if (key !== null && name !== null && protagCreationCategory !== null) {
       setAddedProtagCreations((prevState) => [
@@ -260,6 +327,14 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
     );
   };
 
+  const handleHiRendMarkupChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      setHiRendMarkup('latintype');
+    } else {
+      setHiRendMarkup(null);
+    }
+  };
+
   const handleCancelButtonClick = () => {
     dispatch(
       setEditorMarkedAndContentLeftRightThunk({
@@ -274,10 +349,22 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
     <>
       <Box component="form" sx={{ p: 4, maxWidth: 600, px: '5px', mx: 'auto' }}>
         <Typography variant="h5" gutterBottom>
-          FMB-Werk Auszeichnen und Hinzufügen
+          {t('editor:dialog.protagCreationContainer.addProtagCreationDialog.headline')}
         </Typography>
         <Box sx={{ mb: 3 }}>
           <Stack spacing={1}>
+            <Box sx={{ mb: 3 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={hiRendMarkup !== null}
+                    onChange={handleHiRendMarkupChange}
+                    color="primary" // options: primary, secondary, default
+                  />
+                }
+                label={t('editor:dialog.creationContainer.addCreationDialog.label.latintype')}
+              />
+            </Box>
             {addedProtagCreations.map((entry) => (
               <Box key={entry.key ?? ''}>
                 <Box>
@@ -294,7 +381,11 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
                       .join(' - ')}
                   </Typography>
                 </Box>
-                <IconButton edge="end" onClick={() => removeExistingEntry(entry)} aria-label="delete">
+                <IconButton
+                  edge="end"
+                  onClick={() => removeExistingEntry(entry)}
+                  aria-label="delete"
+                >
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -305,11 +396,15 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
           <Grid size={{ xs: 12, md: 12, lg: 12 }}>
             <ProtagCrtCatSelector
               categories={protagCreationCategories}
-              handleCategorySelected={(protagCategory: ProtagCreationCategory, parentCategoryChain: ProtagCreationCategory[]) => {
+              handleCategorySelected={(
+                protagCategory: ProtagCreationCategory,
+                parentCategoryChain: ProtagCreationCategory[],
+              ) => {
                 setProtagFormData((prevState) => ({
                   ...prevState,
                   protagCreationCategory: protagCategory,
-                  parentProtagCreationCategories: parentCategoryChain.length > 0 ? parentCategoryChain : null,
+                  parentProtagCreationCategories:
+                    parentCategoryChain.length > 0 ? parentCategoryChain : null,
                 }));
                 if (selectedProtagCreationOption === 'EXISTING_ENTRY') {
                   fetchProtagCreationEntries(protagCategory);
@@ -324,17 +419,32 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
           <RadioGroup
             row
             value={selectedProtagCreationOption}
-            onChange={(e) => handleProtagOptionChange(e.target.value as SelectActionProtagCreationOption)}
+            onChange={(e) =>
+              handleProtagOptionChange(e.target.value as SelectActionProtagCreationOption)
+            }
           >
-            <FormControlLabel value={'EXISTING_ENTRY'} control={<Radio />} label="Vorhandenes Werk" />
-            <FormControlLabel value={'NEW_ENTRY'} control={<Radio />} label="Neues Werk" />
+            <FormControlLabel
+              value={'EXISTING_ENTRY'}
+              control={<Radio />}
+              label={t(
+                'editor:dialog.protagCreationContainer.addProtagCreationDialog.label.existingProtagCreation',
+              )}
+            />
+            <FormControlLabel
+              value={'NEW_ENTRY'}
+              control={<Radio />}
+              label={t(
+                'editor:dialog.protagCreationContainer.addProtagCreationDialog.label.newProtagCreation',
+              )}
+            />
           </RadioGroup>
         </FormControl>
 
         <Divider sx={{ my: 3 }} />
 
         <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
-          {(selectedProtagCreationOption === 'EXISTING_ENTRY' || selectedProtagCreationOption === null) && (
+          {(selectedProtagCreationOption === 'EXISTING_ENTRY' ||
+            selectedProtagCreationOption === null) && (
             <EntityExistingProtagCreation
               resetSignal={resetProtagCreationCmp}
               protagCreations={protagCreations}
@@ -366,17 +476,22 @@ const EntityProtagCreationContainer = (props: EditorContainerProps) => {
             disabled={!isValidFormData()}
             startIcon={<AddIcon />}
           >
-            FMB-Werk Hinzufügen
+            {t('editor:dialog.protagCreationContainer.addProtagCreationDialog.button.add')}
           </Button>
 
-          <Button variant="contained" color="primary" onClick={handleSubmitButtonClick} disabled={addedProtagCreations.length === 0}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmitButtonClick}
+            disabled={addedProtagCreations.length === 0}
+          >
             <Badge badgeContent={addedProtagCreations.length} color="secondary">
-              FMB-Werk Auszeichnen
+              {t('editor:dialog.protagCreationContainer.addProtagCreationDialog.button.annotate')}
             </Badge>
           </Button>
 
           <Button variant="text" onClick={handleCancelButtonClick} color="secondary">
-            Abbrechen
+            {t('editor:dialog.buttons.cancel')}
           </Button>
         </Box>
         <div>

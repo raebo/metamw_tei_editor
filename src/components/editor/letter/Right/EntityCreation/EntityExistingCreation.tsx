@@ -2,6 +2,7 @@ import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { Autocomplete, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
+import { useTranslation } from 'react-i18next';
 
 export interface EntityExistingCreationProps {
   creationList: SnippetEntity[];
@@ -12,24 +13,34 @@ export interface EntityExistingCreationProps {
 }
 
 const EntityExistingCreation = (props: EntityExistingCreationProps) => {
+  const { t } = useTranslation();
   const [creationKinds, setCreationKinds] = React.useState<string[]>(props.creationKinds);
-  const [selectedCreation, setSelectedCreation] = React.useState<SnippetEntity | undefined>(undefined);
+  const [selectedCreation, setSelectedCreation] = React.useState<SnippetEntity | undefined>(
+    undefined,
+  );
   const [selectedKind, setSelectedKind] = React.useState<string | null>(null);
   const [allCreationList, setAllCreationList] = React.useState<SnippetEntity[]>(props.creationList);
-  const [groupedCreationList, setGroupedCreationList] = useState<Record<string, SnippetEntity[]>>({});
-  const [displayCreationList, setDisplayCreationList] = useState<SnippetEntity[]>(props.creationList);
+  const [groupedCreationList, setGroupedCreationList] = useState<Record<string, SnippetEntity[]>>(
+    {},
+  );
+  const [displayCreationList, setDisplayCreationList] = useState<SnippetEntity[]>(
+    props.creationList,
+  );
 
   useEffect(() => {
-    const reducedResult = props.creationList.reduce<Record<string, SnippetEntity[]>>((acc: Record<string, SnippetEntity[]>, entity) => {
-      const kind = entity.entityKind;
-      // @ts-expect-error Initialize array if it doesn't exist
-      if (!acc[kind]) acc[kind] = [];
+    const reducedResult = props.creationList.reduce<Record<string, SnippetEntity[]>>(
+      (acc: Record<string, SnippetEntity[]>, entity) => {
+        const kind = entity.entityKind;
+        // @ts-expect-error Initialize array if it doesn't exist
+        if (!acc[kind]) acc[kind] = [];
 
-      // @ts-expect-error Push entity to the correct kind array
-      acc[kind].push(entity);
+        // @ts-expect-error Push entity to the correct kind array
+        acc[kind].push(entity);
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {},
+    );
 
     setGroupedCreationList(reducedResult);
     setDisplayCreationList(props.creationList);
@@ -76,7 +87,13 @@ const EntityExistingCreation = (props: EntityExistingCreationProps) => {
           isOptionEqualToValue={(option, value) => {
             return option.entityId === value.entityId;
           }}
-          renderInput={(params) => <TextField {...params} label="Auswahl Werk" variant="outlined" />}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={t('editor:dialog.creationContainer.addCreationDialog.label.chooseCreation')}
+              variant="outlined"
+            />
+          )}
           disableClearable
         />
       </Grid>
@@ -90,7 +107,13 @@ const EntityExistingCreation = (props: EntityExistingCreationProps) => {
           isOptionEqualToValue={(kind, value) => {
             return kind === value;
           }}
-          renderInput={(params) => <TextField {...params} label="Auswahl Kategorie" variant="outlined" />}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={t('editor:dialog.creationContainer.addCreationDialog.label.chooseCategory')}
+              variant="outlined"
+            />
+          )}
           disableClearable
         />
       </Grid>

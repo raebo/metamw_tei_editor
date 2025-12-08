@@ -134,6 +134,8 @@ export interface MarkupCreationData {
   } | null;
 }
 
+export type HiRendType = 'latintype' | null;
+
 export type SelectCompleteOption = {
   label: string;
   value: string;

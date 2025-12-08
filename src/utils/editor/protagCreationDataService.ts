@@ -1,6 +1,10 @@
 import { initApi } from '@src/services/apiRequest.service';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
-import { MarkupProtagCreationData, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
+import {
+  type HiRendType,
+  MarkupProtagCreationData,
+  ProtagCreationCategory,
+} from '@src/services/mappings/editorMappings';
 import { EditorUtils } from './index';
 import { EditorConstants, EntityType } from '@src/constants/editor';
 
@@ -34,7 +38,11 @@ export const protagCreationDataService = {
       }
     }
   },
-  handleProtagCreationDataEntries: async (xmlDoc: Document, markupProtagCreationData: MarkupProtagCreationData[]): Promise<string> => {
+  handleProtagCreationDataEntries: async (
+    xmlDoc: Document,
+    markupProtagCreationData: MarkupProtagCreationData[],
+    rendType: HiRendType,
+  ): Promise<string> => {
     const protagData = await EditorUtils.protagCreationDataService.fetchProtagPersonData();
 
     const newEntries = markupProtagCreationData.filter((protagData) => protagData.isNewEntry);
@@ -110,7 +118,15 @@ export const protagCreationDataService = {
       titleNameNode.appendChild(protagCreationNode);
     }
 
-    EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNameNode);
+    if (rendType) {
+      const hiNode = document.createElementNS(EditorConstants.TEI_NS, 'hi');
+      hiNode.setAttribute('rend', rendType);
+      hiNode.appendChild(titleNameNode);
+
+      EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, hiNode);
+    } else {
+      EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, titleNameNode);
+    }
 
     return xmlId;
   },

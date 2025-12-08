@@ -1,5 +1,9 @@
 import { EditorUtils } from './index';
-import { CountryOption, MarkupPlaceData } from '@src/services/mappings/editorMappings';
+import {
+  CountryOption,
+  type HiRendType,
+  MarkupPlaceData,
+} from '@src/services/mappings/editorMappings';
 import { EditorConstants, EntityType } from '@src/constants/editor';
 import { SelectCompleteOption } from '@src/schemas';
 
@@ -26,7 +30,11 @@ export const placeDataService = {
       throw new Error('No kinds found');
     }
   },
-  handlePlaceDataEntries: async (xmlDoc: Document, markupPlaceData: MarkupPlaceData[]): Promise<string> => {
+  handlePlaceDataEntries: async (
+    xmlDoc: Document,
+    markupPlaceData: MarkupPlaceData[],
+    rendType: HiRendType,
+  ): Promise<string> => {
     const newEntries = markupPlaceData.filter((placeData) => placeData.isNewEntry);
 
     for (const placeData of newEntries) {
@@ -56,7 +64,15 @@ export const placeDataService = {
       }
     }
 
-    EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, placeNameNode);
+    if (rendType) {
+      const hiNode = document.createElementNS(EditorConstants.TEI_NS, 'hi');
+      hiNode.setAttribute('rend', rendType);
+      hiNode.appendChild(placeNameNode);
+
+      EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, hiNode);
+    } else {
+      EditorUtils.markupGeneration.replaceMarkedNode(markedSpan, placeNameNode);
+    }
 
     return xmlId;
   },

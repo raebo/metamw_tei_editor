@@ -1,21 +1,24 @@
 import React, { useEffect, useMemo } from 'react';
-import { SelectCompleteOption } from '../../../../../services/mappings/editorMappings';
+import { SelectCompleteOption } from '@src/services/mappings/editorMappings';
 import { Autocomplete, TextField } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface PlaceKindAutocompleteProps {
-  isDisabled: boolean
+  isDisabled: boolean;
   afterSelectHandler: (kindName: string) => void;
-  selectedOption: SelectCompleteOption | null
-  allOptions: SelectCompleteOption[]
+  selectedOption: SelectCompleteOption | null;
+  allOptions: SelectCompleteOption[];
 }
 
 function isValidOption(option: any): option is SelectCompleteOption {
-  return option && typeof option === "object" && "value" in option && "label" in option;
+  return option && typeof option === 'object' && 'value' in option && 'label' in option;
 }
 
 const PlaceKindAutocomplete = (props: PlaceKindAutocompleteProps) => {
-
-  const [selectedOption, setSelectedOption] = React.useState<SelectCompleteOption | null>(props.selectedOption);
+  const { t } = useTranslation();
+  const [selectedOption, setSelectedOption] = React.useState<SelectCompleteOption | null>(
+    props.selectedOption,
+  );
 
   useEffect(() => {
     if (isValidOption(props.selectedOption)) {
@@ -29,13 +32,12 @@ const PlaceKindAutocomplete = (props: PlaceKindAutocompleteProps) => {
     return props.allOptions;
   }, [props.allOptions]);
 
-
-  const handleChange = ( kind: SelectCompleteOption | null) => {
+  const handleChange = (kind: SelectCompleteOption | null) => {
     if (kind !== null) {
       setSelectedOption(kind);
       props.afterSelectHandler?.(kind.label);
     }
-  }
+  };
 
   return (
     <>
@@ -62,13 +64,16 @@ const PlaceKindAutocomplete = (props: PlaceKindAutocompleteProps) => {
           return option.value === value.value;
         }}
         renderInput={(params) => (
-          <TextField {...params} label="Auswahl Referenz" variant="outlined" />
+          <TextField
+            {...params}
+            label={t('editor:dialog.placeContainer.addPlaceDialog.label.chooseReference')}
+            variant="outlined"
+          />
         )}
         disableClearable
-
       />
     </>
-  )
-}
+  );
+};
 
-export default PlaceKindAutocomplete
+export default PlaceKindAutocomplete;

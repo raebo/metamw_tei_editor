@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import {
   Badge,
   Box,
+  Checkbox,
   Divider,
   FormControl,
   FormControlLabel,
@@ -24,12 +25,13 @@ import { fetchEntityKey } from '@src/services/editor/apiLetterRequest.service';
 import { EditorConstants } from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import { setEditorMarkedAndContentLeftRightThunk } from '@src/redux/thunks/editor.letter.thunk';
-import { MarkupPersonData } from '@src/services/mappings/editorMappings';
+import { type HiRendType, MarkupPersonData } from '@src/services/mappings/editorMappings';
 import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
 import { EditorUtils } from '@src/utils/editor';
 import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { MiscUtils } from '@src/utils/misc';
+import { useTranslation } from 'react-i18next';
 
 type SelectOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 
@@ -42,10 +44,12 @@ interface PersonFormData {
 
 const EntityPersonContainer = (props: EditorContainerProps) => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const isMounted = useRef(false);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
   const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent);
   const [xmlDoc, setXmlDoc] = React.useState<XMLDocument | null>(null);
+  const [hiRendMarkup, setHiRendMarkup] = useState<HiRendType>(null);
 
   const [personFormData, setPersonFormData] = useState<PersonFormData>({
     key: null,
@@ -62,7 +66,9 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
   const [formIsDisabled, setFormIsDisabled] = useState(true);
 
   const removeExistingEntry = (key: string) => {
-    setAddedPersonEntries((prevEntries) => prevEntries.filter((entry: MarkupPersonData) => entry.key !== key));
+    setAddedPersonEntries((prevEntries) =>
+      prevEntries.filter((entry: MarkupPersonData) => entry.key !== key),
+    );
   };
 
   const addNewPersonEntry = (entry: MarkupPersonData) => {
@@ -74,7 +80,9 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
       addNewPersonEntry({
         id: null,
         key: personFormData.key,
-        nameDisplay: personFormData.nameFull ?? `${personFormData.nameFirst ?? ''} ${personFormData.nameLast ?? ''}`,
+        nameDisplay:
+          personFormData.nameFull ??
+          `${personFormData.nameFirst ?? ''} ${personFormData.nameLast ?? ''}`,
         nameLast: null,
         nameFirst: null,
         isNewEntry: false,
@@ -117,7 +125,10 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
           setFormIsDisabled(false);
         })
         .catch((error: Error) => {
-          enqueueSnackbar(`Could not fetch a valid new key for a Person: "${error.message}", please try again"`, { variant: 'error' });
+          enqueueSnackbar(
+            `Could not fetch a valid new key for a Person: "${error.message}", please try again"`,
+            { variant: 'error' },
+          );
         });
     }
   };
@@ -145,9 +156,16 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
 
   const allowPersonAdding = useMemo(() => {
     if (selectedOption === 'NEW_ENTRY') {
-      return personFormData.nameFirst?.trim() && personFormData.nameLast?.trim() && personFormData.key !== null;
+      return (
+        personFormData.nameFirst?.trim() &&
+        personFormData.nameLast?.trim() &&
+        personFormData.key !== null
+      );
     } else if (selectedOption === 'EXISTING_ENTRY') {
-      return personFormData.key !== null && (personFormData.nameLast?.trim() || personFormData.nameFirst?.trim());
+      return (
+        personFormData.key !== null &&
+        (personFormData.nameLast?.trim() || personFormData.nameFirst?.trim())
+      );
     } else {
       return false;
     }
@@ -163,6 +181,14 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
     );
   };
 
+  const handleHiRendMarkupChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      setHiRendMarkup('latintype');
+    } else {
+      setHiRendMarkup(null);
+    }
+  };
+
   const handleSubmitButtonClick = async () => {
     try {
       for (const person of addedPersonEntries.filter((entry) => entry.isNewEntry)) {
@@ -174,11 +200,20 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
         throw new Error();
       }
 
-      const xmlId = EditorUtils.markupGeneration.addPersonMarkup(xmlDoc, addedPersonEntries);
+      const xmlId = EditorUtils.markupGeneration.addPersonMarkup(
+        xmlDoc,
+        addedPersonEntries,
+        hiRendMarkup,
+      );
 
       await EditorUtils.backendOrchestrator.patchWithDispatch(
         dispatch,
-        [new XMLSerializer().serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.person.ADDED, xmlId],
+        [
+          new XMLSerializer().serializeToString(xmlDoc),
+          stateEditorLetter.id,
+          EditorConstants.changeTypes.person.ADDED,
+          xmlId,
+        ],
         {
           actionsOnSuccess: [
             setReloadLetterContent({ reloadLetterContent: true }),
@@ -188,8 +223,8 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
               contentRight: null,
             }),
           ],
-          successMessage: 'Person markup was added successfully',
-          errorMessage: 'Failed to add person markup',
+          successMessage: t('editor:dialog.personContainer.addPersonDialog.success'),
+          errorMessage: t('editor:dialog.personContainer.addPersonDialog.error'),
         },
       );
     } catch (err) {
@@ -212,10 +247,22 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
     <div>
       <Box component="form" sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
         <Typography variant="h5" gutterBottom>
-          Person Auszeichnen und Hinzufügen
+          {t('editor:dialog.personContainer.addPersonDialog.headline')}
         </Typography>
         <Box sx={{ mb: 3 }}>
           <Stack spacing={1}>
+            <Box sx={{ mb: 3 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={hiRendMarkup !== null}
+                    onChange={handleHiRendMarkupChange}
+                    color="primary" // options: primary, secondary, default
+                  />
+                }
+                label={t('editor:dialog.creationContainer.addCreationDialog.label.latintype')}
+              />
+            </Box>
             {addedPersonEntries.map((entry) => (
               <Box
                 key={entry.key}
@@ -234,7 +281,11 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
                   </Typography>
                   <Typography variant="body2">{entry.nameDisplay}</Typography>
                 </Box>
-                <IconButton edge="end" onClick={() => removeExistingEntry(entry.key)} aria-label="delete">
+                <IconButton
+                  edge="end"
+                  onClick={() => removeExistingEntry(entry.key)}
+                  aria-label="delete"
+                >
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -243,9 +294,22 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
         </Box>
 
         <FormControl component="fieldset" sx={{ mb: 3 }}>
-          <RadioGroup row value={selectedOption} onChange={(e) => handleSelectOption(e.target.value as SelectOption)}>
-            <FormControlLabel value="EXISTING_ENTRY" control={<Radio />} label="Vorhandenen Eintrag" />
-            <FormControlLabel disabled={false} value="NEW_ENTRY" control={<Radio />} label="Neuer Eintrag" />
+          <RadioGroup
+            row
+            value={selectedOption}
+            onChange={(e) => handleSelectOption(e.target.value as SelectOption)}
+          >
+            <FormControlLabel
+              value="EXISTING_ENTRY"
+              control={<Radio />}
+              label={t('editor:dialog.personContainer.addPersonDialog.label.existingEntry')}
+            />
+            <FormControlLabel
+              disabled={false}
+              value="NEW_ENTRY"
+              control={<Radio />}
+              label={t('editor:dialog.personContainer.addPersonDialog.label.newEntry')}
+            />
           </RadioGroup>
         </FormControl>
 
@@ -266,11 +330,16 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
         />
         <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
           <Grid spacing={{ xs: 3, md: 3, lg: 3 }}>
-            <TextField variant="outlined" value={personFormData.key ?? ''} fullWidth disabled={true} />
+            <TextField
+              variant="outlined"
+              value={personFormData.key ?? ''}
+              fullWidth
+              disabled={true}
+            />
           </Grid>
           <Grid spacing={{ xs: 12, md: 9, lg: 9 }}>
             <TextField
-              label="Vorname"
+              label={t('editor:dialog.personContainer.addPersonDialog.label.firstName')}
               variant="outlined"
               fullWidth
               value={personFormData.nameFirst ?? ''}
@@ -285,7 +354,7 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
           </Grid>
           <Grid spacing={{ xs: 12, md: 12, lg: 12 }}>
             <TextField
-              label="Nachname"
+              label={t('editor:dialog.personContainer.addPersonDialog.label.lastName')}
               variant="outlined"
               fullWidth
               value={personFormData.nameLast ?? ''}
@@ -311,17 +380,22 @@ const EntityPersonContainer = (props: EditorContainerProps) => {
             disabled={!allowPersonAdding}
             startIcon={<AddIcon />}
           >
-            Person Hinzufügen
+            {t('editor:dialog.personContainer.addPersonDialog.button.add')}
           </Button>
 
-          <Button variant="contained" color="primary" onClick={handleSubmitButtonClick} disabled={addedPersonEntries.length === 0}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmitButtonClick}
+            disabled={addedPersonEntries.length === 0}
+          >
             <Badge badgeContent={addedPersonEntries.length} color="secondary">
-              Personen Auszeichnen
+              {t('editor:dialog.personContainer.addPersonDialog.button.annotate')}
             </Badge>
           </Button>
 
           <Button variant="text" onClick={handleCancelButtonClick} color="secondary">
-            Abbrechen
+            {t('editor:dialog.buttons.cancel')}
           </Button>
         </Box>
       </Box>

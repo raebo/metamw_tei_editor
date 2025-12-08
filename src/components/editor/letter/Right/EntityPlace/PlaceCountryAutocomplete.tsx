@@ -1,17 +1,20 @@
 import React, { useEffect, useMemo } from 'react';
-import {CountryOption } from '../../../../../services/mappings/editorMappings';
+import { CountryOption } from '@src/services/mappings/editorMappings';
 import { Autocomplete, TextField } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface PlaceCountryAutocompleteProps {
-  isDisabled: boolean
+  isDisabled: boolean;
   afterSelectHandler: (entryData: CountryOption) => void;
-  selectedOption: CountryOption | null
-  allOptions: CountryOption[]
+  selectedOption: CountryOption | null;
+  allOptions: CountryOption[];
 }
 
 const PlaceCountryAutocomplete = (props: PlaceCountryAutocompleteProps) => {
-
-  const [selectedOption, setSelectedOption] = React.useState<CountryOption | null>(props.selectedOption);
+  const { t } = useTranslation();
+  const [selectedOption, setSelectedOption] = React.useState<CountryOption | null>(
+    props.selectedOption,
+  );
 
   useEffect(() => {
     setSelectedOption(props.selectedOption);
@@ -21,13 +24,12 @@ const PlaceCountryAutocomplete = (props: PlaceCountryAutocompleteProps) => {
     return props.allOptions;
   }, [props.allOptions]);
 
-
-  const handleChange = ( country: CountryOption | null) => {
+  const handleChange = (country: CountryOption | null) => {
     if (country) {
       setSelectedOption(country);
       props.afterSelectHandler(country);
     }
-  }
+  };
 
   return (
     <>
@@ -35,16 +37,22 @@ const PlaceCountryAutocomplete = (props: PlaceCountryAutocompleteProps) => {
         disabled={props.isDisabled}
         options={allOptions}
         getOptionLabel={(country) => country.name ?? ''}
-        value={ selectedOption ?? undefined}
+        value={selectedOption ?? undefined}
         onChange={(event, country) => handleChange(country)}
         isOptionEqualToValue={(option, value) => {
           return option.id === value.id;
         }}
-        renderInput={(params) => <TextField {...params} label="Auswahl Land" variant="outlined" />}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={t('editor:dialog.placeContainer.addPlaceDialog.label.chooseCountry')}
+            variant="outlined"
+          />
+        )}
         disableClearable
       />
     </>
-  )
-}
+  );
+};
 
-export default PlaceCountryAutocomplete
+export default PlaceCountryAutocomplete;

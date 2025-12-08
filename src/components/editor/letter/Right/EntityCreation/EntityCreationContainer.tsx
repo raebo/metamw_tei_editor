@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
-import { MarkupCreationData } from '@src/services/mappings/editorMappings';
+import { type HiRendType, MarkupCreationData } from '@src/services/mappings/editorMappings';
 import { setEditorMarkedAndContentLeftRightThunk } from '@src/redux/thunks/editor.letter.thunk';
 import {
   Badge,
   Box,
+  Checkbox,
   Divider,
   FormControl,
   FormControlLabel,
@@ -33,6 +34,7 @@ import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
 import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { EditorUtils } from '@src/utils/editor';
 import { MiscUtils } from '@src/utils/misc';
+import { useTranslation } from 'react-i18next';
 
 type SelectActionAuthorOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 type SelectActionCreationOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
@@ -53,9 +55,12 @@ export interface FormCreationData {
 
 const EntityCreationContainer = (props: EditorContainerProps) => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
 
   const [addedCreationEntries, setAddedCreationEntries] = useState<MarkupCreationData[]>([]);
+
+  const [hiRendMarkup, setHiRendMarkup] = useState<HiRendType>(null);
 
   const [creationFormData, setCreationFormData] = React.useState<FormCreationData>({
     key: null,
@@ -72,8 +77,10 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
   });
   const [authorFormDisabled, setAuthorFormDisabled] = useState(true);
 
-  const [selectedAuthorOption, setSelectedAuthorOption] = useState<SelectActionAuthorOption>('EXISTING_ENTRY');
-  const [selectedCreationOption, setSelectedCreationOption] = useState<SelectActionCreationOption>(null);
+  const [selectedAuthorOption, setSelectedAuthorOption] =
+    useState<SelectActionAuthorOption>('EXISTING_ENTRY');
+  const [selectedCreationOption, setSelectedCreationOption] =
+    useState<SelectActionCreationOption>(null);
 
   const [authorAutocompleteDisabled, setAuthorAutocompleteDisabled] = useState(false);
   const [authorCreations, setAuthorCreations] = useState<SnippetEntity[]>([]); //creations of the selected author
@@ -150,6 +157,14 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
     }
   };
 
+  const handleHiRendMarkupChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      setHiRendMarkup('latintype');
+    } else {
+      setHiRendMarkup(null);
+    }
+  };
+
   const handleCreationOptionChange = (option: SelectActionCreationOption) => {
     resetCreationFormData();
     setSelectedCreationOption(option);
@@ -179,7 +194,10 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
         setAuthorCreations(result);
       })
       .catch((error) => {
-        enqueueSnackbar(`Could not fetch creations for author "${authorKey}": "${error.message}", please try again"`, { variant: 'error' });
+        enqueueSnackbar(
+          `Could not fetch creations for author "${authorKey}": "${error.message}", please try again"`,
+          { variant: 'error' },
+        );
       });
   };
 
@@ -192,7 +210,10 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
         }));
       })
       .catch((error) => {
-        enqueueSnackbar(`Could not fetch a valid new key for a Author: "${error.message}", please try again"`, { variant: 'error' });
+        enqueueSnackbar(
+          `Could not fetch a valid new key for a Author: "${error.message}", please try again"`,
+          { variant: 'error' },
+        );
       });
   };
   const fetchAndSetNewCreationKey = () => {
@@ -205,7 +226,10 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
         }));
       })
       .catch((error) => {
-        enqueueSnackbar(`Could not fetch a valid new key for a Creation: "${error.message}", please try again"`, { variant: 'error' });
+        enqueueSnackbar(
+          `Could not fetch a valid new key for a Creation: "${error.message}", please try again"`,
+          { variant: 'error' },
+        );
       });
   };
 
@@ -230,8 +254,11 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
   const isValidFormData = (): boolean => {
     return (
       authorFormData.key !== null &&
-      ((authorFormData.isNewEntry && authorFormData.firstName !== null && authorFormData.lastName !== null) ||
-        (!authorFormData.isNewEntry && (authorFormData.firstName !== null || authorFormData.lastName !== null))) &&
+      ((authorFormData.isNewEntry &&
+        authorFormData.firstName !== null &&
+        authorFormData.lastName !== null) ||
+        (!authorFormData.isNewEntry &&
+          (authorFormData.firstName !== null || authorFormData.lastName !== null))) &&
       creationFormData.key !== null &&
       creationFormData.name !== null &&
       creationFormData.kind !== null
@@ -277,11 +304,20 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
         throw new Error('No letter id or name found!');
       }
 
-      const xmlId: string = await EditorUtils.creationDataService.handleCreationDataEntries(xmlDoc, addedCreationEntries);
+      const xmlId: string = await EditorUtils.creationDataService.handleCreationDataEntries(
+        xmlDoc,
+        addedCreationEntries,
+        hiRendMarkup,
+      );
 
       await EditorUtils.backendOrchestrator.patchWithDispatch(
         dispatch,
-        [new XMLSerializer().serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.creation.ADDED, xmlId],
+        [
+          new XMLSerializer().serializeToString(xmlDoc),
+          stateEditorLetter.id,
+          EditorConstants.changeTypes.creation.ADDED,
+          xmlId,
+        ],
         {
           actionsOnSuccess: [
             setReloadLetterContent({ reloadLetterContent: true }),
@@ -291,12 +327,10 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
               contentRight: null,
             }),
           ],
-          successMessage: 'Creation markup was added successfully',
-          errorMessage: 'Could not add creation markup, please try again',
+          successMessage: t('editor:dialog.creationContainer.addCreationDialog.success'),
+          errorMessage: t('editor:dialog.creationContainer.addCreationDialog.errorSubmit'),
         },
       );
-
-      enqueueSnackbar('Creation markup was added successfully', { variant: 'success' });
     } catch (err) {
       enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
         variant: 'error',
@@ -317,10 +351,23 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
     <>
       <Box component="form" sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
         <Typography variant="h5" gutterBottom>
-          Werk Auszeichnen und Hinzufügen
+          {t('editor:dialog.creationContainer.addCreationDialog.headline')}
         </Typography>
         <Box sx={{ mb: 3 }}>
           <Stack spacing={1}>
+            <Box sx={{ mb: 3 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={hiRendMarkup !== null}
+                    onChange={handleHiRendMarkupChange}
+                    color="primary" // options: primary, secondary, default
+                  />
+                }
+                label={t('editor:dialog.creationContainer.addCreationDialog.label.latintype')}
+              />
+            </Box>
+
             {addedCreationEntries
               .filter((entry) => {
                 return entry.creation !== null && entry.author !== null;
@@ -345,7 +392,11 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
                       {`${entry.author?.firstName ?? ''} ${entry.author?.lastName ?? ''} (${entry.author?.key})`}
                     </Typography>
                   </Box>
-                  <IconButton edge="end" onClick={() => removeExistingEntry(entry)} aria-label="delete">
+                  <IconButton
+                    edge="end"
+                    onClick={() => removeExistingEntry(entry)}
+                    aria-label="delete"
+                  >
                     <DeleteIcon />
                   </IconButton>
                 </Box>
@@ -359,8 +410,16 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
             value={selectedAuthorOption}
             onChange={(e) => handleAuthorOptionChange(e.target.value as SelectActionAuthorOption)}
           >
-            <FormControlLabel value={'EXISTING_ENTRY'} control={<Radio />} label="Vorhandener Autor" />
-            <FormControlLabel value={'NEW_ENTRY'} control={<Radio />} label="Neuer Autor" />
+            <FormControlLabel
+              value={'EXISTING_ENTRY'}
+              control={<Radio />}
+              label={t('editor:dialog.creationContainer.addCreationDialog.label.existingAuthor')}
+            />
+            <FormControlLabel
+              value={'NEW_ENTRY'}
+              control={<Radio />}
+              label={t('editor:dialog.creationContainer.addCreationDialog.label.newAuthor')}
+            />
           </RadioGroup>
         </FormControl>
 
@@ -389,7 +448,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
           <Grid size={{ xs: 4, md: 4, lg: 4 }}>
             <TextField
               variant="outlined"
-              label="Key"
+              label={t('editor:dialog.creationContainer.addCreationDialog.label.key')}
               value={authorFormData.key ?? ''}
               fullWidth
               slotProps={{ inputLabel: { shrink: true } }}
@@ -399,7 +458,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
           <Grid size={{ xs: 8, md: 8, lg: 8 }}>
             <TextField
               variant="outlined"
-              label="Vorname"
+              label={t('editor:dialog.creationContainer.addCreationDialog.label.firstName')}
               value={authorFormData.firstName ?? ''}
               fullWidth
               slotProps={{ inputLabel: { shrink: true } }}
@@ -416,7 +475,7 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
           <Grid size={{ xs: 12, md: 12, lg: 12 }}>
             <TextField
               variant="outlined"
-              label="Nachname"
+              label={t('editor:dialog.creationContainer.addCreationDialog.label.lastName')}
               value={authorFormData.lastName ?? ''}
               fullWidth
               slotProps={{ inputLabel: { shrink: true } }}
@@ -436,15 +495,22 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
           <RadioGroup
             row
             value={selectedCreationOption}
-            onChange={(e) => handleCreationOptionChange(e.target.value as SelectActionCreationOption)}
+            onChange={(e) =>
+              handleCreationOptionChange(e.target.value as SelectActionCreationOption)
+            }
           >
             <FormControlLabel
               value={'EXISTING_ENTRY'}
               control={<Radio />}
               disabled={selectCreationOptionDisabled}
-              label="Vorhandene Werk"
+              label={t('editor:dialog.creationContainer.addCreationDialog.label.existingCreation')}
             />
-            <FormControlLabel value={'NEW_ENTRY'} control={<Radio />} disabled={selectCreationOptionDisabled} label="Neues Werk" />
+            <FormControlLabel
+              value={'NEW_ENTRY'}
+              control={<Radio />}
+              disabled={selectCreationOptionDisabled}
+              label={t('editor:dialog.creationContainer.addCreationDialog.label.newCreation')}
+            />
           </RadioGroup>
         </FormControl>
 
@@ -494,17 +560,22 @@ const EntityCreationContainer = (props: EditorContainerProps) => {
             disabled={!isValidFormData()}
             startIcon={<AddIcon />}
           >
-            Werk Hinzufügen
+            {t('editor:dialog.creationContainer.addCreationDialog.button.addCreation')}
           </Button>
 
-          <Button variant="contained" color="primary" onClick={handleSubmitButtonClick} disabled={addedCreationEntries.length === 0}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmitButtonClick}
+            disabled={addedCreationEntries.length === 0}
+          >
             <Badge badgeContent={addedCreationEntries.length} color="secondary">
-              Werk Auszeichnen
+              {t('editor:dialog.creationContainer.addCreationDialog.button.annotate')}
             </Badge>
           </Button>
 
           <Button variant="text" onClick={handleCancelButtonClick} color="secondary">
-            Abbrechen
+            {t('editor:dialog.buttons.cancel')}
           </Button>
         </Box>
       </Box>

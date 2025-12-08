@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import { TextField } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface EntityNewProtagCreationProps {
   protagCreationKey: string | null;
@@ -15,7 +16,7 @@ export interface ProtagCreationDetail {
 }
 
 const EntityNewProtagCreation = (props: EntityNewProtagCreationProps) => {
-
+  const { t } = useTranslation();
   const [protagCreationDetail, setProtagCreationDetail] = React.useState<ProtagCreationDetail>({
     name: null,
     key: null,
@@ -27,20 +28,19 @@ const EntityNewProtagCreation = (props: EntityNewProtagCreationProps) => {
     setProtagCreationDetail((prevState) => ({
       ...prevState,
       key: props.protagCreationKey ?? null,
-    })
-    )
+    }));
   }, [props.protagCreationKey]);
 
   useEffect(() => {
     props.afterProtagCreationChange(protagCreationDetail);
-  }, [protagCreationDetail]);
+  }, [props, protagCreationDetail]);
 
   return (
     <>
       <Grid size={{ xs: 12, md: 12, lg: 12 }}>
         <TextField
           variant="outlined"
-          label="Name Werk"
+          label={t('editor:dialog.protagCreationContainer.addProtagCreationDialog.label.name')}
           value={protagCreationDetail.name ?? ''}
           fullWidth
           slotProps={{ inputLabel: { shrink: true } }}
@@ -48,23 +48,27 @@ const EntityNewProtagCreation = (props: EntityNewProtagCreationProps) => {
             setProtagCreationDetail((prevState) => ({
               ...prevState,
               name: e.target.value,
-            }))
+            }));
           }}
-          disabled={false} />
+          disabled={false}
+        />
       </Grid>
       <Grid size={{ xs: 4, md: 4, lg: 4 }}>
         <TextField
           variant="outlined"
-          label="Schlüssel Werk"
+          label={t(
+            'editor:dialog.protagCreationContainer.addProtagCreationDialog.label.identifier',
+          )}
           value={protagCreationDetail.key ?? ''}
           fullWidth
           slotProps={{ inputLabel: { shrink: true } }}
-          disabled={true} />
+          disabled={true}
+        />
       </Grid>
       <Grid size={{ xs: 4, md: 4, lg: 4 }}>
         <TextField
           variant="outlined"
-          label="MWV Werk"
+          label={t('editor:dialog.protagCreationContainer.addProtagCreationDialog.label.mwv')}
           value={protagCreationDetail.mwv ?? ''}
           fullWidth
           slotProps={{ inputLabel: { shrink: true } }}
@@ -72,14 +76,15 @@ const EntityNewProtagCreation = (props: EntityNewProtagCreationProps) => {
             setProtagCreationDetail((prevState) => ({
               ...prevState,
               mwv: e.target.value,
-            }))
+            }));
           }}
-          disabled={false} />
+          disabled={false}
+        />
       </Grid>
       <Grid size={{ xs: 4, md: 4, lg: 4 }}>
         <TextField
           variant="outlined"
-          label="Opus Werk"
+          label={t('editor:dialog.protagCreationContainer.addProtagCreationDialog.label.opus')}
           value={protagCreationDetail.opus ?? ''}
           fullWidth
           slotProps={{ inputLabel: { shrink: true } }}
@@ -87,12 +92,13 @@ const EntityNewProtagCreation = (props: EntityNewProtagCreationProps) => {
             setProtagCreationDetail((prevState) => ({
               ...prevState,
               opus: e.target.value,
-            }))
+            }));
           }}
-          disabled={false} />
+          disabled={false}
+        />
       </Grid>
     </>
-  )
-}
+  );
+};
 
-export default EntityNewProtagCreation
+export default EntityNewProtagCreation;

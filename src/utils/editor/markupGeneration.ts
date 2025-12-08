@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EditorUtils } from './index';
 import {
   ActOfWritingElement,
+  type HiRendType,
   MarkupPersonData,
   MarkupPlaceData,
 } from '@src/services/mappings/editorMappings';
@@ -218,7 +219,11 @@ export const markupGeneration = {
 
     EditorUtils.markupGeneration.replaceMarkedNode(nodeToUpdate, titleNode);
   },
-  addPersonMarkup: (xmlDoc: Document, peopleMarkupData: MarkupPersonData[]): string => {
+  addPersonMarkup: (
+    xmlDoc: Document,
+    peopleMarkupData: MarkupPersonData[],
+    rendType: HiRendType,
+  ): string => {
     const markedSpan = xmlDoc.querySelectorAll('span.marked');
     if (!markedSpan) throw new Error('No marked span found in the document');
 
@@ -238,7 +243,15 @@ export const markupGeneration = {
         persNameNode.appendChild(nameNode);
       });
 
-      EditorUtils.markupGeneration.replaceMarkedNode(span, persNameNode);
+      if (rendType) {
+        const hiNode = document.createElementNS(EditorConstants.TEI_NS, 'hi');
+        hiNode.setAttribute('rend', rendType);
+        hiNode.appendChild(persNameNode);
+
+        EditorUtils.markupGeneration.replaceMarkedNode(span, hiNode);
+      } else {
+        EditorUtils.markupGeneration.replaceMarkedNode(span, persNameNode);
+      }
     });
 
     return xmlId;

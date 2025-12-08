@@ -219,6 +219,17 @@ teiHeader fileDesc sourceDesc msDesc history provenance {
   cursor: pointer;
 }
 
+hi[rend="latintype"] {
+  display: inline;
+  background-color: inherit;
+  color: blue;
+  font-weight: bold;
+}
+
+hi[rend="latintype"] > persName, hi[rend="latintype"] > placeName {
+  font-weight: normal;
+}
+
 /*.hidden {*/
 /*    display: none;*/
 /*}*/

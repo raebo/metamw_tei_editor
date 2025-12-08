@@ -3,6 +3,7 @@ import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
 import {
   Badge,
   Box,
+  Checkbox,
   Divider,
   FormControl,
   FormControlLabel,
@@ -17,7 +18,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
-import { CountryOption, MarkupPlaceData, MarkupPlaceSettlement, SelectCompleteOption } from '@src/services/mappings/editorMappings';
+import {
+  CountryOption,
+  type HiRendType,
+  MarkupPlaceData,
+  MarkupPlaceSettlement,
+  SelectCompleteOption,
+} from '@src/services/mappings/editorMappings';
 import EntityPlaceAutocomplete from './EntityPlaceAutocomplete';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
@@ -32,6 +39,7 @@ import PlaceKindAutocomplete from './PlaceKindAutocomplete';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { fetchEntityKey } from '@src/services/editor/apiLetterRequest.service';
 import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
+import { useTranslation } from 'react-i18next';
 
 type SelectTypeOption = null | EntityType.SETTLEMENT | EntityType.INSTITUTION | EntityType.SIGHT;
 
@@ -50,9 +58,14 @@ export interface PlaceFormData {
 }
 
 const requiredPlaceFormFields: (keyof PlaceFormData)[] = ['key', 'placeType', 'name', 'isNewEntry'];
-const allRequiredFieldsPresent = (placeFormData: PlaceFormData): placeFormData is Required<MarkupPlaceData> => {
+const allRequiredFieldsPresent = (
+  placeFormData: PlaceFormData,
+): placeFormData is Required<MarkupPlaceData> => {
   return requiredPlaceFormFields.every(
-    (field) => placeFormData[field] !== null && placeFormData[field] !== undefined && placeFormData[field] !== '',
+    (field) =>
+      placeFormData[field] !== null &&
+      placeFormData[field] !== undefined &&
+      placeFormData[field] !== '',
   );
 };
 
@@ -69,6 +82,8 @@ const blankPlaceFormData: PlaceFormData = {
 
 const EntityPlaceContainer = (props: EditorContainerProps) => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
+  const [hiRendMarkup, setHiRendMarkup] = useState<HiRendType>(null);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
 
   const [placeFormData, setPlaceFormData] = useState<PlaceFormData>({
@@ -169,7 +184,10 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
         }));
       })
       .catch((error) => {
-        enqueueSnackbar(`Could not fetch a valid new key for a Place: "${error.message}", please try again"`, { variant: 'error' });
+        enqueueSnackbar(
+          `Could not fetch a valid new key for a Place: "${error.message}", please try again"`,
+          { variant: 'error' },
+        );
       });
   };
 
@@ -228,14 +246,19 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
   };
 
   const isValidFormData = (): boolean => {
-    const validKey = placeFormData.key !== null && placeFormData.key !== undefined && placeFormData.key.length > 0;
-    const validName = placeFormData.name !== null && placeFormData.name !== undefined && placeFormData.name.length > 0;
+    const validKey =
+      placeFormData.key !== null && placeFormData.key !== undefined && placeFormData.key.length > 0;
+    const validName =
+      placeFormData.name !== null &&
+      placeFormData.name !== undefined &&
+      placeFormData.name.length > 0;
     const validCountry =
       placeFormData.country !== null &&
       placeFormData.country !== undefined &&
       placeFormData.country.id !== null &&
       placeFormData.country.name !== null;
-    const validSettlement = placeFormData.settlement !== null && placeFormData.settlement !== undefined;
+    const validSettlement =
+      placeFormData.settlement !== null && placeFormData.settlement !== undefined;
 
     if (!validKey || !validName || !validCountry) {
       return false;
@@ -254,7 +277,9 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
   };
 
   const removeExistingEntry = (key: string) => {
-    setAddedPlaceEntries((prevEntries) => prevEntries.filter((entry: MarkupPlaceData) => entry.key !== key));
+    setAddedPlaceEntries((prevEntries) =>
+      prevEntries.filter((entry: MarkupPlaceData) => entry.key !== key),
+    );
   };
 
   const addNewPlaceEntry = (entry: MarkupPlaceData) => {
@@ -265,7 +290,10 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
     if (isValidFormData() && allRequiredFieldsPresent(placeFormData)) {
       let placeKey = placeFormData.key;
 
-      if (selectedTypeOption === EntityType.INSTITUTION && placeFormData.kind !== placeFormData.kindOriginal) {
+      if (
+        selectedTypeOption === EntityType.INSTITUTION &&
+        placeFormData.kind !== placeFormData.kindOriginal
+      ) {
         placeKey = await fetchEntityKey(selectedTypeOption);
       }
 
@@ -319,11 +347,20 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
         throw new Error('No letter id or name found!');
       }
 
-      const xmlId = await EditorUtils.placeDataService.handlePlaceDataEntries(xmlDoc, addedPlaceEntries);
+      const xmlId = await EditorUtils.placeDataService.handlePlaceDataEntries(
+        xmlDoc,
+        addedPlaceEntries,
+        hiRendMarkup,
+      );
 
       await EditorUtils.backendOrchestrator.patchWithDispatch(
         dispatch,
-        [new XMLSerializer().serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.place.ADDED, xmlId],
+        [
+          new XMLSerializer().serializeToString(xmlDoc),
+          stateEditorLetter.id,
+          EditorConstants.changeTypes.place.ADDED,
+          xmlId,
+        ],
         {
           actionsOnSuccess: [
             setReloadLetterContent({ reloadLetterContent: true }),
@@ -333,8 +370,8 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
               contentRight: null,
             }),
           ],
-          successMessage: 'Place markup was added successfully',
-          errorMessage: 'Error adding place markup',
+          successMessage: t('editor:dialog.creationContainer.addCreationDialog.success'),
+          errorMessage: t('editor:dialog.creationContainer.addCreationDialog.error'),
         },
       );
     } catch (err) {
@@ -352,15 +389,35 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
     }
   };
 
+  const handleHiRendMarkupChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      setHiRendMarkup('latintype');
+    } else {
+      setHiRendMarkup(null);
+    }
+  };
+
   return (
     <div>
       <Box component="form" sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
         <Typography variant="h5" gutterBottom>
-          Ortschaften/Instit./Sehenswürd. Auszeichnen und Hinzufügen
+          {t('editor:dialog.placeContainer.addPlaceDialog.headline')}
         </Typography>
 
         <Box sx={{ mb: 3 }}>
           <Stack spacing={1}>
+            <Box sx={{ mb: 3 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={hiRendMarkup !== null}
+                    onChange={handleHiRendMarkupChange}
+                    color="primary" // options: primary, secondary, default
+                  />
+                }
+                label={t('editor:dialog.creationContainer.addCreationDialog.label.latintype')}
+              />
+            </Box>
             {addedPlaceEntries.map((entry) => (
               <Box
                 key={entry.key}
@@ -381,7 +438,11 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
                     {entry.name} {entry.kind ? `(${entry.kind})` : ''}
                   </Typography>
                 </Box>
-                <IconButton edge="end" onClick={() => removeExistingEntry(entry.key)} aria-label="delete">
+                <IconButton
+                  edge="end"
+                  onClick={() => removeExistingEntry(entry.key)}
+                  aria-label="delete"
+                >
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -396,9 +457,21 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
             value={selectedTypeOption}
             onChange={(e) => handleSelectTypeOption(e.target.value as SelectTypeOption)}
           >
-            <FormControlLabel value={EntityType.SETTLEMENT} control={<Radio />} label="Ortschaft" />
-            <FormControlLabel value={EntityType.INSTITUTION} control={<Radio />} label="Institution" />
-            <FormControlLabel value={EntityType.SIGHT} control={<Radio />} label="Sehenswürdigkeit" />
+            <FormControlLabel
+              value={EntityType.SETTLEMENT}
+              control={<Radio />}
+              label={t('editor:dialog.placeContainer.addPlaceDialog.label.settlement')}
+            />
+            <FormControlLabel
+              value={EntityType.INSTITUTION}
+              control={<Radio />}
+              label={t('editor:dialog.placeContainer.addPlaceDialog.label.institution')}
+            />
+            <FormControlLabel
+              value={EntityType.SIGHT}
+              control={<Radio />}
+              label={t('editor:dialog.placeContainer.addPlaceDialog.label.sight')}
+            />
           </RadioGroup>
         </FormControl>
 
@@ -414,9 +487,14 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
               disabled={selectedTypeOption === null}
               value="EXISTING_ENTRY"
               control={<Radio />}
-              label="Vorhandener Eintrag"
+              label={t('editor:dialog.placeContainer.addPlaceDialog.label.existingEntry')}
             />
-            <FormControlLabel disabled={selectedTypeOption === null} value="NEW_ENTRY" control={<Radio />} label="Neuer Eintrag" />
+            <FormControlLabel
+              disabled={selectedTypeOption === null}
+              value="NEW_ENTRY"
+              control={<Radio />}
+              label={t('editor:dialog.placeContainer.addPlaceDialog.label.newEntry')}
+            />
           </RadioGroup>
         </FormControl>
 
@@ -487,7 +565,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
             {selectedActionOption === 'NEW_ENTRY' && (
               <TextField
                 variant="outlined"
-                label="Name"
+                label={t('editor:dialog.placeContainer.addPlaceDialog.label.name')}
                 value={placeFormData.name}
                 fullWidth
                 slotProps={{ inputLabel: { shrink: true } }}
@@ -504,7 +582,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
           <Grid size={{ xs: 4, md: 4 }}>
             <TextField
               variant="outlined"
-              label="Key"
+              label={t('editor:dialog.placeContainer.addPlaceDialog.label.identifier')}
               value={placeFormData.key}
               fullWidth
               slotProps={{ inputLabel: { shrink: true } }}
@@ -515,7 +593,9 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
             <PlaceCountryAutocomplete
               isDisabled={autoCmplCountryDisabled}
               selectedOption={
-                placeFormData.country !== null && placeFormData.country !== undefined ? placeFormData.country : { id: null, name: null }
+                placeFormData.country !== null && placeFormData.country !== undefined
+                  ? placeFormData.country
+                  : { id: null, name: null }
               }
               allOptions={countryOptions}
               afterSelectHandler={(entry) => {
@@ -529,11 +609,15 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
           <Grid size={12}>
             {(selectedActionOption === 'EXISTING_ENTRY' || selectedActionOption === null) && (
               <TextField
-                label="Ortschaft"
+                label={t('editor:dialog.placeContainer.addPlaceDialog.label.settlement')}
                 variant="outlined"
                 fullWidth
                 slotProps={{ inputLabel: { shrink: true } }}
-                value={placeFormData.settlement !== null && placeFormData.settlement !== undefined ? placeFormData.settlement.name : ''}
+                value={
+                  placeFormData.settlement !== null && placeFormData.settlement !== undefined
+                    ? placeFormData.settlement.name
+                    : ''
+                }
                 disabled={true}
               />
             )}
@@ -559,18 +643,22 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
           <Divider sx={{ my: 2 }} />
 
           <FormControl component="fieldset" sx={{ mb: 3 }}>
-            <RadioGroup row value={selectedKindOption} onChange={(e) => handleSelectKindOption(e.target.value as SelectActionOption)}>
+            <RadioGroup
+              row
+              value={selectedKindOption}
+              onChange={(e) => handleSelectKindOption(e.target.value as SelectActionOption)}
+            >
               <FormControlLabel
                 disabled={selectedTypeOption !== EntityType.INSTITUTION}
                 value="EXISTING_ENTRY"
                 control={<Radio />}
-                label="Vorhandene Referenz"
+                label={t('editor:dialog.placeContainer.addPlaceDialog.label.existingType')}
               />
               <FormControlLabel
                 disabled={selectedTypeOption !== EntityType.INSTITUTION}
                 value="NEW_ENTRY"
                 control={<Radio />}
-                label="Neue Referenz"
+                label={t('editor:dialog.placeContainer.addPlaceDialog.label.newType')}
               />
             </RadioGroup>
           </FormControl>
@@ -598,7 +686,7 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
 
             {selectedKindOption === 'NEW_ENTRY' && (
               <TextField
-                label="Referenz (Name)"
+                label={t('editor:dialog.placeContainer.addPlaceDialog.label.referenceName')}
                 variant="outlined"
                 fullWidth
                 value={placeFormData.kind ?? ''}
@@ -625,17 +713,22 @@ const EntityPlaceContainer = (props: EditorContainerProps) => {
             disabled={!isValidFormData()}
             startIcon={<AddIcon />}
           >
-            Ort Hinzufügen
+            {t('editor:dialog.placeContainer.addPlaceDialog.button.add')}
           </Button>
 
-          <Button variant="contained" color="primary" onClick={handleSubmitButtonClick} disabled={addedPlaceEntries.length === 0}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmitButtonClick}
+            disabled={addedPlaceEntries.length === 0}
+          >
             <Badge badgeContent={addedPlaceEntries.length} color="secondary">
-              Orte Auszeichnen
+              {t('editor:dialog.placeContainer.addPlaceDialog.button.annotate')}
             </Badge>
           </Button>
 
           <Button variant="text" onClick={handleCancelButtonClick} color="secondary">
-            Abbrechen
+            {t('editor:dialog.buttons.cancel')}
           </Button>
         </Box>
       </Box>
