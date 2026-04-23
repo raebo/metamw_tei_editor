@@ -101,12 +101,15 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
     try {
       const { newLetterId, newLetterName } = await createNewLetter(completionState);
 
-      const newPinnedLetters = EditorUtils.pinnedLetters.computeNewPinnedLetters(statePinnedLetters, {
-        id: newLetterId,
-        name: newLetterName,
-        isPinned: true,
-        viewMode: 'WYSIWYG',
-      });
+      const newPinnedLetters = EditorUtils.pinnedLetters.computeNewPinnedLetters(
+        statePinnedLetters,
+        {
+          id: newLetterId,
+          name: newLetterName,
+          isPinned: true,
+          viewMode: 'WYSIWYG',
+        },
+      );
       dispatch(setEditorPinnedLetters({ pinnedLetters: newPinnedLetters }));
 
       enqueueSnackbar(`New letter '${completionState.letterName}' created successfully`, {
@@ -134,19 +137,23 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
   const validPrevLetterCheck = (): boolean => {
     if (
       completionState.prevLetterType !== null &&
-      (completionState.prevLetterType === 'unknown' || completionState.prevLetterType === 'not_identified')
+      (completionState.prevLetterType === 'unknown' ||
+        completionState.prevLetterType === 'not_identified')
     ) {
       return true;
-    } else return completionState.prevLetterType === 'select' && completionState.prevLetter !== null;
+    } else
+      return completionState.prevLetterType === 'select' && completionState.prevLetter !== null;
   };
 
   const validNextLetterCheck = (): boolean => {
     if (
       completionState.nextLetterType !== null &&
-      (completionState.nextLetterType === 'unknown' || completionState.nextLetterType === 'not_identified')
+      (completionState.nextLetterType === 'unknown' ||
+        completionState.nextLetterType === 'not_identified')
     ) {
       return true;
-    } else return completionState.nextLetterType === 'select' && completionState.nextLetter !== null;
+    } else
+      return completionState.nextLetterType === 'select' && completionState.nextLetter !== null;
   };
 
   const saveIsAvailable = [
@@ -168,9 +175,17 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
     <div>
       <DialogContent>
         <div className="autoSnippetFormRow">
-          {displayData !== null ? <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} /> : <></>}
+          {displayData !== null ? (
+            <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
+          ) : (
+            <></>
+          )}
         </div>
-        <NewLetterLetterName autoAvailable={null} completionState={completionState} onChange={childOnChange} />
+        <NewLetterLetterName
+          autoAvailable={null}
+          completionState={completionState}
+          onChange={childOnChange}
+        />
         <TeiHeaderFirstHeadline
           teiHeader={null}
           autoAvailable={completionState.firstHeaderComplete}
@@ -222,11 +237,25 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
           dialogType={'receiving'}
           textFieldValue={'Empfängerort Auswählen'}
         />
-        <TeiHeaderTransEdition teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
-        <TeiHeaderEditorTranskriptor teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
+        <TeiHeaderTransEdition
+          teiHeader={null}
+          autoAvailable={null}
+          completionState={completionState}
+          onChange={childOnChange}
+        />
+        <TeiHeaderEditorTranskriptor
+          teiHeader={null}
+          autoAvailable={null}
+          completionState={completionState}
+          onChange={childOnChange}
+        />
       </DialogContent>
       <Divider />
-      <DialogActionButton label={'Brief Erstellen'} onClick={submitCreateHandler} disabled={!saveIsAvailable} />
+      <DialogActionButton
+        label={'Brief Erstellen'}
+        onClick={submitCreateHandler}
+        disabled={!saveIsAvailable}
+      />
 
       {/*<div>*/}
       {/*  <pre>{JSON.stringify(completionState, null, 2)}</pre>*/}

@@ -7,123 +7,142 @@ import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
 import { MiscUtils } from '../../../../../../utils/misc';
 import { EditorConstants } from '../../../../../../constants/editor';
-import {EditorUtils} from "../../../../../../utils/editor";
+import { EditorUtils } from '../../../../../../utils/editor';
 
 const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
+  const [prevLetterType, setPrevLetterType] = useState<
+    'unknown' | 'not_identified' | 'select' | null
+  >(null);
+  const [autoAvailable, setAutoAvailable] = useState<boolean>(false);
 
-  const [prevLetterType, setPrevLetterType] = useState<'unknown' | 'not_identified' | 'select' | null>(null)
-	const [autoAvailable, setAutoAvailable] = useState<boolean>(false)
-
-  const selectedOption: EditorLetter | null = props.completionState.prevLetter
-  const [letters, setLetters] = useState<EditorLetter[]>([])
+  const selectedOption: EditorLetter | null = props.completionState.prevLetter;
+  const [letters, setLetters] = useState<EditorLetter[]>([]);
 
   const setSelectedOption = (value: EditorLetter | null) => {
     if (value) {
-      props.onChange({ prevLetter: value})
+      props.onChange({ prevLetter: value });
     }
-  }
+  };
 
   useEffect(() => {
     const fetchDefaultLetters = async () => {
       try {
-        const defaultLetters: EditorLetter[] | undefined = await searchForLetterNameTitle('fmb', null);
+        const defaultLetters: EditorLetter[] | undefined = await searchForLetterNameTitle(
+          'fmb',
+          null,
+        );
 
         if (defaultLetters === undefined) {
-          enqueueSnackbar("No letters found", { variant:"error" });
+          enqueueSnackbar('No letters found', { variant: 'error' });
         } else {
           setLetters(defaultLetters);
         }
       } catch (error) {
-        enqueueSnackbar("Error fetching letters", { variant:"error" });
+        enqueueSnackbar('Error fetching letters', { variant: 'error' });
       }
     };
 
-		const fetchPrevLetter = async() => {
-			const { name, letterPrefix } = EditorUtils.teiHeaderContent.extractPrevNextLetter(props.teiHeader, 'precursor');
-			if (name && letterPrefix) {
-				const prevLetter: EditorLetter[] | undefined = await searchForLetterNameTitle(letterPrefix, name)
+    const fetchPrevLetter = async () => {
+      const { name, letterPrefix } = EditorUtils.teiHeaderContent.extractPrevNextLetter(
+        props.teiHeader,
+        'precursor',
+      );
+      if (name && letterPrefix) {
+        const prevLetter: EditorLetter[] | undefined = await searchForLetterNameTitle(
+          letterPrefix,
+          name,
+        );
 
-				if (prevLetter && prevLetter[0]) {
-					props.onChange({
-						prevLetterAutoAvailable: true,
-						prevLetterType: 'select',
-						prevLetter: prevLetter[0]
-					});
-					setPrevLetterType('select')
-					setAutoAvailable(true);
-				}
-			} else {
-				props.onChange({
-					prevLetterAutoAvailable: false,
-					prevLetterType: name as 'unknown' | 'not_identified' | null,
-					prevLetter: null
-				});
+        if (prevLetter && prevLetter[0]) {
+          props.onChange({
+            prevLetterAutoAvailable: true,
+            prevLetterType: 'select',
+            prevLetter: prevLetter[0],
+          });
+          setPrevLetterType('select');
+          setAutoAvailable(true);
+        }
+      } else {
+        props.onChange({
+          prevLetterAutoAvailable: false,
+          prevLetterType: name as 'unknown' | 'not_identified' | null,
+          prevLetter: null,
+        });
 
-				if (name === 'unknown' || name === 'not_identified' || name === null) {
-					setPrevLetterType(name as 'unknown' | 'not_identified' | null);
-				} else {
-					setPrevLetterType(null);
-				}
-			}
-		}
+        if (name === 'unknown' || name === 'not_identified' || name === null) {
+          setPrevLetterType(name as 'unknown' | 'not_identified' | null);
+        } else {
+          setPrevLetterType(null);
+        }
+      }
+    };
 
-		try {
-			void fetchDefaultLetters();
-			void fetchPrevLetter();
-		} catch (error) {
-			enqueueSnackbar("Error during initialization prevLetter " + MiscUtils.misc.getErrorMessage(error), { variant:"error" });
-		}
+    try {
+      void fetchDefaultLetters();
+      void fetchPrevLetter();
+    } catch (error) {
+      enqueueSnackbar(
+        'Error during initialization prevLetter ' + MiscUtils.misc.getErrorMessage(error),
+        { variant: 'error' },
+      );
+    }
   }, [props.teiHeader]);
-
 
   const handlePrevLetterCheckboxChange = (value: 'unknown' | 'not_identified' | 'select') => {
     props.onChange({
       prevLetterAutoAvailable: value === 'select',
       prevLetterType: value,
-      ...(value !== 'select' && { prevLetter: null })
+      ...(value !== 'select' && { prevLetter: null }),
     });
-		setPrevLetterType(value)
-		if (value === 'select') { setAutoAvailable(true); }
+    setPrevLetterType(value);
+    if (value === 'select') {
+      setAutoAvailable(true);
+    }
   };
 
   const searchForLetters = async (inputValue: string) => {
     try {
-      const responseLetters = await searchForLetterNameTitle('fmb', inputValue)
+      const responseLetters = await searchForLetterNameTitle('fmb', inputValue);
 
       if (responseLetters) {
         setLetters(responseLetters);
       }
-
     } catch (err) {
-      enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
+      enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
+        variant: 'error',
+      });
     }
-  }
+  };
 
   const debouncedSearchForLetters = useMemo(
     () => debounce(searchForLetters, 300), // 300ms delay
-    []
+    [],
   );
 
   return (
     <>
-      <div className="autoSnippetFormRow" style={ { marginTop: "25px", width: "98%" } }>
+      <div className="autoSnippetFormRow" style={{ marginTop: '25px', width: '98%' }}>
         <Stack spacing={2}>
           <Autocomplete
             disabled={!autoAvailable}
             options={letters}
             value={selectedOption}
             isOptionEqualToValue={(option, value) => option.id === value.id}
-            onChange={(_, newValue) => setSelectedOption(newValue) }
+            onChange={(_, newValue) => setSelectedOption(newValue)}
             onInputChange={(_, inputValue, reason) => {
-              if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
+              if (
+                inputValue &&
+                reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
+              ) {
                 void debouncedSearchForLetters(inputValue);
               }
             }}
             getOptionLabel={(option) => option.title || ''}
             filterOptions={(options, { inputValue }) =>
-              options.filter((option) =>
-                option.title.toLowerCase().includes(inputValue.toLowerCase()) ||
-                option.name.toLowerCase().includes(inputValue.toLowerCase())
+              options.filter(
+                (option) =>
+                  option.title.toLowerCase().includes(inputValue.toLowerCase()) ||
+                  option.name.toLowerCase().includes(inputValue.toLowerCase()),
               )
             }
             renderOption={(props, option, { inputValue }) => {
@@ -132,13 +151,14 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
                   <div>
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: MiscUtils.stringHandling.highlightText(option.title, inputValue)
+                        __html: MiscUtils.stringHandling.highlightText(option.title, inputValue),
                       }}
-                      />
-                    <div style={{ fontSize: '0.8em', color: 'gray' }}
-                       dangerouslySetInnerHTML={{
-                         __html: MiscUtils.stringHandling.highlightText(option.name, inputValue)
-                       }}
+                    />
+                    <div
+                      style={{ fontSize: '0.8em', color: 'gray' }}
+                      dangerouslySetInnerHTML={{
+                        __html: MiscUtils.stringHandling.highlightText(option.name, inputValue),
+                      }}
                     />
                   </div>
                 </li>
@@ -181,12 +201,10 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
               label="Auswahl Vorgängerbrief"
             />
           </Stack>
-
-
         </Stack>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default TeiHeaderPrevLetter
+export default TeiHeaderPrevLetter;

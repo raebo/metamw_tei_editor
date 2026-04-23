@@ -11,6 +11,7 @@ export enum NodeTypes {
   WRITING_ACT = 'WRITING_ACT',
   RISM_ENTRY = 'RISM_ENTRY',
   PROVENANCE_ENTRY = 'PROVENANCE_ENTRY',
+  TITLE_ENTRY = 'TITLE_ENTRY',
 }
 
 export interface NodeType {
@@ -40,6 +41,7 @@ export const nodeTypesMap: Record<NodeTypes, NodeType> = {
     name: 'Provenance',
     tagName: '',
   },
+  [NodeTypes.TITLE_ENTRY]: { key: NodeTypes.TITLE_ENTRY, name: 'Brief', tagName: 'title' },
 };
 
 export const nodeTypes = {

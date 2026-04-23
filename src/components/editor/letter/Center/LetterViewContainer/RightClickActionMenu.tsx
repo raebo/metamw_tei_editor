@@ -162,8 +162,11 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           (node) => {
             setSelectedNode(node);
             const items = handler.getMenuItems(node);
-            if (items.length > 0) {
-              menuItemsToAdd.push(...items);
+            const validItems = (items || []).filter(
+              (i): i is MenuItemType => i !== undefined && i !== null,
+            );
+            if (validItems.length > 0) {
+              menuItemsToAdd.push(...validItems);
               isClickable = true;
             }
           },

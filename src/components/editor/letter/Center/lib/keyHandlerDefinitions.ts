@@ -188,6 +188,30 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     },
     skipForHelp: true,
   },
+  'alt+shift+d': {
+    key: 'alt+shift+d',
+    description: 'Vorgängerbrief nachtragen',
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => {
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER,
+      );
+    },
+  },
+  'alt+shift+e': {
+    key: 'alt+shift+e',
+    description: 'Nachfolgerbrief nachtragen',
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => {
+      return EditorUtils.keyPressHandles.openDialog(
+        dispatch,
+        EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER,
+      );
+    },
+  },
   'alt+ctrl+f': {
     key: 'alt+ctrl+f',
     description: 'Fußnote des Briefautors',
@@ -367,6 +391,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
       );
     },
   },
+
   'alt+shift+"': {
     key: 'alt+shift+"',
     description: "Datum'when-custom' einfügen",

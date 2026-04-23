@@ -1,99 +1,113 @@
-import { DefaultDialogProps} from '../../EditorFormDialog';
-import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
+import { DefaultDialogProps } from '../../EditorFormDialog';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import React, { useEffect, useState } from 'react';
-import { EditorUtils } from '../../../../../../utils/editor';
+import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
-import {Badge, Box, Divider, IconButton, Stack, Typography} from '@mui/material';
+import { Badge, Box, Divider, IconButton, Stack, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import AssignLetterAuthorAutocomplete from './AssignLetterAuthorAutocomplete';
 import Button from '@mui/material/Button';
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
-import { EditorConstants } from "../../../../../../constants/editor";
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import { EditorConstants } from '@src/constants/editor';
 
 interface AssignedLetterData {
-  receiver: SnippetEntity | null
-  letter: SnippetEntity | null
-  authors: SnippetEntity[] | null
+  receiver: SnippetEntity | null;
+  letter: SnippetEntity | null;
+  authors: SnippetEntity[] | null;
 }
 
 const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
   const [letterDialogResetKey, setLetterDialogResetKey] = useState(0);
-	const xmlDoc = props.xmlDoc
+  const xmlDoc = props.xmlDoc;
 
   const [assignedLetterFormData, setAssignedLetterFormData] = useState<AssignedLetterData>({
     receiver: null,
     letter: null,
     authors: null,
-  })
+  });
 
-  const senderType = 'RECEIVER'
+  const senderType = 'RECEIVER';
 
   const [addedLetters, setAddedLetters] = useState<AssignedLetterData[]>([]);
   const [letterReceivers, setLetterReceivers] = useState<SnippetEntity[]>([]);
   const [receiverLetters, setReceiverLetters] = useState<SnippetEntity[]>([]);
 
-  const fetchLetterReceivers = async (searchValue : string | null) => {
+  const fetchLetterReceivers = async (searchValue: string | null) => {
     try {
-      const receivers: SnippetEntity[] = await EditorUtils.backendService.fetchLetterAuthorsSenders(searchValue, senderType);
+      const receivers: SnippetEntity[] = await EditorUtils.backendService.fetchLetterAuthorsSenders(
+        searchValue,
+        senderType,
+      );
       setLetterReceivers(receivers);
     } catch (error) {
-      console.error("Error fetching letter receivers:", error);
-      enqueueSnackbar("Error fetching receivers ", { variant:"error" });
+      console.error('Error fetching letter receivers:', error);
+      enqueueSnackbar('Error fetching receivers ', { variant: 'error' });
     }
-  }
+  };
   useEffect(() => {
-    void fetchLetterReceivers(null)
+    void fetchLetterReceivers(null);
   }, []);
 
-  const fetchReceiverLetters = async (receiver: SnippetEntity, searchValue : string | null) => {
+  const fetchReceiverLetters = async (receiver: SnippetEntity, searchValue: string | null) => {
     try {
-      const letters: SnippetEntity[] = await EditorUtils.backendService.fetchAuthorSenderLetters(receiver, senderType, searchValue);
+      const letters: SnippetEntity[] = await EditorUtils.backendService.fetchAuthorSenderLetters(
+        receiver,
+        senderType,
+        searchValue,
+      );
       setReceiverLetters(letters);
     } catch (error) {
-      console.error("Error fetching receiver letters:", error);
-      enqueueSnackbar("Error fetching letters for receiver", { variant:"error" });
+      console.error('Error fetching receiver letters:', error);
+      enqueueSnackbar('Error fetching letters for receiver', { variant: 'error' });
     }
-  }
+  };
 
   const removeExistingEntry = (entry: AssignedLetterData) => {
-    setAddedLetters((prevEntries) => prevEntries.filter((e) => e.letter?.entityKey !== entry.letter?.entityKey));
-  }
+    setAddedLetters((prevEntries) =>
+      prevEntries.filter((e) => e.letter?.entityKey !== entry.letter?.entityKey),
+    );
+  };
 
   const buttonAddNewLetter = () => {
     if (assignedLetterFormData.letter) {
       const newEntry: AssignedLetterData = {
         receiver: assignedLetterFormData.receiver,
         letter: assignedLetterFormData.letter,
-        authors: assignedLetterFormData.authors
+        authors: assignedLetterFormData.authors,
       };
       setAddedLetters((prevEntries) => [...prevEntries, newEntry]);
       setAssignedLetterFormData({ receiver: null, letter: null, authors: null });
-      setLetterReceivers([])
-      setReceiverLetters([])
+      setLetterReceivers([]);
+      setReceiverLetters([]);
       setLetterDialogResetKey((prevKey) => prevKey + 1);
     } else {
-      enqueueSnackbar("Bitte wählen Sie einen Empfänger und einen Brief aus", { variant: "warning" });
+      enqueueSnackbar('Bitte wählen Sie einen Empfänger und einen Brief aus', {
+        variant: 'warning',
+      });
     }
-  }
+  };
 
   const isValidFormData = () => {
     return assignedLetterFormData.letter !== null;
-  }
+  };
 
   const fetchSenderReceiverLetters = async (searchValue: string | null) => {
     try {
-      const letters: SnippetEntity[] = await EditorUtils.backendService.searchSenderReceiverLetters(searchValue, senderType);
+      const letters: SnippetEntity[] = await EditorUtils.backendService.searchSenderReceiverLetters(
+        searchValue,
+        senderType,
+      );
       setReceiverLetters(letters);
     } catch (error) {
-      enqueueSnackbar("Error fetching sending receiver letters", { variant:"error" });
+      enqueueSnackbar('Error fetching sending receiver letters', { variant: 'error' });
     }
-  }
+  };
 
   const receiverSearchChange = async (inputValue: string) => {
-    setReceiverLetters([])
+    setReceiverLetters([]);
     await fetchLetterReceivers(inputValue);
-  }
+  };
 
   const letterSearchChange = async (inputValue: string) => {
     if (assignedLetterFormData.receiver) {
@@ -101,55 +115,64 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
     } else {
       await fetchSenderReceiverLetters(inputValue);
     }
-  }
+  };
 
   const setAutocompleteReceiver = async (entry: SnippetEntity | null) => {
     if (entry) {
       setAssignedLetterFormData((prevData) => ({
-          ...prevData,
-          receiver: entry
-        })
-      )
-      await fetchReceiverLetters(entry, null)
+        ...prevData,
+        receiver: entry,
+      }));
+      await fetchReceiverLetters(entry, null);
     }
-  }
+  };
 
   const setAutocompleteLetter = async (entry: SnippetEntity | null) => {
     if (entry) {
-      const authors: SnippetEntity[] = await EditorUtils.backendService.fetchLetterAuthors(entry.entityKey)
+      const authors: SnippetEntity[] = await EditorUtils.backendService.fetchLetterAuthors(
+        entry.entityKey,
+      );
 
       setAssignedLetterFormData((prevData) => ({
-          ...prevData,
-          letter: entry,
-          authors: authors
-        })
-      )
+        ...prevData,
+        letter: entry,
+        authors: authors,
+      }));
     }
-  }
+  };
 
   const handleSubmitButtonClick = async () => {
-			try {
-				const markedContent = xmlDoc.querySelectorAll('span.marked')[0];
-				if (!markedContent) {
-					enqueueSnackbar('No marked content found! Please mark the content you want to annotate.', { variant: "error" } );
-					return
-				}
-
-        EditorUtils.markupGeneration.addProtagLetterMarkup(
-					markedContent,
-          addedLetters.map((entry) => {
-              return { letterKey: entry.letter?.entityKey, letterName: entry.letter?.entityName, authors: entry.authors }
-            }
-          ) as [{ letterKey: string, letterName: string, authors: SnippetEntity[] }]
-        )
-
-				props.onSave(xmlDoc, EditorConstants.changeTypes.misc.PROTAG_LETTER_ADDED, "Briefe wurden dem markierten Text zugewiesen", null)
-
-      } catch (error) {
-        enqueueSnackbar("Fehler beim Auszeichnen des Briefs", { variant: "error" });
-				props.onClose();
+    try {
+      const markedContent = xmlDoc.querySelectorAll('span.marked')[0];
+      if (!markedContent) {
+        enqueueSnackbar('No marked content found! Please mark the content you want to annotate.', {
+          variant: 'error',
+        });
+        return;
       }
-  }
+
+      EditorUtils.markupGeneration.addProtagLetterMarkup(
+        markedContent,
+        addedLetters.map((entry) => {
+          return {
+            letterKey: entry.letter?.entityKey,
+            letterName: entry.letter?.entityName,
+            authors: entry.authors,
+          };
+        }) as [{ letterKey: string; letterName: string; authors: SnippetEntity[] }],
+      );
+
+      props.onSave(
+        xmlDoc,
+        EditorConstants.changeTypes.misc.PROTAG_LETTER_ADDED,
+        'Briefe wurden dem markierten Text zugewiesen',
+        null,
+      );
+    } catch (error) {
+      enqueueSnackbar('Fehler beim Auszeichnen des Briefs', { variant: 'error' });
+      props.onClose();
+    }
+  };
 
   return (
     <>
@@ -159,9 +182,13 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
         </Typography>
         <Box sx={{ mb: 3 }}>
           <Stack spacing={1}>
-            { addedLetters.map((entry, _index) => (
+            {addedLetters.map((entry, _index) => (
               <Box
-                key={(entry.letter !== null && entry.letter.entityKey !== null) ? entry.letter.entityKey: ''}
+                key={
+                  entry.letter !== null && entry.letter.entityKey !== null
+                    ? entry.letter.entityKey
+                    : ''
+                }
                 sx={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -173,13 +200,15 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
               >
                 <Box>
                   <Typography variant="body2" fontWeight="bold">
-                    { entry.letter?.entityKey }
+                    {entry.letter?.entityKey}
                   </Typography>
-                  <Typography variant="body2">
-                    { entry.letter?.entityDisplayName }
-                  </Typography>
+                  <Typography variant="body2">{entry.letter?.entityDisplayName}</Typography>
                 </Box>
-                <IconButton edge="end" onClick={() => removeExistingEntry(entry)} aria-label="delete">
+                <IconButton
+                  edge="end"
+                  onClick={() => removeExistingEntry(entry)}
+                  aria-label="delete"
+                >
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -191,10 +220,10 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
             <AssignLetterAuthorAutocomplete
               key={letterDialogResetKey}
               disabled={false}
-              options={ letterReceivers }
+              options={letterReceivers}
               onValueChange={(receiver) => setAutocompleteReceiver(receiver)}
-              onInputChangeHandler={(inputValue) => receiverSearchChange(inputValue) }
-              inputPlaceHolder={ "Empfänger auswählen oder suchen" }
+              onInputChangeHandler={(inputValue) => receiverSearchChange(inputValue)}
+              inputPlaceHolder={'Empfänger auswählen oder suchen'}
             />
           </Grid>
           <Divider sx={{ my: 3 }} />
@@ -202,21 +231,32 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
           <Grid size={{ xs: 12, md: 12, lg: 12 }}>
             <AssignLetterAuthorAutocomplete
               key={letterDialogResetKey}
-              disabled={ false }
-              options={ receiverLetters }
-              onValueChange={ (letter) => setAutocompleteLetter(letter) }
-              onInputChangeHandler={ (inputValue) => letterSearchChange(inputValue) }
-              inputPlaceHolder={ "Brief auswählen oder suchen" }
+              disabled={false}
+              options={receiverLetters}
+              onValueChange={(letter) => setAutocompleteLetter(letter)}
+              onInputChangeHandler={(inputValue) => letterSearchChange(inputValue)}
+              inputPlaceHolder={'Brief auswählen oder suchen'}
             />
           </Grid>
         </Grid>
         <Divider sx={{ my: 3 }} />
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-          <Button variant="contained" color="primary" onClick={buttonAddNewLetter} disabled={!isValidFormData()} startIcon={<AddIcon />}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={buttonAddNewLetter}
+            disabled={!isValidFormData()}
+            startIcon={<AddIcon />}
+          >
             Brief Hinzufügen
           </Button>
-          <Button variant="contained" color="primary" onClick={handleSubmitButtonClick} disabled={ addedLetters.length === 0 } >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmitButtonClick}
+            disabled={addedLetters.length === 0}
+          >
             <Badge badgeContent={addedLetters.length} color="secondary">
               Brief Auszeichnen
             </Badge>
@@ -227,8 +267,8 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
       {/*  <pre>{JSON.stringify(assignedLetterFormData, null, 2)}</pre>*/}
       {/*</div>*/}
     </>
-  )
-}
+  );
+};
 
 export default ChooseProtagLetterDialog;
 

@@ -219,6 +219,11 @@ teiHeader fileDesc sourceDesc msDesc history provenance {
   cursor: pointer;
 }
 
+teiHeader fileDesc titleStmt title[type='successor'],
+teiHeader fileDesc titleStmt title[type='precursor'] {
+  cursor: pointer;
+}
+
 hi[rend="latintype"] {
   display: inline;
   background-color: inherit;

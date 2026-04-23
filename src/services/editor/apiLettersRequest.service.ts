@@ -19,13 +19,29 @@ export const fetchLastUsedLettersByUser = async (): Promise<EditorLetter[] | und
   }
 };
 
-export const fetchSearchLetters = async (searchValue: string): Promise<EditorLetter[] | undefined> => {
+export const fetchSearchLetters = async (
+  searchValue: string,
+): Promise<EditorLetter[] | undefined> => {
   try {
-    const response = await initApi.initApi().get(`/jwt/editor/letters/search?searchValue=${searchValue}`);
+    const response = await initApi
+      .initApi()
+      .get(`/jwt/editor/letters/search?searchValue=${searchValue}`);
 
     return response.data.map(mapApiToEditorLetter);
   } catch (err) {
     throw new Error('Failed to fetch SearchLetters: ' + err);
+  }
+};
+
+export const fetchLetterDataByName = async (
+  letterName: string,
+): Promise<EditorLetter | undefined> => {
+  try {
+    const response = await initApi.initApi().get(`/jwt/editor/letters/by_name/${letterName}`);
+
+    return mapApiToEditorLetter(response.data);
+  } catch (err) {
+    throw new Error('Failed to fetch Letter Find By Name: ' + err);
   }
 };
 
@@ -39,7 +55,10 @@ export const fetchLetterData = async (letterId: number): Promise<EditorLetterDat
   }
 };
 
-export const searchForLetterNameTitle = async (letterType: string, searchValue: string | null): Promise<EditorLetter[] | undefined> => {
+export const searchForLetterNameTitle = async (
+  letterType: string,
+  searchValue: string | null,
+): Promise<EditorLetter[] | undefined> => {
   const searchUrl =
     searchValue === null
       ? `/jwt/editor/letters/search_for_letters/${letterType}`
@@ -83,8 +102,10 @@ export const createNewLetter = async (
   const newLetterName = response.data.letter_name;
   const responseMessage = response.data.message;
 
-  if (newLetterId === undefined) throw new Error('Error creating new letter: no new letter Id given' + responseMessage);
-  if (newLetterName === undefined) throw new Error('Error creating new letter: no new letter Name given' + responseMessage);
+  if (newLetterId === undefined)
+    throw new Error('Error creating new letter: no new letter Id given' + responseMessage);
+  if (newLetterName === undefined)
+    throw new Error('Error creating new letter: no new letter Name given' + responseMessage);
 
   if (response.status === 200) {
     return {

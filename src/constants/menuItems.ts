@@ -17,6 +17,30 @@ export const getMenuItemsNoMarking = (
   xmlDocRef: React.MutableRefObject<XMLDocument | null>,
 ): MenuItem[] => [
   {
+    identifier: EditorConstants.menuItemTypes.MANAGE_PRECURSOR_LETTER,
+    label: 'Vorgänger Brief bearbeiten',
+    action: async ({ node }: { node?: Node }) => {
+      if (!node) {
+        enqueueSnackbar('The given node is undefined', { variant: 'error' });
+        return;
+      }
+
+      dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER }));
+    },
+  },
+  {
+    identifier: EditorConstants.menuItemTypes.MANAGE_SUCCESSOR_LETTER,
+    label: 'Vorgänger Brief bearbeiten',
+    action: async ({ node }: { node?: Node }) => {
+      if (!node) {
+        enqueueSnackbar('The given node is undefined', { variant: 'error' });
+        return;
+      }
+
+      dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER }));
+    },
+  },
+  {
     identifier: EditorConstants.menuItemTypes.MANAGE_RISM_ENTRY,
     label: 'RISM Eintrag Bearbeiten',
     action: async ({ node }: { node?: Node }) => {
@@ -62,10 +86,6 @@ export const getMenuItemsNoMarking = (
         enqueueSnackbar('The given node is undefined', { variant: 'error' });
         return;
       }
-
-      console.log('clicked node tag name: ', (node as Element).tagName);
-
-      // 1. Walk up until we find <history>
       let current: Node | null = node;
       let historyNode: Element | null = null;
 

@@ -228,7 +228,7 @@ export const xmlCheck = {
       .reverse()
       .join(' ');
 
-    //console.log(' + ++ + + + ++ ++ + + Checking node path:', ancestorNodeNames);
+    // console.log(' + ++ + + + ++ ++ + + Checking node path:', ancestorNodeNames);
 
     const matchingEntry = nodeAncestorPaths.find((entry) => {
       const paths = Array.isArray(entry.parentPath) ? entry.parentPath : [entry.parentPath];
@@ -242,6 +242,8 @@ export const xmlCheck = {
 
       const pathMatches = paths.some((path) => path.toLowerCase() === ancestorNodeNames);
       const attributesMatch = entry.checkAttributes ? entry.checkAttributes(node as Element) : true;
+
+      // console.log("pathMatches ", pathMatches);
 
       return pathMatches && attributesMatch;
     });

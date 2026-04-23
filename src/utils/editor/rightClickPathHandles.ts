@@ -4,6 +4,7 @@ import { NodeType, nodeTypes, NodeTypes } from './nodeTypes';
 import { MenuItemType } from '@src/components/editor/letter/Util/ContextMenuLetterItems';
 import { EditorUtils } from './index';
 import { EditorConstants } from '@src/constants/editor';
+import { node } from 'webpack';
 
 export interface NodeAncestorPath {
   parentPath: string | string[];
@@ -169,6 +170,32 @@ export namespace rightClickPathHandles {
       nodeType: nodeTypes.get(NodeTypes.PROVENANCE_ENTRY),
       checkElementDetails: (_nodeElement: Element): boolean => {
         return true;
+      },
+      afterActionCallback: (xmlDoc: Document, _node: Node) => xmlCheck.serializeDocument(xmlDoc),
+    },
+  ];
+
+  export const manageSuccesorEntry = (): NodeAncestorPath[] => [
+    {
+      parentPath: ['tei teiheader filedesc titleStmt title'],
+      nodeType: nodeTypes.get(NodeTypes.TITLE_ENTRY),
+      checkElementDetails: (nodeElement: Element): boolean => {
+        const attrType = nodeElement.getAttribute('type');
+
+        return attrType === 'successor';
+      },
+      afterActionCallback: (xmlDoc: Document, _node: Node) => xmlCheck.serializeDocument(xmlDoc),
+    },
+  ];
+
+  export const managePrecursorEntry = (): NodeAncestorPath[] => [
+    {
+      parentPath: ['tei teiheader filedesc titleStmt title'],
+      nodeType: nodeTypes.get(NodeTypes.TITLE_ENTRY),
+      checkElementDetails: (nodeElement: Element): boolean => {
+        const attrType = nodeElement.getAttribute('type');
+
+        return attrType === 'precursor';
       },
       afterActionCallback: (xmlDoc: Document, _node: Node) => xmlCheck.serializeDocument(xmlDoc),
     },
@@ -393,9 +420,9 @@ export namespace rightClickPathHandles {
     {
       paths: EditorUtils.rightClickPathHandles.manageRismEntryPaths(),
       getMenuItems: (_node: Node) => [
-        menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_RISM_ENTRY,
-        ),
+        menuItemsNoMarking.find((i) => {
+          return i.identifier === EditorConstants.menuItemTypes.MANAGE_RISM_ENTRY;
+        }),
       ],
     },
     {
@@ -403,6 +430,22 @@ export namespace rightClickPathHandles {
       getMenuItems: (_node: Node) => [
         menuItemsNoMarking.find(
           (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_PROVENANCE_ENTRY,
+        ),
+      ],
+    },
+    {
+      paths: EditorUtils.rightClickPathHandles.managePrecursorEntry(),
+      getMenuItems: (_node: Node) => [
+        menuItemsNoMarking.find(
+          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_PRECURSOR_LETTER,
+        ),
+      ],
+    },
+    {
+      paths: EditorUtils.rightClickPathHandles.manageSuccesorEntry(),
+      getMenuItems: (_node: Node) => [
+        menuItemsNoMarking.find(
+          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_SUCCESSOR_LETTER,
         ),
       ],
     },

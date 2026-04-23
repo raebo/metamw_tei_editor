@@ -28,7 +28,9 @@
     "manageAddressSender": "Adresse Sender Verwalten",
     "manageAddressRecipient": "Adresse Empfänger Verwalten",
     "publishLetter": "Brief Veröffentlichen",
-    "resetLetter": "Brief Zurücksetzen"
+    "resetLetter": "Brief Zurücksetzen",
+    "setPrecursorLetter": "Vorgängerbrief Festlegen",
+    "setSuccessorLetter": "Nachfolgerbrief Festlegen"
   },
   "hints": {
     "closing":  "Zum Schließen auf den Hintergrund klicken oder ESC drücken"
@@ -183,6 +185,25 @@
         "catThree": "Kategorie 3",
         "catFour": "Kategorie 4"
       }
+    }
+  },
+  "precursorSuccessorDialog": {
+    "headline": "Brief Verknüpfen",
+    "successPredecessor": "Vorgängerbrief wurde erfolgreich festgelegt",
+    "successSuccessor": "Nachfolgerbrief wurde erfolgreich festgelegt",
+    "errorPredecessor": "Beim Festlegen des Vorgängerbriefes ist ein Fehler aufgetreten",
+    "errorSuccessor": "Beim Festlegen des Nachfolgerbriefes ist ein Fehler aufgetreten",
+    "button": {
+      "setPredecessor": "Vorgängerbrief Festlegen",
+      "setSuccessor": "Nachfolgerbrief Festlegen"
+    },
+    "label": {
+      "chooseLetterPrecursor": "Vorgängererbrief Auswählen",
+      "chooseLetterSuccessor": "Nachfolgerbrief Auswählen",
+      "precursorNotDetermined": "Vorgängerbrief noch nicht ermittelt",
+      "successorNotDetermined": "Nachfolgerbrief noch nicht ermittelt",
+      "precursorUnknown": "Vorgängerbrief unbekannt",
+      "successorUnknown": "Nachfolgerbrief unbekannt"
     }
   }
 }

@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EditorUtils } from './index';
 import {
   ActOfWritingElement,
+  type EditorLetter,
   type HiRendType,
   MarkupPersonData,
   MarkupPlaceData,
@@ -327,7 +328,31 @@ export const markupGeneration = {
 
     noteElement.remove();
   },
+  setPreccSuccMarkup: (
+    xmlDoc: XMLDocument,
+    letterType: 'precursor' | 'successor',
+    selectedOption: 'unknown' | 'not_identified' | 'select',
+    selectedLetter: EditorLetter | null,
+  ): void => {
+    const targetNode = xmlDoc.querySelector(`title[type="${letterType}"]`);
 
+    if (!targetNode) {
+      throw `Node of type ${letterType} not found in the XML.`;
+    }
+
+    // 2. Update the node based on the selected option
+    if (selectedOption === 'unknown') {
+      targetNode.setAttribute('data-key', 'unknown');
+      targetNode.textContent = 'unbekannt';
+    } else if (selectedOption === 'not_identified') {
+      targetNode.setAttribute('data-key', 'not_identified');
+      targetNode.textContent = 'nicht identifiziert';
+    } else if (selectedOption === 'select' && selectedLetter) {
+      // 3. Update with data from the selected letter object
+      targetNode.setAttribute('data-key', selectedLetter.name);
+      targetNode.textContent = selectedLetter.title;
+    }
+  },
   insertActOfWritingBlock: (xmlDoc: XMLDocument, authorWriters: ActOfWritingElement[]): void => {
     const nValue = xmlDoc.querySelectorAll("div[type='act_of_writing']").length + 1;
 

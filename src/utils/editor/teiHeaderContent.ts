@@ -101,48 +101,54 @@ export const teiHeaderContent = {
     letterPrefix: 'fmb' | 'gb' | null;
     letterStatus: 'unknown' | 'not_identified' | 'select' | null;
   } => {
-    if (!teiHeader) {
-      return { title: null, name: null, letterPrefix: null, letterStatus: null };
-    }
+    const defaultReturn = { title: null, name: null, letterPrefix: null, letterStatus: null };
+    const noSelectStatus = [
+      'unknown',
+      'not_identified',
+      'not_yet_identified',
+      'unbekannt',
+      'nicht identifiziert',
+    ];
+
+    if (!teiHeader) return defaultReturn;
 
     const titles = EditorUtils.xmlCheck.queryPath(
       teiHeader,
       `fileDesc > titleStmt > title[@type='${titleType}']`,
     );
 
-    if (titles.length === 0)
-      return { title: null, name: null, letterPrefix: null, letterStatus: null };
+    if (titles.length === 0) return defaultReturn;
 
     const title = titles[0];
-    const letterStatus = title.getAttribute('data-key') as string | null;
+    const textContent = title?.textContent?.trim();
 
-    if (title.textContent) {
-      const textContent = title.textContent.trim();
-      const letterName = title.getAttribute('data-key');
-      if (textContent.length > 0) {
-        return {
-          title: textContent,
-          name: letterName,
-          letterPrefix: letterName?.startsWith('fmb')
-            ? 'fmb'
-            : letterName?.startsWith('gb')
-              ? 'gb'
-              : null,
-          letterStatus: 'select',
-        };
-      }
-    } else {
+    if (textContent && textContent.length > 0 && !noSelectStatus.includes(textContent)) {
+      const letterName = title.getAttribute('data-key') as string | null;
       return {
-        title: null,
-        name: null,
-        letterPrefix: null,
-        letterStatus:
-          letterStatus === 'unknown' || letterStatus === 'not_identified'
-            ? (letterStatus as 'unknown' | 'not_identified')
+        title: textContent,
+        name: letterName,
+        letterPrefix: letterName?.startsWith('fmb')
+          ? 'fmb'
+          : letterName?.startsWith('gb')
+            ? 'gb'
             : null,
+        letterStatus: 'select',
       };
     }
-    return { title: null, name: null, letterPrefix: null, letterStatus: null };
+
+    if (title) {
+      const letterStatus = title.getAttribute('data-key');
+      let returnStatus: 'unknown' | 'not_identified' | null = null;
+
+      if (letterStatus === 'unknown' || letterStatus === 'unbekannt') {
+        returnStatus = 'unknown';
+      } else if (letterStatus === 'not_identified' || letterStatus === 'not_yet_identified') {
+        returnStatus = 'not_identified';
+      }
+
+      return { ...defaultReturn, letterStatus: returnStatus };
+    }
+    return defaultReturn;
   },
   extractWritingPlace: (teiHeader: Element | null): { name: string | null; key: string | null } => {
     if (!teiHeader) {

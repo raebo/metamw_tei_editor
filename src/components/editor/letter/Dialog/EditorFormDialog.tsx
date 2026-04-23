@@ -40,6 +40,7 @@ import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
 import AddProvenanceDialog from '@src/components/editor/letter/Dialog/Components/Provenance/AddProvenanceDialog';
 import ManageProvenanceDialog from '@src/components/editor/letter/Dialog/Components/Provenance/ManageProvenanceDialog';
+import ManagePreccSuccLetterDialog from '@src/components/editor/letter/Dialog/Components/ManagePreccSuccLetterDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -62,6 +63,12 @@ export interface DefaultDialogProps {
 const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: t(
     'editor:dialog.titles.addGreetingsFormula',
+  ),
+  [EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER]: t(
+    'editor:dialog.titles.setPrecursorLetter',
+  ),
+  [EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER]: t(
+    'editor:dialog.titles.setSuccessorLetter',
   ),
   [EditorConstants.dialogTypes.ADD_NEW_LETTER]: t('editor:dialog.titles.addNewLetter'),
   [EditorConstants.dialogTypes.ADD_NOTE]: t('editor:dialog.titles.addNote'),
@@ -117,6 +124,12 @@ const DialogContentComponents: Record<
   string,
   (props: DefaultDialogProps & any) => React.ReactNode
 > = {
+  [EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER]: (props) => (
+    <ManagePreccSuccLetterDialog {...props} letterType={'precursor'} />
+  ),
+  [EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER]: (props) => (
+    <ManagePreccSuccLetterDialog {...props} letterType={'successor'} />
+  ),
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: (props) => (
     <GreetingsFormulaDialog
       {...props}
