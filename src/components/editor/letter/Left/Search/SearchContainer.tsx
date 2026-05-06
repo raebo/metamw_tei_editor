@@ -1,20 +1,17 @@
 import SearchLetters from '../../../index/SearchLetters';
 import React, { useCallback, useEffect, useState } from 'react';
-import { fetchSearchLetters } from '../../../../../services/editor/apiLettersRequest.service';
+import { fetchSearchLetters } from '@src/services/editor/apiLettersRequest.service';
 import { EditorLetter } from '../../../../../services/mappings/editorMappings';
 import Grid from '@mui/material/Grid';
 import SearchResultEntry from './SearchResultEntry';
 import { useSelector } from 'react-redux';
 import {
-  setEditorLetter,
   setEditorPinnedLetters,
   setEditorSearchValue,
-  setEditorTabNumber,
-  setReloadLetterContent,
-} from '../../../../../redux/slices/editor.letter.slice';
-import { RootState } from '../../../../../redux/redux.store';
-import { useAppDispatch } from '../../../../../redux/hooks';
-import { EditorUtils } from '../../../../../utils/editor';
+} from '@src/redux/slices/editor.letter.slice';
+import { RootState } from '@src/redux/redux.store';
+import { useAppDispatch } from '@src/redux/hooks';
+import { EditorUtils } from '@src/utils/editor';
 import { setEditorTabAndPinnedLetterThunk } from '@src/redux/thunks/editor.letter.thunk';
 
 const SearchContainer = () => {
@@ -50,12 +47,15 @@ const SearchContainer = () => {
 
   const handleClick = useCallback(
     (letterId: number, letterName: string) => {
-      const newPinnedLetters = EditorUtils.pinnedLetters.computeNewPinnedLetters(statePinnedLetters, {
-        id: letterId,
-        name: letterName,
-        isPinned: null,
-        viewMode: 'WYSIWYG',
-      });
+      const newPinnedLetters = EditorUtils.pinnedLetters.computeNewPinnedLetters(
+        statePinnedLetters,
+        {
+          id: letterId,
+          name: letterName,
+          isPinned: null,
+          viewMode: 'WYSIWYG',
+        },
+      );
 
       dispatch(setEditorPinnedLetters({ pinnedLetters: newPinnedLetters }));
       dispatch(

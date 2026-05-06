@@ -36,11 +36,9 @@ import { MiscUtils } from '@src/utils/misc';
 import CloseTabWithContent from '@src/components/editor/letter/Dialog/Components/CloseTabWithContentDialog';
 import AddRismEntryDialog from '@src/components/editor/letter/Dialog/Components/RismEntries/AddRismEntryDialog';
 import ManageRismEntryDialog from '@src/components/editor/letter/Dialog/Components/RismEntries/ManageRismEntryDialog';
-import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
-import AddProvenanceDialog from '@src/components/editor/letter/Dialog/Components/Provenance/AddProvenanceDialog';
-import ManageProvenanceDialog from '@src/components/editor/letter/Dialog/Components/Provenance/ManageProvenanceDialog';
 import ManagePreccSuccLetterDialog from '@src/components/editor/letter/Dialog/Components/ManagePreccSuccLetterDialog';
+import { useTranslation } from 'react-i18next';
 
 interface EditorFormDialogProps {
   open: boolean;

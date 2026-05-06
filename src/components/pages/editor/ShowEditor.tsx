@@ -1,9 +1,10 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Box, List, ListItemButton, ListItemIcon, Stack, Tooltip } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import SearchIcon from '@mui/icons-material/Search';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import SplitscreenIcon from '@mui/icons-material/Splitscreen';
 import KeyboardOutlinedIcon from '@mui/icons-material/KeyboardOutlined';
 import SearchContainer from '@src/components/editor/letter/Left/Search/SearchContainer';
 import FavouritesContainer from '@src/components/editor/letter/Left/Favourites/FavouritesContainer';
@@ -51,15 +52,18 @@ import EntityProtagCreationContainer from '@src/components/editor/letter/Right/E
 import { EditorConstants } from '@src/constants/editor';
 import EntityPersonContainer from '@src/components/editor/letter/Right/EntityPerson/EntityPersonContainer';
 import { MiscUtils } from '@src/utils/misc';
-import { ToolbarButton } from '@src/components/editor/letter/Util/ToolbarButton';
 import { ToolbarMenuButton } from '@src/components/editor/letter/Util/ToolbarMenuButton';
 import HelpShortcutsContainer from '@src/components/editor/letter/Left/HelpShortcuts/HelpShortcutsContainer';
-import { QuestionMark } from '@mui/icons-material';
 import EntityNodeInfo from '@src/components/editor/letter/Right/EntityNodeInfo';
+import OnlyReadEditorPanel from '@src/components/editor/letter/Center/OnlyReadEditorPanel';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
 }
+
+const SECOND_EDITOR_MIN_WIDTH = 150;
+const SECOND_EDITOR_MAX_WIDTH = 700;
+const SECOND_EDITOR_DEFAULT_WIDTH = 320;
 
 const ShowEditor = () => {
   const { letterId } = useParams<{ letterId: string }>();
@@ -84,7 +88,13 @@ const ShowEditor = () => {
     null,
   );
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
   const [isCodeView, setIsCodeView] = useState<boolean>(false);
+
+  const [isDraggingState, setIsDraggingState] = useState(false);
+  const [showSecondEditor, setShowSecondEditor] = useState(false);
+  const [secondEditorWidth, setSecondEditorWidth] = useState(SECOND_EDITOR_DEFAULT_WIDTH);
 
   useEffect(() => {
     const setPinnedLetters = async () => {
@@ -362,6 +372,38 @@ const ShowEditor = () => {
     }
   });
 
+  const handleSplitterMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      isDragging.current = true;
+      setIsDraggingState(true); // ← neu
+
+      const startX = e.clientX;
+      const startWidth = secondEditorWidth;
+
+      const onMouseMove = (moveEvent: MouseEvent) => {
+        if (!isDragging.current) return;
+        const delta = moveEvent.clientX - startX;
+        const newWidth = Math.min(
+          Math.max(startWidth + delta, SECOND_EDITOR_MIN_WIDTH),
+          SECOND_EDITOR_MAX_WIDTH,
+        );
+        setSecondEditorWidth(newWidth);
+      };
+
+      const onMouseUp = () => {
+        isDragging.current = false;
+        setIsDraggingState(false); // ← neu
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    },
+    [secondEditorWidth],
+  );
+
   return (
     <>
       <Box
@@ -400,25 +442,65 @@ const ShowEditor = () => {
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.HELP_SHORTCUTS, null)}
               icon=<KeyboardOutlinedIcon />
             />
+            <ToolbarMenuButton
+              title="Nur-Lesen-Ansicht ein-/ausblenden"
+              selected={showSecondEditor}
+              onClick={() => setShowSecondEditor((prev) => !prev)}
+              icon={<SplitscreenIcon />}
+            />
           </Stack>
         </Box>
 
         {showLeftContainer && (
           <Box
+            ref={containerRef}
             sx={{
-              width: '20%',
-              backgroundColor: '#cce5ff',
-              transition: 'width 0.3s',
+              display: 'flex',
+              width: '100%',
+              height: '100vh',
+              backgroundColor: '#f0f0f0',
+              userSelect: isDraggingState ? 'none' : 'auto',
+              cursor: isDraggingState ? 'col-resize' : 'auto',
             }}
           >
             {selectedComponentLeft?.component}
           </Box>
         )}
 
+        {/* ── Linke Nur-Lesen-Ansicht + Splitter (bei Bedarf) ── */}
+        {showSecondEditor && (
+          <>
+            <Box
+              sx={{
+                width: `${secondEditorWidth}px`,
+                flexShrink: 0,
+                overflow: 'hidden',
+                backgroundColor: '#eef4fb',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <OnlyReadEditorPanel />
+            </Box>
+
+            {/* Vertikale Trennleiste – verschiebbar */}
+            <Box
+              onMouseDown={handleSplitterMouseDown}
+              sx={{
+                width: '5px',
+                flexShrink: 0,
+                backgroundColor: '#aaa',
+                cursor: 'col-resize',
+                '&:hover': { backgroundColor: '#555' },
+              }}
+            />
+          </>
+        )}
+
         <Box
           sx={{
             flexGrow: 1,
-            maxWidth: '40vw',
+            maxWidth: '60vw',
             backgroundColor: '#ffffff',
             transition: 'width 0.3s',
             width:

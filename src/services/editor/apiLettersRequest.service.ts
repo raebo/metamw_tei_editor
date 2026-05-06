@@ -33,6 +33,16 @@ export const fetchSearchLetters = async (
   }
 };
 
+export const fetchLetterXmlContent = async (letterId: number): Promise<string> => {
+  try {
+    const response = await initApi.initApi().get(`/jwt/editor/letters/${letterId}/xml_content`);
+
+    return response.data;
+  } catch (err) {
+    throw new Error('Failed to fetch LetterXmlContent: ' + err);
+  }
+};
+
 export const fetchLetterDataByName = async (
   letterName: string,
 ): Promise<EditorLetter | undefined> => {

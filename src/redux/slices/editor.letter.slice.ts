@@ -20,6 +20,10 @@ interface EditorLetterSlice {
       nodeTypeValue: string | null;
     };
   };
+  onlyReadableLetter: {
+    autocompleteName: string | null;
+    xmlContent: string | null;
+  };
   tabToCloseId: number | null;
   tabLetter: {
     //PinnedLetter
@@ -69,6 +73,10 @@ const initialState: EditorLetterSlice = {
     redoAvailable: false,
     selectedIdentifier: null,
   },
+  onlyReadableLetter: {
+    autocompleteName: null,
+    xmlContent: null,
+  },
   tabToCloseId: null, // letter id of the tab to close
   tabLetter: {
     id: null,
@@ -115,6 +123,9 @@ const EditorLetterSlice = createSlice({
       } else {
         state.letter = { ...state.letter, ...action.payload.letter };
       }
+    },
+    setReadableLetter(state, action) {
+      state.onlyReadableLetter = { ...action.payload.readableLetter };
     },
     setReloadLetterContent(state, action) {
       state.reloadLetterContent = action.payload.reloadLetterContent;
@@ -227,6 +238,7 @@ export const {
   setClickedEntityNode,
   clearClickedEntityNode,
   setEditorLetter,
+  setReadableLetter,
   setEditorLetterUndoRedo,
   setEditorLetterActOfWriting,
   setEditorPinnedLetters,
