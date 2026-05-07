@@ -21,7 +21,8 @@ interface EditorLetterSlice {
     };
   };
   onlyReadableLetter: {
-    autocompleteName: string | null;
+    id: number | null;
+    name: string | null;
     xmlContent: string | null;
   };
   tabToCloseId: number | null;
@@ -74,7 +75,8 @@ const initialState: EditorLetterSlice = {
     selectedIdentifier: null,
   },
   onlyReadableLetter: {
-    autocompleteName: null,
+    id: null,
+    name: null,
     xmlContent: null,
   },
   tabToCloseId: null, // letter id of the tab to close
@@ -125,7 +127,7 @@ const EditorLetterSlice = createSlice({
       }
     },
     setReadableLetter(state, action) {
-      state.onlyReadableLetter = { ...action.payload.readableLetter };
+      state.onlyReadableLetter = { ...action.payload };
     },
     setReloadLetterContent(state, action) {
       state.reloadLetterContent = action.payload.reloadLetterContent;

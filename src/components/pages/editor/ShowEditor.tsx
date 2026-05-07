@@ -55,7 +55,7 @@ import { MiscUtils } from '@src/utils/misc';
 import { ToolbarMenuButton } from '@src/components/editor/letter/Util/ToolbarMenuButton';
 import HelpShortcutsContainer from '@src/components/editor/letter/Left/HelpShortcuts/HelpShortcutsContainer';
 import EntityNodeInfo from '@src/components/editor/letter/Right/EntityNodeInfo';
-import OnlyReadEditorPanel from '@src/components/editor/letter/Center/OnlyReadEditorPanel';
+import OnlyReadEditorPanel from '@src/components/editor/letter/Left/OnlyReadEditorPanel';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
