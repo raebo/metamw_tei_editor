@@ -39,6 +39,8 @@ import ManageRismEntryDialog from '@src/components/editor/letter/Dialog/Componen
 import { t } from 'i18next';
 import ManagePreccSuccLetterDialog from '@src/components/editor/letter/Dialog/Components/ManagePreccSuccLetterDialog';
 import { useTranslation } from 'react-i18next';
+import ManageProvenanceDialog from '@src/components/editor/letter/Dialog/Components/Provenance/ManageProvenanceDialog';
+import AddProvenanceDialog from '@src/components/editor/letter/Dialog/Components/Provenance/AddProvenanceDialog';
 
 interface EditorFormDialogProps {
   open: boolean;

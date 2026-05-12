@@ -1,1 +1,220 @@
-{}
+{
+  "titles": {
+    "addGreetingsFormula": "Add Greeting Formula",
+    "addNewLetter": "Add New Letter",
+    "addNote": "Add Comment",
+    "addLetterFromProtag": "Add Reference to a Letter from the Protagonist",
+    "addLetterToProtag": "Add Reference to a Letter to the Protagonist",
+    "addProvenanceEntry": "Add Provenance",
+    "addRismEntry": "Add RISM Entry",
+    "addTeiHeader": "Add/Edit Letter Header",
+    "addWritingPart": "Add Writing Act",
+    "attachmentAdd": "Add Attachment",
+    "closeTabWithContent": "Close Tab with Content?",
+    "dateWhenAdd": "Mark Date 'WHEN'",
+    "dateWhenCustomAdd": "Mark Date 'WHEN CUSTOM'",
+    "dateNotAfterAdd": "Mark Date 'Not After'",
+    "dateNotBeforeAdd": "Mark Date 'Not Before'",
+    "dateFromToAdd": "Mark Date 'From To'",
+    "dateNotBeforeAfterAdd": "Mark Date 'NotBefore NotAfter'",
+    "editLanguages": "Manage Languages",
+    "editNote": "Edit/Delete Comment",
+    "manageRismEntry": "Manage RISM Entry",
+    "manageGreetingsFormula": "Manage Greeting Formula",
+    "manageHeaderAuthorWriter": "Manage Authors/Writers",
+    "manageProvenanceEntry": "Edit Provenance",
+    "manageWritingActAuthorWriter": "Manage Authors/Writers",
+    "manageHeaderReceiver": "Manage Recipient",
+    "manageAddressSender": "Manage Sender Address",
+    "manageAddressRecipient": "Manage Recipient Address",
+    "publishLetter": "Publish Letter",
+    "resetLetter": "Reset Letter",
+    "setPrecursorLetter": "Set Predecessor Letter",
+    "setSuccessorLetter": "Set Successor Letter"
+  },
+  "hints": {
+    "closing": "Click on the background or press ESC to close"
+  },
+  "buttons": {
+    "cancel": "Cancel"
+  },
+  "autocomplete": {
+    "chooseEntry": "Select Entry"
+  },
+  "assignLetterDialog": {},
+  "provenanceEntries": {
+    "addProvenanceDialog": {
+      "headline": "Provenance Data",
+      "success": "Provenance entry has been added!",
+      "label": {
+        "provenance": "Provenance"
+      },
+      "button": {
+        "submit": "Add"
+      }
+    },
+    "manageProvenanceDialog": {
+      "headline": "Provenance Data",
+      "success": "Provenance entry has been updated!",
+      "label": {
+        "provenance": "Provenance"
+      },
+      "button": {
+        "submit": "Update"
+      }
+    }
+  },
+  "rismEntries": {
+    "addRismEntryDialog": {
+      "headline": "Search and Select Existing Entry",
+      "success": "RISM entry has been added!",
+      "label": {
+        "autocomplete": "Select RISM Sigla",
+        "country": "Country",
+        "settlement": "Settlement",
+        "institution": "Institution",
+        "collection": "Collection",
+        "repository": "Repository",
+        "idno": "ID No."
+      },
+      "button": {
+        "reset": "Reset",
+        "submit": "Add Entry",
+        "cancel": "Cancel"
+      }
+    },
+    "manageRismEntryDialog": {
+      "headline": "Replace RISM Sigla",
+      "button": {
+        "reset": "Restore",
+        "submit": "Update Entry"
+      }
+    }
+  },
+  "creationContainer": {
+    "addCreationDialog": {
+      "headline": "Mark and Add Work",
+      "success": "The work has been successfully marked",
+      "errorSubmit": "An error occurred while marking the work",
+      "label": {
+        "latintype": "Latintype Characters",
+        "existingAuthor": "Existing Author",
+        "newAuthor": "New Author",
+        "existingCreation": "Existing Work",
+        "newCreation": "New Work",
+        "chooseCategory": "Select Category",
+        "chooseCreation": "Select Work",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "key": "Key",
+        "newNameCreation": "Name of Work",
+        "newIdentifierCreation": "Key of Work"
+      },
+      "button": {
+        "annotate": "Mark Work",
+        "addCreation": "Add Work"
+      }
+    }
+  },
+  "personContainer": {
+    "addPersonDialog": {
+      "headline": "Mark and Add Person",
+      "success": "Person has been successfully marked",
+      "error": "An error occurred while adding",
+      "button": {
+        "add": "Add",
+        "annotate": "Mark",
+        "cancel": "Cancel"
+      },
+      "label": {
+        "chooseEntry": "Select Entry",
+        "lastName": "Last Name",
+        "firstName": "First Name",
+        "newEntry": "New Entry",
+        "existingEntry": "Existing Entry"
+      }
+    }
+  },
+  "placeContainer": {
+    "addPlaceDialog": {
+      "headline": "Mark and Add Locations/Institutions/Landmarks",
+      "success": "Location has been successfully marked",
+      "error": "An error occurred while adding",
+      "button": {
+        "add": "Add Location",
+        "annotate": "Mark Locations"
+      },
+      "label": {
+        "chooseCountry": "Select Country",
+        "chooseReference": "Select Reference",
+        "existingType": "Existing Reference",
+        "newType": "New Reference",
+        "settlement": "Settlement",
+        "sight": "Landmark",
+        "identifier": "Key",
+        "referenceName": "Reference (Name)",
+        "name": "Name",
+        "newEntry": "New Entry",
+        "existingEntry": "Existing Entry",
+        "institution": "Institution"
+      }
+    }
+  },
+  "protagCreationContainer": {
+    "addProtagCreationDialog": {
+      "headline": "Mark and Add FMB Work",
+      "success": "FMB work has been successfully marked",
+      "error": "An error occurred while adding the FMB work",
+      "button": {
+        "add": "Add FMB Work",
+        "annotate": "Mark"
+      },
+      "label": {
+        "name": "Name",
+        "chooseProtagCreation": "Select FMB Work",
+        "opus": "Opus Work",
+        "mwv": "MWV Work",
+        "identifier": "Work Key",
+        "newProtagCreation": "New Work",
+        "existingProtagCreation": "Existing FMB Work",
+        "catOne": "Category 1",
+        "catTwo": "Category 2",
+        "catThree": "Category 3",
+        "catFour": "Category 4"
+      }
+    }
+  },
+  "precursorSuccessorDialog": {
+    "headline": "Link Letter",
+    "successPredecessor": "Predecessor letter has been successfully set",
+    "successSuccessor": "Successor letter has been successfully set",
+    "errorPredecessor": "An error occurred while setting the predecessor letter",
+    "errorSuccessor": "An error occurred while setting the successor letter",
+    "button": {
+      "setPredecessor": "Set Predecessor Letter",
+      "setSuccessor": "Set Successor Letter"
+    },
+    "label": {
+      "chooseLetterPrecursor": "Select Predecessor Letter",
+      "chooseLetterSuccessor": "Select Successor Letter",
+      "precursorNotDetermined": "Predecessor letter not yet determined",
+      "successorNotDetermined": "Successor letter not yet determined",
+      "precursorUnknown": "Predecessor letter unknown",
+      "successorUnknown": "Successor letter unknown"
+    }
+  },
+  "manageGreetingsFormulaDialog": {
+    "successAdd": "Greeting formula has been successfully added",
+    "successEdit": "Greeting formula has been successfully updated",
+    "button": {
+      "save": "Save Greeting Formula"
+    },
+    "label": {
+      "greetingText": "Content",
+      "position": "Position",
+      "pos_centered": "Centered",
+      "pos_left": "Left",
+      "pos_right": "Right"
+    }
+  }
+}

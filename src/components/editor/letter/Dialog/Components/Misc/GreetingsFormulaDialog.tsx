@@ -7,9 +7,12 @@ import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
 import { EditorConstants } from '@src/constants/editor';
 import { DialogActionButton } from './DialogActionButton';
+import { useTranslation } from 'react-i18next';
 
-export interface GreetingsFormulaProps extends DefaultDialogProps {
-  formulaType: typeof EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA | typeof EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA;
+interface GreetingsFormulaProps extends DefaultDialogProps {
+  formulaType:
+    | typeof EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA
+    | typeof EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA;
 }
 
 type GreetingFormData = {
@@ -19,6 +22,7 @@ type GreetingFormData = {
 };
 
 const GreetingsFormulaDialog = (props: GreetingsFormulaProps) => {
+  const { t } = useTranslation();
   const xmlDoc = props.xmlDoc;
   const [formData, setFormData] = React.useState<GreetingFormData | null>({
     greetingIsNew: true,
@@ -39,6 +43,7 @@ const GreetingsFormulaDialog = (props: GreetingsFormulaProps) => {
 
   useEffect(() => {
     if (!xmlDoc) return;
+    if (refNode) return;
 
     try {
       const greetingNode = EditorUtils.xmlCheck.nodeWithTmpId(xmlDoc, props.formulaType);
@@ -47,7 +52,8 @@ const GreetingsFormulaDialog = (props: GreetingsFormulaProps) => {
       if (props.formulaType === 'ADD_NEW_GREETING') {
         updateFormData({ greetingIsNew: true });
       } else if (props.formulaType === 'MANAGE_GREETINGS_FORMULA') {
-        const greetingPos = (greetingNode.getAttribute('rend') as 'center' | 'left' | 'right') || 'center';
+        const greetingPos =
+          (greetingNode.getAttribute('rend') as 'center' | 'left' | 'right') || 'center';
         updateFormData({
           greetingIsNew: false,
           greetingPosition: greetingPos,
@@ -57,7 +63,7 @@ const GreetingsFormulaDialog = (props: GreetingsFormulaProps) => {
     } catch (error) {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
     }
-  }, [xmlDoc]);
+  }, [props.formulaType, xmlDoc]);
 
   const validFormData = () => {
     if (!formData) return false;
@@ -67,27 +73,28 @@ const GreetingsFormulaDialog = (props: GreetingsFormulaProps) => {
   const handleSave = async () => {
     try {
       if (!xmlDoc) {
-        enqueueSnackbar('Ungültiges XML-Dokument', { variant: 'error' });
+        enqueueSnackbar(t('errors:editor.dialog.noXmlDocument'), { variant: 'error' });
         props.onClose();
         return;
       }
 
       if (!formData || !validFormData()) {
-        enqueueSnackbar('Ungültige Formulardaten', { variant: 'error' });
+        enqueueSnackbar(t('errors:editor.dialog.invalidFormData'), { variant: 'error' });
         props.onClose();
         return;
       }
 
       let changeType: string = EditorConstants.changeTypes.misc.BODY_SALUTE_ADDED;
-      let message: string = 'Grußformel hinzugefügt';
+      let message: string = t('editor:dialog.manageGreetingsFormulaDialog.successAdd');
 
-      if (props.formulaType == 'ADD_NEW_GREETINGS_FORMULA') {
+      if (props.formulaType == 'ADD_GREETINGS_FORMULA') {
         const newGreeting = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'salute');
         newGreeting.setAttribute('rend', formData.greetingPosition);
         newGreeting.textContent = formData.greetingText ? formData.greetingText.trim() : '';
+        refNode?.parentNode?.insertBefore(newGreeting, refNode);
       } else if (props.formulaType == 'MANAGE_GREETINGS_FORMULA' && refNode) {
         changeType = EditorConstants.changeTypes.misc.BODY_SALUTE_CHANGED;
-        message = 'Grußformel geändert';
+        message = t('editor:dialog.manageGreetingsFormulaDialog.successEdit');
         refNode.setAttribute('rend', formData?.greetingPosition || 'center');
         refNode.textContent = formData?.greetingText || '';
       }
@@ -104,7 +111,9 @@ const GreetingsFormulaDialog = (props: GreetingsFormulaProps) => {
         <div className="autoSnippetFormRow">
           <div className="form-item form-item--key">
             <FormControl variant="filled" sx={{ m: 1, minWidth: 120, width: '100%' }}>
-              <InputLabel id="editor-dialog-greetings-formula-position">Position</InputLabel>
+              <InputLabel id="editor-dialog-greetings-formula-position">
+                {t('editor:dialog.manageGreetingsFormulaDialog.label.position')}
+              </InputLabel>
               <Select
                 value={formData?.greetingPosition}
                 disabled={false}
@@ -116,9 +125,18 @@ const GreetingsFormulaDialog = (props: GreetingsFormulaProps) => {
                 }
               >
                 {[
-                  { value: 'center', label: 'Zentriert' },
-                  { value: 'left', label: 'Links' },
-                  { value: 'right', label: 'Rechts' },
+                  {
+                    value: 'center',
+                    label: t('editor:dialog.manageGreetingsFormulaDialog.label.pos_centered'),
+                  },
+                  {
+                    value: 'left',
+                    label: t('editor:dialog.manageGreetingsFormulaDialog.label.pos_left'),
+                  },
+                  {
+                    value: 'right',
+                    label: t('editor:dialog.manageGreetingsFormulaDialog.label.pos_right'),
+                  },
                 ].map((item) => (
                   <MenuItem key={item.value} value={item.value}>
                     {item.label}
@@ -131,14 +149,18 @@ const GreetingsFormulaDialog = (props: GreetingsFormulaProps) => {
             <TextField
               variant="filled"
               sx={{ m: 1, minWidth: 120, width: '100%' }}
-              label="Begrüßungstext"
+              label={t('editor:dialog.manageGreetingsFormulaDialog.label.greetingText')}
               value={formData?.greetingText || ''}
               onChange={(event) => updateFormData({ greetingText: event.target.value as string })}
             />
           </div>
         </div>
       </DialogContent>
-      <DialogActionButton label={'Grußformel Speichern'} onClick={handleSave} disabled={!validFormData} />
+      <DialogActionButton
+        label={t('editor:dialog.manageGreetingsFormulaDialog.button.save')}
+        onClick={handleSave}
+        disabled={!validFormData()}
+      />
     </>
   );
 };

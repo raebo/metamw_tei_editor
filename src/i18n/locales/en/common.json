@@ -3,7 +3,7 @@
     "headline": "Login User",
     "btn_signing": "Login",
     "labels" : {
-      "email": "E-Mail-Address",
+      "email": "E-Mail-Address/Username",
       "password": "Password"
     },
     "errors": {

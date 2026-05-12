@@ -205,5 +205,19 @@
       "precursorUnknown": "Vorgängerbrief unbekannt",
       "successorUnknown": "Nachfolgerbrief unbekannt"
     }
+  },
+  "manageGreetingsFormulaDialog": {
+    "successAdd": "Begrüßungsformel wurde erfolgreich hinzugefügt",
+    "successEdit": "Begrüßungsformel wurde erfolgreich aktualisiert",
+    "button": {
+      "save": "Begrüßungsformel Speichern"
+    },
+    "label": {
+      "greetingText": "Inhalt",
+      "position": "Position",
+      "pos_centered": "Zentriert",
+      "pos_left": "Links",
+      "pos_right": "Rechts"
+    }
   }
 }
