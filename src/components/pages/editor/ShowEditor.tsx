@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Stack } from '@mui/material';
+import { Box, IconButton, Stack } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import SearchIcon from '@mui/icons-material/Search';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
@@ -58,6 +58,7 @@ import EntityNodeInfo from '@src/components/editor/letter/Right/EntityNodeInfo';
 import OnlyReadEditorPanel from '@src/components/editor/letter/Left/OnlyReadEditorPanel';
 import { ToolbarLetterNameDisplay } from '@src/components/editor/letter/Util/ToolbarLetterNameDisplay';
 import { useTranslation } from 'react-i18next';
+import CloseIcon from '@mui/icons-material/Close';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
@@ -529,6 +530,12 @@ const ShowEditor = () => {
               transition: 'width 0.3s',
             }}
           >
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <IconButton onClick={() => setShowRightContainer(false)} size="small">
+                <CloseIcon />
+              </IconButton>
+            </Box>
+
             {selectedComponentRight?.component}
           </Box>
         )}
