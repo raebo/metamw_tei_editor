@@ -6,9 +6,10 @@
       "failedToPatchContent": "Änderungen des Briefes konnten nicht im Backend gespeichert werden",
       "invalidFormData": "Ungültige Formulardaten, bitte überprüfen Sie Ihre Eingaben",
       "rismEntries":{
-        "noBackendRismEntries": "Keine RISM Einträge im Backend verfügbar %{reaon}",
+        "noBackendRismEntries": "Keine RISM Einträge im Backend verfügbar %{reason}",
         "noMsIdentifier": "Der MSIdentifier konnten nicht ausgelesen werden"
       }
-    }
+    },
+    "failedToFetchPinnedLetters": "Die angehefteten Briefe konnten nicht geladen werden %{reason}"
   }
 }

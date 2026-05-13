@@ -1,0 +1,21 @@
+{
+  "letterViewContainer" : {
+    "title": "Letter View",
+    "noLetter": "No letter available to display. Please select a letter from the search on the left side.",
+    "toolbarLeft": {
+      "search": "Search for letters",
+      "favourites": "Favourites overview",
+      "keybindings": "Keyboard shortcuts",
+      "readonlyView": "Toggle read-only view"
+    },
+    "toolbarRight": {
+      "moreActions": "Click for more actions",
+      "withoutFunction": "This button currently has no function",
+      "addLetterToFavourite": "Add letter to favourites",
+      "publishLetter": "Publish letter",
+      "switchWYSIWYG": "Switch to WYSIWYG view",
+      "switchXML": "Switch to XML view",
+      "resetLetter": "Reset letter"
+    }
+  }
+}

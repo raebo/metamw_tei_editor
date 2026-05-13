@@ -4,10 +4,12 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 
 import common_en from './locales/en/common.json';
 import editor_dialog_en from './locales/en/editor/dialog.json';
+import editor_common_en from './locales/en/editor/common.json';
 import errors_en from './locales/en/errors.json';
 
 import common_de from './locales/de/common.json';
 import editor_dialog_de from './locales/de/editor/dialog.json';
+import editor_common_de from './locales/de/editor/common.json';
 import errors_de from './locales/de/errors.json';
 
 i18n
@@ -19,6 +21,7 @@ i18n
         common: common_en,
         errors: errors_en,
         editor: {
+          common: editor_common_en,
           dialog: editor_dialog_en,
         },
       },
@@ -26,6 +29,7 @@ i18n
         common: common_de,
         errors: errors_de,
         editor: {
+          common: editor_common_de,
           dialog: editor_dialog_de,
         },
       },

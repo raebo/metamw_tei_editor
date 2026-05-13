@@ -1,1 +1,15 @@
-{}
+{
+  "editor": {
+    "dialog": {
+      "noXmlDocument": "No XML document available for parsing",
+      "noTeiHeader": "No TEI header found in the XML document",
+      "failedToPatchContent": "Changes to the letter could not be saved in the backend",
+      "invalidFormData": "Invalid form data, please check your inputs",
+      "rismEntries":{
+        "noBackendRismEntries": "No RISM entries available in the backend %{reason}",
+        "noMsIdentifier": "The MSIdentifier could not be read"
+      }
+    },
+    "failedToFetchPinnedLetters": "The pinned letters could not be loaded %{reason}"
+  }
+}

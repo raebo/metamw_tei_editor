@@ -1,0 +1,21 @@
+{
+  "letterViewContainer" : {
+    "title": "Briefansicht",
+    "noLetter": "Keine Brief zur Anzeige vorhanden. Bitte wählen Sie einen Brief aus der Suche auf der linken Seite aus.",
+    "toolbarLeft": {
+      "search": "Suche nach Briefen",
+      "favourites": "Übersicht Favoriten",
+      "keybindings": "Tastenkürzel",
+      "readonlyView": "Nur-Lese-Ansicht ein-/ausblenden"
+    },
+    "toolbarRight": {
+      "moreActions": "Klicken für weitere Aktionen",
+      "withoutFunction": "Der Button hat derzeit keine Funktion",
+      "addLetterToFavourite": "Brief zu Favoriten hinzufügen",
+      "publishLetter": "Brief veröffentlichen",
+      "switchWYSIWYG": "Wechsel zu WYSIWYG Ansicht",
+      "switchXML": "Wechsel zu XML Ansicht",
+      "resetLetter": "Brief zurücksetzen"
+    }
+  }
+}
