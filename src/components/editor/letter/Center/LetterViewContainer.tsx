@@ -15,8 +15,10 @@ import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
 import type { EditorLetterData } from '@src/services/mappings/editorMappings';
 import LeftClickAnnotationAction from '@src/components/editor/letter/Center/LetterViewContainer/LeftClickAnnotationAction';
+import { useTranslation } from 'react-i18next';
 
 const LetterViewContainer = () => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const stateLetterFontSize = useSelector(
     (state: RootState) => state.auth.settings?.letterFontSize,
@@ -176,9 +178,7 @@ const LetterViewContainer = () => {
             </>
           ) : (
             <p>
-              <Alert severity="warning">
-                Kein Brief zur Anzeige vorhanden, bitte wählen Sie einen Brief über die Suche aus.
-              </Alert>
+              <Alert severity="warning">{t('editor:common.letterViewContainer.noLetter')}</Alert>
             </p>
           )}
         </div>

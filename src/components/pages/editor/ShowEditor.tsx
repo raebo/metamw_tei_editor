@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, List, ListItemButton, ListItemIcon, Stack, Tooltip } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import SearchIcon from '@mui/icons-material/Search';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
@@ -56,6 +56,8 @@ import { ToolbarMenuButton } from '@src/components/editor/letter/Util/ToolbarMen
 import HelpShortcutsContainer from '@src/components/editor/letter/Left/HelpShortcuts/HelpShortcutsContainer';
 import EntityNodeInfo from '@src/components/editor/letter/Right/EntityNodeInfo';
 import OnlyReadEditorPanel from '@src/components/editor/letter/Left/OnlyReadEditorPanel';
+import { ToolbarLetterNameDisplay } from '@src/components/editor/letter/Util/ToolbarLetterNameDisplay';
+import { useTranslation } from 'react-i18next';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
@@ -66,6 +68,7 @@ const SECOND_EDITOR_MAX_WIDTH = 700;
 const SECOND_EDITOR_DEFAULT_WIDTH = 320;
 
 const ShowEditor = () => {
+  const { t } = useTranslation();
   const { letterId } = useParams<{ letterId: string }>();
   const { letterName } = useParams<{ letterName: string }>();
 
@@ -79,7 +82,6 @@ const ShowEditor = () => {
   const [showLeftContainer, setShowLeftContainer] = useState<boolean>(false);
   const [showRightContainer, setShowRightContainer] = useState<boolean>(false);
 
-  const [selectedItemLeft, setSelectedItemLeft] = useState<false | string>(false);
   const [selectedItemRight, setSelectedItemRight] = useState<false | string>(false);
   const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem | null>(
     null,
@@ -125,7 +127,9 @@ const ShowEditor = () => {
         isMounted.current = true;
       } catch (error) {
         enqueueSnackbar(
-          `Failed to fetch pinned letters: ${MiscUtils.misc.getErrorMessage(error)}`,
+          t('errors:editor.failedToFetchPinnedLetter', {
+            reason: MiscUtils.misc.getErrorMessage(error),
+          }),
           {
             variant: 'error',
           },
@@ -218,7 +222,6 @@ const ShowEditor = () => {
 
     selectedComponent?.action();
     setSelectedComponentLeft(selectedComponent);
-    setSelectedItemLeft(newValue);
   };
 
   const handleTabChangeRight = (newValue: string) => {
@@ -425,25 +428,25 @@ const ShowEditor = () => {
         >
           <Stack direction="column" spacing={1}>
             <ToolbarMenuButton
-              title="Suche nach Briefen"
+              title={t('editor:common.letterViewContainer.toolbarLeft.search')}
               selected={selectedItemRight === EditorConstants.compMappingLeft.SEARCH}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.SEARCH, null)}
-              icon=<SearchIcon />
+              icon={<SearchIcon />}
             />
             <ToolbarMenuButton
-              title="Übersicht Favoriten"
+              title={t('editor:common.letterViewContainer.toolbarLeft.favourites')}
               selected={selectedItemRight === EditorConstants.compMappingLeft.FAVOURITES}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.FAVOURITES, null)}
-              icon=<AutoAwesomeIcon />
+              icon={<AutoAwesomeIcon />}
             />
             <ToolbarMenuButton
-              title="Übersicht der Tastenkombinationen"
+              title={t('editor:common.letterViewContainer.toolbarLeft.keybindings')}
               selected={selectedItemRight === EditorConstants.compMappingLeft.HELP_SHORTCUTS}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.HELP_SHORTCUTS, null)}
-              icon=<KeyboardOutlinedIcon />
+              icon={<KeyboardOutlinedIcon />}
             />
             <ToolbarMenuButton
-              title="Nur-Lesen-Ansicht ein-/ausblenden"
+              title={t('editor:common.letterViewContainer.toolbarLeft.readonlyView')}
               selected={showSecondEditor}
               onClick={() => setShowSecondEditor((prev) => !prev)}
               icon={<SplitscreenIcon />}
@@ -467,7 +470,6 @@ const ShowEditor = () => {
           </Box>
         )}
 
-        {/* ── Linke Nur-Lesen-Ansicht + Splitter (bei Bedarf) ── */}
         {showSecondEditor && (
           <>
             <Box
@@ -541,46 +543,51 @@ const ShowEditor = () => {
           }}
         >
           <Stack direction="column" spacing={1}>
+            <ToolbarLetterNameDisplay letterName={stateEditorLetter.name} />
             <QuickContentFormatter />
             <ToolbarMenuButton
-              title="Click for more actions"
+              title={t('editor:common.letterViewContainer.toolbarRight.moreActions')}
               selected={selectedItemRight === EditorConstants.compMappingRight.USER_ACTIONS}
               onClick={(event) => handleButtonMenuClick(event)}
-              icon=<MoreHorizIcon />
+              icon={<MoreHorizIcon />}
             />
             <ToolbarMenuButton
-              title="This button has currently no function"
+              title={t('editor:common.letterViewContainer.toolbarRight.withoutFunction')}
               selected={selectedItemRight === EditorConstants.compMappingRight.ASSIGNED}
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
-              icon=<AssignmentIcon />
+              icon={<AssignmentIcon />}
             />
 
             <ToolbarMenuButton
-              title="Add letter to favourite list"
+              title={t('editor:common.letterViewContainer.toolbarRight.addLetterToFavourite')}
               selected={selectedItemRight === EditorConstants.compMappingRight.SET_FAVOURITE}
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
-              icon=<StarOutlineIcon />
+              icon={<StarOutlineIcon />}
             />
 
             <ToolbarMenuButton
-              title="Publish letter to backend"
+              title={t('editor:common.letterViewContainer.toolbarRight.addLetterToFavourite')}
               selected={selectedItemRight === EditorConstants.compMappingRight.PUBLISH_LETTER}
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
-              icon=<CloudUploadOutlinedIcon />
+              icon={<CloudUploadOutlinedIcon />}
             />
 
             <ToolbarMenuButton
-              title={isCodeView ? 'Switch to WYSIWYG view' : 'Switch to Code view'}
+              title={
+                isCodeView
+                  ? t('editor:common.letterViewContainer.toolbarRight.switchWYSIWYG')
+                  : t('editor:common.letterViewContainer.toolbarRight.switchXML')
+              }
               selected={isCodeView}
               onClick={handleToggleCodeview}
               icon={<CodeIcon color={isCodeView ? 'primary' : 'action'} />}
             />
 
             <ToolbarMenuButton
-              title="Reset letter status"
+              title={t('editor:common.letterViewContainer.toolbarRight.resetLetter')}
               selected={stateEditorLetter.undoAvailable || stateEditorLetter.redoAvailable}
               onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
-              icon=<RestartAltIcon />
+              icon={<RestartAltIcon />}
             />
           </Stack>
         </Box>
