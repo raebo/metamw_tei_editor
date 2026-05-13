@@ -1,4 +1,69 @@
-import { EditorUtils } from '../../../src/utils/editor'; // Adjust the path based on your project structure
+import { EditorUtils } from '@src/utils/editor'; // Adjust the path based on your project structure
+import { pathMatchesWithWildcard } from '@src/utils/editor/xmlCheck'; // Adjust the path based on your project structure
+
+describe('pathMatchesWithWildcard', () => {
+  const testCases = [
+    // Exakter Match ohne Wildcard
+    {
+      full: 'tei text body div p persname',
+      pattern: 'tei text body div p persname',
+      expected: true,
+    },
+    {
+      full: 'tei text body div p persname',
+      pattern: 'tei text body div p placename',
+      expected: false,
+    },
+
+    // Wildcard matcht 0 Segmente
+    {
+      full: 'tei text body div p persname',
+      pattern: 'tei text body div p * persname',
+      expected: true,
+    },
+
+    // Wildcard matcht 1 Segment
+    {
+      full: 'tei text body div p app persname',
+      pattern: 'tei text body div p * persname',
+      expected: true,
+    },
+
+    // Wildcard matcht 2 Segmente
+    {
+      full: 'tei text body div p app lem persname',
+      pattern: 'tei text body div p * persname',
+      expected: true,
+    },
+
+    // Endet auf "name", nicht auf "persname" → kein Match
+    {
+      full: 'tei text body div p app lem persname name',
+      pattern: 'tei text body div p * persname',
+      expected: false,
+    },
+
+    // Wildcard + letztes Segment "name"
+    {
+      full: 'tei text body div p app lem persname name',
+      pattern: 'tei text body div p * persname name',
+      expected: true,
+    },
+
+    // Mehrere Wildcards
+    {
+      full: 'tei text body div p app lem persname name',
+      pattern: 'tei * div p * persname name',
+      expected: true,
+    },
+  ];
+
+  testCases.forEach(({ full, pattern, expected }, index) => {
+    test(`Test ${index + 1}: "${pattern}" against "${full}"`, () => {
+      expect(pathMatchesWithWildcard(full, pattern)).toBe(expected);
+    });
+  });
+});
 
 describe('EditorUtils.xmlCheck.checkSelectionRestrictedTags', () => {
   let xmlDoc: Document;
@@ -30,7 +95,14 @@ describe('EditorUtils.xmlCheck.checkSelectionRestrictedTags', () => {
     const selectionEnd = 22;
     const restrictedTags = ['teiHeader'];
 
-    expect(EditorUtils.xmlCheck.checkSelectionRestrictedTags(xmlDoc, selectionStart, selectionEnd, restrictedTags)).toBe(false);
+    expect(
+      EditorUtils.xmlCheck.checkSelectionRestrictedTags(
+        xmlDoc,
+        selectionStart,
+        selectionEnd,
+        restrictedTags,
+      ),
+    ).toBe(false);
   });
 
   test('should return false for selection overlapping <hi>', () => {
@@ -38,7 +110,14 @@ describe('EditorUtils.xmlCheck.checkSelectionRestrictedTags', () => {
     const selectionEnd = 35;
     const restrictedTags = ['teiHeader', 'persName', 'hi'];
 
-    expect(EditorUtils.xmlCheck.checkSelectionRestrictedTags(xmlDoc, selectionStart, selectionEnd, restrictedTags)).toBe(false);
+    expect(
+      EditorUtils.xmlCheck.checkSelectionRestrictedTags(
+        xmlDoc,
+        selectionStart,
+        selectionEnd,
+        restrictedTags,
+      ),
+    ).toBe(false);
   });
 
   test('should return false for selection inside <persName>', () => {
@@ -46,7 +125,14 @@ describe('EditorUtils.xmlCheck.checkSelectionRestrictedTags', () => {
     const selectionEnd = 60;
     const restrictedTags = ['teiHeader', 'persName', 'hi'];
 
-    expect(EditorUtils.xmlCheck.checkSelectionRestrictedTags(xmlDoc, selectionStart, selectionEnd, restrictedTags)).toBe(false);
+    expect(
+      EditorUtils.xmlCheck.checkSelectionRestrictedTags(
+        xmlDoc,
+        selectionStart,
+        selectionEnd,
+        restrictedTags,
+      ),
+    ).toBe(false);
   });
 
   test('should return true for selection within safe areas', () => {
@@ -54,6 +140,13 @@ describe('EditorUtils.xmlCheck.checkSelectionRestrictedTags', () => {
     const selectionEnd = 37;
     const restrictedTags = ['teiHeader', 'persName', 'hi'];
 
-    expect(EditorUtils.xmlCheck.checkSelectionRestrictedTags(xmlDoc, selectionStart, selectionEnd, restrictedTags)).toBe(true);
+    expect(
+      EditorUtils.xmlCheck.checkSelectionRestrictedTags(
+        xmlDoc,
+        selectionStart,
+        selectionEnd,
+        restrictedTags,
+      ),
+    ).toBe(true);
   });
 });

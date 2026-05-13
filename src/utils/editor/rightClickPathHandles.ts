@@ -4,7 +4,6 @@ import { NodeType, nodeTypes, NodeTypes } from './nodeTypes';
 import { MenuItemType } from '@src/components/editor/letter/Util/ContextMenuLetterItems';
 import { EditorUtils } from './index';
 import { EditorConstants } from '@src/constants/editor';
-import { node } from 'webpack';
 
 export interface NodeAncestorPath {
   parentPath: string | string[];
@@ -49,7 +48,7 @@ export namespace rightClickPathHandles {
     {
       parentPath: ['tei teiheader filedesc sourcedesc msDesc history provenance p'],
       nodeType: nodeTypes.get(NodeTypes.PROVENANCE_ENTRY),
-      checkElementDetails: (nodeElement: Element): boolean => {
+      checkElementDetails: (_nodeElement: Element): boolean => {
         return true;
       },
       deleteNodeCallback: (node: Element): Node => {
@@ -73,7 +72,7 @@ export namespace rightClickPathHandles {
 
         return baseParentNode;
       },
-      afterActionCallback: (xmlDoc: Document, node: Node) => {
+      afterActionCallback: (xmlDoc: Document, _node: Node) => {
         return xmlCheck.serializeDocument(xmlDoc);
       },
     },
@@ -239,13 +238,21 @@ export namespace rightClickPathHandles {
     },
   ];
 
-  export const removeAnnotationFromNOde = (): NodeAncestorPath[] => [
+  export const removeAnnotationFromNode = (): NodeAncestorPath[] => [
     {
       parentPath: [
-        'tei text body div p persName',
+        'tei text body div p persName name',
+        'tei text body div p * persName',
+        'tei text body div p * persName name',
+        'tei text body div p * placeName',
         'tei text body div p placeName',
+        'tei text body div p * placeName name',
+        'tei text body div p * title',
+        'tei text body div p * title name',
         'tei text body div p title',
+        'tei text body div p title name',
         'tei text body div p date',
+        'tei text body div p * date',
       ],
       nodeType: nodeTypes.get(NodeTypes.ANNOTATION),
       checkElementDetails: (_nodeElement: Element): boolean => {
@@ -409,7 +416,7 @@ export namespace rightClickPathHandles {
 
   export const pathHandlerFactory = (menuItemsNoMarking: MenuItemType[]) => [
     {
-      paths: EditorUtils.rightClickPathHandles.removeAnnotationFromNOde(),
+      paths: EditorUtils.rightClickPathHandles.removeAnnotationFromNode(),
       getMenuItems: (_node: Node) => {
         const item = menuItemsNoMarking.find(
           (i) => i.identifier === EditorConstants.menuItemTypes.REMOVE_ANNOTATION,

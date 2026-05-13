@@ -3,7 +3,34 @@ import React from 'react';
 import { NodeAncestorPath } from './rightClickPathHandles';
 import { EditorConstants, TmpIdPrefix } from '@src/constants/editor';
 
+export const pathMatchesWithWildcard = (fullPath: string, pattern: string): boolean => {
+  const fullParts = fullPath.split(' ');
+  const patternParts = pattern.toLowerCase().split(' ');
+
+  const match = (fi: number, pi: number): boolean => {
+    if (pi === patternParts.length) return fi === fullParts.length;
+    if (patternParts[pi] === '*') {
+      for (let i = fi; i <= fullParts.length; i++) {
+        if (match(i, pi + 1)) return true;
+      }
+      return false;
+    }
+    if (fi >= fullParts.length) return false;
+    return fullParts[fi] === patternParts[pi] && match(fi + 1, pi + 1);
+  };
+
+  return match(0, 0);
+};
+
 export const xmlCheck = {
+  getAncestorByFilter(node: Node, filter: (node: Node) => boolean): Node | null {
+    let current = node.parentNode;
+    while (current) {
+      if (filter(current)) return current;
+      current = current.parentNode;
+    }
+    return null;
+  },
   // be careful with the path syntax: When giving an attribute, do not forget the @ before the attribute name
   // this is correct:  EditorUtils.xmlCheck.queryPath(teiHeader, `fileDesc > titleStmt > title[@type='${titleType}']`)
   // this is incorrect: EditorUtils.xmlCheck.queryPath(teiHeader, `fileDesc > titleStmt > title[type='${titleType}']`)
@@ -233,18 +260,14 @@ export const xmlCheck = {
     const matchingEntry = nodeAncestorPaths.find((entry) => {
       const paths = Array.isArray(entry.parentPath) ? entry.parentPath : [entry.parentPath];
 
-      // if (
-      //   paths.includes('tei teiheader filedesc sourcedesc msDesc msIdentifier history provenance')
-      // ) {
+      // if (paths.includes('tei text body div p title name')) {
       //   console.log('parent path: ', paths.toString());
       //   console.log('ancestorNodeNames: ', ancestorNodeNames);
       // }
-
-      const pathMatches = paths.some((path) => path.toLowerCase() === ancestorNodeNames);
+      const pathMatches = paths.some((path) =>
+        pathMatchesWithWildcard(ancestorNodeNames, path.toLowerCase()),
+      );
       const attributesMatch = entry.checkAttributes ? entry.checkAttributes(node as Element) : true;
-
-      // console.log("pathMatches ", pathMatches);
-
       return pathMatches && attributesMatch;
     });
 

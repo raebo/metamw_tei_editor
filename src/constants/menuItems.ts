@@ -144,10 +144,19 @@ export const getMenuItemsNoMarking = (
         }
         if (!node) throw new Error('No node given as value');
 
+        const targetNode = EditorUtils.xmlCheck.getAncestorByFilter(node, (n) =>
+          ['persName', 'placeName', 'title', 'date']
+            .map((x) => x.toLowerCase())
+            .includes(n.nodeName.toLowerCase()),
+        );
+
+        if (!targetNode) throw new Error('No annotation ancestor found');
+
         const refNode = EditorUtils.xmlCheck.getNodeByPath(
           currentDoc,
-          EditorUtils.xmlCheck.getNodePath(node),
+          EditorUtils.xmlCheck.getNodePath(targetNode),
         );
+
         EditorUtils.textMarking.unwrapNode(refNode as Element);
 
         if (!refNode) throw new Error('No refNode found in current XML document');
