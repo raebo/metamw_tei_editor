@@ -1,13 +1,13 @@
 import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { Autocomplete, Checkbox, FormControlLabel, Stack, TextField } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
-import { searchForLetterNameTitle } from '../../../../../../services/editor/apiLettersRequest.service';
-import { EditorLetter } from '../../../../../../services/mappings/editorMappings';
+import { searchForLetterNameTitle } from '@src/services/editor/apiLettersRequest.service';
+import { EditorLetter } from '@src/services/mappings/editorMappings';
 import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
-import { MiscUtils } from '../../../../../../utils/misc';
-import { EditorConstants } from '../../../../../../constants/editor';
-import { EditorUtils } from '../../../../../../utils/editor';
+import { MiscUtils } from '@src/utils/misc';
+import { EditorConstants } from '@src/constants/editor';
+import { EditorUtils } from '@src/utils/editor';
 
 const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
   const [prevLetterType, setPrevLetterType] = useState<
