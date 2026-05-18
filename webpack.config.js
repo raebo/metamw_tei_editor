@@ -124,9 +124,18 @@ module.exports = (env, argv) => {
             directory: path.resolve(__dirname, 'dist'),
           },
           historyApiFallback: true,
+          host: 'editor.metamw.local',
           hot: true,
           port: 5000,
           open: true,
+          allowedHosts: ['editor.metamw.local'],
+          server: {
+            type: 'https',
+            options: {
+              key:  path.resolve(__dirname, 'certs/editor.metamw.local-key.pem'),
+              cert: path.resolve(__dirname, 'certs/editor.metamw.local.pem'),
+            },
+          }
         }
       : undefined,
   };
