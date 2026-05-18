@@ -124,6 +124,7 @@ module.exports = (env, argv) => {
             directory: path.resolve(__dirname, 'dist'),
           },
           historyApiFallback: true,
+          host: 'editor.metamw.local',
           hot: true,
           port: 5000,
           open: true,

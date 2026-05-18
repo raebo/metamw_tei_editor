@@ -56,7 +56,7 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             fullWidth
             error={emailError}
-            helperText={emailError ? t('login.errors.eamil') : ''}
+            helperText={emailError ? t('login.errors.email') : ''}
             margin="normal"
           />
           <TextField
@@ -66,7 +66,7 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             fullWidth
             error={passwordError}
-            helperText={passwordError ? t('login.errors.eamil') : ''}
+            helperText={passwordError ? t('login.errors.email') : ''}
             margin="normal"
           />
           <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>

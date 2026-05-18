@@ -262,6 +262,12 @@ const ShowEditor = () => {
       component: <HelpShortcutsContainer />,
       action: () => true,
     },
+    [EditorConstants.compMappingLeft.READONLY_VIEW]: {
+      name: EditorConstants.compMappingLeft.HELP_SHORTCUTS,
+      showContainer: true,
+      component: <OnlyReadEditorPanel />,
+      action: () => true,
+    },
   };
 
   const componentMappingRight: Record<string, ComponentMappingItem> = {
@@ -448,8 +454,8 @@ const ShowEditor = () => {
             />
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarLeft.readonlyView')}
-              selected={showSecondEditor}
-              onClick={() => setShowSecondEditor((prev) => !prev)}
+              selected={selectedItemRight === EditorConstants.compMappingLeft.READONLY_VIEW}
+              onClick={() => setSelectedItem(EditorConstants.compMappingLeft.READONLY_VIEW, null)}
               icon={<SplitscreenIcon />}
             />
           </Stack>
