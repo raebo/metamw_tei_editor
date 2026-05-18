@@ -3,7 +3,10 @@ import { Autocomplete, Box, Grid, TextField, Typography } from '@mui/material';
 import { EditorLetter } from '@src/services/mappings/editorMappings';
 import { EditorConstants } from '@src/constants/editor';
 import { MiscUtils } from '@src/utils/misc';
-import { fetchLetterXmlContent, fetchSearchLetters } from '@src/services/editor/apiLettersRequest.service';
+import {
+  fetchLetterXmlContent,
+  fetchSearchLetters,
+} from '@src/services/editor/apiLettersRequest.service';
 import XMLDisplayParser from '@src/components/editor/letter/Center/LetterViewContainer/XmlDisplayParser';
 import { useSelector } from 'react-redux';
 import { RootState, store } from '@src/redux/redux.store';
@@ -18,8 +21,12 @@ const OnlyReadEditorPanel: React.FC = () => {
   const xmlContentRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
 
-  const stateReadableLetter = useSelector((state: RootState) => state.editorLetter.onlyReadableLetter);
-  const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize);
+  const stateReadableLetter = useSelector(
+    (state: RootState) => state.editorLetter.onlyReadableLetter,
+  );
+  const stateLetterFontSize = useSelector(
+    (state: RootState) => state.auth.settings?.letterFontSize,
+  );
 
   const [xmlContent, setXmlContent] = useState<string | null>(null);
   const [autocompleteOptions, setAutocompleteOptions] = useState<EditorLetter[]>([]);
@@ -39,16 +46,21 @@ const OnlyReadEditorPanel: React.FC = () => {
   // During open panel: listening to external changes
   useEffect(() => {
     if (!stateReadableLetter?.id) return;
-    setAutocompleteLetter({ id: stateReadableLetter.id, name: stateReadableLetter.name } as EditorLetter);
+    setAutocompleteLetter({
+      id: stateReadableLetter.id,
+      name: stateReadableLetter.name,
+    } as EditorLetter);
     setXmlContent(stateReadableLetter.xmlContent);
-  }, [stateReadableLetter?.id]);
+  }, [stateReadableLetter.id, stateReadableLetter.name, stateReadableLetter.xmlContent]);
 
   const onValueChange = async (chosenLetter: EditorLetter | null) => {
     if (!chosenLetter?.id) return;
     try {
       const xml = await fetchLetterXmlContent(chosenLetter.id);
       if (xml) {
-        dispatch(setReadableLetter({ id: chosenLetter.id, name: chosenLetter.name, xmlContent: xml }));
+        dispatch(
+          setReadableLetter({ id: chosenLetter.id, name: chosenLetter.name, xmlContent: xml }),
+        );
         setXmlContent(xml);
       } else {
         enqueueSnackbar('Fehler: Kein XML-Inhalt gefunden', { variant: 'error' });
@@ -81,7 +93,6 @@ const OnlyReadEditorPanel: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-
       {/* Searchbox– fix */}
       <Box
         sx={{
@@ -103,7 +114,10 @@ const OnlyReadEditorPanel: React.FC = () => {
               value={autocompleteLetter}
               onChange={(_, newValue) => void onValueChange(newValue)}
               onInputChange={(_, inputValue, reason) => {
-                if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
+                if (
+                  inputValue &&
+                  reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
+                ) {
                   void onInputChange(inputValue);
                 }
               }}
@@ -137,13 +151,16 @@ const OnlyReadEditorPanel: React.FC = () => {
 
       {/* XML-View– takes the rest space */}
       <Box sx={{ flex: 1, overflow: 'auto', padding: '8px', backgroundColor: '#ffffff' }}>
-        <div className="letter-xml" id="onlyReadletterXml" style={{ fontSize: `${stateLetterFontSize}%` }}>
+        <div
+          className="letter-xml"
+          id="onlyReadletterXml"
+          style={{ fontSize: `${stateLetterFontSize}%` }}
+        >
           <div id="onlyReadletterXmlContent" style={{ padding: 20 }}>
             {parserXmlMemo}
           </div>
         </div>
       </Box>
-
     </Box>
   );
 };

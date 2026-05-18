@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, IconButton, Stack } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import SearchIcon from '@mui/icons-material/Search';
@@ -11,6 +11,7 @@ import FavouritesContainer from '@src/components/editor/letter/Left/Favourites/F
 import AssignedContainer from '@src/components/editor/letter/Right/Assigned/AssignedContainer';
 import { ComponentMappingItem, type PinnedLetter } from '@src/services/mappings/editorMappings';
 import { handleFavouriteClick } from '@src/components/editor/letter/Right/Favourite/LetterFavouriteHandling';
+
 const LetterViewContainer = React.lazy(() =>
   import('@src/components/editor/letter/Center/LetterViewContainer').catch((_err) => {
     window.location.reload(); // oder Redirect zur Startseite
@@ -64,9 +65,107 @@ export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
 }
 
-const SECOND_EDITOR_MIN_WIDTH = 150;
-const SECOND_EDITOR_MAX_WIDTH = 700;
-const SECOND_EDITOR_DEFAULT_WIDTH = 320;
+const LEFT_EDITOR_MIN_WIDTH = 15;
+const LEFT_EDITOR_MAX_WIDTH = 60;
+const LEFT_EDITOR_DEFAULT_WIDTH = 30;
+
+const componentMappingLeft: Record<string, ComponentMappingItem> = {
+  [EditorConstants.compMappingLeft.SEARCH]: {
+    name: EditorConstants.compMappingLeft.SEARCH,
+    showContainer: true,
+    component: <SearchContainer />,
+    action: () => true,
+  },
+  [EditorConstants.compMappingLeft.FAVOURITES]: {
+    name: EditorConstants.compMappingLeft.FAVOURITES,
+    showContainer: true,
+    component: <FavouritesContainer />,
+    action: () => true,
+  },
+  [EditorConstants.compMappingLeft.HELP_SHORTCUTS]: {
+    name: EditorConstants.compMappingLeft.HELP_SHORTCUTS,
+    showContainer: true,
+    component: <HelpShortcutsContainer />,
+    action: () => true,
+  },
+  [EditorConstants.compMappingLeft.READONLY_VIEW]: {
+    name: EditorConstants.compMappingLeft.HELP_SHORTCUTS,
+    showContainer: true,
+    component: <OnlyReadEditorPanel />,
+    action: () => true,
+  },
+};
+
+interface MappingDependencies {
+  letterId: string | undefined;
+  setModalDialog: (type: string) => void;
+  handleFavouriteClick: (id: string, value: boolean) => void;
+  xmlRefCenter: React.RefObject<HTMLDivElement>;
+}
+
+const createComponentMappingRight = (
+  deps: MappingDependencies,
+): Record<string, ComponentMappingItem> => ({
+  [EditorConstants.compMappingRight.ASSIGNED]: {
+    name: EditorConstants.compMappingRight.ASSIGNED,
+    showContainer: true,
+    component: <AssignedContainer />,
+    action: () => true,
+  },
+  [EditorConstants.compMappingRight.SET_FAVOURITE]: {
+    name: EditorConstants.compMappingRight.SET_FAVOURITE,
+    showContainer: false,
+    action: () => handleFavouriteClick(deps.letterId, true),
+  }, // Example with a function
+  [EditorConstants.compMappingRight.PUBLISH_LETTER]: {
+    name: EditorConstants.compMappingRight.PUBLISH_LETTER,
+    showContainer: false,
+    component: null,
+    action: () => deps.setModalDialog(EditorConstants.dialogTypes.PUBLISH_LETTER),
+  },
+  [EditorConstants.compMappingRight.ENT_PERSON]: {
+    name: EditorConstants.compMappingRight.ENT_PERSON,
+    showContainer: true,
+    component: <EntityPersonContainer xmlRef={deps.xmlRefCenter} />,
+    action: () => true,
+  },
+  [EditorConstants.compMappingRight.ENT_PLACE]: {
+    name: EditorConstants.compMappingRight.ENT_PLACE,
+    showContainer: true,
+    component: <EntityPlaceContainer xmlRef={deps.xmlRefCenter} />,
+    action: () => true,
+  },
+  [EditorConstants.compMappingRight.ENT_CREATION]: {
+    name: EditorConstants.compMappingRight.ENT_CREATION,
+    showContainer: true,
+    component: <EntityCreationContainer xmlRef={deps.xmlRefCenter} />,
+    action: () => true,
+  },
+  [EditorConstants.compMappingRight.ENT_FMBC_CREATION]: {
+    name: EditorConstants.compMappingRight.ENT_FMBC_CREATION,
+    showContainer: true,
+    component: <EntityProtagCreationContainer xmlRef={deps.xmlRefCenter} />,
+    action: () => true,
+  },
+  [EditorConstants.compMappingRight.ENT_LETTER]: {
+    name: EditorConstants.compMappingRight.ENT_LETTER,
+    showContainer: true,
+    component: <EntityLetterContainer />,
+    action: () => true,
+  },
+  [EditorConstants.compMappingRight.ENT_NODE_INFO]: {
+    name: EditorConstants.compMappingRight.ENT_NODE_INFO,
+    showContainer: true,
+    component: <EntityNodeInfo />,
+    action: () => true,
+  },
+  [EditorConstants.dialogTypes.RESET_LETTER]: {
+    name: EditorConstants.dialogTypes.RESET_LETTER,
+    showContainer: false,
+    component: null,
+    action: () => deps.setModalDialog(EditorConstants.dialogTypes.RESET_LETTER),
+  },
+});
 
 const ShowEditor = () => {
   const { t } = useTranslation();
@@ -95,11 +194,11 @@ const ShowEditor = () => {
   const isDragging = useRef(false);
   const [isCodeView, setIsCodeView] = useState<boolean>(false);
 
-  const [isDraggingState, setIsDraggingState] = useState(false);
-  const [showSecondEditor, setShowSecondEditor] = useState(false);
-  const [secondEditorWidth, setSecondEditorWidth] = useState(SECOND_EDITOR_DEFAULT_WIDTH);
+  const [leftEditorWidth, setLeftEditorWidth] = useState(LEFT_EDITOR_DEFAULT_WIDTH);
 
   useEffect(() => {
+    if (isMounted.current) return;
+
     const setPinnedLetters = async () => {
       let pinnedLetters: PinnedLetter[] = [];
       if (letterId && letterName) {
@@ -113,32 +212,32 @@ const ShowEditor = () => {
         });
       }
       dispatch(setEditorPinnedLetters({ pinnedLetters }));
+
+      if (letterId !== undefined && letterId !== null && !isNaN(parseInt(letterId))) {
+        dispatch(
+          setEditorLetter({
+            letter: { id: parseInt(letterId), name: letterName, viewMode: 'WYSIWYG' },
+          }),
+        );
+      }
     };
 
-    if (!isMounted.current) {
+    const initialize = async () => {
       try {
-        setPinnedLetters();
-        if (letterId !== undefined && letterId !== null && !isNaN(parseInt(letterId))) {
-          dispatch(
-            setEditorLetter({
-              letter: { id: parseInt(letterId), name: letterName, viewMode: 'WYSIWYG' },
-            }),
-          );
-        }
+        await setPinnedLetters(); // ✅ wird jetzt korrekt awaited
         isMounted.current = true;
       } catch (error) {
         enqueueSnackbar(
           t('errors:editor.failedToFetchPinnedLetter', {
             reason: MiscUtils.misc.getErrorMessage(error),
           }),
-          {
-            variant: 'error',
-          },
+          { variant: 'error' },
         );
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    };
+
+    void initialize();
+  }, [dispatch, letterId, letterName, t]);
 
   useEffect(() => {
     if (stateEditorLetter.id !== undefined && stateEditorLetter.id !== null) {
@@ -171,20 +270,21 @@ const ShowEditor = () => {
 
   useEffect(() => {
     const validateLetterId = async () => {
-      if (letterId === undefined) {
+      if (letterId === undefined) return;
+
+      if (isNaN(Number(letterId))) {
+        navigate('/not-found', { state: { messageKey: 'missingLetterId' } });
         return;
       }
 
-      if (letterId && isNaN(Number(letterId))) {
-        navigate('/not-found', { state: { messageKey: 'missingLetterId' } }); // Redirect if `letterId` is missing
-        return;
+      try {
+        await letterExists(letterId);
+      } catch {
+        navigate('/not-found', { state: { messageKey: 'invalidLetterId' } });
       }
-
-      letterExists(letterId).catch((error) => {
-        navigate('/not-found', { state: { messageKey: 'invalidLetterId' } }); // Redirect if `letterId` is invalid
-      });
     };
-    validateLetterId();
+
+    void validateLetterId();
   }, [letterId, navigate]);
 
   useEffect(() => {
@@ -243,95 +343,6 @@ const ShowEditor = () => {
     setSelectedItemRight(newValue);
   };
 
-  const componentMappingLeft: Record<string, ComponentMappingItem> = {
-    [EditorConstants.compMappingLeft.SEARCH]: {
-      name: EditorConstants.compMappingLeft.SEARCH,
-      showContainer: true,
-      component: <SearchContainer />,
-      action: () => true,
-    },
-    [EditorConstants.compMappingLeft.FAVOURITES]: {
-      name: EditorConstants.compMappingLeft.FAVOURITES,
-      showContainer: true,
-      component: <FavouritesContainer />,
-      action: () => true,
-    },
-    [EditorConstants.compMappingLeft.HELP_SHORTCUTS]: {
-      name: EditorConstants.compMappingLeft.HELP_SHORTCUTS,
-      showContainer: true,
-      component: <HelpShortcutsContainer />,
-      action: () => true,
-    },
-    [EditorConstants.compMappingLeft.READONLY_VIEW]: {
-      name: EditorConstants.compMappingLeft.HELP_SHORTCUTS,
-      showContainer: true,
-      component: <OnlyReadEditorPanel />,
-      action: () => true,
-    },
-  };
-
-  const componentMappingRight: Record<string, ComponentMappingItem> = {
-    [EditorConstants.compMappingRight.ASSIGNED]: {
-      name: EditorConstants.compMappingRight.ASSIGNED,
-      showContainer: true,
-      component: <AssignedContainer />,
-      action: () => true,
-    },
-    [EditorConstants.compMappingRight.SET_FAVOURITE]: {
-      name: EditorConstants.compMappingRight.SET_FAVOURITE,
-      showContainer: false,
-      action: () => handleFavouriteClick(letterId, true),
-    }, // Example with a function
-    [EditorConstants.compMappingRight.PUBLISH_LETTER]: {
-      name: EditorConstants.compMappingRight.PUBLISH_LETTER,
-      showContainer: false,
-      component: null,
-      action: () => setModalDialog(EditorConstants.dialogTypes.PUBLISH_LETTER),
-    },
-    [EditorConstants.compMappingRight.ENT_PERSON]: {
-      name: EditorConstants.compMappingRight.ENT_PERSON,
-      showContainer: true,
-      component: <EntityPersonContainer xmlRef={xmlRefCenter} />,
-      action: () => true,
-    },
-    [EditorConstants.compMappingRight.ENT_PLACE]: {
-      name: EditorConstants.compMappingRight.ENT_PLACE,
-      showContainer: true,
-      component: <EntityPlaceContainer xmlRef={xmlRefCenter} />,
-      action: () => true,
-    },
-    [EditorConstants.compMappingRight.ENT_CREATION]: {
-      name: EditorConstants.compMappingRight.ENT_CREATION,
-      showContainer: true,
-      component: <EntityCreationContainer xmlRef={xmlRefCenter} />,
-      action: () => true,
-    },
-    [EditorConstants.compMappingRight.ENT_FMBC_CREATION]: {
-      name: EditorConstants.compMappingRight.ENT_FMBC_CREATION,
-      showContainer: true,
-      component: <EntityProtagCreationContainer xmlRef={xmlRefCenter} />,
-      action: () => true,
-    },
-    [EditorConstants.compMappingRight.ENT_LETTER]: {
-      name: EditorConstants.compMappingRight.ENT_LETTER,
-      showContainer: true,
-      component: <EntityLetterContainer />,
-      action: () => true,
-    },
-    [EditorConstants.compMappingRight.ENT_NODE_INFO]: {
-      name: EditorConstants.compMappingRight.ENT_NODE_INFO,
-      showContainer: true,
-      component: <EntityNodeInfo />,
-      action: () => true,
-    },
-    [EditorConstants.dialogTypes.RESET_LETTER]: {
-      name: EditorConstants.dialogTypes.RESET_LETTER,
-      showContainer: false,
-      component: null,
-      action: () => setModalDialog(EditorConstants.dialogTypes.RESET_LETTER),
-    },
-  };
-
   const setModalDialog = (dialogType: string) => {
     dispatch(setDialogType({ dialogType: dialogType }));
   };
@@ -386,24 +397,21 @@ const ShowEditor = () => {
     (e: React.MouseEvent) => {
       e.preventDefault();
       isDragging.current = true;
-      setIsDraggingState(true); // ← neu
 
       const startX = e.clientX;
-      const startWidth = secondEditorWidth;
+      const startWidth = leftEditorWidth;
 
       const onMouseMove = (moveEvent: MouseEvent) => {
-        if (!isDragging.current) return;
-        const delta = moveEvent.clientX - startX;
+        const deltaVw = ((moveEvent.clientX - startX) / window.innerWidth) * 100;
         const newWidth = Math.min(
-          Math.max(startWidth + delta, SECOND_EDITOR_MIN_WIDTH),
-          SECOND_EDITOR_MAX_WIDTH,
+          Math.max(startWidth + deltaVw, LEFT_EDITOR_MIN_WIDTH),
+          LEFT_EDITOR_MAX_WIDTH,
         );
-        setSecondEditorWidth(newWidth);
+        setLeftEditorWidth(newWidth);
       };
 
       const onMouseUp = () => {
         isDragging.current = false;
-        setIsDraggingState(false); // ← neu
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
       };
@@ -411,7 +419,18 @@ const ShowEditor = () => {
       window.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onMouseUp);
     },
-    [secondEditorWidth],
+    [leftEditorWidth],
+  );
+
+  const componentMappingRight = useMemo(
+    () =>
+      createComponentMappingRight({
+        letterId,
+        xmlRefCenter,
+        setModalDialog,
+        handleFavouriteClick,
+      }),
+    [letterId, xmlRefCenter, setModalDialog],
   );
 
   return (
@@ -462,37 +481,25 @@ const ShowEditor = () => {
         </Box>
 
         {showLeftContainer && (
-          <Box
-            ref={containerRef}
-            sx={{
-              display: 'flex',
-              width: '100%',
-              height: '100vh',
-              backgroundColor: '#f0f0f0',
-              userSelect: isDraggingState ? 'none' : 'auto',
-              cursor: isDraggingState ? 'col-resize' : 'auto',
-            }}
-          >
-            {selectedComponentLeft?.component}
-          </Box>
-        )}
-
-        {showSecondEditor && (
           <>
             <Box
+              ref={containerRef}
               sx={{
-                width: `${secondEditorWidth}px`,
-                flexShrink: 0,
-                overflow: 'hidden',
-                backgroundColor: '#eef4fb',
                 display: 'flex',
+                width: `${leftEditorWidth}vw`,
+                minWidth: `${LEFT_EDITOR_MIN_WIDTH}vw`,
+                maxWidth: `${LEFT_EDITOR_MAX_WIDTH}vw`,
+                flexShrink: 0,
                 flexDirection: 'column',
+                overflow: 'hidden',
+                height: '100vh',
+                backgroundColor: '#f0f0f0',
+                // userSelect: isDraggingState ? 'none' : 'auto',
+                // cursor: isDraggingState ? 'col-resize' : 'auto',
               }}
             >
-              <OnlyReadEditorPanel />
+              {selectedComponentLeft?.component}
             </Box>
-
-            {/* Vertikale Trennleiste – verschiebbar */}
             <Box
               onMouseDown={handleSplitterMouseDown}
               sx={{

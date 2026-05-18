@@ -2,27 +2,35 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { EditorConstants, LetterState, type ValidLeftClickNodeType } from '@src/constants/editor';
 import { useAppDispatch } from '@src/redux/hooks';
 import { enqueueSnackbar } from 'notistack';
-import { setClickedEntityNode, setEditorSelectedItem } from '@src/redux/slices/editor.letter.slice';
+import {
+  setClickedEntityNode,
+  setEditorSelectedItem,
+  setReadableLetter,
+} from '@src/redux/slices/editor.letter.slice';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
+import { fetchLetterDataByName } from '@src/services/editor/apiLettersRequest.service';
 
 interface UserActionMenuProps {
   xmlContentRef: React.RefObject<HTMLDivElement>;
   setLetterState: (letterState: LetterState) => void;
 }
 
+const validNodeList: string[] = ['title', 'persname', 'placename'];
+
 const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
   const dispatch = useAppDispatch();
   const editorSelectedLeftItem = useSelector(
     (state: RootState) => state.editorLetter.selectedItem.left,
+  );
+  const editorSelectedRightItem = useSelector(
+    (state: RootState) => state.editorLetter.selectedItem.right,
   );
   const selectedNodeXmlIdRef = useRef<string>('');
   const selectedNodeTypeRef = useRef<ValidLeftClickNodeType | null>(null);
   const selectedKeyValueRef = useRef<string>('');
 
   const xmlContentRef = props.xmlContentRef;
-
-  const validNodeList: string[] = ['title', 'persname', 'placename'];
 
   const checkForProtagCreationTitle = (titleNode: Element) => {
     const worksList = titleNode.querySelector('list[type="fmb_works_directory"]');
@@ -121,7 +129,7 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
     throw 'no valid place name node';
   };
 
-  const isValidTitleNode = (node: Element) => {
+  const isValidTitleNode = useCallback((node: Element) => {
     if (node.tagName.toLowerCase() !== 'title' && !selectedNodeTypeRef.current) return;
 
     checkForLetterTitle(node);
@@ -134,35 +142,64 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
     if (selectedNodeTypeRef.current !== null && selectedKeyValueRef.current.length > 0) return true;
 
     throw 'Not a valid left click node';
-  };
+  }, []);
 
-  const handleValidNodeLeftClick = () => {
-    if (
-      selectedNodeTypeRef.current == null ||
-      selectedNodeXmlIdRef.current.length === 0 ||
-      selectedKeyValueRef.current.length === 0
-    )
-      return false;
-
+  const handleLetterNodeClick = useCallback(async () => {
     dispatch(
       setClickedEntityNode({
         xmlId: selectedNodeXmlIdRef.current,
-        nodeType: selectedNodeTypeRef.current,
+        nodeType: selectedNodeTypeRef.current!,
         nodeTypeValue: selectedKeyValueRef.current,
       }),
     );
+
+    const editorLetter = await fetchLetterDataByName(selectedKeyValueRef.current);
+    if (!editorLetter?.xmlContent) {
+      enqueueSnackbar(`Letter with name ${selectedKeyValueRef.current} not found`, {
+        variant: 'error',
+      });
+      return;
+    }
+
+    dispatch(
+      setReadableLetter({
+        id: editorLetter.id,
+        name: editorLetter.name,
+        xmlContent: editorLetter.xmlContent,
+      }),
+    );
+
     dispatch(
       setEditorSelectedItem({
         selectedItem: {
-          left: editorSelectedLeftItem,
+          left: EditorConstants.compMappingLeft.READONLY_VIEW,
+          right: editorSelectedRightItem,
+        },
+      }),
+    );
+  }, [dispatch, editorSelectedRightItem]);
+
+  const handleEntityNodeClick = useCallback(() => {
+    dispatch(
+      setClickedEntityNode({
+        xmlId: selectedNodeXmlIdRef.current,
+        nodeType: selectedNodeTypeRef.current!,
+        nodeTypeValue: selectedKeyValueRef.current,
+      }),
+    );
+
+    dispatch(
+      setEditorSelectedItem({
+        selectedItem: {
+          left: null,
           right: EditorConstants.compMappingRight.ENT_NODE_INFO,
         },
       }),
     );
-  };
+  }, [dispatch]);
 
   const handleNodeLeftClick = useCallback(
-    (event: MouseEvent) => {
+    async (event: MouseEvent) => {
       event.preventDefault();
 
       const targetNode = event.target as Node;
@@ -171,7 +208,6 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
 
       if (!xmlId) return;
 
-      selectedNodeTypeRef.current = null;
       selectedNodeXmlIdRef.current = '';
       selectedKeyValueRef.current = '';
 
@@ -180,12 +216,17 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
       selectedNodeXmlIdRef.current = xmlId;
 
       try {
-        if (
-          isValidTitleNode(targetNode as Element) ||
+        if (!isValidTitleNode(targetNode as Element)) return;
+
+        const isLetter = checkForLetterTitle(targetNode as Element);
+
+        if (isLetter) {
+          await handleLetterNodeClick();
+        } else if (
           checkForPersNameNode(targetNode as Element) ||
           checkForPlaceNameNode(targetNode as Element)
         ) {
-          handleValidNodeLeftClick();
+          handleEntityNodeClick();
         }
       } catch (error) {
         enqueueSnackbar(
@@ -194,7 +235,7 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
         );
       }
     },
-    [isValidTitleNode],
+    [handleEntityNodeClick, handleLetterNodeClick, isValidTitleNode, validNodeList],
   );
 
   useEffect(() => {
