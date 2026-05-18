@@ -109,3 +109,13 @@ pm2 install pm2-logrotate
 pm2 set pm2-logrotate:rotateInterval '0 0 * * *'
 ```
 * the logs can be found in the /home/user/.pm2/logs
+
+
+## Lokales HTTPS Setup
+
+mkcert installieren und Zertifikate erstellen:
+
+    sudo apt install mkcert
+    mkcert -install
+    mkdir certs && cd certs
+    mkcert editor.metamw.local backend.metamw.local
