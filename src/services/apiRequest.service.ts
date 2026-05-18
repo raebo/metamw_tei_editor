@@ -96,7 +96,7 @@ export const initApi = (): AxiosInstance => {
         isRefreshing = true;
 
         try {
-          await AuthService.refresh(); // calls /jwt/auth/refresh
+          await AuthService.refresh(false); // calls /jwt/auth/refresh
           processQueue(null);
           return _axios(originalRequest); // retry failed request
         } catch (refreshError) {

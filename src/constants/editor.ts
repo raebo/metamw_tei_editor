@@ -151,6 +151,7 @@ export const EditorConstants = {
     SEARCH: 'SEARCH',
     FAVOURITES: 'FAVOURITES',
     HELP_SHORTCUTS: 'HELP_SHORTCUTS',
+    READONLY_VIEW: 'READONLY_VIEW',
   },
   compMappingRight: {
     USER_ACTIONS: 'USER_ACTIONS',

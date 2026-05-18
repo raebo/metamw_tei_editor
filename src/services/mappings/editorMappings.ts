@@ -30,6 +30,7 @@ export interface EditorLetter {
   lastUpdatedByName: string;
   lastUpdatedById: number;
   updatedAt: Date;
+  xmlContent: string | undefined;
 }
 export interface EditorEntity {
   id: number;
@@ -154,6 +155,7 @@ export const mapApiToEditorLetter = (apiLetter: any): EditorLetter => {
     lastUpdatedByName: apiLetter.last_updated_by_name,
     lastUpdatedById: apiLetter.last_updated_by_id,
     updatedAt: new Date(apiLetter.updated_at),
+    xmlContent: apiLetter.xml_content,
   };
 };
 

@@ -2,6 +2,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { PinnedLetter } from '@src/services/mappings/editorMappings';
 import type { ValidLeftClickNodeType } from '@src/constants/editor';
 
+export interface ClickedEntityNode {
+  xmlId: string | null;
+  nodeType: string | null;
+  nodeTypeValue: string | null;
+}
+
 interface EditorLetterSlice {
   letter: {
     id: number | null;
@@ -14,11 +20,7 @@ interface EditorLetterSlice {
     undoAvailable: boolean;
     redoAvailable: boolean;
     selectedIdentifier: number | null;
-    clickedEntityNode: {
-      xmlId: string | null;
-      nodeType: string | null;
-      nodeTypeValue: string | null;
-    };
+    clickedEntityNode: ClickedEntityNode;
   };
   onlyReadableLetter: {
     id: number | null;
