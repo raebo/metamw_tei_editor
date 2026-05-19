@@ -41,6 +41,16 @@ const generateCountryNode = (data: { name: string | null }): Element => {
 };
 
 export const markupGeneration = {
+  ensureElementPath: (xmlDoc: XMLDocument, parent: Element, tagNames: string[]): Element => {
+    return tagNames.reduce((currentParent, tagName) => {
+      const existing = currentParent.querySelector(':scope > ' + tagName);
+      if (existing) return existing;
+
+      const newElement = xmlDoc.createElementNS(EditorConstants.TEI_NS, tagName);
+      currentParent.appendChild(newElement);
+      return newElement;
+    }, parent);
+  },
   generateXmlId: (xmlType: string): string => {
     return `${xmlType}_${uuidv4()}`;
   },
@@ -62,8 +72,17 @@ export const markupGeneration = {
     attachmentType: string,
     attachmentName: string,
   ): { contentChanged: boolean } => {
-    const listBibl = xmlDoc.querySelector('teiHeader sourceDesc msDesc physDesc accMat listBibl');
-    if (!listBibl) return { contentChanged: false };
+    const teiHeader = xmlDoc.querySelector('teiHeader');
+    if (!teiHeader) return { contentChanged: false };
+
+    const listBibl = EditorUtils.markupGeneration.ensureElementPath(xmlDoc, teiHeader, [
+      'fileDesc',
+      'sourceDesc',
+      'msDesc',
+      'physDesc',
+      'accMat',
+      'listBibl',
+    ]);
 
     const existingBiblEntries = listBibl.querySelectorAll('bibl');
 

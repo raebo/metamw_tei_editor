@@ -1,5 +1,4 @@
 import { xmlCheck } from './xmlCheck';
-import { markupGeneration } from './markupGeneration';
 import { NodeType, nodeTypes, NodeTypes } from './nodeTypes';
 import { MenuItemType } from '@src/components/editor/letter/Util/ContextMenuLetterItems';
 import { EditorUtils } from './index';
@@ -83,8 +82,24 @@ export namespace rightClickPathHandles {
         const typeValue = nodeElement.getAttribute('type');
         return !!(typeValue && typeValue !== 'none');
       },
-      afterActionCallback: (xmlDoc: Document, node: Node) => {
-        handleBiblNode(xmlDoc, node);
+      deleteNodeCallback: (biblNode: Element): Node => {
+        const listBibl = biblNode.parentNode;
+        if (!listBibl) throw new Error('listBibl not found');
+
+        listBibl.removeChild(biblNode);
+
+        if (listBibl.children.length === 0) {
+          const noneBibl = (listBibl as Element).ownerDocument!.createElementNS(
+            EditorConstants.TEI_NS,
+            'bibl',
+          );
+          noneBibl.setAttribute('type', 'none');
+          listBibl.appendChild(noneBibl);
+        }
+
+        return listBibl;
+      },
+      afterActionCallback: (xmlDoc: Document, _node: Node) => {
         return xmlCheck.serializeDocument(xmlDoc);
       },
     },
@@ -410,7 +425,6 @@ export namespace rightClickPathHandles {
     },
   ): string => {
     const baseNode = deleteStrategy(node as Element);
-
     return onSuccess(xmlCheck.createDocumentFromNodeToTeiRoot(baseNode), baseNode);
   };
 
@@ -541,10 +555,3 @@ export namespace rightClickPathHandles {
     },
   ];
 }
-
-// --- helper for attachments
-const handleBiblNode = (xmlDoc: Document, node: Node) => {
-  if (node.childNodes.length > 0) return xmlCheck.serializeDocument(xmlDoc);
-
-  markupGeneration.addAttachmentMarkup(xmlDoc, 'none', '');
-};
