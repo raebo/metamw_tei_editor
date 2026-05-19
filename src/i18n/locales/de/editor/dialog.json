@@ -1,4 +1,10 @@
 {
+  "authentication": {
+    "inactivity": {
+      "title": "Sitzung läuft ab",
+      "body": "Sie werden in 1 Minute aufgrund von Inaktivität abgemeldet"
+    }
+  },
   "titles": {
     "addGreetingsFormula": "Begrüßungsformel Hinzufügen",
     "addNewLetter": "Neuen Brief Hinzufügen",

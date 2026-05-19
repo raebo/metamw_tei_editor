@@ -1,11 +1,10 @@
 import { API_ENDPOINTS } from '@src/constants/url';
 import axios from 'axios';
-import { initApi } from '@src/services/apiRequest.service';
 
 export const AuthService = {
   async getMe() {
     try {
-      const response = await initApi().get(`${API_ENDPOINTS.AUTH}/me`, {
+      const response = await axios.get(`${API_ENDPOINTS.AUTH}/me`, {
         withCredentials: true,
       });
       return response.data;
@@ -20,8 +19,6 @@ export const AuthService = {
       { email, password },
       { withCredentials: true },
     );
-
-    console.log("response.data: ", response.data)
 
     return response.data;
   },

@@ -1,4 +1,10 @@
 {
+  "authentication": {
+    "inactivity": {
+      "title": "Session expiring",
+      "body": "You will be automatically logged out in 1 minute due to inactivity."
+    }
+  },
   "titles": {
     "addGreetingsFormula": "Add Greeting Formula",
     "addNewLetter": "Add New Letter",
