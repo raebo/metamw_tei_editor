@@ -1,15 +1,18 @@
 import { EditorConstants, MenuItem } from './editor';
 import { enqueueSnackbar } from 'notistack';
-import { EditorUtils } from '../utils/editor';
+import { EditorUtils } from '@src/utils/editor';
 import {
   setDialogType,
   setEditorLetterActOfWriting,
   setReloadLetterContent,
   setSelectedIdentifier,
   setXmlLetterContent,
-} from '../redux/slices/editor.letter.slice';
-import { MiscUtils } from '../utils/misc';
-import { setEditorDialogAndReferenceThunk } from '../redux/thunks/editor.letter.thunk';
+} from '@src/redux/slices/editor.letter.slice';
+import { MiscUtils } from '@src/utils/misc';
+import { setEditorDialogAndReferenceThunk } from '@src/redux/thunks/editor.letter.thunk';
+import i18n from 'i18next';
+
+const t = i18n.t.bind(i18n);
 
 export const getMenuItemsNoMarking = (
   dispatch: any,
@@ -18,7 +21,7 @@ export const getMenuItemsNoMarking = (
 ): MenuItem[] => [
   {
     identifier: EditorConstants.menuItemTypes.MANAGE_PRECURSOR_LETTER,
-    label: 'Vorgänger Brief bearbeiten',
+    label: t('editor:common.menuItems.managePrecursorLetter'),
     action: async ({ node }: { node?: Node }) => {
       if (!node) {
         enqueueSnackbar('The given node is undefined', { variant: 'error' });
@@ -30,7 +33,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.MANAGE_SUCCESSOR_LETTER,
-    label: 'Vorgänger Brief bearbeiten',
+    label: t('editor:common.menuItems.manageSuccessorLetter'),
     action: async ({ node }: { node?: Node }) => {
       if (!node) {
         enqueueSnackbar('The given node is undefined', { variant: 'error' });
@@ -42,7 +45,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.MANAGE_RISM_ENTRY,
-    label: 'RISM Eintrag Bearbeiten',
+    label: t('editor:common.menuItems.manageRismEntry'),
     action: async ({ node }: { node?: Node }) => {
       if (!node) {
         enqueueSnackbar('The given node is undefined', { variant: 'error' });
@@ -80,7 +83,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.MANAGE_PROVENANCE_ENTRY,
-    label: 'Provenienz Eintrag Bearbeiten',
+    label: t('editor:common.menuItems.manageProvenanceEntry'),
     action: async ({ node }: { node?: Node }) => {
       if (!node) {
         enqueueSnackbar('The given node is undefined', { variant: 'error' });
@@ -134,7 +137,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.REMOVE_ANNOTATION,
-    label: 'Auszeichnung Entfernen',
+    label: t('editor:common.menuItems.removeAnnotation'),
     action: async ({ node }: { node?: Node }) => {
       try {
         const currentDoc = xmlDocRef.current;
@@ -182,17 +185,17 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.WRITING_ACT.LABEL_MOVE_DOWN,
-    label: 'Verschieben Unten',
+    label: t('editor:common.menuItems.labelMoveDown'),
     type: 'inactive',
   },
   {
     identifier: EditorConstants.menuItemTypes.WRITING_ACT.LABEL_MOVE_UP,
-    label: 'Verschieben Oben',
+    label: t('editor:common.menuItems.labelMoveUp'),
     type: 'inactive',
   },
   {
     identifier: EditorConstants.menuItemTypes.WRITING_ACT.MOVE_DOWN,
-    label: 'Verschieben Unten',
+    label: t('editor:common.menuItems.moveDown'),
     action: async ({ node }: { node?: Node }) => {
       try {
         const currentDoc = xmlDocRef.current;
@@ -224,7 +227,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.WRITING_ACT.MOVE_UP,
-    label: 'Verschieben Oben',
+    label: t('editor:common.menuItems.moveUp'),
     action: async ({ node }: { node?: Node }) => {
       try {
         const currentDoc = xmlDocRef.current;
@@ -256,7 +259,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_AUTHOR_WRITER,
-    label: 'Schreiber/Autoren Verwalten',
+    label: t('editor:common.menuItems.manageAuthorWriter'),
     action: async ({ node }: { node?: Node }) => {
       try {
         if (!node) throw new Error('No node given as value');
@@ -280,7 +283,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.MANAGE_TEXT_ADDRESS,
-    label: 'Adresse Bearbeiten',
+    label: t('editor:common.menuItems.manageTextAddress'),
     action: async ({ node }: { node?: Node }) => {
       try {
         if (!node) throw new Error('No node given as value');
@@ -288,7 +291,6 @@ export const getMenuItemsNoMarking = (
         const ancestorNodeNames = EditorUtils.xmlCheck.getAncestorsNodes(node);
 
         const addressNode = ancestorNodeNames.filter((node: Node) => {
-          // console.log("node", node, node.nodeName.toLowerCase(), (node as Element).getAttribute('type'))
           if (node.nodeName.toLowerCase() === 'div' && (node as Element).getAttribute('type')) {
             return node as Element;
           }
@@ -319,7 +321,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.DELETE_NODE,
-    label: 'Eintrag Entfernen',
+    label: t('editor:common.menuItems.deleteNode'),
     action: async ({ node }: { node?: Node }) => {
       try {
         if (!node) {
@@ -363,7 +365,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.MANAGE_WRITER_AUTHOR_HEADER,
-    label: 'Autoren/Schreiber Verwalten',
+    label: t('editor:common.menuItems.manageWriterAuthorHeader'),
     action: async ({ node }: { node?: Node }) => {
       try {
         if (!node) throw new Error('No node given as value');
@@ -378,7 +380,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.MANAGE_RECEIVER,
-    label: 'Empfänger Verwalten',
+    label: t('editor:common.menuItems.manageReceiver'),
     action: async ({ node }: { node?: Node }) => {
       try {
         if (!node) throw new Error('No node given as value');
@@ -391,7 +393,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.MANAGE_HEADER_LANGUAGES,
-    label: 'Sprachen Verwalten',
+    label: t('editor:common.menuItems.manageHeaderLanguages'),
     action: async ({ node }: { node?: Node }) => {
       try {
         if (!node) throw new Error('No node given as value');
@@ -404,7 +406,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.WRITING_ACT.ADD_GREETINGS_FORMULA,
-    label: 'Begrüßungsformel Hinzufügen',
+    label: t('editor:common.menuItems.addGreetingsFormula'),
     action: async ({ node }: { node?: Node }) => {
       try {
         if (!node) throw new Error('No node given as value');
@@ -430,7 +432,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_GREETINGS_FORMULA,
-    label: 'Begrüßungsformel Bearbeiten',
+    label: t('editor:common.menuItems.manageGreetingsFormula'),
     action: async ({ node }: { node?: Node }) => {
       try {
         if (!node) throw new Error('No node given as value');
@@ -454,7 +456,7 @@ export const getMenuItemsNoMarking = (
   },
   {
     identifier: EditorConstants.menuItemTypes.WRITING_ACT.EDIT_NOTE,
-    label: 'Kommentar Bearbeiten',
+    label: t('editor:common.menuItems.editNote'),
     action: async ({ node }: { node?: Node }) => {
       try {
         if (!node) throw new Error('No node given as value');

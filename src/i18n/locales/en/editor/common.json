@@ -17,5 +17,23 @@
       "switchXML": "Switch to XML view",
       "resetLetter": "Reset letter"
     }
+  },
+  "menuItems": {
+    "managePrecursorLetter": "Edit Predecessor Letter",
+    "manageSuccessorLetter": "Edit Successor Letter",
+    "manageRismEntry": "Edit RISM Entry",
+    "manageProvenanceEntry": "Edit Provenance Entry",
+    "removeAnnotation": "Remove Annotation",
+    "moveDown": "Move Down",
+    "moveUp": "Move Up",
+    "manageAuthorWriter": "Manage Author/Writer",
+    "manageTextAddress": "Edit Address",
+    "deleteNode": "Remove Entry",
+    "manageWriterAuthorHeader": "Manage Authors/Writers",
+    "manageReceiver": "Manage Recipient",
+    "manageHeaderLanguages": "Manage Languages",
+    "addGreetingsFormula": "Add Greeting Formula",
+    "manageGreetingsFormula": "Edit Greeting Formula",
+    "editNote": "Edit Comment"
   }
 }

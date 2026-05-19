@@ -17,5 +17,23 @@
       "switchXML": "Wechsel zu XML Ansicht",
       "resetLetter": "Brief zurücksetzen"
     }
+  },
+  "menuItems": {
+    "managePrecursorLetter": "Vorgänger Brief bearbeiten",
+    "manageSuccessorLetter": "Nachfolger Brief bearbeiten",
+    "manageRismEntry": "RISM Eintrag Bearbeiten",
+    "manageProvenanceEntry": "Provenienz Eintrag Bearbeiten",
+    "removeAnnotation": "Auszeichnung Entfernen",
+    "moveDown": "Verschieben Unten",
+    "moveUp": "Verschieben Oben",
+    "manageAuthorWriter": "Schreiber/Autoren Verwalten",
+    "manageTextAddress": "Adresse Bearbeiten",
+    "deleteNode": "Eintrag Entfernen",
+    "manageWriterAuthorHeader": "Autoren/Schreiber Verwalten",
+    "manageReceiver": "Empfänger Verwalten",
+    "manageHeaderLanguages": "Sprachen Verwalten",
+    "addGreetingsFormula": "Begrüßungsformel Hinzufügen",
+    "manageGreetingsFormula": "Begrüßungsformel Bearbeiten",
+    "editNote": "Kommentar Bearbeiten"
   }
 }
