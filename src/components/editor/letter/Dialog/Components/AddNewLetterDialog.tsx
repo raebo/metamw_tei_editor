@@ -1,31 +1,32 @@
 import { DefaultDialogProps } from '../EditorFormDialog';
 import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
-import { DISPLAY_NAME_MAP } from '../../../../../utils/entityMappings';
-import React from 'react';
+import { DISPLAY_NAME_MAP } from '@src/utils/entityMappings';
+import React, { useEffect, useRef } from 'react';
 import { Divider } from '@mui/material';
 import TeiHeaderFirstHeadline from './TeiHeaderDialog/10TeiHeaderFirstHeadline';
 import TeiHeaderSndHeadline from './TeiHeaderDialog/20TeiHeaderSndHeadline';
 import TeiHeaderPrevLetter from './TeiHeaderDialog/30TeiHeaderPrevLetter';
 import TeiHeaderNextLetter from './TeiHeaderDialog/40TeiHeaderNextLetter';
 import TeiHeaderTransEdition from './TeiHeaderDialog/70TeiHeaderTransEdition';
-import { MiscUtils } from '../../../../../utils/misc';
+import { MiscUtils } from '@src/utils/misc';
 import NewLetterLetterName from './NewLetterDialog/10NewLetterLetterName';
 import { enqueueSnackbar } from 'notistack';
-import { createNewLetter } from '../../../../../services/editor/apiLettersRequest.service';
+import { createNewLetter } from '@src/services/editor/apiLettersRequest.service';
 import TeiHeaderWritingReceivingPlace from './TeiHeaderDialog/50TeiHeaderWritingReceivingPlace';
-import { EditorLetter } from '../../../../../services/mappings/editorMappings';
-import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
+import { EditorLetter } from '@src/services/mappings/editorMappings';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import TeiHeaderWritingPerson from './NewLetterDialog/20TeiHeaderWritingPerson';
-import { useAppDispatch } from '../../../../../redux/hooks';
+import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
-import { EditorUtils } from '../../../../../utils/editor';
-import { setEditorPinnedLetters } from '../../../../../redux/slices/editor.letter.slice';
-import { HeaderPerson, LanguageOption } from '../../../../../constants/editor';
+import { EditorUtils } from '@src/utils/editor';
+import { setEditorPinnedLetters } from '@src/redux/slices/editor.letter.slice';
+import { HeaderPerson, LanguageOption } from '@src/constants/editor';
 import TeiHeaderEditorTranskriptor from './TeiHeaderDialog/80EditorTranskriptor';
 import TeiHeaderReceivers from './TeiHeaderDialog/60TeiHeaderReceivers';
 import DialogContent from '@mui/material/DialogContent';
 import { DialogActionButton } from './Misc/DialogActionButton';
+import StepNavigation from './NewLetterDialog/StepNavigation';
 
 export type NewLetterDialogProps = {
   autoAvailable: boolean | null;
@@ -62,9 +63,22 @@ export type NewLetterCompletionState = {
   transkriptorValue: string | null;
 };
 
+const STEP_DEFINITIONS = [
+  { key: 'letterName', label: 'Briefname' },
+  { key: 'headlines', label: 'Kopfzeilen' },
+  { key: 'referenceLetters', label: 'Vorheriger / Nächster Brief' },
+  { key: 'writer', label: 'Schreiber & Schreibort' },
+  { key: 'receiver', label: 'Empfänger & Empfängerort' },
+  { key: 'transEdition', label: 'Transkription & Edition' },
+  { key: 'editorTranskriptor', label: 'Bearbeiter' },
+] as const;
+
+type StepKey = (typeof STEP_DEFINITIONS)[number]['key'];
+
 const AddNewLetterDialog = (props: DefaultDialogProps) => {
   const dispatch = useAppDispatch();
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
+  const [currentStepIndex, setCurrentStepIndex] = React.useState(0);
 
   const [displayData] = React.useState<{ [key: string]: string } | null>(null);
 
@@ -125,6 +139,46 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
 
   const childOnChange = MiscUtils.stateHandling.createHandleChange(setCompletionState);
 
+  const goToPreviousStep = () => setCurrentStepIndex((i) => Math.max(0, i - 1));
+  const goToNextStep = () =>
+    setCurrentStepIndex((i) => Math.min(STEP_DEFINITIONS.length - 1, i + 1));
+
+  const currentStep = STEP_DEFINITIONS[currentStepIndex];
+  const previousStep = currentStepIndex > 0 ? STEP_DEFINITIONS[currentStepIndex - 1] : null;
+  const nextStep =
+    currentStepIndex < STEP_DEFINITIONS.length - 1 ? STEP_DEFINITIONS[currentStepIndex + 1] : null;
+
+  // Pfeiltasten-Navigation, aber nur wenn der Fokus nicht in einem Textfeld liegt,
+  // damit z.B. die Cursor-Bewegung in Autocomplete/TextField nicht gestört wird.
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const activeElement = document.activeElement as HTMLElement | null;
+      const isTextInput =
+        !!activeElement &&
+        (activeElement.tagName === 'INPUT' ||
+          activeElement.tagName === 'TEXTAREA' ||
+          activeElement.isContentEditable);
+
+      if (isTextInput) {
+        return;
+      }
+
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        goToPreviousStep();
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        goToNextStep();
+      }
+    };
+
+    const node = containerRef.current;
+    node?.addEventListener('keydown', handleKeyDown);
+    return () => node?.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const validWriterCheck = (): boolean => {
     if (completionState.isFmbLetter && completionState.writerEntity === null) {
       return true;
@@ -158,21 +212,125 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
 
   const saveIsAvailable = [
     completionState.letterNameComplete,
-    completionState.firstHeaderComplete,
-    completionState.sndHeaderComplete,
-    validWriterCheck(),
-    validPrevLetterCheck(),
-    validNextLetterCheck(),
-    completionState.writingPlace !== null,
-    completionState.receivers.length > 0,
-    completionState.receivingPlace !== null,
-    completionState.letterLanguage.length > 0,
-    completionState.editorValue !== null,
-    completionState.transkriptorValue !== null,
+    // completionState.firstHeaderComplete,
+    // completionState.sndHeaderComplete,
+    // validWriterCheck(),
+    // validPrevLetterCheck(),
+    // validNextLetterCheck(),
+    // completionState.writingPlace !== null,
+    // completionState.receivers.length > 0,
+    // completionState.receivingPlace !== null,
+    // completionState.letterLanguage.length > 0,
+    // completionState.editorValue !== null,
+    // completionState.transkriptorValue !== null,
   ].every(Boolean);
 
+  const renderStepContent = (stepKey: StepKey) => {
+    switch (stepKey) {
+      case 'letterName':
+        return (
+          <NewLetterLetterName
+            autoAvailable={null}
+            completionState={completionState}
+            onChange={childOnChange}
+          />
+        );
+      case 'headlines':
+        return (
+          <>
+            <TeiHeaderFirstHeadline
+              teiHeader={null}
+              autoAvailable={completionState.firstHeaderComplete}
+              completionState={completionState}
+              onChange={childOnChange}
+            />
+            <TeiHeaderSndHeadline
+              teiHeader={null}
+              autoAvailable={completionState.sndHeaderComplete}
+              completionState={completionState}
+              onChange={childOnChange}
+            />
+          </>
+        );
+      case 'referenceLetters':
+        return (
+          <>
+            <TeiHeaderPrevLetter
+              teiHeader={null}
+              autoAvailable={completionState.prevLetterAutoAvailable}
+              completionState={completionState}
+              onChange={childOnChange}
+            />
+            <TeiHeaderNextLetter
+              teiHeader={null}
+              autoAvailable={completionState.nextLetterAutoAvailable}
+              completionState={completionState}
+              onChange={childOnChange}
+            />
+          </>
+        );
+      case 'writer':
+        return (
+          <>
+            <TeiHeaderWritingPerson
+              autoAvailable={completionState.letterNameComplete}
+              completionState={completionState}
+              onChange={childOnChange}
+            />
+            <TeiHeaderWritingReceivingPlace
+              teiHeader={null}
+              autoAvailable={null}
+              completionState={completionState}
+              onChange={childOnChange}
+              dialogType={'writing'}
+              textFieldValue={'Schreibort Auswählen'}
+            />
+          </>
+        );
+      case 'receiver':
+        return (
+          <>
+            <TeiHeaderReceivers
+              teiHeader={null}
+              autoAvailable={completionState.receiverAutoAvailable}
+              completionState={completionState}
+              onChange={childOnChange}
+            />
+            <TeiHeaderWritingReceivingPlace
+              teiHeader={null}
+              autoAvailable={null}
+              completionState={completionState}
+              onChange={childOnChange}
+              dialogType={'receiving'}
+              textFieldValue={'Empfängerort Auswählen'}
+            />
+          </>
+        );
+      case 'transEdition':
+        return (
+          <TeiHeaderTransEdition
+            teiHeader={null}
+            autoAvailable={null}
+            completionState={completionState}
+            onChange={childOnChange}
+          />
+        );
+      case 'editorTranskriptor':
+        return (
+          <TeiHeaderEditorTranskriptor
+            teiHeader={null}
+            autoAvailable={null}
+            completionState={completionState}
+            onChange={childOnChange}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div>
+    <div ref={containerRef} tabIndex={-1}>
       <DialogContent>
         <div className="autoSnippetFormRow">
           {displayData !== null ? (
@@ -181,85 +339,34 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
             <></>
           )}
         </div>
-        <NewLetterLetterName
-          autoAvailable={null}
-          completionState={completionState}
-          onChange={childOnChange}
-        />
-        <TeiHeaderFirstHeadline
-          teiHeader={null}
-          autoAvailable={completionState.firstHeaderComplete}
-          completionState={completionState}
-          onChange={childOnChange}
-        />
-        <TeiHeaderSndHeadline
-          teiHeader={null}
-          autoAvailable={completionState.sndHeaderComplete}
-          completionState={completionState}
-          onChange={childOnChange}
-        />
-        <TeiHeaderPrevLetter
-          teiHeader={null}
-          autoAvailable={completionState.prevLetterAutoAvailable}
-          completionState={completionState}
-          onChange={childOnChange}
-        />
-        <TeiHeaderNextLetter
-          teiHeader={null}
-          autoAvailable={completionState.nextLetterAutoAvailable}
-          completionState={completionState}
-          onChange={childOnChange}
-        />
-        <TeiHeaderWritingPerson
-          autoAvailable={completionState.letterNameComplete}
-          completionState={completionState}
-          onChange={childOnChange}
-        />
-        <TeiHeaderWritingReceivingPlace
-          teiHeader={null}
-          autoAvailable={null}
-          completionState={completionState}
-          onChange={childOnChange}
-          dialogType={'writing'}
-          textFieldValue={'Schreibort Auswählen'}
-        />
-        <TeiHeaderReceivers
-          teiHeader={null}
-          autoAvailable={completionState.receiverAutoAvailable}
-          completionState={completionState}
-          onChange={childOnChange}
-        />
-        <TeiHeaderWritingReceivingPlace
-          teiHeader={null}
-          autoAvailable={null}
-          completionState={completionState}
-          onChange={childOnChange}
-          dialogType={'receiving'}
-          textFieldValue={'Empfängerort Auswählen'}
-        />
-        <TeiHeaderTransEdition
-          teiHeader={null}
-          autoAvailable={null}
-          completionState={completionState}
-          onChange={childOnChange}
-        />
-        <TeiHeaderEditorTranskriptor
-          teiHeader={null}
-          autoAvailable={null}
-          completionState={completionState}
-          onChange={childOnChange}
-        />
+
+        {renderStepContent(currentStep.key)}
       </DialogContent>
-      <Divider />
-      <DialogActionButton
-        label={'Brief Erstellen'}
-        onClick={submitCreateHandler}
-        disabled={!saveIsAvailable}
+
+      <Divider
+        sx={{
+          marginTop: 5,
+        }}
       />
 
-      {/*<div>*/}
-      {/*  <pre>{JSON.stringify(completionState, null, 2)}</pre>*/}
-      {/*</div>*/}
+      <DialogContent>
+        <StepNavigation
+          currentIndex={currentStepIndex}
+          totalSteps={STEP_DEFINITIONS.length}
+          currentLabel={currentStep.label}
+          previousLabel={previousStep?.label ?? null}
+          nextLabel={nextStep?.label ?? null}
+          onPrevious={goToPreviousStep}
+          onNext={goToNextStep}
+        />
+
+        {/* saveing is always possible, even if not all fields are set. */}
+        <DialogActionButton
+          label={'Brief Erstellen'}
+          onClick={submitCreateHandler}
+          disabled={!saveIsAvailable}
+        />
+      </DialogContent>
     </div>
   );
 };

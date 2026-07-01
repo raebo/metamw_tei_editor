@@ -3,6 +3,7 @@
     "title": "Letter View",
     "noLetter": "No letter available to display. Please select a letter from the search on the left side.",
     "toolbarLeft": {
+      "newLetter": "Add new letter",
       "search": "Search for letters",
       "favourites": "Favourites overview",
       "keybindings": "Keyboard shortcuts",
