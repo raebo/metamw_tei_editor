@@ -1,24 +1,24 @@
 import { ButtonGroup, Divider } from "@mui/material";
 import Button from "@mui/material/Button";
 import React, { useEffect } from "react";
-import { useAppDispatch } from "../../../redux/hooks";
+import { useAppDispatch } from "@src/redux/hooks";
 import {
   clearSnippetState,
   setAutoAnnoLetter,
   setAutoSnippetFormContainer
-} from "../../../redux/slices/auto.letter.snippet.slice";
+} from "@src/redux/slices/auto.letter.snippet.slice";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/redux.store";
+import { RootState } from "@src/redux/redux.store";
 import { enqueueSnackbar } from "notistack";
 import {
   fetchAutoAnnoSnippetEntityData, setAnnoSnippetEntity, setAutoAnnoSnippetStatus,
   updateAnnoLetterContent
-} from "../../../services/auto_anno/apiAutoAnno.service";
+} from "@src/services/auto_anno/apiAutoAnno.service";
 import {
   autoAnnoReplaceDomNodeContent,
   removeMarkedSpans,
   transformLetterXmlForExport
-} from "../../../utils/auto_anno/domHandling";
+} from "@src/utils/auto_anno/domHandling";
 
 interface Props {
   autoJobLetterId: number,

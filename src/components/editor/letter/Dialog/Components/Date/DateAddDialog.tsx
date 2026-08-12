@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { DefaultDialogProps } from '../../EditorFormDialog';
-import { DateCertainty, EditorConstants, EditorDateType } from '../../../../../../constants/editor';
+import { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
+import { DateCertainty, EditorConstants, EditorDateType } from '@src/constants/editor';
 import { Box, Divider, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -8,7 +8,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/de';
 import Button from '@mui/material/Button';
 import { LocalizationProvider } from '@mui/x-date-pickers';
-import { EditorUtils } from '../../../../../../utils/editor';
+import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
 
 export interface DateWhenAddDialogProps extends DefaultDialogProps {

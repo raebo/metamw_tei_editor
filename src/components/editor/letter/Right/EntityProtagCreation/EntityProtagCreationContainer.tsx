@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import ProtagCrtCatSelector from './ProtagCrtCatSelector';
-import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
+import { EditorContainerProps } from '@src/components/pages/editor/ShowEditor';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import { setEditorMarkedAndContentLeftRightThunk } from '@src/redux/thunks/editor.letter.thunk';

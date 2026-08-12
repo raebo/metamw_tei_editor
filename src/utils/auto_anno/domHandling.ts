@@ -1,5 +1,5 @@
-import { SnippetEntity } from '../../services/mappings/autoAnnoMappings';
-import { EditorConstants } from '../../constants/editor';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
+import { EditorConstants } from '@src/constants/editor';
 
 export const markSpanAndScrollToId = (xmlId: string) => {
   const targetElement = document.querySelector('[xml\\:id="' + xmlId + '"]');

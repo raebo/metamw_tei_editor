@@ -1,6 +1,6 @@
 import initApi from "../apiRequest.service";
 import { SnippetEntity } from '../mappings/autoAnnoMappings';
-import { EditorConstants } from '../../constants/editor';
+import { EditorConstants } from '@src/constants/editor';
 
 export const setLetterFavourite= async (letterId: number, isFavourite: boolean): Promise<boolean> => {
   try {

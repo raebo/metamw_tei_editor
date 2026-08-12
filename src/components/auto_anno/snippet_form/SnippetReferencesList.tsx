@@ -1,4 +1,4 @@
-import { SnippetDialogType} from "../../../services/mappings/autoAnnoMappings"
+import { SnippetDialogType} from "@src/services/mappings/autoAnnoMappings"
 import React, { useEffect, useRef, useState } from "react"
 import {
   Box,
@@ -17,23 +17,23 @@ import {
   clearSnippetState,
   setAutoAnnoLetter, setSnippetEntityInfo, setSnippetReferenceFormActive,
   setSnippetReferences
-} from "../../../redux/slices/auto.letter.snippet.slice";
-import { useAppDispatch } from "../../../redux/hooks";
+} from "@src/redux/slices/auto.letter.snippet.slice";
+import { useAppDispatch } from "@src/redux/hooks";
 import SnippetFormDialog from "./SnippetFormDialog";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/redux.store";
+import { RootState } from "@src/redux/redux.store";
 import { enqueueSnackbar } from "notistack";
 import {
   fetchAutoAnnoSnippetEntityData, setAnnoSnippetEntity, setAutoAnnoSnippetStatus,
   updateAnnoLetterContent
-} from "../../../services/auto_anno/apiAutoAnno.service";
+} from "@src/services/auto_anno/apiAutoAnno.service";
 import {
   autoAnnoReplaceDomNodeContent, markSpanAndScrollToId, referenceTypeForXmlId,
   removeMarkedSpans, removeSnippetEntityFromDom,
   transformLetterXmlForExport
-} from "../../../utils/auto_anno/domHandling";
-import { AnnoSnippetStatus } from "../../../constants/snack";
-import { setAutoAnnoSnippetAndShow } from "../../../redux/thunks/auto.snippet.thunks";
+} from "@src/utils/auto_anno/domHandling";
+import { AnnoSnippetStatus } from "@src/constants/snack";
+import { setAutoAnnoSnippetAndShow } from "@src/redux/thunks/auto.snippet.thunks";
 import InfoIcon from "@mui/icons-material/Info";
 
 interface Reference {

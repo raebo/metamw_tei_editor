@@ -1,9 +1,9 @@
 import { DefaultDialogProps } from '../EditorFormDialog';
 import React, { useEffect, useState } from 'react';
-import { EditorConstants, EntityType, HeaderPerson } from '../../../../../constants/editor';
-import { EditorUtils } from '../../../../../utils/editor';
+import { EditorConstants, EntityType, HeaderPerson } from '@src/constants/editor';
+import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
-import { MiscUtils } from '../../../../../utils/misc';
+import { MiscUtils } from '@src/utils/misc';
 import {
   Box,
   Checkbox,
@@ -18,15 +18,15 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
-import { fetchMetamwEntityData } from '../../../../../services/auto_anno/apiMetaMw.service';
-import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
-import { DISPLAY_NAME_MAP } from '../../../../../utils/entityMappings';
+import { fetchMetamwEntityData } from '@src/services/auto_anno/apiMetaMw.service';
+import DynamicDataDisplay from '@src/components/support/DynamicDataDisplay';
+import { DISPLAY_NAME_MAP } from '@src/utils/entityMappings';
 import AddIcon from '@mui/icons-material/Add';
-import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
-import { searchEditortEntities } from '../../../../../services/editor/apiLetterRequest.service';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
+import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
 import DialogContent from '@mui/material/DialogContent';
 import { DialogActionButton } from './Misc/DialogActionButton';
-import FormAutocomplete from '../../Util/FormAutocomplete';
+import FormAutocomplete from '@src/components/editor/letter/Util/FormAutocomplete';
 
 const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
   const [authors, setAuthors] = React.useState<HeaderPerson[]>([]);

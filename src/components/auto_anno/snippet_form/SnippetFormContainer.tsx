@@ -3,7 +3,7 @@ import Paper from "@mui/material/Paper";
 import BlankForm from "./BlankForm";
 import BlankButtons from "./BlankButtons";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../redux/redux.store";
+import { RootState } from "@src/redux/redux.store";
 import ShowButtons from "./ShowButtons";
 import ShowForm from "./ShowForm";
 import EditForm from "./EditForm";
@@ -11,7 +11,7 @@ import EditButtons from "./EditButtons";
 import {
   setAutoSnippetFormContainer,
   setSnippetReferenceFormActive,
-} from "../../../redux/slices/auto.letter.snippet.slice";
+} from "@src/redux/slices/auto.letter.snippet.slice";
 
 interface SnippetFormContainerProps {
   autoAnnoLetterId: number

@@ -1,9 +1,9 @@
 import Box from '@mui/material/Box';
-import { useAppDispatch } from '../../../../redux/hooks';
+import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../redux/redux.store';
+import { RootState } from '@src/redux/redux.store';
 import React from 'react';
-import { setReloadLetterContent } from '../../../../redux/slices/editor.letter.slice';
+import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 
 const StateInfo = () => {
   const dispatch = useAppDispatch();

@@ -30,7 +30,7 @@ import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import EntityExistingCreation from './EntityExistingCreation';
 import { backendService } from '@src/utils/editor/backendService';
 import EntityNewCreation from './EntityNewCreation';
-import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
+import { EditorContainerProps } from '@src/components/pages/editor/ShowEditor';
 import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { EditorUtils } from '@src/utils/editor';
 import { MiscUtils } from '@src/utils/misc';

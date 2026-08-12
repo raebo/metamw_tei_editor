@@ -1,40 +1,40 @@
 import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { Autocomplete, TextField } from '@mui/material';
-import React, {useEffect} from 'react';
-import {EditorUtils} from "../../../../../../utils/editor";
+import React, { useEffect } from 'react';
+import { EditorUtils } from '@src/utils/editor';
 import { useTranslation } from 'react-i18next';
 
 const sndHeaderOptions = [
-  "Musterstadt, 01. Januar 1821",
-  "Musterstadt, 1. und 15. Januar 1821",
-  "1. Januar 1821",
-  "vor dem 1. Januar",
-  "nach dem 5. Februar",
-  "zwischen dem 1. und 5. Januar",
-  "zwischen dem 1. Januar und 7. Februar",
-  "Musterstadt, 1821",
-  "1821",
-]
+  'Musterstadt, 01. Januar 1821',
+  'Musterstadt, 1. und 15. Januar 1821',
+  '1. Januar 1821',
+  'vor dem 1. Januar',
+  'nach dem 5. Februar',
+  'zwischen dem 1. und 5. Januar',
+  'zwischen dem 1. Januar und 7. Februar',
+  'Musterstadt, 1821',
+  '1821',
+];
 
 const TeiHeaderSndHeadline = (props: TeiHeaderDialogProps) => {
   const { t } = useTranslation();
-  const completionState = props.completionState
+  const completionState = props.completionState;
 
-	useEffect(() => {
-		const { sndHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(props.teiHeader)
+  useEffect(() => {
+    const { sndHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(props.teiHeader);
 
-		if (sndHeadline) {
-			props.onChange({ sndHeaderComplete: true, sndHeaderContent: sndHeadline});
-		}
-	}, [props.teiHeader]);
+    if (sndHeadline) {
+      props.onChange({ sndHeaderComplete: true, sndHeaderContent: sndHeadline });
+    }
+  }, [props.teiHeader]);
 
-	const setSndHeaderValue = (value: string) => {
-    props.onChange( { sndHeaderComplete: true, sndHeaderContent: value })
-  }
+  const setSndHeaderValue = (value: string) => {
+    props.onChange({ sndHeaderComplete: true, sndHeaderContent: value });
+  };
 
   return (
     <>
-      <div className="autoSnippetFormRow" style={ { marginTop: "25px", width: "98%" } }>
+      <div className="autoSnippetFormRow" style={{ marginTop: '25px', width: '98%' }}>
         <Autocomplete
           freeSolo
           options={sndHeaderOptions}
@@ -57,7 +57,7 @@ const TeiHeaderSndHeadline = (props: TeiHeaderDialogProps) => {
         />
       </div>
     </>
-  )
-}
+  );
+};
 
 export default TeiHeaderSndHeadline;

@@ -1,4 +1,4 @@
-import { AuthUser } from '../../services/mappings/authMappings';
+import { AuthUser } from '@src/services/mappings/authMappings';
 
 // Only the name fields nameShortCut actually needs - the Redux auth slice's user does not carry
 // AuthUser's full shape (no email/language), so requiring a full AuthUser here would either

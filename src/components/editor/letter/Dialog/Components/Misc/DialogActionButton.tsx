@@ -1,6 +1,6 @@
 import React from "react";
 import { DialogActions, Button, ButtonProps } from "@mui/material";
-import {EditorConstants} from "../../../../../../constants/editor";
+import {EditorConstants} from "@src/constants/editor";
 
 interface DialogActionButtonProps {
 	label: string;

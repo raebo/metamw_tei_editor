@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
+import { EditorContainerProps } from '@src/components/pages/editor/ShowEditor';
 import {
   Badge,
   Box,

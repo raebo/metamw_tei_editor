@@ -5,10 +5,10 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import { useEffect, } from "react";
-import { fetchMetamwEntityData } from "../../../services/auto_anno/apiMetaMw.service";
+import { fetchMetamwEntityData } from "@src/services/auto_anno/apiMetaMw.service";
 import { enqueueSnackbar } from "notistack";
-import DynamicDataDisplay from "../../support/DynamicDataDisplay";
-import { DISPLAY_NAME_MAP } from "../../../utils/entityMappings";
+import DynamicDataDisplay from "@src/components/support/DynamicDataDisplay";
+import { DISPLAY_NAME_MAP } from "@src/utils/entityMappings";
 import { Divider, Typography } from "@mui/material";
 
 interface SnippetReferencesInfoDialogProps {

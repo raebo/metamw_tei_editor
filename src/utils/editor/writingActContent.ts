@@ -1,4 +1,4 @@
-import { EditorConstants, HeaderPerson } from '../../constants/editor';
+import { EditorConstants, HeaderPerson } from '@src/constants/editor';
 
 function currentWritingAct(xmlDoc: XMLDocument, numberOfWritingAct: number): Element {
   const allWritingActsList = allWritingActs(xmlDoc);

@@ -4,11 +4,11 @@ import Paper from "@mui/material/Paper";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { enqueueSnackbar } from "notistack";
-import { RootState } from "../../../redux/redux.store";
-import { EditorLetter } from "../../../services/mappings/editorMappings";
-import { fetchLastUsedLettersByUser, fetchSearchLetters } from "../../../services/editor/apiLettersRequest.service";
-import LetterCard from "../../editor/index/LetterCard";
-import SearchLetters from "../../editor/index/SearchLetters";
+import { RootState } from "@src/redux/redux.store";
+import { EditorLetter } from "@src/services/mappings/editorMappings";
+import { fetchLastUsedLettersByUser, fetchSearchLetters } from "@src/services/editor/apiLettersRequest.service";
+import LetterCard from "@src/components/editor/index/LetterCard";
+import SearchLetters from "@src/components/editor/index/SearchLetters";
 
 
 const IndexLetters = () => {

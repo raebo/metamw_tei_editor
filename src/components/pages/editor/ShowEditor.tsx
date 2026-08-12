@@ -49,7 +49,7 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import UserActionMenu from '@src/components/editor/letter/Right/UserActionMenu';
 import EditorKeyHandle from '@src/components/editor/letter/Center/EditorKeyHandle';
 import QuickContentFormatter from '@src/components/editor/letter/Right/QuickContentFormatter';
-import LetterFontSizeHandle from '../../auto_anno/misc/LetterFontSizeHandle';
+import LetterFontSizeHandle from '@src/components/auto_anno/misc/LetterFontSizeHandle';
 import EntityProtagCreationContainer from '@src/components/editor/letter/Right/EntityProtagCreation/EntityProtagCreationContainer';
 import { EditorConstants } from '@src/constants/editor';
 import EntityPersonContainer from '@src/components/editor/letter/Right/EntityPerson/EntityPersonContainer';

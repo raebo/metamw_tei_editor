@@ -1,9 +1,9 @@
 import { DefaultDialogProps} from "../EditorFormDialog";
 import React, {useEffect} from "react";
-import {EditorUtils} from "../../../../../utils/editor";
+import {EditorUtils} from "@src/utils/editor";
 import {enqueueSnackbar} from "notistack";
-import {MiscUtils} from "../../../../../utils/misc";
-import {ContentAddressEntry, EditorConstants} from "../../../../../constants/editor";
+import {MiscUtils} from "@src/utils/misc";
+import {ContentAddressEntry, EditorConstants} from "@src/constants/editor";
 import ContentAddressEntryForm from "../Forms/ContentAddressEntryForm";
 import {Divider} from "@mui/material";
 import {DialogActionButton} from "./Misc/DialogActionButton";

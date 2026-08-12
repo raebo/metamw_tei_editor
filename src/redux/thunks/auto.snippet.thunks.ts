@@ -1,11 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { SnippetUpdateParams } from "../../components/auto_anno/AutoAnnoSnippetList";
+import { SnippetUpdateParams } from "@src/components/auto_anno/AutoAnnoSnippetList";
 import {
   setAutoAnnoSnippet,
   setAutoSnippetFormContainer,
   setSnippetReferences
 } from "../slices/auto.letter.snippet.slice";
-import { SnippetReference } from "../../services/mappings/autoAnnoMappings";
+import { SnippetReference } from "@src/services/mappings/autoAnnoMappings";
 
 
 export const setAutoAnnoSnippetAndShow = createAsyncThunk(

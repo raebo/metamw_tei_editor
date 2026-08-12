@@ -1,14 +1,14 @@
 import { TeiHeaderWritingReceivingPlaceProps } from '../ManageTeiHeaderDialog';
-import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
-import { EditorConstants, EntityType } from '../../../../../../constants/editor';
+import { EditorConstants, EntityType } from '@src/constants/editor';
 import HighlightedText from '@src/components/support/HighlightedText';
 import { Autocomplete, TextField } from '@mui/material';
-import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
-import {EditorUtils} from "../../../../../../utils/editor";
-import {fetchMetamwEntityData} from "../../../../../../services/auto_anno/apiMetaMw.service";
+import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
+import {EditorUtils} from "@src/utils/editor";
+import {fetchMetamwEntityData} from "@src/services/auto_anno/apiMetaMw.service";
 
 
 const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlaceProps) => {

@@ -1,9 +1,9 @@
-import { DefaultDialogProps} from "../../EditorFormDialog";
+import { DefaultDialogProps} from "@src/components/editor/letter/Dialog/EditorFormDialog";
 import React, {useEffect, useState} from "react";
-import {EditorUtils} from "../../../../../../utils/editor";
+import {EditorUtils} from "@src/utils/editor";
 import {enqueueSnackbar} from "notistack";
-import {MiscUtils} from "../../../../../../utils/misc";
-import {EditorConstants, LanguageOption} from "../../../../../../constants/editor";
+import {MiscUtils} from "@src/utils/misc";
+import {EditorConstants, LanguageOption} from "@src/constants/editor";
 import {Box, Chip, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Stack} from "@mui/material";
 import CancelIcon from "@mui/icons-material/Cancel";
 import DialogContent from "@mui/material/DialogContent";

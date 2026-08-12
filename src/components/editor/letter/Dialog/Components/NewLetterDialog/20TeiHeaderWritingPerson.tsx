@@ -1,9 +1,9 @@
 import { Autocomplete, TextField } from '@mui/material';
-import { EditorConstants, EntityType } from '../../../../../../constants/editor';
+import { EditorConstants, EntityType } from '@src/constants/editor';
 import HighlightedText from '@src/components/support/HighlightedText';
 import React, { useEffect, useMemo, useState } from 'react';
-import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
-import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
+import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
 import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
 import { NewLetterDialogProps } from '../AddNewLetterDialog';

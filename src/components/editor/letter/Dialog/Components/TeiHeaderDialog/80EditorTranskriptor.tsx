@@ -1,6 +1,6 @@
 import {TeiHeaderDialogProps} from "../ManageTeiHeaderDialog";
 import React, {useEffect, useState} from "react";
-import {EditorUtils} from "../../../../../../utils/editor";
+import {EditorUtils} from "@src/utils/editor";
 import {Stack, TextField} from "@mui/material";
 import { useTranslation } from 'react-i18next';
 

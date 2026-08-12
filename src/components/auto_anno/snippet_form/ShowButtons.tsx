@@ -2,27 +2,27 @@ import { ButtonGroup, Divider } from "@mui/material";
 import Button from "@mui/material/Button";
 import SnippetFormDialog from "./SnippetFormDialog";
 import React, { useState } from "react";
-import { SnippetDialogType } from "../../../services/mappings/autoAnnoMappings";
+import { SnippetDialogType } from "@src/services/mappings/autoAnnoMappings";
 import {
   autoAnnoReplaceDomNodeContent,
   removeMarkedSpans,
   removeSnippetEntityFromDom,
   transformLetterXmlForExport
-} from "../../../utils/auto_anno/domHandling";
+} from "@src/utils/auto_anno/domHandling";
 import {
   fetchAutoAnnoSnippetEntityData, setAnnoSnippetEntity,
   setAutoAnnoSnippetStatus,
   updateAnnoLetterContent
-} from "../../../services/auto_anno/apiAutoAnno.service";
+} from "@src/services/auto_anno/apiAutoAnno.service";
 import { enqueueSnackbar } from "notistack";
 import {
   clearSnippetState,
   setAutoAnnoLetter,
   setAutoSnippetFormContainer
-} from "../../../redux/slices/auto.letter.snippet.slice";
-import { useAppDispatch } from "../../../redux/hooks";
+} from "@src/redux/slices/auto.letter.snippet.slice";
+import { useAppDispatch } from "@src/redux/hooks";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/redux.store";
+import { RootState } from "@src/redux/redux.store";
 
 interface Props {
   autoJobLetterId: number

@@ -1,15 +1,15 @@
 import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
-import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import React, { useEffect, useState } from 'react';
-import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
-import { EntityType, HeaderPerson} from '../../../../../../constants/editor';
+import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
+import { EntityType, HeaderPerson} from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import { Box, Chip, IconButton } from '@mui/material';
-import { MiscUtils } from '../../../../../../utils/misc';
-import {EditorUtils} from "../../../../../../utils/editor";
+import { MiscUtils } from '@src/utils/misc';
+import {EditorUtils} from "@src/utils/editor";
 import AddIcon from "@mui/icons-material/Add";
 import CancelIcon from "@mui/icons-material/Cancel";
-import FormAutocomplete from "../../../Util/FormAutocomplete";
+import FormAutocomplete from "@src/components/editor/letter/Util/FormAutocomplete";
 import { useTranslation } from 'react-i18next';
 
 const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {

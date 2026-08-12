@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Card, CardActions, CardContent, IconButton, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
-import { EditorLetter } from '../../../services/mappings/editorMappings';
+import { EditorLetter } from '@src/services/mappings/editorMappings';
 import { Link } from 'react-router-dom';
 import EditNote from '@mui/icons-material/EditNote';
 

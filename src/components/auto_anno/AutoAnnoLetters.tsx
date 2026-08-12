@@ -3,22 +3,22 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   fetchAutoAnnoLetter,
   patchAutoAnnoLetterLockingUser,
-} from '../../services/auto_anno/apiAutoAnno.service';
+} from '@src/services/auto_anno/apiAutoAnno.service';
 import { enqueueSnackbar } from 'notistack';
 import XMLDisplayParser from '../editor/letter/Center/LetterViewContainer/XmlDisplayParser';
-import { RootState } from '../../redux/redux.store';
+import { RootState } from '@src/redux/redux.store';
 import { useSelector } from 'react-redux';
 import AutoAnnoSnippetList from './AutoAnnoSnippetList';
 import AutoAnnoLetterHandle from './AutoAnnoLetterHandle';
-import { markSpanAndScrollToId } from '../../utils/auto_anno/domHandling';
+import { markSpanAndScrollToId } from '@src/utils/auto_anno/domHandling';
 import {
   setAutoAnnoLetter,
   setSnippetEntityInfo,
   setStateMessage,
-} from '../../redux/slices/auto.letter.snippet.slice';
+} from '@src/redux/slices/auto.letter.snippet.slice';
 import { Box, Typography } from '@mui/material';
-import { useAppDispatch } from '../../redux/hooks';
-import { ComponentMappingItem } from '../../services/mappings/editorMappings';
+import { useAppDispatch } from '@src/redux/hooks';
+import { ComponentMappingItem } from '@src/services/mappings/editorMappings';
 import SnippetReferencesList from './snippet_form/SnippetReferencesList';
 import SnippetFormContainer from './snippet_form/SnippetFormContainer';
 import SnippetEntityInfoDialog from './snippet_form/SnippetEntityInfoDialog';

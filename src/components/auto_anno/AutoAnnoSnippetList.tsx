@@ -2,21 +2,21 @@ import React, { useEffect, useState } from "react";
 import {  useSelector } from "react-redux";
 import {
   setAutoAnnoLetter,
-} from "../../redux/slices/auto.letter.snippet.slice";
-import { fetchAutoAnnoLetterSnippets } from "../../services/auto_anno/apiAutoAnno.service";
+} from "@src/redux/slices/auto.letter.snippet.slice";
+import { fetchAutoAnnoLetterSnippets } from "@src/services/auto_anno/apiAutoAnno.service";
 import {
   AutoAnnoSnippet,
   getStatusDetails, SnippetReference,
-} from "../../services/mappings/autoAnnoMappings";
+} from "@src/services/mappings/autoAnnoMappings";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { IconButton } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 import Paper from "@mui/material/Paper";
 import { Edit } from "@mui/icons-material";
-import { RootState } from "../../redux/redux.store";
-import { useAppDispatch } from "../../redux/hooks";
-import { setAutoAnnoSnippetAndShow, setAutoSnippetAndSnippetReferences } from "../../redux/thunks/auto.snippet.thunks";
-import { markSpanAndScrollToId, referenceTypeForXmlId } from "../../utils/auto_anno/domHandling";
+import { RootState } from "@src/redux/redux.store";
+import { useAppDispatch } from "@src/redux/hooks";
+import { setAutoAnnoSnippetAndShow, setAutoSnippetAndSnippetReferences } from "@src/redux/thunks/auto.snippet.thunks";
+import { markSpanAndScrollToId, referenceTypeForXmlId } from "@src/utils/auto_anno/domHandling";
 
 interface AutoAnnoSnippetListProps {
   autoJobLetterId: number

@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { fetchAutoAnnoJobLetters, fetchAutoAnnoJobs } from "../../services/auto_anno/apiAutoAnno.service";
+import { fetchAutoAnnoJobLetters, fetchAutoAnnoJobs } from "@src/services/auto_anno/apiAutoAnno.service";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import { Box, IconButton, Typography } from "@mui/material";
@@ -8,12 +8,12 @@ import InfoIcon from '@mui/icons-material/Info';
 import {
   AutoAnnoJobLetter,
   AutoAnnoJob, getStatusDetails,
-} from "../../services/mappings/autoAnnoMappings";
+} from "@src/services/mappings/autoAnnoMappings";
 import { enqueueSnackbar } from "notistack";
 import { format, parse } from "date-fns";
-import { dateFnsFormat, dateFnsParseFormat } from "../../constants/snack";
+import { dateFnsFormat, dateFnsParseFormat } from "@src/constants/snack";
 import { useSelector } from "react-redux";
-import { RootState } from "../../redux/redux.store";
+import { RootState } from "@src/redux/redux.store";
 
 
 const AutoAnnoList: React.FC = () => {

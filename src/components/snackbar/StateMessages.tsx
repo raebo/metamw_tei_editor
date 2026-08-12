@@ -1,8 +1,8 @@
-import { useAppDispatch } from "../../redux/hooks";
+import { useAppDispatch } from "@src/redux/hooks";
 import { useSelector } from "react-redux";
-import { RootState } from "../../redux/redux.store";
+import { RootState } from "@src/redux/redux.store";
 import React, { useCallback, useEffect } from "react";
-import { setStateMessage } from "../../redux/slices/auto.letter.snippet.slice";
+import { setStateMessage } from "@src/redux/slices/auto.letter.snippet.slice";
 import { enqueueSnackbar } from "notistack";
 
 const StateMessages = () => {

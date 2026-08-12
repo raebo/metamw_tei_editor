@@ -1,7 +1,7 @@
-import { DefaultDialogProps } from '../../EditorFormDialog';
-import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
+import { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import React, { useEffect, useState } from 'react';
-import { EditorUtils } from '../../../../../../utils/editor';
+import { EditorUtils } from '@src/utils/editor';
 import Grid from '@mui/material/Grid';
 import { enqueueSnackbar } from 'notistack';
 import Button from '@mui/material/Button';
@@ -9,8 +9,8 @@ import AssignLetterAuthorAutocomplete from './AssignLetterAuthorAutocomplete';
 import { Badge, Box, Divider, IconButton, Stack, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { EditorConstants } from '../../../../../../constants/editor';
-import { MiscUtils } from '../../../../../../utils/misc';
+import { EditorConstants } from '@src/constants/editor';
+import { MiscUtils } from '@src/utils/misc';
 
 interface AssignedLetterData {
   writer: SnippetEntity | null;

@@ -1,4 +1,4 @@
-import { DefaultDialogProps } from '../../EditorFormDialog';
+import { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
 import DialogContent from '@mui/material/DialogContent';
 import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';

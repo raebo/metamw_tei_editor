@@ -1,4 +1,4 @@
-import { PinnedLetter } from '../../services/mappings/editorMappings';
+import { PinnedLetter } from '@src/services/mappings/editorMappings';
 
 export const pinnedLetters = {
   computeNewPinnedLetters: (

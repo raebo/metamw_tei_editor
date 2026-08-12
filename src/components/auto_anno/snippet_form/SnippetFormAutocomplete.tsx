@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
-import { searchAutoAnnoSnippetEntities } from "../../../services/auto_anno/apiAutoAnno.service";
-import { SnippetEntity } from "../../../services/mappings/autoAnnoMappings";
+import { searchAutoAnnoSnippetEntities } from "@src/services/auto_anno/apiAutoAnno.service";
+import { SnippetEntity } from "@src/services/mappings/autoAnnoMappings";
 
 interface SnippetFormAutocompleteProps {
   autoJobLetterId: number

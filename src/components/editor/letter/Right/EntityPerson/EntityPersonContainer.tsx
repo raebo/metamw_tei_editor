@@ -26,7 +26,7 @@ import { EditorConstants } from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import { setEditorMarkedAndContentLeftRightThunk } from '@src/redux/thunks/editor.letter.thunk';
 import { type HiRendType, MarkupPersonData } from '@src/services/mappings/editorMappings';
-import { EditorContainerProps } from '../../../../pages/editor/ShowEditor';
+import { EditorContainerProps } from '@src/components/pages/editor/ShowEditor';
 import { EditorUtils } from '@src/utils/editor';
 import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';

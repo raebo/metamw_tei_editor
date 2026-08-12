@@ -1,14 +1,14 @@
-import { DefaultDialogProps } from '../../EditorFormDialog';
+import { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../../../redux/redux.store';
+import { RootState } from '@src/redux/redux.store';
 import React, { useEffect, useState } from 'react';
-import { EditorUtils } from '../../../../../../utils/editor';
+import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
-import { MiscUtils } from '../../../../../../utils/misc';
-import { EditorConstants, EntityType, HeaderPerson } from '../../../../../../constants/editor';
+import { MiscUtils } from '@src/utils/misc';
+import { EditorConstants, EntityType, HeaderPerson } from '@src/constants/editor';
 import DialogContent from '@mui/material/DialogContent';
-import DynamicDataDisplay from '../../../../../support/DynamicDataDisplay';
-import { DISPLAY_NAME_MAP } from '../../../../../../utils/entityMappings';
+import DynamicDataDisplay from '@src/components/support/DynamicDataDisplay';
+import { DISPLAY_NAME_MAP } from '@src/utils/entityMappings';
 import {
   Box,
   Checkbox,
@@ -23,11 +23,11 @@ import {
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { fetchMetamwEntityData } from '../../../../../../services/auto_anno/apiMetaMw.service';
-import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
-import FormAutocomplete from '../../../Util/FormAutocomplete';
+import { fetchMetamwEntityData } from '@src/services/auto_anno/apiMetaMw.service';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
+import FormAutocomplete from '@src/components/editor/letter/Util/FormAutocomplete';
 import AddIcon from '@mui/icons-material/Add';
-import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
+import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
 import { DialogActionButton } from '../Misc/DialogActionButton';
 
 const ManageWritingActAuthorWriterDialog = (props: DefaultDialogProps) => {

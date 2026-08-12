@@ -1,5 +1,5 @@
 import { DefaultDialogProps } from '../EditorFormDialog';
-import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
+import DynamicDataDisplay from '@src/components/support/DynamicDataDisplay';
 import { DISPLAY_NAME_MAP } from '@src/utils/entityMappings';
 import React, { useEffect, useRef } from 'react';
 import { Divider } from '@mui/material';

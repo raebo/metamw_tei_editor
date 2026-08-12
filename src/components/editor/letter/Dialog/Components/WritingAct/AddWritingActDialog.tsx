@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { DefaultDialogProps } from '../../EditorFormDialog';
-import { EditorConstants, EntityType, HeaderPerson } from '../../../../../../constants/editor';
-import FormAutocomplete from '../../../Util/FormAutocomplete';
+import { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
+import { EditorConstants, EntityType, HeaderPerson } from '@src/constants/editor';
+import FormAutocomplete from '@src/components/editor/letter/Util/FormAutocomplete';
 import {
   Box,
   Checkbox,
@@ -14,22 +14,22 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
-import DynamicDataDisplay from '../../../../../support/DynamicDataDisplay';
-import { DISPLAY_NAME_MAP } from '../../../../../../utils/entityMappings';
-import { fetchMetamwEntityData } from '../../../../../../services/auto_anno/apiMetaMw.service';
+import DynamicDataDisplay from '@src/components/support/DynamicDataDisplay';
+import { DISPLAY_NAME_MAP } from '@src/utils/entityMappings';
+import { fetchMetamwEntityData } from '@src/services/auto_anno/apiMetaMw.service';
 import { enqueueSnackbar } from 'notistack';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../../../redux/redux.store';
-import { markupGeneration } from '../../../../../../utils/editor/markupGeneration';
-import { ActOfWritingElement } from '../../../../../../services/mappings/editorMappings';
+import { RootState } from '@src/redux/redux.store';
+import { markupGeneration } from '@src/utils/editor/markupGeneration';
+import { ActOfWritingElement } from '@src/services/mappings/editorMappings';
 import DialogContent from '@mui/material/DialogContent';
 import { DialogActionButton } from '../Misc/DialogActionButton';
-import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
-import { MiscUtils } from '../../../../../../utils/misc';
+import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
+import { MiscUtils } from '@src/utils/misc';
 
 const AddWritingActDialog = (props: DefaultDialogProps) => {
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);

@@ -5,7 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import React, { Fragment, useState } from 'react';
 import { snackVar } from '@src/constants/snack';
 import { SnackbarProvider } from 'notistack';
-import useReactiveVar from '../../utils/makeReactiveVar';
+import useReactiveVar from '@src/utils/makeReactiveVar';
 
 const Snackbar = () => {
   const [open, setOpen] = useState(false);

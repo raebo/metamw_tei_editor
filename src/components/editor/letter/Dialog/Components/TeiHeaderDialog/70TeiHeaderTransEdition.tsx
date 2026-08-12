@@ -1,9 +1,9 @@
 import {Box, Chip, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField} from '@mui/material';
 import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
-import {EditorConstants, LanguageOption } from '../../../../../../constants/editor';
+import {EditorConstants, LanguageOption } from '@src/constants/editor';
 import React, {useEffect, useState} from 'react';
 import CancelIcon from "@mui/icons-material/Cancel";
-import {EditorUtils} from "../../../../../../utils/editor";
+import {EditorUtils} from "@src/utils/editor";
 import { useTranslation } from 'react-i18next';
 
 const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {

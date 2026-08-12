@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import { EditorUtils } from '@src/utils/editor';
 import { MiscUtils } from '@src/utils/misc';
 import { enqueueSnackbar } from 'notistack';
-import { DefaultDialogProps } from '../../EditorFormDialog';
+import { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
 
 const AttachmentAddDialog = (props: DefaultDialogProps) => {
   const xmlDoc = props.xmlDoc;

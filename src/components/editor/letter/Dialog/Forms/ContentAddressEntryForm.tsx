@@ -18,7 +18,7 @@ import Grid from '@mui/material/Grid';
 
 
 import { Add, Delete } from "@mui/icons-material";
-import {ContentAddressEntry, ContentAddrLine, validParagraphClasses} from "../../../../../constants/editor";
+import {ContentAddressEntry, ContentAddrLine, validParagraphClasses} from "@src/constants/editor";
 
 type Props = {
 	entry: ContentAddressEntry;

@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { SnippetReference } from "../../services/mappings/autoAnnoMappings";
+import { SnippetReference } from "@src/services/mappings/autoAnnoMappings";
 
 interface AutoLetterSnippetState {
   snippet: {

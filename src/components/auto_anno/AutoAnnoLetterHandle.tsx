@@ -5,16 +5,16 @@ import {
   fetchAutoAnnoLetter, patchAutoAnnoLetterLockingUser,
   resetAnnoLetter,
   writeAnnoLetter
-} from "../../services/auto_anno/apiAutoAnno.service";
-import { Statuses } from "../../utils/entityMappings";
-import { RootState } from "../../redux/redux.store";
+} from "@src/services/auto_anno/apiAutoAnno.service";
+import { Statuses } from "@src/utils/entityMappings";
+import { RootState } from "@src/redux/redux.store";
 import {  useSelector } from "react-redux";
-import { clearSnippetState, setAutoAnnoLetter } from "../../redux/slices/auto.letter.snippet.slice";
-import { SnippetDialogType } from "../../services/mappings/autoAnnoMappings";
+import { clearSnippetState, setAutoAnnoLetter } from "@src/redux/slices/auto.letter.snippet.slice";
+import { SnippetDialogType } from "@src/services/mappings/autoAnnoMappings";
 import SnippetFormDialog from "./snippet_form/SnippetFormDialog";
 import { enqueueSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "../../redux/hooks";
+import { useAppDispatch } from "@src/redux/hooks";
 
 interface AutoAnnoLetterHandleProps {
   autoJobId: number

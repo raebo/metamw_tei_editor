@@ -1,21 +1,21 @@
 import { DefaultDialogProps } from '../EditorFormDialog';
-import { EditorConstants, EntityType, HeaderPerson } from '../../../../../constants/editor';
+import { EditorConstants, EntityType, HeaderPerson } from '@src/constants/editor';
 import React, { useEffect, useState } from 'react';
-import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
-import { EditorUtils } from '../../../../../utils/editor';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
+import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
-import { MiscUtils } from '../../../../../utils/misc';
-import { searchEditortEntities } from '../../../../../services/editor/apiLetterRequest.service';
-import { fetchMetamwEntityData } from '../../../../../services/auto_anno/apiMetaMw.service';
+import { MiscUtils } from '@src/utils/misc';
+import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
+import { fetchMetamwEntityData } from '@src/services/auto_anno/apiMetaMw.service';
 import DialogContent from '@mui/material/DialogContent';
-import DynamicDataDisplay from '../../../../support/DynamicDataDisplay';
-import { DISPLAY_NAME_MAP } from '../../../../../utils/entityMappings';
+import DynamicDataDisplay from '@src/components/support/DynamicDataDisplay';
+import { DISPLAY_NAME_MAP } from '@src/utils/entityMappings';
 import { Box, Divider, IconButton, List, ListItem, ListItemText, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { DialogActionButton } from './Misc/DialogActionButton';
-import FormAutocomplete from '../../Util/FormAutocomplete';
+import FormAutocomplete from '@src/components/editor/letter/Util/FormAutocomplete';
 
 const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
   const [receivers, setReceivers] = React.useState<HeaderPerson[]>([]);

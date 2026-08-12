@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
-import { searchEditortEntities } from '../../../../services/editor/apiLetterRequest.service';
-import { SnippetEntity } from '../../../../services/mappings/autoAnnoMappings';
+import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 
 interface FormAutocompleteProps {
 	entityType: string

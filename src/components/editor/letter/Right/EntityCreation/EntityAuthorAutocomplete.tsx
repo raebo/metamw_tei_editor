@@ -1,7 +1,7 @@
-import { SnippetEntity } from '../../../../../services/mappings/autoAnnoMappings';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import React, { useCallback, useEffect, useState } from 'react';
-import { searchEditortEntities } from '../../../../../services/editor/apiLetterRequest.service';
-import { EditorConstants, EntityType } from '../../../../../constants/editor';
+import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
+import { EditorConstants, EntityType } from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
 import { Autocomplete, TextField } from '@mui/material';

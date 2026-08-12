@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../redux/redux.store";
+import { RootState } from "@src/redux/redux.store";
 import {
   FormControl,
   IconButton,
@@ -14,7 +14,7 @@ import {
   setAutoAnnoSnippet,
   setAutoSnippetFormContainer,
   setSnippetEntityInfo
-} from "../../../redux/slices/auto.letter.snippet.slice";
+} from "@src/redux/slices/auto.letter.snippet.slice";
 import SnippetFormAutocomplete from "./SnippetFormAutocomplete";
 import { InfoOutlined, InfoSharp } from "@mui/icons-material";
 

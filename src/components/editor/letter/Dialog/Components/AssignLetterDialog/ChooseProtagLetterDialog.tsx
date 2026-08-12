@@ -1,4 +1,4 @@
-import { DefaultDialogProps } from '../../EditorFormDialog';
+import { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import React, { useEffect, useState } from 'react';
 import { EditorUtils } from '@src/utils/editor';

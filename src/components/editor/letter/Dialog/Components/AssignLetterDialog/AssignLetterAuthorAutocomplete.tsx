@@ -1,7 +1,7 @@
-import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import React from 'react';
 import { Autocomplete, TextField } from '@mui/material';
-import { EditorConstants } from '../../../../../../constants/editor';
+import { EditorConstants } from '@src/constants/editor';
 import HighlightedText from '@src/components/support/HighlightedText';
 
 interface AssignLetterAuthorAutocompleteProps {

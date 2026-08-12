@@ -1,10 +1,10 @@
 import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/redux.store";
+import { RootState } from "@src/redux/redux.store";
 import { IconButton, InputAdornment, OutlinedInput, TextField } from "@mui/material";
 import React from "react";
 import { InfoOutlined, InfoSharp, } from "@mui/icons-material";
-import { setSnippetEntityInfo } from "../../../redux/slices/auto.letter.snippet.slice";
-import { useAppDispatch } from "../../../redux/hooks";
+import { setSnippetEntityInfo } from "@src/redux/slices/auto.letter.snippet.slice";
+import { useAppDispatch } from "@src/redux/hooks";
 
 const ShowForm = () => {
 

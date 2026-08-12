@@ -3,7 +3,7 @@ import { NewLetterDialogProps } from '../AddNewLetterDialog';
 import React, { useState } from 'react';
 import {
   searchForLetterNameTitle,
-} from '../../../../../../services/editor/apiLettersRequest.service';
+} from '@src/services/editor/apiLettersRequest.service';
 
 const NewLetterLetterName= (props: NewLetterDialogProps) => {
   const [letterName, setLetterName] = React.useState<string | null>(props.completionState.letterName)

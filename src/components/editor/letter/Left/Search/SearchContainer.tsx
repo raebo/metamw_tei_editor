@@ -1,7 +1,7 @@
-import SearchLetters from '../../../index/SearchLetters';
+import SearchLetters from '@src/components/editor/index/SearchLetters';
 import React, { useCallback, useEffect, useState } from 'react';
 import { fetchSearchLetters } from '@src/services/editor/apiLettersRequest.service';
-import { EditorLetter } from '../../../../../services/mappings/editorMappings';
+import { EditorLetter } from '@src/services/mappings/editorMappings';
 import Grid from '@mui/material/Grid';
 import SearchResultEntry from './SearchResultEntry';
 import { useSelector } from 'react-redux';
