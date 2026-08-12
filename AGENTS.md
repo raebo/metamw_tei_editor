@@ -23,7 +23,7 @@ yarn eslint src tests --max-warnings=0
 yarn build
 ```
 
-Hinweis: Der aktuelle Ausgangsstand besteht TypeScript und ESLint noch nicht. Neue Aenderungen duerfen keine weiteren Fehler einfuehren. Relevante Altfehler sind in `audit.md` festgehalten.
+Hinweis: `yarn tsc --noEmit` und `yarn eslint src tests --max-warnings=0` sind fehlerfrei (Stand siehe `audit.md`); es bestehen noch ESLint-Warnungen (u. a. `react-hooks/exhaustive-deps`), die bewusst nicht blind gefixt wurden. Neue Aenderungen duerfen keine neuen Fehler einfuehren und die Warnungszahl nicht erhoehen. Details in `audit.md`.
 
 ## Arbeitsweise
 
