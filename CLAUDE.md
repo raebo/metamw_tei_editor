@@ -40,8 +40,9 @@ yarn build                  # Production-Build (webpack --mode production)
 
 ## Sprache im Projekt: Code englisch, UI/Doku deutsch
 
-- **Alle Bezeichner im Code sind auf Englisch zu halten**: Variablen-, Funktions-, Klassen-, Komponenten-, Hook-, Typ-, Interface- und Dateinamen, Redux-Slice- und Action-Namen, Ordnernamen, Kommentare im Code.
-- Bereits bestehende deutschsprachige Bezeichner beim Beruehren der jeweiligen Datei nach Moeglichkeit englisch benennen (kein grossflaechiges Rename-Refactoring ohne Auftrag, aber keine neuen deutschen Bezeichner einfuehren).
+- **Alle Bezeichner im Code sind auf Englisch zu halten**: Variablen-, Funktions-, Klassen-, Komponenten-, Hook-, Typ-, Interface- und Dateinamen, Redux-Slice- und Action-Namen, Ordnernamen.
+- **Code-Kommentare sind ausnahmslos auf Englisch zu verfassen** (vom Nutzer explizit bestaetigt) — auch inline-Kommentare, JSDoc/TSDoc und Erklaerungen zu Bugfixes. Keine deutschen Kommentare neu einfuegen, auch nicht als Erklaerung fuer eine Aenderung.
+- Bereits bestehende deutschsprachige Bezeichner und Kommentare beim Beruehren der jeweiligen Datei nach Moeglichkeit englisch nachziehen (kein grossflaechiges Rename-Refactoring ohne Auftrag, aber keine neuen deutschen Bezeichner/Kommentare einfuehren).
 - **Ausnahme UI-Text und Fachdokumentation:** Sichtbare Oberflaechentexte bleiben deutsch (oder werden ueber `src/i18n/` gepflegt) und `AGENTS.md`/`audit.md`/`CLAUDE.md` bleiben in deutscher Sprache, da sie sich an das Projektteam richten. Diese Ausnahme betrifft **nicht** Code-Identifier.
 - Neue sichtbare Texte nach Moeglichkeit ueber `src/i18n/locales/{de,en}/...` pflegen statt hartkodiert im JSX.
 - Bei Unsicherheit, ob ein Bezeichner ein "Code-Identifier" oder "UI-Text" ist: Property-/Variablennamen, Funktionsnamen und Dateinamen sind Identifier (englisch); Strings, die im UI gerendert werden, sind Text (deutsch/i18n).

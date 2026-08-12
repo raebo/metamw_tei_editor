@@ -34,6 +34,7 @@ Hinweis: Der aktuelle Ausgangsstand besteht TypeScript und ESLint noch nicht. Ne
 - Neue Umgebungsvariablen in `.env.example` dokumentieren; im Browser nur explizit freigegebene Variablen exponieren.
 - Bestehende deutsche UI-Texte und i18n-Struktur respektieren; neue sichtbare Texte nach Moeglichkeit ueber `src/i18n/` pflegen.
 - Keine grossflaechige automatische Formatierung zusammen mit fachlichen Aenderungen.
+- Code-Bezeichner (Variablen, Funktionen, Klassen, Komponenten, Hooks, Typen, Interfaces, Dateien, Ordner) sind englisch zu benennen; **Code-Kommentare sind ebenfalls ausnahmslos auf Englisch zu verfassen**, auch inline-Kommentare und Erklaerungen zu Bugfixes. Ausnahme: sichtbare UI-Texte (deutsch/i18n) und diese Projektdokumente (`AGENTS.md`, `audit.md`) bleiben deutsch.
 
 ## TypeScript und React
 
