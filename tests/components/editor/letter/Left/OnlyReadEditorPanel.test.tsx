@@ -3,9 +3,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import OnlyReadEditorPanel from './OnlyReadEditorPanel';
-import { fetchLetterXmlContent, fetchSearchLetters } from '@src/services/editor/apiLettersRequest.service';
+import OnlyReadEditorPanel from '@src/components/editor/letter/Left/OnlyReadEditorPanel';
+import {
+  fetchLetterXmlContent,
+  fetchSearchLetters,
+} from '@src/services/editor/apiLettersRequest.service';
 import editorLetterReducer from '@src/redux/slices/editor.letter.slice';
+import authReducer from '@src/redux/slices/authentication.slice';
+import type { EditorLetter } from '@src/services/mappings/editorMappings';
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 jest.mock('@src/services/editor/apiLettersRequest.service');
@@ -14,40 +19,71 @@ jest.mock('notistack', () => ({
 }));
 jest.mock('@src/components/editor/letter/Center/LetterViewContainer/XmlDisplayParser', () => ({
   __esModule: true,
-  default: ({ xmlString }: { xmlString: string }) => <div data-testid="xml-parser">{xmlString}</div>,
+  default: ({ xmlString }: { xmlString: string }) => (
+    <div data-testid="xml-parser">{xmlString}</div>
+  ),
 }));
 
 const mockFetchSearchLetters = fetchSearchLetters as jest.MockedFunction<typeof fetchSearchLetters>;
-const mockFetchLetterXmlContent = fetchLetterXmlContent as jest.MockedFunction<typeof fetchLetterXmlContent>;
+const mockFetchLetterXmlContent = fetchLetterXmlContent as jest.MockedFunction<
+  typeof fetchLetterXmlContent
+>;
 
-// ── Hilfsfunktionen ────────────────────────────────────────────────────────
-const MOCK_LETTERS = [
-  { id: 1, name: 'Brief A', entityDisplayName: 'Brief A' },
-  { id: 2, name: 'Brief B', entityDisplayName: 'Brief B' },
-];
+// ── Helpers ────────────────────────────────────────────────────────────────
+const buildLetter = (id: number, name: string): EditorLetter => ({
+  id,
+  name,
+  title: name,
+  lastUpdatedByName: 'Tester',
+  lastUpdatedById: 1,
+  updatedAt: new Date('2024-01-01'),
+  xmlContent: undefined,
+});
+
+const MOCK_LETTERS: EditorLetter[] = [buildLetter(1, 'Brief A'), buildLetter(2, 'Brief B')];
 
 const XML_CONTENT = '<root><letter>Test</letter></root>';
 
-const buildStore = (onlyReadableLetter = null) =>
-  configureStore({
-    reducer: { editorLetter: editorLetterReducer },
+const buildStore = (
+  onlyReadableLetter: {
+    id: number | null;
+    name: string | null;
+    xmlContent: string | null;
+  } = { id: null, name: null, xmlContent: null },
+) => {
+  // Start from the reducer's own default state instead of duplicating its shape here, so this
+  // test doesn't need to change every time the slice gains/loses a field.
+  const defaultState = editorLetterReducer(undefined, { type: '@@INIT' });
+
+  return configureStore({
+    reducer: { editorLetter: editorLetterReducer, auth: authReducer },
     preloadedState: {
       editorLetter: {
+        ...defaultState,
         onlyReadableLetter,
       },
     },
   });
+};
 
 const renderComponent = (store = buildStore()) =>
   render(
     <Provider store={store}>
       <OnlyReadEditorPanel />
-    </Provider>
+    </Provider>,
+  );
+
+// HighlightedText (see the XSS fix) renders the matched substring in its own <span>, splitting
+// e.g. "Brief A" into a <span>Br</span> + "ief A" text sibling. Neither getByText's default
+// single-node matching nor getByRole's accessible-name computation reliably reconstructs that
+// split text in jsdom, so match directly against the option element's full textContent instead.
+const getOptionByName = (name: string) =>
+  screen.getByText(
+    (_, element) => element?.getAttribute('role') === 'option' && element.textContent === name,
   );
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 describe('OnlyReadEditorPanel', () => {
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -105,8 +141,8 @@ describe('OnlyReadEditorPanel', () => {
       await userEvent.type(input, 'Br');
 
       await waitFor(() => {
-        expect(screen.getByText('Brief A')).toBeInTheDocument();
-        expect(screen.getByText('Brief B')).toBeInTheDocument();
+        expect(getOptionByName('Brief A')).toBeInTheDocument();
+        expect(getOptionByName('Brief B')).toBeInTheDocument();
       });
     });
 
@@ -135,8 +171,8 @@ describe('OnlyReadEditorPanel', () => {
       const input = screen.getByLabelText('Briefname oder -titel eingeben');
       await userEvent.type(input, 'Br');
 
-      await waitFor(() => screen.getByText('Brief A'));
-      await userEvent.click(screen.getByText('Brief A'));
+      await waitFor(() => getOptionByName('Brief A'));
+      await userEvent.click(getOptionByName('Brief A'));
 
       await waitFor(() => {
         expect(mockFetchLetterXmlContent).toHaveBeenCalledWith(1);
@@ -153,8 +189,8 @@ describe('OnlyReadEditorPanel', () => {
 
       const input = screen.getByLabelText('Briefname oder -titel eingeben');
       await userEvent.type(input, 'Br');
-      await waitFor(() => screen.getByText('Brief A'));
-      await userEvent.click(screen.getByText('Brief A'));
+      await waitFor(() => getOptionByName('Brief A'));
+      await userEvent.click(getOptionByName('Brief A'));
 
       await waitFor(() => {
         const state = store.getState().editorLetter.onlyReadableLetter;
@@ -165,39 +201,39 @@ describe('OnlyReadEditorPanel', () => {
     });
 
     it('zeigt Fehlermeldung wenn kein XML-Inhalt gefunden', async () => {
-      const { enqueueSnackbar } = require('notistack');
+      const { enqueueSnackbar } = jest.requireMock('notistack');
       mockFetchSearchLetters.mockResolvedValue(MOCK_LETTERS);
-      mockFetchLetterXmlContent.mockResolvedValue(null);
+      // fetchLetterXmlContent always resolves to a string; an empty one is the "nothing found"
+      // case the component treats as falsy (`if (xml)`).
+      mockFetchLetterXmlContent.mockResolvedValue('');
       renderComponent();
 
       const input = screen.getByLabelText('Briefname oder -titel eingeben');
       await userEvent.type(input, 'Br');
-      await waitFor(() => screen.getByText('Brief A'));
-      await userEvent.click(screen.getByText('Brief A'));
+      await waitFor(() => getOptionByName('Brief A'));
+      await userEvent.click(getOptionByName('Brief A'));
 
       await waitFor(() => {
-        expect(enqueueSnackbar).toHaveBeenCalledWith(
-          'Fehler: Kein XML-Inhalt gefunden',
-          { variant: 'error' }
-        );
+        expect(enqueueSnackbar).toHaveBeenCalledWith('Fehler: Kein XML-Inhalt gefunden', {
+          variant: 'error',
+        });
       });
     });
 
     it('zeigt Fehlermeldung bei API-Fehler', async () => {
-      const { enqueueSnackbar } = require('notistack');
+      const { enqueueSnackbar } = jest.requireMock('notistack');
       mockFetchSearchLetters.mockResolvedValue(MOCK_LETTERS);
       mockFetchLetterXmlContent.mockRejectedValue(new Error('Netzwerkfehler'));
       renderComponent();
 
       const input = screen.getByLabelText('Briefname oder -titel eingeben');
       await userEvent.type(input, 'Br');
-      await waitFor(() => screen.getByText('Brief A'));
-      await userEvent.click(screen.getByText('Brief A'));
+      await waitFor(() => getOptionByName('Brief A'));
+      await userEvent.click(getOptionByName('Brief A'));
 
       await waitFor(() => {
         expect(enqueueSnackbar).toHaveBeenCalledWith('Netzwerkfehler', { variant: 'error' });
       });
     });
   });
-
 });

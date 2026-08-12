@@ -6,36 +6,40 @@ type ToolbarButtonProps = {
   title: string;
   active?: boolean;
   icon: React.ReactNode;
-  onClick: (() => void) | ((event: React.MouseEvent<HTMLDivElement>) => void);
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
-export const ToolbarButton: React.FC<ToolbarButtonProps> = ({ title, active = false, onClick, icon }) => {
+export const ToolbarButton: React.FC<ToolbarButtonProps> = ({
+  title,
+  active = false,
+  onClick,
+  icon,
+}) => {
   const theme = useTheme<Theme>();
 
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (!active) {
       event.preventDefault();
       event.stopPropagation();
       return;
     }
 
-    if (active) {
-      if (typeof onClick === 'function') {
-        onClick?.(event);
-      }
-    }
+    onClick(event);
   };
 
   return (
-    <Tooltip title={active ? 'is active' : 'is not active'} placement="right">
+    <Tooltip title={title} placement="right">
       <IconButton
         size="small"
-        active={title}
+        aria-pressed={active}
         onClick={handleClick}
         sx={{
-          border: `1px solid ${theme.palette.toolbarButton.borderColor}`,
-          bgcolor: active ? theme.palette.toolbarButton.activeBg : theme.palette.toolbarButton.inactiveBg,
-          color: active ? theme.palette.toolbarButton.activeColor : theme.palette.toolbarButton.inactiveColor,
+          bgcolor: active
+            ? theme.palette.toolbarButton.activeBg
+            : theme.palette.toolbarButton.inactiveBg,
+          color: active
+            ? theme.palette.toolbarButton.activeColor
+            : theme.palette.toolbarButton.inactiveColor,
           border: '1px solid',
           borderColor: active ? theme.palette.toolbarButton.activeBg : '#ccc',
           borderRadius: 1,

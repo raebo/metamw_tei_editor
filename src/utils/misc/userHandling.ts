@@ -1,30 +1,25 @@
-import { AuthUser } from "../../services/mappings/authMappings";
+import { AuthUser } from '../../services/mappings/authMappings';
+
+// Only the name fields nameShortCut actually needs - the Redux auth slice's user does not carry
+// AuthUser's full shape (no email/language), so requiring a full AuthUser here would either
+// force a fake one or (as before) silently mismatch names/casing at runtime.
+type NamePartsUser = Pick<AuthUser, 'first_name' | 'last_name'>;
+
+// Matches the (unexported) user shape of src/redux/slices/authentication.slice.ts.
+type StateUser = { id: number; login: string; firstName: string; lastName: string } | null;
 
 export const userHandling = {
-  nameShortCut : (user: AuthUser): string => {
+  nameShortCut: (user: NamePartsUser): string => {
     if (user.last_name && user.first_name) {
-      return `${user.last_name.charAt(0)}${user.first_name.charAt(0)}`
-
-    } else if (user.login && user.login.indexOf('_') !== -1) {
-      const split = user.login.split('_')
-      return  `${split[0].charAt(0)}${split[1].charAt(0)}`
-
-    } else if (user.login && user.login.length > 1) {
-      return `${user.login.charAt(0)}${user.login.charAt(1)}`
-
-    } else if (user.login) {
-      return user.login.charAt(0)
-
+      return `${user.last_name.charAt(0)}${user.first_name.charAt(0)}`;
     } else {
-      throw new Error("User without name and login")
+      throw new Error('User without first/last name');
     }
   },
-  stateUserToAuthUser: (stateUser: any): AuthUser => {
+  stateUserToAuthUser: (stateUser: StateUser): NamePartsUser => {
     return {
-      id: stateUser.id,
-      login: stateUser.login,
-      last_name: stateUser.last_name,
-      first_name: stateUser.first_name
-    }
-  }
-}
+      first_name: stateUser?.firstName ?? '',
+      last_name: stateUser?.lastName ?? '',
+    };
+  },
+};
