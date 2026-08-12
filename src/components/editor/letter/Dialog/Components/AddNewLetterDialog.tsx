@@ -193,51 +193,10 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
     return () => node?.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const validWriterCheck = (): boolean => {
-    if (completionState.isFmbLetter && completionState.writerEntity === null) {
-      return true;
-    } else if (!completionState.isFmbLetter && completionState.writerEntity === null) {
-      return false;
-    } else {
-      return false;
-    }
-  };
-  const validPrevLetterCheck = (): boolean => {
-    if (
-      completionState.prevLetterType !== null &&
-      (completionState.prevLetterType === 'unknown' ||
-        completionState.prevLetterType === 'not_identified')
-    ) {
-      return true;
-    } else
-      return completionState.prevLetterType === 'select' && completionState.prevLetter !== null;
-  };
-
-  const validNextLetterCheck = (): boolean => {
-    if (
-      completionState.nextLetterType !== null &&
-      (completionState.nextLetterType === 'unknown' ||
-        completionState.nextLetterType === 'not_identified')
-    ) {
-      return true;
-    } else
-      return completionState.nextLetterType === 'select' && completionState.nextLetter !== null;
-  };
-
-  const saveIsAvailable = [
-    completionState.letterNameComplete,
-    // completionState.firstHeaderComplete,
-    // completionState.sndHeaderComplete,
-    // validWriterCheck(),
-    // validPrevLetterCheck(),
-    // validNextLetterCheck(),
-    // completionState.writingPlace !== null,
-    // completionState.receivers.length > 0,
-    // completionState.receivingPlace !== null,
-    // completionState.letterLanguage.length > 0,
-    // completionState.editorValue !== null,
-    // completionState.transkriptorValue !== null,
-  ].every(Boolean);
+  // Saving is intentionally allowed as soon as the letter name is set; every other field
+  // (headlines, writer, prev/next letter, writing/receiving place, receivers, language,
+  // editor/transcriber) is optional and can be filled in later.
+  const saveIsAvailable = completionState.letterNameComplete;
 
   const renderStepContent = (stepKey: StepKey) => {
     switch (stepKey) {
