@@ -1,26 +1,25 @@
 import React from 'react';
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import { useEffect, } from "react";
-import { fetchMetamwEntityData } from "@src/services/auto_anno/apiMetaMw.service";
-import { enqueueSnackbar } from "notistack";
-import DynamicDataDisplay from "@src/components/support/DynamicDataDisplay";
-import { DISPLAY_NAME_MAP } from "@src/utils/entityMappings";
-import { Divider, Typography } from "@mui/material";
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
+import { useEffect } from 'react';
+import { fetchMetamwEntityData } from '@src/services/auto_anno/apiMetaMw.service';
+import { enqueueSnackbar } from 'notistack';
+import DynamicDataDisplay from '@src/components/support/DynamicDataDisplay';
+import { DISPLAY_NAME_MAP } from '@src/utils/entityMappings';
+import { Divider, Typography } from '@mui/material';
 
 interface SnippetReferencesInfoDialogProps {
-  open: boolean,
-  referenceKey: string | null,
-  handleClose: () => void
+  open: boolean;
+  referenceKey: string | null;
+  handleClose: () => void;
 }
 
 const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
-
-  const [displayData, setDisplayData] = React.useState<{ [key: string]:string}|null>(null);
-  const filterAttributeList = ["country"]
+  const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
+  const filterAttributeList = ['country'];
 
   useEffect(() => {
     (async () => {
@@ -29,19 +28,20 @@ const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
           const result = await fetchMetamwEntityData(String(props.referenceKey));
 
           if (result === null) {
-            enqueueSnackbar(`No data found for entity with key: ${props.referenceKey}`, { variant: "error" });
+            enqueueSnackbar(`No data found for entity with key: ${props.referenceKey}`, {
+              variant: 'error',
+            });
             return;
           }
           const entries = Object.fromEntries(
-            Object.entries(result)
-              .filter(
-                ([key]) => !filterAttributeList.includes(key)
-              )
-          )
-          
-          setDisplayData(entries)
+            Object.entries(result).filter(([key]) => !filterAttributeList.includes(key)),
+          );
+
+          setDisplayData(entries);
         } catch (error) {
-          enqueueSnackbar(`Error fetching data for entity with key: ${props.referenceKey}` , { variant: "error" });
+          enqueueSnackbar(`Error fetching data for entity with key: ${props.referenceKey}`, {
+            variant: 'error',
+          });
         }
       }
     })();
@@ -55,15 +55,14 @@ const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
         fullWidth={true}
-        maxWidth={"lg"}
+        maxWidth={'lg'}
       >
         <DialogTitle id="alert-dialog-title">
-          { `Informationen für - ${props.referenceKey}` }
+          {`Informationen für - ${props.referenceKey}`}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-          </DialogContentText>
-            <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
+          <DialogContentText id="alert-dialog-description"></DialogContentText>
+          <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
         </DialogContent>
         <DialogActions>
           <Divider sx={{ my: 2 }} />
@@ -73,7 +72,7 @@ const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
         </DialogActions>
       </Dialog>
     </React.Fragment>
-  )
-}
+  );
+};
 
-export default SnippetEntityInfoDialog
+export default SnippetEntityInfoDialog;

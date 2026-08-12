@@ -1,38 +1,38 @@
 import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { Autocomplete, TextField } from '@mui/material';
-import React, {useEffect} from 'react';
-import {EditorUtils} from "@src/utils/editor";
+import React, { useEffect } from 'react';
+import { EditorUtils } from '@src/utils/editor';
 import { useTranslation } from 'react-i18next';
 
 const firstHeaderOptions = [
-  "Anna Mustermann an Felix Mendelssohn Bartholdy in Musterstadt",
-  "Anna Mustermann an Felix Mendelssohn Bartholdy und Otto Mustermann in Musterstadt",
-  "Anna Mustermann und Otto Mustermann an Felix Mendelssohn Bartholdy in Musterstadt",
-  "Anna Mustermann und Otto Mustermann an Felix Mendelssohn Bartholdy und Amalie Musterfrau in Musterstadt",
-  "Anna Mustermann an Felix Mendelssohn Bartholdy",
-  "Felix Mendelssohn Bartholdy an Anna Mustermann in Musterstadt"
-]
+  'Anna Mustermann an Felix Mendelssohn Bartholdy in Musterstadt',
+  'Anna Mustermann an Felix Mendelssohn Bartholdy und Otto Mustermann in Musterstadt',
+  'Anna Mustermann und Otto Mustermann an Felix Mendelssohn Bartholdy in Musterstadt',
+  'Anna Mustermann und Otto Mustermann an Felix Mendelssohn Bartholdy und Amalie Musterfrau in Musterstadt',
+  'Anna Mustermann an Felix Mendelssohn Bartholdy',
+  'Felix Mendelssohn Bartholdy an Anna Mustermann in Musterstadt',
+];
 
 const TeiHeaderFirstHeadline = (props: TeiHeaderDialogProps) => {
   const { t } = useTranslation();
 
   const completionState = props.completionState;
 
-	useEffect(() => {
-		const { firstHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(props.teiHeader)
+  useEffect(() => {
+    const { firstHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(props.teiHeader);
 
-		if (firstHeadline) {
-			props.onChange({ firstHeaderComplete: true, firstHeaderContent: firstHeadline });
-		}
-	}, [props.teiHeader]);
+    if (firstHeadline) {
+      props.onChange({ firstHeaderComplete: true, firstHeaderContent: firstHeadline });
+    }
+  }, [props.teiHeader]);
 
   const setFirstHeaderValue = (value: string) => {
-    props.onChange({ firstHeaderComplete: true, firstHeaderContent: value })
-  }
+    props.onChange({ firstHeaderComplete: true, firstHeaderContent: value });
+  };
 
   return (
     <>
-      <div className="autoSnippetFormRow" style={ { marginTop: "25px", width: "98%" } }>
+      <div className="autoSnippetFormRow" style={{ marginTop: '25px', width: '98%' }}>
         <Autocomplete
           freeSolo
           options={firstHeaderOptions}
@@ -55,7 +55,7 @@ const TeiHeaderFirstHeadline = (props: TeiHeaderDialogProps) => {
         />
       </div>
     </>
-  )
-}
+  );
+};
 
 export default TeiHeaderFirstHeadline;

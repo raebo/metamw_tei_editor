@@ -1,73 +1,73 @@
-import { createSlice } from '@reduxjs/toolkit'
-import { SnippetReference } from "@src/services/mappings/autoAnnoMappings";
+import { createSlice } from '@reduxjs/toolkit';
+import { SnippetReference } from '@src/services/mappings/autoAnnoMappings';
 
 interface AutoLetterSnippetState {
   snippet: {
-    id: number,
-    xmlId: string,
-    referenceName: string
-    referenceKey: string
-    referenceType: string
-    referenceNameChanged: string
-    referenceKeyChanged: string
-    referenceTypeChanged: string
-  } | null
+    id: number;
+    xmlId: string;
+    referenceName: string;
+    referenceKey: string;
+    referenceType: string;
+    referenceNameChanged: string;
+    referenceKeyChanged: string;
+    referenceTypeChanged: string;
+  } | null;
   snippetFormContainer: {
-    form: string
-    buttons: string
-    actionButtonDisabled?: boolean
-  }
+    form: string;
+    buttons: string;
+    actionButtonDisabled?: boolean;
+  };
   snippetReferences: {
-    items: SnippetReference[] | []
-    showReferences: boolean
-    referenceFormActive: boolean
-  }
+    items: SnippetReference[] | [];
+    showReferences: boolean;
+    referenceFormActive: boolean;
+  };
   letter: {
-    id: string | null,
-    reloadStatus?: boolean
-    reloadSnippetsStatus?: boolean
-    contentChanged?: boolean
-  } | null
+    id: string | null;
+    reloadStatus?: boolean;
+    reloadSnippetsStatus?: boolean;
+    contentChanged?: boolean;
+  } | null;
   job: {
-    id:string | null,
-    reloadStatus: boolean
-  } | null
+    id: string | null;
+    reloadStatus: boolean;
+  } | null;
   entityInfo: {
-    key: string | null
-  },
+    key: string | null;
+  };
   stateMessage: {
-    message: string,
-    variant: "default" | "error" | "success" | "warning" | "info"
-  } | null
+    message: string;
+    variant: 'default' | 'error' | 'success' | 'warning' | 'info';
+  } | null;
 }
 
 const initialState: AutoLetterSnippetState = {
   snippet: null,
   snippetFormContainer: {
-    form: "BLANK_FORM",
-    buttons: "BLANK_BUTTONS",
-    actionButtonDisabled: true
+    form: 'BLANK_FORM',
+    buttons: 'BLANK_BUTTONS',
+    actionButtonDisabled: true,
   },
   snippetReferences: {
     items: [],
     showReferences: false,
-    referenceFormActive: true
+    referenceFormActive: true,
   },
   letter: {
     id: null,
     reloadStatus: true,
     reloadSnippetsStatus: true,
-    contentChanged: false
+    contentChanged: false,
   },
   job: {
     id: null,
-    reloadStatus: true
+    reloadStatus: true,
   },
   entityInfo: {
-    key: null
+    key: null,
   },
-  stateMessage: null
-}
+  stateMessage: null,
+};
 
 const autoLetterSnippetSlice = createSlice({
   name: 'autoLetterSnippet',
@@ -75,54 +75,66 @@ const autoLetterSnippetSlice = createSlice({
   reducers: {
     setAutoAnnoSnippet(state, action) {
       if (!state.snippet) {
-        state.snippet = { ...action.payload.snippet }
+        state.snippet = { ...action.payload.snippet };
       } else {
-        state.snippet = { ...state.snippet, ...action.payload.snippet }
+        state.snippet = { ...state.snippet, ...action.payload.snippet };
       }
 
       if (state.snippet?.id) {
-        state.job = { id: "", reloadStatus: false }
-        state.letter = { id: "", reloadStatus: false }
+        state.job = { id: '', reloadStatus: false };
+        state.letter = { id: '', reloadStatus: false };
       }
     },
     setAutoSnippetFormContainer(state, action) {
       if (!state.snippetFormContainer) {
-        state.snippetFormContainer = { ...action.payload.snippetFormContainer }
+        state.snippetFormContainer = { ...action.payload.snippetFormContainer };
       } else {
-        state.snippetFormContainer = { ...state.snippetFormContainer, ...action.payload.snippetFormContainer}
+        state.snippetFormContainer = {
+          ...state.snippetFormContainer,
+          ...action.payload.snippetFormContainer,
+        };
       }
     },
     clearSnippetState(state) {
-      state.snippet= null
-      state.snippetFormContainer= { form: "BLANK_FORM", buttons: "BLANK_BUTTONS" }
+      state.snippet = null;
+      state.snippetFormContainer = { form: 'BLANK_FORM', buttons: 'BLANK_BUTTONS' };
     },
 
     setAutoAnnoLetter(state, action) {
       if (!state.letter) {
-        state.letter = { ...action.payload.letter}
+        state.letter = { ...action.payload.letter };
       } else {
-        state.letter = { ...state.letter, ...action.payload.letter}
+        state.letter = { ...state.letter, ...action.payload.letter };
       }
     },
     setSnippetReferences(state, action) {
-      state.snippetReferences= action.payload.references
+      state.snippetReferences = action.payload.references;
     },
     setSnippetReferenceFormActive(state, action) {
-      state.snippetReferences.referenceFormActive = action.payload.referenceFormActive
+      state.snippetReferences.referenceFormActive = action.payload.referenceFormActive;
     },
     setSnippetEntityInfo(state, action) {
-      state.entityInfo.key = action.payload.key
+      state.entityInfo.key = action.payload.key;
     },
     setStateMessage(state, action) {
       if (action.payload === null) {
-        state.stateMessage = null
+        state.stateMessage = null;
       } else {
-        state.stateMessage = action.payload.stateMessage
+        state.stateMessage = action.payload.stateMessage;
       }
-    }
+    },
   },
-})
+});
 
-export const { setSnippetEntityInfo, setAutoAnnoSnippet, setAutoSnippetFormContainer, setSnippetReferenceFormActive, clearSnippetState, setAutoAnnoLetter, setSnippetReferences, setStateMessage } = autoLetterSnippetSlice.actions
+export const {
+  setSnippetEntityInfo,
+  setAutoAnnoSnippet,
+  setAutoSnippetFormContainer,
+  setSnippetReferenceFormActive,
+  clearSnippetState,
+  setAutoAnnoLetter,
+  setSnippetReferences,
+  setStateMessage,
+} = autoLetterSnippetSlice.actions;
 
-export default autoLetterSnippetSlice.reducer
+export default autoLetterSnippetSlice.reducer;

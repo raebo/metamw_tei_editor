@@ -1,20 +1,23 @@
-import { useNavigate, useParams } from "react-router-dom";
-import React, { useEffect, useState } from "react";
-import { fetchAutoAnnoJobLetters, fetchAutoAnnoJobs } from "@src/services/auto_anno/apiAutoAnno.service";
+import { useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import {
+  fetchAutoAnnoJobLetters,
+  fetchAutoAnnoJobs,
+} from '@src/services/auto_anno/apiAutoAnno.service';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import {
   AutoAnnoJobLetter,
-  AutoAnnoJob, getStatusDetails,
-} from "@src/services/mappings/autoAnnoMappings";
-import { enqueueSnackbar } from "notistack";
-import { format, parse } from "date-fns";
-import { dateFnsFormat, dateFnsParseFormat } from "@src/constants/snack";
-import { useSelector } from "react-redux";
-import { RootState } from "@src/redux/redux.store";
-
+  AutoAnnoJob,
+  getStatusDetails,
+} from '@src/services/mappings/autoAnnoMappings';
+import { enqueueSnackbar } from 'notistack';
+import { format, parse } from 'date-fns';
+import { dateFnsFormat, dateFnsParseFormat } from '@src/constants/snack';
+import { useSelector } from 'react-redux';
+import { RootState } from '@src/redux/redux.store';
 
 const AutoAnnoList: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +28,7 @@ const AutoAnnoList: React.FC = () => {
   const [autoAnnoLetters, setLetterRows] = useState<AutoAnnoJobLetter[] | undefined>();
   const [error, setError] = useState<string | null>(null);
 
-  const _navigate = useNavigate()
+  const _navigate = useNavigate();
 
   useEffect(() => {
     const getData = async () => {
@@ -45,18 +48,21 @@ const AutoAnnoList: React.FC = () => {
     if (id) {
       const parsedId = parseInt(id, 10);
       if (!isNaN(parsedId)) {
-        fetchAutoAnnoJobLetters(parsedId).then((result) => {
-          setLetterRows(result);
-          setAutoAnnoJobId(parsedId);
-        }).catch((err) => {
-          enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
-        })
+        fetchAutoAnnoJobLetters(parsedId)
+          .then((result) => {
+            setLetterRows(result);
+            setAutoAnnoJobId(parsedId);
+          })
+          .catch((err) => {
+            enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
+              variant: 'error',
+            });
+          });
       } else {
         console.error(`Invalid id: ${id}`);
       }
     }
   }, [id]);
-
 
   const jobColumns: GridColDef[] = [
     {
@@ -73,24 +79,24 @@ const AutoAnnoList: React.FC = () => {
               padding: '0',
               borderRadius: '4px',
               textAlign: 'center',
-              color: foregroundColor
+              color: foregroundColor,
             }}
           >
-            { label }
+            {label}
           </div>
         );
-      }
+      },
     },
-    {field: 'id', headerName: 'ID', width: 90},
+    { field: 'id', headerName: 'ID', width: 90 },
     {
-      field: 'job_updated_at', headerName: 'Service Identifier', width: 180,
+      field: 'job_updated_at',
+      headerName: 'Service Identifier',
+      width: 180,
       renderCell: (params) => {
-        return format(
-          parse(params.row.updated_at, dateFnsParseFormat, new Date()),
-          dateFnsFormat)
-      }
+        return format(parse(params.row.updated_at, dateFnsParseFormat, new Date()), dateFnsFormat);
+      },
     },
-    {field: 'search_string', headerName: 'Suchbegriff', width: 200},
+    { field: 'search_string', headerName: 'Suchbegriff', width: 200 },
     {
       field: 'letters_open',
       headerName: 'Briefe',
@@ -98,7 +104,7 @@ const AutoAnnoList: React.FC = () => {
       sortable: false,
       renderCell: (params) => {
         return `${params.row.letters_closed}/${params.row.letters_count}`;
-      }
+      },
     },
     {
       field: 'snippets_open',
@@ -107,7 +113,7 @@ const AutoAnnoList: React.FC = () => {
       sortable: false,
       renderCell: (params) => {
         return `${params.row.snippets_closed}/${params.row.snippets_count}`;
-      }
+      },
     },
     {
       field: 'actions',
@@ -127,19 +133,19 @@ const AutoAnnoList: React.FC = () => {
 
         return (
           <IconButton onClick={handleIconClick} aria-label="info">
-            <InfoIcon color="primary"/>
+            <InfoIcon color="primary" />
           </IconButton>
         );
       },
-    }
+    },
   ];
 
   const letterColumns: GridColDef[] = [
-    {field: 'status',
+    {
+      field: 'status',
       headerName: 'Status',
       width: 150,
       renderCell: (params) => {
-
         const { label, backgroundColor, foregroundColor } = getStatusDetails(params.row.status);
 
         return (
@@ -149,15 +155,15 @@ const AutoAnnoList: React.FC = () => {
               padding: '0',
               borderRadius: '4px',
               textAlign: 'center',
-              color: foregroundColor
+              color: foregroundColor,
             }}
           >
-            { label }
+            {label}
           </div>
         );
-      }
+      },
     },
-    {field: 'letter_name', headerName: 'Brief', width: 150},
+    { field: 'letter_name', headerName: 'Brief', width: 150 },
     {
       field: 'snippets_count',
       headerName: 'Auszeichnungen',
@@ -165,7 +171,7 @@ const AutoAnnoList: React.FC = () => {
       sortable: false,
       renderCell: (params) => {
         return `${params.row.snippets_closed}/${params.row.snippets_count}`;
-      }
+      },
     },
     {
       field: 'user_id',
@@ -173,10 +179,10 @@ const AutoAnnoList: React.FC = () => {
       width: 120,
       sortable: false,
       renderCell: (params) => {
-        const locking_user = params.row.locking_user
+        const locking_user = params.row.locking_user;
 
         return locking_user !== null ? locking_user.login : '';
-      }
+      },
     },
     {
       field: 'actions',
@@ -184,69 +190,69 @@ const AutoAnnoList: React.FC = () => {
       width: 100,
       sortable: false,
       renderCell: (params) => {
-        const letter = params.row
-        const locking_user = letter.locking_user
+        const letter = params.row;
+        const locking_user = letter.locking_user;
         const handleIconDetailClick = () => {
           _navigate(`/automatic_annotations/${autoAnnoJobId}/letters/${letter.id}`);
-        }
+        };
 
-        if (locking_user === null || (user !== null && locking_user.id === user.id) ) {
+        if (locking_user === null || (user !== null && locking_user.id === user.id)) {
           return (
             <>
               <IconButton onClick={handleIconDetailClick} aria-label="info">
-                <InfoIcon color="primary"/>
+                <InfoIcon color="primary" />
               </IconButton>
             </>
-          )
+          );
         } else {
           return (
             <>
               <IconButton aria-label="info">
-                <InfoIcon color="disabled"/>
+                <InfoIcon color="disabled" />
               </IconButton>
             </>
-          )
+          );
         }
-
-      }
-    }
+      },
+    },
   ];
 
   const paginationModel = { page: 0, pageSize: 10 };
 
   return (
     <>
-      <Paper sx={{height: 600, width: '100%'}}>
+      <Paper sx={{ height: 600, width: '100%' }}>
         <DataGrid
           rows={autoAnnoData}
           columns={jobColumns}
-          initialState={{pagination: {paginationModel}}}
+          initialState={{ pagination: { paginationModel } }}
           pageSizeOptions={[5, 10]}
-          sx={{border: 0}}
+          sx={{ border: 0 }}
         />
       </Paper>
       {autoAnnoLetters !== undefined && autoAnnoLetters.length > 0 ? (
-        <div style={{marginTop: '40px', width: '100%'}}>
-          <Paper sx={{height: 400, width: '100%'}}>
+        <div style={{ marginTop: '40px', width: '100%' }}>
+          <Paper sx={{ height: 400, width: '100%' }}>
             <DataGrid
               rows={autoAnnoLetters}
               columns={letterColumns}
-              initialState={{pagination: {paginationModel}}}
+              initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
-              sx={{border: 0}}
+              sx={{ border: 0 }}
             />
           </Paper>
         </div>
-        ) : (
-        <div style={{marginTop: '40px', width: '100%'}}>
+      ) : (
+        <div style={{ marginTop: '40px', width: '100%' }}>
           <Box>
-            <Typography variant="h4">Bitte wählen Sie einen Eintrag in der oberen Tabelle aus.</Typography>
+            <Typography variant="h4">
+              Bitte wählen Sie einen Eintrag in der oberen Tabelle aus.
+            </Typography>
           </Box>
         </div>
-        )}
+      )}
     </>
+  );
+};
 
-  )
-}
-
-export default AutoAnnoList
+export default AutoAnnoList;

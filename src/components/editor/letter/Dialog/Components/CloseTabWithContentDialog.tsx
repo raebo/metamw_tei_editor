@@ -58,7 +58,8 @@ const CloseTabWithContent = (props: DefaultDialogProps) => {
   return (
     <>
       <DialogContent>
-        Für dieses Tab existieren ungespeicherte Änderungen. Möchten Sie den Brief zurücksetzen und das Tab schließen?
+        Für dieses Tab existieren ungespeicherte Änderungen. Möchten Sie den Brief zurücksetzen und
+        das Tab schließen?
       </DialogContent>
       <DialogActions>
         <Button
@@ -70,7 +71,12 @@ const CloseTabWithContent = (props: DefaultDialogProps) => {
         >
           Abbrechen
         </Button>
-        <Button size={EditorConstants.styles.panel.buttonSize} variant="contained" onClick={() => closeTab()} color="primary">
+        <Button
+          size={EditorConstants.styles.panel.buttonSize}
+          variant="contained"
+          onClick={() => closeTab()}
+          color="primary"
+        >
           Brief Schließen
         </Button>
       </DialogActions>

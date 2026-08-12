@@ -1,5 +1,5 @@
-import { SnippetDialogType} from "@src/services/mappings/autoAnnoMappings"
-import React, { useEffect, useRef, useState } from "react"
+import { SnippetDialogType } from '@src/services/mappings/autoAnnoMappings';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   ButtonGroup,
@@ -9,91 +9,99 @@ import {
   IconButton,
   Radio,
   RadioGroup,
-  Typography
-} from "@mui/material"
-import Button from "@mui/material/Button"
-import Paper from "@mui/material/Paper"
+  Typography,
+} from '@mui/material';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
 import {
   clearSnippetState,
-  setAutoAnnoLetter, setSnippetEntityInfo, setSnippetReferenceFormActive,
-  setSnippetReferences
-} from "@src/redux/slices/auto.letter.snippet.slice";
-import { useAppDispatch } from "@src/redux/hooks";
-import SnippetFormDialog from "./SnippetFormDialog";
-import { useSelector } from "react-redux";
-import { RootState } from "@src/redux/redux.store";
-import { enqueueSnackbar } from "notistack";
+  setAutoAnnoLetter,
+  setSnippetEntityInfo,
+  setSnippetReferenceFormActive,
+  setSnippetReferences,
+} from '@src/redux/slices/auto.letter.snippet.slice';
+import { useAppDispatch } from '@src/redux/hooks';
+import SnippetFormDialog from './SnippetFormDialog';
+import { useSelector } from 'react-redux';
+import { RootState } from '@src/redux/redux.store';
+import { enqueueSnackbar } from 'notistack';
 import {
-  fetchAutoAnnoSnippetEntityData, setAnnoSnippetEntity, setAutoAnnoSnippetStatus,
-  updateAnnoLetterContent
-} from "@src/services/auto_anno/apiAutoAnno.service";
+  fetchAutoAnnoSnippetEntityData,
+  setAnnoSnippetEntity,
+  setAutoAnnoSnippetStatus,
+  updateAnnoLetterContent,
+} from '@src/services/auto_anno/apiAutoAnno.service';
 import {
-  autoAnnoReplaceDomNodeContent, markSpanAndScrollToId, referenceTypeForXmlId,
-  removeMarkedSpans, removeSnippetEntityFromDom,
-  transformLetterXmlForExport
-} from "@src/utils/auto_anno/domHandling";
-import { AnnoSnippetStatus } from "@src/constants/snack";
-import { setAutoAnnoSnippetAndShow } from "@src/redux/thunks/auto.snippet.thunks";
-import InfoIcon from "@mui/icons-material/Info";
+  autoAnnoReplaceDomNodeContent,
+  markSpanAndScrollToId,
+  referenceTypeForXmlId,
+  removeMarkedSpans,
+  removeSnippetEntityFromDom,
+  transformLetterXmlForExport,
+} from '@src/utils/auto_anno/domHandling';
+import { AnnoSnippetStatus } from '@src/constants/snack';
+import { setAutoAnnoSnippetAndShow } from '@src/redux/thunks/auto.snippet.thunks';
+import InfoIcon from '@mui/icons-material/Info';
 
 interface Reference {
-  key: string
-  name: string
+  key: string;
+  name: string;
 }
 
 interface SnippetReferenceListProps {
-  autoAnnoLetterId: number
-  references: Reference[]
+  autoAnnoLetterId: number;
+  references: Reference[];
 }
 
-const SnippetReferencesList= (props: SnippetReferenceListProps) => {
+const SnippetReferencesList = (props: SnippetReferenceListProps) => {
   const sharedSnippet = useSelector((state: RootState) => state.autoLetterSnippet.snippet);
-  const referenceFormActive = useSelector((state: RootState) => state.autoLetterSnippet.snippetReferences.referenceFormActive);
+  const referenceFormActive = useSelector(
+    (state: RootState) => state.autoLetterSnippet.snippetReferences.referenceFormActive,
+  );
 
-  const [selectedValue, setSelectedValue] = useState<string | null>(null)
-  const [selectedReferenceKey, setSelectedReferenceKey] = useState<string| null>(null)
-  const [buttonsDisabled, setButtonsDisabled] = useState(true)
+  const [selectedValue, setSelectedValue] = useState<string | null>(null);
+  const [selectedReferenceKey, setSelectedReferenceKey] = useState<string | null>(null);
+  const [buttonsDisabled, setButtonsDisabled] = useState(true);
 
-  const [dialogType, setDialogType] = useState<SnippetDialogType>("ACCEPT")
-  const [dialogSubmitFunction, setDialogSubmitFunction] = useState<() => void>(() => {})
+  const [dialogType, setDialogType] = useState<SnippetDialogType>('ACCEPT');
+  const [dialogSubmitFunction, setDialogSubmitFunction] = useState<() => void>(() => {});
   const [dialogOpen, setDialogOpen] = useState(false);
 
-
-  const dispatch = useAppDispatch()
-  const [disabled, setDisabled] = useState(false)
+  const dispatch = useAppDispatch();
+  const [disabled, setDisabled] = useState(false);
 
   const handleSelectionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedValue(event.target.value)
-  }
+    setSelectedValue(event.target.value);
+  };
 
   const isMounted = useRef(false);
   useEffect(() => {
-    if(!isMounted.current && sharedSnippet) {
-      markSpanAndScrollToId(sharedSnippet?.xmlId)
-      isMounted.current = true
+    if (!isMounted.current && sharedSnippet) {
+      markSpanAndScrollToId(sharedSnippet?.xmlId);
+      isMounted.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (referenceFormActive) {
-      setButtonsDisabled(false)
+      setButtonsDisabled(false);
     } else {
-      setButtonsDisabled(true)
+      setButtonsDisabled(true);
     }
   }, [referenceFormActive]);
 
   const handleCancel = () => {
-    setDisabled(true)
+    setDisabled(true);
     dispatch(
       setSnippetReferences({
         references: {
           items: [],
-          showReferences: false
-        }
-      })
-    )
-  }
+          showReferences: false,
+        },
+      }),
+    );
+  };
 
   const handleOpenDialog = (type: SnippetDialogType, handleClickSubmit: () => void) => {
     setDialogType(type);
@@ -102,117 +110,161 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
   };
 
   const handleConfirmElement = async () => {
-    const xmlLetterNode: Element|null = document.querySelector("#letterXml")
-    let xmlContent: string = ""
+    const xmlLetterNode: Element | null = document.querySelector('#letterXml');
+    let xmlContent: string = '';
 
     if (!sharedSnippet?.id) {
-      enqueueSnackbar("no snippet id given", { variant: "error" })
-      return }
+      enqueueSnackbar('no snippet id given', { variant: 'error' });
+      return;
+    }
     if (xmlLetterNode === null) {
-      enqueueSnackbar("xmlNodeContent is null", {variant: "error"})
-      return }
+      enqueueSnackbar('xmlNodeContent is null', { variant: 'error' });
+      return;
+    }
     if (!selectedReferenceKey) {
-      enqueueSnackbar("no reference key selected", {variant: "error"})
-      return }
+      enqueueSnackbar('no reference key selected', { variant: 'error' });
+      return;
+    }
 
     try {
-      const snippetData = await fetchAutoAnnoSnippetEntityData(props.autoAnnoLetterId, sharedSnippet.id, selectedReferenceKey, sharedSnippet.referenceType)
+      const snippetData = await fetchAutoAnnoSnippetEntityData(
+        props.autoAnnoLetterId,
+        sharedSnippet.id,
+        selectedReferenceKey,
+        sharedSnippet.referenceType,
+      );
 
-      autoAnnoReplaceDomNodeContent(sharedSnippet.xmlId, sharedSnippet.referenceType, snippetData)
+      autoAnnoReplaceDomNodeContent(sharedSnippet.xmlId, sharedSnippet.referenceType, snippetData);
 
-      xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML)
+      xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML);
 
-      await updateAnnoLetterContent(props.autoAnnoLetterId, xmlContent)
+      await updateAnnoLetterContent(props.autoAnnoLetterId, xmlContent);
 
-      await setAnnoSnippetEntity(props.autoAnnoLetterId, sharedSnippet?.id, sharedSnippet?.referenceTypeChanged, selectedReferenceKey)
+      await setAnnoSnippetEntity(
+        props.autoAnnoLetterId,
+        sharedSnippet?.id,
+        sharedSnippet?.referenceTypeChanged,
+        selectedReferenceKey,
+      );
 
-      await setAutoAnnoSnippetStatus(props.autoAnnoLetterId, sharedSnippet?.id, AnnoSnippetStatus.ACCEPTED)
+      await setAutoAnnoSnippetStatus(
+        props.autoAnnoLetterId,
+        sharedSnippet?.id,
+        AnnoSnippetStatus.ACCEPTED,
+      );
 
-      enqueueSnackbar("Die Auszeichnung wurde akzeptiert", { variant: "success" })
+      enqueueSnackbar('Die Auszeichnung wurde akzeptiert', { variant: 'success' });
 
-      dispatch(setAutoAnnoLetter({letter: {id: props.autoAnnoLetterId, reloadStatus: true, reloadSnippetsStatus: true} }))
-      dispatch(clearSnippetState())
-      dispatch(setSnippetReferences( { references: { showReferences: false } } ))
-
-    } catch(err) {
-      enqueueSnackbar("error during writing ShowLetter: " + err, {variant: "error"})
+      dispatch(
+        setAutoAnnoLetter({
+          letter: { id: props.autoAnnoLetterId, reloadStatus: true, reloadSnippetsStatus: true },
+        }),
+      );
+      dispatch(clearSnippetState());
+      dispatch(setSnippetReferences({ references: { showReferences: false } }));
+    } catch (err) {
+      enqueueSnackbar('error during writing ShowLetter: ' + err, { variant: 'error' });
     }
-  }
+  };
 
   const handleRejectSnippet = async () => {
-    setDisabled(true)
-    const xmlLetterNode: Element | null = document.querySelector("#letterXml")
+    setDisabled(true);
+    const xmlLetterNode: Element | null = document.querySelector('#letterXml');
 
     try {
-      if (!sharedSnippet?.id) { throw new Error("no snippet id given") }
-      if (xmlLetterNode === null) { throw new Error("xmlNodeContent is null") }
+      if (!sharedSnippet?.id) {
+        throw new Error('no snippet id given');
+      }
+      if (xmlLetterNode === null) {
+        throw new Error('xmlNodeContent is null');
+      }
 
-      removeSnippetEntityFromDom(sharedSnippet?.xmlId)
+      removeSnippetEntityFromDom(sharedSnippet?.xmlId);
 
-      const xmlContent = transformLetterXmlForExport( removeMarkedSpans(xmlLetterNode).innerHTML )
-      await updateAnnoLetterContent(props.autoAnnoLetterId, xmlContent)
+      const xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML);
+      await updateAnnoLetterContent(props.autoAnnoLetterId, xmlContent);
 
-      enqueueSnackbar("Die Auszeichnung wurde entfernt", { variant: "success" })
+      enqueueSnackbar('Die Auszeichnung wurde entfernt', { variant: 'success' });
 
-      await setAutoAnnoSnippetStatus(props.autoAnnoLetterId, sharedSnippet?.id, AnnoSnippetStatus.REJECTED)
+      await setAutoAnnoSnippetStatus(
+        props.autoAnnoLetterId,
+        sharedSnippet?.id,
+        AnnoSnippetStatus.REJECTED,
+      );
 
-      dispatch(setAutoAnnoLetter(
-          { letter: {id: props.autoAnnoLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: true } }
-        ))
-      dispatch(clearSnippetState())
-      dispatch(setSnippetReferences( { references: { items: [], showReferences: false } }))
-
-    } catch(error) {
-      enqueueSnackbar("error during setting data: " + error, {variant: "error"})
+      dispatch(
+        setAutoAnnoLetter({
+          letter: {
+            id: props.autoAnnoLetterId,
+            reloadStatus: true,
+            reloadSnippetsStatus: true,
+            contentChanged: true,
+          },
+        }),
+      );
+      dispatch(clearSnippetState());
+      dispatch(setSnippetReferences({ references: { items: [], showReferences: false } }));
+    } catch (error) {
+      enqueueSnackbar('error during setting data: ' + error, { variant: 'error' });
     }
-  }
+  };
 
   const handleAddEntry = () => {
     if (!sharedSnippet) {
-      enqueueSnackbar("no shared snippet found", { variant: "error" })
-      return
+      enqueueSnackbar('no shared snippet found', { variant: 'error' });
+      return;
     }
-    dispatch(setSnippetReferenceFormActive({ referenceFormActive: false }))
+    dispatch(setSnippetReferenceFormActive({ referenceFormActive: false }));
 
-    dispatch(setAutoAnnoSnippetAndShow({
-      snippetUpdateParams: {
-        snippetId: sharedSnippet.id.toString(),
-        xmlId: sharedSnippet.xmlId,
-        referenceName: null,
-        referenceKey: null,
-        referenceType: referenceTypeForXmlId(sharedSnippet.xmlId),
-        snippetFormContainer: {form: "EDIT_FORM", buttons: "EDIT_BUTTONS_REFERENCE_LIST"}
-      }
-    })
-    )
-  }
+    dispatch(
+      setAutoAnnoSnippetAndShow({
+        snippetUpdateParams: {
+          snippetId: sharedSnippet.id.toString(),
+          xmlId: sharedSnippet.xmlId,
+          referenceName: null,
+          referenceKey: null,
+          referenceType: referenceTypeForXmlId(sharedSnippet.xmlId),
+          snippetFormContainer: { form: 'EDIT_FORM', buttons: 'EDIT_BUTTONS_REFERENCE_LIST' },
+        },
+      }),
+    );
+  };
 
   const handleInfoIconClick = (referenceKey: string) => {
-    dispatch(setSnippetEntityInfo({ key: referenceKey }))
-  }
+    dispatch(setSnippetEntityInfo({ key: referenceKey }));
+  };
 
   return (
-    <Paper sx={{ width: 'auto', border: "1px solid #ccc", borderRadius: 2, p: 2 }}>
+    <Paper sx={{ width: 'auto', border: '1px solid #ccc', borderRadius: 2, p: 2 }}>
       <Typography variant="h6" sx={{ textAlign: 'left' }}>
         Wählen Sie einen Eintrag aus. Oder verwerfen Sie die Vorschläge
       </Typography>
       <Divider sx={{ my: 2 }} />
-      <Box sx={{ maxHeight: 200, overflowY: "auto", borderBottom: "1px solid #ddd", pb: 1 }}>
+      <Box sx={{ maxHeight: 200, overflowY: 'auto', borderBottom: '1px solid #ddd', pb: 1 }}>
         <FormControl
-          disabled={ disabled || buttonsDisabled}
+          disabled={disabled || buttonsDisabled}
           component="fieldset"
           sx={{
             minWidth: '60%', // Set minimum width for the FormControl
-            '& fieldset': { // Target the nested fieldset element
-             minWidth: '60%', // Ensure the fieldset also has the same minimum width
-           },
+            '& fieldset': {
+              // Target the nested fieldset element
+              minWidth: '60%', // Ensure the fieldset also has the same minimum width
+            },
           }}
         >
           <RadioGroup value={selectedValue} onChange={handleSelectionChange}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', flexWrap: 'wrap', maxHeight: 200 }}>
+            <Box
+              sx={{ display: 'flex', flexDirection: 'column', flexWrap: 'wrap', maxHeight: 200 }}
+            >
               {props.references.map((reference) => (
-                <Box key={reference.key} sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: '70%' } }}>
-                  <IconButton onClick={(event) => handleInfoIconClick(reference.key)} aria-label="info">
+                <Box
+                  key={reference.key}
+                  sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: '70%' } }}
+                >
+                  <IconButton
+                    onClick={(event) => handleInfoIconClick(reference.key)}
+                    aria-label="info"
+                  >
                     <InfoIcon color="primary" />
                   </IconButton>
                   <FormControlLabel
@@ -229,19 +281,27 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
         </FormControl>
       </Box>
 
-      <Box sx={{ display: "flex", justifyContent: "right", marginTop: "1%" }}>
+      <Box sx={{ display: 'flex', justifyContent: 'right', marginTop: '1%' }}>
         <ButtonGroup size="small" variant="contained">
-          <Button color="info" onClick={() => handleCancel()} disabled={ buttonsDisabled }>
+          <Button color="info" onClick={() => handleCancel()} disabled={buttonsDisabled}>
             Abbruch
           </Button>
-          <Button color="info" onClick={() => handleOpenDialog("REJECT", handleRejectSnippet)} disabled={ buttonsDisabled }>
+          <Button
+            color="info"
+            onClick={() => handleOpenDialog('REJECT', handleRejectSnippet)}
+            disabled={buttonsDisabled}
+          >
             Verwerfen
           </Button>
-          <Button color="info" onClick={() => handleAddEntry()} disabled={ buttonsDisabled }>
+          <Button color="info" onClick={() => handleAddEntry()} disabled={buttonsDisabled}>
             Eigener Eintrag
           </Button>
 
-          <Button color="primary" onClick={() =>  handleConfirmElement() } disabled={ !selectedValue || buttonsDisabled }>
+          <Button
+            color="primary"
+            onClick={() => handleConfirmElement()}
+            disabled={!selectedValue || buttonsDisabled}
+          >
             Bestätigen
           </Button>
         </ButtonGroup>
@@ -253,8 +313,7 @@ const SnippetReferencesList= (props: SnippetReferenceListProps) => {
         handleClose={() => setDialogOpen(false)}
       />
     </Paper>
-  )
-}
+  );
+};
 
-
-export default SnippetReferencesList
+export default SnippetReferencesList;

@@ -1,8 +1,8 @@
-import React, { ComponentProps } from "react";
+import React, { ComponentProps } from 'react';
 
 type ButtonProps = {
   children?: JSX.Element;
-} & ComponentProps<"button">;
+} & ComponentProps<'button'>;
 
 export function Button({ children, ...props }: ButtonProps) {
   return (

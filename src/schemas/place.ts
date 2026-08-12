@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { MarkupPlaceSettlementSchema } from './shared/markupPlaceSettlement';
-import {MarkupCountrySchema} from "./shared/markupCountry";
+import { MarkupCountrySchema } from './shared/markupCountry';
 
 export const RemotePlaceDataSchema = z.object({
   id: z.number().nullable().optional(),

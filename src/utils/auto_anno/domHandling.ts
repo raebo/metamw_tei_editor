@@ -39,7 +39,11 @@ export const domReplaceNodeWithMarkedSpan = (element: Element): void => {
   span.appendChild(element);
 };
 
-export const autoAnnoReplaceDomNodeContent = (xmlId: string, referenceType: string, snippetEntity: SnippetEntity): void => {
+export const autoAnnoReplaceDomNodeContent = (
+  xmlId: string,
+  referenceType: string,
+  snippetEntity: SnippetEntity,
+): void => {
   const domNode = document.querySelector(`[xml\\:id="${xmlId}"]`);
 
   if (!domNode) {
@@ -50,14 +54,18 @@ export const autoAnnoReplaceDomNodeContent = (xmlId: string, referenceType: stri
   const referenceHandlers: Record<string, ReferenceHandler> = {
     Person: (domNode, snippetEntity) => replacePersonDomNode(domNode, snippetEntity),
     Settlement: (domNode, snippetEntity) => replacePlaceDomNodeSettlement(domNode, snippetEntity),
-    Institution: (domNode, snippetEntity) => replacePlaceDomNodeInstiSight(domNode, 'institution', snippetEntity),
-    Sight: (domNode, snippetEntity) => replacePlaceDomNodeInstiSight(domNode, 'sight', snippetEntity),
+    Institution: (domNode, snippetEntity) =>
+      replacePlaceDomNodeInstiSight(domNode, 'institution', snippetEntity),
+    Sight: (domNode, snippetEntity) =>
+      replacePlaceDomNodeInstiSight(domNode, 'sight', snippetEntity),
   };
 
   if (Object.prototype.hasOwnProperty.call(referenceHandlers, referenceType)) {
     referenceHandlers[referenceType](domNode, snippetEntity);
   } else {
-    throw new Error(`Unsupported reference type: "${referenceType}". Supported types are: ${Object.keys(referenceHandlers).join(', ')}`);
+    throw new Error(
+      `Unsupported reference type: "${referenceType}". Supported types are: ${Object.keys(referenceHandlers).join(', ')}`,
+    );
   }
 };
 
@@ -81,7 +89,10 @@ export const referenceTypeForXmlId = (xmlId: string): string => {
   }
 };
 
-const replacePersonDomNode = (domNode: Element, { entityKey, entityName }: { entityKey: string; entityName: string }): void => {
+const replacePersonDomNode = (
+  domNode: Element,
+  { entityKey, entityName }: { entityKey: string; entityName: string },
+): void => {
   let nameNode = domNode.querySelector('name');
   if (!nameNode) {
     nameNode = document.createElementNS(EditorConstants.TEI_NS, 'name');
@@ -94,7 +105,10 @@ const replacePersonDomNode = (domNode: Element, { entityKey, entityName }: { ent
   }
 };
 
-const replacePlaceDomNodeSettlement = (placeNameNode: Element, snippetEntity: SnippetEntity): void => {
+const replacePlaceDomNodeSettlement = (
+  placeNameNode: Element,
+  snippetEntity: SnippetEntity,
+): void => {
   if (placeNameNode.tagName !== 'PLACENAME') {
     throw new Error(`Invalid element provided for ${placeNameNode.tagName}`);
   }
@@ -119,7 +133,11 @@ const replacePlaceDomNodeSettlement = (placeNameNode: Element, snippetEntity: Sn
   }
 };
 
-const replacePlaceDomNodeInstiSight = (placeNameNode: Element, typeOfPlace: string, snippetEntity: SnippetEntity): void => {
+const replacePlaceDomNodeInstiSight = (
+  placeNameNode: Element,
+  typeOfPlace: string,
+  snippetEntity: SnippetEntity,
+): void => {
   if (placeNameNode.tagName !== 'PLACENAME') {
     throw new Error(`Invalid element provided for ${placeNameNode.tagName}`);
   }
@@ -182,9 +200,15 @@ export const transformLetterXmlForExport = (xmlString: string | null | undefined
 
   let transformedHTML = xmlString.replace(/\n\s*/g, ' ');
 
-  transformedHTML = transformedHTML.replace(/<\/?persname/gi, (match) => match.replace(/persname/gi, 'persName'));
-  transformedHTML = transformedHTML.replace(/<\/?placename/gi, (match) => match.replace(/placename/gi, 'placeName'));
-  transformedHTML = transformedHTML.replace(/schemalocation/gi, (match) => match.replace(/schemalocation/gi, 'schemaLocation'));
+  transformedHTML = transformedHTML.replace(/<\/?persname/gi, (match) =>
+    match.replace(/persname/gi, 'persName'),
+  );
+  transformedHTML = transformedHTML.replace(/<\/?placename/gi, (match) =>
+    match.replace(/placename/gi, 'placeName'),
+  );
+  transformedHTML = transformedHTML.replace(/schemalocation/gi, (match) =>
+    match.replace(/schemalocation/gi, 'schemaLocation'),
+  );
   transformedHTML = transformedHTML.replace(/&nbsp;/gi, ' ');
   // transformedHTML = transformedHTML.replace(/&amp;c/gi, "&");
 

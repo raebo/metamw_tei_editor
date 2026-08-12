@@ -1,3 +1,3 @@
-const excludedRoutes = ["/login", "/about","/"];
+const excludedRoutes = ['/login', '/about', '/'];
 
 export default excludedRoutes;

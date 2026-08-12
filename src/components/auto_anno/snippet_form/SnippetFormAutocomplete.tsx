@@ -1,26 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { Autocomplete, TextField } from "@mui/material";
-import CircularProgress from "@mui/material/CircularProgress";
-import { searchAutoAnnoSnippetEntities } from "@src/services/auto_anno/apiAutoAnno.service";
-import { SnippetEntity } from "@src/services/mappings/autoAnnoMappings";
+import React, { useEffect, useState } from 'react';
+import { Autocomplete, TextField } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import { searchAutoAnnoSnippetEntities } from '@src/services/auto_anno/apiAutoAnno.service';
+import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 
 interface SnippetFormAutocompleteProps {
-  autoJobLetterId: number
-  entityType: string | null | undefined
-  entityKey:string | null | undefined
-  isDisabled: boolean
-  setFormEntityKey: (entityKey: string) => void
-  setSaveButtonDisabled: (isDisabled: boolean) => void
+  autoJobLetterId: number;
+  entityType: string | null | undefined;
+  entityKey: string | null | undefined;
+  isDisabled: boolean;
+  setFormEntityKey: (entityKey: string) => void;
+  setSaveButtonDisabled: (isDisabled: boolean) => void;
 }
 
 const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
-
   const [options, setOptions] = useState<SnippetEntity[]>([]);
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (inputValue.trim() === "") {
+    if (inputValue.trim() === '') {
       setOptions([]);
       return;
     }
@@ -28,9 +27,17 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
     const fetchData = async () => {
       setLoading(true);
 
-      if (props.entityType !== null && props.entityType !== undefined && props.autoJobLetterId !== null) {
+      if (
+        props.entityType !== null &&
+        props.entityType !== undefined &&
+        props.autoJobLetterId !== null
+      ) {
         try {
-          const response = await searchAutoAnnoSnippetEntities(props.autoJobLetterId, inputValue, props.entityType);
+          const response = await searchAutoAnnoSnippetEntities(
+            props.autoJobLetterId,
+            inputValue,
+            props.entityType,
+          );
 
           if (response) {
             setOptions(response || []);
@@ -60,7 +67,7 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
             props.setFormEntityKey(value.entityKey); // Store the ID in state or pass it to a parent component
             props.setSaveButtonDisabled(false);
           } else {
-            props.setFormEntityKey(""); // Handle the case where no valid selection is made
+            props.setFormEntityKey(''); // Handle the case where no valid selection is made
           }
         }}
         renderOption={(props, option) => (
@@ -71,7 +78,7 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
         getOptionLabel={(option) => (typeof option === 'string' ? option : option.entityName)}
         renderInput={(params) => (
           <TextField
-            sx={{ m: 1, width: '100%'}}
+            sx={{ m: 1, width: '100%' }}
             {...params}
             label="Suche"
             variant="outlined"
@@ -88,7 +95,7 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
         )}
       />
     </>
-  )
-}
+  );
+};
 
 export default SnippetFormAutocomplete;

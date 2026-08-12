@@ -1,20 +1,22 @@
-import Grid from "@mui/material/Grid";
-import { Box, styled } from "@mui/material";
-import Paper from "@mui/material/Paper";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { enqueueSnackbar } from "notistack";
-import { RootState } from "@src/redux/redux.store";
-import { EditorLetter } from "@src/services/mappings/editorMappings";
-import { fetchLastUsedLettersByUser, fetchSearchLetters } from "@src/services/editor/apiLettersRequest.service";
-import LetterCard from "@src/components/editor/index/LetterCard";
-import SearchLetters from "@src/components/editor/index/SearchLetters";
-
+import Grid from '@mui/material/Grid';
+import { Box, styled } from '@mui/material';
+import Paper from '@mui/material/Paper';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { enqueueSnackbar } from 'notistack';
+import { RootState } from '@src/redux/redux.store';
+import { EditorLetter } from '@src/services/mappings/editorMappings';
+import {
+  fetchLastUsedLettersByUser,
+  fetchSearchLetters,
+} from '@src/services/editor/apiLettersRequest.service';
+import LetterCard from '@src/components/editor/index/LetterCard';
+import SearchLetters from '@src/components/editor/index/SearchLetters';
 
 const IndexLetters = () => {
   const user = useSelector((state: RootState) => state.auth.user);
-  const [lettersByAuthor, setLettersByAuthor] = useState<EditorLetter[] | undefined>()
-  const [textfieldSearchValue, setTextfieldSearchValue] = useState("");
+  const [lettersByAuthor, setLettersByAuthor] = useState<EditorLetter[] | undefined>();
+  const [textfieldSearchValue, setTextfieldSearchValue] = useState('');
   const [letterSearchResults, setLetterSearchResults] = useState<EditorLetter[] | undefined>();
 
   const Item = styled(Paper)(({ theme }) => ({
@@ -33,10 +35,13 @@ const IndexLetters = () => {
       try {
         const lastUserLetters = await fetchLastUsedLettersByUser();
 
-        if (lastUserLetters) { setLettersByAuthor(lastUserLetters) }
-
+        if (lastUserLetters) {
+          setLettersByAuthor(lastUserLetters);
+        }
       } catch (err) {
-        enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' } );
+        enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
+          variant: 'error',
+        });
       } finally {
         // setLoading(false);
       }
@@ -48,40 +53,47 @@ const IndexLetters = () => {
   const handleSearch = async (searchValue: string) => {
     const searchResult = await fetchSearchLetters(searchValue);
     if (searchResult) {
-      setLetterSearchResults(searchResult)
-      setTextfieldSearchValue(searchValue)
+      setLetterSearchResults(searchResult);
+      setTextfieldSearchValue(searchValue);
     }
-  }
+  };
 
   return (
     <>
       <Box sx={{ width: '100%' }}>
         <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-          { lettersByAuthor ? (
+          {lettersByAuthor ? (
             lettersByAuthor.map((letter) => {
               return (
                 <Grid key={`lettersByUser_${letter.id}`} size={2}>
                   <LetterCard letter={letter} />
                 </Grid>
-              )
+              );
             })
           ) : (
             <Item>No letters found</Item>
           )}
           <Grid size={12}>
             <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-              <Grid size={12} rowSpacing={{ xs: 3, sm: 3, md: 3}} columnSpacing={{ xs: 3, sm: 3, md: 3 }}>
-                <div className={"editor-search-letters"}>
-                  <SearchLetters handleSearch={handleSearch} defaultSearchValue={textfieldSearchValue}/>
+              <Grid
+                size={12}
+                rowSpacing={{ xs: 3, sm: 3, md: 3 }}
+                columnSpacing={{ xs: 3, sm: 3, md: 3 }}
+              >
+                <div className={'editor-search-letters'}>
+                  <SearchLetters
+                    handleSearch={handleSearch}
+                    defaultSearchValue={textfieldSearchValue}
+                  />
                 </div>
               </Grid>
-              { letterSearchResults ? (
+              {letterSearchResults ? (
                 letterSearchResults.map((letter) => {
                   return (
                     <Grid key={`lastLetters_${letter.id}`} size={2}>
                       <LetterCard letter={letter} />
                     </Grid>
-                  )
+                  );
                 })
               ) : (
                 <></>
@@ -91,7 +103,7 @@ const IndexLetters = () => {
         </Grid>
       </Box>
     </>
-  )
-}
+  );
+};
 
 export default IndexLetters;

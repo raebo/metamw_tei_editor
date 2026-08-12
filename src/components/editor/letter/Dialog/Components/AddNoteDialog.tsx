@@ -1,4 +1,11 @@
-import { Divider, FormControl, InputLabel, MenuItem, Select, TextareaAutosize } from '@mui/material';
+import {
+  Divider,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextareaAutosize,
+} from '@mui/material';
 import React, { useState } from 'react';
 import { EditorUtils } from '@src/utils/editor';
 import { useSelector } from 'react-redux';
@@ -22,11 +29,23 @@ const AddNoteDialog = (props: DefaultDialogProps) => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleSubmit = () => {
-    const userNameShort = MiscUtils.userHandling.nameShortCut(MiscUtils.userHandling.stateUserToAuthUser(user));
+    const userNameShort = MiscUtils.userHandling.nameShortCut(
+      MiscUtils.userHandling.stateUserToAuthUser(user),
+    );
 
     try {
-      const { xmlId } = EditorUtils.markupGeneration.noteMarkup(xmlDoc, userNameShort, comment, noteType);
-      props.onSave(xmlDoc, EditorConstants.changeTypes.note.ADDED, 'Kommentar wurde hinzugefügt', xmlId);
+      const { xmlId } = EditorUtils.markupGeneration.noteMarkup(
+        xmlDoc,
+        userNameShort,
+        comment,
+        noteType,
+      );
+      props.onSave(
+        xmlDoc,
+        EditorConstants.changeTypes.note.ADDED,
+        'Kommentar wurde hinzugefügt',
+        xmlId,
+      );
     } catch (error) {
       enqueueSnackbar('No xml content found', { variant: 'error' });
     }

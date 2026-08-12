@@ -224,7 +224,13 @@ const LetterViewCode = ({ xmlString }: LetterViewCodeProps) => {
             {errorCount > 0 ? <ErrorIcon color="error" /> : <CheckCircleIcon color="success" />}
           </Badge>
 
-          <Button variant="contained" color="primary" disabled={errorCount > 0} onClick={handleSave} sx={{ marginRight: '20px' }}>
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={errorCount > 0}
+            onClick={handleSave}
+            sx={{ marginRight: '20px' }}
+          >
             Inhalt Speichern
           </Button>
         </Box>

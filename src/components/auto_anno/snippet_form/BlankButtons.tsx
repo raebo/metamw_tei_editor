@@ -1,6 +1,6 @@
-import { ButtonGroup, Divider } from "@mui/material";
-import React from "react";
-import Button from "@mui/material/Button";
+import { ButtonGroup, Divider } from '@mui/material';
+import React from 'react';
+import Button from '@mui/material/Button';
 
 const BlankButtons = () => {
   return (
@@ -14,7 +14,7 @@ const BlankButtons = () => {
         </ButtonGroup>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BlankButtons
+export default BlankButtons;

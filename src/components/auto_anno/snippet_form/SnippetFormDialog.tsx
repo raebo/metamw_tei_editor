@@ -51,7 +51,8 @@ export default function SnippetFormDialog(props: SnippetFormDialogProps) {
 
   if (dialogType === 'WRITE_LETTER') {
     dialogTitle = 'Brief in Datei Speichern';
-    dialogContent = 'Sind Sie sicher, dass Sie den angepassten Inhalt in einer Datei speichern möchten?';
+    dialogContent =
+      'Sind Sie sicher, dass Sie den angepassten Inhalt in einer Datei speichern möchten?';
     dialogSubmit = 'Speichern/Schreiben';
   }
 
@@ -63,7 +64,11 @@ export default function SnippetFormDialog(props: SnippetFormDialogProps) {
 
   return (
     <React.Fragment>
-      <Dialog open={props.open} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+      <Dialog
+        open={props.open}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
         <DialogTitle id="alert-dialog-title">{dialogTitle}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">{dialogContent}</DialogContentText>
@@ -72,7 +77,12 @@ export default function SnippetFormDialog(props: SnippetFormDialogProps) {
           <Button variant="outlined" onClick={props.handleClose}>
             Abbrechen
           </Button>
-          <Button ref={submitButtonRef} variant="contained" disabled={submitDisabled} onClick={() => componentClickSubmit()}>
+          <Button
+            ref={submitButtonRef}
+            variant="contained"
+            disabled={submitDisabled}
+            onClick={() => componentClickSubmit()}
+          >
             {dialogSubmit}
           </Button>
         </DialogActions>

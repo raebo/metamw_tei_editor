@@ -256,7 +256,9 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
               completionState={completionState}
               onChange={childOnChange}
               dialogType={'writing'}
-              textFieldValue={t('editor:dialog.teiHeaderWritingReceivingPlace.label.chooseWritingPlace')}
+              textFieldValue={t(
+                'editor:dialog.teiHeaderWritingReceivingPlace.label.chooseWritingPlace',
+              )}
             />
           </>
         );
@@ -275,7 +277,9 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
               completionState={completionState}
               onChange={childOnChange}
               dialogType={'receiving'}
-              textFieldValue={t('editor:dialog.teiHeaderWritingReceivingPlace.label.chooseReceivingPlace')}
+              textFieldValue={t(
+                'editor:dialog.teiHeaderWritingReceivingPlace.label.chooseReceivingPlace',
+              )}
             />
           </>
         );

@@ -71,7 +71,7 @@ const GitInfo: React.FC = () => {
         boxShadow: 1,
       }}
     >
-      <Typography variant="body2" color="textSecondary" sx={{fontSize: '0.4rem'}}>
+      <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.4rem' }}>
         Last commit: {gitInfo.commitHash} on {new Date(gitInfo.commitDate).toLocaleString()}
       </Typography>
     </Box>

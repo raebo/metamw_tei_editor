@@ -1,3 +1,3 @@
 export interface AbstractModel {
-  _id: string
-};
+  _id: string;
+}

@@ -1,47 +1,48 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Box, ButtonGroup } from "@mui/material";
-import Button from "@mui/material/Button";
+import React, { useEffect, useRef, useState } from 'react';
+import { Box, ButtonGroup } from '@mui/material';
+import Button from '@mui/material/Button';
 import {
-  fetchAutoAnnoLetter, patchAutoAnnoLetterLockingUser,
+  fetchAutoAnnoLetter,
+  patchAutoAnnoLetterLockingUser,
   resetAnnoLetter,
-  writeAnnoLetter
-} from "@src/services/auto_anno/apiAutoAnno.service";
-import { Statuses } from "@src/utils/entityMappings";
-import { RootState } from "@src/redux/redux.store";
-import {  useSelector } from "react-redux";
-import { clearSnippetState, setAutoAnnoLetter } from "@src/redux/slices/auto.letter.snippet.slice";
-import { SnippetDialogType } from "@src/services/mappings/autoAnnoMappings";
-import SnippetFormDialog from "./snippet_form/SnippetFormDialog";
-import { enqueueSnackbar } from "notistack";
-import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "@src/redux/hooks";
+  writeAnnoLetter,
+} from '@src/services/auto_anno/apiAutoAnno.service';
+import { Statuses } from '@src/utils/entityMappings';
+import { RootState } from '@src/redux/redux.store';
+import { useSelector } from 'react-redux';
+import { clearSnippetState, setAutoAnnoLetter } from '@src/redux/slices/auto.letter.snippet.slice';
+import { SnippetDialogType } from '@src/services/mappings/autoAnnoMappings';
+import SnippetFormDialog from './snippet_form/SnippetFormDialog';
+import { enqueueSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '@src/redux/hooks';
 
 interface AutoAnnoLetterHandleProps {
-  autoJobId: number
-  autoJobLetterId: number
+  autoJobId: number;
+  autoJobLetterId: number;
 }
 
 const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
-  const dispatch = useAppDispatch()
-  const navigate = useNavigate()
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<SnippetDialogType>("RESET_LETTER");
+  const [dialogType, setDialogType] = useState<SnippetDialogType>('RESET_LETTER');
   const [dialogSubmitFunction, setDialogSubmitFunction] = useState<() => void>(() => {});
 
   const [finalSaveDisabled, setFinalSaveDisabled] = useState(true);
 
-  const reloadLetterStatus= useSelector((state: RootState) =>
-    state.autoLetterSnippet.letter?.reloadStatus?? false
+  const reloadLetterStatus = useSelector(
+    (state: RootState) => state.autoLetterSnippet.letter?.reloadStatus ?? false,
   );
 
-  const [resetButtonDisabled, setDisableResetButton]= useState(true);
+  const [resetButtonDisabled, setDisableResetButton] = useState(true);
 
   const handleOpenDialog = (type: SnippetDialogType, handleClickSubmit: () => void) => {
     setDialogType(type);
-    setDialogSubmitFunction(() => handleClickSubmit)
+    setDialogSubmitFunction(() => handleClickSubmit);
     setDialogOpen(true);
-  }
+  };
 
   const isMounted = useRef(false);
   useEffect(() => {
@@ -49,8 +50,16 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
       if (!isMounted.current) {
         const result = await fetchAutoAnnoLetter(props.autoJobLetterId);
 
-        if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) { setFinalSaveDisabled(false); }
-        if (result && result.xml_content_updated !== null && result.xml_content_updated !== undefined ) { setFinalSaveDisabled(false); }
+        if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) {
+          setFinalSaveDisabled(false);
+        }
+        if (
+          result &&
+          result.xml_content_updated !== null &&
+          result.xml_content_updated !== undefined
+        ) {
+          setFinalSaveDisabled(false);
+        }
 
         isMounted.current = true;
       }
@@ -58,54 +67,69 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
   }, [props.autoJobLetterId]);
 
   const handleResetLetter = () => {
-    resetAnnoLetter(props.autoJobLetterId).then(() => {
-      dispatch(
-        setAutoAnnoLetter(
-          { letter: {id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: false} }
-        ))
+    resetAnnoLetter(props.autoJobLetterId)
+      .then(() => {
+        dispatch(
+          setAutoAnnoLetter({
+            letter: {
+              id: props.autoJobLetterId,
+              reloadStatus: true,
+              reloadSnippetsStatus: true,
+              contentChanged: false,
+            },
+          }),
+        );
 
-      dispatch(clearSnippetState())
-      setDisableResetButton(true)
-      setFinalSaveDisabled(true)
+        dispatch(clearSnippetState());
+        setDisableResetButton(true);
+        setFinalSaveDisabled(true);
 
-      enqueueSnackbar("Der Brief wurde erfolgreich zurückgesetzt", {variant: "success"})
-    }).catch((err) => {
-
-      enqueueSnackbar("error during resetting ShowLetter: " + err, {variant: "error"})
-    })
-    setDialogOpen(false)
-  }
+        enqueueSnackbar('Der Brief wurde erfolgreich zurückgesetzt', { variant: 'success' });
+      })
+      .catch((err) => {
+        enqueueSnackbar('error during resetting ShowLetter: ' + err, { variant: 'error' });
+      });
+    setDialogOpen(false);
+  };
 
   const handleWriteLetter = () => {
-    setDialogOpen(false)
-    writeAnnoLetter(props.autoJobLetterId).then(() => {
-      dispatch(
-        setAutoAnnoLetter(
-          { letter: { id: props.autoJobLetterId, reloadStatus: true, reloadSnippetsStatus: true, contentChanged: false } }
-        )
-      )
+    setDialogOpen(false);
+    writeAnnoLetter(props.autoJobLetterId)
+      .then(() => {
+        dispatch(
+          setAutoAnnoLetter({
+            letter: {
+              id: props.autoJobLetterId,
+              reloadStatus: true,
+              reloadSnippetsStatus: true,
+              contentChanged: false,
+            },
+          }),
+        );
 
-      setFinalSaveDisabled(true)
-      enqueueSnackbar("Der Brief wurde erfolgreich geschrieben", {variant: "success"})
+        setFinalSaveDisabled(true);
+        enqueueSnackbar('Der Brief wurde erfolgreich geschrieben', { variant: 'success' });
 
-      navigate(`/automatic_annotations/${props.autoJobId}`)
+        navigate(`/automatic_annotations/${props.autoJobId}`);
+      })
+      .catch((err) => {
+        enqueueSnackbar('error during writing ShowLetter: ' + err, { variant: 'error' });
+      });
 
-    }).catch((err) => {
-      enqueueSnackbar("error during writing ShowLetter: " + err, {variant: "error"})
-    })
-
-    setDialogOpen(false)
-  }
+    setDialogOpen(false);
+  };
 
   useEffect(() => {
     (async () => {
       if (reloadLetterStatus) {
         const result = await fetchAutoAnnoLetter(props.autoJobLetterId);
 
-        if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) { setFinalSaveDisabled(false); }
+        if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) {
+          setFinalSaveDisabled(false);
+        }
         if (result?.content_changed) {
           setDisableResetButton(false);
-          setFinalSaveDisabled(false)
+          setFinalSaveDisabled(false);
         }
 
         dispatch(setAutoAnnoLetter({ letter: { id: props.autoJobLetterId, reloadStatus: false } }));
@@ -114,8 +138,8 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
   }, [dispatch, reloadLetterStatus, props.autoJobLetterId]);
 
   const saveAndLeaveLetterView = async () => {
-    await patchAutoAnnoLetterLockingUser(props.autoJobLetterId, null)
-  }
+    await patchAutoAnnoLetterLockingUser(props.autoJobLetterId, null);
+  };
 
   return (
     <>
@@ -130,8 +154,22 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
         }}
       >
         <ButtonGroup variant="outlined" aria-label="Basic button group">
-          <Button variant={"contained"} disabled={finalSaveDisabled} color={"success"} onClick={() => handleOpenDialog("WRITE_LETTER", handleWriteLetter)}>Brief in Datei schreiben</Button>
-          <Button variant={"contained"} disabled={resetButtonDisabled} color={"warning"} onClick={() => handleOpenDialog("RESET_LETTER", handleResetLetter)}>Zurücksetzen</Button>
+          <Button
+            variant={'contained'}
+            disabled={finalSaveDisabled}
+            color={'success'}
+            onClick={() => handleOpenDialog('WRITE_LETTER', handleWriteLetter)}
+          >
+            Brief in Datei schreiben
+          </Button>
+          <Button
+            variant={'contained'}
+            disabled={resetButtonDisabled}
+            color={'warning'}
+            onClick={() => handleOpenDialog('RESET_LETTER', handleResetLetter)}
+          >
+            Zurücksetzen
+          </Button>
           <Button
             onClick={async (event) => {
               event.preventDefault();
@@ -141,19 +179,18 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
             variant="contained"
             color="primary"
           >
-          Stand Speichern
+            Stand Speichern
           </Button>
         </ButtonGroup>
         <SnippetFormDialog
           open={dialogOpen}
           dialogType={dialogType}
           handleClickSubmit={dialogSubmitFunction}
-          handleClose={
-            ()=>setDialogOpen(false)}
+          handleClose={() => setDialogOpen(false)}
         />
       </Box>
     </>
-  )
-}
+  );
+};
 
 export default AutoAnnoLetterHandle;

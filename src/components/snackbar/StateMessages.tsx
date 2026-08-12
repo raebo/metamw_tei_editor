@@ -1,9 +1,9 @@
-import { useAppDispatch } from "@src/redux/hooks";
-import { useSelector } from "react-redux";
-import { RootState } from "@src/redux/redux.store";
-import React, { useCallback, useEffect } from "react";
-import { setStateMessage } from "@src/redux/slices/auto.letter.snippet.slice";
-import { enqueueSnackbar } from "notistack";
+import { useAppDispatch } from '@src/redux/hooks';
+import { useSelector } from 'react-redux';
+import { RootState } from '@src/redux/redux.store';
+import React, { useCallback, useEffect } from 'react';
+import { setStateMessage } from '@src/redux/slices/auto.letter.snippet.slice';
+import { enqueueSnackbar } from 'notistack';
 
 const StateMessages = () => {
   const dispatch = useAppDispatch();
@@ -19,8 +19,6 @@ const StateMessages = () => {
       enqueueSnackbar(stateMessage.message, { variant: stateMessage.variant });
       clearStateMessage(); // Call the memoized function
     }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stateMessage, clearStateMessage]);
 
   return null;

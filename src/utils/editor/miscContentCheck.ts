@@ -1,8 +1,4 @@
-import {
-  ContentAddressEntry,
-  EditorConstants,
-  validParagraphClasses,
-} from '@src/constants/editor';
+import { ContentAddressEntry, EditorConstants, validParagraphClasses } from '@src/constants/editor';
 import { EditorUtils } from './index';
 
 function writeSenderAddressContainer(xmlDoc: XMLDocument): Element {

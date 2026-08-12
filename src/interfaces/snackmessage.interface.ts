@@ -1,6 +1,6 @@
-import { AlertColor } from "@mui/material";
+import { AlertColor } from '@mui/material';
 
-export interface  SnackMessage {
+export interface SnackMessage {
   message: string;
-  type: AlertColor
+  type: AlertColor;
 }

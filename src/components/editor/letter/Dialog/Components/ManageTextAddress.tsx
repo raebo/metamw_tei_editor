@@ -1,73 +1,77 @@
-import { DefaultDialogProps} from "../EditorFormDialog";
-import React, {useEffect} from "react";
-import {EditorUtils} from "@src/utils/editor";
-import {enqueueSnackbar} from "notistack";
-import {MiscUtils} from "@src/utils/misc";
-import {ContentAddressEntry, EditorConstants} from "@src/constants/editor";
-import ContentAddressEntryForm from "../Forms/ContentAddressEntryForm";
-import {Divider} from "@mui/material";
-import {DialogActionButton} from "./Misc/DialogActionButton";
+import { DefaultDialogProps } from '../EditorFormDialog';
+import React, { useEffect } from 'react';
+import { EditorUtils } from '@src/utils/editor';
+import { enqueueSnackbar } from 'notistack';
+import { MiscUtils } from '@src/utils/misc';
+import { ContentAddressEntry, EditorConstants } from '@src/constants/editor';
+import ContentAddressEntryForm from '../Forms/ContentAddressEntryForm';
+import { Divider } from '@mui/material';
+import { DialogActionButton } from './Misc/DialogActionButton';
 
 export type ManageTextAddressDialogProps = DefaultDialogProps & {
-	addressType: 'RECIPIENT' | 'SENDER'
-}
+  addressType: 'RECIPIENT' | 'SENDER';
+};
 
 const ManageTextAddress = (props: ManageTextAddressDialogProps) => {
-	const { addressType } = props
-	const xmlDoc = props.xmlDoc
-	const formIsValid = true
-	const [addressData, setAddressData] = React.useState<ContentAddressEntry | null>(null);
+  const { addressType } = props;
+  const xmlDoc = props.xmlDoc;
+  const formIsValid = true;
+  const [addressData, setAddressData] = React.useState<ContentAddressEntry | null>(null);
 
-	useEffect(() => {
-		const extractExistingAddress = (xmlDoc: XMLDocument) => {
-			setAddressData(
-				EditorUtils.miscContentCheck.existingAddressEntry(xmlDoc, addressType)
-			)
-		}
+  useEffect(() => {
+    const extractExistingAddress = (xmlDoc: XMLDocument) => {
+      setAddressData(EditorUtils.miscContentCheck.existingAddressEntry(xmlDoc, addressType));
+    };
 
-		if (xmlDoc) {
-			extractExistingAddress(xmlDoc)
-		}
+    if (xmlDoc) {
+      extractExistingAddress(xmlDoc);
+    }
+  }, [xmlDoc]);
 
-	}, [xmlDoc])
+  const submitSaveHandler = async () => {
+    try {
+      if (!xmlDoc) {
+        enqueueSnackbar('Ungültiges XML-Dokument', { variant: 'error' });
+        props.onClose();
+        return;
+      }
+      EditorUtils.miscContentCheck.writeAddressEntry(xmlDoc, addressType, addressData);
 
-	const submitSaveHandler = async () => {
-		try {
-			if (!xmlDoc) {
-				enqueueSnackbar("Ungültiges XML-Dokument", {variant: "error"});
-				props.onClose()
-				return;
-			}
-			EditorUtils.miscContentCheck.writeAddressEntry(xmlDoc, addressType, addressData);
+      const changeType =
+        addressType === 'RECIPIENT'
+          ? EditorConstants.changeTypes.misc.BODY_ADDRESS_RECEIVER_CHANGED
+          : EditorConstants.changeTypes.misc.BODY_ADDRESS_SENDER_CHANGED;
 
-			const changeType = addressType === 'RECIPIENT' ?
-				EditorConstants.changeTypes.misc.BODY_ADDRESS_RECEIVER_CHANGED :
-				EditorConstants.changeTypes.misc.BODY_ADDRESS_SENDER_CHANGED;
+      props.onSave(xmlDoc, changeType, 'Die Adresse des Briefes wurde erfolgreich angepasst', null);
+    } catch (error) {
+      enqueueSnackbar(
+        'Fehler beim Speichern des TEI-Headers: ' + MiscUtils.misc.getErrorMessage(error),
+        { variant: 'error' },
+      );
+      props.onClose();
+    }
+  };
 
-			props.onSave(xmlDoc, changeType, "Die Adresse des Briefes wurde erfolgreich angepasst", null);
+  return (
+    <div>
+      {addressData ? (
+        <>
+          <ContentAddressEntryForm
+            entry={addressData}
+            onChange={(updated) => setAddressData(updated)}
+          />
+          <Divider />
+          <DialogActionButton
+            label={'Adresse Speichern'}
+            onClick={submitSaveHandler}
+            disabled={!formIsValid}
+          />
+        </>
+      ) : (
+        <p>Loading address data…</p>
+      )}
+    </div>
+  );
+};
 
-			} catch (error) {
-			enqueueSnackbar("Fehler beim Speichern des TEI-Headers: " + MiscUtils.misc.getErrorMessage(error), {variant: "error"});
-			props.onClose()
-		}
-	}
-
-	return (
-		<div>
-			{addressData ? (
-				<>
-					<ContentAddressEntryForm
-						entry={addressData}
-						onChange={(updated) => setAddressData(updated)}
-					/>
-					<Divider />
-					<DialogActionButton label={"Adresse Speichern"} onClick={submitSaveHandler} disabled={!formIsValid}/>
-				</>
-	) : (
-				<p>Loading address data…</p>
-			)}
-		</div>
-	)
-}
-
-export default ManageTextAddress
+export default ManageTextAddress;

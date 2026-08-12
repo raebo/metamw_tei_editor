@@ -12,8 +12,11 @@ function calculateNewActiveTab(
   pinnedLetter: PinnedLetter,
   currentIndex: number | null,
 ): number | null {
-  const closingTabIndex = originalPinnedLetters.findIndex((letter) => letter.id === pinnedLetter.id);
-  const isValidCurrentIndex = currentIndex !== null && currentIndex >= 0 && currentIndex < originalPinnedLetters.length;
+  const closingTabIndex = originalPinnedLetters.findIndex(
+    (letter) => letter.id === pinnedLetter.id,
+  );
+  const isValidCurrentIndex =
+    currentIndex !== null && currentIndex >= 0 && currentIndex < originalPinnedLetters.length;
 
   // No valid active tab or no tabs left
   if (!isValidCurrentIndex || updatedPinnedLetters.length === 0) {
@@ -47,10 +50,23 @@ export const letterTabs = {
   tabIndex: (pinnedLetters: PinnedLetter[], letterId: number): number => {
     return pinnedLetters.findIndex((letter) => letter.id === letterId);
   },
-  removeStateTab: (dispatch: AppDispatch, statePinnedLetters: PinnedLetter[], pinnedLetter: PinnedLetter, currentIndex: number): void => {
-    const updatedPinnedLetters = EditorUtils.letterTabs.removePinnedLetter(statePinnedLetters, pinnedLetter.id);
+  removeStateTab: (
+    dispatch: AppDispatch,
+    statePinnedLetters: PinnedLetter[],
+    pinnedLetter: PinnedLetter,
+    currentIndex: number,
+  ): void => {
+    const updatedPinnedLetters = EditorUtils.letterTabs.removePinnedLetter(
+      statePinnedLetters,
+      pinnedLetter.id,
+    );
 
-    const newActiveTab = calculateNewActiveTab(statePinnedLetters, updatedPinnedLetters, pinnedLetter, currentIndex);
+    const newActiveTab = calculateNewActiveTab(
+      statePinnedLetters,
+      updatedPinnedLetters,
+      pinnedLetter,
+      currentIndex,
+    );
 
     dispatch(
       setEditorTabAndPinnedLettersThunk({
@@ -59,7 +75,13 @@ export const letterTabs = {
       }),
     );
   },
-  updatePinnedLetterStatus: (pinnedLetters: PinnedLetter[], letterId: number, isPinned: boolean): PinnedLetter[] => {
-    return pinnedLetters.map((letter) => (letter.id === letterId ? { ...letter, isPinned: isPinned } : letter));
+  updatePinnedLetterStatus: (
+    pinnedLetters: PinnedLetter[],
+    letterId: number,
+    isPinned: boolean,
+  ): PinnedLetter[] => {
+    return pinnedLetters.map((letter) =>
+      letter.id === letterId ? { ...letter, isPinned: isPinned } : letter,
+    );
   },
 };

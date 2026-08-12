@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 
 interface LoadCSSProps {
   href: string; // URL of the CSS file
@@ -7,9 +7,9 @@ interface LoadCSSProps {
 const LoadCSSFile: React.FC<LoadCSSProps> = ({ href }) => {
   useEffect(() => {
     // Create a <link> element
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.type = "text/css";
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
     link.href = href;
 
     // Add the <link> element to the end of the <head> tag

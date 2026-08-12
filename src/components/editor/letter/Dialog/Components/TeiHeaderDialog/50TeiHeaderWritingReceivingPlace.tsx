@@ -7,136 +7,148 @@ import { EditorConstants, EntityType } from '@src/constants/editor';
 import HighlightedText from '@src/components/support/HighlightedText';
 import { Autocomplete, TextField } from '@mui/material';
 import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
-import {EditorUtils} from "@src/utils/editor";
-import {fetchMetamwEntityData} from "@src/services/auto_anno/apiMetaMw.service";
-
+import { EditorUtils } from '@src/utils/editor';
+import { fetchMetamwEntityData } from '@src/services/auto_anno/apiMetaMw.service';
 
 const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlaceProps) => {
-
-  const completionState = props.completionState
+  const completionState = props.completionState;
   const selectedOption: SnippetEntity | null =
-    props.dialogType === 'writing' ? completionState.writingPlace : completionState.receivingPlace
+    props.dialogType === 'writing' ? completionState.writingPlace : completionState.receivingPlace;
   const [places, setPlaces] = useState<SnippetEntity[]>([]);
 
   const setAutocmplSelectedOption = (settlement: SnippetEntity | null) => {
-		if (settlement !== null && settlement.entityKey !== null) {
-			fetchMetamwEntityData(settlement.entityKey).then((data) => {
-				if (data !== null ) {
-					settlement.entityName = data.name || '';
-					settlement.entityPlaceCountryName = data.country_name || '';
-				}
-			})
-		}
+    if (settlement !== null && settlement.entityKey !== null) {
+      fetchMetamwEntityData(settlement.entityKey).then((data) => {
+        if (data !== null) {
+          settlement.entityName = data.name || '';
+          settlement.entityPlaceCountryName = data.country_name || '';
+        }
+      });
+    }
 
     if (settlement && props.dialogType === 'writing') {
-      props.onChange({ writingPlace: settlement })
+      props.onChange({ writingPlace: settlement });
     } else if (settlement && props.dialogType === 'receiving') {
-      props.onChange({ receivingPlace: settlement })
+      props.onChange({ receivingPlace: settlement });
     }
-  }
+  };
 
   useEffect(() => {
     const fetchDefaultPlaces = async () => {
       try {
-        const defaultPlaces: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.SETTLEMENT)
+        const defaultPlaces: SnippetEntity[] | undefined = await searchEditortEntities(
+          null,
+          EntityType.SETTLEMENT,
+        );
 
         if (defaultPlaces === undefined) {
-          enqueueSnackbar("No places found", { variant:"error" });
+          enqueueSnackbar('No places found', { variant: 'error' });
         } else {
           setPlaces(defaultPlaces);
         }
       } catch (error) {
-        enqueueSnackbar("Error fetching places", { variant:"error" });
+        enqueueSnackbar('Error fetching places', { variant: 'error' });
       }
     };
 
-		const assignedWritingPlace = async () => {
-			if (!props.teiHeader) {
-				// No TEI header available (e.g. when creating a new letter) -> nothing to extract;
-				// a selection already made in completionState must not be touched here.
-				return;
-			}
+    const assignedWritingPlace = async () => {
+      if (!props.teiHeader) {
+        // No TEI header available (e.g. when creating a new letter) -> nothing to extract;
+        // a selection already made in completionState must not be touched here.
+        return;
+      }
 
-			const { name, key } = EditorUtils.teiHeaderContent.extractWritingPlace(props.teiHeader)
+      const { name, key } = EditorUtils.teiHeaderContent.extractWritingPlace(props.teiHeader);
 
-			if (name && key) {
-				const place: SnippetEntity[] | undefined = await searchEditortEntities(key, EntityType.SETTLEMENT)
-				if (place && place[0]) {
-					props.onChange( { writingPlace: place[0], writingPlaceAutoAvailable: true } )
-				}
-			}
-		}
+      if (name && key) {
+        const place: SnippetEntity[] | undefined = await searchEditortEntities(
+          key,
+          EntityType.SETTLEMENT,
+        );
+        if (place && place[0]) {
+          props.onChange({ writingPlace: place[0], writingPlaceAutoAvailable: true });
+        }
+      }
+    };
 
-		const assignedReceivingPlace = async () => {
-			if (!props.teiHeader) {
-				// No TEI header available (e.g. when creating a new letter) -> nothing to extract;
-				// a selection already made in completionState must not be touched here.
-				return;
-			}
+    const assignedReceivingPlace = async () => {
+      if (!props.teiHeader) {
+        // No TEI header available (e.g. when creating a new letter) -> nothing to extract;
+        // a selection already made in completionState must not be touched here.
+        return;
+      }
 
-			const { name, key } = EditorUtils.teiHeaderContent.extractReceivingPlace(props.teiHeader)
+      const { name, key } = EditorUtils.teiHeaderContent.extractReceivingPlace(props.teiHeader);
 
-			if (name && key) {
-				const place: SnippetEntity[] | undefined = await searchEditortEntities(key, EntityType.SETTLEMENT)
-				if (place && place[0]) {
-					props.onChange( { receivingPlace: place[0], receivingPlaceAutoAvailable: true } )
-				}
-			}
-		}
+      if (name && key) {
+        const place: SnippetEntity[] | undefined = await searchEditortEntities(
+          key,
+          EntityType.SETTLEMENT,
+        );
+        if (place && place[0]) {
+          props.onChange({ receivingPlace: place[0], receivingPlaceAutoAvailable: true });
+        }
+      }
+    };
 
     void fetchDefaultPlaces();
-		if (props.dialogType === 'writing') {
-			void assignedWritingPlace()
-		} else if (props.dialogType === 'receiving') {
-			void assignedReceivingPlace()
-		}
+    if (props.dialogType === 'writing') {
+      void assignedWritingPlace();
+    } else if (props.dialogType === 'receiving') {
+      void assignedReceivingPlace();
+    }
   }, [props.teiHeader]);
 
   const searchForPlacess = async (inputValue: string) => {
     try {
-      const responsePlacess = await searchEditortEntities(inputValue, EntityType.SETTLEMENT)
+      const responsePlacess = await searchEditortEntities(inputValue, EntityType.SETTLEMENT);
 
       if (responsePlacess) {
         setPlaces(responsePlacess);
       }
     } catch (err) {
-      enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
+      enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
+        variant: 'error',
+      });
     }
-  }
+  };
 
   const debouncedSearchForPlacess = useMemo(
     () => debounce(searchForPlacess, 300), // 300ms delay
-    []
+    [],
   );
 
-  const autoCompleteAvailable = ():boolean => {
+  const autoCompleteAvailable = (): boolean => {
     if (props.dialogType === 'writing') {
-      return !completionState.writingPlaceAutoAvailable
+      return !completionState.writingPlaceAutoAvailable;
     } else if (props.dialogType === 'receiving') {
-      return !completionState.receivingPlaceAutoAvailable
+      return !completionState.receivingPlaceAutoAvailable;
     } else {
-      throw new Error('Receiving place auto not available')
+      throw new Error('Receiving place auto not available');
     }
-  }
+  };
 
   return (
     <>
-      <div className="autoSnippetFormRow" style={ { marginTop: "35px", width: "98%" } }>
+      <div className="autoSnippetFormRow" style={{ marginTop: '35px', width: '98%' }}>
         <Autocomplete
           disabled={autoCompleteAvailable()}
           options={places}
           value={selectedOption}
-          isOptionEqualToValue={(option, value) => option.entityId === value.entityId }
+          isOptionEqualToValue={(option, value) => option.entityId === value.entityId}
           onChange={(_, newValue) => setAutocmplSelectedOption(newValue)}
           onInputChange={(_, inputValue, reason) => {
-            if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
+            if (
+              inputValue &&
+              reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
+            ) {
               void debouncedSearchForPlacess(inputValue);
             }
           }}
           getOptionLabel={(option) => option.entityName || ''}
           filterOptions={(options, { inputValue }) =>
             options.filter((option) =>
-              option.entityName.toLowerCase().includes(inputValue.toLowerCase())
+              option.entityName.toLowerCase().includes(inputValue.toLowerCase()),
             )
           }
           renderOption={(props, option, { inputValue }) => {
@@ -149,13 +161,13 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
             );
           }}
           renderInput={(params) => (
-            <TextField {...params} label={ props.textFieldValue } variant="outlined" />
+            <TextField {...params} label={props.textFieldValue} variant="outlined" />
           )}
           fullWidth
         />
       </div>
     </>
-  )
-}
+  );
+};
 
-export default TeiHeaderWritingReceivingPlace
+export default TeiHeaderWritingReceivingPlace;

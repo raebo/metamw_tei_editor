@@ -1,20 +1,17 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import { SnippetUpdateParams } from "@src/components/auto_anno/AutoAnnoSnippetList";
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { SnippetUpdateParams } from '@src/components/auto_anno/AutoAnnoSnippetList';
 import {
   setAutoAnnoSnippet,
   setAutoSnippetFormContainer,
-  setSnippetReferences
-} from "../slices/auto.letter.snippet.slice";
-import { SnippetReference } from "@src/services/mappings/autoAnnoMappings";
-
+  setSnippetReferences,
+} from '../slices/auto.letter.snippet.slice';
+import { SnippetReference } from '@src/services/mappings/autoAnnoMappings';
 
 export const setAutoAnnoSnippetAndShow = createAsyncThunk(
   'snippet/setSnippetAndShow',
-  async (
-    { snippetUpdateParams }: { snippetUpdateParams: SnippetUpdateParams },
-    { dispatch }
-  ) => {
-    const {snippetId, xmlId, referenceName, referenceKey, referenceType, ...rest} = snippetUpdateParams
+  async ({ snippetUpdateParams }: { snippetUpdateParams: SnippetUpdateParams }, { dispatch }) => {
+    const { snippetId, xmlId, referenceName, referenceKey, referenceType, ...rest } =
+      snippetUpdateParams;
 
     dispatch(
       setAutoAnnoSnippet({
@@ -27,47 +24,56 @@ export const setAutoAnnoSnippetAndShow = createAsyncThunk(
           referenceNameChanged: referenceName,
           referenceKeyChanged: referenceKey,
           referenceTypeChanged: referenceType,
-          ...rest
-        }
-      })
-    )
+          ...rest,
+        },
+      }),
+    );
     dispatch(
       setAutoSnippetFormContainer({
         snippetFormContainer: {
           form: snippetUpdateParams.snippetFormContainer.form,
           buttons: snippetUpdateParams.snippetFormContainer.buttons,
-        }
-      })
-    )
-  }
-)
+        },
+      }),
+    );
+  },
+);
 
 export const setAutoSnippetAndSnippetReferences = createAsyncThunk(
   'snippet/setSnippetAndReferences',
   async (
-    { snippetUpdateParams, references, showSnippetReferences }: { snippetUpdateParams: SnippetUpdateParams, references: SnippetReference[], showSnippetReferences: boolean },
-    { dispatch }
+    {
+      snippetUpdateParams,
+      references,
+      showSnippetReferences,
+    }: {
+      snippetUpdateParams: SnippetUpdateParams;
+      references: SnippetReference[];
+      showSnippetReferences: boolean;
+    },
+    { dispatch },
   ) => {
-    const { snippetId, xmlId, referenceName, referenceKey, referenceType, ...rest } = snippetUpdateParams
+    const { snippetId, xmlId, referenceName, referenceKey, referenceType, ...rest } =
+      snippetUpdateParams;
 
     dispatch(
       setSnippetReferences({
         references: {
           items: references,
           showReferences: showSnippetReferences,
-          referenceFormActive: true
-        }
-      })
-    )
+          referenceFormActive: true,
+        },
+      }),
+    );
     dispatch(
       setAutoSnippetFormContainer({
         snippetFormContainer: {
-          form: "BLANK_FORM",
-          buttons: "BLANK_BUTTONS",
-          actionButtonDisabled: true
-        }
-      })
-    )
+          form: 'BLANK_FORM',
+          buttons: 'BLANK_BUTTONS',
+          actionButtonDisabled: true,
+        },
+      }),
+    );
     dispatch(
       setAutoAnnoSnippet({
         snippet: {
@@ -79,9 +85,9 @@ export const setAutoSnippetAndSnippetReferences = createAsyncThunk(
           referenceNameChanged: referenceName,
           referenceKeyChanged: referenceKey,
           referenceTypeChanged: referenceType,
-          ...rest
-        }
-      })
-    )
-  }
-)
+          ...rest,
+        },
+      }),
+    );
+  },
+);

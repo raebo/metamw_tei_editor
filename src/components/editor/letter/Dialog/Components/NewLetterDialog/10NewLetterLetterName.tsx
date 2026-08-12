@@ -1,20 +1,27 @@
 import { TextField } from '@mui/material';
 import { NewLetterDialogProps } from '../AddNewLetterDialog';
 import React, { useState } from 'react';
-import {
-  searchForLetterNameTitle,
-} from '@src/services/editor/apiLettersRequest.service';
+import { searchForLetterNameTitle } from '@src/services/editor/apiLettersRequest.service';
 
-const NewLetterLetterName= (props: NewLetterDialogProps) => {
-  const [letterName, setLetterName] = React.useState<string | null>(props.completionState.letterName)
+const NewLetterLetterName = (props: NewLetterDialogProps) => {
+  const [letterName, setLetterName] = React.useState<string | null>(
+    props.completionState.letterName,
+  );
   const [error, setError] = useState(false);
   const [helperText, setHelperText] = useState('');
 
-  const validateLetterName = (letterName: string) : { isValid: boolean, errorMessage: string | null } => {
+  const validateLetterName = (
+    letterName: string,
+  ): { isValid: boolean; errorMessage: string | null } => {
     const regex = /^(FMB|GB|fmb|gb)-(\d{4})-(\d{2})-(\d{2})-(\d{2})$/;
 
     const match = letterName.match(regex);
-    if (!match) return { isValid: false, errorMessage: 'Invalid format. Expected FMB-YYYY-MM-DD-AA or GB-YYYY-MM-DD-AA with AA between 01 and 99.' };
+    if (!match)
+      return {
+        isValid: false,
+        errorMessage:
+          'Invalid format. Expected FMB-YYYY-MM-DD-AA or GB-YYYY-MM-DD-AA with AA between 01 and 99.',
+      };
 
     const [, , yearStr, monthStr, dayStr] = match;
 
@@ -24,18 +31,19 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
 
     const date = new Date(year, month - 1, day);
     const isValidDate =
-      date.getFullYear() === year &&
-      date.getMonth() === month - 1 &&
-      date.getDate() === day;
+      date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
 
-    return { isValid: isValidDate, errorMessage: isValidDate ? null : 'The given name does not contains a valid date' };
-  }
+    return {
+      isValid: isValidDate,
+      errorMessage: isValidDate ? null : 'The given name does not contains a valid date',
+    };
+  };
 
   const checkLetterNameAvailable = async (letterName: string | null): Promise<boolean> => {
     const letterType = letterName?.substring(0, 3).toLowerCase() === 'fmb' ? 'FMB' : 'GB';
 
     try {
-      const responseLetters = await searchForLetterNameTitle(letterType, letterName)
+      const responseLetters = await searchForLetterNameTitle(letterType, letterName);
 
       return !(responseLetters && responseLetters.length > 0);
     } catch (error) {
@@ -46,7 +54,6 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
   };
 
   const handleBlur = async () => {
-
     if (!letterName || letterName?.length == 0) {
       setError(true);
       setHelperText('Please enter a letter name');
@@ -56,11 +63,11 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
 
     if (!isValid && errorMessage) {
       setError(true);
-      setHelperText( errorMessage );
+      setHelperText(errorMessage);
       return;
     }
 
-    const letterIsAvailable  = await checkLetterNameAvailable(letterName);
+    const letterIsAvailable = await checkLetterNameAvailable(letterName);
 
     if (!letterIsAvailable) {
       setError(true);
@@ -86,13 +93,15 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
     props.onChange(payload);
     setError(false);
     setHelperText('');
-  }
+  };
 
   const isFmbLetter = (letterName: string | null) => {
-    if (letterName === null) { return false }
+    if (letterName === null) {
+      return false;
+    }
 
-    return (letterName.length > 3 && letterName.toLowerCase().indexOf('fmb') === 0)
-  }
+    return letterName.length > 3 && letterName.toLowerCase().indexOf('fmb') === 0;
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLetterName(event.target.value);
@@ -104,7 +113,7 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
 
   return (
     <>
-      <div className="autoSnippetFormRow" style={ { marginTop: "25px", width: "98%" } }>
+      <div className="autoSnippetFormRow" style={{ marginTop: '25px', width: '98%' }}>
         <TextField
           id="outlined-basic"
           label="Name des Briefes"
@@ -118,7 +127,7 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
         />
       </div>
     </>
-  )
-}
+  );
+};
 
 export default NewLetterLetterName;

@@ -44,9 +44,13 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
       });
     } catch (error) {
       setErrorMessage(MiscUtils.misc.getErrorMessage(error));
-      enqueueSnackbar('Letter could not publisheed on backend side. Please check the details.' + MiscUtils.misc.getErrorMessage(error), {
-        variant: 'error',
-      });
+      enqueueSnackbar(
+        'Letter could not publisheed on backend side. Please check the details.' +
+          MiscUtils.misc.getErrorMessage(error),
+        {
+          variant: 'error',
+        },
+      );
     }
   };
 
@@ -55,7 +59,8 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
       <DialogContent>
         Sind Sie sicher, dass Sie den aktuellen Brief im Backend veröffentlichen möchten?
         <Alert severity="warning" sx={{ mt: 2 }}>
-          ACHTUNG: Diese Aktion kann nicht rückgängig gemacht werden und der Brief wird im Dateisystem überschrieben!!!
+          ACHTUNG: Diese Aktion kann nicht rückgängig gemacht werden und der Brief wird im
+          Dateisystem überschrieben!!!
         </Alert>
         {errorMessage && (
           <Alert severity="error" sx={{ mt: 2 }}>
@@ -64,7 +69,12 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
         )}
       </DialogContent>
       <DialogActions>
-        <Button size={EditorConstants.styles.panel.buttonSize} variant="outlined" onClick={props.onClose} color="primary">
+        <Button
+          size={EditorConstants.styles.panel.buttonSize}
+          variant="outlined"
+          onClick={props.onClose}
+          color="primary"
+        >
           Abbrechen
         </Button>
         <Button

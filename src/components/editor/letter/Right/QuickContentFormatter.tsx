@@ -22,7 +22,9 @@ import { runOncePerAction } from '@src/utils/misc/stateHandling';
 const QuickContentFormatter = () => {
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
-  const contentTextIsMarked = useSelector((state: RootState) => state.editorLetter.content.textIsMarked);
+  const contentTextIsMarked = useSelector(
+    (state: RootState) => state.editorLetter.content.textIsMarked,
+  );
 
   const [undoActive, setUndoActive] = useState<boolean>(stateEditorLetter.undoAvailable);
   const [redoActive, setRedoActive] = useState<boolean>(stateEditorLetter.redoAvailable);
@@ -47,8 +49,13 @@ const QuickContentFormatter = () => {
     },
   });
 
-  const handleEditorKeyHandle = async (keyCombination: string, editorKeyHandleItems: Record<string, EditorKeyHandleItem>) => {
-    const editorKeyHandleItem = Object.values(editorKeyHandleItems).filter((item) => item.key === keyCombination)[0];
+  const handleEditorKeyHandle = async (
+    keyCombination: string,
+    editorKeyHandleItems: Record<string, EditorKeyHandleItem>,
+  ) => {
+    const editorKeyHandleItem = Object.values(editorKeyHandleItems).filter(
+      (item) => item.key === keyCombination,
+    )[0];
 
     runOncePerAction(editorKeyHandleItem.key, async () => {
       if (!editorKeyHandleItem) {
@@ -85,7 +92,12 @@ const QuickContentFormatter = () => {
         }}
       >
         <ListItemIcon>
-          <ToolbarButton title="Bold (Ctrl+B)" active={iconsAreActive} onClick={() => onClickButton('ctrl+b')} icon=<FormatBoldIcon /> />
+          <ToolbarButton
+            title="Bold (Ctrl+B)"
+            active={iconsAreActive}
+            onClick={() => onClickButton('ctrl+b')}
+            icon=<FormatBoldIcon />
+          />
         </ListItemIcon>
       </ListItemButton>
       <ListItemButton
@@ -94,7 +106,12 @@ const QuickContentFormatter = () => {
           ...getToolbarButtonStyle(iconsAreActive),
         }}
       >
-        <ToolbarButton title="Italic (Ctrl+I)" active={iconsAreActive} onClick={() => onClickButton('ctrl+i')} icon=<FormatItalicIcon /> />
+        <ToolbarButton
+          title="Italic (Ctrl+I)"
+          active={iconsAreActive}
+          onClick={() => onClickButton('ctrl+i')}
+          icon=<FormatItalicIcon />
+        />
       </ListItemButton>
       <ListItemButton
         onClick={() => onClickButton('ctrl+u')}
@@ -115,7 +132,12 @@ const QuickContentFormatter = () => {
           ...getToolbarButtonStyle(undoActive),
         }}
       >
-        <ToolbarButton title="Undo (Ctrl+Z)" onClick={() => onClickNoMarkedButton('ctrl+z')} active={undoActive} icon=<UndoIcon /> />
+        <ToolbarButton
+          title="Undo (Ctrl+Z)"
+          onClick={() => onClickNoMarkedButton('ctrl+z')}
+          active={undoActive}
+          icon=<UndoIcon />
+        />
       </ListItemButton>
       <ListItemButton
         onClick={() => onClickNoMarkedButton('ctrl+shift+z')}

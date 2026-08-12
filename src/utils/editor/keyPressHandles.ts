@@ -91,7 +91,10 @@ export const keyPressHandles = {
 
     let parentNode: Node | null = parent;
 
-    while (parentNode && !(parentNode instanceof Element && parentNode.tagName.toLowerCase() === 'tei')) {
+    while (
+      parentNode &&
+      !(parentNode instanceof Element && parentNode.tagName.toLowerCase() === 'tei')
+    ) {
       parentNode = parentNode.parentNode;
     }
 

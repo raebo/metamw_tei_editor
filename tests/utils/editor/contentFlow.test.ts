@@ -24,7 +24,9 @@ describe('contentFlow.insertPageBreak', () => {
     const result = serializer.serializeToString(xmlDoc);
 
     // Expect a new seg + pb inserted before "Here comes..."
-    expect(result).toContain('<seg type="pagebreak">|1| <pb n="1" type="pagebreak"/></seg>Here comes a new page break');
+    expect(result).toContain(
+      '<seg type="pagebreak">|1| <pb n="1" type="pagebreak"/></seg>Here comes a new page break',
+    );
 
     // Expect the old <pb n="3"> got updated to 4
     expect(result).not.toContain('<pb n="2" type="pagebreak"/>');
@@ -55,7 +57,9 @@ describe('contentFlow.insertPageBreak', () => {
     const result = serializer.serializeToString(xmlDoc);
 
     // Expect a new seg + pb inserted before "Here comes..."
-    expect(result).toContain('<seg type="pagebreak">|1| <pb n="1" type="pagebreak"/></seg>Here comes a new page break');
+    expect(result).toContain(
+      '<seg type="pagebreak">|1| <pb n="1" type="pagebreak"/></seg>Here comes a new page break',
+    );
 
     // Expect the old <pb n="3"> got updated to 4
     expect(result).toContain('<pb n="2" type="pagebreak"/>');
@@ -88,7 +92,9 @@ describe('contentFlow.insertPageBreak', () => {
     const result = serializer.serializeToString(xmlDoc);
 
     // Expect a new seg + pb inserted before "Here comes..."
-    expect(result).toContain('<seg type="pagebreak">|3| <pb n="3" type="pagebreak"/></seg>Here comes a new page break');
+    expect(result).toContain(
+      '<seg type="pagebreak">|3| <pb n="3" type="pagebreak"/></seg>Here comes a new page break',
+    );
 
     // Expect the old <pb n="3"> got updated to 4
     expect(result).toContain('<pb n="4" type="pagebreak"/>');

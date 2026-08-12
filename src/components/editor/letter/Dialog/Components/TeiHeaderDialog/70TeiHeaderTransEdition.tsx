@@ -1,75 +1,91 @@
-import {Box, Chip, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField} from '@mui/material';
+import {
+  Box,
+  Chip,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  TextField,
+} from '@mui/material';
 import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
-import {EditorConstants, LanguageOption } from '@src/constants/editor';
-import React, {useEffect, useState} from 'react';
-import CancelIcon from "@mui/icons-material/Cancel";
-import {EditorUtils} from "@src/utils/editor";
+import { EditorConstants, LanguageOption } from '@src/constants/editor';
+import React, { useEffect, useState } from 'react';
+import CancelIcon from '@mui/icons-material/Cancel';
+import { EditorUtils } from '@src/utils/editor';
 import { useTranslation } from 'react-i18next';
 
 const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {
   const { t } = useTranslation();
-  const [letterLanguages, setLetterLanguages] = useState<LanguageOption[]>([])
-	const [selectedLang, setSelectedLang] = useState("");
-	const [transkriptionValue, setTranskriptionValue] = useState<string>(props.completionState.transkriptionValue)
-	const [editionValue, setEditionValue] = useState<string>(props.completionState.editionValue)
+  const [letterLanguages, setLetterLanguages] = useState<LanguageOption[]>([]);
+  const [selectedLang, setSelectedLang] = useState('');
+  const [transkriptionValue, setTranskriptionValue] = useState<string>(
+    props.completionState.transkriptionValue,
+  );
+  const [editionValue, setEditionValue] = useState<string>(props.completionState.editionValue);
 
-	useEffect(() => {
-		const assignedLanguages : LanguageOption[] = EditorUtils.teiHeaderContent.extractLanguages(props.teiHeader)
+  useEffect(() => {
+    const assignedLanguages: LanguageOption[] = EditorUtils.teiHeaderContent.extractLanguages(
+      props.teiHeader,
+    );
 
-		props.onChange({ letterLanguage: assignedLanguages });
-		setLetterLanguages(Array.from(new Set([...assignedLanguages, ...letterLanguages])));
-	}, [props.teiHeader])
+    props.onChange({ letterLanguage: assignedLanguages });
+    setLetterLanguages(Array.from(new Set([...assignedLanguages, ...letterLanguages])));
+  }, [props.teiHeader]);
 
   const changeTranskriptionValue = (value: string) => {
-    props.onChange({ transkriptionValue: value })
-		setTranskriptionValue(value);
-  }
+    props.onChange({ transkriptionValue: value });
+    setTranskriptionValue(value);
+  };
 
   const changeEditionValue = (value: string) => {
-    props.onChange({ editionValue: value })
-		setEditionValue(value);
-  }
+    props.onChange({ editionValue: value });
+    setEditionValue(value);
+  };
 
   const handleLanguageChange = (event: SelectChangeEvent) => {
     const value = event.target.value as 'de' | 'en' | 'fr' | 'it' | 'la' | 'grc' | 'he';
 
-		const language = EditorConstants.LANGUAGES.find( lang => lang.value === value)
+    const language = EditorConstants.LANGUAGES.find((lang) => lang.value === value);
 
-		if (language) {
-			setLetterLanguages(Array.from(new Set([...letterLanguages, language])));
-			props.onChange({ letterLanguage: Array.from(new Set([...letterLanguages, language]) ) });
-			setSelectedLang("");
-		}
-	}
+    if (language) {
+      setLetterLanguages(Array.from(new Set([...letterLanguages, language])));
+      props.onChange({ letterLanguage: Array.from(new Set([...letterLanguages, language])) });
+      setSelectedLang('');
+    }
+  };
 
-	const handleRemoveLanguage = (lang: LanguageOption) => {
-		const updatedLanguages = letterLanguages.filter((l) => l !== lang);
-		setLetterLanguages(updatedLanguages);
-		props.onChange({ letterLanguage: updatedLanguages });
-	}
+  const handleRemoveLanguage = (lang: LanguageOption) => {
+    const updatedLanguages = letterLanguages.filter((l) => l !== lang);
+    setLetterLanguages(updatedLanguages);
+    props.onChange({ letterLanguage: updatedLanguages });
+  };
 
   return (
     <>
-      <div className="autoSnippetFormRow" style={ { marginTop: "25px", width: "98%" } }>
+      <div className="autoSnippetFormRow" style={{ marginTop: '25px', width: '98%' }}>
         <Stack direction="row" spacing={2}>
           <TextField
             id="outlined-basic"
             label={t('editor:dialog.teiHeaderTransEdition.label.transcription')}
             variant="outlined"
-						disabled={true}
+            disabled={true}
             value={transkriptionValue}
             onChange={(event) => changeTranskriptionValue(event.target.value)}
           />
-            <TextField
+          <TextField
             id="outlined-basic"
             label={t('editor:dialog.teiHeaderTransEdition.label.edition')}
             variant="outlined"
-						disabled={true}
+            disabled={true}
             value={editionValue}
             onChange={(event) => changeEditionValue(event.target.value)}
           />
-          <FormControl variant="outlined" sx={{m: 1, minWidth: 120, width: '98%'}}>
-            <InputLabel id="auto-anno-snippet-reference-type">{t('editor:dialog.teiHeaderTransEdition.label.letterLanguage')}</InputLabel>
+          <FormControl variant="outlined" sx={{ m: 1, minWidth: 120, width: '98%' }}>
+            <InputLabel id="auto-anno-snippet-reference-type">
+              {t('editor:dialog.teiHeaderTransEdition.label.letterLanguage')}
+            </InputLabel>
             <Select
               value={selectedLang}
               disabled={false}
@@ -77,45 +93,45 @@ const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {
               id="simple-select-filled"
               onChange={(event) => handleLanguageChange(event)}
             >
-							<MenuItem value="">
-								<em>{t('editor:dialog.teiHeaderTransEdition.label.chooseLanguage')}</em>
-							</MenuItem>
-							{ EditorConstants.LANGUAGES.map((item) => {
-								const isAdded = letterLanguages.some(lang => lang.value === item.value );
-								return (
-									<MenuItem
-										key={item.value}
-										value={item.value}
-										disabled={isAdded}
-										sx={isAdded ? { color: "gray" } : {}}
-									>
-										{item.label}
-									</MenuItem>
-								);
-							})}
+              <MenuItem value="">
+                <em>{t('editor:dialog.teiHeaderTransEdition.label.chooseLanguage')}</em>
+              </MenuItem>
+              {EditorConstants.LANGUAGES.map((item) => {
+                const isAdded = letterLanguages.some((lang) => lang.value === item.value);
+                return (
+                  <MenuItem
+                    key={item.value}
+                    value={item.value}
+                    disabled={isAdded}
+                    sx={isAdded ? { color: 'gray' } : {}}
+                  >
+                    {item.label}
+                  </MenuItem>
+                );
+              })}
             </Select>
-						<Box mt={2} sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-							{ letterLanguages.map((lang) => {
-								const label =
-									EditorConstants.LANGUAGES.filter((l) => l.value === lang.value)[0].label || ""
+            <Box mt={2} sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              {letterLanguages.map((lang) => {
+                const label =
+                  EditorConstants.LANGUAGES.filter((l) => l.value === lang.value)[0].label || '';
 
-								return (
-									<Chip
-										key={lang.value}
-										label={label}
-										onDelete={() => handleRemoveLanguage(lang)}
-										deleteIcon={<CancelIcon />}
-										color="primary"
-										variant="outlined"
-									/>
-								);
-							}) }
-						</Box>
+                return (
+                  <Chip
+                    key={lang.value}
+                    label={label}
+                    onDelete={() => handleRemoveLanguage(lang)}
+                    deleteIcon={<CancelIcon />}
+                    color="primary"
+                    variant="outlined"
+                  />
+                );
+              })}
+            </Box>
           </FormControl>
         </Stack>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default TeiHeaderTransEdition
+export default TeiHeaderTransEdition;
