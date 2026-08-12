@@ -20,7 +20,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { MiscUtils } from '@src/utils/misc';
+import HighlightedText from '@src/components/support/HighlightedText';
 import { debounce } from 'lodash-es';
 import { useTranslation } from 'react-i18next';
 
@@ -226,22 +226,11 @@ const ManageRismEntryDialog = (props: DefaultDialogProps) => {
                   return (
                     <li {...props}>
                       <div>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: MiscUtils.stringHandling.highlightText(
-                              option.title,
-                              inputValue,
-                            ),
-                          }}
-                        />
-                        <div
+                        <HighlightedText text={option.title} query={inputValue} />
+                        <HighlightedText
+                          text={option.title}
+                          query={inputValue}
                           style={{ fontSize: '0.8em', color: 'gray' }}
-                          dangerouslySetInnerHTML={{
-                            __html: MiscUtils.stringHandling.highlightText(
-                              option.title,
-                              inputValue,
-                            ),
-                          }}
                         />
                       </div>
                     </li>

@@ -1,6 +1,6 @@
 import { Autocomplete, TextField } from '@mui/material';
 import { EditorConstants, EntityType } from '../../../../../../constants/editor';
-import { MiscUtils } from '../../../../../../utils/misc';
+import HighlightedText from '@src/components/support/HighlightedText';
 import React, { useEffect, useMemo, useState } from 'react';
 import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappings';
 import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
@@ -80,11 +80,7 @@ const TeiHeaderWritingPerson = (props: NewLetterDialogProps) => {
             return (
               <li {...props}>
                 <div>
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: MiscUtils.stringHandling.highlightText(option.entityName, inputValue)
-                    }}
-                  />
+                  <HighlightedText text={option.entityName} query={inputValue} />
                 </div>
               </li>
             );

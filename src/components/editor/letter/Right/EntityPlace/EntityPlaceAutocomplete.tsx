@@ -6,7 +6,7 @@ import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.ser
 import { debounce } from 'lodash-es';
 import { EditorConstants } from '@src/constants/editor';
 import { Autocomplete, TextField } from '@mui/material';
-import { MiscUtils } from '@src/utils/misc';
+import HighlightedText from '@src/components/support/HighlightedText';
 import { fetchMetamwEntityData } from '@src/services/auto_anno/apiMetaMw.service';
 import { RemotePlaceDataSchema } from '@src/schemas';
 import { z } from 'zod';
@@ -158,11 +158,7 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
           return (
             <li {...props}>
               <div>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: MiscUtils.stringHandling.highlightText(option.entityName, inputValue),
-                  }}
-                />
+                <HighlightedText text={option.entityName} query={inputValue} />
               </div>
             </li>
           );

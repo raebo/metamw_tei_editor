@@ -5,7 +5,7 @@ import { EditorConstants, EntityType } from '../../../../../constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
 import { Autocomplete, TextField } from '@mui/material';
-import { MiscUtils } from '../../../../../utils/misc';
+import HighlightedText from '@src/components/support/HighlightedText';
 import { useTranslation } from 'react-i18next';
 
 interface EntityAuthorAutocompleteProps {
@@ -89,11 +89,7 @@ const EntityAuthorAutocomplete = (props: EntityAuthorAutocompleteProps) => {
           return (
             <li {...props}>
               <div>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: MiscUtils.stringHandling.highlightText(option.entityName, inputValue),
-                  }}
-                />
+                <HighlightedText text={option.entityName} query={inputValue} />
               </div>
             </li>
           );

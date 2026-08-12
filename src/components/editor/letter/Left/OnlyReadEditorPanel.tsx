@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Autocomplete, Box, Grid, TextField, Typography } from '@mui/material';
 import { EditorLetter } from '@src/services/mappings/editorMappings';
 import { EditorConstants } from '@src/constants/editor';
-import { MiscUtils } from '@src/utils/misc';
+import HighlightedText from '@src/components/support/HighlightedText';
 import {
   fetchLetterXmlContent,
   fetchSearchLetters,
@@ -128,11 +128,7 @@ const OnlyReadEditorPanel: React.FC = () => {
               }
               renderOption={(props, option, { inputValue }) => (
                 <li {...props}>
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: MiscUtils.stringHandling.highlightText(option.name, inputValue),
-                    }}
-                  />
+                  <HighlightedText text={option.name} query={inputValue} />
                 </li>
               )}
               renderInput={(params) => (

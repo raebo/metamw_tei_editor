@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
 import { EditorConstants, EntityType } from '../../../../../../constants/editor';
-import { MiscUtils } from '../../../../../../utils/misc';
+import HighlightedText from '@src/components/support/HighlightedText';
 import { Autocomplete, TextField } from '@mui/material';
 import { searchEditortEntities } from '../../../../../../services/editor/apiLetterRequest.service';
 import {EditorUtils} from "../../../../../../utils/editor";
@@ -143,11 +143,7 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
             return (
               <li {...props}>
                 <div>
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: MiscUtils.stringHandling.highlightText(option.entityName, inputValue)
-                    }}
-                  />
+                  <HighlightedText text={option.entityName} query={inputValue} />
                 </div>
               </li>
             );

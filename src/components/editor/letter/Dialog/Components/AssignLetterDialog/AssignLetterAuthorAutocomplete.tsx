@@ -2,7 +2,7 @@ import { SnippetEntity } from '../../../../../../services/mappings/autoAnnoMappi
 import React from 'react';
 import { Autocomplete, TextField } from '@mui/material';
 import { EditorConstants } from '../../../../../../constants/editor';
-import { MiscUtils } from '../../../../../../utils/misc';
+import HighlightedText from '@src/components/support/HighlightedText';
 
 interface AssignLetterAuthorAutocompleteProps {
   disabled: boolean;
@@ -46,14 +46,7 @@ const AssignLetterAuthorAutocomplete = (props: AssignLetterAuthorAutocompletePro
           return (
             <li {...props}>
               <div>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: MiscUtils.stringHandling.highlightText(
-                      option.entityDisplayName,
-                      inputValue,
-                    ),
-                  }}
-                />
+                <HighlightedText text={option.entityDisplayName} query={inputValue} />
               </div>
             </li>
           );

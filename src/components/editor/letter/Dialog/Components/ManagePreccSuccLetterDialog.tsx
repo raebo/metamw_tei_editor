@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
+import HighlightedText from '@src/components/support/HighlightedText';
 import {
   fetchLetterData,
   fetchLetterDataByName,
@@ -233,16 +234,11 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
                 return (
                   <li {...props}>
                     <div>
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: MiscUtils.stringHandling.highlightText(option.title, inputValue),
-                        }}
-                      />
-                      <div
+                      <HighlightedText text={option.title} query={inputValue} />
+                      <HighlightedText
+                        text={option.name}
+                        query={inputValue}
                         style={{ fontSize: '0.8em', color: 'gray' }}
-                        dangerouslySetInnerHTML={{
-                          __html: MiscUtils.stringHandling.highlightText(option.name, inputValue),
-                        }}
                       />
                     </div>
                   </li>

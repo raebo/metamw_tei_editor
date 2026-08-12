@@ -5,7 +5,7 @@ import type { RismEntry, RismFormEntry } from '@src/services/mappings/autoAnnoMa
 import { EditorConstants } from '@src/constants/editor';
 import { backendService } from '@src/utils/editor/backendService';
 import { debounce } from 'lodash-es';
-import { MiscUtils } from '@src/utils/misc';
+import HighlightedText from '@src/components/support/HighlightedText';
 import type { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
 import { enqueueSnackbar } from 'notistack';
 import { EditorUtils } from '@src/utils/editor';
@@ -157,22 +157,11 @@ const AddRismEntryDialog = (props: DefaultDialogProps) => {
                   return (
                     <li {...props}>
                       <div>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: MiscUtils.stringHandling.highlightText(
-                              option.title,
-                              inputValue,
-                            ),
-                          }}
-                        />
-                        <div
+                        <HighlightedText text={option.title} query={inputValue} />
+                        <HighlightedText
+                          text={option.title}
+                          query={inputValue}
                           style={{ fontSize: '0.8em', color: 'gray' }}
-                          dangerouslySetInnerHTML={{
-                            __html: MiscUtils.stringHandling.highlightText(
-                              option.title,
-                              inputValue,
-                            ),
-                          }}
                         />
                       </div>
                     </li>
