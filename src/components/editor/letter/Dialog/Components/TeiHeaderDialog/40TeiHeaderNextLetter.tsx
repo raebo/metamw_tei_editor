@@ -8,12 +8,14 @@ import { debounce } from 'lodash-es';
 import { MiscUtils } from '../../../../../../utils/misc';
 import { EditorConstants } from '../../../../../../constants/editor';
 import {EditorUtils} from "../../../../../../utils/editor";
+import { useTranslation } from 'react-i18next';
 
 
 const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
+	const { t } = useTranslation();
 
-	const [nextLetterType, setNextLetterType] = useState<'unknown' | 'not_identified' | 'select' | null>(null)
-	const [autoAvailable, setAutoAvailable] = useState<boolean>(false)
+	const [nextLetterType, setNextLetterType] = useState<'unknown' | 'not_identified' | 'select' | null>(props.completionState.nextLetterType)
+	const [autoAvailable, setAutoAvailable] = useState<boolean>(props.completionState.nextLetterType === 'select')
   const selectedOption: EditorLetter | null = props.completionState.nextLetter
   const [letters, setLetters] = useState<EditorLetter[]>([]);
 
@@ -40,6 +42,12 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
     };
 
 		const fetchNextLetter = async() => {
+			if (!props.teiHeader) {
+				// No TEI header available (e.g. when creating a new letter) -> nothing to extract;
+				// a selection already made in completionState must not be overwritten here.
+				return;
+			}
+
 			const { name, letterPrefix } = EditorUtils.teiHeaderContent.extractPrevNextLetter(props.teiHeader, 'successor');
 			if (name && letterPrefix) {
 				const nextLetter: EditorLetter[] | undefined = await searchForLetterNameTitle(letterPrefix, name)
@@ -146,7 +154,11 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
               );
             }}
             renderInput={(params) => (
-              <TextField {...params} label="Folgebrief auswählen" variant="outlined" />
+              <TextField
+                {...params}
+                label={t('editor:dialog.teiHeaderNextLetter.label.chooseNextLetter')}
+                variant="outlined"
+              />
             )}
             fullWidth
           />
@@ -159,7 +171,7 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
                   checked={nextLetterType === 'unknown'}
                 />
               }
-              label="Folgerbrief (Unbekannt)"
+              label={t('editor:dialog.teiHeaderNextLetter.checkbox.unknown')}
             />
 
             <FormControlLabel
@@ -169,7 +181,7 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
                   checked={nextLetterType === 'not_identified'}
                 />
               }
-              label="Folgebrief (Noch nicht ermittelt)"
+              label={t('editor:dialog.teiHeaderNextLetter.checkbox.notIdentified')}
             />
 
             <FormControlLabel
@@ -179,7 +191,7 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
                   checked={autoAvailable}
                 />
               }
-              label="Auswahl Folgebrief"
+              label={t('editor:dialog.teiHeaderNextLetter.checkbox.select')}
             />
           </Stack>
 

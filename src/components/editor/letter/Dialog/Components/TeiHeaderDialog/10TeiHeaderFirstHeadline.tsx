@@ -2,6 +2,7 @@ import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { Autocomplete, TextField } from '@mui/material';
 import React, {useEffect} from 'react';
 import {EditorUtils} from "../../../../../../utils/editor";
+import { useTranslation } from 'react-i18next';
 
 const firstHeaderOptions = [
   "Anna Mustermann an Felix Mendelssohn Bartholdy in Musterstadt",
@@ -13,6 +14,7 @@ const firstHeaderOptions = [
 ]
 
 const TeiHeaderFirstHeadline = (props: TeiHeaderDialogProps) => {
+  const { t } = useTranslation();
 
   const completionState = props.completionState;
 
@@ -44,7 +46,11 @@ const TeiHeaderFirstHeadline = (props: TeiHeaderDialogProps) => {
             setFirstHeaderValue(newInputValue);
           }}
           renderInput={(params) => (
-            <TextField {...params} label="Erste Kopfzeile des Briefes einfügen" variant="outlined" />
+            <TextField
+              {...params}
+              label={t('editor:dialog.teiHeaderFirstHeadline.label.insertFirstHeadline')}
+              variant="outlined"
+            />
           )}
         />
       </div>

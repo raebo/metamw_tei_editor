@@ -5,6 +5,7 @@ import CodeIcon from '@mui/icons-material/Code';
 import SearchIcon from '@mui/icons-material/Search';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SplitscreenIcon from '@mui/icons-material/Splitscreen';
+import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 import KeyboardOutlinedIcon from '@mui/icons-material/KeyboardOutlined';
 import SearchContainer from '@src/components/editor/letter/Left/Search/SearchContainer';
 import FavouritesContainer from '@src/components/editor/letter/Left/Favourites/FavouritesContainer';
@@ -60,6 +61,7 @@ import OnlyReadEditorPanel from '@src/components/editor/letter/Left/OnlyReadEdit
 import { ToolbarLetterNameDisplay } from '@src/components/editor/letter/Util/ToolbarLetterNameDisplay';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
+import AddNewLetterDialog from '@src/components/editor/letter/Dialog/Components/AddNewLetterDialog';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
@@ -69,7 +71,21 @@ const LEFT_EDITOR_MIN_WIDTH = 15;
 const LEFT_EDITOR_MAX_WIDTH = 60;
 const LEFT_EDITOR_DEFAULT_WIDTH = 30;
 
-const componentMappingLeft: Record<string, ComponentMappingItem> = {
+interface MappingDependencies {
+  letterId: string | undefined;
+  setModalDialog: (type: string) => void;
+  handleFavouriteClick: (id: string, value: boolean) => void;
+  xmlRefCenter: React.RefObject<HTMLDivElement>;
+}
+
+const createComponentMappingLeft = (
+  deps: MappingDependencies,
+): Record<string, ComponentMappingItem> => ({
+  [EditorConstants.compMappingLeft.NEW_LETTER]: {
+    name: EditorConstants.compMappingLeft.NEW_LETTER,
+    showContainer: false,
+    action: () => deps.setModalDialog(EditorConstants.dialogTypes.ADD_NEW_LETTER),
+  },
   [EditorConstants.compMappingLeft.SEARCH]: {
     name: EditorConstants.compMappingLeft.SEARCH,
     showContainer: true,
@@ -94,14 +110,7 @@ const componentMappingLeft: Record<string, ComponentMappingItem> = {
     component: <OnlyReadEditorPanel />,
     action: () => true,
   },
-};
-
-interface MappingDependencies {
-  letterId: string | undefined;
-  setModalDialog: (type: string) => void;
-  handleFavouriteClick: (id: string, value: boolean) => void;
-  xmlRefCenter: React.RefObject<HTMLDivElement>;
-}
+});
 
 const createComponentMappingRight = (
   deps: MappingDependencies,
@@ -433,6 +442,17 @@ const ShowEditor = () => {
     [letterId, xmlRefCenter, setModalDialog],
   );
 
+  const componentMappingLeft = useMemo(
+    () =>
+      createComponentMappingLeft({
+        letterId,
+        xmlRefCenter,
+        setModalDialog,
+        handleFavouriteClick,
+      }),
+    [letterId, xmlRefCenter, setModalDialog],
+  );
+
   return (
     <>
       <Box
@@ -453,6 +473,12 @@ const ShowEditor = () => {
           }}
         >
           <Stack direction="column" spacing={1}>
+            <ToolbarMenuButton
+              title={t('editor:common.letterViewContainer.toolbarLeft.newLetter')}
+              selected={selectedItemRight === EditorConstants.compMappingLeft.NEW_LETTER}
+              onClick={() => setSelectedItem(EditorConstants.compMappingLeft.NEW_LETTER, null)}
+              icon={<LibraryAddIcon />}
+            />
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarLeft.search')}
               selected={selectedItemRight === EditorConstants.compMappingLeft.SEARCH}

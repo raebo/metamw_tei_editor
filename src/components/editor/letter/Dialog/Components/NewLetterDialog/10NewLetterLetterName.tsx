@@ -75,7 +75,11 @@ const NewLetterLetterName= (props: NewLetterDialogProps) => {
       isFmbLetter: isFmb,
     };
 
-    const payload = isFmb
+    // Only clear an already selected writer when the letter is newly classified as an FMB
+    // letter (writer selection is not applicable there); a redundant blur of the unchanged
+    // field must not wipe a writer that was already picked in a later step.
+    const becomesFmb = isFmb && !props.completionState.isFmbLetter;
+    const payload = becomesFmb
       ? { ...basePayload, writerAutoAvailable: false, writerEntity: null }
       : basePayload;
 

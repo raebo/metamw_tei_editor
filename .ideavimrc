@@ -1,0 +1,2 @@
+nmap <C-Tab> <<
+vmap <C-Tab> <gv

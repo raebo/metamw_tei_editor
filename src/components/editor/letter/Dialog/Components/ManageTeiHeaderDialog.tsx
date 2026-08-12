@@ -19,6 +19,7 @@ import TeiHeaderEditorTranskriptor from "./TeiHeaderDialog/80EditorTranskriptor"
 import TeiHeaderReceivers from "./TeiHeaderDialog/60TeiHeaderReceivers";
 import DialogContent from "@mui/material/DialogContent";
 import {DialogActionButton} from "./Misc/DialogActionButton";
+import { useTranslation } from 'react-i18next';
 
 
 export type TeiHeaderDialogProps = {
@@ -30,7 +31,7 @@ export type TeiHeaderDialogProps = {
 
 export type TeiHeaderWritingReceivingPlaceProps = TeiHeaderDialogProps & {
   dialogType: 'writing' | 'receiving',
-  textFieldValue: 'Schreibort Auswählen' | 'Empfängerort Auswählen',
+  textFieldValue: string,
 };
 
 type CompletionState = {
@@ -48,6 +49,7 @@ type CompletionState = {
 }
 
 const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
+  const { t } = useTranslation();
 
   const [displayData] = React.useState<{ [key: string]:string}|null>(null)
 	const [formIsValid, setFormIsValid] = React.useState<boolean>(false);
@@ -172,9 +174,9 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
 				<TeiHeaderSndHeadline teiHeader={docData.teiHeader} autoAvailable={completionState.sndHeaderComplete} completionState={completionState} onChange={childOnChange} />
 				<TeiHeaderPrevLetter teiHeader={docData.teiHeader} autoAvailable={completionState.prevLetterAutoAvailable} completionState={completionState} onChange={childOnChange}  />
 				<TeiHeaderNextLetter teiHeader={docData.teiHeader} autoAvailable={completionState.nextLetterAutoAvailable} completionState={completionState} onChange={childOnChange} />
-				<TeiHeaderWritingReceivingPlace teiHeader={docData.teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"writing"} textFieldValue={'Schreibort Auswählen'}/>
+				<TeiHeaderWritingReceivingPlace teiHeader={docData.teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"writing"} textFieldValue={t('editor:dialog.teiHeaderWritingReceivingPlace.label.chooseWritingPlace')}/>
 				<TeiHeaderReceivers teiHeader={docData.teiHeader} autoAvailable={completionState.receiverAutoAvailable} completionState={completionState} onChange={childOnChange} />
-				<TeiHeaderWritingReceivingPlace teiHeader={docData.teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"receiving"} textFieldValue={'Empfängerort Auswählen'}/>
+				<TeiHeaderWritingReceivingPlace teiHeader={docData.teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} dialogType={"receiving"} textFieldValue={t('editor:dialog.teiHeaderWritingReceivingPlace.label.chooseReceivingPlace')}/>
 				<TeiHeaderTransEdition teiHeader={docData.teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
 				<TeiHeaderEditorTranskriptor teiHeader={docData.teiHeader} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
 

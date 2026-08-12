@@ -10,6 +10,7 @@ interface FormAutocompleteProps {
 	isDisabled: boolean,
 	selectedValue: SnippetEntity | null,
 	initialOptions: SnippetEntity[]
+	label?: string
 	setFormEntityKey?: (entityKey: string) => void
 	afterClickHandler?: (entity: SnippetEntity | null) => void
 }
@@ -80,9 +81,9 @@ const FormAutocomplete = (props: FormAutocompleteProps) => {
         getOptionLabel={(option) => (typeof option === 'string' ? option : option.entityName)}
         renderInput={(params) => (
           <TextField
-            sx={{ m: 1, width: '100%'}}
+            sx={{ width: '100%' }}
             {...params}
-            label="Suche"
+            label={props.label ?? "Suche"}
             variant="outlined"
             InputProps={{
               ...params.InputProps,

@@ -148,6 +148,7 @@ export const EditorConstants = {
     ADD_GREETINGS_FORMULA: dialogTypes.ADD_GREETINGS_FORMULA,
   },
   compMappingLeft: {
+    NEW_LETTER: 'NEW_LETTER',
     SEARCH: 'SEARCH',
     FAVOURITES: 'FAVOURITES',
     HELP_SHORTCUTS: 'HELP_SHORTCUTS',
