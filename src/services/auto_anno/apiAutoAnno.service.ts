@@ -4,21 +4,23 @@ import {
   AutoAnnoSnippet,
   AutoAnnoJob,
   SnippetApiEntity,
-  SnippetEntity
-} from "../mappings/autoAnnoMappings";
-import axios from "axios";
+  SnippetEntity,
+} from '../mappings/autoAnnoMappings';
+import axios from 'axios';
 
 export const fetchAutoAnnoJobs = async (): Promise<AutoAnnoJob[] | undefined> => {
   try {
-  const response = await initApi.initApi().get('/jwt/automatic_annotations')
+    const response = await initApi.initApi().get('/jwt/automatic_annotations');
 
-  return response.data;
+    return response.data;
   } catch (err) {
     console.error(err);
   }
 };
 
-export const fetchAutoAnnoJobLetters = async (id: number): Promise<AutoAnnoJobLetter[]| undefined> => {
+export const fetchAutoAnnoJobLetters = async (
+  id: number,
+): Promise<AutoAnnoJobLetter[] | undefined> => {
   try {
     const response = await initApi.initApi().get(`/jwt/automatic_annotations/${id}/letters`);
 
@@ -26,40 +28,58 @@ export const fetchAutoAnnoJobLetters = async (id: number): Promise<AutoAnnoJobLe
   } catch (err) {
     console.error(err);
   }
-}
+};
 
-export const fetchAutoAnnoLetter = async (annoLetterId: number): Promise<AutoAnnoJobLetter | undefined> => {
+export const fetchAutoAnnoLetter = async (
+  annoLetterId: number,
+): Promise<AutoAnnoJobLetter | undefined> => {
   try {
-    const response = await initApi.initApi().get(`/jwt/automatic_annotation_letters/${annoLetterId}`);
+    const response = await initApi
+      .initApi()
+      .get(`/jwt/automatic_annotation_letters/${annoLetterId}`);
 
     return response.data;
   } catch (err) {
     console.error(err);
   }
-}
+};
 
-export const patchAutoAnnoLetterLockingUser = async (annoLetterId: number, userId: number | null): Promise<boolean> => {
+export const patchAutoAnnoLetterLockingUser = async (
+  annoLetterId: number,
+  userId: number | null,
+): Promise<boolean> => {
   try {
-    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/set_locking_user`, { userId: userId });
+    await initApi
+      .initApi()
+      .patch(`/jwt/automatic_annotation_letters/${annoLetterId}/set_locking_user`, {
+        userId: userId,
+      });
 
     return true;
   } catch (err) {
-    throw new Error("patchAutoAnnoLetterLockingUser failed with error: " + err);
+    throw new Error('patchAutoAnnoLetterLockingUser failed with error: ' + err);
   }
-}
+};
 
-
-export const fetchAutoAnnoLetterSnippets = async (id: number | undefined): Promise<AutoAnnoSnippet[]| undefined> => {
+export const fetchAutoAnnoLetterSnippets = async (
+  id: number | undefined,
+): Promise<AutoAnnoSnippet[] | undefined> => {
   try {
-    const response = await initApi.initApi().get(`/jwt/automatic_annotation_letters/${id}/snippets`);
+    const response = await initApi
+      .initApi()
+      .get(`/jwt/automatic_annotation_letters/${id}/snippets`);
 
     return response.data;
   } catch (err) {
     console.error(err);
   }
-}
+};
 
-export const searchAutoAnnoSnippetEntities = async (annoLetterId: number, searchString: string, entityType: string): Promise<SnippetEntity[]| undefined> => {
+export const searchAutoAnnoSnippetEntities = async (
+  annoLetterId: number,
+  searchString: string,
+  entityType: string,
+): Promise<SnippetEntity[] | undefined> => {
   try {
     const entityMapping: Record<string, string> = {
       Person: 'person',
@@ -76,16 +96,14 @@ export const searchAutoAnnoSnippetEntities = async (annoLetterId: number, search
     const response = await initApi
       .initApi()
       .get(
-        `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/search_entity/${searchString}/${entityType.toLowerCase()}?per_page=20`
+        `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/search_entity/${searchString}/${entityType.toLowerCase()}?per_page=20`,
       );
 
     return response?.data?.[entityKey]?.entries || undefined;
-
   } catch (err) {
-    throw new Error("Error fetching data for search entity: " + err);
+    throw new Error('Error fetching data for search entity: ' + err);
   }
-}
-
+};
 
 const mapApiToSnippetEntity = (apiEntity: SnippetApiEntity): SnippetEntity => {
   return {
@@ -99,60 +117,85 @@ const mapApiToSnippetEntity = (apiEntity: SnippetApiEntity): SnippetEntity => {
     entityPlaceCountryName: apiEntity.entity_place_country_name,
     entityKind: apiEntity.entity_kind,
     extraData: apiEntity.extra_data,
-  }
-}
+  };
+};
 
-export const fetchAutoAnnoSnippetEntityData = async (annoLetterId: number, snippetId: number, entityKey: string, entityType: string): Promise<SnippetEntity> => {
+export const fetchAutoAnnoSnippetEntityData = async (
+  annoLetterId: number,
+  snippetId: number,
+  entityKey: string,
+  entityType: string,
+): Promise<SnippetEntity> => {
   const response = await initApi
     .initApi()
     .get(
-      `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/entity_data/${entityType.toLowerCase()}/${entityKey}`
+      `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/entity_data/${entityType.toLowerCase()}/${entityKey}`,
     );
 
   return mapApiToSnippetEntity(response.data);
-}
+};
 
 //TODO: Why cant we move this to autoAnnoMappings.ts?
-type SnippetStatus = "REJECTED" | "ACCEPTED" | "UPDATED";
+type SnippetStatus = 'REJECTED' | 'ACCEPTED' | 'UPDATED';
 
-export const setAutoAnnoSnippetStatus = async (annoLetterId: number, snippetId: number, status: SnippetStatus): Promise<boolean> => {
+export const setAutoAnnoSnippetStatus = async (
+  annoLetterId: number,
+  snippetId: number,
+  status: SnippetStatus,
+): Promise<boolean> => {
   try {
-    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_status`, { status });
+    await initApi
+      .initApi()
+      .patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_status`, {
+        status,
+      });
 
     return true;
   } catch (err) {
-    throw new Error("Error updating snippet status: " + err);
+    throw new Error('Error updating snippet status: ' + err);
   }
-}
+};
 
-export const updateAnnoLetterContent = async (id: number, xmlContent: String): Promise<boolean> => {
+export const updateAnnoLetterContent = async (id: number, xmlContent: string): Promise<boolean> => {
   try {
-    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/set_xml_content`, { xmlContent });
-
+    await initApi
+      .initApi()
+      .patch(`/jwt/automatic_annotation_letters/${id}/set_xml_content`, { xmlContent });
   } catch (err) {
-    // @ts-ignore
-    throw new Error("Error updating anno letter content: " + err.message?.toString());
+    throw new Error(
+      'Error updating anno letter content: ' + (err instanceof Error ? err.message : String(err)),
+    );
   }
-  return true
-}
+  return true;
+};
 
-export const setAnnoSnippetEntity= async (annoLetterId: number, snippetId: number, entityType: string, entityKey: string): Promise<boolean> => {
+export const setAnnoSnippetEntity = async (
+  annoLetterId: number,
+  snippetId: number,
+  entityType: string,
+  entityKey: string,
+): Promise<boolean> => {
   try {
-    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_entity`, { entityType, entityKey });
-
+    await initApi
+      .initApi()
+      .patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_entity`, {
+        entityType,
+        entityKey,
+      });
   } catch (err) {
-    // @ts-ignore
-    throw new Error("Error updating snippet entity: " + err.message?.toString());
+    throw new Error(
+      'Error updating snippet entity: ' + (err instanceof Error ? err.message : String(err)),
+    );
   }
 
   return true;
-}
+};
 
 export const writeAnnoLetter = async (id: number): Promise<boolean> => {
   try {
     await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/write_letter_to_file`);
 
-    return true
+    return true;
   } catch (err) {
     if (axios.isAxiosError(err)) {
       throw new Error(`Error writing anno letter: ${err.response?.data?.status || err.message}`);
@@ -160,14 +203,13 @@ export const writeAnnoLetter = async (id: number): Promise<boolean> => {
       throw new Error('An unknown error occurred');
     }
   }
-}
+};
 
 export const resetAnnoLetter = async (id: number): Promise<boolean> => {
   try {
     await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/reset_letter`);
 
-    return true
-
+    return true;
   } catch (err) {
     if (axios.isAxiosError(err)) {
       // Handle Axios-specific error
@@ -177,4 +219,4 @@ export const resetAnnoLetter = async (id: number): Promise<boolean> => {
       throw new Error('An unknown error occurred');
     }
   }
-}
+};

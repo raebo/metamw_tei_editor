@@ -27,6 +27,7 @@ const SearchInputField = forwardRef<HTMLInputElement, {
     onKeyDown={onKeyDown}
   />
 ));
+SearchInputField.displayName = 'SearchInputField';
 
 interface SearchLettersProps {
   handleSearch: (searchValue: string) => void;

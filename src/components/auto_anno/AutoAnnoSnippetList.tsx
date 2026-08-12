@@ -144,10 +144,13 @@ const AutoAnnoSnippetList = ( { autoJobLetterId }: AutoAnnoSnippetListProps) => 
                 })
             };
 
-            (references.length > 1 && actions.moreThanOne()) ||
-            (references.length === 1 && actions.exactlyOne()) || (
-              references.length === 0 && actions.none()
-            )
+            if (references.length > 1) {
+              actions.moreThanOne();
+            } else if (references.length === 1) {
+              actions.exactlyOne();
+            } else if (references.length === 0) {
+              actions.none();
+            }
           } catch (err) {
             enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', { variant: 'error' });
           }

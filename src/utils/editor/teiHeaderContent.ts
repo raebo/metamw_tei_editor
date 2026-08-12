@@ -475,7 +475,7 @@ export const teiHeaderContent = {
 
     const elements = EditorUtils.xmlCheck.queryPath(
       teiHeader,
-      `fileDesc > titleStmt > respStmt[@resp=\'${respStmtType}\'] > name`,
+      `fileDesc > titleStmt > respStmt[@resp='${respStmtType}'] > name`,
     );
 
     if (elements.length > 1) {
@@ -495,7 +495,7 @@ export const teiHeaderContent = {
 
     const elements = EditorUtils.xmlCheck.queryPath(
       teiHeader,
-      `fileDesc > titleStmt > respStmt[@resp=\'${respStmtType}\'] > name`,
+      `fileDesc > titleStmt > respStmt[@resp='${respStmtType}'] > name`,
     );
 
     const lastElement = elements[elements.length - 1];

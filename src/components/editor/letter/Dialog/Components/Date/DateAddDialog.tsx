@@ -218,12 +218,12 @@ const DateAddDialog = (props: DateWhenAddDialogProps) => {
             }}
             label="Date Type"
           >
-            <MenuItem value="when">Datum 'when'</MenuItem>
-            <MenuItem value="when-custom">Datum 'when-custom'</MenuItem>
-            <MenuItem value="notAfter">Datum 'notAfter'</MenuItem>
-            <MenuItem value="notBefore">Datum 'notBefore'</MenuItem>
-            <MenuItem value="from-to">Datum 'from / to'</MenuItem>
-            <MenuItem value="notBefore-notAfter">Datum 'notBefore / notAfter'</MenuItem>
+            <MenuItem value="when">{"Datum 'when'"}</MenuItem>
+            <MenuItem value="when-custom">{"Datum 'when-custom'"}</MenuItem>
+            <MenuItem value="notAfter">{"Datum 'notAfter'"}</MenuItem>
+            <MenuItem value="notBefore">{"Datum 'notBefore'"}</MenuItem>
+            <MenuItem value="from-to">{"Datum 'from / to'"}</MenuItem>
+            <MenuItem value="notBefore-notAfter">{"Datum 'notBefore / notAfter'"}</MenuItem>
           </Select>
         </FormControl>
 
