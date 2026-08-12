@@ -7,13 +7,35 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
+// Only these explicitly allowlisted variables are ever exposed to the client bundle via
+// DefinePlugin - anything else in .env (secrets, tokens, ...) never reaches the browser,
+// however it's named. NODE_ENV is deliberately excluded: webpack already defines it
+// consistently from `mode`, and re-defining it from .env caused a "Conflicting values for
+// 'process.env.NODE_ENV'" build warning and could silently ship a dev-mode React build in
+// production.
+const PUBLIC_ENV_ALLOWLIST = ['REACT_APP_API_URL', 'REACT_DEBUG_MODE'];
+const REQUIRED_PUBLIC_ENV_VARS = ['REACT_APP_API_URL'];
+
 module.exports = (env, argv) => {
   const isDev = argv.mode === 'development';
-  const isProd = env.mode === 'production';
-  const envVars = dotenv.config({ path: '.env' }).parsed || {};
+  const isProd = argv.mode === 'production';
+  const shouldAnalyzeBundle = env.analyze === true || env.analyze === 'true';
 
-  const envKeys = Object.keys(envVars).reduce((prev, key) => {
-    prev[`process.env.${key}`] = JSON.stringify(envVars[key]);
+  // Populates process.env as a side effect; real environment variables (e.g. set by CI/the
+  // deployment target) always take precedence over values from the .env file.
+  dotenv.config({ path: '.env' });
+
+  const missingRequiredVars = REQUIRED_PUBLIC_ENV_VARS.filter((key) => !process.env[key]);
+  if (missingRequiredVars.length > 0) {
+    throw new Error(
+      `Missing required environment variable(s): ${missingRequiredVars.join(', ')}. Set them in .env (see .env.example).`,
+    );
+  }
+
+  const envKeys = PUBLIC_ENV_ALLOWLIST.reduce((prev, key) => {
+    if (process.env[key] !== undefined) {
+      prev[`process.env.${key}`] = JSON.stringify(process.env[key]);
+    }
     return prev;
   }, {});
 
@@ -82,10 +104,6 @@ module.exports = (env, argv) => {
           test: /\.css$/,
           use: [isProd ? MiniCssExtractPlugin.loader : 'style-loader', 'css-loader'],
         },
-        {
-          test: /\.(png|jpg|gif|svg)$/,
-          use: ['file-loader'],
-        },
       ],
     },
     plugins: [
@@ -103,12 +121,14 @@ module.exports = (env, argv) => {
           : false,
       }),
       ...(isProd ? [new MiniCssExtractPlugin({ filename: '[name].[contenthash].css' })] : []),
-      ...(isProd
+      // Only runs with an explicit --env analyze=true flag, and never auto-opens a browser tab,
+      // so a normal `yarn build` (e.g. in CI) isn't slowed down or blocked by it.
+      ...(shouldAnalyzeBundle
         ? [
             new BundleAnalyzerPlugin({
               analyzerMode: 'static', // generate a static HTML report
               reportFilename: 'bundle-report.html', // optional, name of the HTML file
-              openAnalyzer: true, // open the report automatically after build
+              openAnalyzer: false,
               generateStatsFile: false, // optional, whether to create stats.json
             }),
           ]
