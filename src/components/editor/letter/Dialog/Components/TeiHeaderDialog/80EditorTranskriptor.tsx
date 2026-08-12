@@ -2,8 +2,10 @@ import {TeiHeaderDialogProps} from "../ManageTeiHeaderDialog";
 import React, {useEffect, useState} from "react";
 import {EditorUtils} from "../../../../../../utils/editor";
 import {Stack, TextField} from "@mui/material";
+import { useTranslation } from 'react-i18next';
 
 const TeiHeaderEditorTranskriptor = (props: TeiHeaderDialogProps) => {
+	const { t } = useTranslation();
 
 	const [transkriptorValue, setTranskriptorValue] = useState<string | null>(props.completionState.transkriptorValue)
 	const [editorValue, setEditorValue] = useState<string | null>(props.completionState.editorValue)
@@ -42,7 +44,7 @@ const TeiHeaderEditorTranskriptor = (props: TeiHeaderDialogProps) => {
 					<TextField
 						fullWidth={true}
 						id="outlined-basic"
-						label="Transkriptor"
+						label={t('editor:dialog.teiHeaderEditorTranskriptor.label.transcriber')}
 						variant="outlined"
 						disabled={false}
 						value={transkriptorValue}
@@ -51,7 +53,7 @@ const TeiHeaderEditorTranskriptor = (props: TeiHeaderDialogProps) => {
 					<TextField
 						fullWidth={true}
 						id="outlined-basic"
-						label="Editior"
+						label={t('editor:dialog.teiHeaderEditorTranskriptor.label.editor')}
 						variant="outlined"
 						disabled={false}
 						value={editorValue}

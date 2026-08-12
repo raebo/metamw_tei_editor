@@ -10,10 +10,12 @@ import {EditorUtils} from "../../../../../../utils/editor";
 import AddIcon from "@mui/icons-material/Add";
 import CancelIcon from "@mui/icons-material/Cancel";
 import FormAutocomplete from "../../../Util/FormAutocomplete";
+import { useTranslation } from 'react-i18next';
 
 const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
+	const { t } = useTranslation();
 
-	const [receivers, setReceivers] = React.useState<HeaderPerson[]>([]);
+	const [receivers, setReceivers] = React.useState<HeaderPerson[]>(props.completionState.receivers);
 	const [selectedPerson, setSelectedPerson] = React.useState<SnippetEntity | null>(null)
   const [people, setPeople] = useState<SnippetEntity[]>([]);
 
@@ -32,6 +34,12 @@ const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
       }
     };
 		const assignedReceivers = () => {
+			if (!props.teiHeader) {
+				// No TEI header available (e.g. when creating a new letter) -> nothing to extract;
+				// receivers already chosen in completionState must not be overwritten here.
+				return;
+			}
+
 			setReceivers(EditorUtils.teiHeaderContent.extractReceivers(props.teiHeader))
 		}
 
@@ -39,7 +47,7 @@ const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
 			void fetchDefaultPeople();
 			assignedReceivers()
 		} catch (error) {
-			enqueueSnackbar("Fehler beim Lesen der TEI-Header-Daten: " + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
+			enqueueSnackbar(t('editor:dialog.teiHeaderReceivers.error.readingHeaderData') + MiscUtils.misc.getErrorMessage(error), { variant: "error" });
 		}
   }, [props.teiHeader]);
 
@@ -53,7 +61,7 @@ const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
 		}
 
 		if (receivers.find(w => w.key === selectedPerson.entityKey)) {
-			enqueueSnackbar("Receiver already added", { variant: "warning" });
+			enqueueSnackbar(t('editor:dialog.teiHeaderReceivers.message.receiverAlreadyAdded'), { variant: "warning" });
 			return;
 		}
 
@@ -76,6 +84,7 @@ const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
 						entityKey={selectedPerson ? selectedPerson.entityKey : null }
 						afterClickHandler={setSelectedPerson}
 						selectedValue={selectedPerson}
+						label={t('editor:dialog.teiHeaderReceivers.label.chooseReceiver')}
 					/>
 					<IconButton
 						color="primary"

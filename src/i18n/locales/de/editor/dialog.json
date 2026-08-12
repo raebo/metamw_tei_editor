@@ -50,6 +50,82 @@
   "assignLetterDialog": {
 
   },
+  "newLetterDialog": {
+    "steps": {
+      "letterName": "Briefname",
+      "headlines": "Kopfzeilen",
+      "referenceLetters": "Vorheriger / Nächster Brief",
+      "writer": "Schreiber & Schreibort",
+      "receiver": "Empfänger & Empfängerort",
+      "transEdition": "Transkription & Edition",
+      "editorTranskriptor": "Bearbeiter"
+    },
+    "stepIndicator": "Schritt {{current}} / {{total}}",
+    "button": {
+      "create": "Brief Erstellen"
+    }
+  },
+  "teiHeaderWritingReceivingPlace": {
+    "label": {
+      "chooseWritingPlace": "Schreibort Auswählen",
+      "chooseReceivingPlace": "Empfängerort Auswählen"
+    }
+  },
+  "teiHeaderFirstHeadline": {
+    "label": {
+      "insertFirstHeadline": "Erste Kopfzeile des Briefes einfügen"
+    }
+  },
+  "teiHeaderSndHeadline": {
+    "label": {
+      "insertSndHeadline": "Zweite Kopfzeile des Briefes einfügen"
+    }
+  },
+  "teiHeaderPrevLetter": {
+    "label": {
+      "choosePrevLetter": "Vorgängerbrief auswählen"
+    },
+    "checkbox": {
+      "unknown": "Vorgängerbrief (Unbekannt)",
+      "notIdentified": "Vorgängerbrief (Noch nicht ermittelt)",
+      "select": "Auswahl Vorgängerbrief"
+    }
+  },
+  "teiHeaderNextLetter": {
+    "label": {
+      "chooseNextLetter": "Folgebrief auswählen"
+    },
+    "checkbox": {
+      "unknown": "Folgebrief (Unbekannt)",
+      "notIdentified": "Folgebrief (Noch nicht ermittelt)",
+      "select": "Auswahl Folgebrief"
+    }
+  },
+  "teiHeaderReceivers": {
+    "label": {
+      "chooseReceiver": "Empfänger Auswählen"
+    },
+    "message": {
+      "receiverAlreadyAdded": "Empfänger bereits hinzugefügt"
+    },
+    "error": {
+      "readingHeaderData": "Fehler beim Lesen der TEI-Header-Daten: "
+    }
+  },
+  "teiHeaderTransEdition": {
+    "label": {
+      "transcription": "Transkription",
+      "edition": "Edition",
+      "letterLanguage": "Sprache des Briefes",
+      "chooseLanguage": "Sprache Auswählen"
+    }
+  },
+  "teiHeaderEditorTranskriptor": {
+    "label": {
+      "transcriber": "Transkriptor",
+      "editor": "Editor"
+    }
+  },
   "provenanceEntries": {
     "addProvenanceDialog": {
       "headline": "Provenienz Daten",

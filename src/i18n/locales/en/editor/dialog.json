@@ -48,6 +48,82 @@
     "chooseEntry": "Select Entry"
   },
   "assignLetterDialog": {},
+  "newLetterDialog": {
+    "steps": {
+      "letterName": "Letter Name",
+      "headlines": "Headlines",
+      "referenceLetters": "Predecessor / Successor Letter",
+      "writer": "Writer & Writing Place",
+      "receiver": "Recipient & Recipient Place",
+      "transEdition": "Transcription & Edition",
+      "editorTranskriptor": "Editor & Transcriber"
+    },
+    "stepIndicator": "Step {{current}} of {{total}}",
+    "button": {
+      "create": "Create Letter"
+    }
+  },
+  "teiHeaderWritingReceivingPlace": {
+    "label": {
+      "chooseWritingPlace": "Select Writing Place",
+      "chooseReceivingPlace": "Select Recipient Place"
+    }
+  },
+  "teiHeaderFirstHeadline": {
+    "label": {
+      "insertFirstHeadline": "Insert First Headline of the Letter"
+    }
+  },
+  "teiHeaderSndHeadline": {
+    "label": {
+      "insertSndHeadline": "Insert Second Headline of the Letter"
+    }
+  },
+  "teiHeaderPrevLetter": {
+    "label": {
+      "choosePrevLetter": "Select Predecessor Letter"
+    },
+    "checkbox": {
+      "unknown": "Predecessor Letter (Unknown)",
+      "notIdentified": "Predecessor Letter (Not Yet Identified)",
+      "select": "Select Predecessor Letter"
+    }
+  },
+  "teiHeaderNextLetter": {
+    "label": {
+      "chooseNextLetter": "Select Successor Letter"
+    },
+    "checkbox": {
+      "unknown": "Successor Letter (Unknown)",
+      "notIdentified": "Successor Letter (Not Yet Identified)",
+      "select": "Select Successor Letter"
+    }
+  },
+  "teiHeaderReceivers": {
+    "label": {
+      "chooseReceiver": "Select Recipient"
+    },
+    "message": {
+      "receiverAlreadyAdded": "Recipient already added"
+    },
+    "error": {
+      "readingHeaderData": "Error reading TEI header data: "
+    }
+  },
+  "teiHeaderTransEdition": {
+    "label": {
+      "transcription": "Transcription",
+      "edition": "Edition",
+      "letterLanguage": "Language of the Letter",
+      "chooseLanguage": "Select Language"
+    }
+  },
+  "teiHeaderEditorTranskriptor": {
+    "label": {
+      "transcriber": "Transcriber",
+      "editor": "Editor"
+    }
+  },
   "provenanceEntries": {
     "addProvenanceDialog": {
       "headline": "Provenance Data",

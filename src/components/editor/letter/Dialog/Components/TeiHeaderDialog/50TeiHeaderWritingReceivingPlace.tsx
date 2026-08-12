@@ -14,7 +14,8 @@ import {fetchMetamwEntityData} from "../../../../../../services/auto_anno/apiMet
 const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlaceProps) => {
 
   const completionState = props.completionState
-  const [selectedOption, setSelectedOption] = useState<SnippetEntity | null>(null)
+  const selectedOption: SnippetEntity | null =
+    props.dialogType === 'writing' ? completionState.writingPlace : completionState.receivingPlace
   const [places, setPlaces] = useState<SnippetEntity[]>([]);
 
   const setAutocmplSelectedOption = (settlement: SnippetEntity | null) => {
@@ -35,10 +36,6 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
   }
 
   useEffect(() => {
-		const setInitialSelectedOption = async () => {
-			setSelectedOption(props.dialogType === 'writing' ? props.completionState.writingPlace : props.completionState.receivingPlace)
-		}
-
     const fetchDefaultPlaces = async () => {
       try {
         const defaultPlaces: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.SETTLEMENT)
@@ -54,30 +51,39 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
     };
 
 		const assignedWritingPlace = async () => {
+			if (!props.teiHeader) {
+				// No TEI header available (e.g. when creating a new letter) -> nothing to extract;
+				// a selection already made in completionState must not be touched here.
+				return;
+			}
+
 			const { name, key } = EditorUtils.teiHeaderContent.extractWritingPlace(props.teiHeader)
 
 			if (name && key) {
 				const place: SnippetEntity[] | undefined = await searchEditortEntities(key, EntityType.SETTLEMENT)
 				if (place && place[0]) {
-					setSelectedOption(place[0]);
 					props.onChange( { writingPlace: place[0], writingPlaceAutoAvailable: true } )
 				}
 			}
 		}
 
 		const assignedReceivingPlace = async () => {
+			if (!props.teiHeader) {
+				// No TEI header available (e.g. when creating a new letter) -> nothing to extract;
+				// a selection already made in completionState must not be touched here.
+				return;
+			}
+
 			const { name, key } = EditorUtils.teiHeaderContent.extractReceivingPlace(props.teiHeader)
 
 			if (name && key) {
 				const place: SnippetEntity[] | undefined = await searchEditortEntities(key, EntityType.SETTLEMENT)
 				if (place && place[0]) {
-					setSelectedOption(place[0]);
 					props.onChange( { receivingPlace: place[0], receivingPlaceAutoAvailable: true } )
 				}
 			}
 		}
 
-		void setInitialSelectedOption()
     void fetchDefaultPlaces();
 		if (props.dialogType === 'writing') {
 			void assignedWritingPlace()

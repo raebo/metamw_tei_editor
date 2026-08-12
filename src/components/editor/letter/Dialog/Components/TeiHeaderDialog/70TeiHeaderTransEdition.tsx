@@ -4,8 +4,10 @@ import {EditorConstants, LanguageOption } from '../../../../../../constants/edit
 import React, {useEffect, useState} from 'react';
 import CancelIcon from "@mui/icons-material/Cancel";
 import {EditorUtils} from "../../../../../../utils/editor";
+import { useTranslation } from 'react-i18next';
 
 const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {
+  const { t } = useTranslation();
   const [letterLanguages, setLetterLanguages] = useState<LanguageOption[]>([])
 	const [selectedLang, setSelectedLang] = useState("");
 	const [transkriptionValue, setTranskriptionValue] = useState<string>(props.completionState.transkriptionValue)
@@ -52,7 +54,7 @@ const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {
         <Stack direction="row" spacing={2}>
           <TextField
             id="outlined-basic"
-            label="Transkription"
+            label={t('editor:dialog.teiHeaderTransEdition.label.transcription')}
             variant="outlined"
 						disabled={true}
             value={transkriptionValue}
@@ -60,14 +62,14 @@ const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {
           />
             <TextField
             id="outlined-basic"
-            label="Edition"
+            label={t('editor:dialog.teiHeaderTransEdition.label.edition')}
             variant="outlined"
 						disabled={true}
             value={editionValue}
             onChange={(event) => changeEditionValue(event.target.value)}
           />
           <FormControl variant="outlined" sx={{m: 1, minWidth: 120, width: '98%'}}>
-            <InputLabel id="auto-anno-snippet-reference-type">Sprache des Briefes</InputLabel>
+            <InputLabel id="auto-anno-snippet-reference-type">{t('editor:dialog.teiHeaderTransEdition.label.letterLanguage')}</InputLabel>
             <Select
               value={selectedLang}
               disabled={false}
@@ -76,7 +78,7 @@ const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {
               onChange={(event) => handleLanguageChange(event)}
             >
 							<MenuItem value="">
-								<em>Sprache Auswählen</em>
+								<em>{t('editor:dialog.teiHeaderTransEdition.label.chooseLanguage')}</em>
 							</MenuItem>
 							{ EditorConstants.LANGUAGES.map((item) => {
 								const isAdded = letterLanguages.some(lang => lang.value === item.value );

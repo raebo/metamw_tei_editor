@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { useTranslation } from 'react-i18next';
 
 export type StepNavigationProps = {
   currentIndex: number;
@@ -22,6 +23,8 @@ const StepNavigation = ({
   onPrevious,
   onNext,
 }: StepNavigationProps) => {
+  const { t } = useTranslation();
+
   return (
     <Box
       sx={{
@@ -44,7 +47,10 @@ const StepNavigation = ({
 
       <Box sx={{ textAlign: 'center' }}>
         <Typography variant="caption" color="text.secondary" display="block">
-          Schritt {currentIndex + 1} / {totalSteps}
+          {t('editor:dialog.newLetterDialog.stepIndicator', {
+            current: currentIndex + 1,
+            total: totalSteps,
+          })}
         </Typography>
         <Typography variant="subtitle1" fontWeight="bold">
           {currentLabel}

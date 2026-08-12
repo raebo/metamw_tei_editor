@@ -27,6 +27,7 @@ import TeiHeaderReceivers from './TeiHeaderDialog/60TeiHeaderReceivers';
 import DialogContent from '@mui/material/DialogContent';
 import { DialogActionButton } from './Misc/DialogActionButton';
 import StepNavigation from './NewLetterDialog/StepNavigation';
+import { useTranslation } from 'react-i18next';
 
 export type NewLetterDialogProps = {
   autoAvailable: boolean | null;
@@ -63,19 +64,32 @@ export type NewLetterCompletionState = {
   transkriptorValue: string | null;
 };
 
-const STEP_DEFINITIONS = [
-  { key: 'letterName', label: 'Briefname' },
-  { key: 'headlines', label: 'Kopfzeilen' },
-  { key: 'referenceLetters', label: 'Vorheriger / Nächster Brief' },
-  { key: 'writer', label: 'Schreiber & Schreibort' },
-  { key: 'receiver', label: 'Empfänger & Empfängerort' },
-  { key: 'transEdition', label: 'Transkription & Edition' },
-  { key: 'editorTranskriptor', label: 'Bearbeiter' },
+const STEP_ORDER = [
+  'letterName',
+  'headlines',
+  'referenceLetters',
+  'writer',
+  'receiver',
+  'transEdition',
+  'editorTranskriptor',
 ] as const;
 
-type StepKey = (typeof STEP_DEFINITIONS)[number]['key'];
+type StepKey = (typeof STEP_ORDER)[number];
 
 const AddNewLetterDialog = (props: DefaultDialogProps) => {
+  const { t } = useTranslation();
+  const td = (key: string) => t(`editor:dialog.newLetterDialog.${key}`);
+  const stepLabels: Record<StepKey, string> = {
+    letterName: td('steps.letterName'),
+    headlines: td('steps.headlines'),
+    referenceLetters: td('steps.referenceLetters'),
+    writer: td('steps.writer'),
+    receiver: td('steps.receiver'),
+    transEdition: td('steps.transEdition'),
+    editorTranskriptor: td('steps.editorTranskriptor'),
+  };
+  const STEP_DEFINITIONS = STEP_ORDER.map((key) => ({ key, label: stepLabels[key] }));
+
   const dispatch = useAppDispatch();
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
   const [currentStepIndex, setCurrentStepIndex] = React.useState(0);
@@ -148,8 +162,8 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
   const nextStep =
     currentStepIndex < STEP_DEFINITIONS.length - 1 ? STEP_DEFINITIONS[currentStepIndex + 1] : null;
 
-  // Pfeiltasten-Navigation, aber nur wenn der Fokus nicht in einem Textfeld liegt,
-  // damit z.B. die Cursor-Bewegung in Autocomplete/TextField nicht gestört wird.
+  // Arrow-key navigation, but only when focus is not inside a text input, so that
+  // e.g. cursor movement in Autocomplete/TextField is not interfered with.
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -283,7 +297,7 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
               completionState={completionState}
               onChange={childOnChange}
               dialogType={'writing'}
-              textFieldValue={'Schreibort Auswählen'}
+              textFieldValue={t('editor:dialog.teiHeaderWritingReceivingPlace.label.chooseWritingPlace')}
             />
           </>
         );
@@ -302,7 +316,7 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
               completionState={completionState}
               onChange={childOnChange}
               dialogType={'receiving'}
-              textFieldValue={'Empfängerort Auswählen'}
+              textFieldValue={t('editor:dialog.teiHeaderWritingReceivingPlace.label.chooseReceivingPlace')}
             />
           </>
         );
@@ -362,7 +376,7 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
 
         {/* saveing is always possible, even if not all fields are set. */}
         <DialogActionButton
-          label={'Brief Erstellen'}
+          label={td('button.create')}
           onClick={submitCreateHandler}
           disabled={!saveIsAvailable}
         />

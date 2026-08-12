@@ -2,6 +2,7 @@ import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { Autocomplete, TextField } from '@mui/material';
 import React, {useEffect} from 'react';
 import {EditorUtils} from "../../../../../../utils/editor";
+import { useTranslation } from 'react-i18next';
 
 const sndHeaderOptions = [
   "Musterstadt, 01. Januar 1821",
@@ -16,6 +17,7 @@ const sndHeaderOptions = [
 ]
 
 const TeiHeaderSndHeadline = (props: TeiHeaderDialogProps) => {
+  const { t } = useTranslation();
   const completionState = props.completionState
 
 	useEffect(() => {
@@ -46,7 +48,11 @@ const TeiHeaderSndHeadline = (props: TeiHeaderDialogProps) => {
             setSndHeaderValue(newInputValue);
           }}
           renderInput={(params) => (
-            <TextField {...params} label="Zweite Kopfzeile des Briefes einfügen" variant="outlined" />
+            <TextField
+              {...params}
+              label={t('editor:dialog.teiHeaderSndHeadline.label.insertSndHeadline')}
+              variant="outlined"
+            />
           )}
         />
       </div>

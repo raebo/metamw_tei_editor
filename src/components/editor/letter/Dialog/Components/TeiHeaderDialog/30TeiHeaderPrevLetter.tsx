@@ -8,12 +8,16 @@ import { debounce } from 'lodash-es';
 import { MiscUtils } from '@src/utils/misc';
 import { EditorConstants } from '@src/constants/editor';
 import { EditorUtils } from '@src/utils/editor';
+import { useTranslation } from 'react-i18next';
 
 const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
+  const { t } = useTranslation();
   const [prevLetterType, setPrevLetterType] = useState<
     'unknown' | 'not_identified' | 'select' | null
-  >(null);
-  const [autoAvailable, setAutoAvailable] = useState<boolean>(false);
+  >(props.completionState.prevLetterType);
+  const [autoAvailable, setAutoAvailable] = useState<boolean>(
+    props.completionState.prevLetterType === 'select',
+  );
 
   const selectedOption: EditorLetter | null = props.completionState.prevLetter;
   const [letters, setLetters] = useState<EditorLetter[]>([]);
@@ -43,6 +47,12 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
     };
 
     const fetchPrevLetter = async () => {
+      if (!props.teiHeader) {
+        // No TEI header available (e.g. when creating a new letter) -> nothing to extract;
+        // a selection already made in completionState must not be overwritten here.
+        return;
+      }
+
       const { name, letterPrefix } = EditorUtils.teiHeaderContent.extractPrevNextLetter(
         props.teiHeader,
         'precursor',
@@ -165,7 +175,11 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
               );
             }}
             renderInput={(params) => (
-              <TextField {...params} label="Vorgängerbrief auswählen" variant="outlined" />
+              <TextField
+                {...params}
+                label={t('editor:dialog.teiHeaderPrevLetter.label.choosePrevLetter')}
+                variant="outlined"
+              />
             )}
             fullWidth
           />
@@ -178,7 +192,7 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
                   checked={prevLetterType === 'unknown'}
                 />
               }
-              label="Vorgängerbrief (Unbekannt)"
+              label={t('editor:dialog.teiHeaderPrevLetter.checkbox.unknown')}
             />
 
             <FormControlLabel
@@ -188,7 +202,7 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
                   checked={prevLetterType === 'not_identified'}
                 />
               }
-              label="Vorgängerbrief (Noch nicht ermittelt)"
+              label={t('editor:dialog.teiHeaderPrevLetter.checkbox.notIdentified')}
             />
 
             <FormControlLabel
@@ -198,7 +212,7 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
                   checked={autoAvailable}
                 />
               }
-              label="Auswahl Vorgängerbrief"
+              label={t('editor:dialog.teiHeaderPrevLetter.checkbox.select')}
             />
           </Stack>
         </Stack>
