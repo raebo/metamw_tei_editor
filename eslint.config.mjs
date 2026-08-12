@@ -58,7 +58,10 @@ export default defineConfig([
     },
 
     rules: {
-      'no-console': 'warn',
+      // console.error is the established pattern for diagnostic error logging throughout this
+      // codebase (usually paired with a user-facing enqueueSnackbar); console.log/warn/etc.
+      // remain flagged as likely leftover debug output.
+      'no-console': ['warn', { allow: ['error'] }],
       'no-debugger': 'error',
       'no-useless-catch': 'off',
       'no-throw-literal': 'off',

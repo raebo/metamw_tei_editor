@@ -20,9 +20,6 @@ const validNodeList: string[] = ['title', 'persname', 'placename'];
 
 const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
   const dispatch = useAppDispatch();
-  const editorSelectedLeftItem = useSelector(
-    (state: RootState) => state.editorLetter.selectedItem.left,
-  );
   const editorSelectedRightItem = useSelector(
     (state: RootState) => state.editorLetter.selectedItem.right,
   );

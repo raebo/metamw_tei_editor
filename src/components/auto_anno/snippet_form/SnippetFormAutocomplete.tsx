@@ -42,7 +42,7 @@ const SnippetFormAutocomplete = (props: SnippetFormAutocompleteProps) => {
           if (response) {
             setOptions(response || []);
           }
-        } catch (error) {
+        } catch {
           setOptions([]);
         } finally {
           setLoading(false);

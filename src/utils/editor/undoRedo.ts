@@ -1,4 +1,5 @@
+// TODO: not implemented yet - both are no-op stubs.
 export const undoRedo = {
-  undo: async (xmlDoc: Document): Promise<void> => {},
-  redo: async (xmlDoc: Document): Promise<void> => {},
+  undo: async (_xmlDoc: Document): Promise<void> => {},
+  redo: async (_xmlDoc: Document): Promise<void> => {},
 };

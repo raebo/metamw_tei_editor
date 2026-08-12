@@ -53,7 +53,7 @@ export interface FormCreationData {
   isNewEntry: boolean;
 }
 
-const EntityCreationContainer = (props: EditorContainerProps) => {
+const EntityCreationContainer = (_props: EditorContainerProps) => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);

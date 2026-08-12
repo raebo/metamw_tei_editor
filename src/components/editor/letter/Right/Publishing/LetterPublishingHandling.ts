@@ -1,6 +1,7 @@
 import { enqueueSnackbar } from 'notistack';
 
-const handlePublishingClick = (letterId: string | undefined, isFavourite: boolean) => {
+// TODO: letterId/isFavourite are unused - the actual publish call below is still commented out.
+const handlePublishingClick = (_letterId: string | undefined, _isFavourite: boolean) => {
   (async () => {
     try {
       // await setLetterFavourite(parseInt(letterId || ""), isFavourite);

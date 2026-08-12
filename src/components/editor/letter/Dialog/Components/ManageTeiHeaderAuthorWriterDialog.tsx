@@ -84,7 +84,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
         } else {
           setPeople(defaultPeople);
         }
-      } catch (error) {
+      } catch {
         enqueueSnackbar('Error fetching people', { variant: 'error' });
       }
     };
@@ -109,7 +109,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
     try {
       const result = await fetchMetamwEntityData(reference.key);
       setDisplayData(result);
-    } catch (error) {
+    } catch {
       enqueueSnackbar(`Error fetching data for entity with key: ${reference.key}`, {
         variant: 'error',
       });

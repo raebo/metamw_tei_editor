@@ -1,9 +1,3 @@
-type AutoAnnoLetterStatus = 'open' | 'ready_to_check' | 'checked_with_success' | 'error';
-
-type EntityStatus = {
-  AutoAnnoLetter: AutoAnnoLetterStatus;
-};
-
 const Statuses = {
   AutoAnnoLetter: {
     OPEN: 'open',
@@ -12,8 +6,6 @@ const Statuses = {
     ERROR: 'error',
   },
 };
-
-type StatusesType = typeof Statuses; // Create a type from the Statuses object for additional type safety.
 
 const DISPLAY_NAME_MAP: { [key: string]: string } = {
   background: 'Hintergr.',

@@ -46,7 +46,7 @@ const AddNoteDialog = (props: DefaultDialogProps) => {
         'Kommentar wurde hinzugefügt',
         xmlId,
       );
-    } catch (error) {
+    } catch {
       enqueueSnackbar('No xml content found', { variant: 'error' });
     }
   };

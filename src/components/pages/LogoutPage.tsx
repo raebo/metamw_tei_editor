@@ -12,7 +12,7 @@ const LogoutPage = () => {
       try {
         await logout();
         navigate('/login', { replace: true });
-      } catch (_err) {
+      } catch {
         enqueueSnackbar('Logout failed. Please try again. ', { variant: 'error' });
       }
     };

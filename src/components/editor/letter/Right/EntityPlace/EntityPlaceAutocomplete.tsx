@@ -53,7 +53,7 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
             defaultPlaces.filter((item) => !entriesToExclude.has(item.entityKey)),
           );
         }
-      } catch (error) {
+      } catch {
         enqueueSnackbar('Error fetching places', { variant: 'error' });
       }
     };
@@ -120,7 +120,7 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
         } catch (error) {
           enqueueSnackbar(`Unexpected error: : ${error}`, { variant: 'error' });
         }
-      } catch (error) {
+      } catch {
         enqueueSnackbar(`Error fetching place data for '${entry.entityKey}'`, { variant: 'error' });
       }
     }

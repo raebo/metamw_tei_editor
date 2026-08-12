@@ -46,7 +46,7 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
         } else {
           setPlaces(defaultPlaces);
         }
-      } catch (error) {
+      } catch {
         enqueueSnackbar('Error fetching places', { variant: 'error' });
       }
     };

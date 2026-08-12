@@ -1,6 +1,5 @@
 import type { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import { useTranslation } from 'react-i18next';
 import React, { useEffect, useMemo, useState } from 'react';
 import { EditorUtils } from '@src/utils/editor';
@@ -8,17 +7,15 @@ import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
 import HighlightedText from '@src/components/support/HighlightedText';
 import {
-  fetchLetterData,
   fetchLetterDataByName,
   searchForLetterNameTitle,
 } from '@src/services/editor/apiLettersRequest.service';
 import { debounce } from 'lodash-es';
-import { EditorLetter, type SearchLetter } from '@src/services/mappings/editorMappings';
+import { EditorLetter } from '@src/services/mappings/editorMappings';
 import { Autocomplete, Checkbox, Divider, FormControlLabel, Stack, TextField } from '@mui/material';
 import { EditorConstants } from '@src/constants/editor';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
-import Button from '@mui/material/Button';
 import { DialogActionButton } from '@src/components/editor/letter/Dialog/Components/Misc/DialogActionButton';
 
 type AddPreccSuccProps = DefaultDialogProps & {
@@ -34,9 +31,9 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
   const letterName = useSelector((state: RootState) => state.editorLetter.letter.name);
   const [selectedLetter, setSelectedLetter] = useState<EditorLetter | null>(null);
   const [teiHeader, setTeiHeader] = useState<Element | null>(null);
-  const [letterType, setLetterType] = useState<'unknown' | 'not_identified' | 'select' | null>(
-    null,
-  );
+  // setLetterType is never called - this flag only ever stays at its initial value. Left as-is
+  // (not removed) since the effect below still legitimately depends on it staying `null`.
+  const [letterType] = useState<'unknown' | 'not_identified' | 'select' | null>(null);
   const isPrecursor = props.letterType === 'precursor';
   const isSuccessor = props.letterType === 'successor';
   const [selectedOption, setSelectedOption] = useState<

@@ -26,7 +26,6 @@ const AutoAnnoList: React.FC = () => {
 
   const [autoAnnoData, setJobRows] = useState<AutoAnnoJob[] | undefined>();
   const [autoAnnoLetters, setLetterRows] = useState<AutoAnnoJobLetter[] | undefined>();
-  const [error, setError] = useState<string | null>(null);
 
   const _navigate = useNavigate();
 
@@ -36,7 +35,9 @@ const AutoAnnoList: React.FC = () => {
         const result = await fetchAutoAnnoJobs();
         setJobRows(result);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
+          variant: 'error',
+        });
       } finally {
         // setLoading(false);
       }
@@ -127,7 +128,9 @@ const AutoAnnoList: React.FC = () => {
             setLetterRows(result);
             setAutoAnnoJobId(params.row.id);
           } catch (err) {
-            setError(err instanceof Error ? err.message : 'An unknown error occurred');
+            enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
+              variant: 'error',
+            });
           }
         };
 

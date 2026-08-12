@@ -25,7 +25,6 @@ import LogoutPage from '@src/components/pages/LogoutPage';
 import AutoAnnoLetters from '@src/components/auto_anno/AutoAnnoLetters';
 import IndexLetters from '@src/components/pages/editor/IndexLetters';
 import ShowEditor from '@src/components/pages/editor/ShowEditor';
-import PathRestorer from '@src/components/misc/routes/PathRestorer';
 import RouteTracker from '@src/components/misc/routes/RouteTracker';
 import './i18n';
 

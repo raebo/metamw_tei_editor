@@ -61,7 +61,6 @@ import OnlyReadEditorPanel from '@src/components/editor/letter/Left/OnlyReadEdit
 import { ToolbarLetterNameDisplay } from '@src/components/editor/letter/Util/ToolbarLetterNameDisplay';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
-import AddNewLetterDialog from '@src/components/editor/letter/Dialog/Components/AddNewLetterDialog';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;

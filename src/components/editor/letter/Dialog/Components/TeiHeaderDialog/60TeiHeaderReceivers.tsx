@@ -32,7 +32,7 @@ const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
         } else {
           setPeople(defaultPeople);
         }
-      } catch (error) {
+      } catch {
         enqueueSnackbar('Error fetching people', { variant: 'error' });
       }
     };

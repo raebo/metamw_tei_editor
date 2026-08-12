@@ -136,7 +136,7 @@ const AutoAnnoLettersResizable: React.FC = () => {
 
   useEffect(() => {
     // This ensures that setSelectedComponentList always gets the latest componentMappingList and triggers a re-render when necessary.
-    setSelectedComponentList((prevState) => {
+    setSelectedComponentList(() => {
       return snippetReferences.showReferences
         ? componentMappingList['REFERENCE_LIST']
         : componentMappingList['SNIPPET_LIST'];
@@ -158,7 +158,7 @@ const AutoAnnoLettersResizable: React.FC = () => {
   const isResizing = useRef(false);
   const [boxResizing, setBoxIsResizing] = useState(false);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (_e: React.MouseEvent) => {
     isResizing.current = true;
     setBoxIsResizing(true);
 

@@ -55,7 +55,7 @@ export const fetchEntityKey = async (entityType: string): Promise<string> => {
       .get(`/jwt/editor/entities/fetch_entity_key?entity_type=${entityType.toLowerCase()}`);
 
     return response?.data?.entity_key;
-  } catch (err) {
+  } catch {
     throw new Error(`Could not fetch new entity key for: ${entityType}`);
   }
 };

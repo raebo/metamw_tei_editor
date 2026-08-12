@@ -51,7 +51,7 @@ interface ProtagFormData {
   protagCreationCategory: null | ProtagCreationCategory;
 }
 
-const EntityProtagCreationContainer = (props: EditorContainerProps) => {
+const EntityProtagCreationContainer = (_props: EditorContainerProps) => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const [hiRendMarkup, setHiRendMarkup] = useState<HiRendType>(null);

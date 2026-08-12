@@ -261,10 +261,7 @@ const SnippetReferencesList = (props: SnippetReferenceListProps) => {
                   key={reference.key}
                   sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: '70%' } }}
                 >
-                  <IconButton
-                    onClick={(event) => handleInfoIconClick(reference.key)}
-                    aria-label="info"
-                  >
+                  <IconButton onClick={() => handleInfoIconClick(reference.key)} aria-label="info">
                     <InfoIcon color="primary" />
                   </IconButton>
                   <FormControlLabel

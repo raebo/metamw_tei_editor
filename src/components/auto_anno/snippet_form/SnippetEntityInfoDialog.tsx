@@ -38,7 +38,7 @@ const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
           );
 
           setDisplayData(entries);
-        } catch (error) {
+        } catch {
           enqueueSnackbar(`Error fetching data for entity with key: ${props.referenceKey}`, {
             variant: 'error',
           });

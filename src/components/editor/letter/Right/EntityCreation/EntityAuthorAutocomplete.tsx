@@ -30,7 +30,7 @@ const EntityAuthorAutocomplete = (props: EntityAuthorAutocompleteProps) => {
         } else {
           setAutocompletePeople(defaultPeople);
         }
-      } catch (error) {
+      } catch {
         enqueueSnackbar('Error fetching people', { variant: 'error' });
       }
     };

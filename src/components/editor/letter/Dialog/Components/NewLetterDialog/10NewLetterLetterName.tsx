@@ -46,7 +46,7 @@ const NewLetterLetterName = (props: NewLetterDialogProps) => {
       const responseLetters = await searchForLetterNameTitle(letterType, letterName);
 
       return !(responseLetters && responseLetters.length > 0);
-    } catch (error) {
+    } catch {
       setError(true);
       setHelperText('Error fetching letter name');
       return true;

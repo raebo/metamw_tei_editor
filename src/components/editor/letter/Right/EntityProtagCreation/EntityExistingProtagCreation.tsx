@@ -1,6 +1,6 @@
 import { type ProtagCreation } from '@src/services/mappings/editorMappings';
 import { Autocomplete, TextField } from '@mui/material';
-import React, { useState } from 'react';
+import React from 'react';
 import Grid from '@mui/material/Grid';
 import { useTranslation } from 'react-i18next';
 

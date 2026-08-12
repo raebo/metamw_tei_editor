@@ -80,7 +80,7 @@ const blankPlaceFormData: PlaceFormData = {
   isNewEntry: false,
 };
 
-const EntityPlaceContainer = (props: EditorContainerProps) => {
+const EntityPlaceContainer = (_props: EditorContainerProps) => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const [hiRendMarkup, setHiRendMarkup] = useState<HiRendType>(null);

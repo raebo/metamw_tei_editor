@@ -46,8 +46,6 @@ const HelpShortcutsContainer = () => {
     return all.sort((a, b) => a.description.localeCompare(b.description));
   }, [allShortcutsArray, markedShortcutsArray, textIsMarked]);
 
-  console.log('Active Shortcuts:', activeShortcuts);
-
   const filteredShortcuts = useMemo(() => {
     const term = searchTerm.toLowerCase();
     return activeShortcuts.filter(

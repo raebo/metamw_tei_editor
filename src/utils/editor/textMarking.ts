@@ -1,6 +1,5 @@
 import { EditorConstants } from '@src/constants/editor';
 import { EditorUtils } from './index';
-import { start } from 'node:repl';
 
 export const textMarking = {
   isValidSelection(

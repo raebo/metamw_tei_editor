@@ -209,7 +209,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
   const dispatch = useAppDispatch();
 
   const dialogType = useSelector((state: RootState) => state.editorLetter.dialogType);
-  const [dialogWidth, _setDialogWidth] = useState<string | number>('auto');
+  const [dialogWidth] = useState<string | number>('auto');
   const [isOpen, setIsOpen] = React.useState(props.open);
   const xmlRef = props.xmlRef;
   const [xmlDoc, setXmlDoc] = React.useState<XMLDocument | null>(null);

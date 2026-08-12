@@ -41,7 +41,7 @@ const FormAutocomplete = (props: FormAutocompleteProps) => {
         if (response) {
           setOptions(response || []);
         }
-      } catch (error) {
+      } catch {
         setOptions([]);
       } finally {
         setLoading(false);

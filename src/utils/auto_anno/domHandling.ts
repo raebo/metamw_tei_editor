@@ -5,10 +5,6 @@ export const markSpanAndScrollToId = (xmlId: string) => {
   const targetElement = document.querySelector('[xml\\:id="' + xmlId + '"]');
 
   if (targetElement) {
-    const elementRect = targetElement.getBoundingClientRect();
-    // const absoluteElementTop = elementRect.top + window.scrollY;
-
-    // window.scrollTo(0, middle);
     targetElement.scrollIntoView({
       behavior: 'smooth',
       block: 'center', // Scroll to the top of the element
@@ -150,8 +146,6 @@ const replacePlaceDomNodeInstiSight = (
   nameNode.textContent = snippetEntity.entityName;
 
   placeNameNode.appendChild(nameNode);
-
-  console.log('snippetEntity: ', snippetEntity);
 
   const settlementNode = document.createElementNS(EditorConstants.TEI_NS, 'settlement');
   settlementNode.setAttribute('type', 'locality');

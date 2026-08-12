@@ -1,7 +1,7 @@
 // src/MonacoSetup.ts
 
 (self as any).MonacoEnvironment = {
-  getWorker: (moduleId: string, label: string) => {
+  getWorker: (_moduleId: string, _label: string) => {
     // For XML, just return the default editor worker
     return new Worker(new URL('monaco-editor/esm/vs/editor/editor.worker', import.meta.url), {
       type: 'module',

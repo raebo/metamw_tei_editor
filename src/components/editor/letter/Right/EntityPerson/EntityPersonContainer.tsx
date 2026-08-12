@@ -42,7 +42,7 @@ interface PersonFormData {
   nameFirst: string | null;
 }
 
-const EntityPersonContainer = (props: EditorContainerProps) => {
+const EntityPersonContainer = (_props: EditorContainerProps) => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const isMounted = useRef(false);

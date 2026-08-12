@@ -1,15 +1,9 @@
 import React from 'react';
-import { Box, Card, CardActions, CardContent, IconButton, Typography } from '@mui/material';
+import { Box, Card, CardActions, CardContent, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import { EditorLetter } from '@src/services/mappings/editorMappings';
 import { Link } from 'react-router-dom';
 import EditNote from '@mui/icons-material/EditNote';
-
-const bull = (
-  <Box component="span" sx={{ display: 'inline-block', mx: '2px', transform: 'scale(0.8)' }}>
-    •
-  </Box>
-);
 
 interface LetterCardProps {
   letter: EditorLetter;

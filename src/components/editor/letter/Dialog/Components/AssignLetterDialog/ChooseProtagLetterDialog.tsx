@@ -99,7 +99,7 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
         senderType,
       );
       setReceiverLetters(letters);
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Error fetching sending receiver letters', { variant: 'error' });
     }
   };
@@ -168,7 +168,7 @@ const ChooseProtagLetterDialog = (props: DefaultDialogProps) => {
         'Briefe wurden dem markierten Text zugewiesen',
         null,
       );
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Fehler beim Auszeichnen des Briefs', { variant: 'error' });
       props.onClose();
     }

@@ -3,7 +3,6 @@ import { EditorUtils } from './index';
 import { EditorConstants, EntityType } from '@src/constants/editor';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { initApi } from '@src/services/apiRequest.service';
-import { xml } from 'vkbeautify';
 
 interface EnrichedCreation {
   creation: { key: string; name: string; kind: string; isNewEntry: boolean };

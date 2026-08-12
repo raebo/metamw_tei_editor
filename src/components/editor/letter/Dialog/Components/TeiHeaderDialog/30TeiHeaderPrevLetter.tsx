@@ -42,7 +42,7 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
         } else {
           setLetters(defaultLetters);
         }
-      } catch (error) {
+      } catch {
         enqueueSnackbar('Error fetching letters', { variant: 'error' });
       }
     };
