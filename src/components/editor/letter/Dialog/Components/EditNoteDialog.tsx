@@ -1,94 +1,115 @@
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../../redux/redux.store";
-import { EditorUtils } from "../../../../../utils/editor";
-import Button from "@mui/material/Button";
-import {Divider, FormControl, InputLabel, MenuItem, Select, TextareaAutosize} from "@mui/material";
-import { EditorConstants } from "../../../../../constants/editor";
-import { enqueueSnackbar } from "notistack";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import {DefaultDialogProps} from '../EditorFormDialog';
-import {MiscUtils} from "../../../../../utils/misc";
-
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@src/redux/redux.store';
+import { EditorUtils } from '@src/utils/editor';
+import Button from '@mui/material/Button';
+import {
+  Divider,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextareaAutosize,
+} from '@mui/material';
+import { EditorConstants } from '@src/constants/editor';
+import { enqueueSnackbar } from 'notistack';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import { DefaultDialogProps } from '../EditorFormDialog';
+import { MiscUtils } from '@src/utils/misc';
+import SanitizedHtml from '@src/components/support/SanitizedHtml';
 
 const EditNoteDialog = (props: DefaultDialogProps) => {
-
-  const stateLetterReference = useSelector((state: RootState) => state.editorLetter.letterReference)
-  const [noteContent, setNoteContent] = useState("");
-  const [noteType, setNoteType] = useState("");
-  const [noteLanguage, setNoteLanguage] = useState("");
+  const stateLetterReference = useSelector(
+    (state: RootState) => state.editorLetter.letterReference,
+  );
+  const [noteContent, setNoteContent] = useState('');
+  const [noteType, setNoteType] = useState('');
+  const [noteLanguage, setNoteLanguage] = useState('');
   const noteTypeItems = EditorConstants.noteTypeItems;
   const noteLanguages = EditorConstants.noteTypeLanguages;
-  const [noteParentContent, setNoteParentContent] = useState("")
-  const [noteXmlId, setNoteXmlId] = useState("")
-  const [deleteButtonsVisible, setDeleteButtonsVisible] = useState(false)
-	const xmlDoc = props.xmlDoc
+  const [noteParentContent, setNoteParentContent] = useState('');
+  const [noteXmlId, setNoteXmlId] = useState('');
+  const [deleteButtonsVisible, setDeleteButtonsVisible] = useState(false);
+  const xmlDoc = props.xmlDoc;
 
   useEffect(() => {
     const initNoteContent = (xmlId: string) => {
-      const note = EditorUtils.xmlCheck.elementByXmlTypeAndId(xmlId, 'note', xmlDoc)
+      const note = EditorUtils.xmlCheck.elementByXmlTypeAndId(xmlId, 'note', xmlDoc);
       if (note) {
         if (note?.parentElement) {
-          setNoteParentContent(note?.parentElement?.innerHTML)
+          setNoteParentContent(note?.parentElement?.innerHTML);
         }
 
-        setNoteContent(note?.textContent?.trim() || "")
-        setNoteXmlId(xmlId)
+        setNoteContent(note?.textContent?.trim() || '');
+        setNoteXmlId(xmlId);
 
-        const currentNoteTypes = noteTypeItems.filter((item) => item.value === note.getAttribute('type'))
-        if (currentNoteTypes.any()) { setNoteType(currentNoteTypes[0].value) }
+        const currentNoteTypes = noteTypeItems.filter(
+          (item) => item.value === note.getAttribute('type'),
+        );
+        if (currentNoteTypes.any()) {
+          setNoteType(currentNoteTypes[0].value);
+        }
 
-        const currentNoteLangs = noteLanguages.filter((item) => item.value === note.getAttribute('xml:lang'))
-        if (currentNoteLangs.any()) { setNoteLanguage(currentNoteLangs[0].value) }
+        const currentNoteLangs = noteLanguages.filter(
+          (item) => item.value === note.getAttribute('xml:lang'),
+        );
+        if (currentNoteLangs.any()) {
+          setNoteLanguage(currentNoteLangs[0].value);
+        }
       }
-    }
+    };
 
     if (stateLetterReference.elementXmlId) {
-      initNoteContent(stateLetterReference.elementXmlId)
+      initNoteContent(stateLetterReference.elementXmlId);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stateLetterReference]);
 
-  const handleDeleteNote= () => {
+  const handleDeleteNote = () => {
     try {
-      EditorUtils.markupGeneration.deleteNoteMarkup(xmlDoc, noteXmlId)
+      EditorUtils.markupGeneration.deleteNoteMarkup(xmlDoc, noteXmlId);
 
-			props.onSave(xmlDoc, EditorConstants.changeTypes.note.REMOVED, "Note deleted", null)
-
+      props.onSave(xmlDoc, EditorConstants.changeTypes.note.REMOVED, 'Note deleted', null);
     } catch (error) {
-      enqueueSnackbar("Error durign deletion of note: " + MiscUtils.misc.getErrorMessage(error), {variant: "error"})
-			props.onClose()
+      enqueueSnackbar('Error durign deletion of note: ' + MiscUtils.misc.getErrorMessage(error), {
+        variant: 'error',
+      });
+      props.onClose();
     }
-  }
+  };
 
-  const handleUpdateNote= () => {
+  const handleUpdateNote = () => {
     try {
       EditorUtils.markupGeneration.updateNoteMarkup(
-					xmlDoc,
-          noteXmlId,
-          noteType,
-          noteLanguage,
-          noteContent
-        )
+        xmlDoc,
+        noteXmlId,
+        noteType,
+        noteLanguage,
+        noteContent,
+      );
 
-			props.onSave(xmlDoc, EditorConstants.changeTypes.note.CONTENT_CHANGED, "Note content changed", noteXmlId)
-
+      props.onSave(
+        xmlDoc,
+        EditorConstants.changeTypes.note.CONTENT_CHANGED,
+        'Note content changed',
+        noteXmlId,
+      );
     } catch {
-      enqueueSnackbar("No xml content found", { variant: "error" })
-			props.onClose()
+      enqueueSnackbar('No xml content found', { variant: 'error' });
+      props.onClose();
     }
-  }
+  };
 
-  return(
-    <div style={{padding: 5}}>
+  return (
+    <div style={{ padding: 5 }}>
       <DialogContent>
-        <div id="noteReferencedXmlWrapper" style={{padding: 5}}>
-          <div id="noteReferencedXml" dangerouslySetInnerHTML={{ __html: noteParentContent }} />
+        <div id="noteReferencedXmlWrapper" style={{ padding: 5 }}>
+          <SanitizedHtml id="noteReferencedXml" html={noteParentContent} />
         </div>
         <div className="form-item form-item--key">
-          <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
+          <FormControl variant="filled" sx={{ m: 1, minWidth: 120, width: '100%' }}>
             <InputLabel id="editor-dialog-edit-note-type">Kommentar (Typ)</InputLabel>
             <Select
               value={noteType}
@@ -97,16 +118,16 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
               id="editor-dialog-edit-note-select"
               onChange={(event) => setNoteType(event.target.value)}
             >
-              { noteTypeItems.map((item) => (
+              {noteTypeItems.map((item) => (
                 <MenuItem key={item.value} value={item.value}>
                   {item.label}
                 </MenuItem>
-              )) }
+              ))}
             </Select>
           </FormControl>
         </div>
         <div className="form-item form-item--key">
-          <FormControl variant="filled" sx={{m: 1, minWidth: 120, width: '100%'}}>
+          <FormControl variant="filled" sx={{ m: 1, minWidth: 120, width: '100%' }}>
             <InputLabel id="auto-anno-snippet-reference-type">Kommentar (Sprache)</InputLabel>
             <Select
               value={noteLanguage}
@@ -115,71 +136,83 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
               id="demo-simple-select-filled"
               onChange={(event) => setNoteLanguage(event.target.value)}
             >
-              { noteLanguages.map((item) => (
+              {noteLanguages.map((item) => (
                 <MenuItem key={item.value} value={item.value}>
                   {item.label}
                 </MenuItem>
-              )) }
+              ))}
             </Select>
           </FormControl>
         </div>
-        <div className="form-item form-item--key" style={{margin: 5}}>
+        <div className="form-item form-item--key" style={{ margin: 5 }}>
           <TextareaAutosize
             aria-label="comment"
             minRows={10}
             maxRows={20}
             disabled={deleteButtonsVisible}
             placeholder="Kommentar"
-            style={{ width: "100%", padding: 8 }}
+            style={{ width: '100%', padding: 8 }}
             value={noteContent}
             onChange={(e) => setNoteContent(e.target.value)}
           />
         </div>
-        </DialogContent>
-				<Divider />
-        <DialogActions>
-          { !deleteButtonsVisible && <Button
-              variant="contained"
-              color="primary"
-              size={EditorConstants.styles.panel.buttonSize}
-              onClick={() => { setDeleteButtonsVisible(true) }}
-              style={{ marginTop: 8 }}
-          >
-              Löschen
-          </Button> }
-          { !deleteButtonsVisible && <Button
+      </DialogContent>
+      <Divider />
+      <DialogActions>
+        {!deleteButtonsVisible && (
+          <Button
             variant="contained"
             color="primary"
             size={EditorConstants.styles.panel.buttonSize}
-            onClick={ handleUpdateNote }
+            onClick={() => {
+              setDeleteButtonsVisible(true);
+            }}
             style={{ marginTop: 8 }}
-            disabled={!noteContent.trim() || noteType === "" || noteLanguage === ""}
+          >
+            Löschen
+          </Button>
+        )}
+        {!deleteButtonsVisible && (
+          <Button
+            variant="contained"
+            color="primary"
+            size={EditorConstants.styles.panel.buttonSize}
+            onClick={handleUpdateNote}
+            style={{ marginTop: 8 }}
+            disabled={!noteContent.trim() || noteType === '' || noteLanguage === ''}
           >
             Aktualisieren
-          </Button> }
+          </Button>
+        )}
 
-          { deleteButtonsVisible && <Button
-              variant="outlined"
-              size={EditorConstants.styles.panel.buttonSize}
-              color="primary"
-              onClick={() => { setDeleteButtonsVisible(false) }}
-              style={{ marginTop: 8 }}
+        {deleteButtonsVisible && (
+          <Button
+            variant="outlined"
+            size={EditorConstants.styles.panel.buttonSize}
+            color="primary"
+            onClick={() => {
+              setDeleteButtonsVisible(false);
+            }}
+            style={{ marginTop: 8 }}
           >
-              Abbrechen
-          </Button> }
+            Abbrechen
+          </Button>
+        )}
 
-          { deleteButtonsVisible && <Button
-              variant="contained"
-              size={EditorConstants.styles.panel.buttonSize}
-              color="primary"
-              onClick={ handleDeleteNote }
-              style={{ marginTop: 8 }}
+        {deleteButtonsVisible && (
+          <Button
+            variant="contained"
+            size={EditorConstants.styles.panel.buttonSize}
+            color="primary"
+            onClick={handleDeleteNote}
+            style={{ marginTop: 8 }}
           >
-              Löschen
-          </Button> }
-        </DialogActions>
+            Löschen
+          </Button>
+        )}
+      </DialogActions>
     </div>
-  )
-}
+  );
+};
 
-export default  EditNoteDialog;
+export default EditNoteDialog;

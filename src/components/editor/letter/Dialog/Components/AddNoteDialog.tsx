@@ -9,6 +9,7 @@ import { EditorConstants } from '@src/constants/editor';
 import { DefaultDialogProps } from '../EditorFormDialog';
 import DialogContent from '@mui/material/DialogContent';
 import { DialogActionButton } from './Misc/DialogActionButton';
+import SanitizedHtml from '@src/components/support/SanitizedHtml';
 
 const AddNoteDialog = (props: DefaultDialogProps) => {
   const [comment, setComment] = useState('');
@@ -36,7 +37,7 @@ const AddNoteDialog = (props: DefaultDialogProps) => {
       <DialogContent>
         <div style={{ padding: 5 }}>
           <div id="noteReferencedXmlWrapper" style={{ padding: 5 }}>
-            <div id="noteReferencedXml" dangerouslySetInnerHTML={{ __html: markedSection }} />
+            <SanitizedHtml id="noteReferencedXml" html={markedSection} />
           </div>
           <div className="form-item form-item--key">
             <FormControl variant="filled" sx={{ m: 1, minWidth: 120, width: '100%' }}>
