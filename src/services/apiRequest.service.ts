@@ -33,7 +33,16 @@ const apiRequest = async (
   return response.json();
 };
 
-export const initApi = (): AxiosInstance => {
+// initApi() used to create a brand-new axios instance - with its own interceptors and its own
+// isRefreshing/failedQueue closure - on every single call. Since every API function in this
+// codebase calls initApi() itself, that meant every request effectively had its own private
+// refresh lock: concurrent requests could never coordinate, so several parallel 401s each
+// triggered their own independent refresh call instead of sharing one. Building the instance
+// once and caching it here is what actually gives the refresh lock below something to
+// coordinate across calls.
+let sharedAxiosInstance: AxiosInstance | null = null;
+
+const createAxiosInstance = (): AxiosInstance => {
   const _dispatch = store.dispatch;
 
   const _axios = axios.create({
@@ -81,6 +90,12 @@ export const initApi = (): AxiosInstance => {
 
       const originalRequest = error.config;
 
+      // No request config (e.g. a network-level error with no associated request) - nothing to
+      // retry, so bail out before touching originalRequest._retry below.
+      if (!originalRequest) {
+        return Promise.reject(error);
+      }
+
       // Handle 401 Unauthorized
       if (error.response?.status === 401 && !originalRequest._retry) {
         if (isRefreshing) {
@@ -96,7 +111,10 @@ export const initApi = (): AxiosInstance => {
         isRefreshing = true;
 
         try {
-          await AuthService.refresh(false); // calls /jwt/auth/refresh
+          // A 401 from a real request means the session needs refreshing regardless of what the
+          // (possibly stale) Redux isAuthenticated flag currently says - unlike
+          // AuthContext's own refreshUser(), this call site must not skip the request.
+          await AuthService.refresh(true); // calls /jwt/auth/refresh
           processQueue(null);
           return _axios(originalRequest); // retry failed request
         } catch (refreshError) {
@@ -114,6 +132,13 @@ export const initApi = (): AxiosInstance => {
   );
 
   return _axios;
+};
+
+export const initApi = (): AxiosInstance => {
+  if (!sharedAxiosInstance) {
+    sharedAxiosInstance = createAxiosInstance();
+  }
+  return sharedAxiosInstance;
 };
 
 export default { initApi, apiRequest };
