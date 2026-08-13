@@ -175,6 +175,30 @@ const createComponentMappingRight = (
   },
 });
 
+// Only items that render a persistent container (showContainer: true) have a
+// meaningful "selected" state to toggle off on a repeat click of the same toolbar
+// button. Action-only items (e.g. dialogs like ADD_NEW_LETTER) never end up
+// "selected" from the user's perspective, so clicking their toolbar button must
+// always re-fire the action - otherwise the first click after closing the dialog
+// silently toggles this value back to null instead of reopening it, requiring a
+// second click to work again.
+export const valueForSide = (
+  newValue: string | null,
+  selectedComponent: ComponentMappingItem | null,
+): string | null => {
+  if (newValue === null) {
+    return null;
+  }
+  if (
+    selectedComponent !== null &&
+    selectedComponent.name === newValue &&
+    selectedComponent.showContainer
+  ) {
+    return null;
+  }
+  return newValue;
+};
+
 const ShowEditor = () => {
   const { t } = useTranslation();
   const { letterId } = useParams<{ letterId: string }>();
@@ -190,6 +214,7 @@ const ShowEditor = () => {
   const [showLeftContainer, setShowLeftContainer] = useState<boolean>(false);
   const [showRightContainer, setShowRightContainer] = useState<boolean>(false);
 
+  const [selectedItemLeft, setSelectedItemLeft] = useState<false | string>(false);
   const [selectedItemRight, setSelectedItemRight] = useState<false | string>(false);
   const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem | null>(
     null,
@@ -301,6 +326,7 @@ const ShowEditor = () => {
         handleTabChangeLeft(selectedItem.left);
       } else {
         setSelectedComponentLeft(null);
+        setSelectedItemLeft(false);
         setShowLeftContainer(false);
       }
 
@@ -309,6 +335,7 @@ const ShowEditor = () => {
       } else {
         setShowRightContainer(false);
         setSelectedComponentRight(null);
+        setSelectedItemRight(false);
       }
     };
 
@@ -331,6 +358,7 @@ const ShowEditor = () => {
 
     selectedComponent?.action();
     setSelectedComponentLeft(selectedComponent);
+    setSelectedItemLeft(newValue);
   };
 
   const handleTabChangeRight = (newValue: string) => {
@@ -353,16 +381,6 @@ const ShowEditor = () => {
 
   const setModalDialog = (dialogType: string) => {
     dispatch(setDialogType({ dialogType: dialogType }));
-  };
-
-  const valueForSide = (
-    newValue: string | null,
-    selectedComponent: { name: string } | null,
-  ): string | null => {
-    if (newValue === null || (selectedComponent !== null && selectedComponent.name === newValue)) {
-      return null;
-    }
-    return newValue;
   };
 
   const setSelectedItem = (newValueLeft: string | null, newValueRight: string | null) => {
@@ -474,31 +492,31 @@ const ShowEditor = () => {
           <Stack direction="column" spacing={1}>
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarLeft.newLetter')}
-              selected={selectedItemRight === EditorConstants.compMappingLeft.NEW_LETTER}
+              selected={selectedItemLeft === EditorConstants.compMappingLeft.NEW_LETTER}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.NEW_LETTER, null)}
               icon={<LibraryAddIcon />}
             />
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarLeft.search')}
-              selected={selectedItemRight === EditorConstants.compMappingLeft.SEARCH}
+              selected={selectedItemLeft === EditorConstants.compMappingLeft.SEARCH}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.SEARCH, null)}
               icon={<SearchIcon />}
             />
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarLeft.favourites')}
-              selected={selectedItemRight === EditorConstants.compMappingLeft.FAVOURITES}
+              selected={selectedItemLeft === EditorConstants.compMappingLeft.FAVOURITES}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.FAVOURITES, null)}
               icon={<AutoAwesomeIcon />}
             />
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarLeft.keybindings')}
-              selected={selectedItemRight === EditorConstants.compMappingLeft.HELP_SHORTCUTS}
+              selected={selectedItemLeft === EditorConstants.compMappingLeft.HELP_SHORTCUTS}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.HELP_SHORTCUTS, null)}
               icon={<KeyboardOutlinedIcon />}
             />
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarLeft.readonlyView')}
-              selected={selectedItemRight === EditorConstants.compMappingLeft.READONLY_VIEW}
+              selected={selectedItemLeft === EditorConstants.compMappingLeft.READONLY_VIEW}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.READONLY_VIEW, null)}
               icon={<SplitscreenIcon />}
             />
