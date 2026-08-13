@@ -6,21 +6,20 @@ import { configureStore } from '@reduxjs/toolkit';
 import '@src/i18n';
 import i18n from '@src/i18n';
 import AddNewLetterDialog from '@src/components/editor/letter/Dialog/Components/AddNewLetterDialog';
-import {
-  createNewLetter,
-  searchForLetterNameTitle,
-} from '@src/services/editor/apiLettersRequest.service';
+import { createNewLetter } from '@src/services/editor/apiLettersRequest.service';
+import { fetchMetamwLetterData } from '@src/services/auto_anno/apiMetaMw.service';
 import editorLetterReducer from '@src/redux/slices/editor.letter.slice';
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 jest.mock('@src/services/editor/apiLettersRequest.service');
+jest.mock('@src/services/auto_anno/apiMetaMw.service');
 jest.mock('notistack', () => ({
   enqueueSnackbar: jest.fn(),
 }));
 
 const mockCreateNewLetter = createNewLetter as jest.MockedFunction<typeof createNewLetter>;
-const mockSearchForLetterNameTitle = searchForLetterNameTitle as jest.MockedFunction<
-  typeof searchForLetterNameTitle
+const mockFetchMetamwLetterData = fetchMetamwLetterData as jest.MockedFunction<
+  typeof fetchMetamwLetterData
 >;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -58,9 +57,9 @@ describe('AddNewLetterDialog', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Backend response for the "is this letter name already taken" lookup is mocked here;
-    // an empty result means the name is available.
-    mockSearchForLetterNameTitle.mockResolvedValue([]);
+    // Backend response for the "is this letter name already taken" lookup (the exact-match
+    // /by_name endpoint) is mocked here; null means no letter with that name exists yet.
+    mockFetchMetamwLetterData.mockResolvedValue(null);
   });
 
   it('disables the save button as long as no letter name has been entered', () => {
@@ -69,12 +68,40 @@ describe('AddNewLetterDialog', () => {
     expect(getSaveButton()).toBeDisabled();
   });
 
-  it('enables the save button once a valid letter name has been entered, with every other field left empty', async () => {
+  it('enables the save button once a valid, available letter name has been entered, with every other field left empty', async () => {
     renderComponent();
 
     await enterValidLetterName();
 
     await waitFor(() => expect(getSaveButton()).toBeEnabled());
+    expect(mockFetchMetamwLetterData).toHaveBeenCalledWith(VALID_LETTER_NAME.toLowerCase());
+  });
+
+  it('rejects the name and keeps the save button disabled when the backend reports the letter already exists', async () => {
+    mockFetchMetamwLetterData.mockResolvedValue({ id: '1', name: VALID_LETTER_NAME });
+
+    renderComponent();
+
+    await enterValidLetterName();
+
+    await waitFor(() => expect(screen.getByText('Letter name already exists')).toBeInTheDocument());
+    expect(getSaveButton()).toBeDisabled();
+    expect(mockCreateNewLetter).not.toHaveBeenCalled();
+  });
+
+  it('rejects the name and surfaces the failure when the availability check itself fails', async () => {
+    mockFetchMetamwLetterData.mockRejectedValue(new Error('network down'));
+
+    renderComponent();
+
+    await enterValidLetterName();
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('Error checking letter name availability: network down'),
+      ).toBeInTheDocument(),
+    );
+    expect(getSaveButton()).toBeDisabled();
   });
 
   it('saves the letter with only the name set, leaving all other fields at their optional defaults', async () => {

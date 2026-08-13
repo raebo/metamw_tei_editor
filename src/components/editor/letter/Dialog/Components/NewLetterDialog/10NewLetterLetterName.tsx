@@ -1,7 +1,8 @@
 import { TextField } from '@mui/material';
 import { NewLetterDialogProps } from '../AddNewLetterDialog';
 import React, { useState } from 'react';
-import { searchForLetterNameTitle } from '@src/services/editor/apiLettersRequest.service';
+import { fetchMetamwLetterData } from '@src/services/auto_anno/apiMetaMw.service';
+import { MiscUtils } from '@src/utils/misc';
 
 const NewLetterLetterName = (props: NewLetterDialogProps) => {
   const [letterName, setLetterName] = React.useState<string | null>(
@@ -39,17 +40,32 @@ const NewLetterLetterName = (props: NewLetterDialogProps) => {
     };
   };
 
-  const checkLetterNameAvailable = async (letterName: string | null): Promise<boolean> => {
-    const letterType = letterName?.substring(0, 3).toLowerCase() === 'fmb' ? 'FMB' : 'GB';
-
+  // Looks the name up via the exact-match /by_name endpoint (also used by
+  // fetchMetamwLetterData elsewhere) instead of the fuzzy search endpoint, since a
+  // partial/title search is the wrong tool for an exact "does this name already exist"
+  // check. Returns null when the letter does not exist yet (name is available).
+  const checkLetterNameAvailable = async (
+    letterName: string,
+  ): Promise<{ isAvailable: boolean; errorMessage: string | null }> => {
     try {
-      const responseLetters = await searchForLetterNameTitle(letterType, letterName);
+      // Letters are stored under a lowercased name (see backend CreateLetterService), but
+      // the allowed name format accepts either case for the FMB/GB prefix - look the name
+      // up lowercased too, otherwise an existing "fmb-..." letter would not be found for a
+      // differently-cased "FMB-..." input and the check would wrongly report it as free.
+      const existingLetter = await fetchMetamwLetterData(letterName.toLowerCase());
 
-      return !(responseLetters && responseLetters.length > 0);
-    } catch {
-      setError(true);
-      setHelperText('Error fetching letter name');
-      return true;
+      return existingLetter === null
+        ? { isAvailable: true, errorMessage: null }
+        : { isAvailable: false, errorMessage: 'Letter name already exists' };
+    } catch (err) {
+      // A failed availability check must not silently be treated as "available" - that
+      // would let the user proceed with an unconfirmed name. Surface the failure instead
+      // and block completion until the check can run successfully.
+      return {
+        isAvailable: false,
+        errorMessage:
+          'Error checking letter name availability: ' + MiscUtils.misc.getErrorMessage(err),
+      };
     }
   };
 
@@ -67,11 +83,12 @@ const NewLetterLetterName = (props: NewLetterDialogProps) => {
       return;
     }
 
-    const letterIsAvailable = await checkLetterNameAvailable(letterName);
+    const { isAvailable, errorMessage: availabilityErrorMessage } =
+      await checkLetterNameAvailable(letterName);
 
-    if (!letterIsAvailable) {
+    if (!isAvailable) {
       setError(true);
-      setHelperText('Letter name already exists');
+      setHelperText(availabilityErrorMessage ?? 'Letter name already exists');
       return;
     }
 
