@@ -5,7 +5,7 @@ Diese Datei ergaenzt `AGENTS.md` um Claude-spezifische Hinweise. Bei Widerspruec
 ## Projektueberblick
 
 - React-18-/TypeScript-Frontend fuer einen TEI-XML-Editor (Editionsprojekt, HU Berlin / MetaMW).
-- State: Redux Toolkit; UI: Material UI (MUI 7); Editor-Komponenten: Lexical und Monaco; HTTP: Axios (cookie-basierte Auth, `withCredentials`).
+- State: Redux Toolkit; UI: Material UI (MUI 7); Editor-Komponenten: Monaco; HTTP: Axios (cookie-basierte Auth, `withCredentials`).
 - Build: Webpack 5; Tests: Jest + Testing Library; Paketmanager: Yarn 4 (`packageManager: yarn@4.9.1`).
 - Quellcode in `src/`, Tests in `tests/`, statische Dateien in `public/`.
 - Pfadaliase: `@src/*` und `@tests/*` (siehe `tsconfig.json`).

@@ -55,10 +55,17 @@ module.exports = (env, argv) => {
       splitChunks: {
         chunks: 'all',
         cacheGroups: {
+          // `chunks: 'initial'` (not 'all'): only node_modules code reachable from the
+          // synchronous entry chain goes into the single, eagerly-loaded vendors.js. Code
+          // that's only reachable via a dynamic import() (e.g. the lazy-loaded Monaco editor
+          // and its worker, see LetterViewCode.tsx/MonacoEditorSetup.ts) is left for webpack's
+          // default async chunking instead of being force-merged into vendors.js. Cut the
+          // initial bundle roughly in half (monaco-editor no longer ships fully in the eager
+          // chunk) without touching lazy-loading of any route/component itself.
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
-            chunks: 'all',
+            chunks: 'initial',
           },
         },
       },

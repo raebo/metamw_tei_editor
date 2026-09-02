@@ -14,8 +14,8 @@ import {
   getStatusDetails,
 } from '@src/services/mappings/autoAnnoMappings';
 import { enqueueSnackbar } from 'notistack';
-import { format, parse } from 'date-fns';
-import { dateFnsFormat, dateFnsParseFormat } from '@src/constants/snack';
+import dayjs from 'dayjs';
+import { jobUpdatedAtDisplayFormat } from '@src/constants/snack';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 
@@ -94,7 +94,7 @@ const AutoAnnoList: React.FC = () => {
       headerName: 'Service Identifier',
       width: 180,
       renderCell: (params) => {
-        return format(parse(params.row.updated_at, dateFnsParseFormat, new Date()), dateFnsFormat);
+        return dayjs(params.row.updated_at).format(jobUpdatedAtDisplayFormat);
       },
     },
     { field: 'search_string', headerName: 'Suchbegriff', width: 200 },
