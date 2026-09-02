@@ -26,7 +26,7 @@ const ManageTextAddress = (props: ManageTextAddressDialogProps) => {
     if (xmlDoc) {
       extractExistingAddress(xmlDoc);
     }
-  }, [xmlDoc]);
+  }, [xmlDoc, addressType]);
 
   const submitSaveHandler = async () => {
     try {

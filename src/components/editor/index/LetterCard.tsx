@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Card, CardActions, CardContent, Typography } from '@mui/material';
+import { Card, CardActions, CardContent, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import { EditorLetter } from '@src/services/mappings/editorMappings';
 import { Link } from 'react-router-dom';

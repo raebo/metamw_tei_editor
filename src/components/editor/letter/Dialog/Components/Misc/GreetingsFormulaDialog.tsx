@@ -63,7 +63,10 @@ const GreetingsFormulaDialog = (props: GreetingsFormulaProps) => {
     } catch (error) {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
     }
-  }, [props.formulaType, xmlDoc]);
+    // refNode is both read (as a run-once guard, `if (refNode) return;`) and set here. Adding
+    // it as a dependency is safe: once set, the effect re-runs once more but the guard makes
+    // it exit immediately, so no loop.
+  }, [props.formulaType, xmlDoc, refNode]);
 
   const validFormData = () => {
     if (!formData) return false;

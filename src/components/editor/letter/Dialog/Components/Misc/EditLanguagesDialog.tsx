@@ -30,12 +30,16 @@ const EditLanguagesDialog = (props: DefaultDialogProps) => {
     } catch (err) {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
     }
-  }, [props]);
+  }, [xmlDoc]);
 
   useEffect(() => {
     const assignedLanguages: LanguageOption[] =
       EditorUtils.teiHeaderContent.extractLanguages(teiHeader);
-    setLetterLanguages(Array.from(new Set([...assignedLanguages, ...letterLanguages])));
+    // Functional update: reads the *current* letterLanguages via `prev` instead of the value
+    // closed over when this effect was created, so it doesn't need letterLanguages as a
+    // dependency. A direct dependency would be unsafe - the merged array is a fresh reference
+    // every run, so it would re-trigger this same effect on every commit.
+    setLetterLanguages((prev) => Array.from(new Set([...assignedLanguages, ...prev])));
   }, [teiHeader]);
 
   const handleLanguageChange = (event: SelectChangeEvent) => {

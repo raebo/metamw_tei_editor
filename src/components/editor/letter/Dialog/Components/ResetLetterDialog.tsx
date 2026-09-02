@@ -38,7 +38,10 @@ const ResetLetterDialog = (props: DefaultDialogProps) => {
         }),
       );
     }
-  }, [props]);
+    // Was `[props]` before: props is never read inside this effect at all (a leftover/
+    // copy-paste dependency), so it neither satisfied nor needed to include the values
+    // actually read here.
+  }, [dispatch, selectedItem.left, selectedItem.right]);
 
   const resetLetter = async () => {
     if (!stateEditorLetter || !stateEditorLetter.id) {

@@ -379,9 +379,12 @@ const ShowEditor = () => {
     setSelectedItemRight(newValue);
   };
 
-  const setModalDialog = (dialogType: string) => {
-    dispatch(setDialogType({ dialogType: dialogType }));
-  };
+  const setModalDialog = useCallback(
+    (dialogType: string) => {
+      dispatch(setDialogType({ dialogType: dialogType }));
+    },
+    [dispatch],
+  );
 
   const setSelectedItem = (newValueLeft: string | null, newValueRight: string | null) => {
     dispatch(
