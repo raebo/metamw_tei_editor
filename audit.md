@@ -66,7 +66,7 @@ Damit sind beide in dieser Sektion dokumentierten "unfertigen Features" abgearbe
 
 **Nachtrag 2026-09-02:** Erneut verifiziert (im Rahmen der P2-Doku-Bereinigung). Testsuite ist inzwischen auf 13 Suiten / 97 Tests gewachsen (u. a. `SanitizedHtml.test.tsx`, `HighlightedText.test.tsx`, `useInactivityLogout.test.ts` aus den oben dokumentierten XSS-/Auth-Fixes) — weiterhin alle grün. `yarn tsc --noEmit` und `yarn test --runInBand` schlugen zunächst mit `Cannot find module '@testing-library/dom'` bzw. `Module '@testing-library/react' has no exported member 'screen'` fehl; Ursache war ein unvollständiger lokaler `node_modules`-Stand (Paket in `yarn.lock` vorhanden, aber nicht gelinkt), kein Code- oder Doku-Fehler. Nach `yarn install` beide wieder grün. Falls das erneut auftritt: `yarn install` vor den Gate-Checks ausführen.
 
-## Offene Arbeitspakete (unverändert oder P2)
+## Ehemals offene Arbeitspakete (inzwischen abgearbeitet, siehe jeweilige "Weiterhin offen"-Hinweise für Restpunkte)
 
 ### P1 (Rest) – Lint-Baseline vollständig auf null; CI-Grundgerüst steht ✅
 **CI-Einrichtung erledigt (2026-09-02):**
