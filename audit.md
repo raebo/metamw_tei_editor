@@ -1,10 +1,10 @@
 # Repository-Audit
 
-Ursprünglicher Stand: 2026-08-12. Aktualisiert: 2026-08-12 (nach Abarbeitung aller P0- und der meisten P1-Punkte, siehe Commit-Verweise unten); 2026-09-02 (P2 "Dokumentation und Altlasten" abgearbeitet). Geprüft wurden Konfiguration, Build, TypeScript, ESLint, Tests sowie stichprobenartig Auth-, API- und XML/HTML-Pfade. Es wurde kein externer Dependency-/CVE-Scan ausgefuehrt.
+Ursprünglicher Stand: 2026-08-12. Aktualisiert: 2026-08-12 (nach Abarbeitung aller P0- und der meisten P1-Punkte, siehe Commit-Verweise unten); 2026-09-02 (beide P2-Punkte "Dokumentation und Altlasten" sowie teilweise "Bundle und Assets" abgearbeitet). Geprüft wurden Konfiguration, Build, TypeScript, ESLint, Tests sowie stichprobenartig Auth-, API- und XML/HTML-Pfade. Es wurde kein externer Dependency-/CVE-Scan ausgefuehrt.
 
 ## Kurzfazit (Update)
 
-Alle P0-Befunde sowie die HTTP-/Auth-Konsolidierung, der TypeScript-Gate und die ESLint-Fehler (nicht Warnungen) aus dem ursprünglichen Audit sind behoben. `yarn tsc --noEmit`, `yarn eslint src tests --max-warnings=0` (0 Fehler) und `yarn build` (korrekter Produktionsmodus) laufen sauber; die volle Testsuite (11 Suiten / 86 Tests) ist grün. Offen bleiben: ~2100→38 reduzierte ESLint-Warnungen (davon 32 `react-hooks/exhaustive-deps` bewusst nicht blind gefixt, siehe unten), zwei dabei neu entdeckte vermutlich unfertige Features, CI-Einrichtung sowie der P2-Punkt Bundle-/Asset-Größe. Der P2-Punkt Doku/Altlasten (README, doppelte ESLint-Configs) ist inzwischen erledigt (siehe unten).
+Alle P0-Befunde sowie die HTTP-/Auth-Konsolidierung, der TypeScript-Gate und die ESLint-Fehler (nicht Warnungen) aus dem ursprünglichen Audit sind behoben. `yarn tsc --noEmit`, `yarn eslint src tests --max-warnings=0` (0 Fehler) und `yarn build` (korrekter Produktionsmodus) laufen sauber; die volle Testsuite (13 Suiten / 97 Tests) ist grün. Offen bleiben: ~2100→38 reduzierte ESLint-Warnungen (davon 32 `react-hooks/exhaustive-deps` bewusst nicht blind gefixt, siehe unten), zwei dabei neu entdeckte vermutlich unfertige Features, CI-Einrichtung sowie der Rest von P2 Bundle-Größe (`vendors.js` 3.63 MiB, Monaco/Lexical/MUI-lastig; `date-fns`/`dayjs`-Doppelung). Beide P2-Punkte "Doku/Altlasten" und "Bundle/Assets" (Font-Awesome-Altlast, `favicon.ico`, CRA-Logo-Reste) sind zum größeren Teil erledigt (siehe unten).
 
 ## Erledigte Arbeitspakete
 
@@ -65,8 +65,16 @@ Siehe Production-Build-Commit oben. `PUBLIC_ENV_ALLOWLIST` (`REACT_APP_API_URL`,
 ### P1 (Rest) – Lint-Baseline vollständig auf null, CI herstellen
 **Aufgabe:** Die 32 `exhaustive-deps`-Warnungen einzeln durchgehen (echtes Verhalten verstehen, nicht blind Dependencies ergänzen). Die zwei oben dokumentierten unfertigen Features (`AutoAnnoLettersResizable.tsx`, `ShowButtons.tsx`) fachlich klären: Feature fertigstellen oder toten Code entfernen. `lint`/`typecheck`/`test:ci`-Scripts anlegen und in einer CI-Pipeline als Required Checks verankern.
 
-### P2 – Bundle und Assets verschlanken
-Unverändert offen. Nach dem Production-Build-Fix jetzt ein Bundle-Report auswertbar (`yarn build --env analyze=true`). TTF/WOFF2 parallel, `favicon.ico` ca. 422 KiB, `vendors.js` weiterhin 3.63 MiB (Monaco/Lexical/MUI-lastig) — Budgets und automatisierte Prüfung stehen noch aus.
+### P2 – Bundle und Assets verschlanken (teilweise) ✅
+**Erledigt:**
+- **Font Awesome komplett entfernt** (nicht nur die vermutete TTF/WOFF2-Doppelung): `fontawesomeAll.css` + alle 8 Webfont-Dateien (`src/assets/webfonts/`) waren toter Code — global in `index.tsx` importiert, aber `grep` über den gesamten `src/`-Baum fand **0** Verwendungen von `fa-*`-Klassen; das Projekt nutzt durchgehend `@mui/icons-material` (33 Dateien). War u. a. für die im Build-Log dokumentierte 416-KiB-Asset-Größenwarnung (`fa-solid-900.ttf`) verantwortlich; diese Warnung ist nach dem Fix aus dem Build verschwunden. `main.css` dadurch 198 KiB → 125 KiB.
+- **`favicon.ico` verlustfrei komprimiert:** 432 KiB → 182 KiB (58 % kleiner). Ursache war eine unkomprimierte BMP-Ebene für die 256×256-Größe statt PNG-Kompression; per `identify`/`compare -metric AE` verifiziert, dass alle 9 Icon-Frames nach der Neukodierung bitidentisch sind (keine sichtbare Änderung).
+- Drei weitere unbenutzte CRA-Altlasten entfernt (~17,6 KB, 0 Referenzen im Code): `src/logo.svg`, `src/assets/img/logo192.png`, `logo512.png` — gehörten zu einer nie vorhandenen `manifest.json` (Link dazu bereits in `public/index.html` auskommentiert).
+
+**Weiterhin offen:**
+- `vendors.js` weiterhin 3.63 MiB (Monaco/Lexical/MUI-lastig) — Code-Splitting/dynamische Imports nötig, deutlich größerer Eingriff als die obigen Asset-Bereinigungen, hier bewusst nicht mit angefasst.
+- **Zusätzlich gefunden, nicht behoben:** `date-fns` und `dayjs` sind beide als Abhängigkeit vorhanden und werden je genau einmal verwendet (`date-fns` in `AutoAnnoList.tsx` für `format`/`parse`; `dayjs` als von `@mui/x-date-pickers` benötigter `AdapterDayjs` in `DateAddDialog.tsx`, dort nicht austauschbar). `date-fns` liesse sich vermutlich durch die ohnehin vorhandene `dayjs`-Abhängigkeit ersetzen und damit eine ganze Library aus dem Vendor-Bundle entfernen — das ist aber eine Verhaltensänderung (unterschiedliche Format-Tokens) und keine reine Asset-Bereinigung, braucht Review und einen Regressionstest, daher hier nur dokumentiert statt umgesetzt.
+- Budgets/automatisierte Bundle-Größen-Prüfung stehen weiterhin aus.
 
 ### P2 – Dokumentation und Altlasten bereinigen ✅
 `README.md` auf den tatsächlichen Yarn-/Webpack-Ablauf umgeschrieben (kein CRA/`build/`-Wortlaut mehr, Scripts entsprechen `package.json`, Deployment-Anleitung auf `dist/` korrigiert). Doppelte ESLint-Konfigurationen entfernt: `.eslintrc.js`/`.eslintrc.json` waren toter Code — ESLint 9 nutzt standardmäßig ausschließlich Flat Config (`eslint.config.mjs`) und liest Legacy-Configs nur bei `ESLINT_USE_FLAT_CONFIG=false`, was nirgends im Repo gesetzt ist; verifiziert per `yarn eslint`, dass sich Fehler-/Warnungszahl nach dem Löschen nicht ändert. Zusätzlich gefunden und entfernt: `"eject": "react-scripts eject"`-Script (`react-scripts` ist gar keine Dependency mehr, der Befehl war bereits kaputt) — weiteres CRA-Überbleibsel im selben Themenfeld.

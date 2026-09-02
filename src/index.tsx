@@ -12,7 +12,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './assets/css/index.css';
 import './assets/css/root.css';
-import './assets/css/fontawesomeAll.css';
 import './assets/css/fmbc.css';
 import './assets/css/tei.css';
 import './assets/css/tei_weblayout.css';
