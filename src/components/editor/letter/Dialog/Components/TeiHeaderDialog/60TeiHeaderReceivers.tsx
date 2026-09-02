@@ -18,6 +18,7 @@ const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
   const [receivers, setReceivers] = React.useState<HeaderPerson[]>(props.completionState.receivers);
   const [selectedPerson, setSelectedPerson] = React.useState<SnippetEntity | null>(null);
   const [people, setPeople] = useState<SnippetEntity[]>([]);
+  const { teiHeader, onChange } = props;
 
   useEffect(() => {
     const fetchDefaultPeople = async () => {
@@ -37,13 +38,13 @@ const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
       }
     };
     const assignedReceivers = () => {
-      if (!props.teiHeader) {
+      if (!teiHeader) {
         // No TEI header available (e.g. when creating a new letter) -> nothing to extract;
         // receivers already chosen in completionState must not be overwritten here.
         return;
       }
 
-      setReceivers(EditorUtils.teiHeaderContent.extractReceivers(props.teiHeader));
+      setReceivers(EditorUtils.teiHeaderContent.extractReceivers(teiHeader));
     };
 
     try {
@@ -56,11 +57,15 @@ const TeiHeaderReceivers = (props: TeiHeaderDialogProps) => {
         { variant: 'error' },
       );
     }
-  }, [props.teiHeader]);
+    // `t` is included per react-i18next's own recommendation (its identity can change on a
+    // language switch; omitting it risks the catch-block error message staying in a stale
+    // language). It's only read in the error path here, so including it cannot introduce a
+    // re-run loop with `teiHeader`.
+  }, [teiHeader, t]);
 
   useEffect(() => {
-    props.onChange({ receivers: receivers });
-  }, [receivers]);
+    onChange({ receivers: receivers });
+  }, [receivers, onChange]);
 
   const handleAddReceiver = () => {
     if (!selectedPerson) {

@@ -17,14 +17,15 @@ const TeiHeaderFirstHeadline = (props: TeiHeaderDialogProps) => {
   const { t } = useTranslation();
 
   const completionState = props.completionState;
+  const { teiHeader, onChange } = props;
 
   useEffect(() => {
-    const { firstHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(props.teiHeader);
+    const { firstHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(teiHeader);
 
     if (firstHeadline) {
-      props.onChange({ firstHeaderComplete: true, firstHeaderContent: firstHeadline });
+      onChange({ firstHeaderComplete: true, firstHeaderContent: firstHeadline });
     }
-  }, [props.teiHeader]);
+  }, [teiHeader, onChange]);
 
   const setFirstHeaderValue = (value: string) => {
     props.onChange({ firstHeaderComplete: true, firstHeaderContent: value });

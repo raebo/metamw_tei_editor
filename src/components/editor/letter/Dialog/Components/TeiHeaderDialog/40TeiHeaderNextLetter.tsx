@@ -22,10 +22,11 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
   );
   const selectedOption: EditorLetter | null = props.completionState.nextLetter;
   const [letters, setLetters] = useState<EditorLetter[]>([]);
+  const { teiHeader, onChange } = props;
 
   const setSelectedOption = (value: EditorLetter | null) => {
     if (value) {
-      props.onChange({ nextLetter: value });
+      onChange({ nextLetter: value });
     }
   };
 
@@ -48,14 +49,14 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
     };
 
     const fetchNextLetter = async () => {
-      if (!props.teiHeader) {
+      if (!teiHeader) {
         // No TEI header available (e.g. when creating a new letter) -> nothing to extract;
         // a selection already made in completionState must not be overwritten here.
         return;
       }
 
       const { name, letterPrefix } = EditorUtils.teiHeaderContent.extractPrevNextLetter(
-        props.teiHeader,
+        teiHeader,
         'successor',
       );
       if (name && letterPrefix) {
@@ -65,7 +66,7 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
         );
 
         if (nextLetter && nextLetter[0]) {
-          props.onChange({
+          onChange({
             nextLetterAutoAvailable: true,
             nextLetterType: 'select',
             nextLetter: nextLetter[0],
@@ -74,7 +75,7 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
           setAutoAvailable(true);
         }
       } else {
-        props.onChange({
+        onChange({
           nextLetterAutoAvailable: false,
           nextLetterType: name as 'unknown' | 'not_identified' | null,
           nextLetter: null,
@@ -96,10 +97,10 @@ const TeiHeaderNextLetter = (props: TeiHeaderDialogProps) => {
         { variant: 'error' },
       );
     }
-  }, [props.teiHeader]);
+  }, [teiHeader, onChange]);
 
   const handlePrevLetterCheckboxChange = (value: 'unknown' | 'not_identified' | 'select') => {
-    props.onChange({
+    onChange({
       nextLetterAutoAvailable: value === 'select',
       nextLetterType: value,
       ...(value !== 'select' && { nextLetter: null }),

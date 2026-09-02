@@ -15,6 +15,7 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
   const selectedOption: SnippetEntity | null =
     props.dialogType === 'writing' ? completionState.writingPlace : completionState.receivingPlace;
   const [places, setPlaces] = useState<SnippetEntity[]>([]);
+  const { teiHeader, onChange, dialogType } = props;
 
   const setAutocmplSelectedOption = (settlement: SnippetEntity | null) => {
     if (settlement !== null && settlement.entityKey !== null) {
@@ -26,10 +27,10 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
       });
     }
 
-    if (settlement && props.dialogType === 'writing') {
-      props.onChange({ writingPlace: settlement });
-    } else if (settlement && props.dialogType === 'receiving') {
-      props.onChange({ receivingPlace: settlement });
+    if (settlement && dialogType === 'writing') {
+      onChange({ writingPlace: settlement });
+    } else if (settlement && dialogType === 'receiving') {
+      onChange({ receivingPlace: settlement });
     }
   };
 
@@ -52,13 +53,13 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
     };
 
     const assignedWritingPlace = async () => {
-      if (!props.teiHeader) {
+      if (!teiHeader) {
         // No TEI header available (e.g. when creating a new letter) -> nothing to extract;
         // a selection already made in completionState must not be touched here.
         return;
       }
 
-      const { name, key } = EditorUtils.teiHeaderContent.extractWritingPlace(props.teiHeader);
+      const { name, key } = EditorUtils.teiHeaderContent.extractWritingPlace(teiHeader);
 
       if (name && key) {
         const place: SnippetEntity[] | undefined = await searchEditortEntities(
@@ -66,19 +67,19 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
           EntityType.SETTLEMENT,
         );
         if (place && place[0]) {
-          props.onChange({ writingPlace: place[0], writingPlaceAutoAvailable: true });
+          onChange({ writingPlace: place[0], writingPlaceAutoAvailable: true });
         }
       }
     };
 
     const assignedReceivingPlace = async () => {
-      if (!props.teiHeader) {
+      if (!teiHeader) {
         // No TEI header available (e.g. when creating a new letter) -> nothing to extract;
         // a selection already made in completionState must not be touched here.
         return;
       }
 
-      const { name, key } = EditorUtils.teiHeaderContent.extractReceivingPlace(props.teiHeader);
+      const { name, key } = EditorUtils.teiHeaderContent.extractReceivingPlace(teiHeader);
 
       if (name && key) {
         const place: SnippetEntity[] | undefined = await searchEditortEntities(
@@ -86,18 +87,18 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
           EntityType.SETTLEMENT,
         );
         if (place && place[0]) {
-          props.onChange({ receivingPlace: place[0], receivingPlaceAutoAvailable: true });
+          onChange({ receivingPlace: place[0], receivingPlaceAutoAvailable: true });
         }
       }
     };
 
     void fetchDefaultPlaces();
-    if (props.dialogType === 'writing') {
+    if (dialogType === 'writing') {
       void assignedWritingPlace();
-    } else if (props.dialogType === 'receiving') {
+    } else if (dialogType === 'receiving') {
       void assignedReceivingPlace();
     }
-  }, [props.teiHeader]);
+  }, [teiHeader, onChange, dialogType]);
 
   const searchForPlacess = async (inputValue: string) => {
     try {

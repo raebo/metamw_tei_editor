@@ -1,7 +1,7 @@
 import { DefaultDialogProps } from '../EditorFormDialog';
 import DynamicDataDisplay from '@src/components/support/DynamicDataDisplay';
 import { DISPLAY_NAME_MAP } from '@src/utils/entityMappings';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Divider } from '@mui/material';
 import TeiHeaderFirstHeadline from './TeiHeaderDialog/10TeiHeaderFirstHeadline';
 import TeiHeaderSndHeadline from './TeiHeaderDialog/20TeiHeaderSndHeadline';
@@ -218,7 +218,14 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
     }
   };
 
-  const childOnChange = MiscUtils.stateHandling.createHandleChange(setCompletionState);
+  // Stable across renders (deps: []) so the 9 child components below can safely depend on
+  // `onChange` in their own effects without re-running on every unrelated parent render.
+  // setCompletionState (a useState setter) is itself guaranteed stable by React, so this
+  // doesn't lose any freshness.
+  const childOnChange = useCallback(
+    (updates: Partial<CompletionState>) => setCompletionState((prev) => ({ ...prev, ...updates })),
+    [],
+  );
 
   return (
     <div ref={ref}>

@@ -11,35 +11,36 @@ const TeiHeaderEditorTranskriptor = (props: TeiHeaderDialogProps) => {
     props.completionState.transkriptorValue,
   );
   const [editorValue, setEditorValue] = useState<string | null>(props.completionState.editorValue);
+  const { teiHeader, onChange } = props;
 
   useEffect(() => {
     const { name: editorName } = EditorUtils.teiHeaderContent.extractEditorTranskriptorName(
-      props.teiHeader,
+      teiHeader,
       'edition',
     );
     const { name: transkriptorName } = EditorUtils.teiHeaderContent.extractEditorTranskriptorName(
-      props.teiHeader,
+      teiHeader,
       'transcription',
     );
 
     if (editorName) {
-      props.onChange({ editorValue: editorName });
+      onChange({ editorValue: editorName });
       setEditorValue(editorName);
     }
 
     if (transkriptorName) {
-      props.onChange({ transkriptorValue: transkriptorName });
+      onChange({ transkriptorValue: transkriptorName });
       setTranskriptorValue(transkriptorName);
     }
-  }, [props.teiHeader]);
+  }, [teiHeader, onChange]);
 
   const changeTranskriptorValue = (value: string) => {
-    props.onChange({ transkriptorValue: value });
+    onChange({ transkriptorValue: value });
     setTranskriptorValue(value);
   };
 
   const changeEditorValue = (value: string) => {
-    props.onChange({ editorValue: value });
+    onChange({ editorValue: value });
     setEditorValue(value);
   };
 

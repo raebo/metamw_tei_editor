@@ -24,23 +24,28 @@ const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {
     props.completionState.transkriptionValue,
   );
   const [editionValue, setEditionValue] = useState<string>(props.completionState.editionValue);
+  const { teiHeader, onChange } = props;
 
   useEffect(() => {
-    const assignedLanguages: LanguageOption[] = EditorUtils.teiHeaderContent.extractLanguages(
-      props.teiHeader,
-    );
+    const assignedLanguages: LanguageOption[] =
+      EditorUtils.teiHeaderContent.extractLanguages(teiHeader);
 
-    props.onChange({ letterLanguage: assignedLanguages });
-    setLetterLanguages(Array.from(new Set([...assignedLanguages, ...letterLanguages])));
-  }, [props.teiHeader]);
+    onChange({ letterLanguage: assignedLanguages });
+    // Functional update (reads the *current* letterLanguages via `prev`, not the value closed
+    // over when this effect was created) so the effect doesn't need `letterLanguages` as a
+    // dependency. Depending on it directly would be unsafe here: the merged array below is a
+    // freshly created reference every run, so a `letterLanguages` dependency would make this
+    // effect re-trigger itself on every commit - an infinite loop.
+    setLetterLanguages((prev) => Array.from(new Set([...assignedLanguages, ...prev])));
+  }, [teiHeader, onChange]);
 
   const changeTranskriptionValue = (value: string) => {
-    props.onChange({ transkriptionValue: value });
+    onChange({ transkriptionValue: value });
     setTranskriptionValue(value);
   };
 
   const changeEditionValue = (value: string) => {
-    props.onChange({ editionValue: value });
+    onChange({ editionValue: value });
     setEditionValue(value);
   };
 
@@ -50,8 +55,9 @@ const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {
     const language = EditorConstants.LANGUAGES.find((lang) => lang.value === value);
 
     if (language) {
-      setLetterLanguages(Array.from(new Set([...letterLanguages, language])));
-      props.onChange({ letterLanguage: Array.from(new Set([...letterLanguages, language])) });
+      const updatedLanguages = Array.from(new Set([...letterLanguages, language]));
+      setLetterLanguages(updatedLanguages);
+      onChange({ letterLanguage: updatedLanguages });
       setSelectedLang('');
     }
   };
@@ -59,7 +65,7 @@ const TeiHeaderTransEdition = (props: TeiHeaderDialogProps) => {
   const handleRemoveLanguage = (lang: LanguageOption) => {
     const updatedLanguages = letterLanguages.filter((l) => l !== lang);
     setLetterLanguages(updatedLanguages);
-    props.onChange({ letterLanguage: updatedLanguages });
+    onChange({ letterLanguage: updatedLanguages });
   };
 
   return (

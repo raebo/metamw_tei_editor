@@ -19,14 +19,15 @@ const sndHeaderOptions = [
 const TeiHeaderSndHeadline = (props: TeiHeaderDialogProps) => {
   const { t } = useTranslation();
   const completionState = props.completionState;
+  const { teiHeader, onChange } = props;
 
   useEffect(() => {
-    const { sndHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(props.teiHeader);
+    const { sndHeadline } = EditorUtils.teiHeaderContent.titleElementHeadlines(teiHeader);
 
     if (sndHeadline) {
-      props.onChange({ sndHeaderComplete: true, sndHeaderContent: sndHeadline });
+      onChange({ sndHeaderComplete: true, sndHeaderContent: sndHeadline });
     }
-  }, [props.teiHeader]);
+  }, [teiHeader, onChange]);
 
   const setSndHeaderValue = (value: string) => {
     props.onChange({ sndHeaderComplete: true, sndHeaderContent: value });

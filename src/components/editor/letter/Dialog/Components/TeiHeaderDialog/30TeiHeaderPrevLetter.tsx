@@ -22,10 +22,11 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
 
   const selectedOption: EditorLetter | null = props.completionState.prevLetter;
   const [letters, setLetters] = useState<EditorLetter[]>([]);
+  const { teiHeader, onChange } = props;
 
   const setSelectedOption = (value: EditorLetter | null) => {
     if (value) {
-      props.onChange({ prevLetter: value });
+      onChange({ prevLetter: value });
     }
   };
 
@@ -48,14 +49,14 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
     };
 
     const fetchPrevLetter = async () => {
-      if (!props.teiHeader) {
+      if (!teiHeader) {
         // No TEI header available (e.g. when creating a new letter) -> nothing to extract;
         // a selection already made in completionState must not be overwritten here.
         return;
       }
 
       const { name, letterPrefix } = EditorUtils.teiHeaderContent.extractPrevNextLetter(
-        props.teiHeader,
+        teiHeader,
         'precursor',
       );
       if (name && letterPrefix) {
@@ -65,7 +66,7 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
         );
 
         if (prevLetter && prevLetter[0]) {
-          props.onChange({
+          onChange({
             prevLetterAutoAvailable: true,
             prevLetterType: 'select',
             prevLetter: prevLetter[0],
@@ -74,7 +75,7 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
           setAutoAvailable(true);
         }
       } else {
-        props.onChange({
+        onChange({
           prevLetterAutoAvailable: false,
           prevLetterType: name as 'unknown' | 'not_identified' | null,
           prevLetter: null,
@@ -97,10 +98,10 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
         { variant: 'error' },
       );
     }
-  }, [props.teiHeader]);
+  }, [teiHeader, onChange]);
 
   const handlePrevLetterCheckboxChange = (value: 'unknown' | 'not_identified' | 'select') => {
-    props.onChange({
+    onChange({
       prevLetterAutoAvailable: value === 'select',
       prevLetterType: value,
       ...(value !== 'select' && { prevLetter: null }),
