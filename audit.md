@@ -1,10 +1,10 @@
 # Repository-Audit
 
-Ursprünglicher Stand: 2026-08-12. Aktualisiert: 2026-08-12 (nach Abarbeitung aller P0- und der meisten P1-Punkte, siehe Commit-Verweise unten). Geprüft wurden Konfiguration, Build, TypeScript, ESLint, Tests sowie stichprobenartig Auth-, API- und XML/HTML-Pfade. Es wurde kein externer Dependency-/CVE-Scan ausgefuehrt.
+Ursprünglicher Stand: 2026-08-12. Aktualisiert: 2026-08-12 (nach Abarbeitung aller P0- und der meisten P1-Punkte, siehe Commit-Verweise unten); 2026-09-02 (P2 "Dokumentation und Altlasten" abgearbeitet). Geprüft wurden Konfiguration, Build, TypeScript, ESLint, Tests sowie stichprobenartig Auth-, API- und XML/HTML-Pfade. Es wurde kein externer Dependency-/CVE-Scan ausgefuehrt.
 
 ## Kurzfazit (Update)
 
-Alle P0-Befunde sowie die HTTP-/Auth-Konsolidierung, der TypeScript-Gate und die ESLint-Fehler (nicht Warnungen) aus dem ursprünglichen Audit sind behoben. `yarn tsc --noEmit`, `yarn eslint src tests --max-warnings=0` (0 Fehler) und `yarn build` (korrekter Produktionsmodus) laufen sauber; die volle Testsuite (11 Suiten / 86 Tests) ist grün. Offen bleiben: ~2100→38 reduzierte ESLint-Warnungen (davon 32 `react-hooks/exhaustive-deps` bewusst nicht blind gefixt, siehe unten), zwei dabei neu entdeckte vermutlich unfertige Features, sowie die P2-Punkte (Bundle-Größe, Doku/Altlasten, CI-Einrichtung).
+Alle P0-Befunde sowie die HTTP-/Auth-Konsolidierung, der TypeScript-Gate und die ESLint-Fehler (nicht Warnungen) aus dem ursprünglichen Audit sind behoben. `yarn tsc --noEmit`, `yarn eslint src tests --max-warnings=0` (0 Fehler) und `yarn build` (korrekter Produktionsmodus) laufen sauber; die volle Testsuite (11 Suiten / 86 Tests) ist grün. Offen bleiben: ~2100→38 reduzierte ESLint-Warnungen (davon 32 `react-hooks/exhaustive-deps` bewusst nicht blind gefixt, siehe unten), zwei dabei neu entdeckte vermutlich unfertige Features, CI-Einrichtung sowie der P2-Punkt Bundle-/Asset-Größe. Der P2-Punkt Doku/Altlasten (README, doppelte ESLint-Configs) ist inzwischen erledigt (siehe unten).
 
 ## Erledigte Arbeitspakete
 
@@ -58,6 +58,8 @@ Siehe Production-Build-Commit oben. `PUBLIC_ENV_ALLOWLIST` (`REACT_APP_API_URL`,
 - `yarn test --runInBand`: ✅ 11 Suiten, 86 Tests, alle grün.
 - `yarn build`: ✅ Exit 0, minifiziertes Production-Bundle mit Content-Hashes, kein `NODE_ENV`-Konflikt, Secret-Variablen nachweislich nicht im Output.
 
+**Nachtrag 2026-09-02:** Erneut verifiziert (im Rahmen der P2-Doku-Bereinigung). Testsuite ist inzwischen auf 13 Suiten / 97 Tests gewachsen (u. a. `SanitizedHtml.test.tsx`, `HighlightedText.test.tsx`, `useInactivityLogout.test.ts` aus den oben dokumentierten XSS-/Auth-Fixes) — weiterhin alle grün. `yarn tsc --noEmit` und `yarn test --runInBand` schlugen zunächst mit `Cannot find module '@testing-library/dom'` bzw. `Module '@testing-library/react' has no exported member 'screen'` fehl; Ursache war ein unvollständiger lokaler `node_modules`-Stand (Paket in `yarn.lock` vorhanden, aber nicht gelinkt), kein Code- oder Doku-Fehler. Nach `yarn install` beide wieder grün. Falls das erneut auftritt: `yarn install` vor den Gate-Checks ausführen.
+
 ## Offene Arbeitspakete (unverändert oder P2)
 
 ### P1 (Rest) – Lint-Baseline vollständig auf null, CI herstellen
@@ -66,5 +68,7 @@ Siehe Production-Build-Commit oben. `PUBLIC_ENV_ALLOWLIST` (`REACT_APP_API_URL`,
 ### P2 – Bundle und Assets verschlanken
 Unverändert offen. Nach dem Production-Build-Fix jetzt ein Bundle-Report auswertbar (`yarn build --env analyze=true`). TTF/WOFF2 parallel, `favicon.ico` ca. 422 KiB, `vendors.js` weiterhin 3.63 MiB (Monaco/Lexical/MUI-lastig) — Budgets und automatisierte Prüfung stehen noch aus.
 
-### P2 – Dokumentation und Altlasten bereinigen
-`README.md` beschreibt weiterhin Create React App und `build/`, tatsächlich Webpack und `dist/`. Mehrere tote Dateien wurden im Rahmen der TS-/Lint-Fixes bereits entfernt (`components/App/`, Legacy-Auth-Kette, `Auth.tsx`, `SpecialDialogContainer.tsx`, `hooks/useReactiveVar.ts`); ein gezielter README-Abgleich mit dem tatsächlichen Yarn-/Webpack-Ablauf steht noch aus, ebenso die Bereinigung der doppelten ESLint-Konfigurationen (`.eslintrc.js`/`.eslintrc.json`/`eslint.config.mjs`).
+### P2 – Dokumentation und Altlasten bereinigen ✅
+`README.md` auf den tatsächlichen Yarn-/Webpack-Ablauf umgeschrieben (kein CRA/`build/`-Wortlaut mehr, Scripts entsprechen `package.json`, Deployment-Anleitung auf `dist/` korrigiert). Doppelte ESLint-Konfigurationen entfernt: `.eslintrc.js`/`.eslintrc.json` waren toter Code — ESLint 9 nutzt standardmäßig ausschließlich Flat Config (`eslint.config.mjs`) und liest Legacy-Configs nur bei `ESLINT_USE_FLAT_CONFIG=false`, was nirgends im Repo gesetzt ist; verifiziert per `yarn eslint`, dass sich Fehler-/Warnungszahl nach dem Löschen nicht ändert. Zusätzlich gefunden und entfernt: `"eject": "react-scripts eject"`-Script (`react-scripts` ist gar keine Dependency mehr, der Befehl war bereits kaputt) — weiteres CRA-Überbleibsel im selben Themenfeld.
+
+**Nicht mit angefasst (separater Fund, nicht Teil dieses Tickets):** `package.json` enthält noch ein CRA-typisches `"proxy": "http://localhost:5000"`-Feld, das von `webpack.config.js`/`webpack-dev-server` nicht ausgewertet wird (kein `proxy`-Treffer dort) — vermutlich ebenfalls tote CRA-Altlast, aber ungeprüft, ob es an anderer Stelle (z. B. lokale Entwickler-Setups) noch erwartet wird.
