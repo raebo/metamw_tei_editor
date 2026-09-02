@@ -62,8 +62,17 @@ Siehe Production-Build-Commit oben. `PUBLIC_ENV_ALLOWLIST` (`REACT_APP_API_URL`,
 
 ## Offene Arbeitspakete (unverändert oder P2)
 
-### P1 (Rest) – Lint-Baseline vollständig auf null, CI herstellen
-**Aufgabe:** Die 32 `exhaustive-deps`-Warnungen einzeln durchgehen (echtes Verhalten verstehen, nicht blind Dependencies ergänzen). Die zwei oben dokumentierten unfertigen Features (`AutoAnnoLettersResizable.tsx`, `ShowButtons.tsx`) fachlich klären: Feature fertigstellen oder toten Code entfernen. `lint`/`typecheck`/`test:ci`-Scripts anlegen und in einer CI-Pipeline als Required Checks verankern.
+### P1 (Rest) – Lint-Baseline vollständig auf null; CI-Grundgerüst steht ✅ (teilweise)
+**CI-Einrichtung erledigt (2026-09-02):**
+- `package.json`: `lint` (`eslint src tests --max-warnings=0`), `typecheck` (`tsc --noEmit`), `test:ci` (`jest --ci --runInBand`) als benannte Scripts ergänzt.
+- `.gitlab-ci.yml` neu angelegt: 4 parallele Jobs im `test`-Stage — `typecheck`, `lint`, `test`, `build`. Nutzt `corepack enable` + `yarn install --immutable` (Yarn 4, per `packageManager`-Feld), Cache auf `yarn.lock` geschlüsselt. `workflow: rules` verhindert doppelte Pipelines (Branch- und MR-Pipeline gleichzeitig).
+  - **`lint`-Job nutzt bewusst `--max-warnings=38` statt der strengeren `--max-warnings=0` aus dem `lint`-Script:** Die 38 aktuell offenen Warnungen (v. a. die unten dokumentierten `exhaustive-deps`-Fälle) sind bekannt und nicht Ziel dieser Änderung; mit `--max-warnings=0` wäre die Pipeline vom ersten Lauf an rot, ohne dass ein neuer Fehler vorläge. Sobald die Warnungen abgearbeitet sind, diese Zahl schrittweise senken (Ratchet).
+  - **`build`-Job:** `REACT_APP_API_URL` ist eine Pflicht-Build-Variable (siehe oben, P0 Umgebungsvariablen), aber es gibt bewusst keine `.env`-Datei im Repo. `webpack.config.js` liest bereits echte `process.env`-Werte vorrangig vor `.env` (extra dafür vorgesehen, siehe Kommentar dort) — der Job setzt daher nur eine Platzhalter-`CI`-Variable (`https://ci-placeholder.invalid`), lokal verifiziert (Build ohne `.env`-Datei, nur mit env var gesetzt, exit 0).
+- Husky-Pre-Commit-Hook (`​.husky/pre-commit`) erweitert: führt jetzt `npx lint-staged` (Eslint+Prettier auf gestagte Dateien; war in `package.json` bereits konfiguriert, aber nie aufgerufen) vor `npm test` aus — behebt den in `audit.md` dokumentierten Befund "Husky-Pre-Commit-Hook prueft nur Tests, nicht Lint".
+- Lokal verifiziert: `yarn lint`/`yarn typecheck`/`yarn test:ci` laufen wie erwartet (`lint` schlägt mit den bekannten 38 Warnungen fehl, `--max-warnings=38` — der tatsächliche CI-Befehl — läuft mit Exit 0 durch); `npx lint-staged --debug` bestätigt korrekte Kommando-Konstruktion.
+- **Nicht von hier aus möglich:** Das eigentliche "als Required Check verankern" (GitLab-Projekteinstellung "Pipelines must succeed" unter Settings → Merge requests → Merge checks) ist eine UI-/API-Aktion auf dem GitLab-Server, die ein Werkzeug ohne GitLab-Token/`glab`-CLI nicht ausführen kann — muss manuell im Projekt aktiviert werden. Ebenso ungeprüft: ob auf `scm.cms.hu-berlin.de` für dieses Projekt überhaupt ein CI-Runner registriert ist (Pipeline würde sonst dauerhaft "pending" bleiben) — bitte nach dem ersten Push in der GitLab-CI/CD-Ansicht kontrollieren.
+
+**Weiterhin offen:** Die 32 `exhaustive-deps`-Warnungen einzeln durchgehen (echtes Verhalten verstehen, nicht blind Dependencies ergänzen). Die zwei oben dokumentierten unfertigen Features (`AutoAnnoLettersResizable.tsx`, `ShowButtons.tsx`) fachlich klären: Feature fertigstellen oder toten Code entfernen.
 
 ### P2 – Bundle und Assets verschlanken ✅
 **Session 1 (Assets):**

@@ -1,0 +1,55 @@
+stages:
+  - test
+
+# Only run once per push (branch pipeline) or once per merge request, not both, to avoid
+# duplicate pipelines when a feature branch has an open MR.
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+default:
+  image: node:20
+  cache:
+    key:
+      files:
+        - yarn.lock
+    paths:
+      - .yarn/cache
+      - node_modules
+  before_script:
+    - corepack enable
+    # --immutable: fail instead of silently rewriting yarn.lock, matching what `yarn install`
+    # does locally when the lockfile and package.json are in sync.
+    - yarn install --immutable
+
+typecheck:
+  stage: test
+  script:
+    - yarn typecheck
+
+lint:
+  stage: test
+  script:
+    # NOTE: --max-warnings=0 (yarn lint) is the long-term target, but the repo currently
+    # carries 38 documented pre-existing warnings (see audit.md, "react-hooks/exhaustive-deps",
+    # deliberately not blind-fixed - each needs individual review). Using that as the current
+    # ceiling here keeps this check meaningful (catches new warnings) without starting CI red
+    # on day one. Ratchet this number down as audit.md's open lint items get resolved.
+    - yarn eslint src tests --max-warnings=38
+
+test:
+  stage: test
+  script:
+    - yarn test:ci
+
+build:
+  stage: test
+  # REACT_APP_API_URL is a required build-time variable (see webpack.config.js /
+  # .env.example) but no .env file is committed. webpack.config.js already prefers real
+  # process.env values over .env, so a plain CI variable is enough - no .env file needed.
+  # This is only a placeholder to satisfy the build; the value never has to be reachable.
+  variables:
+    REACT_APP_API_URL: 'https://ci-placeholder.invalid'
+  script:
+    - yarn build

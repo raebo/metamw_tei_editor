@@ -50,7 +50,10 @@
     "start": "webpack serve --mode development",
     "build": "webpack --mode production",
     "test": "jest",
-    "jest": "jest"
+    "test:ci": "jest --ci --runInBand",
+    "jest": "jest",
+    "lint": "eslint src tests --max-warnings=0",
+    "typecheck": "tsc --noEmit"
   },
   "proxy": "http://localhost:5000",
   "browserslist": {
