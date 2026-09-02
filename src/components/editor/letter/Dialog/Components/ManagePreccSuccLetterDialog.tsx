@@ -1,7 +1,7 @@
 import type { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
 import DialogContent from '@mui/material/DialogContent';
 import { useTranslation } from 'react-i18next';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
@@ -98,7 +98,7 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
     };
   }, [letterType, props.letterType, teiHeader]);
 
-  const resolveLetterPrefix = (): 'fmb' | 'gb' => {
+  const resolveLetterPrefix = useCallback((): 'fmb' | 'gb' => {
     if (letterName === null) throw new Error('AddPreccSuccLetterDialog Letter name is required');
 
     const startsWithFmb = letterName.toLowerCase().startsWith('fmb');
@@ -111,7 +111,7 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
       return 'fmb';
     }
     throw new Error('AddPreccSuccLetterDialog searchLetterPrefix unsupported condition');
-  };
+  }, [letterName, isPrecursor, isSuccessor]);
 
   const handlePrecSuccLetterCheckboxChange = (value: 'unknown' | 'not_identified' | 'select') => {
     setSelectedOption(value);
@@ -121,19 +121,22 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
     }
   };
 
-  const searchForLetters = async (inputValue: string) => {
-    try {
-      const responseLetters = await searchForLetterNameTitle(resolveLetterPrefix(), inputValue);
+  const searchForLetters = useCallback(
+    async (inputValue: string) => {
+      try {
+        const responseLetters = await searchForLetterNameTitle(resolveLetterPrefix(), inputValue);
 
-      if (responseLetters) {
-        setLetters(responseLetters);
+        if (responseLetters) {
+          setLetters(responseLetters);
+        }
+      } catch (err) {
+        enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
+          variant: 'error',
+        });
       }
-    } catch (err) {
-      enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
-        variant: 'error',
-      });
-    }
-  };
+    },
+    [resolveLetterPrefix],
+  );
 
   const debouncedSearchForLetters = useMemo(
     () => debounce(searchForLetters, 300), // 300ms delay

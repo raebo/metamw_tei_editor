@@ -1,5 +1,5 @@
 import type { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
 import { EditorUtils } from '@src/utils/editor';
 import { backendService } from '@src/utils/editor/backendService';
@@ -143,21 +143,27 @@ const ManageRismEntryDialog = (props: DefaultDialogProps) => {
     );
   };
 
-  const searchRismEntries = async (term: string) => {
-    try {
-      const results = await backendService.searchRismEntries(term);
-      setRismEntries(results);
-    } catch (error) {
-      enqueueSnackbar(
-        t('errors:editor.dialog.rismEntries.noBackendRismEntries', {
-          reason: (error as Error).message,
-        }),
-        { variant: 'error' },
-      );
-    }
-  };
+  const searchRismEntries = useCallback(
+    async (term: string) => {
+      try {
+        const results = await backendService.searchRismEntries(term);
+        setRismEntries(results);
+      } catch (error) {
+        enqueueSnackbar(
+          t('errors:editor.dialog.rismEntries.noBackendRismEntries', {
+            reason: (error as Error).message,
+          }),
+          { variant: 'error' },
+        );
+      }
+    },
+    [t],
+  );
 
-  const debouncedSearchForRismEntries = useMemo(() => debounce(searchRismEntries, 300), []);
+  const debouncedSearchForRismEntries = useMemo(
+    () => debounce(searchRismEntries, 300),
+    [searchRismEntries],
+  );
 
   const rismEntryChanged = (entry: RismEntry | null) => {
     if (entry) {
