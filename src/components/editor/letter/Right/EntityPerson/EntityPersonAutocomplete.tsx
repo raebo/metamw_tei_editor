@@ -46,7 +46,7 @@ const EntityPersonAutocomplete = (props: EntityPersonAutocompleteProps) => {
   }, [entriesToExclude]);
 
   const searchForPeople = useCallback(
-    debounce(async (inputValue: string) => {
+    async (inputValue: string) => {
       try {
         const responsePeoples: SnippetEntity[] | undefined = await searchEditortEntities(
           inputValue,
@@ -54,16 +54,22 @@ const EntityPersonAutocomplete = (props: EntityPersonAutocompleteProps) => {
         );
 
         if (responsePeoples) {
-          const excludeKeys = new Set(props.addedPersonEntries.map((item) => item.key));
-          setAutocompletePeople(responsePeoples.filter((item) => !excludeKeys.has(item.entityKey)));
+          setAutocompletePeople(
+            responsePeoples.filter((item) => !entriesToExclude.has(item.entityKey)),
+          );
         }
       } catch (err) {
         enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
           variant: 'error',
         });
       }
-    }, 300),
-    [props.addedPersonEntries],
+    },
+    [entriesToExclude],
+  );
+
+  const debouncedSearchForPeople = useMemo(
+    () => debounce(searchForPeople, 300), // 300ms delay
+    [searchForPeople],
   );
 
   const setAutoCompletePerson = (entry: SnippetEntity | null) => {
@@ -84,7 +90,7 @@ const EntityPersonAutocomplete = (props: EntityPersonAutocompleteProps) => {
             inputValue &&
             reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
           ) {
-            searchForPeople(inputValue);
+            void debouncedSearchForPeople(inputValue);
           }
         }}
         getOptionLabel={() => ''}

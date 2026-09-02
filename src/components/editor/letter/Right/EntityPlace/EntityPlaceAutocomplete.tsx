@@ -36,7 +36,7 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
   const [autocompletePlaces, setAutocompletePlaces] = useState<SnippetEntity[]>([]);
   const entriesToExclude = useMemo(() => {
     return new Set(props.addedPlaceEntries.map((item) => item.key));
-  }, [props.addedPlaceEntries, props.placeType]);
+  }, [props.addedPlaceEntries]);
 
   useEffect(() => {
     const fetchDefaultPlaces = async (placeType: 'SIGHT' | 'INSTITUTION' | 'SETTLEMENT') => {
@@ -66,30 +66,37 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
     setIsNewEntry(latestProps.current.isNewEntry);
   }, [entriesToExclude, props]);
 
-  const searchForPlaces = useCallback(
-    debounce(async (inputValue: string) => {
-      const currentProps = latestProps.current;
-      try {
-        if (currentProps.placeType === null) {
-          throw new Error('Place type is null');
-        }
-
-        const responsePlaces: SnippetEntity[] | undefined = await searchEditortEntities(
-          inputValue,
-          currentProps.placeType,
-        );
-
-        if (responsePlaces) {
-          const excludeKeys = new Set(props.addedPlaceEntries.map((item) => item.key));
-          setAutocompletePlaces(responsePlaces.filter((item) => !excludeKeys.has(item.entityKey)));
-        }
-      } catch (err) {
-        enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
-          variant: 'error',
-        });
+  // Reads everything through `latestProps` (kept current by the effect above) rather than
+  // closing over `props`/`entriesToExclude` directly: this is a debounced callback, so by the
+  // time it actually runs, a closure over the props from render time could be stale. Depending
+  // on `[]` below (created once) preserves that on purpose - recreating the debounced wrapper
+  // on every keystroke-relevant prop change would reset its debounce timer.
+  const searchForPlaces = useCallback(async (inputValue: string) => {
+    const currentProps = latestProps.current;
+    try {
+      if (currentProps.placeType === null) {
+        throw new Error('Place type is null');
       }
-    }, 300),
-    [props.addedPlaceEntries],
+
+      const responsePlaces: SnippetEntity[] | undefined = await searchEditortEntities(
+        inputValue,
+        currentProps.placeType,
+      );
+
+      if (responsePlaces) {
+        const excludeKeys = new Set(currentProps.addedPlaceEntries.map((item) => item.key));
+        setAutocompletePlaces(responsePlaces.filter((item) => !excludeKeys.has(item.entityKey)));
+      }
+    } catch (err) {
+      enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
+        variant: 'error',
+      });
+    }
+  }, []);
+
+  const debouncedSearchForPlaces = useMemo(
+    () => debounce(searchForPlaces, 300), // 300ms delay
+    [searchForPlaces],
   );
 
   const setAutoCompletePlace = async (entry: SnippetEntity | null) => {
@@ -142,7 +149,7 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
             inputValue &&
             reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
           ) {
-            searchForPlaces(inputValue);
+            void debouncedSearchForPlaces(inputValue);
           }
         }}
         getOptionLabel={(option) => {

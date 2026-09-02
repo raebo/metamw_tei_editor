@@ -1,5 +1,5 @@
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
 import { EditorConstants, EntityType } from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
@@ -38,23 +38,25 @@ const EntityAuthorAutocomplete = (props: EntityAuthorAutocompleteProps) => {
     fetchDefaultPeople();
   }, []);
 
-  const searchForPeople = useCallback(
-    debounce(async (inputValue: string) => {
-      try {
-        const responsePeoples: SnippetEntity[] | undefined = await searchEditortEntities(
-          inputValue,
-          EntityType.PERSON,
-        );
+  const searchForPeople = async (inputValue: string) => {
+    try {
+      const responsePeoples: SnippetEntity[] | undefined = await searchEditortEntities(
+        inputValue,
+        EntityType.PERSON,
+      );
 
-        if (responsePeoples) {
-          setAutocompletePeople(responsePeoples);
-        }
-      } catch (err) {
-        enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
-          variant: 'error',
-        });
+      if (responsePeoples) {
+        setAutocompletePeople(responsePeoples);
       }
-    }, 300),
+    } catch (err) {
+      enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
+        variant: 'error',
+      });
+    }
+  };
+
+  const debouncedSearchForPeople = useMemo(
+    () => debounce(searchForPeople, 300), // 300ms delay
     [],
   );
 
@@ -76,7 +78,7 @@ const EntityAuthorAutocomplete = (props: EntityAuthorAutocompleteProps) => {
             inputValue &&
             reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
           ) {
-            searchForPeople(inputValue);
+            void debouncedSearchForPeople(inputValue);
           }
         }}
         getOptionLabel={() => ''}
