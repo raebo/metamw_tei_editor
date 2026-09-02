@@ -93,6 +93,14 @@ Damit sind beide in dieser Sektion dokumentierten "unfertigen Features" abgearbe
 
 Warnungen 16 → 12. Verifiziert: `yarn tsc --noEmit`, `yarn eslint --max-warnings=12` (Exit 0), `yarn build`, `yarn test --runInBand` (14/100 grün). `.gitlab-ci.yml`-Ratchet nachgezogen.
 
+**Nachtrag 2026-09-02 — `exhaustive-deps` Batch 5/n (4 Warnungen) ✅:**
+- `SnippetEntityInfoDialog.tsx`: `filterAttributeList = ['country']` war eine im Komponentenkörper bei jedem Render neu erzeugte Array-Literal-Konstante, die nie von Props/State abhängt — auf Modulebene verschoben (wie die bereits vorhandenen `firstHeaderOptions` u. Ä. in den TeiHeaderDialog-Dateien), dadurch keine Dependency mehr nötig.
+- `LetterViewContainer.tsx`: zweiter Effekt las `statePinnedLetters` (Redux-Selector-Wert), ohne es als Dependency zu führen — ein anderer Effekt in derselben Datei nutzt es bereits korrekt als Dependency; sicher ergänzt, da der Effekt sich durch das interne `reloadLetterContent`-Flag selbst "abschaltet" (kein Rückkopplungsrisiko).
+- `LeftClickAnnotationAction.tsx`: `validNodeList` war bereits eine Modul-Konstante, wurde aber trotzdem unnötig als Dependency geführt — entfernt (ESLints eigene Erklärung: Aussenwerte lösen ohnehin keinen Re-Render aus).
+- `AddNewLetterDialog.tsx`: `goToNextStep`/`goToPreviousStep` waren nicht memoisiert, wurden aber in einem `[]`-Keydown-Effekt verwendet. Da beide ausschliesslich funktionale State-Updates nutzen (`setCurrentStepIndex(i => …)`, liest also nie einen möglicherweise veralteten Wert direkt), war das Stale-Closure-Risiko schon vorher praktisch null — trotzdem sauber in `useCallback` gewrappt und als Dependency ergänzt statt nur zu unterdrücken. Dabei aufgefallen: `goToNextStep` griff auf `STEP_DEFINITIONS.length` zu, ein bei jedem Render aus der Modul-Konstante `STEP_ORDER` neu abgeleitetes Array — auf die stabile `STEP_ORDER.length` umgestellt, um keine weitere Dependency zu benötigen.
+
+Warnungen 12 → 8. Verifiziert: `yarn tsc --noEmit`, `yarn eslint --max-warnings=8` (Exit 0), `yarn build`, `yarn test --runInBand` (14/100 grün, inkl. gezielt erneut laufen gelassener `AddNewLetterDialog.test.tsx`). `.gitlab-ci.yml`-Ratchet nachgezogen.
+
 ### P2 – Bundle und Assets verschlanken ✅
 **Session 1 (Assets):**
 - **Font Awesome komplett entfernt** (nicht nur die vermutete TTF/WOFF2-Doppelung): `fontawesomeAll.css` + alle 8 Webfont-Dateien (`src/assets/webfonts/`) waren toter Code — global in `index.tsx` importiert, aber `grep` über den gesamten `src/`-Baum fand **0** Verwendungen von `fa-*`-Klassen; das Projekt nutzt durchgehend `@mui/icons-material` (33 Dateien). War u. a. für die im Build-Log dokumentierte 416-KiB-Asset-Größenwarnung (`fa-solid-900.ttf`) verantwortlich; diese Warnung ist nach dem Fix aus dem Build verschwunden. `main.css` dadurch 198 KiB → 125 KiB.

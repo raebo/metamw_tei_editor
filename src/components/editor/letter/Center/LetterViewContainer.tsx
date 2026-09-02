@@ -123,7 +123,7 @@ const LetterViewContainer = () => {
         );
       });
     }
-  }, [dispatch, reloadLetterContent, stateEditorLetter]);
+  }, [dispatch, reloadLetterContent, stateEditorLetter, statePinnedLetters]);
 
   // 👇 memoize XMLDisplayParser so it only re-renders if xmlContent changes
   const parserXmlMemo = useMemo(() => {

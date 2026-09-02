@@ -17,9 +17,14 @@ interface SnippetReferencesInfoDialogProps {
   handleClose: () => void;
 }
 
+// Constant, not derived from props/state - defined at module scope so it doesn't need to be a
+// useEffect dependency (a fresh array literal recreated in the component body every render
+// would otherwise force the effect below to refetch on every render, not just on a genuine
+// referenceKey change).
+const filterAttributeList = ['country'];
+
 const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
   const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
-  const filterAttributeList = ['country'];
 
   useEffect(() => {
     (async () => {

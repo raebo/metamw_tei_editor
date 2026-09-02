@@ -1,7 +1,7 @@
 import { DefaultDialogProps } from '../EditorFormDialog';
 import DynamicDataDisplay from '@src/components/support/DynamicDataDisplay';
 import { DISPLAY_NAME_MAP } from '@src/utils/entityMappings';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Divider } from '@mui/material';
 import TeiHeaderFirstHeadline from './TeiHeaderDialog/10TeiHeaderFirstHeadline';
 import TeiHeaderSndHeadline from './TeiHeaderDialog/20TeiHeaderSndHeadline';
@@ -153,9 +153,14 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
 
   const childOnChange = MiscUtils.stateHandling.createHandleChange(setCompletionState);
 
-  const goToPreviousStep = () => setCurrentStepIndex((i) => Math.max(0, i - 1));
-  const goToNextStep = () =>
-    setCurrentStepIndex((i) => Math.min(STEP_DEFINITIONS.length - 1, i + 1));
+  const goToPreviousStep = useCallback(() => setCurrentStepIndex((i) => Math.max(0, i - 1)), []);
+  // STEP_ORDER.length (not STEP_DEFINITIONS.length): STEP_DEFINITIONS is rebuilt every render
+  // from the module-level, constant-length STEP_ORDER, so referencing STEP_ORDER directly
+  // avoids needing STEP_DEFINITIONS itself as a dependency here.
+  const goToNextStep = useCallback(
+    () => setCurrentStepIndex((i) => Math.min(STEP_ORDER.length - 1, i + 1)),
+    [],
+  );
 
   const currentStep = STEP_DEFINITIONS[currentStepIndex];
   const previousStep = currentStepIndex > 0 ? STEP_DEFINITIONS[currentStepIndex - 1] : null;
@@ -191,7 +196,7 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
     const node = containerRef.current;
     node?.addEventListener('keydown', handleKeyDown);
     return () => node?.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [goToPreviousStep, goToNextStep]);
 
   // Saving is intentionally allowed as soon as the letter name is set; every other field
   // (headlines, writer, prev/next letter, writing/receiving place, receivers, language,

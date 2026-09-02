@@ -232,7 +232,7 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
         );
       }
     },
-    [handleEntityNodeClick, handleLetterNodeClick, isValidTitleNode, validNodeList],
+    [handleEntityNodeClick, handleLetterNodeClick, isValidTitleNode],
   );
 
   useEffect(() => {
