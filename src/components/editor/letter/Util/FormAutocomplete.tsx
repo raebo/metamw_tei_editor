@@ -50,7 +50,7 @@ const FormAutocomplete = (props: FormAutocompleteProps) => {
 
     const debounceTimeout = setTimeout(fetchData, 300); // Debounce API calls
     return () => clearTimeout(debounceTimeout); // Cleanup on new input
-  }, [inputValue]);
+  }, [inputValue, props.entityType]);
 
   return (
     <>

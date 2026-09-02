@@ -87,7 +87,12 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
       setDocData({ xmlDoc: null, teiHeader: null });
     }
-  }, [props]);
+    // Was `[props]` before: since `props` is a fresh object every render, that made this
+    // effect re-run (and re-extract the header) on every unrelated parent re-render while the
+    // dialog stayed open, not just when a new document actually arrived. The dialog is fully
+    // unmounted/remounted on open/close (see EditorFormDialog.tsx), so docData.xmlDoc is
+    // correctly re-seeded from props.xmlDoc on every fresh open regardless.
+  }, [docData.xmlDoc]);
 
   const [completionState, setCompletionState] = React.useState<CompletionState>({
     firstHeaderComplete: false,

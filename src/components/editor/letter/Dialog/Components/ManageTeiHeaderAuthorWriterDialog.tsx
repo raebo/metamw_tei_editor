@@ -60,6 +60,14 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
       setDocData({ xmlDoc: null, teiHeader: null });
     }
+    // Deliberately NOT depending on docData.xmlDoc, despite reading it above: docData.xmlDoc
+    // is seeded from props.xmlDoc at mount, so this already runs with the right value on the
+    // initial pass. Adding it as a dependency would be actively unsafe here - the catch branch
+    // resets docData.xmlDoc to null, which would then re-trigger this same effect (since it's
+    // now a listed dependency), which re-seeds xmlDoc from props.xmlDoc, which fails
+    // extraction the same deterministic way again, resets to null again, and so on: an
+    // infinite loop for any document where extractTeiHeader throws.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.xmlDoc]);
 
   useEffect(() => {
