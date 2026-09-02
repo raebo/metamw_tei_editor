@@ -32,11 +32,11 @@ lint:
   stage: test
   script:
     # NOTE: --max-warnings=0 (yarn lint) is the long-term target, but the repo currently
-    # carries 38 documented pre-existing warnings (see audit.md, "react-hooks/exhaustive-deps",
+    # carries 37 documented pre-existing warnings (see audit.md, "react-hooks/exhaustive-deps",
     # deliberately not blind-fixed - each needs individual review). Using that as the current
     # ceiling here keeps this check meaningful (catches new warnings) without starting CI red
     # on day one. Ratchet this number down as audit.md's open lint items get resolved.
-    - yarn eslint src tests --max-warnings=38
+    - yarn eslint src tests --max-warnings=37
 
 test:
   stage: test

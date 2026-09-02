@@ -151,13 +151,13 @@ const ShowButtons = (props: Props) => {
             <Button color="info" onClick={() => activateEditMode()}>
               Anpassen
             </Button>
-            <Button color="info" onClick={() => handleRejectSnippet()}>
+            <Button color="info" onClick={() => handleOpenDialog('REJECT', handleRejectSnippet)}>
               Verwerfen
             </Button>
             <Button
               color="primary"
               disabled={sharedSnippet?.referenceKeyChanged ? false : true}
-              onClick={() => handleAcceptSnippet()}
+              onClick={() => handleOpenDialog('ACCEPT', handleAcceptSnippet)}
             >
               Übernehmen
             </Button>
