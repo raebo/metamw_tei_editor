@@ -2,6 +2,8 @@ export interface AutoAnnoJob {
   id: number;
   name: string;
   status: string;
+  search_string: string;
+  updated_at: string;
   letters_count: number;
   snippets_count: number;
   letters_open: number;
