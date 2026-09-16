@@ -2,6 +2,8 @@
 
 Ursprünglicher Stand: 2026-08-12. Aktualisiert: 2026-08-12 (nach Abarbeitung aller P0- und der meisten P1-Punkte, siehe Commit-Verweise unten); 2026-09-02 (beide P2-Punkte, CI-Grundgerüst, beide dokumentierten "unfertigen Features" und die komplette `exhaustive-deps`-Lint-Baseline abgearbeitet, in mehreren Sessions). Geprüft wurden Konfiguration, Build, TypeScript, ESLint, Tests sowie stichprobenartig Auth-, API- und XML/HTML-Pfade. Es wurde kein externer Dependency-/CVE-Scan ausgefuehrt.
 
+Ergänzt: 2026-09-16 (gezielte Durchsicht des Auto-Anno-Bereichs, d. h. `src/components/auto_anno`, `src/services/auto_anno`, `src/utils/auto_anno`, `src/redux/{slices,thunks}/auto*`; siehe neue Punkte unten unter "Ehemals offene Arbeitspakete").
+
 ## Kurzfazit (Update)
 
 Alle P0-Befunde sowie die HTTP-/Auth-Konsolidierung, der TypeScript-Gate und die ESLint-Fehler (nicht Warnungen) aus dem ursprünglichen Audit sind behoben. `yarn tsc --noEmit`, `yarn eslint src tests --max-warnings=0` (**0 Fehler, 0 Warnungen** — vollständig sauber) und `yarn build` (korrekter Produktionsmodus) laufen sauber; die volle Testsuite (14 Suiten / 100 Tests) ist grün. Beide P2-Punkte ("Doku/Altlasten" und "Bundle/Assets") sind abgearbeitet — u. a. initialer Bundle 4.25 MiB → 1.67 MiB (−61 %). Ein CI-Grundgerüst (`.gitlab-ci.yml`) steht. Beide ursprünglich dokumentierten "unfertigen Features" sind geklärt: `ShowButtons.tsx` war ein echter Bug (gefixt, mit Regressionstest), `AutoAnnoLettersResizable.tsx` war totes, unerreichbares Experiment (auf Nutzerentscheid hin gelöscht). Alle 38 ESLint-Warnungen (32 `exhaustive-deps` + 6 `no-unused-vars`) sind einzeln durchgegangen und behoben — mehrere davon waren echte Bugs (u. a. zwei Stale-Closure-Fälle, eine falsche `[props]`-Dependency, die den Effekt bei jedem Eltern-Render statt nur bei neuem Dokument auslöste), zwei bewusst nicht "gefixt" sondern mit begründetem `eslint-disable`-Kommentar dokumentiert, da das Nachtragen der von ESLint geforderten Dependency real eine Endlosschleife ausgelöst hätte. Offen bleiben nur noch: das Aktivieren von "Pipelines must succeed" als GitLab-Merge-Check sowie die Prüfung, ob ein CI-Runner registriert ist (beides ausserhalb der Reichweite dieses Werkzeugs).
@@ -67,6 +69,29 @@ Damit sind beide in dieser Sektion dokumentierten "unfertigen Features" abgearbe
 **Nachtrag 2026-09-02:** Erneut verifiziert (im Rahmen der P2-Doku-Bereinigung). Testsuite ist inzwischen auf 13 Suiten / 97 Tests gewachsen (u. a. `SanitizedHtml.test.tsx`, `HighlightedText.test.tsx`, `useInactivityLogout.test.ts` aus den oben dokumentierten XSS-/Auth-Fixes) — weiterhin alle grün. `yarn tsc --noEmit` und `yarn test --runInBand` schlugen zunächst mit `Cannot find module '@testing-library/dom'` bzw. `Module '@testing-library/react' has no exported member 'screen'` fehl; Ursache war ein unvollständiger lokaler `node_modules`-Stand (Paket in `yarn.lock` vorhanden, aber nicht gelinkt), kein Code- oder Doku-Fehler. Nach `yarn install` beide wieder grün. Falls das erneut auftritt: `yarn install` vor den Gate-Checks ausführen.
 
 ## Ehemals offene Arbeitspakete (inzwischen abgearbeitet, siehe jeweilige "Weiterhin offen"-Hinweise für Restpunkte)
+
+### P1 – Auto-Anno: Brief-Sperre (`locking_user`) wird nicht zuverlässig freigegeben
+**Gefunden:** 2026-09-16.
+
+Beim Öffnen eines Briefs setzt `AutoAnnoLetters.tsx` (`checkAndLockLetter`, Zeilen 94–122) per `patchAutoAnnoLetterLockingUser(id, user.id)` eine serverseitige Sperre. Freigegeben wird sie ausschließlich in `AutoAnnoLetterHandle.tsx` (`saveAndLeaveLetterView`, Zeilen 140–142) durch den expliziten Klick auf "Stand Speichern". Es gibt weder ein `useEffect`-Cleanup (Unmount/Routenwechsel) noch einen `beforeunload`-Handler. Browser-Zurück, Tab schließen, direkte URL-Navigation weg von der Seite oder ein Absturz lassen den Brief serverseitig dauerhaft gesperrt ("Der Brief wird von einem anderen Benutzer bearbeitet") — andere Bearbeiter:innen sind bis zu einer manuellen Freigabe blockiert.
+
+**Vorschlag:** Freigabe zusätzlich in einem `useEffect`-Cleanup sowie nach Möglichkeit per `beforeunload`/`visibilitychange` auslösen; serverseitig zusätzlich ein Lock-Timeout einführen, da Client-Events (z. B. Tab-Crash) nie zu 100 % zuverlässig feuern.
+
+### P1 – Auto-Anno: Keine Laufzeitvalidierung der API-Antworten
+Alle Funktionen in `src/services/auto_anno/apiAutoAnno.service.ts` (u. a. `fetchAutoAnnoJobs`, `fetchAutoAnnoJobLetters`, `fetchAutoAnnoLetter`, `fetchAutoAnnoLetterSnippets`, `fetchAutoAnnoSnippetEntityData`) geben `response.data` ungeprüft als `AutoAnnoJob[]`, `AutoAnnoJobLetter`, `AutoAnnoSnippet[]` bzw. `SnippetEntity` zurück (siehe `src/services/mappings/autoAnnoMappings.ts`) — dafür existiert kein Zod-Schema in `src/schemas/`, entgegen der in `CLAUDE.md` festgelegten Regel, API-Antworten an der Systemgrenze zu validieren. Die ungeprüften Felder landen anschließend in DOM-manipulierendem Code (`src/utils/auto_anno/domHandling.ts`, `setAttribute`/`textContent`-Aufrufe mit z. B. `snippetEntity.entityKey`), der bei fehlenden/veränderten Feldern (etwa nach einer Backend-Änderung) `undefined`-Werte still in echte TEI-Attribute schreibt statt früh sichtbar zu scheitern.
+
+**Vorschlag:** Zod-Schemas für die Auto-Anno-Antworttypen ergänzen (analog zu bestehenden Schemas in `src/schemas/`) und an den `fetch*`-Stellen parsen statt nur casten.
+
+### P2 – Auto-Anno: Unsichere String-Interpolation in CSS-Selektoren und Such-URL
+- `src/utils/auto_anno/domHandling.ts` baut an vier Stellen (`markSpanAndScrollToId`, `autoAnnoReplaceDomNodeContent`, `referenceTypeForXmlId`, `removeSnippetEntityFromDom`) CSS-Attributselektoren per Stringkonkatenation aus `xmlId`-Werten, die aus nicht vertrauenswürdigem Backend-XML stammen (`document.querySelector('[xml\\:id="' + xmlId + '"]')`). Enthält ein `xml:id` ein `"`, wirft `querySelector` eine `DOMException`; ohne `CSS.escape()` ist das nicht abgesichert.
+- `src/services/auto_anno/apiAutoAnno.service.ts` (`searchAutoAnnoSnippetEntities`, ca. Zeile 99) interpoliert den frei eingegebenen Suchtext direkt und unescaped als URL-Pfadsegment (`/search_entity/${searchString}/...`) statt ihn als Query-Parameter zu senden oder mit `encodeURIComponent` zu kodieren. Enthält die Eingabe z. B. `/` oder `#`, bricht die Route/Suche still.
+
+**Vorschlag:** `CSS.escape(xmlId)` in `domHandling.ts` verwenden; Suchbegriff in `searchAutoAnnoSnippetEntities` per `encodeURIComponent` kodieren oder als Query-Parameter senden.
+
+### P2 – Auto-Anno: TEI-Export über `innerHTML` + Regex-Fixups statt `XMLSerializer`
+`transformLetterXmlForExport` (`src/utils/auto_anno/domHandling.ts:190`) bekommt an allen Aufrufstellen (`ShowButtons.tsx`, `EditButtons.tsx`, `SnippetReferencesList.tsx`) das Ergebnis von `.innerHTML` eines im echten Browser-DOM geparsten Brief-Knotens übergeben. Weil der Browser dabei HTML- statt XML-Serialisierung anwendet, werden Tag-/Attributnamen kleingeschrieben; die Funktion repariert das nachträglich per Regex (`persname`→`persName`, `placename`→`placeName`, `schemalocation`→`schemaLocation`). Das deckt nur die drei bekannten Fälle ab und widerspricht der `CLAUDE.md`-Vorgabe, TEI-Inhalte mit `DOMParser`/`XMLSerializer` statt String-/Regex-Verarbeitung zu behandeln. Neue TEI-Elemente/-Attribute mit Groß-/Kleinschreibung würden beim Export still falsch geschrieben.
+
+**Vorschlag:** Export über `XMLSerializer` auf dem Original-XML-DOM (nicht über das HTML-geparste Anzeige-DOM) erzeugen, um die Regex-Fixup-Liste überflüssig zu machen.
 
 ### P1 (Rest) – Lint-Baseline vollständig auf null; CI-Grundgerüst steht ✅
 **CI-Einrichtung erledigt (2026-09-02):**
