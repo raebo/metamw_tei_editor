@@ -2,6 +2,8 @@
 
 Ursprünglicher Stand: 2026-08-12. Aktualisiert: 2026-08-12 (nach Abarbeitung aller P0- und der meisten P1-Punkte, siehe Commit-Verweise unten). Geprüft wurden Konfiguration, Build, TypeScript, ESLint, Tests sowie stichprobenartig Auth-, API- und XML/HTML-Pfade. Es wurde kein externer Dependency-/CVE-Scan ausgefuehrt.
 
+Ergänzt: 2026-09-16 (gezielte Durchsicht des Auto-Anno-Bereichs, d. h. `src/components/auto_anno`, `src/services/auto_anno`, `src/utils/auto_anno`, `src/redux/{slices,thunks}/auto*`; siehe neue Punkte unten unter "Offene Arbeitspakete").
+
 ## Kurzfazit (Update)
 
 Alle P0-Befunde sowie die HTTP-/Auth-Konsolidierung, der TypeScript-Gate und die ESLint-Fehler (nicht Warnungen) aus dem ursprünglichen Audit sind behoben. `yarn tsc --noEmit`, `yarn eslint src tests --max-warnings=0` (0 Fehler) und `yarn build` (korrekter Produktionsmodus) laufen sauber; die volle Testsuite (11 Suiten / 86 Tests) ist grün. Offen bleiben: ~2100→38 reduzierte ESLint-Warnungen (davon 32 `react-hooks/exhaustive-deps` bewusst nicht blind gefixt, siehe unten), zwei dabei neu entdeckte vermutlich unfertige Features, sowie die P2-Punkte (Bundle-Größe, Doku/Altlasten, CI-Einrichtung).
@@ -59,6 +61,29 @@ Siehe Production-Build-Commit oben. `PUBLIC_ENV_ALLOWLIST` (`REACT_APP_API_URL`,
 - `yarn build`: ✅ Exit 0, minifiziertes Production-Bundle mit Content-Hashes, kein `NODE_ENV`-Konflikt, Secret-Variablen nachweislich nicht im Output.
 
 ## Offene Arbeitspakete (unverändert oder P2)
+
+### P1 – Auto-Anno: Brief-Sperre (`locking_user`) wird nicht zuverlässig freigegeben
+**Gefunden:** 2026-09-16.
+
+Beim Öffnen eines Briefs setzt `AutoAnnoLetters.tsx` (`checkAndLockLetter`, Zeilen 94–122) per `patchAutoAnnoLetterLockingUser(id, user.id)` eine serverseitige Sperre. Freigegeben wird sie ausschließlich in `AutoAnnoLetterHandle.tsx` (`saveAndLeaveLetterView`, Zeilen 140–142) durch den expliziten Klick auf "Stand Speichern". Es gibt weder ein `useEffect`-Cleanup (Unmount/Routenwechsel) noch einen `beforeunload`-Handler. Browser-Zurück, Tab schließen, direkte URL-Navigation weg von der Seite oder ein Absturz lassen den Brief serverseitig dauerhaft gesperrt ("Der Brief wird von einem anderen Benutzer bearbeitet") — andere Bearbeiter:innen sind bis zu einer manuellen Freigabe blockiert.
+
+**Vorschlag:** Freigabe zusätzlich in einem `useEffect`-Cleanup sowie nach Möglichkeit per `beforeunload`/`visibilitychange` auslösen; serverseitig zusätzlich ein Lock-Timeout einführen, da Client-Events (z. B. Tab-Crash) nie zu 100 % zuverlässig feuern.
+
+### P1 – Auto-Anno: Keine Laufzeitvalidierung der API-Antworten
+Alle Funktionen in `src/services/auto_anno/apiAutoAnno.service.ts` (u. a. `fetchAutoAnnoJobs`, `fetchAutoAnnoJobLetters`, `fetchAutoAnnoLetter`, `fetchAutoAnnoLetterSnippets`, `fetchAutoAnnoSnippetEntityData`) geben `response.data` ungeprüft als `AutoAnnoJob[]`, `AutoAnnoJobLetter`, `AutoAnnoSnippet[]` bzw. `SnippetEntity` zurück (siehe `src/services/mappings/autoAnnoMappings.ts`) — dafür existiert kein Zod-Schema in `src/schemas/`, entgegen der in `CLAUDE.md` festgelegten Regel, API-Antworten an der Systemgrenze zu validieren. Die ungeprüften Felder landen anschließend in DOM-manipulierendem Code (`src/utils/auto_anno/domHandling.ts`, `setAttribute`/`textContent`-Aufrufe mit z. B. `snippetEntity.entityKey`), der bei fehlenden/veränderten Feldern (etwa nach einer Backend-Änderung) `undefined`-Werte still in echte TEI-Attribute schreibt statt früh sichtbar zu scheitern.
+
+**Vorschlag:** Zod-Schemas für die Auto-Anno-Antworttypen ergänzen (analog zu bestehenden Schemas in `src/schemas/`) und an den `fetch*`-Stellen parsen statt nur casten.
+
+### P2 – Auto-Anno: Unsichere String-Interpolation in CSS-Selektoren und Such-URL
+- `src/utils/auto_anno/domHandling.ts` baut an vier Stellen (`markSpanAndScrollToId`, `autoAnnoReplaceDomNodeContent`, `referenceTypeForXmlId`, `removeSnippetEntityFromDom`) CSS-Attributselektoren per Stringkonkatenation aus `xmlId`-Werten, die aus nicht vertrauenswürdigem Backend-XML stammen (`document.querySelector('[xml\\:id="' + xmlId + '"]')`). Enthält ein `xml:id` ein `"`, wirft `querySelector` eine `DOMException`; ohne `CSS.escape()` ist das nicht abgesichert.
+- `src/services/auto_anno/apiAutoAnno.service.ts` (`searchAutoAnnoSnippetEntities`, ca. Zeile 99) interpoliert den frei eingegebenen Suchtext direkt und unescaped als URL-Pfadsegment (`/search_entity/${searchString}/...`) statt ihn als Query-Parameter zu senden oder mit `encodeURIComponent` zu kodieren. Enthält die Eingabe z. B. `/` oder `#`, bricht die Route/Suche still.
+
+**Vorschlag:** `CSS.escape(xmlId)` in `domHandling.ts` verwenden; Suchbegriff in `searchAutoAnnoSnippetEntities` per `encodeURIComponent` kodieren oder als Query-Parameter senden.
+
+### P2 – Auto-Anno: TEI-Export über `innerHTML` + Regex-Fixups statt `XMLSerializer`
+`transformLetterXmlForExport` (`src/utils/auto_anno/domHandling.ts:190`) bekommt an allen Aufrufstellen (`ShowButtons.tsx`, `EditButtons.tsx`, `SnippetReferencesList.tsx`) das Ergebnis von `.innerHTML` eines im echten Browser-DOM geparsten Brief-Knotens übergeben. Weil der Browser dabei HTML- statt XML-Serialisierung anwendet, werden Tag-/Attributnamen kleingeschrieben; die Funktion repariert das nachträglich per Regex (`persname`→`persName`, `placename`→`placeName`, `schemalocation`→`schemaLocation`). Das deckt nur die drei bekannten Fälle ab und widerspricht der `CLAUDE.md`-Vorgabe, TEI-Inhalte mit `DOMParser`/`XMLSerializer` statt String-/Regex-Verarbeitung zu behandeln. Neue TEI-Elemente/-Attribute mit Groß-/Kleinschreibung würden beim Export still falsch geschrieben.
+
+**Vorschlag:** Export über `XMLSerializer` auf dem Original-XML-DOM (nicht über das HTML-geparste Anzeige-DOM) erzeugen, um die Regex-Fixup-Liste überflüssig zu machen.
 
 ### P1 (Rest) – Lint-Baseline vollständig auf null, CI herstellen
 **Aufgabe:** Die 32 `exhaustive-deps`-Warnungen einzeln durchgehen (echtes Verhalten verstehen, nicht blind Dependencies ergänzen). Die zwei oben dokumentierten unfertigen Features (`AutoAnnoLettersResizable.tsx`, `ShowButtons.tsx`) fachlich klären: Feature fertigstellen oder toten Code entfernen. `lint`/`typecheck`/`test:ci`-Scripts anlegen und in einer CI-Pipeline als Required Checks verankern.
