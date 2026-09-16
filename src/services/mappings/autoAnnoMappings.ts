@@ -15,7 +15,7 @@ export interface AutoAnnoJobLetter {
   letter_name: string;
   status: string;
   xml_content: string;
-  xml_content_updated: string;
+  xml_content_updated: string | null;
   content_changed: boolean;
   snippets_count: number;
   snippets_open: number;
