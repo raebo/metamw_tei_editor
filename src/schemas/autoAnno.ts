@@ -4,6 +4,8 @@ export const AutoAnnoJobSchema = z.object({
   id: z.number(),
   name: z.string(),
   status: z.string(),
+  search_string: z.string(),
+  updated_at: z.string(),
   letters_count: z.number(),
   snippets_count: z.number(),
   letters_open: z.number(),

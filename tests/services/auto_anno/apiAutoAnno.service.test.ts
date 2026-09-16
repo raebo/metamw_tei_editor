@@ -28,6 +28,8 @@ describe('apiAutoAnno.service', () => {
     id: 1,
     name: 'Job 1',
     status: 'open',
+    search_string: 'Goethe',
+    updated_at: '2026-01-01T12:00:00+01:00',
     letters_count: 3,
     snippets_count: 5,
     letters_open: 1,
@@ -42,6 +44,15 @@ describe('apiAutoAnno.service', () => {
     const result = await fetchAutoAnnoJobs();
 
     expect(result).toEqual([validJob]);
+  });
+
+  it('behaelt search_string und updated_at, die AutoAnnoList.tsx rendert (Zod entfernt sonst unbekannte Felder)', async () => {
+    mockGet.mockResolvedValue({ data: [validJob] });
+
+    const result = await fetchAutoAnnoJobs();
+
+    expect(result?.[0]?.search_string).toBe('Goethe');
+    expect(result?.[0]?.updated_at).toBe('2026-01-01T12:00:00+01:00');
   });
 
   it('gibt undefined zurueck (statt ungueltiger Daten), wenn die API-Antwort vom Schema abweicht', async () => {
