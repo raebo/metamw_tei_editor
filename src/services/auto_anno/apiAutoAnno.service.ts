@@ -6,13 +6,20 @@ import {
   SnippetApiEntity,
   SnippetEntity,
 } from '../mappings/autoAnnoMappings';
+import {
+  AutoAnnoJobSchema,
+  AutoAnnoJobLetterSchema,
+  AutoAnnoSnippetSchema,
+  SnippetApiEntitySchema,
+  SnippetEntitySchema,
+} from '@src/schemas/autoAnno';
 import axios from 'axios';
 
 export const fetchAutoAnnoJobs = async (): Promise<AutoAnnoJob[] | undefined> => {
   try {
     const response = await initApi.initApi().get('/jwt/automatic_annotations');
 
-    return response.data;
+    return AutoAnnoJobSchema.array().parse(response.data);
   } catch (err) {
     console.error(err);
   }
@@ -24,7 +31,7 @@ export const fetchAutoAnnoJobLetters = async (
   try {
     const response = await initApi.initApi().get(`/jwt/automatic_annotations/${id}/letters`);
 
-    return response.data;
+    return AutoAnnoJobLetterSchema.array().parse(response.data);
   } catch (err) {
     console.error(err);
   }
@@ -38,7 +45,7 @@ export const fetchAutoAnnoLetter = async (
       .initApi()
       .get(`/jwt/automatic_annotation_letters/${annoLetterId}`);
 
-    return response.data;
+    return AutoAnnoJobLetterSchema.parse(response.data);
   } catch (err) {
     console.error(err);
   }
@@ -69,7 +76,7 @@ export const fetchAutoAnnoLetterSnippets = async (
       .initApi()
       .get(`/jwt/automatic_annotation_letters/${id}/snippets`);
 
-    return response.data;
+    return AutoAnnoSnippetSchema.array().parse(response.data);
   } catch (err) {
     console.error(err);
   }
@@ -96,10 +103,12 @@ export const searchAutoAnnoSnippetEntities = async (
     const response = await initApi
       .initApi()
       .get(
-        `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/search_entity/${searchString}/${entityType.toLowerCase()}?per_page=20`,
+        `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/search_entity/${encodeURIComponent(searchString)}/${entityType.toLowerCase()}?per_page=20`,
       );
 
-    return response?.data?.[entityKey]?.entries || undefined;
+    const entries = response?.data?.[entityKey]?.entries;
+
+    return entries ? SnippetEntitySchema.array().parse(entries) : undefined;
   } catch (err) {
     throw new Error('Error fetching data for search entity: ' + err);
   }
@@ -129,10 +138,10 @@ export const fetchAutoAnnoSnippetEntityData = async (
   const response = await initApi
     .initApi()
     .get(
-      `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/entity_data/${entityType.toLowerCase()}/${entityKey}`,
+      `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/entity_data/${entityType.toLowerCase()}/${encodeURIComponent(entityKey)}`,
     );
 
-  return mapApiToSnippetEntity(response.data);
+  return mapApiToSnippetEntity(SnippetApiEntitySchema.parse(response.data));
 };
 
 //TODO: Why cant we move this to autoAnnoMappings.ts?
