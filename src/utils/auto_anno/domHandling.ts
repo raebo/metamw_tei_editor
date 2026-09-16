@@ -1,8 +1,13 @@
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { EditorConstants } from '@src/constants/editor';
 
+// xmlId values come from backend TEI content and are not guaranteed to be free of characters
+// that break an attribute selector (e.g. a literal `"`), so escape before building the selector.
+const queryByXmlId = (xmlId: string): Element | null =>
+  document.querySelector(`[xml\\:id="${CSS.escape(xmlId)}"]`);
+
 export const markSpanAndScrollToId = (xmlId: string) => {
-  const targetElement = document.querySelector('[xml\\:id="' + xmlId + '"]');
+  const targetElement = queryByXmlId(xmlId);
 
   if (targetElement) {
     targetElement.scrollIntoView({
@@ -40,7 +45,7 @@ export const autoAnnoReplaceDomNodeContent = (
   referenceType: string,
   snippetEntity: SnippetEntity,
 ): void => {
-  const domNode = document.querySelector(`[xml\\:id="${xmlId}"]`);
+  const domNode = queryByXmlId(xmlId);
 
   if (!domNode) {
     throw new Error(`No DOM element found with xml:id="${xmlId}".`);
@@ -66,7 +71,7 @@ export const autoAnnoReplaceDomNodeContent = (
 };
 
 export const referenceTypeForXmlId = (xmlId: string): string => {
-  const domNode = document.querySelector(`[xml\\:id="${xmlId}"]`);
+  const domNode = queryByXmlId(xmlId);
 
   if (!domNode) {
     throw new Error(`No DOM element found with xml:id="${xmlId}".`);
@@ -166,7 +171,7 @@ const replacePlaceDomNodeInstiSight = (
 };
 
 export const removeSnippetEntityFromDom = (xmlId: string): void => {
-  const domNode = document.querySelector(`[xml\\:id="${xmlId}"]`);
+  const domNode = queryByXmlId(xmlId);
 
   if (!domNode) {
     throw new Error(`No element found with xml:id="${xmlId}"`);
