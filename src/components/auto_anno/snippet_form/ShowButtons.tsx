@@ -7,7 +7,7 @@ import {
   autoAnnoReplaceDomNodeContent,
   removeMarkedSpans,
   removeSnippetEntityFromDom,
-  transformLetterXmlForExport,
+  serializeLetterXmlForExport,
 } from '@src/utils/auto_anno/domHandling';
 import {
   fetchAutoAnnoSnippetEntityData,
@@ -62,7 +62,8 @@ const ShowButtons = (props: Props) => {
 
       removeSnippetEntityFromDom(sharedSnippet?.xmlId);
 
-      const xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML);
+      removeMarkedSpans(xmlLetterNode);
+      const xmlContent = serializeLetterXmlForExport(xmlLetterNode);
 
       await updateAnnoLetterContent(props.autoJobLetterId, xmlContent);
 
@@ -114,7 +115,8 @@ const ShowButtons = (props: Props) => {
 
       autoAnnoReplaceDomNodeContent(sharedSnippet.xmlId, sharedSnippet.referenceType, data);
 
-      const xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML);
+      removeMarkedSpans(xmlLetterNode);
+      const xmlContent = serializeLetterXmlForExport(xmlLetterNode);
 
       await updateAnnoLetterContent(props.autoJobLetterId, xmlContent);
 
