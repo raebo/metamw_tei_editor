@@ -3,6 +3,42 @@ import { EntityType } from '@src/constants/editor';
 import { type RismEntry, SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { ProtagCreation, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
 import { prepareEditorXmlForBackend } from '@src/utils/xml/backendXml';
+import { z } from 'zod';
+
+const letterChangedSincePinnedSchema = z.object({
+  error: z.literal('letter_changed_since_pinned'),
+  message: z.string(),
+});
+
+const letterStalenessSchema = z.object({
+  stale: z.boolean(),
+  letter_updated_at: z.string().nullable(),
+});
+
+const rebaseLetterSchema = z.object({
+  success: z.literal(true),
+  message: z.string(),
+  xml_content: z.string(),
+});
+
+export interface LetterStaleness {
+  stale: boolean;
+  letterUpdatedAt: string | null;
+}
+
+export class LetterChangedSincePinnedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'LetterChangedSincePinnedError';
+  }
+}
+
+export class PinnedLetterNotFoundError extends Error {
+  constructor() {
+    super('Pinned letter not found');
+    this.name = 'PinnedLetterNotFoundError';
+  }
+}
 
 export const backendService = {
   updateUserLanguage: async (langCode: 'de' | 'en') => {
@@ -458,16 +494,72 @@ export const backendService = {
       }
     }
   },
+  fetchLetterStaleness: async (
+    letterId: number,
+    signal?: AbortSignal,
+  ): Promise<LetterStaleness> => {
+    try {
+      const response = await initApi().get(`/jwt/editor/pinned_letters/${letterId}/staleness`, {
+        signal,
+      });
+      const data = letterStalenessSchema.parse(response.data);
+
+      return {
+        stale: data.stale,
+        letterUpdatedAt: data.letter_updated_at,
+      };
+    } catch (error: unknown) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        (error as { response?: { status?: number } }).response?.status === 404
+      ) {
+        throw new PinnedLetterNotFoundError();
+      }
+      throw error;
+    }
+  },
+  rebaseLetter: async (letterId: number): Promise<string> => {
+    try {
+      const response = await initApi().post(`/jwt/editor/pinned_letters/${letterId}/rebase/`);
+      return rebaseLetterSchema.parse(response.data).xml_content;
+    } catch (error: unknown) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        typeof (error as { response?: { data?: { error?: unknown } } }).response?.data?.error ===
+          'string'
+      ) {
+        throw new Error((error as { response: { data: { error: string } } }).response.data.error);
+      }
+      throw error;
+    }
+  },
   publishLetter: async (letterId: number): Promise<boolean> => {
     try {
       await initApi().post(`/jwt/editor/pinned_letters/${letterId}/publish/`);
 
       return true;
-    } catch (err: any) {
-      const response = err.response;
+    } catch (err: unknown) {
+      const response =
+        typeof err === 'object' && err !== null && 'response' in err
+          ? (err as { response?: { status?: number; data?: unknown } }).response
+          : undefined;
 
       if (response !== undefined) {
-        throw new Error(response.data.error);
+        if (response.status === 409) {
+          const conflict = letterChangedSincePinnedSchema.safeParse(response.data);
+          if (conflict.success) {
+            throw new LetterChangedSincePinnedError(conflict.data.message);
+          }
+        }
+
+        const genericError = z.object({ error: z.string() }).safeParse(response.data);
+        throw new Error(
+          genericError.success ? genericError.data.error : 'Could not publish letter',
+        );
       } else {
         throw new Error('Error publishing letter content: ' + err);
       }

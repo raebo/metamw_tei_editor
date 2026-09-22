@@ -27,10 +27,17 @@ export const removeTmpIds = (text: string): string => {
   return text.replace(/\s?tmp:id=".*?"/g, '').replace(/\s?tmp_id=".*?"/g, '');
 };
 
+export const ensureXmlDeclaration = (text: string): string => {
+  if (/^\s*<\?xml\b/.test(text)) return text;
+  return `<?xml version="1.0" encoding="UTF-8"?> ${text.trimStart()}`;
+};
+
 export const prepareEditorXmlForBackend = (xmlString: string): string => {
   assertWellFormedXml(xmlString);
 
-  const preparedXml = removeTmpIds(replaceDataKeys(replaceWithCamelCase(xmlString)));
+  const preparedXml = ensureXmlDeclaration(
+    removeTmpIds(replaceDataKeys(replaceWithCamelCase(xmlString))),
+  );
 
   assertWellFormedXml(preparedXml);
   return preparedXml;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import XMLDisplayParser from '@src/components/editor/letter/Center/LetterViewContainer/XmlDisplayParser';
+import { textMarking } from '@src/utils/editor/textMarking';
 
 const renderXml = (xmlString: string) =>
   render(<XMLDisplayParser xmlContentRef={null} xmlString={xmlString} />);
@@ -39,6 +40,52 @@ describe('XMLDisplayParser', () => {
     const persName = container.querySelector('persname');
     expect(persName).toHaveAttribute('data-key', 'p1');
     expect(persName).toHaveAttribute('xml:lang', 'de');
+  });
+
+  it('maps a selection back to the complete source XML without serializing the filtered preview', () => {
+    const sourceXml = `<?xml version="1.0" encoding="UTF-8"?>
+      <TEI xmlns="http://www.tei-c.org/ns/1.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.tei-c.org/ns/1.0 schema.xsd"
+           xml:id="letter-1" xml:space="default">
+        <teiHeader><fileDesc><publicationStmt><licence target="https://example.test/licence">CC</licence></publicationStmt></fileDesc></teiHeader>
+        <text><body><div type="act_of_writing"><docAuthor style="hidden">Editor metadata</docAuthor><p><date cert="medium" notAfter="1821-01-31" notBefore="1821-01-25">Ende Januar</date> Domino anbieten.</p></div></body></text>
+      </TEI>`;
+    const { container } = renderXml(sourceXml);
+    const paragraph = container.querySelector('p');
+    const textNode = Array.from(paragraph?.childNodes ?? []).find(
+      (node) => node.nodeType === Node.TEXT_NODE && node.nodeValue?.includes('Domino'),
+    );
+    expect(textNode).toBeDefined();
+
+    const range = document.createRange();
+    const start = textNode?.nodeValue?.indexOf('Domino') ?? -1;
+    range.setStart(textNode!, start);
+    range.setEnd(textNode!, start + 'Domino'.length);
+
+    const markedDocument = textMarking.createMarkedXmlDocument(
+      sourceXml,
+      container as HTMLElement,
+      range,
+    );
+    const serialized = new XMLSerializer().serializeToString(markedDocument);
+
+    expect(markedDocument.documentElement.tagName).toBe('TEI');
+    expect(markedDocument.documentElement.namespaceURI).toBe('http://www.tei-c.org/ns/1.0');
+    expect(markedDocument.documentElement.getAttribute('xmlns:xsi')).toBe(
+      'http://www.w3.org/2001/XMLSchema-instance',
+    );
+    expect(markedDocument.documentElement.getAttribute('xsi:schemaLocation')).toBe(
+      'http://www.tei-c.org/ns/1.0 schema.xsd',
+    );
+    expect(markedDocument.documentElement.getAttribute('xml:space')).toBe('default');
+    expect(markedDocument.querySelector('licence')?.getAttribute('target')).toBe(
+      'https://example.test/licence',
+    );
+    expect(markedDocument.querySelector('date')?.getAttribute('cert')).toBe('medium');
+    expect(markedDocument.querySelector('date')?.getAttribute('notAfter')).toBe('1821-01-31');
+    expect(markedDocument.querySelector('docAuthor')?.getAttribute('style')).toBe('hidden');
+    expect(serialized).toContain('<span class="marked">Domino</span>');
   });
 
   // A literal object property named "key" is always intercepted by React as the reconciliation
