@@ -1,9 +1,8 @@
 import { initApi } from '@src/services/apiRequest.service';
-import { removeTmpIds, replaceDataKeys, replaceWithCamelCase } from '../auto_anno/domHandling';
 import { EntityType } from '@src/constants/editor';
-import { MiscUtils } from '../misc';
 import { type RismEntry, SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { ProtagCreation, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
+import { prepareEditorXmlForBackend } from '@src/utils/xml/backendXml';
 
 export const backendService = {
   updateUserLanguage: async (langCode: 'de' | 'en') => {
@@ -428,12 +427,7 @@ export const backendService = {
     try {
       await initApi().patch(`/jwt/editor/pinned_letters/${letterId}/set_content/`, {
         changes: {
-          new_content: MiscUtils.misc.pipeFunctions(
-            content,
-            replaceWithCamelCase,
-            replaceDataKeys,
-            removeTmpIds,
-          ),
+          new_content: prepareEditorXmlForBackend(content),
           xml_id: xmlId,
           change_type: changeType,
         },

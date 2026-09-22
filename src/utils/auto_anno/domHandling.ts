@@ -255,20 +255,3 @@ export const removeMarkedSpans = (root: Element): Element => {
 
   return root;
 };
-
-export const replaceWithCamelCase = (text: string): string => {
-  EditorConstants.camelCaseTags.forEach((tag) => {
-    const lowercaseTag = tag.toLowerCase();
-    text = text.replace(new RegExp(`\\b${lowercaseTag}\\b`, 'g'), tag);
-  });
-  return text;
-};
-
-export const replaceDataKeys = (text: string): string => {
-  return text.replace(/data-key="(.*?)"/g, 'key="$1"');
-};
-
-export const removeTmpIds = (text: string): string => {
-  // remove all tmp:id="..." or tmp_id="..."
-  return text.replace(/\s?tmp:id=".*?"/g, '').replace(/\s?tmp_id=".*?"/g, '');
-};

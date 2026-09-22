@@ -3,20 +3,23 @@ import {
   fetchAutoAnnoLetter,
   searchAutoAnnoSnippetEntities,
   fetchAutoAnnoSnippetEntityData,
+  updateAnnoLetterContent,
 } from '@src/services/auto_anno/apiAutoAnno.service';
 
 const mockGet = jest.fn();
+const mockPatch = jest.fn();
 
 jest.mock('@src/services/apiRequest.service', () => ({
   __esModule: true,
   default: {
-    initApi: () => ({ get: mockGet }),
+    initApi: () => ({ get: mockGet, patch: mockPatch }),
   },
 }));
 
 describe('apiAutoAnno.service', () => {
   beforeEach(() => {
     mockGet.mockReset();
+    mockPatch.mockReset();
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -140,5 +143,22 @@ describe('apiAutoAnno.service', () => {
     expect(result).toEqual(
       expect.objectContaining({ entityId: 1, entityKey: 'k/1', entityType: 'Person' }),
     );
+  });
+
+  it('sendet nur wohlgeformtes XML und veraendert keine Auto-Anno-Attribute', async () => {
+    mockPatch.mockResolvedValue({});
+    const xmlContent = '<TEI><text tmp_id="backend-value">Brief</text></TEI>';
+
+    await expect(updateAnnoLetterContent(7, xmlContent)).resolves.toBe(true);
+    expect(mockPatch).toHaveBeenCalledWith('/jwt/automatic_annotation_letters/7/set_xml_content', {
+      xmlContent,
+    });
+  });
+
+  it('sendet ungueltiges XML nicht an das Auto-Anno-Backend', async () => {
+    await expect(updateAnnoLetterContent(7, '<TEI><text></TEI>')).rejects.toThrow(
+      'XML content is not well-formed.',
+    );
+    expect(mockPatch).not.toHaveBeenCalled();
   });
 });

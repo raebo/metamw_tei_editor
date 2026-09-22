@@ -14,6 +14,7 @@ import {
   SnippetEntitySchema,
 } from '@src/schemas/autoAnno';
 import axios from 'axios';
+import { assertWellFormedXml } from '@src/utils/xml/backendXml';
 
 export const fetchAutoAnnoJobs = async (): Promise<AutoAnnoJob[] | undefined> => {
   try {
@@ -167,6 +168,7 @@ export const setAutoAnnoSnippetStatus = async (
 
 export const updateAnnoLetterContent = async (id: number, xmlContent: string): Promise<boolean> => {
   try {
+    assertWellFormedXml(xmlContent);
     await initApi
       .initApi()
       .patch(`/jwt/automatic_annotation_letters/${id}/set_xml_content`, { xmlContent });

@@ -63,6 +63,11 @@ URL-Pfadsegmente (`searchAutoAnnoSnippetEntities`, `fetchAutoAnnoSnippetEntityDa
 
 Die Auto-Anno-Ansicht hält jetzt neben dem weiterhin unveränderten React/HTML-Vorschau-DOM eine separat per `DOMParser` erzeugte XML-Arbeitskopie. Snippet-Übernahmen und -Entfernungen werden auf beiden Bäumen ausgeführt; an das Backend geht ausschließlich die per `XMLSerializer` serialisierte XML-Kopie. Damit bleiben auch bisher unbekannte case-sensitive TEI-Element- und Attributnamen erhalten. Die drei speziellen Regex-Reparaturen und der Export über `.innerHTML` sind entfernt. Ungültiges XML wird beim Initialisieren der Exportquelle explizit abgelehnt. Regressionstests decken unbekannte CamelCase-Namen, `schemaLocation`, Entity-Änderungen, das Entfernen von HTML-Hüllknoten und ungültiges XML ab.
 
+### P2 – Gemeinsame XML-Aufbereitung an den Backend-Grenzen ✅
+**Stand:** 2026-09-22
+
+Die zuvor im Auto-Anno-DOM-Modul liegenden Editor-Helfer (`replaceWithCamelCase`, `replaceDataKeys`, `removeTmpIds`) wurden nach `src/utils/xml/backendXml.ts` verschoben. Der normale Editor prüft XML nun direkt an der Backend-Grenze vor und nach diesen Transformationen auf Wohlgeformtheit; Auto-Anno prüft ebenfalls unmittelbar vor dem Request, behält aber seine bereits case-sensitive XML-Ausgabe unverändert bei. Auto-Anno selbst erzeugt keine temporären IDs und bekommt persistiertes Backend-XML als Quelle, daher entfernt dieser Pfad `tmp:id`/`tmp_id` bewusst nicht. Ein API-Test hält fest, dass unbekannte Auto-Anno-Attribute nicht still verändert werden. Direkte Regressionstests für beide Schreibpfade stellen sicher, dass ungültiges XML nicht gesendet wird. XSD-/TEI-Schemavalidierung und eine Umstellung des Editor-DOMs waren ausdrücklich nicht Teil dieses kleinen Folgetickets.
+
 **Bewusst nicht angefasst (Fertig-wenn-Kriterium für spätere Session):**
 - **32 `react-hooks/exhaustive-deps`-Warnungen**: nicht blind mit fehlenden Dependencies aufgefüllt, da das reale Endlosschleifen oder Verhaltensänderungen auslösen kann. Jede braucht Einzelfallprüfung.
 - **6 verbliebene `no-unused-vars`-Warnungen** in `AutoAnnoLettersResizable.tsx` und `snippet_form/ShowButtons.tsx` — beim Nachschauen stellte sich heraus, dass es sich um **echte unfertige/kaputte Features** handelt, nicht um simple Lint-Kosmetik:
@@ -82,22 +87,12 @@ Damit sind beide in dieser Sektion dokumentierten "unfertigen Features" abgearbe
 
 - `yarn tsc --noEmit`: ✅ 0 Fehler.
 - `yarn eslint src tests --max-warnings=0`: ✅ 0 Fehler, 38 Warnungen (s. o., unverändert gegenüber der Session vom 2026-08-12 — keine neuen Warnungen durch die Auto-Anno-Fixes).
-- `yarn test --runInBand`: ✅ 16 Suiten, 115 Tests, alle grün (Stand 2026-09-22).
+- `yarn test --runInBand`: ✅ 18 Suiten, 121 Tests, alle grün (Stand 2026-09-22).
 - `yarn build`: ✅ Exit 0, minifiziertes Production-Bundle mit Content-Hashes, kein `NODE_ENV`-Konflikt, Secret-Variablen nachweislich nicht im Output (Stand 2026-08-12; für die Auto-Anno-Fixes vom 2026-09-16 nicht erneut geprüft, da keine Build-/Webpack-Konfiguration angefasst wurde).
 
 **Nachtrag 2026-09-02:** Erneut verifiziert (im Rahmen der P2-Doku-Bereinigung). Testsuite ist inzwischen auf 13 Suiten / 97 Tests gewachsen (u. a. `SanitizedHtml.test.tsx`, `HighlightedText.test.tsx`, `useInactivityLogout.test.ts` aus den oben dokumentierten XSS-/Auth-Fixes) — weiterhin alle grün. `yarn tsc --noEmit` und `yarn test --runInBand` schlugen zunächst mit `Cannot find module '@testing-library/dom'` bzw. `Module '@testing-library/react' has no exported member 'screen'` fehl; Ursache war ein unvollständiger lokaler `node_modules`-Stand (Paket in `yarn.lock` vorhanden, aber nicht gelinkt), kein Code- oder Doku-Fehler. Nach `yarn install` beide wieder grün. Falls das erneut auftritt: `yarn install` vor den Gate-Checks ausführen.
 
 ## Ehemals offene Arbeitspakete (inzwischen abgearbeitet, siehe jeweilige "Weiterhin offen"-Hinweise für Restpunkte)
-
-### P2 – Gemeinsame XML-Aufbereitung an den Backend-Grenzen
-**Erfasst:** 2026-09-22 als bewusst vom Auto-Anno-Export getrenntes Folgeticket.
-
-Die Editor-Aufbereitung (`replaceWithCamelCase`, `replaceDataKeys`, `removeTmpIds`) liegt derzeit fachlich irreführend in `src/utils/auto_anno/domHandling.ts`, wird aber nur zentral von `src/utils/editor/backendService.ts` aufgerufen. Auto-Anno verwendet mit seiner case-sensitiven XML-Arbeitskopie bewusst nicht dieselbe String-Reparaturpipeline. Als kleines eigenes Arbeitspaket:
-
-- XML-Wohlgeformtheit unmittelbar vor beiden Backend-Schreibpfaden prüfen und nach etwaigen Transformationen erneut prüfen,
-- die gemeinsam nutzbaren XML-Helfer aus dem Auto-Anno-DOM-Modul in ein neutrales XML-Modul verschieben,
-- fachlich klären und mit einem Test festhalten, ob `tmp:id`/`tmp_id` im Auto-Anno-Pfad vorkommen können und dort entfernt werden müssen,
-- keine XSD-/TEI-Schemavalidierung oder größere Umstellung des Editor-DOMs in dieses Ticket aufnehmen.
 
 ### P1 (Rest) – Lint-Baseline vollständig auf null; CI-Grundgerüst steht ✅
 **CI-Einrichtung erledigt (2026-09-02):**
