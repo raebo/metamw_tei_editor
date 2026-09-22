@@ -104,10 +104,19 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
             selection,
             xmlContentRef.current,
             (sel: Selection) => {
-              EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current!);
-              EditorUtils.textMarking.markValidSelection(sel, sel.getRangeAt(0));
+              if (!stateEditorLetter.xmlContent) {
+                throw new Error('No source XML content found');
+              }
 
-              const xmlDoc = EditorUtils.xmlCheck.extractDocumentByRef(xmlContentRef);
+              const range = sel.getRangeAt(0);
+              const xmlDoc = EditorUtils.textMarking.createMarkedXmlDocument(
+                stateEditorLetter.xmlContent,
+                xmlContentRef.current!,
+                range,
+              );
+
+              EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current!);
+              EditorUtils.textMarking.markValidSelection(sel, range);
 
               dispatch(
                 setEditorMarkedAndContentLeftRightThunk({
@@ -145,7 +154,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         }
       });
     }, 100),
-    [dispatch, menuItemsMarked, props],
+    [dispatch, menuItemsMarked, props, stateEditorLetter.xmlContent],
   );
 
   const handleNoMarkupRightClick = useCallback(

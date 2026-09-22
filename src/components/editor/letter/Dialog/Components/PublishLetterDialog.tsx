@@ -12,11 +12,21 @@ import { EditorConstants } from '@src/constants/editor';
 import { DefaultDialogProps } from '../EditorFormDialog';
 import { Alert } from '@mui/material';
 import { MiscUtils } from '@src/utils/misc';
+import { LetterChangedSincePinnedError } from '@src/utils/editor/backendService';
+import { useRebaseLetter } from '@src/components/editor/letter/hooks/useRebaseLetter';
+import { useTranslation } from 'react-i18next';
 
 const PublishLetterDialog = (props: DefaultDialogProps) => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
+  const rebaseLetter = useRebaseLetter();
   const [errorMessage, setErrorMessage] = React.useState<string>();
+  const [conflictMessage, setConflictMessage] = React.useState<string>();
+  const [confirmRebase, setConfirmRebase] = React.useState(false);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const pinnedLetter = useSelector((state: RootState) =>
+    state.editorLetter.pinnedLetters.find((letter) => letter.id === state.editorLetter.letter.id),
+  );
 
   const publishButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -36,13 +46,19 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
     }
 
     try {
+      setErrorMessage(undefined);
       await EditorUtils.backendService.publishLetter(stateEditorLetter.id);
 
       dispatch(setReloadLetterContent({ reloadLetterContent: true }));
       enqueueSnackbar(`Letter ${stateEditorLetter.name} successfully published!`, {
         variant: 'success',
       });
+      props.onClose();
     } catch (error) {
+      if (error instanceof LetterChangedSincePinnedError) {
+        setConflictMessage(error.message);
+        return;
+      }
       setErrorMessage(MiscUtils.misc.getErrorMessage(error));
       enqueueSnackbar(
         'Letter could not publisheed on backend side. Please check the details.' +
@@ -53,6 +69,48 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
       );
     }
   };
+
+  const reloadLetter = async () => {
+    if (!stateEditorLetter.id) return;
+    if (pinnedLetter?.contentChanged && !confirmRebase) {
+      setConfirmRebase(true);
+      return;
+    }
+    const succeeded = await rebaseLetter(stateEditorLetter.id, stateEditorLetter.name);
+    if (succeeded) props.onClose();
+  };
+
+  if (conflictMessage) {
+    return (
+      <>
+        <DialogContent>
+          <Alert severity="warning">
+            {confirmRebase
+              ? t('editor:common.staleness.confirmBody')
+              : t('editor:common.staleness.publishConflict', { message: conflictMessage })}
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            size={EditorConstants.styles.panel.buttonSize}
+            variant="outlined"
+            onClick={props.onClose}
+            color="primary"
+          >
+            {t('editor:common.staleness.cancel')}
+          </Button>
+          <Button
+            size={EditorConstants.styles.panel.buttonSize}
+            variant="contained"
+            onClick={() => void reloadLetter()}
+            color="primary"
+          >
+            {t('editor:common.staleness.reload')}
+          </Button>
+        </DialogActions>
+      </>
+    );
+  }
 
   return (
     <>

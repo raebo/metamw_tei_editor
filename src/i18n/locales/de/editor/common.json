@@ -19,6 +19,16 @@
       "resetLetter": "Brief zurücksetzen"
     }
   },
+  "staleness": {
+    "notice": "Der Brief wurde zwischenzeitlich geändert.",
+    "reload": "Neu laden",
+    "cancel": "Abbrechen",
+    "confirmTitle": "Lokale Änderungen verwerfen?",
+    "confirmBody": "Der Brief wurde zwischenzeitlich geändert. Beim Neuladen werden alle lokalen Änderungen verworfen und der aktuelle Briefstand wird als neue Grundlage übernommen.",
+    "publishConflict": "Der Brief kann nicht veröffentlicht werden, weil sich seine Grundlage geändert hat. {{message}}",
+    "reloadSuccess": "Der Brief '{{name}}' wurde neu geladen.",
+    "reloadError": "Der Brief konnte nicht neu geladen werden: {{reason}}"
+  },
   "menuItems": {
     "managePrecursorLetter": "Vorgänger Brief bearbeiten",
     "manageSuccessorLetter": "Nachfolger Brief bearbeiten",

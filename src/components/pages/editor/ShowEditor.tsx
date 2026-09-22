@@ -61,6 +61,7 @@ import OnlyReadEditorPanel from '@src/components/editor/letter/Left/OnlyReadEdit
 import { ToolbarLetterNameDisplay } from '@src/components/editor/letter/Util/ToolbarLetterNameDisplay';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
+import LetterStalenessMonitor from '@src/components/editor/letter/LetterStalenessMonitor';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
@@ -629,7 +630,7 @@ const ShowEditor = () => {
             />
 
             <ToolbarMenuButton
-              title={t('editor:common.letterViewContainer.toolbarRight.addLetterToFavourite')}
+              title={t('editor:common.letterViewContainer.toolbarRight.publishLetter')}
               selected={selectedItemRight === EditorConstants.compMappingRight.PUBLISH_LETTER}
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
               icon={<CloudUploadOutlinedIcon />}
@@ -663,6 +664,7 @@ const ShowEditor = () => {
       />
       <EditorKeyHandle />
       <LetterFontSizeHandle />
+      <LetterStalenessMonitor />
     </>
   );
 };

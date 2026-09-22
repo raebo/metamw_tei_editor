@@ -19,6 +19,16 @@
       "resetLetter": "Reset letter"
     }
   },
+  "staleness": {
+    "notice": "The letter has changed in the meantime.",
+    "reload": "Reload",
+    "cancel": "Cancel",
+    "confirmTitle": "Discard local changes?",
+    "confirmBody": "The letter has changed in the meantime. Reloading discards all local changes and uses the current letter as the new baseline.",
+    "publishConflict": "The letter cannot be published because its baseline has changed. {{message}}",
+    "reloadSuccess": "The letter '{{name}}' was reloaded.",
+    "reloadError": "The letter could not be reloaded: {{reason}}"
+  },
   "menuItems": {
     "managePrecursorLetter": "Edit Predecessor Letter",
     "manageSuccessorLetter": "Edit Successor Letter",

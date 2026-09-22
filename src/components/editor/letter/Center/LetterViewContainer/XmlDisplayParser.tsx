@@ -82,7 +82,7 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
     return parser.parseFromString(xmlString, 'application/xml');
   };
 
-  const renderNode = (node: ChildNode): React.ReactNode => {
+  const renderNode = (node: ChildNode, sourcePath: number[] = []): React.ReactNode => {
     if (node.nodeType === Node.TEXT_NODE) {
       return node.textContent;
     }
@@ -95,7 +95,9 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         return null;
       }
 
-      const children = Array.from(element.childNodes).map((child) => renderNode(child));
+      const children = Array.from(element.childNodes).map((child, index) =>
+        renderNode(child, [...sourcePath, index]),
+      );
 
       if (UNWRAP_TAGS.has(tagName)) {
         return (
@@ -130,7 +132,11 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
       );
 
       return (
-        <TagName key={`${element.tagName}-${Math.random()}`} {...attributes}>
+        <TagName
+          key={`${element.tagName}-${Math.random()}`}
+          {...attributes}
+          data-editor-xml-path={sourcePath.join('.')}
+        >
           {children}
         </TagName>
       );

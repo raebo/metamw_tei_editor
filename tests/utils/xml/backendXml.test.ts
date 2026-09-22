@@ -1,4 +1,8 @@
-import { assertWellFormedXml, prepareEditorXmlForBackend } from '@src/utils/xml/backendXml';
+import {
+  assertWellFormedXml,
+  ensureXmlDeclaration,
+  prepareEditorXmlForBackend,
+} from '@src/utils/xml/backendXml';
 
 describe('backend XML preparation', () => {
   it('rejects malformed and empty XML', () => {
@@ -17,6 +21,14 @@ describe('backend XML preparation', () => {
     expect(preparedXml).toContain('<placeName>Berlin</placeName>');
     expect(preparedXml).not.toContain('tmp:id');
     expect(preparedXml).not.toContain('tmp_id');
+    expect(preparedXml).toMatch(/^<\?xml version="1\.0" encoding="UTF-8"\?>/);
     expect(() => assertWellFormedXml(preparedXml)).not.toThrow();
+  });
+
+  it('keeps an existing declaration and adds one when it is missing', () => {
+    const declared = '<?xml version="1.0" encoding="UTF-8"?><TEI />';
+
+    expect(ensureXmlDeclaration(declared)).toBe(declared);
+    expect(ensureXmlDeclaration('<TEI />')).toBe('<?xml version="1.0" encoding="UTF-8"?> <TEI />');
   });
 });

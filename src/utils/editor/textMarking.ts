@@ -2,6 +2,63 @@ import { EditorConstants } from '@src/constants/editor';
 import { EditorUtils } from './index';
 
 export const textMarking = {
+  createMarkedXmlDocument(xmlString: string, renderedRoot: HTMLElement, range: Range): Document {
+    if (
+      range.startContainer !== range.endContainer ||
+      range.startContainer.nodeType !== Node.TEXT_NODE
+    ) {
+      throw new Error('The selection must be contained in one text node.');
+    }
+
+    const renderedTextNode = range.startContainer;
+    const renderedParent =
+      renderedTextNode.parentElement?.closest<HTMLElement>('[data-editor-xml-path]');
+    if (!renderedParent) {
+      throw new Error('Could not map the selected text to the source XML.');
+    }
+
+    const xmlDoc = EditorUtils.xmlCheck.parseXml(xmlString);
+    if (xmlDoc.querySelector('parsererror')) {
+      throw new Error('The source XML is not well-formed.');
+    }
+
+    const sourcePath = renderedParent.dataset.editorXmlPath
+      ? renderedParent.dataset.editorXmlPath.split('.').map(Number)
+      : [];
+    let sourceParent: Node | null = xmlDoc.documentElement;
+    for (const index of sourcePath) {
+      sourceParent = sourceParent?.childNodes[index] ?? null;
+    }
+
+    if (!sourceParent || sourceParent.nodeType !== Node.ELEMENT_NODE) {
+      throw new Error('Could not resolve the selected element in the source XML.');
+    }
+
+    const renderedSiblingIndex = Array.from(renderedParent.childNodes)
+      .filter(
+        (node) => node.nodeType === Node.TEXT_NODE && node.nodeValue === renderedTextNode.nodeValue,
+      )
+      .indexOf(renderedTextNode as ChildNode);
+    const matchingSourceTextNodes = Array.from(sourceParent.childNodes).filter(
+      (node) => node.nodeType === Node.TEXT_NODE && node.nodeValue === renderedTextNode.nodeValue,
+    );
+    const sourceTextNode =
+      matchingSourceTextNodes[renderedSiblingIndex] ??
+      matchingSourceTextNodes.find((node) => node.nodeValue === renderedTextNode.nodeValue);
+
+    if (!sourceTextNode || range.endOffset > (sourceTextNode.nodeValue?.length ?? 0)) {
+      throw new Error('Could not resolve the selected text in the source XML.');
+    }
+
+    const sourceRange = xmlDoc.createRange();
+    sourceRange.setStart(sourceTextNode, range.startOffset);
+    sourceRange.setEnd(sourceTextNode, range.endOffset);
+    const markedSpan = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'span');
+    markedSpan.setAttribute('class', 'marked');
+    sourceRange.surroundContents(markedSpan);
+
+    return xmlDoc;
+  },
   isValidSelection(
     selection: Selection | null,
     rootElement: HTMLElement | null,
