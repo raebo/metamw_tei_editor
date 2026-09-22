@@ -7,7 +7,10 @@ import { RootState } from '@src/redux/redux.store';
 import { useSelector } from 'react-redux';
 import AutoAnnoSnippetList from './AutoAnnoSnippetList';
 import AutoAnnoLetterHandle from './AutoAnnoLetterHandle';
-import { markSpanAndScrollToId } from '@src/utils/auto_anno/domHandling';
+import {
+  initializeLetterXmlExportSource,
+  markSpanAndScrollToId,
+} from '@src/utils/auto_anno/domHandling';
 import {
   setAutoAnnoLetter,
   setSnippetEntityInfo,
@@ -144,6 +147,18 @@ const AutoAnnoLettersResizable: React.FC = () => {
   }, [snippetReferences.showReferences, componentMappingList]);
 
   const containerRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current && transformedData.xmlContent) {
+      try {
+        initializeLetterXmlExportSource(containerRef.current, transformedData.xmlContent);
+      } catch (error) {
+        enqueueSnackbar(error instanceof Error ? error.message : 'Invalid XML export source', {
+          variant: 'error',
+        });
+      }
+    }
+  }, [transformedData.xmlContent]);
 
   useEffect(() => {
     const snippetScrollToId = () => {

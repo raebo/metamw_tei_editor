@@ -4,6 +4,8 @@ Ursprünglicher Stand: 2026-08-12. Aktualisiert: 2026-08-12 (nach Abarbeitung al
 
 Ergänzt: 2026-09-16 (gezielte Durchsicht des Auto-Anno-Bereichs, d. h. `src/components/auto_anno`, `src/services/auto_anno`, `src/utils/auto_anno`, `src/redux/{slices,thunks}/auto*`). Drei der vier dabei gefundenen Punkte wurden noch am selben Tag behoben (siehe "Erledigte Arbeitspakete"), einer bewusst offen gelassen (siehe "Offene Arbeitspakete").
 
+Ergänzt: 2026-09-22 (der letzte offene Auto-Anno-Befund zum TEI-Export wurde mit einer separaten XML-Arbeitskopie und `XMLSerializer` behoben).
+
 ## Kurzfazit (Update)
 
 Alle P0-Befunde sowie die HTTP-/Auth-Konsolidierung, der TypeScript-Gate und die ESLint-Fehler (nicht Warnungen) aus dem ursprünglichen Audit sind behoben. `yarn tsc --noEmit`, `yarn eslint src tests --max-warnings=0` (0 Fehler) und `yarn build` (korrekter Produktionsmodus) laufen sauber; die volle Testsuite (11 Suiten / 86 Tests) ist grün. Offen bleiben: ~2100→38 reduzierte ESLint-Warnungen (davon 32 `react-hooks/exhaustive-deps` bewusst nicht blind gefixt, siehe unten), zwei dabei neu entdeckte vermutlich unfertige Features, sowie die P2-Punkte (Bundle-Größe, Doku/Altlasten, CI-Einrichtung).
@@ -56,6 +58,11 @@ Zod-Schemas für alle vier Auto-Anno-Antworttypen in `src/schemas/autoAnno.ts` e
 **Commits:** `add Zod validation for Auto-Anno API responses, encode URL path params`, `escape xml:id before building CSS attribute selectors in domHandling.ts`
 URL-Pfadsegmente (`searchAutoAnnoSnippetEntities`, `fetchAutoAnnoSnippetEntityData`) werden jetzt per `encodeURIComponent` kodiert. Die vier `xml:id`-CSS-Selektoren in `domHandling.ts` laufen jetzt über einen gemeinsamen `queryByXmlId()`-Helper mit `CSS.escape()`. 4 neue Tests in `tests/utils/auto_anno/domHandling.test.ts`.
 
+### P2 – Auto-Anno: TEI-Export ohne HTML-DOM und Regex-Fixups ✅
+**Stand:** 2026-09-22
+
+Die Auto-Anno-Ansicht hält jetzt neben dem weiterhin unveränderten React/HTML-Vorschau-DOM eine separat per `DOMParser` erzeugte XML-Arbeitskopie. Snippet-Übernahmen und -Entfernungen werden auf beiden Bäumen ausgeführt; an das Backend geht ausschließlich die per `XMLSerializer` serialisierte XML-Kopie. Damit bleiben auch bisher unbekannte case-sensitive TEI-Element- und Attributnamen erhalten. Die drei speziellen Regex-Reparaturen und der Export über `.innerHTML` sind entfernt. Ungültiges XML wird beim Initialisieren der Exportquelle explizit abgelehnt. Regressionstests decken unbekannte CamelCase-Namen, `schemaLocation`, Entity-Änderungen, das Entfernen von HTML-Hüllknoten und ungültiges XML ab.
+
 **Bewusst nicht angefasst (Fertig-wenn-Kriterium für spätere Session):**
 - **32 `react-hooks/exhaustive-deps`-Warnungen**: nicht blind mit fehlenden Dependencies aufgefüllt, da das reale Endlosschleifen oder Verhaltensänderungen auslösen kann. Jede braucht Einzelfallprüfung.
 - **6 verbliebene `no-unused-vars`-Warnungen** in `AutoAnnoLettersResizable.tsx` und `snippet_form/ShowButtons.tsx` — beim Nachschauen stellte sich heraus, dass es sich um **echte unfertige/kaputte Features** handelt, nicht um simple Lint-Kosmetik:
@@ -69,21 +76,20 @@ URL-Pfadsegmente (`searchAutoAnnoSnippetEntities`, `fetchAutoAnnoSnippetEntityDa
 
 - `yarn tsc --noEmit`: ✅ 0 Fehler.
 - `yarn eslint src tests --max-warnings=0`: ✅ 0 Fehler, 38 Warnungen (s. o., unverändert gegenüber der Session vom 2026-08-12 — keine neuen Warnungen durch die Auto-Anno-Fixes).
-- `yarn test --runInBand`: ✅ 16 Suiten, 112 Tests, alle grün (11/86 zuletzt verifiziert am 2026-08-12, + 5 Suiten/26 Tests aus der Auto-Anno-Session vom 2026-09-16).
+- `yarn test --runInBand`: ✅ 16 Suiten, 115 Tests, alle grün (Stand 2026-09-22).
 - `yarn build`: ✅ Exit 0, minifiziertes Production-Bundle mit Content-Hashes, kein `NODE_ENV`-Konflikt, Secret-Variablen nachweislich nicht im Output (Stand 2026-08-12; für die Auto-Anno-Fixes vom 2026-09-16 nicht erneut geprüft, da keine Build-/Webpack-Konfiguration angefasst wurde).
 
 ## Offene Arbeitspakete (unverändert oder P2)
 
-### P2 – Auto-Anno: TEI-Export über `innerHTML` + Regex-Fixups statt `XMLSerializer`
-**Gefunden:** 2026-09-16. Bewusst nicht in derselben Session gefixt, siehe Begründung unten.
+### P2 – Gemeinsame XML-Aufbereitung an den Backend-Grenzen
+**Erfasst:** 2026-09-22 als bewusst vom Auto-Anno-Export getrenntes Folgeticket.
 
-`transformLetterXmlForExport` (`src/utils/auto_anno/domHandling.ts:190`) bekommt an allen Aufrufstellen (`ShowButtons.tsx`, `EditButtons.tsx`, `SnippetReferencesList.tsx`) das Ergebnis von `.innerHTML` eines im echten Browser-DOM geparsten Brief-Knotens (`document.querySelector('#letterXml')`) übergeben. Weil der Browser dabei HTML- statt XML-Serialisierung anwendet, werden Tag-/Attributnamen kleingeschrieben; die Funktion repariert das nachträglich per Regex (`persname`→`persName`, `placename`→`placeName`, `schemalocation`→`schemaLocation`). Das deckt nur die drei bekannten Fälle ab und widerspricht der `CLAUDE.md`-Vorgabe, TEI-Inhalte mit `DOMParser`/`XMLSerializer` statt String-/Regex-Verarbeitung zu behandeln. Neue TEI-Elemente/-Attribute mit Groß-/Kleinschreibung würden beim Export still falsch geschrieben.
+Die Editor-Aufbereitung (`replaceWithCamelCase`, `replaceDataKeys`, `removeTmpIds`) liegt derzeit fachlich irreführend in `src/utils/auto_anno/domHandling.ts`, wird aber nur zentral von `src/utils/editor/backendService.ts` aufgerufen. Auto-Anno verwendet mit seiner case-sensitiven XML-Arbeitskopie bewusst nicht dieselbe String-Reparaturpipeline. Als kleines eigenes Arbeitspaket:
 
-**Root Cause (beim Nachschauen gefunden):** Die Kleinschreibung geht nicht erst beim Export verloren, sondern schon beim Rendern. `XMLDisplayParser.tsx` rendert jedes TEI-Element per `<TagName {...attributes}>` als normales JSX-Host-Element (`TagName = element.tagName`, Zeile ~106/133); React legt das per `document.createElement(type)` an, und diese Methode schreibt für ein HTML-Dokument den Tag-Namen laut Spezifikation immer klein — unabhängig von der Groß-/Kleinschreibung des übergebenen Strings. D. h. `#letterXml` (die einzige Quelle für `xmlLetterNode` in allen drei Aufrufstellen) enthält bereits beim ersten Rendern kleingeschriebene Tags, lange bevor `transformLetterXmlForExport` läuft.
-
-**Warum nicht in dieser Session gefixt:** Ein sauberer Fix müsste die Sperre lösen, dass `XMLDisplayParser` gleichzeitig (a) die einzige sichtbare Darstellung des Briefs im Auto-Anno-Editor ist und (b) als "Quelle der Wahrheit" für den XML-Export dient. Das erfordert entweder eine parallele, nie durch das HTML-DOM laufende XML-`Document`-Instanz als Exportquelle, oder eine Änderung an `XMLDisplayParser` selbst (z. B. `document.createElementNS`) — und `XMLDisplayParser` ist keine Auto-Anno-spezifische Komponente, sondern die zentrale, sicherheitsrelevante (XSS-Allowlist, siehe oben) Anzeigekomponente für **alle** Brief-Ansichten der Anwendung (Hauptansicht, Leseansicht, Auto-Anno). Eine Änderung an ihrer Render-Strategie hat Tragweite über den Auto-Anno-Bereich hinaus und sollte nicht nebenbei im Rahmen eines Auto-Anno-Reviews entschieden werden.
-
-**Vorschlag:** In einer eigenen, fachlich abgestimmten Session klären, ob (a) eine separate XML-`Document`-Instanz als alleinige Exportquelle eingeführt wird (Snippet-Übernahmen aus `domHandling.ts` müssten dann auf dieser statt auf dem sichtbaren HTML-DOM operieren), oder (b) `XMLDisplayParser` selbst über `createElementNS` rendert. Erst danach kann `transformLetterXmlForExport` durch einen echten `XMLSerializer`-Aufruf ersetzt werden.
+- XML-Wohlgeformtheit unmittelbar vor beiden Backend-Schreibpfaden prüfen und nach etwaigen Transformationen erneut prüfen,
+- die gemeinsam nutzbaren XML-Helfer aus dem Auto-Anno-DOM-Modul in ein neutrales XML-Modul verschieben,
+- fachlich klären und mit einem Test festhalten, ob `tmp:id`/`tmp_id` im Auto-Anno-Pfad vorkommen können und dort entfernt werden müssen,
+- keine XSD-/TEI-Schemavalidierung oder größere Umstellung des Editor-DOMs in dieses Ticket aufnehmen.
 
 ### P1 (Rest) – Lint-Baseline vollständig auf null, CI herstellen
 **Aufgabe:** Die 32 `exhaustive-deps`-Warnungen einzeln durchgehen (echtes Verhalten verstehen, nicht blind Dependencies ergänzen). Die zwei oben dokumentierten unfertigen Features (`AutoAnnoLettersResizable.tsx`, `ShowButtons.tsx`) fachlich klären: Feature fertigstellen oder toten Code entfernen. `lint`/`typecheck`/`test:ci`-Scripts anlegen und in einer CI-Pipeline als Required Checks verankern.

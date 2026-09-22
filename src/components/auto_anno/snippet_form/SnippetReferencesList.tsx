@@ -37,7 +37,7 @@ import {
   referenceTypeForXmlId,
   removeMarkedSpans,
   removeSnippetEntityFromDom,
-  transformLetterXmlForExport,
+  serializeLetterXmlForExport,
 } from '@src/utils/auto_anno/domHandling';
 import { AnnoSnippetStatus } from '@src/constants/snack';
 import { setAutoAnnoSnippetAndShow } from '@src/redux/thunks/auto.snippet.thunks';
@@ -136,7 +136,8 @@ const SnippetReferencesList = (props: SnippetReferenceListProps) => {
 
       autoAnnoReplaceDomNodeContent(sharedSnippet.xmlId, sharedSnippet.referenceType, snippetData);
 
-      xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML);
+      removeMarkedSpans(xmlLetterNode);
+      xmlContent = serializeLetterXmlForExport(xmlLetterNode);
 
       await updateAnnoLetterContent(props.autoAnnoLetterId, xmlContent);
 
@@ -181,7 +182,8 @@ const SnippetReferencesList = (props: SnippetReferenceListProps) => {
 
       removeSnippetEntityFromDom(sharedSnippet?.xmlId);
 
-      const xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML);
+      removeMarkedSpans(xmlLetterNode);
+      const xmlContent = serializeLetterXmlForExport(xmlLetterNode);
       await updateAnnoLetterContent(props.autoAnnoLetterId, xmlContent);
 
       enqueueSnackbar('Die Auszeichnung wurde entfernt', { variant: 'success' });

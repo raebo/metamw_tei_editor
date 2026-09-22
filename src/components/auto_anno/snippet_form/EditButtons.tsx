@@ -19,7 +19,7 @@ import {
 import {
   autoAnnoReplaceDomNodeContent,
   removeMarkedSpans,
-  transformLetterXmlForExport,
+  serializeLetterXmlForExport,
 } from '@src/utils/auto_anno/domHandling';
 
 interface Props {
@@ -78,7 +78,8 @@ const EditButtons = (props: Props) => {
         sharedSnippet?.referenceTypeChanged,
         snippetData,
       );
-      const xmlContent = transformLetterXmlForExport(removeMarkedSpans(xmlLetterNode).innerHTML);
+      removeMarkedSpans(xmlLetterNode);
+      const xmlContent = serializeLetterXmlForExport(xmlLetterNode);
 
       await updateAnnoLetterContent(props.autoJobLetterId, xmlContent);
 

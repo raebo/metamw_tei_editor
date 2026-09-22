@@ -1,10 +1,47 @@
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { EditorConstants } from '@src/constants/editor';
 
-// xmlId values come from backend TEI content and are not guaranteed to be free of characters
-// that break an attribute selector (e.g. a literal `"`), so escape before building the selector.
+const letterXmlDocuments = new WeakMap<Element, XMLDocument>();
+
+const findByXmlId = (root: Document | Element, xmlId: string): Element | null => {
+  const elements =
+    root instanceof Document
+      ? Array.from(root.getElementsByTagName('*'))
+      : [root, ...Array.from(root.getElementsByTagName('*'))];
+
+  return elements.find((element) => element.getAttribute('xml:id') === xmlId) ?? null;
+};
+
 const queryByXmlId = (xmlId: string): Element | null =>
-  document.querySelector(`[xml\\:id="${CSS.escape(xmlId)}"]`);
+  findByXmlId(document.documentElement, xmlId);
+
+const getLetterXmlRoot = (element: Element): Element | null => element.closest('#letterXml');
+
+const getMirroredElements = (xmlId: string): Element[] => {
+  const previewElement = queryByXmlId(xmlId);
+  if (!previewElement) {
+    throw new Error(`No DOM element found with xml:id="${xmlId}".`);
+  }
+
+  const letterRoot = getLetterXmlRoot(previewElement);
+  const xmlDocument = letterRoot ? letterXmlDocuments.get(letterRoot) : undefined;
+  const xmlElement = xmlDocument ? findByXmlId(xmlDocument, xmlId) : null;
+
+  if (xmlDocument && !xmlElement) {
+    throw new Error(`No XML source element found with xml:id="${xmlId}".`);
+  }
+
+  return xmlElement ? [previewElement, xmlElement] : [previewElement];
+};
+
+export const initializeLetterXmlExportSource = (root: Element, xmlString: string): void => {
+  const xmlDocument = new DOMParser().parseFromString(xmlString, 'application/xml');
+  if (xmlDocument.querySelector('parsererror')) {
+    throw new Error('Cannot initialize letter export from invalid XML.');
+  }
+
+  letterXmlDocuments.set(root, xmlDocument);
+};
 
 export const markSpanAndScrollToId = (xmlId: string) => {
   const targetElement = queryByXmlId(xmlId);
@@ -45,13 +82,7 @@ export const autoAnnoReplaceDomNodeContent = (
   referenceType: string,
   snippetEntity: SnippetEntity,
 ): void => {
-  const domNode = queryByXmlId(xmlId);
-
-  if (!domNode) {
-    throw new Error(`No DOM element found with xml:id="${xmlId}".`);
-  }
-
-  type ReferenceHandler = (domNode: Element, snippetEntity: any) => void;
+  type ReferenceHandler = (domNode: Element, snippetEntity: SnippetEntity) => void;
   const referenceHandlers: Record<string, ReferenceHandler> = {
     Person: (domNode, snippetEntity) => replacePersonDomNode(domNode, snippetEntity),
     Settlement: (domNode, snippetEntity) => replacePlaceDomNodeSettlement(domNode, snippetEntity),
@@ -62,7 +93,9 @@ export const autoAnnoReplaceDomNodeContent = (
   };
 
   if (Object.prototype.hasOwnProperty.call(referenceHandlers, referenceType)) {
-    referenceHandlers[referenceType](domNode, snippetEntity);
+    getMirroredElements(xmlId).forEach((element) =>
+      referenceHandlers[referenceType](element, snippetEntity),
+    );
   } else {
     throw new Error(
       `Unsupported reference type: "${referenceType}". Supported types are: ${Object.keys(referenceHandlers).join(', ')}`,
@@ -77,12 +110,13 @@ export const referenceTypeForXmlId = (xmlId: string): string => {
     throw new Error(`No DOM element found with xml:id="${xmlId}".`);
   }
   const referenceTypeMapping: Record<string, string> = {
-    PERSNAME: 'Person',
-    PLACENAME: 'Settlement',
+    persname: 'Person',
+    placename: 'Settlement',
   };
+  const normalizedTagName = domNode.tagName.toLowerCase();
 
-  if (Object.prototype.hasOwnProperty.call(referenceTypeMapping, domNode.tagName)) {
-    return referenceTypeMapping[domNode.tagName];
+  if (Object.prototype.hasOwnProperty.call(referenceTypeMapping, normalizedTagName)) {
+    return referenceTypeMapping[normalizedTagName];
   } else {
     throw new Error(
       `Unsupported reference type: "${domNode.tagName}". Supported types are: ${Object.keys(referenceTypeMapping).join(', ')}`,
@@ -96,7 +130,7 @@ const replacePersonDomNode = (
 ): void => {
   let nameNode = domNode.querySelector('name');
   if (!nameNode) {
-    nameNode = document.createElementNS(EditorConstants.TEI_NS, 'name');
+    nameNode = domNode.ownerDocument.createElementNS(EditorConstants.TEI_NS, 'name');
     nameNode.setAttribute('key', entityKey);
     nameNode.textContent = entityName;
     domNode.appendChild(nameNode);
@@ -110,11 +144,14 @@ const replacePlaceDomNodeSettlement = (
   placeNameNode: Element,
   snippetEntity: SnippetEntity,
 ): void => {
-  if (placeNameNode.tagName !== 'PLACENAME') {
+  if (placeNameNode.tagName.toLowerCase() !== 'placename') {
     throw new Error(`Invalid element provided for ${placeNameNode.tagName}`);
   }
 
-  const settlementNode = document.createElementNS(EditorConstants.TEI_NS, 'settlement');
+  const settlementNode = placeNameNode.ownerDocument.createElementNS(
+    EditorConstants.TEI_NS,
+    'settlement',
+  );
 
   if (snippetEntity.entityKind) {
     settlementNode.setAttribute('type', snippetEntity.entityKind);
@@ -127,7 +164,10 @@ const replacePlaceDomNodeSettlement = (
   placeNameNode.appendChild(settlementNode);
 
   if (snippetEntity.entityPlaceCountryName) {
-    const countryNode = document.createElementNS(EditorConstants.TEI_NS, 'country');
+    const countryNode = placeNameNode.ownerDocument.createElementNS(
+      EditorConstants.TEI_NS,
+      'country',
+    );
     countryNode.textContent = snippetEntity.entityPlaceCountryName;
     countryNode.setAttribute('style', 'hidden');
     placeNameNode.appendChild(countryNode);
@@ -139,11 +179,11 @@ const replacePlaceDomNodeInstiSight = (
   typeOfPlace: string,
   snippetEntity: SnippetEntity,
 ): void => {
-  if (placeNameNode.tagName !== 'PLACENAME') {
+  if (placeNameNode.tagName.toLowerCase() !== 'placename') {
     throw new Error(`Invalid element provided for ${placeNameNode.tagName}`);
   }
 
-  const nameNode = document.createElementNS(EditorConstants.TEI_NS, 'name');
+  const nameNode = placeNameNode.ownerDocument.createElementNS(EditorConstants.TEI_NS, 'name');
   nameNode.setAttribute('key', snippetEntity.entityKey);
   nameNode.setAttribute('type', typeOfPlace);
   nameNode.setAttribute('sub_type', '');
@@ -152,7 +192,10 @@ const replacePlaceDomNodeInstiSight = (
 
   placeNameNode.appendChild(nameNode);
 
-  const settlementNode = document.createElementNS(EditorConstants.TEI_NS, 'settlement');
+  const settlementNode = placeNameNode.ownerDocument.createElementNS(
+    EditorConstants.TEI_NS,
+    'settlement',
+  );
   settlementNode.setAttribute('type', 'locality');
   settlementNode.setAttribute('key', snippetEntity.entityKey);
   settlementNode.setAttribute('style', 'hidden');
@@ -163,7 +206,10 @@ const replacePlaceDomNodeInstiSight = (
   placeNameNode.appendChild(settlementNode);
 
   if (snippetEntity.entityPlaceCountryName) {
-    const countryNode = document.createElementNS(EditorConstants.TEI_NS, 'country');
+    const countryNode = placeNameNode.ownerDocument.createElementNS(
+      EditorConstants.TEI_NS,
+      'country',
+    );
     countryNode.textContent = snippetEntity.entityPlaceCountryName;
     countryNode.setAttribute('style', 'hidden');
     placeNameNode.appendChild(countryNode);
@@ -171,47 +217,30 @@ const replacePlaceDomNodeInstiSight = (
 };
 
 export const removeSnippetEntityFromDom = (xmlId: string): void => {
-  const domNode = queryByXmlId(xmlId);
+  getMirroredElements(xmlId).forEach((domNode) => {
+    const childNodes = Array.from(domNode.childNodes);
+    let textContent = '';
 
-  if (!domNode) {
-    throw new Error(`No element found with xml:id="${xmlId}"`);
-  }
-
-  const childNodes = Array.from(domNode.childNodes);
-  let textContent = '';
-
-  for (const node of childNodes) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      textContent += node.textContent?.trim() ?? '';
-    } else if (node.nodeName.toLowerCase() === 'name') {
-      break;
+    for (const node of childNodes) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        textContent += node.textContent?.trim() ?? '';
+      } else if (node.nodeName.toLowerCase() === 'name') {
+        break;
+      }
     }
-  }
-  const textNode = document.createTextNode(textContent);
+    const textNode = domNode.ownerDocument.createTextNode(textContent);
 
-  domNode.replaceWith(textNode);
+    domNode.replaceWith(textNode);
+  });
 };
 
-export const transformLetterXmlForExport = (xmlString: string | null | undefined): string => {
-  if (xmlString === undefined || !xmlString) {
-    throw Error('No XML string provided.');
+export const serializeLetterXmlForExport = (root: Element): string => {
+  const xmlDocument = letterXmlDocuments.get(root);
+  if (!xmlDocument) {
+    throw new Error('No XML export source initialized.');
   }
 
-  let transformedHTML = xmlString.replace(/\n\s*/g, ' ');
-
-  transformedHTML = transformedHTML.replace(/<\/?persname/gi, (match) =>
-    match.replace(/persname/gi, 'persName'),
-  );
-  transformedHTML = transformedHTML.replace(/<\/?placename/gi, (match) =>
-    match.replace(/placename/gi, 'placeName'),
-  );
-  transformedHTML = transformedHTML.replace(/schemalocation/gi, (match) =>
-    match.replace(/schemalocation/gi, 'schemaLocation'),
-  );
-  transformedHTML = transformedHTML.replace(/&nbsp;/gi, ' ');
-  // transformedHTML = transformedHTML.replace(/&amp;c/gi, "&");
-
-  return transformedHTML.endsWith(';') ? transformedHTML.slice(0, -1) : transformedHTML;
+  return new XMLSerializer().serializeToString(xmlDocument);
 };
 
 export const removeMarkedSpans = (root: Element): Element => {
