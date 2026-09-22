@@ -4,9 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import ShowButtons from '@src/components/auto_anno/snippet_form/ShowButtons';
-import autoLetterSnippetReducer, {
-  setAutoAnnoSnippet,
-} from '@src/redux/slices/auto.letter.snippet.slice';
+import autoLetterSnippetReducer, { setAutoAnnoSnippet } from '@src/redux/slices/auto.letter.snippet.slice';
 import {
   fetchAutoAnnoSnippetEntityData,
   setAnnoSnippetEntity,
@@ -20,24 +18,16 @@ jest.mock('@src/utils/auto_anno/domHandling', () => ({
   autoAnnoReplaceDomNodeContent: jest.fn(),
   removeMarkedSpans: jest.fn((el: Element) => el),
   removeSnippetEntityFromDom: jest.fn(),
-  transformLetterXmlForExport: jest.fn(() => '<xml/>'),
+  serializeLetterXmlForExport: jest.fn(() => '<xml/>'),
 }));
 jest.mock('notistack', () => ({
   enqueueSnackbar: jest.fn(),
 }));
 
-const mockSetAutoAnnoSnippetStatus = setAutoAnnoSnippetStatus as jest.MockedFunction<
-  typeof setAutoAnnoSnippetStatus
->;
-const mockUpdateAnnoLetterContent = updateAnnoLetterContent as jest.MockedFunction<
-  typeof updateAnnoLetterContent
->;
-const mockSetAnnoSnippetEntity = setAnnoSnippetEntity as jest.MockedFunction<
-  typeof setAnnoSnippetEntity
->;
-const mockFetchAutoAnnoSnippetEntityData = fetchAutoAnnoSnippetEntityData as jest.MockedFunction<
-  typeof fetchAutoAnnoSnippetEntityData
->;
+const mockSetAutoAnnoSnippetStatus = setAutoAnnoSnippetStatus as jest.MockedFunction<typeof setAutoAnnoSnippetStatus>;
+const mockUpdateAnnoLetterContent = updateAnnoLetterContent as jest.MockedFunction<typeof updateAnnoLetterContent>;
+const mockSetAnnoSnippetEntity = setAnnoSnippetEntity as jest.MockedFunction<typeof setAnnoSnippetEntity>;
+const mockFetchAutoAnnoSnippetEntityData = fetchAutoAnnoSnippetEntityData as jest.MockedFunction<typeof fetchAutoAnnoSnippetEntityData>;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const buildStore = () => {
@@ -107,9 +97,7 @@ describe('ShowButtons', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Speichern' }));
 
     await waitFor(() => expect(mockSetAnnoSnippetEntity).toHaveBeenCalledTimes(1));
-    await waitFor(() =>
-      expect(mockSetAutoAnnoSnippetStatus).toHaveBeenCalledWith(42, 1, 'ACCEPTED'),
-    );
+    await waitFor(() => expect(mockSetAutoAnnoSnippetStatus).toHaveBeenCalledWith(42, 1, 'ACCEPTED'));
   });
 
   it('does not reject or accept when the confirmation dialog is cancelled', async () => {
