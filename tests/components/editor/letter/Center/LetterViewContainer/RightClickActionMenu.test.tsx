@@ -11,7 +11,8 @@ jest.mock('notistack', () => ({
   enqueueSnackbar: jest.fn(),
 }));
 
-const sourceXml = '<TEI><text><body><div xml:id="act_1"><p xml:id="paragraph_1">Text</p></div></body></text></TEI>';
+const sourceXml =
+  '<TEI><text><body><div xml:id="act_1"><p xml:id="paragraph_1">Text</p><list type="ordered"><item>First</item></list></div></body></text></TEI>';
 
 const ContextMenuHarness = () => {
   const xmlContentRef = useRef<HTMLDivElement>(null);
@@ -24,12 +25,18 @@ const ContextMenuHarness = () => {
     const body = document.createElement('body');
     const div = document.createElement('div');
     const paragraph = document.createElement('p');
+    const list = document.createElement('list');
+    const item = document.createElement('item');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
     paragraph.dataset.editorXmlPath = '0.0.0.0';
     paragraph.textContent = 'Text';
-    div.appendChild(paragraph);
+    list.dataset.editorXmlPath = '0.0.0.1';
+    item.dataset.editorXmlPath = '0.0.0.1.0';
+    item.textContent = 'First';
+    list.appendChild(item);
+    div.append(paragraph, list);
     body.appendChild(div);
     text.appendChild(body);
     tei.appendChild(text);
@@ -108,6 +115,75 @@ describe('RightClickActionMenu figure upload action', () => {
       elementType: 'p',
       elementXmlId: '0.0.0.0',
       elementKey: 'paragraph-insert',
+    });
+  });
+
+  it('opens the list structure dialog for an existing list item', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('item')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Listen|Lists/ }));
+    expect(await screen.findByRole('menuitem', { name: /Listeneintrag bearbeiten|Edit list item/ })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /Listeneintrag löschen|Delete list item/ })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /^(Liste löschen|Delete list) …$/ })).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Listeneintrag hinzufügen|Add list item/ }));
+
+    const state = store.getState().editorLetter;
+    expect(state.dialogType).toBe('LIST_STRUCTURE');
+    expect(state.letterReference).toEqual({
+      elementType: 'item',
+      elementXmlId: '0.0.0.1.0',
+      elementKey: 'list-add-item',
+    });
+  });
+
+  it('offers creating an empty ordered list after a paragraph', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('p')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Listen|Lists/ }));
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Leere nummerierte Liste|Insert empty ordered list/,
+      }),
+    );
+
+    const state = store.getState().editorLetter;
+    expect(state.dialogType).toBe('LIST_STRUCTURE');
+    expect(state.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'list-empty-ordered',
     });
   });
 

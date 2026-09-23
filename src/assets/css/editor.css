@@ -180,3 +180,19 @@ note {
 .tei-paragraph-right {
   text-align: right;
 }
+
+.tei-list {
+  min-height: 1em;
+  cursor: pointer;
+}
+
+.tei-list::before {
+  margin-right: 5px;
+  content: '▶';
+  font-size: 60%;
+}
+
+.tei-list:focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}

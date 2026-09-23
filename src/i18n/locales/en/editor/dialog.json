@@ -17,6 +17,7 @@
     "addWritingPart": "Add Writing Act",
     "attachmentAdd": "Add Attachment",
     "figureUpload": "Insert Image",
+    "listStructure": "Edit list structure",
     "paragraphStructure": "Edit paragraph and section structure",
     "closeTabWithContent": "Close Tab with Content?",
     "dateWhenAdd": "Mark Date 'WHEN'",
@@ -114,6 +115,42 @@
     },
     "submit": "Apply change",
     "success": "The paragraph or section structure was updated.",
+    "errors": {
+      "context": "The editing context is no longer available."
+    }
+  },
+  "listStructure": {
+    "contextAction": "Lists",
+    "actions": {
+      "emptyOrdered": "Insert empty ordered list after …",
+      "emptyUnordered": "Insert empty unordered list after …",
+      "selectionOrdered": "Convert selection to ordered list …",
+      "selectionUnordered": "Convert selection to unordered list …",
+      "addItem": "Add list item …",
+      "editItem": "Edit list item …",
+      "deleteItem": "Delete list item …",
+      "sortAscending": "Sort items ascending …",
+      "sortDescending": "Sort items descending …",
+      "deleteList": "Delete list …"
+    },
+    "operations": {
+      "list-empty-ordered": "An empty ordered list is inserted after the selected paragraph.",
+      "list-empty-unordered": "An empty unordered list is inserted after the selected paragraph.",
+      "list-selection-ordered": "The selected text is converted to an item in an ordered list.",
+      "list-selection-unordered": "The selected text is converted to an item in an unordered list.",
+      "list-add-item": "A new item is appended to the selected list.",
+      "list-edit-item": "The selected list item's text is replaced.",
+      "list-delete-item": "The selected list item is permanently deleted.",
+      "list-delete": "The selected list and all its items are permanently deleted.",
+      "list-sort-ascending": "The list's direct items are sorted by text in ascending order.",
+      "list-sort-descending": "The list's direct items are sorted by text in descending order."
+    },
+    "fields": {
+      "itemText": "List item text"
+    },
+    "submit": "Apply change",
+    "submitDelete": "Delete",
+    "success": "The list structure was updated.",
     "errors": {
       "context": "The editing context is no longer available."
     }

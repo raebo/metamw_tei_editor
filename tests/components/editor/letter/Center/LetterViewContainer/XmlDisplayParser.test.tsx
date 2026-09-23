@@ -53,6 +53,15 @@ describe('XMLDisplayParser', () => {
     expect(marked).toHaveTextContent('selected text');
   });
 
+  it('renders an empty list as a focusable editor target', () => {
+    const { container } = renderXml('<TEI><text><body><div><list type="ordered"/></div></body></text></TEI>');
+
+    const list = container.querySelector('list');
+    expect(list).toHaveClass('tei-list');
+    expect(list).toHaveAttribute('tabindex', '0');
+    expect(list).toHaveAttribute('data-editor-xml-path', '0.0.0.0');
+  });
+
   it('preserves known TEI attributes (type, xml:id, xml:lang, data-key, n, subtype, resp)', () => {
     const { container } = renderXml(
       '<div type="act_of_writing" n="1" xml:id="d1"><persName data-key="p1" xml:lang="de">Anna</persName></div>',

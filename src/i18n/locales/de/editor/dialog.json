@@ -17,6 +17,7 @@
     "addWritingPart": "Schreibakt Hinzufügen",
     "attachmentAdd": "Beilage Hinzufügen",
     "figureUpload": "Bild einfügen",
+    "listStructure": "Listenstruktur bearbeiten",
     "paragraphStructure": "Absatz- und Abschnittsstruktur bearbeiten",
     "closeTabWithContent": "Tab mit Inhalt Schließen?",
     "dateWhenAdd": "Datum 'WHEN' Auszeichnen",
@@ -114,6 +115,42 @@
     },
     "submit": "Änderung übernehmen",
     "success": "Die Absatz- oder Abschnittsstruktur wurde aktualisiert.",
+    "errors": {
+      "context": "Der Bearbeitungskontext ist nicht mehr verfügbar."
+    }
+  },
+  "listStructure": {
+    "contextAction": "Listen",
+    "actions": {
+      "emptyOrdered": "Leere nummerierte Liste danach einfügen …",
+      "emptyUnordered": "Leere Aufzählung danach einfügen …",
+      "selectionOrdered": "Auswahl als nummerierte Liste …",
+      "selectionUnordered": "Auswahl als Aufzählung …",
+      "addItem": "Listeneintrag hinzufügen …",
+      "editItem": "Listeneintrag bearbeiten …",
+      "deleteItem": "Listeneintrag löschen …",
+      "sortAscending": "Einträge aufsteigend sortieren …",
+      "sortDescending": "Einträge absteigend sortieren …",
+      "deleteList": "Liste löschen …"
+    },
+    "operations": {
+      "list-empty-ordered": "Eine leere nummerierte Liste wird nach dem ausgewählten Absatz eingefügt.",
+      "list-empty-unordered": "Eine leere Aufzählung wird nach dem ausgewählten Absatz eingefügt.",
+      "list-selection-ordered": "Der markierte Text wird in einen Eintrag einer nummerierten Liste umgewandelt.",
+      "list-selection-unordered": "Der markierte Text wird in einen Eintrag einer Aufzählung umgewandelt.",
+      "list-add-item": "Ein neuer Eintrag wird am Ende der ausgewählten Liste ergänzt.",
+      "list-edit-item": "Der Text des ausgewählten Listeneintrags wird ersetzt.",
+      "list-delete-item": "Der ausgewählte Listeneintrag wird unwiderruflich gelöscht.",
+      "list-delete": "Die ausgewählte Liste und alle ihre Einträge werden unwiderruflich gelöscht.",
+      "list-sort-ascending": "Die direkten Einträge der Liste werden aufsteigend nach ihrem Text sortiert.",
+      "list-sort-descending": "Die direkten Einträge der Liste werden absteigend nach ihrem Text sortiert."
+    },
+    "fields": {
+      "itemText": "Text des Listeneintrags"
+    },
+    "submit": "Änderung übernehmen",
+    "submitDelete": "Löschen",
+    "success": "Die Listenstruktur wurde aktualisiert.",
     "errors": {
       "context": "Der Bearbeitungskontext ist nicht mehr verfügbar."
     }

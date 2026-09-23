@@ -20,6 +20,7 @@ import { rightClickPathHandles } from '@src/utils/editor/rightClickPathHandles';
 import { useTranslation } from 'react-i18next';
 import { findFigureAnchor } from '@src/utils/editor/figureAnchor';
 import type { ParagraphStructureOperation } from '@src/utils/editor/paragraphStructure';
+import type { ListStructureOperation } from '@src/utils/editor/listStructure';
 
 const SECTION_SELECTOR =
   'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
@@ -72,6 +73,41 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
             }),
           );
         },
+      },
+      { type: 'divider' as const },
+      {
+        label: t('editor:dialog.listStructure.contextAction'),
+        hasSubMenu: true,
+        subMenu: [
+          {
+            label: t('editor:dialog.listStructure.actions.selectionOrdered'),
+            action: () => {
+              props.setAnchorPosition(null);
+              dispatch(
+                setEditorDialogAndReferenceThunk({
+                  dialogType: EditorConstants.dialogTypes.LIST_STRUCTURE,
+                  elementType: 'selection',
+                  elementXmlId: '',
+                  elementKey: 'list-selection-ordered',
+                }),
+              );
+            },
+          },
+          {
+            label: t('editor:dialog.listStructure.actions.selectionUnordered'),
+            action: () => {
+              props.setAnchorPosition(null);
+              dispatch(
+                setEditorDialogAndReferenceThunk({
+                  dialogType: EditorConstants.dialogTypes.LIST_STRUCTURE,
+                  elementType: 'selection',
+                  elementXmlId: '',
+                  elementKey: 'list-selection-unordered',
+                }),
+              );
+            },
+          },
+        ],
       },
     ],
     [dispatch, props, t],
@@ -195,7 +231,10 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const targetElement = targetNode.nodeType === Node.ELEMENT_NODE ? (targetNode as HTMLElement) : targetNode.parentElement;
       const paragraphAnchor = targetElement?.closest<HTMLElement>('p[data-editor-xml-path]');
       const sectionAnchor = targetElement?.closest<HTMLElement>(SECTION_SELECTOR);
+      const listAnchor = targetElement?.closest<HTMLElement>('list[data-editor-xml-path]');
+      const itemAnchor = targetElement?.closest<HTMLElement>('item[data-editor-xml-path]');
       const structureActions: NonNullable<MenuItemType['subMenu']> = [];
+      const listActions: NonNullable<MenuItemType['subMenu']> = [];
 
       const openStructureDialog = (operation: ParagraphStructureOperation, anchor: HTMLElement) => {
         const sourcePath = anchor.dataset.editorXmlPath;
@@ -203,6 +242,19 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         dispatch(
           setEditorDialogAndReferenceThunk({
             dialogType: EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE,
+            elementType: anchor.localName,
+            elementXmlId: sourcePath,
+            elementKey: operation,
+          }),
+        );
+      };
+
+      const openListDialog = (operation: ListStructureOperation, anchor: HTMLElement) => {
+        const sourcePath = anchor.dataset.editorXmlPath;
+        if (sourcePath === undefined) return;
+        dispatch(
+          setEditorDialogAndReferenceThunk({
+            dialogType: EditorConstants.dialogTypes.LIST_STRUCTURE,
             elementType: anchor.localName,
             elementXmlId: sourcePath,
             elementKey: operation,
@@ -254,6 +306,63 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           label: t('editor:dialog.paragraphStructure.contextAction'),
           hasSubMenu: true,
           subMenu: structureActions,
+        });
+        isClickable = true;
+      }
+
+      if (paragraphAnchor?.closest('body')) {
+        listActions.push(
+          {
+            label: t('editor:dialog.listStructure.actions.emptyOrdered'),
+            action: () => openListDialog('list-empty-ordered', paragraphAnchor),
+          },
+          {
+            label: t('editor:dialog.listStructure.actions.emptyUnordered'),
+            action: () => openListDialog('list-empty-unordered', paragraphAnchor),
+          },
+        );
+      }
+
+      const listSource = itemAnchor ?? listAnchor;
+      if (listSource?.closest('body')) {
+        listActions.push({
+          label: t('editor:dialog.listStructure.actions.addItem'),
+          action: () => openListDialog('list-add-item', listSource),
+        });
+        if (itemAnchor) {
+          listActions.push(
+            {
+              label: t('editor:dialog.listStructure.actions.editItem'),
+              action: () => openListDialog('list-edit-item', itemAnchor),
+            },
+            {
+              label: t('editor:dialog.listStructure.actions.deleteItem'),
+              action: () => openListDialog('list-delete-item', itemAnchor),
+            },
+          );
+        }
+        listActions.push(
+          {
+            label: t('editor:dialog.listStructure.actions.sortAscending'),
+            action: () => openListDialog('list-sort-ascending', listSource),
+          },
+          {
+            label: t('editor:dialog.listStructure.actions.sortDescending'),
+            action: () => openListDialog('list-sort-descending', listSource),
+          },
+          {
+            label: t('editor:dialog.listStructure.actions.deleteList'),
+            action: () => openListDialog('list-delete', listSource),
+          },
+        );
+      }
+
+      if (listActions.length > 0) {
+        if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
+        menuItemsToAdd.push({
+          label: t('editor:dialog.listStructure.contextAction'),
+          hasSubMenu: true,
+          subMenu: listActions,
         });
         isClickable = true;
       }

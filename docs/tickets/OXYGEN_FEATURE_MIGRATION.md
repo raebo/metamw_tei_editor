@@ -55,7 +55,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-002 – Listen und Listeneinträge bearbeiten
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P2
 - Oxygen-Aktionen: `item`, `ordered list`, `itemizedlist`, `sort`, `list without items`
 - Ausgangslage: Dedizierte Listenbefehle aus Oxygen fehlen.
@@ -63,6 +63,14 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 - Akzeptanzkriterien: Listen können aus Auswahl oder leer erzeugt, erweitert und nach den
   fachlich erlaubten Kriterien sortiert werden.
 - Tests: Leere Liste, Auswahl in Liste umwandeln, Eintrag ergänzen und Sortierung.
+- Umsetzungsstand: Nummerierte und unnummerierte TEI-Listen können über das Kontextmenü leer
+  nach einem Absatz oder aus einer Textauswahl erzeugt werden. Bestehende Listen lassen sich um
+  Einträge erweitern; Einträge können bearbeitet oder einzeln gelöscht und Listen vollständig
+  gelöscht werden. Die direkten Einträge lassen sich anhand ihres normalisierten Textinhalts
+  stabil auf- oder absteigend sortieren; Inline-Markup und bestehende XML-IDs bleiben bei der
+  Umwandlung erhalten. Ein sichtbarer, fokussierbarer Caret-Anker hält auch leere Listen im
+  WYSIWYG auswählbar. Für diese Oxygen-Aktionen sind keine Shortcuts dokumentiert. DOM-,
+  Rendering-, Dialog- und Kontextmenütests decken alle Akzeptanzkriterien ab.
 
 ### OXY-003 – Tabellen vollständig bearbeiten
 

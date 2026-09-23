@@ -3,9 +3,9 @@ bold,Fettschrift,Auszuzeichnende Textpassage markieren und Shortkey auslösen,Ct
 italic,Kursivschrift,Auszuzeichnende Textpassage markieren und Shortkey auslösen,Ctrl+I,yes,,implemented
 underline,Unterstreichung,Zu unterstreichenden Text markieren und Shortkey auslösen.,Ctrl+U,yes,,implemented
 paragraph,Absatz mit Einzug in Brieftext hinzufügen,"Zum Einfügen von Absätzen mit Einzug den Cursor immer in das Element setzen, nach welchem der neue Absatz eingefügt werden soll und Shortkey auslösen. Zum Umwandeln von Absätzen ohne Zeileneinzug (erster Absatz) oder Teilen von Absätzen ohne Zeileneinzug in Absätze mit Zeileneinzug die Textpassage markieren und Shortkey auslösen. Merke: Der erste Absatz eines Briefes ist immer automatischer Einfügebestandteil des Schreibaktes (siehe oben Nr. 2) und kann nicht separat eingefügt werden. Der erste Absatz ist immer ohne Einzug, die darauffolgenden Abzüge jedoch mit Einzug.",Ctrl+Shift+P,yes,OXY-001,implemented
-item,${i18n(item)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(item_description)},,no,OXY-002,open
-ordered list,${i18n(ordered list)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(orderedList_description)},,no,OXY-002,open
-itemizedlist,${i18n(itemizedlist)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(itemizedlist_description)},,no,OXY-002,open
+item,${i18n(item)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(item_description)},,yes,OXY-002,implemented
+ordered list,${i18n(ordered list)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(orderedList_description)},,yes,OXY-002,implemented
+itemizedlist,${i18n(itemizedlist)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(itemizedlist_description)},,yes,OXY-002,implemented
 insert.table,${i18n(insert.table)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(insert.table_description)},,no,OXY-003,open
 insert.table.row.below,${i18n(insert.table.row.below)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(insert.table.row.below_description)},,no,OXY-003,open
 insert.table.cell,${i18n(insert.table.cell)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(insert.table.cell_description)},,no,OXY-003,open
@@ -24,7 +24,7 @@ delete.table.row,${i18n(delete.table.rows)},Beschreibung nur als Oxygen-i18n-Sch
 id.options,ID-Optionen,Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(id.options_description)},,no,OXY-005,open
 generate.ids,ID's generieren,Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(generate.ids_description)},Alt+Shift+H,no,OXY-005,open
 show.TEIp5.documentation,${i18n(show.TEIp5.documentation)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(show.TEIp5.documentation_description)},,no,OXY-005,open
-sort,${i18n(sort)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(sort_description)},,no,OXY-002,open
+sort,${i18n(sort)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(sort_description)},,yes,OXY-002,implemented
 sort_table,${i18n(sort)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(sort_description)},,no,OXY-003,open
 insert.table.row.above,${i18n(insert.table.row.above)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(insert.table.row.above_description)},,no,OXY-003,open
 insert.table.column.before,${i18n(insert.table.column.before)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(insert.table.column.before_description)},,no,OXY-003,open
@@ -199,7 +199,7 @@ Anmerkungen zur Handschrift hinzufügen,Anmerkungen zur Handschrift hinzufügen,
 Briefbeilage hinzufügen/ersetzen - old,Briefbeilage hinzufügen/ersetzen - old,Cursor an beliebiger Stelle des Headers positionieren und Shortkey auslösen.,,yes,,implemented
 Grafisches Inline-Element (in Textzeile),Grafisches Inline-Element (in Textzeile) hinzufügen,"Den Cursor an die Stelle setzen, an der das grafische Element eingefügt werden soll und dann Shortkey oder Menübefehl auslösen. Zu Details siehe Shortkey-Verzeichnis Kap. II. Brief erstellen, Nr. 12.2.",,yes,OXY-004,implemented
 Quellen hinzufügen (Quellenbeschreibung),Quellennachweise hinzufügen (Handschrift und Druck),Cursor an beliebiger Stelle des Headers positionieren und Shortkey oder Menübefehl auslösen Merke: Es können beliebig viele weitere Quellennachweise eingefügt werden. Die Quellennachweise können Handschriften oder auch Drucke betreffen.,Ctrl+Q,no,OXY-014,open
-list without items,list without items,list without items,,no,OXY-002,open
+list without items,list without items,list without items,,yes,OXY-002,implemented
 Adresse des Absenders hinzufügen part2,Adresse des Absenders hinzufügen part2,Keine eigene Beschreibung hinterlegt; Aktionsname: Adresse des Absenders hinzufügen part2.,,yes,,implemented
 Briefbeilage hinzufügen/ersetzen in Rekonstruktion - old,Briefbeilage hinzufügen/ersetzen - old,Cursor an beliebiger Stelle des Headers positionieren und Shortkey auslösen.,,no,OXY-014,open
 Schreibakt ersetzen,Schreibakt ersetzen,Cursor an beliebiger Stelle des Dokuments positionieren und Shortkey oder Menübefehl auslösen. Je nach Bedarf können beliebig viele weitere Schreibakte mit dem Shortkey oder Menübefehl erstellt werden.,Alt+Shift+0,no,OXY-020,open

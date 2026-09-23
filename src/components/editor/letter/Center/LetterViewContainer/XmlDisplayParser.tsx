@@ -197,6 +197,11 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         {} as Record<string, any>,
       );
 
+      if (tagName === 'list') {
+        appendClassName(attributes, 'tei-list');
+        attributes.tabIndex = 0;
+      }
+
       if (tagName === 'figure' && element.getAttribute('xml:id') === props.focusedFigureXmlId) {
         appendClassName(attributes, 'tei-figure--focused');
         attributes.tabIndex = -1;
