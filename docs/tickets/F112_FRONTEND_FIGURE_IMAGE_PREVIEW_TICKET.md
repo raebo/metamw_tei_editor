@@ -1,6 +1,12 @@
 # F-112 – Vergrößerte Figure-Vorschau im WYSIWYG-Editor
 
-**Status:** in Umsetzung. **Priorität:** P2. **Zuständigkeit:** Frontend-Team.
+**Status:** umgesetzt und getestet. **Priorität:** P2. **Zuständigkeit:** Frontend-Team.
+
+**Umsetzungsstand:** Die vergrößerte, per Maus und Tastatur bedienbare Vorschau
+einschließlich Zoomsteuerung und Wiederverwendung der vorhandenen Object-URL
+wurde mit Commit `09a04c7` umgesetzt und durch Komponenten- und
+Regressionstests abgesichert. Eine fachliche manuelle Abnahme bleibt von
+diesem technischen Status unberührt.
 
 ## Ausgangslage
 

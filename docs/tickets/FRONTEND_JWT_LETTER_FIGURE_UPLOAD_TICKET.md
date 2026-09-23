@@ -34,7 +34,13 @@ F-111 darf erst nach oder gemeinsam mit F-110 ausgerollt werden.
 
 ## F-110 – Vorhandene TEI-Figures im WYSIWYG-Editor anzeigen
 
-**Status:** offen. **Priorität:** P2. **Zuständigkeit:** Frontend-Team.
+**Status:** umgesetzt und getestet. **Priorität:** P2. **Zuständigkeit:** Frontend-Team.
+
+**Umsetzungsstand:** Die geschützte Figure-Anzeige wurde mit den Commits
+`af5c0e6` und `09a04c7` umgesetzt. Parser-, Komponenten- und API-Tests decken
+unter anderem JPEG, PNG, SVG-Altbestand, sichere Layoutattribute,
+Fehlerzustände und den Object-URL-Lebenszyklus ab. Eine fachliche manuelle
+Abnahme bleibt von diesem technischen Status unberührt.
 
 ### Ziel
 
@@ -187,7 +193,14 @@ verändern beziehungsweise löschen.
 
 ## F-111 – Neue Figures auswählen, hochladen und zuweisen
 
-**Status:** offen. **Priorität:** P2. **Zuständigkeit:** Frontend-Team.
+**Status:** umgesetzt und getestet. **Priorität:** P2. **Zuständigkeit:** Frontend-Team.
+
+**Umsetzungsstand:** Auswahl des Einfügeankers, JPEG-/PNG-Upload,
+Fehlerbehandlung, Übernahme der vollständigen XML-Arbeitskopie, Undo-/Redo-
+Status, Figure-Fokus und editorweite Uploadsperren wurden mit den Commits
+`af5c0e6`, `ff26412` und `09a04c7` umgesetzt und durch API-, Dialog-, Parser-
+und Kontextmenütests abgesichert. Eine fachliche manuelle Abnahme bleibt von
+diesem technischen Status unberührt.
 
 **Abhängigkeit:** F-110 und das Backend mit F-109.
 
