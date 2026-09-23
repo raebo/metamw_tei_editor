@@ -37,6 +37,9 @@ const LetterViewContainer = () => {
   });
 
   const reloadLetterContent = useSelector((state: RootState) => state.editorLetter.reloadLetterContent);
+  const activeLetterIsPinned = statePinnedLetters.some(
+    (letter) => letter.id === stateEditorLetter.id && letter.isPinned === true,
+  );
   const isDebugMode = process.env.REACT_DEBUG_MODE === 'true';
 
   useEffect(() => {
@@ -61,28 +64,32 @@ const LetterViewContainer = () => {
   }, [focusedFigureXmlId, letterState.xmlContent]);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadLetterData = async () => {
       const letterId = stateEditorLetter.id;
       if (letterId === null) {
-        setLetterState({
-          viewMode: null,
-          xmlContent: null,
-          undoAvailable: false,
-          redoAvailable: false,
-        });
+        if (!cancelled) {
+          setLetterState({
+            viewMode: null,
+            xmlContent: null,
+            undoAvailable: false,
+            redoAvailable: false,
+          });
+        }
         return;
       }
-      const hasPinnedLetters = statePinnedLetters.some((letter) => letter.id === stateEditorLetter.id && letter.isPinned == true);
 
       let letterData: EditorLetterData | null;
 
       //TODO optimize: if letter is pinned, fetch from pinned endpoint, else from normal endpoint
-      if (hasPinnedLetters) {
+      if (activeLetterIsPinned) {
         letterData = await fetchPinnedLetterData(letterId);
       } else {
         letterData = await fetchLetterData(letterId);
       }
 
+      if (cancelled) return;
       setLetterState({
         viewMode: stateEditorLetter.viewMode,
         xmlContent: letterData.xmlContent,
@@ -92,23 +99,29 @@ const LetterViewContainer = () => {
     };
 
     loadLetterData().catch((error) => {
+      if (cancelled) return;
       enqueueSnackbar('Fehler beim Laden des Briefinhalts: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
     });
-  }, [stateEditorLetter.id, stateEditorLetter.viewMode, statePinnedLetters]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeLetterIsPinned, stateEditorLetter.id, stateEditorLetter.viewMode]);
 
   useEffect(() => {
+    let cancelled = false;
+
     const reloadNewData = async () => {
       let letterData: EditorLetterData | null = null;
       if (stateEditorLetter.id === null) return;
 
-      const hasPinnedLetters = statePinnedLetters.some((letter) => letter.id === stateEditorLetter.id && letter.isPinned == true);
-
-      if (hasPinnedLetters) {
+      if (activeLetterIsPinned) {
         letterData = await fetchPinnedLetterData(stateEditorLetter.id);
       } else {
         letterData = await fetchLetterData(stateEditorLetter.id);
       }
 
+      if (cancelled) return;
       setLetterState({
         viewMode: stateEditorLetter.viewMode,
         xmlContent: letterData.xmlContent,
@@ -128,10 +141,21 @@ const LetterViewContainer = () => {
 
     if (reloadLetterContent && stateEditorLetter?.id !== null) {
       void reloadNewData().catch((error) => {
+        if (cancelled) return;
         enqueueSnackbar('Fehler beim Neuladen des Briefinhalts: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       });
     }
-  }, [dispatch, reloadLetterContent, stateEditorLetter, statePinnedLetters]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    activeLetterIsPinned,
+    dispatch,
+    reloadLetterContent,
+    stateEditorLetter.id,
+    stateEditorLetter.viewMode,
+  ]);
 
   // 👇 memoize XMLDisplayParser so it only re-renders if xmlContent changes
   const parserXmlMemo = useMemo(() => {
