@@ -27,6 +27,7 @@ Hinweis: `yarn tsc --noEmit` und `yarn eslint src tests --max-warnings=0` sind f
 
 ## Arbeitsweise
 
+- Vor jeder Aenderung den aktuellen Branch und Arbeitsbaum pruefen, den zugehoerigen Remote-Stand mit `git fetch` aktualisieren und feststellen, ob der aktuelle Branch Remote-Aenderungen aufweist. Mit der eigentlichen Aenderung erst beginnen, nachdem eine Abweichung geklaert beziehungsweise integriert wurde.
 - Kleine, thematisch geschlossene Aenderungen bevorzugen.
 - Vor Aenderungen die betroffenen Services, Redux-Slices und Tests gemeinsam lesen.
 - Keine generierten Ordner (`dist/`, `coverage/`) committen.
