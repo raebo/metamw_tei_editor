@@ -36,7 +36,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-001 – Absatz- und Abschnittsstrukturen bearbeiten
 
-- Status: Offen
+- Status: Umgesetzt und abgenommen
 - Priorität: P1
 - Oxygen-Aktionen: `paragraph`, `section`, `paragraph ohne Einzug hängend`,
   `paragraph zentriert`, `paragraph rechts`, `paragraph ohne Einzug`,
@@ -48,6 +48,10 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 - Akzeptanzkriterien: Alle genannten Varianten erzeugen die vorgesehenen `p`-/`div*`-Strukturen;
   unzulässige Einfügepositionen werden verhindert; bestehender Text bleibt erhalten.
 - Tests: Einfügen, Umschließen/Teilen, Umwandeln und ungültiger Kontext.
+- Umsetzungsstand: Absatzvarianten sind über Kontextmenü und Oxygen-kompatible Shortcuts
+  erreichbar. Abschnitte können hierarchisch als Kind oder gleichrangig angelegt und ihre
+  Überschriften bearbeitet werden. Die manuelle Abnahme wurde erfolgreich durchgeführt und die
+  zugehörigen CSV-Zeilen wurden als implementiert markiert.
 
 ### OXY-002 – Listen und Listeneinträge bearbeiten
 

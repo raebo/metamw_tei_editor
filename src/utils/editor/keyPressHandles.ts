@@ -1,6 +1,7 @@
 import { EditorUtils } from './index';
 import { AppDispatch } from '@src/redux/redux.store';
 import { setDialogType, setEditorSelectedItem } from '@src/redux/slices/editor.letter.slice';
+import { splitMarkedParagraph, type ParagraphVariant } from './paragraphStructure';
 
 export const keyPressHandles = {
   openLeftPanel(dispatch: AppDispatch, leftItem: string): void {
@@ -14,6 +15,9 @@ export const keyPressHandles = {
   },
   async baseHandling(xmlDoc: Document, keyFunction: (xmlDoc: Document) => void) {
     keyFunction(xmlDoc);
+  },
+  splitParagraph(xmlDoc: Document, variant: ParagraphVariant) {
+    splitMarkedParagraph(xmlDoc, variant);
   },
   moveWritingActUp(xmlDoc: Document) {
     try {
@@ -91,10 +95,7 @@ export const keyPressHandles = {
 
     let parentNode: Node | null = parent;
 
-    while (
-      parentNode &&
-      !(parentNode instanceof Element && parentNode.tagName.toLowerCase() === 'tei')
-    ) {
+    while (parentNode && !(parentNode instanceof Element && parentNode.tagName.toLowerCase() === 'tei')) {
       parentNode = parentNode.parentNode;
     }
 

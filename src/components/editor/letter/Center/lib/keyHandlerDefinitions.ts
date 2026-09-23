@@ -4,19 +4,10 @@ import { AppDispatch, RootState } from '@src/redux/redux.store';
 import { EditorConstants } from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
-import {
-  setContentTextIsMarked,
-  setReloadLetterContent,
-  setXmlLetterContent,
-} from '@src/redux/slices/editor.letter.slice';
+import { setContentTextIsMarked, setReloadLetterContent, setXmlLetterContent } from '@src/redux/slices/editor.letter.slice';
 
-export const filterForKeyHandleDefinitions = (
-  keyHandleDefinitions: Record<string, EditorKeyHandleItem>,
-  keyCombination: string,
-) => {
-  const filteredKeyHandle = Object.values(keyHandleDefinitions).filter(
-    (item) => item.key === keyCombination,
-  )[0];
+export const filterForKeyHandleDefinitions = (keyHandleDefinitions: Record<string, EditorKeyHandleItem>, keyCombination: string) => {
+  const filteredKeyHandle = Object.values(keyHandleDefinitions).filter((item) => item.key === keyCombination)[0];
 
   if (!filteredKeyHandle) {
     throw new Error('Keybinding not found: for' + keyCombination);
@@ -77,19 +68,15 @@ async function runXmlAction(
   try {
     const xmlString = new XMLSerializer().serializeToString(xmlDoc);
 
-    await EditorUtils.backendOrchestrator.patchWithDispatch(
-      dispatch,
-      [xmlString, stateEditorLetter.id, operationType, null],
-      {
-        actionsOnSuccess: [
-          setXmlLetterContent({ content: { xmlContent: xmlString } }),
-          setReloadLetterContent({ reloadLetterContent: true }),
-          setContentTextIsMarked({ contentTextIsMarked: false }),
-        ],
-        successMessage: successMessage,
-        errorMessage: 'Error during backend update.',
-      },
-    );
+    await EditorUtils.backendOrchestrator.patchWithDispatch(dispatch, [xmlString, stateEditorLetter.id, operationType, null], {
+      actionsOnSuccess: [
+        setXmlLetterContent({ content: { xmlContent: xmlString } }),
+        setReloadLetterContent({ reloadLetterContent: true }),
+        setContentTextIsMarked({ contentTextIsMarked: false }),
+      ],
+      successMessage: successMessage,
+      errorMessage: 'Error during backend update.',
+    });
 
     return operationType;
   } catch (error) {
@@ -122,10 +109,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.ADD_TEI_HEADER,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_TEI_HEADER);
     },
   },
   'alt+d': {
@@ -134,10 +118,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.MANAGE_HEADER_RECEIVER);
     },
   },
   'alt+j': {
@@ -146,10 +127,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.EDIT_LANGUAGES,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.EDIT_LANGUAGES);
     },
   },
   'alt+k': {
@@ -157,10 +135,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     description: 'Zeige Hilfsmenü der Shortcuts',
     action: async (dispatch: AppDispatch, _getState: () => RootState) => {
-      return EditorUtils.keyPressHandles.openLeftPanel(
-        dispatch,
-        EditorConstants.compMappingLeft.HELP_SHORTCUTS,
-      );
+      return EditorUtils.keyPressHandles.openLeftPanel(dispatch, EditorConstants.compMappingLeft.HELP_SHORTCUTS);
     },
     skipForHelp: true,
   },
@@ -170,10 +145,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.ADD_NEW_LETTER,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_NEW_LETTER);
     },
   },
   'alt+s': {
@@ -181,10 +153,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     description: 'Suche nach Briefen',
     action: async (dispatch: AppDispatch, _getState: () => RootState) => {
-      return EditorUtils.keyPressHandles.openLeftPanel(
-        dispatch,
-        EditorConstants.compMappingLeft.SEARCH,
-      );
+      return EditorUtils.keyPressHandles.openLeftPanel(dispatch, EditorConstants.compMappingLeft.SEARCH);
     },
     skipForHelp: true,
   },
@@ -194,10 +163,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER);
     },
   },
   'alt+shift+e': {
@@ -206,10 +172,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER);
     },
   },
   'alt+ctrl+f': {
@@ -218,10 +181,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR);
     },
     skipForHelp: true,
   },
@@ -231,10 +191,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.SOURCE_DESC_HANDWRITING,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.SOURCE_DESC_HANDWRITING);
     },
     skipForHelp: true,
   },
@@ -267,10 +224,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.ATTACHMENT_ADD,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ATTACHMENT_ADD);
     },
   },
   'ctrl+shift+a': {
@@ -279,10 +233,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT);
     },
   },
   'ctrl+shift+b': {
@@ -291,10 +242,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER);
     },
   },
   'ctrl+shift+s': {
@@ -303,10 +251,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.ADD_WRITING_PART,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_WRITING_PART);
     },
   },
   'ctrl+shift+z': {
@@ -339,10 +284,7 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.ADD_RISM_ENTRY,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_RISM_ENTRY);
     },
   },
   'ctrl+shift+n': {
@@ -351,15 +293,60 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.ADD_PROVENANCE_ENTRY,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_PROVENANCE_ENTRY);
     },
   },
 };
 
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {
+  'ctrl+shift+p': {
+    key: 'ctrl+shift+p',
+    description: 'Auswahl als Absatz mit Einzug abtrennen',
+    component: null,
+    xmlAction: (xmlDoc) => EditorUtils.keyPressHandles.splitParagraph(xmlDoc, 'indented'),
+    operationType: EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED,
+    successMessage: 'Absatz eingefügt',
+  },
+  'ctrl+shift+d': {
+    key: 'ctrl+shift+d',
+    description: 'Auswahl als hängenden Absatz abtrennen',
+    component: null,
+    xmlAction: (xmlDoc) => EditorUtils.keyPressHandles.splitParagraph(xmlDoc, 'hanging'),
+    operationType: EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED,
+    successMessage: 'Absatz eingefügt',
+  },
+  'alt+shift+a': {
+    key: 'alt+shift+a',
+    description: 'Auswahl als zentrierten Absatz abtrennen',
+    component: null,
+    xmlAction: (xmlDoc) => EditorUtils.keyPressHandles.splitParagraph(xmlDoc, 'centered'),
+    operationType: EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED,
+    successMessage: 'Absatz eingefügt',
+  },
+  'ctrl+alt+4': {
+    key: 'ctrl+alt+4',
+    description: 'Auswahl als rechtsbündigen Absatz abtrennen',
+    component: null,
+    xmlAction: (xmlDoc) => EditorUtils.keyPressHandles.splitParagraph(xmlDoc, 'right'),
+    operationType: EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED,
+    successMessage: 'Absatz eingefügt',
+  },
+  'ctrl+alt+5': {
+    key: 'ctrl+alt+5',
+    description: 'Auswahl als Absatz ohne Einzug abtrennen',
+    component: null,
+    xmlAction: (xmlDoc) => EditorUtils.keyPressHandles.splitParagraph(xmlDoc, 'without-indent'),
+    operationType: EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED,
+    successMessage: 'Absatz eingefügt',
+  },
+  'alt+9': {
+    key: 'alt+9',
+    description: 'Auswahl als eingerückten Absatz ohne Einzug abtrennen',
+    component: null,
+    xmlAction: (xmlDoc) => EditorUtils.keyPressHandles.splitParagraph(xmlDoc, 'without-indent-indented'),
+    operationType: EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED,
+    successMessage: 'Absatz eingefügt',
+  },
   'alt+1': {
     key: 'alt+1',
     description: 'Datum oberhalb einfügen',
@@ -372,10 +359,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     description: 'Schreibakt nach oben verschieben',
     component: null,
     xmlAction: (xmlDoc) => {
-      return EditorUtils.keyPressHandles.baseHandling(
-        xmlDoc,
-        EditorUtils.keyPressHandles.moveWritingActUp,
-      );
+      return EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.moveWritingActUp);
     },
     operationType: EditorConstants.changeTypes.writing_act.CHANGED_ORDER,
   },
@@ -385,10 +369,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.DATE_WHEN_ADD,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_ADD);
     },
   },
 
@@ -398,10 +379,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD);
     },
   },
   'alt+shift+§': {
@@ -410,10 +388,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_AFTER_ADD);
     },
   },
   'alt+shift+$': {
@@ -422,10 +397,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_BEFORE_ADD);
     },
   },
   'alt+shift+%': {
@@ -434,10 +406,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.DATE_FROM_TO_ADD,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_FROM_TO_ADD);
     },
   },
   'alt+shift+&': {
@@ -446,10 +415,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD);
     },
   },
   'alt+shift+v': {
@@ -457,10 +423,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     description: 'Schreibakt nach unten verschieben',
     component: null,
     xmlAction: (xmlDoc) => {
-      EditorUtils.keyPressHandles.baseHandling(
-        xmlDoc,
-        EditorUtils.keyPressHandles.moveWritingActDown,
-      );
+      EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.moveWritingActDown);
     },
     operationType: EditorConstants.changeTypes.writing_act.CHANGED_ORDER,
   },
@@ -468,8 +431,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     key: 'ctrl+b',
     description: 'Inhalt fett markieren',
     component: null,
-    xmlAction: (xmlDoc) =>
-      EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.markContentBold),
+    xmlAction: (xmlDoc) => EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.markContentBold),
     operationType: EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED,
   },
   'ctrl+i': {
@@ -477,10 +439,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     description: 'Inhalt kursiv markieren',
     component: null,
     xmlAction: (xmlDoc) => {
-      return EditorUtils.keyPressHandles.baseHandling(
-        xmlDoc,
-        EditorUtils.keyPressHandles.markContentItalic,
-      );
+      return EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.markContentItalic);
     },
     operationType: EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED,
   },
@@ -489,10 +448,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     description: 'Inhalt mit Unterstrich markieren.',
     component: null,
     xmlAction: (xmlDoc) => {
-      return EditorUtils.keyPressHandles.baseHandling(
-        xmlDoc,
-        EditorUtils.keyPressHandles.markContentUnderline,
-      );
+      return EditorUtils.keyPressHandles.baseHandling(xmlDoc, EditorUtils.keyPressHandles.markContentUnderline);
     },
     operationType: EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED,
   },
@@ -511,10 +467,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openRightPanel(
-        dispatch,
-        EditorConstants.compMappingRight.ENT_PLACE,
-      );
+      return EditorUtils.keyPressHandles.openRightPanel(dispatch, EditorConstants.compMappingRight.ENT_PLACE);
     },
   },
   'ctrl+alt+p': {
@@ -523,10 +476,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openRightPanel(
-        dispatch,
-        EditorConstants.compMappingRight.ENT_PERSON,
-      );
+      return EditorUtils.keyPressHandles.openRightPanel(dispatch, EditorConstants.compMappingRight.ENT_PERSON);
     },
   },
   'ctrl+alt+w': {
@@ -535,10 +485,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openRightPanel(
-        dispatch,
-        EditorConstants.compMappingRight.ENT_CREATION,
-      );
+      return EditorUtils.keyPressHandles.openRightPanel(dispatch, EditorConstants.compMappingRight.ENT_CREATION);
     },
   },
   'ctrl+alt+v': {
@@ -547,10 +494,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_LETTER_TO_PROTAG);
     },
   },
   'ctrl+alt+b': {
@@ -559,10 +503,7 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: (dispatch: AppDispatch) => {
-      return EditorUtils.keyPressHandles.openDialog(
-        dispatch,
-        EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG,
-      );
+      return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_LETTER_FROM_PROTAG);
     },
   },
   'ctrl+shift+h': {

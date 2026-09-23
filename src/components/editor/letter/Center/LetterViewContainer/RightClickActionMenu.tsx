@@ -19,6 +19,10 @@ import { debounce } from 'lodash-es';
 import { rightClickPathHandles } from '@src/utils/editor/rightClickPathHandles';
 import { useTranslation } from 'react-i18next';
 import { findFigureAnchor } from '@src/utils/editor/figureAnchor';
+import type { ParagraphStructureOperation } from '@src/utils/editor/paragraphStructure';
+
+const SECTION_SELECTOR =
+  'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
 
 interface UserActionMenuProps {
   xmlContentRef: React.RefObject<HTMLDivElement>;
@@ -43,8 +47,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
 
   /** CACHE MENU ITEMS */
   const menuItemsMarked = useMemo(
-    () =>
-      createContextMenuItems({
+    () => [
+      ...createContextMenuItems({
         handleMenuItemClick: (left, right) => {
           props.setAnchorPosition(null);
           dispatch(setEditorSelectedItem({ selectedItem: { left, right } }));
@@ -54,7 +58,23 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           dispatch(setDialogType({ dialogType }));
         },
       }),
-    [dispatch, props],
+      { type: 'divider' as const },
+      {
+        label: t('editor:dialog.paragraphStructure.actions.splitParagraph'),
+        action: () => {
+          props.setAnchorPosition(null);
+          dispatch(
+            setEditorDialogAndReferenceThunk({
+              dialogType: EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE,
+              elementType: 'selection',
+              elementXmlId: '',
+              elementKey: 'paragraph-split',
+            }),
+          );
+        },
+      },
+    ],
+    [dispatch, props, t],
   );
 
   const menuItemsNoMarking: MenuItemType[] = useMemo(
@@ -170,6 +190,72 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
           () => {},
         );
+      }
+
+      const targetElement = targetNode.nodeType === Node.ELEMENT_NODE ? (targetNode as HTMLElement) : targetNode.parentElement;
+      const paragraphAnchor = targetElement?.closest<HTMLElement>('p[data-editor-xml-path]');
+      const sectionAnchor = targetElement?.closest<HTMLElement>(SECTION_SELECTOR);
+      const structureActions: NonNullable<MenuItemType['subMenu']> = [];
+
+      const openStructureDialog = (operation: ParagraphStructureOperation, anchor: HTMLElement) => {
+        const sourcePath = anchor.dataset.editorXmlPath;
+        if (sourcePath === undefined) return;
+        dispatch(
+          setEditorDialogAndReferenceThunk({
+            dialogType: EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE,
+            elementType: anchor.localName,
+            elementXmlId: sourcePath,
+            elementKey: operation,
+          }),
+        );
+      };
+
+      if (paragraphAnchor?.closest('body')) {
+        structureActions.push(
+          {
+            label: t('editor:dialog.paragraphStructure.actions.insertParagraph'),
+            action: () => openStructureDialog('paragraph-insert', paragraphAnchor),
+          },
+          {
+            label: t('editor:dialog.paragraphStructure.actions.convertParagraph'),
+            action: () => openStructureDialog('paragraph-convert', paragraphAnchor),
+          },
+        );
+      }
+
+      if (sectionAnchor?.closest('body')) {
+        const sectionName = sectionAnchor.localName.toLowerCase();
+        const sectionLevel = sectionName === 'div' ? 0 : Number(sectionName.slice(3));
+        const isWritingAct = sectionAnchor.getAttribute('type') === 'act_of_writing';
+
+        if (sectionName === 'div' || (sectionLevel >= 1 && sectionLevel < 7)) {
+          structureActions.push({
+            label: t('editor:dialog.paragraphStructure.actions.insertChildSection'),
+            action: () => openStructureDialog('section-child', sectionAnchor),
+          });
+        }
+        if (!isWritingAct && /^div([1-7])?$/.test(sectionName)) {
+          structureActions.push(
+            {
+              label: t('editor:dialog.paragraphStructure.actions.insertSiblingSection'),
+              action: () => openStructureDialog('section-sibling', sectionAnchor),
+            },
+            {
+              label: t('editor:dialog.paragraphStructure.actions.editSection'),
+              action: () => openStructureDialog('section-edit', sectionAnchor),
+            },
+          );
+        }
+      }
+
+      if (structureActions.length > 0) {
+        if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
+        menuItemsToAdd.push({
+          label: t('editor:dialog.paragraphStructure.contextAction'),
+          hasSubMenu: true,
+          subMenu: structureActions,
+        });
+        isClickable = true;
       }
 
       if (!figureUploadInProgress && xmlDocRef.current && xmlContentRef.current) {

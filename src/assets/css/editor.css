@@ -158,3 +158,25 @@ note {
   outline: 3px solid var(--secondary-color);
   outline-offset: 3px;
 }
+
+.tei-paragraph-without-indent {
+  text-indent: 0;
+}
+
+.tei-paragraph-without-indent-indented {
+  padding-left: 2.5em;
+  text-indent: 0;
+}
+
+.tei-paragraph-hanging {
+  padding-left: 1em;
+  text-indent: -1em;
+}
+
+.tei-paragraph-centered {
+  text-align: center;
+}
+
+.tei-paragraph-right {
+  text-align: right;
+}
