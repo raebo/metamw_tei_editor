@@ -62,6 +62,47 @@ describe('XMLDisplayParser', () => {
     expect(list).toHaveAttribute('data-editor-xml-path', '0.0.0.0');
   });
 
+  it('renders a focusable caret and selectable HTML cells for every TEI table', () => {
+    const { container } = renderXml(
+      '<TEI><text><body><div><table rows="1" cols="1"><row><cell>A</cell></row></table></div></body></text></TEI>',
+    );
+
+    const caret = container.querySelector('[data-editor-table-caret]');
+    const table = container.querySelector('table');
+    const row = container.querySelector('tr[data-editor-tei-element="row"]');
+    const cell = container.querySelector('td[data-editor-tei-element="cell"]');
+    expect(caret).toHaveTextContent('▶');
+    expect(caret).toHaveAttribute('tabindex', '0');
+    expect(caret).toHaveAttribute('data-editor-xml-path', '0.0.0.0');
+    expect(table).toHaveClass('tei-table');
+    expect(table).toHaveAttribute('data-editor-xml-path', '0.0.0.0');
+    expect(table).toHaveAttribute('rows', '1');
+    expect(table).toHaveAttribute('cols', '1');
+    expect(row).toHaveAttribute('data-editor-xml-path', '0.0.0.0.0');
+    expect(cell).toHaveTextContent('A');
+    expect(cell).toHaveAttribute('tabindex', '0');
+    expect(cell).toHaveAttribute('data-editor-xml-path', '0.0.0.0.0.0');
+  });
+
+  it('maps TEI cell spans to their HTML table equivalents', () => {
+    const { container } = renderXml('<table rows="2" cols="2"><row><cell rows="2" cols="2" role="label">Heading</cell></row></table>');
+
+    const cell = container.querySelector('td');
+    expect(cell).toHaveAttribute('rowspan', '2');
+    expect(cell).toHaveAttribute('colspan', '2');
+    expect(cell).toHaveAttribute('data-tei-role', 'label');
+    expect(cell).not.toHaveAttribute('role');
+  });
+
+  it('renders a TEI table head as an HTML caption outside the table body', () => {
+    const { container } = renderXml('<table><head>Overview</head><row role="label"><cell>Heading</cell></row></table>');
+
+    const table = container.querySelector('table')!;
+    expect(table.querySelector(':scope > caption')).toHaveTextContent('Overview');
+    expect(table.querySelector(':scope > tbody > tr')).toHaveAttribute('data-tei-role', 'label');
+    expect(table.querySelector('tr')).not.toHaveAttribute('role');
+  });
+
   it('preserves known TEI attributes (type, xml:id, xml:lang, data-key, n, subtype, resp)', () => {
     const { container } = renderXml(
       '<div type="act_of_writing" n="1" xml:id="d1"><persName data-key="p1" xml:lang="de">Anna</persName></div>',

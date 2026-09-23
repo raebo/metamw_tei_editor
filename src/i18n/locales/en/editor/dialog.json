@@ -19,6 +19,7 @@
     "figureUpload": "Insert Image",
     "listStructure": "Edit list structure",
     "paragraphStructure": "Edit paragraph and section structure",
+    "tableStructure": "Edit table structure",
     "closeTabWithContent": "Close Tab with Content?",
     "dateWhenAdd": "Mark Date 'WHEN'",
     "dateWhenCustomAdd": "Mark Date 'WHEN CUSTOM'",
@@ -151,6 +152,87 @@
     "submit": "Apply change",
     "submitDelete": "Delete",
     "success": "The list structure was updated.",
+    "errors": {
+      "context": "The editing context is no longer available."
+    }
+  },
+  "tableStructure": {
+    "contextAction": "Tables",
+    "groups": {
+      "cell": "Cell",
+      "row": "Row",
+      "column": "Column",
+      "table": "Table"
+    },
+    "actions": {
+      "create": "Insert table after …",
+      "rowAbove": "Insert row above …",
+      "rowBelow": "Insert row below …",
+      "editCell": "Edit cell content …",
+      "insertCell": "Insert cell after …",
+      "columnBefore": "Insert column before …",
+      "columnAfter": "Insert column after …",
+      "columnsCustom": "Insert multiple columns after …",
+      "rowsCustom": "Insert multiple rows below …",
+      "joinRight": "Join with right cell …",
+      "splitLeft": "Split joined cell to the left …",
+      "splitRight": "Split joined cell to the right …",
+      "joinAbove": "Join with cell above …",
+      "joinBelow": "Join with cell below …",
+      "splitAbove": "Split joined cell above …",
+      "splitBelow": "Split joined cell below …",
+      "deleteColumn": "Delete column …",
+      "deleteRow": "Delete row …",
+      "deleteTable": "Delete table …",
+      "sort": "Sort table …",
+      "join": "Join cells …",
+      "split": "Split joined cell …"
+    },
+    "operations": {
+      "table-create": "A rectangular TEI table is inserted after the selected paragraph.",
+      "table-row-above": "A row is inserted above the selected row.",
+      "table-row-below": "A row is inserted below the selected row.",
+      "table-cell-edit": "The selected cell's text content is replaced.",
+      "table-cell-insert": "A new table column is inserted after the selected cell.",
+      "table-column-before": "A column is inserted before the selected cell.",
+      "table-column-after": "A column is inserted after the selected cell.",
+      "table-columns-custom": "The requested number of columns is inserted after the selected cell.",
+      "table-rows-custom": "The requested number of rows is inserted below the selected row.",
+      "table-cells-join-right": "The selected cell is joined with its right neighbour.",
+      "table-cell-split-left": "A cell is split off to the left of the selected horizontal span.",
+      "table-cell-split-right": "A cell is split off to the right of the selected horizontal span.",
+      "table-cell-join-above": "The selected cell is joined with the cell above.",
+      "table-cell-join-below": "The selected cell is joined with the cell below.",
+      "table-cell-split-above": "A cell is split off above the selected vertical span.",
+      "table-cell-split-below": "A cell is split off below the selected vertical span.",
+      "table-column-delete": "The selected cell's column is deleted.",
+      "table-row-delete": "The selected row is deleted.",
+      "table-delete": "The selected table and all of its content are permanently deleted.",
+      "table-sort": "Data rows are sorted by the selected column text while label rows remain fixed.",
+      "table-join": "The selected cell is joined with its neighbour in the chosen direction.",
+      "table-split": "The selected joined cell is split in the chosen direction."
+    },
+    "fields": {
+      "rows": "Number of rows",
+      "columns": "Number of columns",
+      "count": "Count",
+      "cellText": "Table cell text",
+      "sortColumn": "Sort column (starting at 1)",
+      "sortDirection": "Sort direction",
+      "joinDirection": "Neighbour cell direction",
+      "splitDirection": "Split direction"
+    },
+    "directions": {
+      "ascending": "Ascending",
+      "descending": "Descending",
+      "left": "Left",
+      "right": "Right",
+      "above": "Above",
+      "below": "Below"
+    },
+    "submit": "Apply change",
+    "submitDelete": "Delete table",
+    "success": "The table structure was updated.",
     "errors": {
       "context": "The editing context is no longer available."
     }

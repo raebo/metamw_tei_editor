@@ -9,11 +9,7 @@ export type MenuItemType = {
   action?: NodeActionCallback;
   type?: 'divider' | 'inactive' | null;
   hasSubMenu?: boolean;
-  subMenu?: {
-    label: string;
-    action?: NodeActionCallback;
-    keyShortcut?: string;
-  }[];
+  subMenu?: MenuItemType[];
 };
 
 type MenuHandlers = {
@@ -21,10 +17,7 @@ type MenuHandlers = {
   handleMenuItemDialogClick: (dialogType: string) => void;
 };
 
-export function createContextMenuItems({
-  handleMenuItemClick,
-  handleMenuItemDialogClick,
-}: MenuHandlers): MenuItemType[] {
+export function createContextMenuItems({ handleMenuItemClick, handleMenuItemDialogClick }: MenuHandlers): MenuItemType[] {
   return [
     {
       label: 'Person Auszeichnen',
@@ -94,8 +87,7 @@ export function createContextMenuItems({
         },
         {
           label: 'Datum-NotBefore-NotAfter',
-          action: () =>
-            handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD),
+          action: () => handleMenuItemDialogClick(EditorConstants.dialogTypes.DATE_NOT_BEFORE_AFTER_ADD),
           keyShortcut: 'Alt+SHIFT+6',
         },
       ],

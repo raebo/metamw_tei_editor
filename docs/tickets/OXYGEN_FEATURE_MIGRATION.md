@@ -74,7 +74,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-003 – Tabellen vollständig bearbeiten
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P2
 - Oxygen-Aktionen: `insert.table`, `insert.table.row.below`, `insert.table.cell`,
   `insert.table.column.after`, `table.join.row.cells`, `table.split.left`, `table.split.right`,
@@ -88,6 +88,18 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 - Akzeptanzkriterien: Jede Operation ist nur in einem gültigen Tabellenkontext verfügbar und
   bewahrt eine wohlgeformte, rechteckige Tabellenstruktur.
 - Tests: Strukturänderungen einschließlich erster/letzter Zeile oder Spalte und ungültige Auswahl.
+- Umsetzungsstand: TEI-Tabellen können über das Kontextmenü erstellt und strukturell bearbeitet
+  werden. Zeilen und Spalten lassen sich einzeln oder in frei gewählter Anzahl einfügen und
+  löschen; Zellen können horizontal beziehungsweise vertikal verbunden, richtungsabhängig
+  geteilt, als Klartext bearbeitet und Tabellen nach einer gewählten Spalte sortiert werden. Auch
+  eine vollständige Tabelle kann samt Inhalt über eine ausdrücklich benannte Löschaktion entfernt werden. Eine
+  validierte logische Tabellenmatrix berücksichtigt `rows`-/`cols`-Spannen und verhindert
+  nicht-rechteckige Ergebnisse. In der WYSIWYG-Ansicht werden TEI-`row`/`cell` als sichtbare,
+  fokussierbare HTML-`tr`/`td` dargestellt; ein separater Caret-Anker macht zusätzlich jede
+  Tabelle als Ganzes auswählbar. Das Tabellen-Kontextmenü gruppiert die Befehle in einer weiteren
+  Ebene nach Zelle, Zeile, Spalte und gesamter Tabelle. Für diese Oxygen-Aktionen sind keine
+  Shortcuts dokumentiert. Struktur-, Rendering-, Dialog- und Kontextmenütests decken die
+  Operationen und Grenzfälle ab.
 
 ### OXY-004 – Bilder, grafische Elemente, Image-Maps und SVG
 

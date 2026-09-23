@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
-import { Menu, MenuItem, Divider, Box } from '@mui/material';
+import { Menu, MenuItem, Divider, Box, MenuList, Paper, Popper } from '@mui/material';
 import { createContextMenuItems, MenuItemType } from '@src/components/editor/letter/Util/ContextMenuLetterItems';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { findFigureAnchor } from '@src/utils/editor/figureAnchor';
 import type { ParagraphStructureOperation } from '@src/utils/editor/paragraphStructure';
 import type { ListStructureOperation } from '@src/utils/editor/listStructure';
+import type { TableStructureOperation } from '@src/utils/editor/tableStructure';
 
 const SECTION_SELECTOR =
   'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
@@ -43,6 +44,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   const [displayMenuItems, setDisplayMenuItems] = useState<MenuItemType[]>([]);
   const [submenuAnchorEl, setSubmenuAnchorEl] = useState<null | HTMLElement>(null);
   const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
+  const [nestedSubmenuAnchorEl, setNestedSubmenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [openNestedSubmenuIndex, setOpenNestedSubmenuIndex] = useState<number | null>(null);
 
   const xmlDocRef = useRef<XMLDocument | null>(null);
 
@@ -203,7 +206,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
 
   const handleNoMarkupRightClick = useCallback(
     (event: MouseEvent) => {
-      if (event.button !== 2) return;
+      const keyboardContextMenu = event.button === 0 && event.detail === 0;
+      if (event.button !== 2 && !keyboardContextMenu) return;
       event.preventDefault();
 
       setDisplayMenuItems([]);
@@ -233,8 +237,18 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const sectionAnchor = targetElement?.closest<HTMLElement>(SECTION_SELECTOR);
       const listAnchor = targetElement?.closest<HTMLElement>('list[data-editor-xml-path]');
       const itemAnchor = targetElement?.closest<HTMLElement>('item[data-editor-xml-path]');
+      const tableCaretAnchor = targetElement?.closest<HTMLElement>('[data-editor-table-caret]');
+      const tableElementAnchor = targetElement?.closest<HTMLElement>('table[data-editor-xml-path]');
+      const tableAnchor = tableCaretAnchor ?? tableElementAnchor;
+      const rowAnchor = targetElement?.closest<HTMLElement>('[data-editor-tei-element="row"][data-editor-xml-path]');
+      const cellAnchor = targetElement?.closest<HTMLElement>('[data-editor-tei-element="cell"][data-editor-xml-path]');
       const structureActions: NonNullable<MenuItemType['subMenu']> = [];
       const listActions: NonNullable<MenuItemType['subMenu']> = [];
+      const tableActions: NonNullable<MenuItemType['subMenu']> = [];
+      const tableCellActions: NonNullable<MenuItemType['subMenu']> = [];
+      const tableRowActions: NonNullable<MenuItemType['subMenu']> = [];
+      const tableColumnActions: NonNullable<MenuItemType['subMenu']> = [];
+      const wholeTableActions: NonNullable<MenuItemType['subMenu']> = [];
 
       const openStructureDialog = (operation: ParagraphStructureOperation, anchor: HTMLElement) => {
         const sourcePath = anchor.dataset.editorXmlPath;
@@ -256,6 +270,19 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           setEditorDialogAndReferenceThunk({
             dialogType: EditorConstants.dialogTypes.LIST_STRUCTURE,
             elementType: anchor.localName,
+            elementXmlId: sourcePath,
+            elementKey: operation,
+          }),
+        );
+      };
+
+      const openTableDialog = (operation: TableStructureOperation, anchor: HTMLElement, elementType = anchor.localName) => {
+        const sourcePath = anchor.dataset.editorXmlPath;
+        if (sourcePath === undefined) return;
+        dispatch(
+          setEditorDialogAndReferenceThunk({
+            dialogType: EditorConstants.dialogTypes.TABLE_STRUCTURE,
+            elementType,
             elementXmlId: sourcePath,
             elementKey: operation,
           }),
@@ -367,6 +394,146 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         isClickable = true;
       }
 
+      if (paragraphAnchor?.closest('body')) {
+        tableActions.push({
+          label: t('editor:dialog.tableStructure.actions.create'),
+          action: () => openTableDialog('table-create', paragraphAnchor),
+        });
+      }
+
+      const tableSource = cellAnchor ?? rowAnchor ?? tableAnchor;
+      if (tableSource?.closest('body')) {
+        if (rowAnchor) {
+          tableRowActions.push(
+            {
+              label: t('editor:dialog.tableStructure.actions.rowAbove'),
+              action: () => openTableDialog('table-row-above', rowAnchor, 'row'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.rowBelow'),
+              action: () => openTableDialog('table-row-below', rowAnchor, 'row'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.rowsCustom'),
+              action: () => openTableDialog('table-rows-custom', rowAnchor, 'row'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.deleteRow'),
+              action: () => openTableDialog('table-row-delete', rowAnchor, 'row'),
+            },
+          );
+        }
+        if (cellAnchor) {
+          tableCellActions.push(
+            {
+              label: t('editor:dialog.tableStructure.actions.editCell'),
+              action: () => openTableDialog('table-cell-edit', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.insertCell'),
+              action: () => openTableDialog('table-cell-insert', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.joinRight'),
+              action: () => openTableDialog('table-cells-join-right', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.splitLeft'),
+              action: () => openTableDialog('table-cell-split-left', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.splitRight'),
+              action: () => openTableDialog('table-cell-split-right', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.joinAbove'),
+              action: () => openTableDialog('table-cell-join-above', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.joinBelow'),
+              action: () => openTableDialog('table-cell-join-below', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.splitAbove'),
+              action: () => openTableDialog('table-cell-split-above', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.splitBelow'),
+              action: () => openTableDialog('table-cell-split-below', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.join'),
+              action: () => openTableDialog('table-join', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.split'),
+              action: () => openTableDialog('table-split', cellAnchor, 'cell'),
+            },
+          );
+          tableColumnActions.push(
+            {
+              label: t('editor:dialog.tableStructure.actions.columnBefore'),
+              action: () => openTableDialog('table-column-before', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.columnAfter'),
+              action: () => openTableDialog('table-column-after', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.columnsCustom'),
+              action: () => openTableDialog('table-columns-custom', cellAnchor, 'cell'),
+            },
+            {
+              label: t('editor:dialog.tableStructure.actions.deleteColumn'),
+              action: () => openTableDialog('table-column-delete', cellAnchor, 'cell'),
+            },
+          );
+        }
+        wholeTableActions.push({
+          label: t('editor:dialog.tableStructure.actions.sort'),
+          action: () => openTableDialog('table-sort', tableSource, 'table'),
+        });
+        wholeTableActions.push({
+          label: t('editor:dialog.tableStructure.actions.deleteTable'),
+          action: () => openTableDialog('table-delete', tableSource, 'table'),
+        });
+      }
+
+      if (tableCellActions.length > 0)
+        tableActions.push({
+          label: t('editor:dialog.tableStructure.groups.cell'),
+          hasSubMenu: true,
+          subMenu: tableCellActions,
+        });
+      if (tableRowActions.length > 0)
+        tableActions.push({
+          label: t('editor:dialog.tableStructure.groups.row'),
+          hasSubMenu: true,
+          subMenu: tableRowActions,
+        });
+      if (tableColumnActions.length > 0)
+        tableActions.push({
+          label: t('editor:dialog.tableStructure.groups.column'),
+          hasSubMenu: true,
+          subMenu: tableColumnActions,
+        });
+      if (wholeTableActions.length > 0)
+        tableActions.push({
+          label: t('editor:dialog.tableStructure.groups.table'),
+          hasSubMenu: true,
+          subMenu: wholeTableActions,
+        });
+
+      if (tableActions.length > 0) {
+        if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
+        menuItemsToAdd.push({
+          label: t('editor:dialog.tableStructure.contextAction'),
+          hasSubMenu: true,
+          subMenu: tableActions,
+        });
+        isClickable = true;
+      }
+
       if (!figureUploadInProgress && xmlDocRef.current && xmlContentRef.current) {
         const figureAnchor = findFigureAnchor(targetNode, xmlContentRef.current, xmlDocRef.current);
 
@@ -411,6 +578,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
 
   /** CLOSE MENU */
   const handleCloseAll = () => {
+    setNestedSubmenuAnchorEl(null);
+    setOpenNestedSubmenuIndex(null);
     setSubmenuAnchorEl(null);
     setOpenSubmenuIndex(null);
     props.setAnchorPosition(null);
@@ -461,6 +630,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
               key={index}
               onClick={(e) => {
                 if (item.hasSubMenu) {
+                  setNestedSubmenuAnchorEl(null);
+                  setOpenNestedSubmenuIndex(null);
                   setSubmenuAnchorEl(e.currentTarget);
                   setOpenSubmenuIndex(index);
                 } else {
@@ -492,13 +663,19 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           onClose={handleCloseAll}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+          slotProps={{ paper: { sx: { minWidth: '6rem' } } }}
         >
           {displayMenuItems[openSubmenuIndex]!.subMenu!.map((subItem, subIndex) => (
             <MenuItem
               key={subIndex}
-              onClick={() => {
-                subItem.action?.(selectedNode ? { node: selectedNode } : {});
-                handleCloseAll();
+              onClick={(event) => {
+                if (subItem.hasSubMenu) {
+                  setNestedSubmenuAnchorEl(event.currentTarget);
+                  setOpenNestedSubmenuIndex(subIndex);
+                } else {
+                  subItem.action?.(selectedNode ? { node: selectedNode } : {});
+                  handleCloseAll();
+                }
               }}
             >
               <Box
@@ -511,11 +688,48 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
               >
                 <span>{subItem.label}</span>
                 {subItem.keyShortcut && <span style={SndMenuItemStylesSpan}>{subItem.keyShortcut}</span>}
+                {subItem.hasSubMenu && <span style={{ marginLeft: 'auto' }}>▶</span>}
               </Box>
             </MenuItem>
           ))}
         </Menu>
       )}
+      {openSubmenuIndex !== null &&
+        openNestedSubmenuIndex !== null &&
+        displayMenuItems[openSubmenuIndex]?.subMenu?.[openNestedSubmenuIndex]?.subMenu && (
+          <Popper
+            anchorEl={nestedSubmenuAnchorEl}
+            open={Boolean(nestedSubmenuAnchorEl)}
+            placement="right-start"
+            sx={{ zIndex: (theme) => theme.zIndex.modal + 1 }}
+          >
+            <Paper elevation={8}>
+              <MenuList>
+                {displayMenuItems[openSubmenuIndex]!.subMenu![openNestedSubmenuIndex]!.subMenu!.map((nestedItem, nestedIndex) => (
+                  <MenuItem
+                    key={nestedIndex}
+                    onClick={() => {
+                      nestedItem.action?.(selectedNode ? { node: selectedNode } : {});
+                      handleCloseAll();
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        fontSize: '70%',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                      }}
+                    >
+                      <span>{nestedItem.label}</span>
+                      {nestedItem.keyShortcut && <span style={SndMenuItemStylesSpan}>{nestedItem.keyShortcut}</span>}
+                    </Box>
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </Paper>
+          </Popper>
+        )}
     </>
   );
 };

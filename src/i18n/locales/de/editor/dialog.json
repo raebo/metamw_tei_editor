@@ -19,6 +19,7 @@
     "figureUpload": "Bild einfügen",
     "listStructure": "Listenstruktur bearbeiten",
     "paragraphStructure": "Absatz- und Abschnittsstruktur bearbeiten",
+    "tableStructure": "Tabellenstruktur bearbeiten",
     "closeTabWithContent": "Tab mit Inhalt Schließen?",
     "dateWhenAdd": "Datum 'WHEN' Auszeichnen",
     "dateWhenCustomAdd": "Datum 'WHEN CUSTOM' Auszeichnen",
@@ -151,6 +152,87 @@
     "submit": "Änderung übernehmen",
     "submitDelete": "Löschen",
     "success": "Die Listenstruktur wurde aktualisiert.",
+    "errors": {
+      "context": "Der Bearbeitungskontext ist nicht mehr verfügbar."
+    }
+  },
+  "tableStructure": {
+    "contextAction": "Tabellen",
+    "groups": {
+      "cell": "Zelle",
+      "row": "Zeile",
+      "column": "Spalte",
+      "table": "Tabelle"
+    },
+    "actions": {
+      "create": "Tabelle danach einfügen …",
+      "rowAbove": "Zeile oberhalb einfügen …",
+      "rowBelow": "Zeile unterhalb einfügen …",
+      "editCell": "Zellinhalt bearbeiten …",
+      "insertCell": "Zelle danach einfügen …",
+      "columnBefore": "Spalte davor einfügen …",
+      "columnAfter": "Spalte danach einfügen …",
+      "columnsCustom": "Mehrere Spalten danach einfügen …",
+      "rowsCustom": "Mehrere Zeilen darunter einfügen …",
+      "joinRight": "Mit rechter Zelle verbinden …",
+      "splitLeft": "Verbundzelle nach links teilen …",
+      "splitRight": "Verbundzelle nach rechts teilen …",
+      "joinAbove": "Mit oberer Zelle verbinden …",
+      "joinBelow": "Mit unterer Zelle verbinden …",
+      "splitAbove": "Verbundzelle nach oben teilen …",
+      "splitBelow": "Verbundzelle nach unten teilen …",
+      "deleteColumn": "Spalte löschen …",
+      "deleteRow": "Zeile löschen …",
+      "deleteTable": "Tabelle löschen …",
+      "sort": "Tabelle sortieren …",
+      "join": "Zellen verbinden …",
+      "split": "Verbundzelle teilen …"
+    },
+    "operations": {
+      "table-create": "Eine rechteckige TEI-Tabelle wird nach dem ausgewählten Absatz eingefügt.",
+      "table-row-above": "Eine Zeile wird oberhalb der ausgewählten Zeile eingefügt.",
+      "table-row-below": "Eine Zeile wird unterhalb der ausgewählten Zeile eingefügt.",
+      "table-cell-edit": "Der Textinhalt der ausgewählten Zelle wird ersetzt.",
+      "table-cell-insert": "Eine neue Tabellenspalte wird nach der ausgewählten Zelle eingefügt.",
+      "table-column-before": "Eine Spalte wird vor der ausgewählten Zelle eingefügt.",
+      "table-column-after": "Eine Spalte wird nach der ausgewählten Zelle eingefügt.",
+      "table-columns-custom": "Die angegebene Zahl von Spalten wird nach der ausgewählten Zelle eingefügt.",
+      "table-rows-custom": "Die angegebene Zahl von Zeilen wird unterhalb der ausgewählten Zeile eingefügt.",
+      "table-cells-join-right": "Die ausgewählte Zelle wird mit ihrer rechten Nachbarzelle verbunden.",
+      "table-cell-split-left": "Von der ausgewählten horizontalen Verbundzelle wird links eine Zelle abgetrennt.",
+      "table-cell-split-right": "Von der ausgewählten horizontalen Verbundzelle wird rechts eine Zelle abgetrennt.",
+      "table-cell-join-above": "Die ausgewählte Zelle wird mit der Zelle darüber verbunden.",
+      "table-cell-join-below": "Die ausgewählte Zelle wird mit der Zelle darunter verbunden.",
+      "table-cell-split-above": "Von der ausgewählten vertikalen Verbundzelle wird oben eine Zelle abgetrennt.",
+      "table-cell-split-below": "Von der ausgewählten vertikalen Verbundzelle wird unten eine Zelle abgetrennt.",
+      "table-column-delete": "Die Spalte der ausgewählten Zelle wird gelöscht.",
+      "table-row-delete": "Die ausgewählte Zeile wird gelöscht.",
+      "table-delete": "Die ausgewählte Tabelle und ihr gesamter Inhalt werden unwiderruflich gelöscht.",
+      "table-sort": "Datenzeilen werden nach dem Text der gewählten Spalte sortiert; Kopfzeilen bleiben stehen.",
+      "table-join": "Die ausgewählte Zelle wird in der gewählten Richtung mit ihrer Nachbarzelle verbunden.",
+      "table-split": "Die ausgewählte Verbundzelle wird in der gewählten Richtung geteilt."
+    },
+    "fields": {
+      "rows": "Anzahl Zeilen",
+      "columns": "Anzahl Spalten",
+      "count": "Anzahl",
+      "cellText": "Text der Tabellenzelle",
+      "sortColumn": "Sortierspalte (ab 1)",
+      "sortDirection": "Sortierrichtung",
+      "joinDirection": "Richtung der Nachbarzelle",
+      "splitDirection": "Teilungsrichtung"
+    },
+    "directions": {
+      "ascending": "Aufsteigend",
+      "descending": "Absteigend",
+      "left": "Links",
+      "right": "Rechts",
+      "above": "Oben",
+      "below": "Unten"
+    },
+    "submit": "Änderung übernehmen",
+    "submitDelete": "Tabelle löschen",
+    "success": "Die Tabellenstruktur wurde aktualisiert.",
     "errors": {
       "context": "Der Bearbeitungskontext ist nicht mehr verfügbar."
     }

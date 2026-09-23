@@ -40,6 +40,7 @@ import AddProvenanceDialog from '@src/components/editor/letter/Dialog/Components
 import FigureUploadDialog from './Components/FigureUploadDialog';
 import ListStructureDialog from './Components/ListStructureDialog';
 import ParagraphStructureDialog from './Components/ParagraphStructureDialog';
+import TableStructureDialog from './Components/TableStructureDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -75,6 +76,7 @@ const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.FIGURE_UPLOAD]: t('editor:dialog.titles.figureUpload'),
   [EditorConstants.dialogTypes.LIST_STRUCTURE]: t('editor:dialog.titles.listStructure'),
   [EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE]: t('editor:dialog.titles.paragraphStructure'),
+  [EditorConstants.dialogTypes.TABLE_STRUCTURE]: t('editor:dialog.titles.tableStructure'),
   [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: t('editor:dialog.titles.closeTabWithContent'),
   [EditorConstants.dialogTypes.DATE_WHEN_ADD]: t('editor:dialog.titles.dateWhenAdd'),
   [EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD]: t('editor:dialog.titles.dateWhenCustomAdd'),
@@ -114,6 +116,7 @@ const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) 
   [EditorConstants.dialogTypes.FIGURE_UPLOAD]: (props) => <FigureUploadDialog {...props} />,
   [EditorConstants.dialogTypes.LIST_STRUCTURE]: (props) => <ListStructureDialog {...props} />,
   [EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE]: (props) => <ParagraphStructureDialog {...props} />,
+  [EditorConstants.dialogTypes.TABLE_STRUCTURE]: (props) => <TableStructureDialog {...props} />,
   [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: (props) => <CloseTabWithContent {...props} />,
   [EditorConstants.dialogTypes.DATE_WHEN_ADD]: (props) => <DateAddDialog {...props} dateType={EditorConstants.dateDialog.dateTypes.WHEN} />,
   [EditorConstants.dialogTypes.DATE_WHEN_CUSTOM_ADD]: (props) => (

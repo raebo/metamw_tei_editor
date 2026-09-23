@@ -196,3 +196,44 @@ note {
   outline: 2px solid var(--secondary-color);
   outline-offset: 2px;
 }
+
+.tei-table-caret {
+  display: inline-block;
+  padding: 0;
+  border: 0;
+  margin-right: 5px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 60%;
+}
+
+.tei-table-caret:focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
+.tei-table {
+  width: auto;
+  margin: 0.5rem 0;
+  border-collapse: collapse;
+}
+
+.tei-table-cell {
+  min-width: 2rem;
+  height: 1.5rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid currentcolor;
+  cursor: pointer;
+  vertical-align: top;
+}
+
+.tei-table-cell:focus-visible {
+  outline: 3px solid var(--secondary-color);
+  outline-offset: -3px;
+}
+
+.tei-table tr[data-tei-role='label'] .tei-table-cell,
+.tei-table-cell[data-tei-role='label'] {
+  font-weight: 700;
+}

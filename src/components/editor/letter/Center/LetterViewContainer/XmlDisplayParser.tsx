@@ -48,7 +48,22 @@ const UNWRAP_TAGS = new Set(['a', 'button', 'form']);
 // handler below). In particular there is no legitimate use of `href`/`src`/`xlink:href`/
 // `formaction`/... or any `on*` event handler attribute, so none of those are ever passed
 // through - regardless of what the source XML contains.
-const ALLOWED_ATTRIBUTES = new Set(['class', 'style', 'xml:id', 'xml:lang', 'data-key', 'key', 'n', 'rend', 'resp', 'subtype', 'type']);
+const ALLOWED_ATTRIBUTES = new Set([
+  'class',
+  'style',
+  'xml:id',
+  'xml:lang',
+  'cols',
+  'data-key',
+  'key',
+  'n',
+  'rend',
+  'resp',
+  'role',
+  'rows',
+  'subtype',
+  'type',
+]);
 
 // Defensive check on top of the attribute allowlist: even for the allowed `style` attribute,
 // reject any declaration that could trigger a network request or code execution (url(...),
@@ -84,6 +99,11 @@ const PARAGRAPH_STYLE_CLASSES: Record<string, string> = {
   paragraph_hanging: 'tei-paragraph-hanging',
   'paragraph centered': 'tei-paragraph-centered',
   paragraph_right: 'tei-paragraph-right',
+};
+
+const TABLE_ELEMENT_TAGS: Partial<Record<string, keyof JSX.IntrinsicElements>> = {
+  cell: 'td',
+  row: 'tr',
 };
 
 const appendClassName = (attributes: Record<string, any>, className?: string) => {
@@ -159,7 +179,8 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         return <React.Fragment key={`${element.tagName}-${Math.random()}`}>{children}</React.Fragment>;
       }
 
-      const TagName = element.tagName as keyof JSX.IntrinsicElements;
+      const isTableHead = tagName === 'head' && element.parentElement?.tagName.toLowerCase() === 'table';
+      const TagName = isTableHead ? 'caption' : (TABLE_ELEMENT_TAGS[tagName] ?? (element.tagName as keyof JSX.IntrinsicElements));
 
       const attributes = Array.from(element.attributes).reduce(
         (acc, attr) => {
@@ -189,6 +210,12 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
             // preview DOM (see XMLDisplayParser tests), so this is a known, accepted gap rather
             // than a silent attribute that only sometimes works.
             return acc;
+          } else if (tagName === 'cell' && attr.name === 'cols') {
+            acc.colSpan = attr.value;
+          } else if (tagName === 'cell' && attr.name === 'rows') {
+            acc.rowSpan = attr.value;
+          } else if ((tagName === 'cell' || tagName === 'row') && attr.name === 'role') {
+            acc['data-tei-role'] = attr.value;
           } else {
             acc[attr.name] = attr.value;
           }
@@ -201,16 +228,63 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         appendClassName(attributes, 'tei-list');
         attributes.tabIndex = 0;
       }
+      if (tagName === 'table') appendClassName(attributes, 'tei-table');
+      if (tagName === 'row') attributes['data-editor-tei-element'] = 'row';
+      if (tagName === 'cell') {
+        appendClassName(attributes, 'tei-table-cell');
+        attributes['data-editor-tei-element'] = 'cell';
+        // Table cells remain semantic cells while acting as keyboard focus targets for editor actions.
+
+        attributes.tabIndex = 0;
+      }
 
       if (tagName === 'figure' && element.getAttribute('xml:id') === props.focusedFigureXmlId) {
         appendClassName(attributes, 'tei-figure--focused');
         attributes.tabIndex = -1;
       }
 
-      return (
+      const tableCaption =
+        tagName === 'table'
+          ? children.filter((_child, index) => {
+              const sourceChild = element.childNodes[index];
+              return sourceChild.nodeType === Node.ELEMENT_NODE && (sourceChild as Element).tagName.toLowerCase() === 'head';
+            })
+          : [];
+      const tableRows =
+        tagName === 'table'
+          ? children.filter((_child, index) => {
+              const sourceChild = element.childNodes[index];
+              return sourceChild.nodeType === Node.ELEMENT_NODE && (sourceChild as Element).tagName.toLowerCase() === 'row';
+            })
+          : [];
+      const renderedElement = (
         <TagName key={`${element.tagName}-${Math.random()}`} {...attributes} data-editor-xml-path={sourcePath.join('.')}>
-          {children}
+          {tagName === 'table' ? (
+            <>
+              {tableCaption}
+              <tbody>{tableRows}</tbody>
+            </>
+          ) : (
+            children
+          )}
         </TagName>
+      );
+      if (tagName !== 'table') return renderedElement;
+
+      return (
+        <React.Fragment key={`table-${sourcePath.join('.')}`}>
+          <button
+            type="button"
+            className="tei-table-caret"
+            data-editor-table-caret="true"
+            data-editor-xml-path={sourcePath.join('.')}
+            tabIndex={0}
+            aria-label="Tabelle auswählen"
+          >
+            ▶
+          </button>
+          {renderedElement}
+        </React.Fragment>
       );
     }
 
