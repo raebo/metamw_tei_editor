@@ -66,6 +66,7 @@
     },
     "submit": "Bild hochladen",
     "uploading": "Bild wird hochgeladen …",
+    "reload": "Arbeitskopie neu laden",
     "success": "Das Bild wurde eingefügt.",
     "errors": {
       "fileType": "Bitte wählen Sie eine JPEG- oder PNG-Datei aus. SVG-Dateien werden nicht unterstützt.",

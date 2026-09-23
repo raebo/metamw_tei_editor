@@ -10,6 +10,7 @@ import {
   setEditorPinnedLetterContentChanged,
   setFigureUploadInProgress,
   setFocusedFigureXmlId,
+  setReloadLetterContent,
   setXmlLetterContent,
 } from '@src/redux/slices/editor.letter.slice';
 import { uploadFigure } from '@src/services/editor/apiFigureRequest.service';
@@ -36,6 +37,7 @@ const FigureUploadDialog = (props: DefaultDialogProps) => {
   const [head, setHead] = useState('');
   const [figDesc, setFigDesc] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorStatus, setErrorStatus] = useState<number | null>(null);
   const submittingRef = useRef(false);
 
   const submit = async () => {
@@ -52,6 +54,7 @@ const FigureUploadDialog = (props: DefaultDialogProps) => {
     submittingRef.current = true;
     dispatch(setFigureUploadInProgress(true));
     setErrorMessage(null);
+    setErrorStatus(null);
     try {
       const result = await uploadFigure(letterId, {
         image,
@@ -82,6 +85,7 @@ const FigureUploadDialog = (props: DefaultDialogProps) => {
           ? `editor:dialog.figureUpload.errors.http${status}`
           : 'editor:dialog.figureUpload.errors.generic';
       setErrorMessage(t(key));
+      setErrorStatus(status ?? null);
     } finally {
       submittingRef.current = false;
       dispatch(setFigureUploadInProgress(false));
@@ -94,6 +98,18 @@ const FigureUploadDialog = (props: DefaultDialogProps) => {
       {errorMessage && (
         <Alert severity="error" role="alert">
           {errorMessage}
+          {(errorStatus === 404 || errorStatus === 409) && (
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => {
+                dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+                props.onClose();
+              }}
+            >
+              {t('editor:dialog.figureUpload.reload')}
+            </Button>
+          )}
         </Alert>
       )}
       <Button component="label" variant="outlined" disabled={uploadInProgress}>

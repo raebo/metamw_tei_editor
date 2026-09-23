@@ -1,5 +1,7 @@
 import { startLoading, stopLoading } from '@src/redux/slices/spinner.loading.slice';
 import apiRequestModule from '@src/services/apiRequest.service';
+import { setLogoutState } from '@src/redux/slices/authentication.slice';
+import { SESSION_EXPIRED_EVENT } from '@src/constants/auth';
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 // Captures the interceptor handlers axios.create()'s instance was configured with, and exposes
@@ -67,9 +69,7 @@ describe('apiRequest.service / initApi', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    axiosMock.__instance.mockImplementation((config: any) =>
-      Promise.resolve({ data: 'retried', config }),
-    );
+    axiosMock.__instance.mockImplementation((config: any) => Promise.resolve({ data: 'retried', config }));
   });
 
   it('creates the axios instance only once (single shared instance across all callers)', async () => {
@@ -121,9 +121,7 @@ describe('apiRequest.service / initApi', () => {
     });
 
     it('rejects gracefully when the error has no request config (e.g. a network-level error)', async () => {
-      await expect(
-        axiosMock.__responseHandlers.error({ response: { status: 401 } }),
-      ).rejects.toEqual({ response: { status: 401 } });
+      await expect(axiosMock.__responseHandlers.error({ response: { status: 401 } })).rejects.toEqual({ response: { status: 401 } });
       expect(mockRefresh).not.toHaveBeenCalled();
     });
 
@@ -146,6 +144,8 @@ describe('apiRequest.service / initApi', () => {
       const refreshError = new Error('refresh failed');
       mockRefresh.mockRejectedValue(refreshError);
       const originalRequest = { url: '/jwt/editor/letters/1', headers: {} };
+      const sessionExpiredListener = jest.fn();
+      window.addEventListener(SESSION_EXPIRED_EVENT, sessionExpiredListener);
 
       await expect(
         axiosMock.__responseHandlers.error({
@@ -154,6 +154,9 @@ describe('apiRequest.service / initApi', () => {
         }),
       ).rejects.toBe(refreshError);
       expect(axiosMock.__instance).not.toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(setLogoutState());
+      expect(sessionExpiredListener).toHaveBeenCalledTimes(1);
+      window.removeEventListener(SESSION_EXPIRED_EVENT, sessionExpiredListener);
     });
 
     it('does not attempt a second refresh once a request has already been retried', async () => {

@@ -2,8 +2,14 @@
   "figure": {
     "defaultAlt": "Figure in the letter",
     "loading": "Loading figure",
+    "notFound": "Figure is not available",
     "unavailable": "Figure could not be loaded",
-    "retry": "Retry"
+    "retry": "Retry",
+    "openPreview": "Enlarge figure: {{description}}",
+    "closePreview": "Close enlarged figure",
+    "zoomIn": "Zoom into figure",
+    "zoomOut": "Zoom out of figure",
+    "resetZoom": "Reset zoom to 100 percent"
   },
   "letterViewContainer" : {
     "title": "Letter View",

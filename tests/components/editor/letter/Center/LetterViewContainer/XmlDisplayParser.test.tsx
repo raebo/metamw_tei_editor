@@ -90,12 +90,67 @@ describe('XMLDisplayParser', () => {
     expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:figure-image');
   });
 
+  it('opens and closes an enlarged preview without loading the image again', async () => {
+    render(
+      <XMLDisplayParser
+        xmlContentRef={null}
+        letterId={123}
+        xmlString='<figure xml:id="figure_preview"><graphic/><figDesc>Preview image</figDesc></figure>'
+      />,
+    );
+
+    const trigger = await screen.findByRole('button', {
+      name: 'editor:common.figure.openPreview',
+    });
+    fireEvent.click(trigger);
+
+    expect(await screen.findByRole('dialog', { name: 'Preview image' })).toBeInTheDocument();
+    const images = Array.from(document.querySelectorAll('img[alt="Preview image"]'));
+    expect(images).toHaveLength(2);
+    expect(images[0]).toHaveAttribute('src', 'blob:figure-image');
+    expect(images[1]).toHaveAttribute('src', 'blob:figure-image');
+    expect(mockFetchFigureImage).toHaveBeenCalledTimes(1);
+
+    const canvas = screen.getByTestId('figure-preview-canvas');
+    const zoomOut = screen.getByRole('button', {
+      name: 'editor:common.figure.zoomOut',
+    });
+    const zoomIn = screen.getByRole('button', {
+      name: 'editor:common.figure.zoomIn',
+    });
+    const resetZoom = screen.getByRole('button', {
+      name: 'editor:common.figure.resetZoom',
+    });
+    expect(canvas).toHaveStyle({ width: '100%' });
+    expect(resetZoom).toBeDisabled();
+
+    fireEvent.click(zoomOut);
+    fireEvent.click(zoomOut);
+    expect(canvas).toHaveStyle({ width: '50%' });
+    expect(zoomOut).toBeDisabled();
+
+    fireEvent.click(zoomIn);
+    expect(canvas).toHaveStyle({ width: '75%' });
+    fireEvent.click(resetZoom);
+    expect(canvas).toHaveStyle({ width: '100%' });
+
+    for (let step = 0; step < 8; step += 1) fireEvent.click(zoomIn);
+    expect(canvas).toHaveStyle({ width: '300%' });
+    expect(zoomIn).toBeDisabled();
+    expect(mockFetchFigureImage).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: 'editor:common.figure.closePreview' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.getByRole('img', { name: 'Preview image' })).toBeInTheDocument();
+    expect(mockFetchFigureImage).toHaveBeenCalledTimes(1);
+  });
+
   it('maps trusted figure layout tokens without exposing them as inline CSS', async () => {
     const { container } = render(
       <XMLDisplayParser
         xmlContentRef={null}
         letterId={123}
-        xmlString={`<figure xml:id="figure_layout" style="center" rend="inline">
+        xmlString={`<figure xml:id="figure_layout" style="center" rend="inline" subtype="half_page">
           <graphic/>
           <head style="display_none">Hidden heading</head>
           <figDesc style="display_none">Hidden description</figDesc>
@@ -106,9 +161,30 @@ describe('XMLDisplayParser', () => {
     await screen.findByRole('img', { name: 'Hidden description' });
     const figure = container.querySelector('figure');
     expect(figure).toHaveClass('tei-figure-align-center');
+    expect(figure).toHaveClass('tei-figure-rend-inline');
+    expect(figure).toHaveClass('tei-figure-subtype-half-page');
     expect(figure).not.toHaveAttribute('style');
+    expect(figure).not.toHaveAttribute('rend');
+    expect(figure).not.toHaveAttribute('subtype');
     expect(container.querySelector('head')).toHaveStyle({ display: 'none' });
     expect(container.querySelector('figdesc')).toHaveStyle({ display: 'none' });
+  });
+
+  it('uses neutral layout for unknown figure layout tokens', async () => {
+    const { container } = render(
+      <XMLDisplayParser
+        xmlContentRef={null}
+        letterId={123}
+        xmlString='<figure xml:id="figure_layout" style="position:fixed" rend="evil" subtype="unknown"><graphic/></figure>'
+      />,
+    );
+
+    await screen.findByRole('img');
+    const figure = container.querySelector('figure');
+    expect(figure).not.toHaveAttribute('style');
+    expect(figure).not.toHaveAttribute('rend');
+    expect(figure).not.toHaveAttribute('subtype');
+    expect(figure?.className).toBe('');
   });
 
   it('shows a local placeholder and makes no request for a figure without xml:id', () => {
@@ -122,6 +198,35 @@ describe('XMLDisplayParser', () => {
 
     expect(screen.getByRole('img', { name: 'Missing image' })).toBeInTheDocument();
     expect(mockFetchFigureImage).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('shows a local placeholder and makes no request for a figure without graphic', () => {
+    render(
+      <XMLDisplayParser
+        xmlContentRef={null}
+        letterId={123}
+        xmlString='<TEI><text><body><figure xml:id="figure_missing"><figDesc>Missing graphic</figDesc></figure></body></text></TEI>'
+      />,
+    );
+
+    expect(screen.getByRole('img', { name: 'Missing graphic' })).toBeInTheDocument();
+    expect(mockFetchFigureImage).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('does not offer retry for a figure image that returns 404', async () => {
+    mockFetchFigureImage.mockRejectedValue({ response: { status: 404 } });
+
+    render(
+      <XMLDisplayParser
+        xmlContentRef={null}
+        letterId={123}
+        xmlString='<figure xml:id="figure_missing"><graphic/><figDesc>Missing file</figDesc></figure>'
+      />,
+    );
+
+    expect(await screen.findByRole('img', { name: 'Missing file' })).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
@@ -141,6 +246,21 @@ describe('XMLDisplayParser', () => {
 
     expect(await screen.findByRole('img', { name: 'Retry image' })).toHaveAttribute('src', 'blob:figure-image');
     await waitFor(() => expect(mockFetchFigureImage).toHaveBeenCalledTimes(2));
+  });
+
+  it('updates figure display when the XML working copy changes through undo and redo', async () => {
+    const figureXml =
+      '<TEI><text><body><figure xml:id="figure_history"><graphic/><figDesc>History image</figDesc></figure></body></text></TEI>';
+    const withoutFigureXml = '<TEI><text><body><p>Text</p></body></text></TEI>';
+    const { rerender } = render(<XMLDisplayParser xmlContentRef={null} letterId={123} xmlString={figureXml} />);
+
+    expect(await screen.findByRole('img', { name: 'History image' })).toBeInTheDocument();
+    rerender(<XMLDisplayParser xmlContentRef={null} letterId={123} xmlString={withoutFigureXml} />);
+    expect(screen.queryByRole('img', { name: 'History image' })).not.toBeInTheDocument();
+
+    rerender(<XMLDisplayParser xmlContentRef={null} letterId={123} xmlString={figureXml} />);
+    expect(await screen.findByRole('img', { name: 'History image' })).toBeInTheDocument();
+    expect(mockFetchFigureImage).toHaveBeenCalledTimes(2);
   });
 
   it('maps a selection back to the complete source XML without serializing the filtered preview', () => {

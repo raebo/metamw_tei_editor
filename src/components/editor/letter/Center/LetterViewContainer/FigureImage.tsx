@@ -1,6 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchFigureImage } from '@src/services/editor/apiFigureRequest.service';
+import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 
 interface FigureImageProps {
   letterId: number | null;
@@ -8,14 +13,25 @@ interface FigureImageProps {
   description: string | null;
 }
 
-type FigureImageStatus = 'loading' | 'ready' | 'error';
+type FigureImageStatus = 'loading' | 'ready' | 'not-found' | 'error';
+const MIN_PREVIEW_ZOOM = 0.5;
+const MAX_PREVIEW_ZOOM = 3;
+const PREVIEW_ZOOM_STEP = 0.25;
+
+const responseStatus = (error: unknown): number | undefined =>
+  typeof error === 'object' && error !== null && 'response' in error
+    ? (error as { response?: { status?: number } }).response?.status
+    : undefined;
 
 const FigureImage = ({ letterId, figureXmlId, description }: FigureImageProps) => {
   const { t } = useTranslation();
-  const [status, setStatus] = useState<FigureImageStatus>('loading');
+  const [status, setStatus] = useState<FigureImageStatus>(letterId === null || !figureXmlId ? 'not-found' : 'loading');
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewZoom, setPreviewZoom] = useState(1);
   const objectUrlRef = useRef<string | null>(null);
+  const previewTitleId = useId();
 
   const revokeObjectUrl = useCallback(() => {
     if (objectUrlRef.current) {
@@ -27,9 +43,10 @@ const FigureImage = ({ letterId, figureXmlId, description }: FigureImageProps) =
   useEffect(() => {
     revokeObjectUrl();
     setObjectUrl(null);
+    setPreviewOpen(false);
 
     if (letterId === null || !figureXmlId) {
-      setStatus('error');
+      setStatus('not-found');
       return;
     }
 
@@ -49,9 +66,9 @@ const FigureImage = ({ letterId, figureXmlId, description }: FigureImageProps) =
         setObjectUrl(nextObjectUrl);
         setStatus('ready');
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!abortController.signal.aborted && isActive) {
-          setStatus('error');
+          setStatus(responseStatus(error) === 404 ? 'not-found' : 'error');
         }
       });
 
@@ -72,13 +89,13 @@ const FigureImage = ({ letterId, figureXmlId, description }: FigureImageProps) =
     );
   }
 
-  if (status === 'error' || !objectUrl) {
+  if (status === 'not-found' || status === 'error' || !objectUrl) {
     return (
       <span className="tei-figure-status tei-figure-status--error" role="alert">
         <span role="img" aria-label={altText}>
-          {t('editor:common.figure.unavailable')}
+          {t(status === 'not-found' ? 'editor:common.figure.notFound' : 'editor:common.figure.unavailable')}
         </span>
-        {letterId !== null && figureXmlId && (
+        {status === 'error' && letterId !== null && figureXmlId && (
           <button type="button" onClick={() => setRetryCount((count) => count + 1)}>
             {t('editor:common.figure.retry')}
           </button>
@@ -88,16 +105,73 @@ const FigureImage = ({ letterId, figureXmlId, description }: FigureImageProps) =
   }
 
   return (
-    <img
-      className="tei-figure-image"
-      src={objectUrl}
-      alt={altText}
-      onError={() => {
-        revokeObjectUrl();
-        setObjectUrl(null);
-        setStatus('error');
-      }}
-    />
+    <>
+      <button
+        type="button"
+        className="tei-figure-preview-trigger"
+        aria-label={t('editor:common.figure.openPreview', { description: altText })}
+        aria-haspopup="dialog"
+        onClick={() => {
+          setPreviewZoom(1);
+          setPreviewOpen(true);
+        }}
+      >
+        <img
+          className="tei-figure-image"
+          src={objectUrl}
+          alt={altText}
+          onError={() => {
+            setPreviewOpen(false);
+            revokeObjectUrl();
+            setObjectUrl(null);
+            setStatus('error');
+          }}
+        />
+      </button>
+      <Dialog
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        maxWidth="xl"
+        aria-labelledby={previewTitleId}
+        PaperProps={{ className: 'tei-figure-preview-panel' }}
+      >
+        <DialogTitle id={previewTitleId} className="tei-figure-preview-title">
+          {altText}
+          <IconButton aria-label={t('editor:common.figure.closePreview')} onClick={() => setPreviewOpen(false)} edge="end">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers className="tei-figure-preview-content">
+          <Box className="tei-figure-preview-toolbar">
+            <IconButton
+              aria-label={t('editor:common.figure.zoomOut')}
+              disabled={previewZoom <= MIN_PREVIEW_ZOOM}
+              onClick={() => setPreviewZoom((zoom) => Math.max(MIN_PREVIEW_ZOOM, zoom - PREVIEW_ZOOM_STEP))}
+            >
+              <ZoomOutIcon />
+            </IconButton>
+            <Typography aria-live="polite" className="tei-figure-preview-zoom-value">
+              {Math.round(previewZoom * 100)}%
+            </Typography>
+            <IconButton
+              aria-label={t('editor:common.figure.zoomIn')}
+              disabled={previewZoom >= MAX_PREVIEW_ZOOM}
+              onClick={() => setPreviewZoom((zoom) => Math.min(MAX_PREVIEW_ZOOM, zoom + PREVIEW_ZOOM_STEP))}
+            >
+              <ZoomInIcon />
+            </IconButton>
+            <IconButton aria-label={t('editor:common.figure.resetZoom')} disabled={previewZoom === 1} onClick={() => setPreviewZoom(1)}>
+              <RestartAltIcon />
+            </IconButton>
+          </Box>
+          <Box className="tei-figure-preview-viewport">
+            <Box className="tei-figure-preview-canvas" data-testid="figure-preview-canvas" style={{ width: `${previewZoom * 100}%` }}>
+              <img className="tei-figure-preview-image" src={objectUrl} alt={altText} />
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

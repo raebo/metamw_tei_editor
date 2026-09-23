@@ -108,4 +108,69 @@ describe('FigureUploadDialog', () => {
     expect(mockUploadFigure).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
   });
+
+  it.each([
+    [401, /Sitzung ist abgelaufen/],
+    [413, /für den Server zu groß/],
+    [415, /Nur echte JPEG- und PNG-Dateien/],
+    [422, /nicht validiert/],
+  ])('keeps the form open for HTTP %s and shows its specific error', async (status, message) => {
+    mockUploadFigure.mockRejectedValue({ response: { status } });
+    const store = buildStore();
+    const onClose = jest.fn();
+    const { container } = render(
+      <Provider store={store}>
+        <FigureUploadDialog xmlDoc={document.implementation.createDocument(null, 'root')} onSave={jest.fn()} onClose={onClose} />
+      </Provider>,
+    );
+    fireEvent.change(container.querySelector('input[type="file"]')!, {
+      target: { files: [new File(['image'], 'drawing.png', { type: 'image/png' })] },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Bild hochladen' }));
+
+    expect(await screen.findByText(message)).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+    expect(store.getState().editorLetter.figureUploadInProgress).toBe(false);
+  });
+
+  it.each([404, 409])('offers to reload the working copy after HTTP %s', async (status) => {
+    mockUploadFigure.mockRejectedValue({ response: { status } });
+    const store = buildStore();
+    const onClose = jest.fn();
+    const { container } = render(
+      <Provider store={store}>
+        <FigureUploadDialog xmlDoc={document.implementation.createDocument(null, 'root')} onSave={jest.fn()} onClose={onClose} />
+      </Provider>,
+    );
+    fireEvent.change(container.querySelector('input[type="file"]')!, {
+      target: { files: [new File(['image'], 'drawing.png', { type: 'image/png' })] },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Bild hochladen' }));
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Arbeitskopie neu laden' }));
+
+    expect(store.getState().editorLetter.reloadLetterContent).toBe(true);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('prevents duplicate submissions while the first upload is pending', () => {
+    mockUploadFigure.mockReturnValue(new Promise(() => {}));
+    const store = buildStore();
+    const { container } = render(
+      <Provider store={store}>
+        <FigureUploadDialog xmlDoc={document.implementation.createDocument(null, 'root')} onSave={jest.fn()} onClose={jest.fn()} />
+      </Provider>,
+    );
+    fireEvent.change(container.querySelector('input[type="file"]')!, {
+      target: { files: [new File(['image'], 'drawing.png', { type: 'image/png' })] },
+    });
+    const submit = screen.getByRole('button', { name: 'Bild hochladen' });
+
+    fireEvent.click(submit);
+    fireEvent.click(submit);
+
+    expect(mockUploadFigure).toHaveBeenCalledTimes(1);
+    expect(store.getState().editorLetter.figureUploadInProgress).toBe(true);
+  });
 });

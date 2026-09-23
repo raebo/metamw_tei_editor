@@ -2,8 +2,14 @@
   "figure": {
     "defaultAlt": "Abbildung im Brief",
     "loading": "Abbildung wird geladen",
+    "notFound": "Abbildung ist nicht verfügbar",
     "unavailable": "Abbildung konnte nicht geladen werden",
-    "retry": "Erneut laden"
+    "retry": "Erneut laden",
+    "openPreview": "Abbildung vergrößern: {{description}}",
+    "closePreview": "Vergrößerte Abbildung schließen",
+    "zoomIn": "In die Abbildung hineinzoomen",
+    "zoomOut": "Aus der Abbildung herauszoomen",
+    "resetZoom": "Zoom auf 100 Prozent zurücksetzen"
   },
   "letterViewContainer" : {
     "title": "Briefansicht",

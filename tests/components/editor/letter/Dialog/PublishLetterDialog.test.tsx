@@ -5,7 +5,11 @@ import { configureStore } from '@reduxjs/toolkit';
 import '@src/i18n';
 import i18n from '@src/i18n';
 import PublishLetterDialog from '@src/components/editor/letter/Dialog/Components/PublishLetterDialog';
-import editorLetterReducer, { setEditorLetter, setEditorPinnedLetters } from '@src/redux/slices/editor.letter.slice';
+import editorLetterReducer, {
+  setEditorLetter,
+  setEditorPinnedLetters,
+  setFigureUploadInProgress,
+} from '@src/redux/slices/editor.letter.slice';
 import { EditorUtils } from '@src/utils/editor';
 import { LetterChangedSincePinnedError } from '@src/utils/editor/backendService';
 
@@ -78,5 +82,19 @@ describe('PublishLetterDialog conflict handling', () => {
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
     expect(store.getState().editorLetter.reloadLetterContent).toBe(true);
     expect(store.getState().editorLetter.pinnedLetters[0].contentChanged).toBe(false);
+  });
+
+  it('disables publishing while a figure upload is running', () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(setEditorLetter({ letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG' } }));
+    store.dispatch(setFigureUploadInProgress(true));
+
+    render(
+      <Provider store={store}>
+        <PublishLetterDialog xmlDoc={document.implementation.createDocument(null, 'root')} onSave={jest.fn()} onClose={jest.fn()} />
+      </Provider>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Veröffentlichen' })).toBeDisabled();
   });
 });

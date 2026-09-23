@@ -3,12 +3,10 @@ import axios, { AxiosInstance } from 'axios';
 import { store } from '../redux/redux.store';
 import { startLoading, stopLoading } from '../redux/slices/spinner.loading.slice';
 import { AuthService } from '@src/services/authentication.service';
+import { setLogoutState } from '@src/redux/slices/authentication.slice';
+import { SESSION_EXPIRED_EVENT } from '@src/constants/auth';
 
-const apiRequest = async (
-  endpoint: string,
-  options: RequestInit = {},
-  params?: Record<string, string | number>,
-) => {
+const apiRequest = async (endpoint: string, options: RequestInit = {}, params?: Record<string, string | number>) => {
   const baseURL = API_URL; // Read base URL from env
 
   const queryString = params
@@ -119,8 +117,10 @@ const createAxiosInstance = (): AxiosInstance => {
           return _axios(originalRequest); // retry failed request
         } catch (refreshError) {
           processQueue(refreshError, null);
-
-          // Optionally dispatch logout or redirect to login here
+          _dispatch(setLogoutState());
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+          }
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;

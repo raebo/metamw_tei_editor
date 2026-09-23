@@ -27,23 +27,120 @@ note {
   height: auto;
 }
 
-figure[rend='inline'] > .tei-figure-image {
+.tei-figure-preview-trigger {
+  display: block;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.tei-figure-preview-trigger:focus-visible {
+  outline: 3px solid var(--secondary-color);
+  outline-offset: 3px;
+}
+
+.tei-figure-rend-inline > .tei-figure-preview-trigger {
   display: inline-block;
   width: auto;
   height: 55px;
 }
 
-.tei-figure-align-center > .tei-figure-image {
+.tei-figure-rend-inline > .tei-figure-preview-trigger > .tei-figure-image {
+  width: auto;
+  height: 100%;
+}
+
+.tei-figure-rend-inline {
+  display: inline;
+  line-height: 3.5em;
+  vertical-align: sub;
+}
+
+.tei-figure-rend-inline-big-size > .tei-figure-preview-trigger > .tei-figure-image {
+  width: auto;
+  max-height: 12em;
+}
+
+.tei-figure-rend-block > .tei-figure-preview-trigger {
+  display: block;
+}
+
+.tei-figure-subtype-eighth-page > .tei-figure-preview-trigger { width: 12.5%; }
+.tei-figure-subtype-quarter-page > .tei-figure-preview-trigger { width: 25%; }
+.tei-figure-subtype-half-page > .tei-figure-preview-trigger { width: 50%; }
+.tei-figure-subtype-three-quarter-page > .tei-figure-preview-trigger { width: 75%; }
+.tei-figure-subtype-full-page > .tei-figure-preview-trigger { width: 100%; }
+
+.tei-figure-align-center > .tei-figure-preview-trigger {
   margin-right: auto;
   margin-left: auto;
 }
 
-.tei-figure-align-left > .tei-figure-image {
+.tei-figure-align-left > .tei-figure-preview-trigger {
   margin-right: auto;
 }
 
-.tei-figure-align-right > .tei-figure-image {
+.tei-figure-align-right > .tei-figure-preview-trigger {
   margin-left: auto;
+}
+
+.tei-figure-preview-panel {
+  max-width: min(96vw, 1200px);
+  max-height: 94vh;
+}
+
+.tei-figure-preview-title {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tei-figure-preview-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+.tei-figure-preview-toolbar {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  border-radius: 0.25rem;
+  background: var(--background-color, #fff);
+}
+
+.tei-figure-preview-zoom-value {
+  min-width: 4rem;
+  text-align: center;
+}
+
+.tei-figure-preview-viewport {
+  overflow: auto;
+  width: 90vw;
+  max-width: 1160px;
+  max-height: calc(94vh - 10rem);
+}
+
+.tei-figure-preview-canvas {
+  display: flex;
+  min-width: 50%;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.tei-figure-preview-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .tei-figure-status {

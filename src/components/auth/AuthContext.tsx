@@ -8,6 +8,7 @@ import { clearPath } from '@src/redux/slices/route.slice';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@src/redux/redux.store';
 import i18n from '@src/i18n';
+import { SESSION_EXPIRED_EVENT } from '@src/constants/auth';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -19,6 +20,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const currentPath = useSelector((state: RootState) => state.route.currentPath);
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setUser(null);
+      setLoading(false);
+      dispatch(setLogoutState());
+      navigate('/login', { replace: true });
+    };
+
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+  }, [dispatch, navigate]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -90,11 +103,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout, refreshUser, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, login, logout, refreshUser, loading }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

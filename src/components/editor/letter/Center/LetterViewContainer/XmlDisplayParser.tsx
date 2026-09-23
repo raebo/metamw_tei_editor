@@ -59,6 +59,30 @@ const FIGURE_ALIGNMENT_CLASSES: Record<string, string> = {
   left: 'tei-figure-align-left',
   right: 'tei-figure-align-right',
 };
+const FIGURE_REND_CLASSES: Record<string, string> = {
+  inline: 'tei-figure-rend-inline',
+  inline_big_size: 'tei-figure-rend-inline-big-size',
+  below: 'tei-figure-rend-block',
+  above: 'tei-figure-rend-block',
+  bottom: 'tei-figure-rend-block',
+  top: 'tei-figure-rend-block',
+  margin: 'tei-figure-rend-block',
+  overleaf: 'tei-figure-rend-block',
+  inspace: 'tei-figure-rend-block',
+};
+const FIGURE_SUBTYPE_CLASSES: Record<string, string> = {
+  inline: 'tei-figure-subtype-inline',
+  eighth_page: 'tei-figure-subtype-eighth-page',
+  quarter_page: 'tei-figure-subtype-quarter-page',
+  half_page: 'tei-figure-subtype-half-page',
+  'three-quarter_page': 'tei-figure-subtype-three-quarter-page',
+  full_page: 'tei-figure-subtype-full-page',
+};
+
+const appendClassName = (attributes: Record<string, any>, className?: string) => {
+  if (!className) return;
+  attributes.className = [attributes.className, className].filter(Boolean).join(' ');
+};
 
 const parseInlineStyle = (styleValue: string): React.CSSProperties => {
   return styleValue.split(';').reduce((styleObj, styleProp) => {
@@ -112,6 +136,18 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
 
       const children = Array.from(element.childNodes).map((child, index) => renderNode(child, [...sourcePath, index]));
 
+      if (tagName === 'figure' && !Array.from(element.children).some((child) => child.tagName.toLowerCase() === 'graphic')) {
+        const figDesc = Array.from(element.children).find((child) => child.tagName.toLowerCase() === 'figdesc');
+        children.push(
+          <FigureImage
+            key={`missing-graphic-${sourcePath.join('.')}`}
+            letterId={props.letterId ?? null}
+            figureXmlId={null}
+            description={figDesc?.textContent ?? null}
+          />,
+        );
+      }
+
       if (UNWRAP_TAGS.has(tagName)) {
         return <React.Fragment key={`${element.tagName}-${Math.random()}`}>{children}</React.Fragment>;
       }
@@ -128,10 +164,14 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
             if (attr.value === 'display_none') {
               acc.style = { display: 'none' };
             } else if (tagName === 'figure' && FIGURE_ALIGNMENT_CLASSES[attr.value]) {
-              acc.className = FIGURE_ALIGNMENT_CLASSES[attr.value];
-            } else {
+              appendClassName(acc, FIGURE_ALIGNMENT_CLASSES[attr.value]);
+            } else if (tagName !== 'figure') {
               acc.style = parseInlineStyle(attr.value);
             }
+          } else if (tagName === 'figure' && attr.name === 'rend') {
+            appendClassName(acc, FIGURE_REND_CLASSES[attr.value]);
+          } else if (tagName === 'figure' && attr.name === 'subtype') {
+            appendClassName(acc, FIGURE_SUBTYPE_CLASSES[attr.value]);
           } else if (attr.name === 'key') {
             // A literal object property named "key" is always intercepted by React as the
             // reconciliation key and never reaches the DOM, however it is merged in - so the
@@ -149,7 +189,7 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
       );
 
       if (tagName === 'figure' && element.getAttribute('xml:id') === props.focusedFigureXmlId) {
-        attributes.className = [attributes.className, 'tei-figure--focused'].filter(Boolean).join(' ');
+        appendClassName(attributes, 'tei-figure--focused');
         attributes.tabIndex = -1;
       }
 
