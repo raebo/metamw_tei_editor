@@ -21,4 +21,43 @@
 note {
     cursor: pointer;
 }
+.tei-figure-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
 
+figure[rend='inline'] > .tei-figure-image {
+  display: inline-block;
+  width: auto;
+  height: 55px;
+}
+
+.tei-figure-align-center > .tei-figure-image {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.tei-figure-align-left > .tei-figure-image {
+  margin-right: auto;
+}
+
+.tei-figure-align-right > .tei-figure-image {
+  margin-left: auto;
+}
+
+.tei-figure-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2rem;
+}
+
+.tei-figure-status--error {
+  color: #b00020;
+}
+
+.tei-figure--focused {
+  outline: 3px solid var(--secondary-color);
+  outline-offset: 3px;
+}

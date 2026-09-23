@@ -15,10 +15,9 @@ import { useRebaseLetter } from './hooks/useRebaseLetter';
 const LetterStalenessMonitor = () => {
   const { t } = useTranslation();
   const activeLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
   const pinnedLetter = useSelector((state: RootState) =>
-    state.editorLetter.pinnedLetters.find(
-      (letter) => letter.id === state.editorLetter.letter.id && letter.isPinned,
-    ),
+    state.editorLetter.pinnedLetters.find((letter) => letter.id === state.editorLetter.letter.id && letter.isPinned),
   );
   const rebaseLetter = useRebaseLetter();
   const snackbarKeyRef = useRef<SnackbarKey | null>(null);
@@ -33,21 +32,22 @@ const LetterStalenessMonitor = () => {
   }, []);
 
   const reloadLetter = useCallback(async () => {
-    if (letterId === null) return;
+    if (letterId === null || figureUploadInProgress) return;
     const succeeded = await rebaseLetter(letterId, activeLetter.name);
     if (succeeded) {
       setConfirmationOpen(false);
       closeStalenessNotice();
     }
-  }, [activeLetter.name, closeStalenessNotice, letterId, rebaseLetter]);
+  }, [activeLetter.name, closeStalenessNotice, figureUploadInProgress, letterId, rebaseLetter]);
 
   const handleReload = useCallback(() => {
+    if (figureUploadInProgress) return;
     if (pinnedLetter?.contentChanged) {
       setConfirmationOpen(true);
       return;
     }
     void reloadLetter();
-  }, [pinnedLetter?.contentChanged, reloadLetter]);
+  }, [figureUploadInProgress, pinnedLetter?.contentChanged, reloadLetter]);
 
   const handleStale = useCallback(() => {
     if (snackbarKeyRef.current !== null) return;
@@ -55,12 +55,12 @@ const LetterStalenessMonitor = () => {
       persist: true,
       variant: 'warning',
       action: (
-        <Button color="inherit" size="small" onClick={handleReload}>
+        <Button color="inherit" size="small" onClick={handleReload} disabled={figureUploadInProgress}>
           {t('editor:common.staleness.reload')}
         </Button>
       ),
     });
-  }, [handleReload, t]);
+  }, [figureUploadInProgress, handleReload, t]);
 
   useLetterStalenessPolling({ letterId, onStale: handleStale });
 
@@ -75,17 +75,14 @@ const LetterStalenessMonitor = () => {
       <DialogTitle>{t('editor:common.staleness.confirmTitle')}</DialogTitle>
       <DialogContent>{t('editor:common.staleness.confirmBody')}</DialogContent>
       <DialogActions>
-        <Button
-          size={EditorConstants.styles.panel.buttonSize}
-          variant="outlined"
-          onClick={() => setConfirmationOpen(false)}
-        >
+        <Button size={EditorConstants.styles.panel.buttonSize} variant="outlined" onClick={() => setConfirmationOpen(false)}>
           {t('editor:common.staleness.cancel')}
         </Button>
         <Button
           size={EditorConstants.styles.panel.buttonSize}
           variant="contained"
           onClick={() => void reloadLetter()}
+          disabled={figureUploadInProgress}
         >
           {t('editor:common.staleness.reload')}
         </Button>

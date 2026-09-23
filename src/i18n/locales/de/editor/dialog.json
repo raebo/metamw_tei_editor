@@ -16,6 +16,7 @@
     "addTeiHeader": "Header des Briefes Hinzufügen/Bearbeiten",
     "addWritingPart": "Schreibakt Hinzufügen",
     "attachmentAdd": "Beilage Hinzufügen",
+    "figureUpload": "Bild einfügen",
     "closeTabWithContent": "Tab mit Inhalt Schließen?",
     "dateWhenAdd": "Datum 'WHEN' Auszeichnen",
     "dateWhenCustomAdd": "Datum 'WHEN CUSTOM' Auszeichnen",
@@ -43,6 +44,40 @@
   },
   "buttons": {
     "cancel": "Abbrechen"
+  },
+  "figureUpload": {
+    "contextAction": "Bild einfügen",
+    "anchor": "Einfügeanker: {{anchor}}",
+    "fields": {
+      "image": "Bilddatei auswählen",
+      "category": "Kategorie",
+      "position": "Einfügeposition",
+      "head": "Überschrift (optional)",
+      "description": "Bildbeschreibung (optional)"
+    },
+    "categories": {
+      "notation": "Noten",
+      "drawing": "Zeichnung"
+    },
+    "positions": {
+      "before": "Vor dem ausgewählten Element",
+      "after": "Nach dem ausgewählten Element",
+      "append": "Innerhalb des ausgewählten Elements"
+    },
+    "submit": "Bild hochladen",
+    "uploading": "Bild wird hochgeladen …",
+    "success": "Das Bild wurde eingefügt.",
+    "errors": {
+      "fileType": "Bitte wählen Sie eine JPEG- oder PNG-Datei aus. SVG-Dateien werden nicht unterstützt.",
+      "fileSize": "Die Datei überschreitet die maximale Größe von 10 MiB.",
+      "http401": "Die Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+      "http404": "Der Brief ist nicht mehr gepinnt oder die Einfügestelle wurde nicht gefunden.",
+      "http409": "Es besteht ein Namenskonflikt. Bitte laden Sie die aktuelle Arbeitskopie neu und versuchen Sie es erneut.",
+      "http413": "Die Datei ist für den Server zu groß.",
+      "http415": "Nur echte JPEG- und PNG-Dateien sind erlaubt; SVG wird nicht unterstützt.",
+      "http422": "Die Bilddaten konnten nicht validiert werden. Bitte prüfen Sie Ihre Eingaben.",
+      "generic": "Das Bild konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut."
+    }
   },
   "autocomplete": {
     "chooseEntry": "Eintrag Auswählen"

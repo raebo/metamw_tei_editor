@@ -1,4 +1,10 @@
 {
+  "figure": {
+    "defaultAlt": "Figure in the letter",
+    "loading": "Loading figure",
+    "unavailable": "Figure could not be loaded",
+    "retry": "Retry"
+  },
   "letterViewContainer" : {
     "title": "Letter View",
     "noLetter": "No letter available to display. Please select a letter from the search on the left side.",
@@ -24,7 +30,7 @@
     "reload": "Reload",
     "cancel": "Cancel",
     "confirmTitle": "Discard local changes?",
-    "confirmBody": "The letter has changed in the meantime. Reloading discards all local changes and uses the current letter as the new baseline.",
+    "confirmBody": "The letter has changed in the meantime. Reloading discards all local changes, including unpublished image uploads, and uses the current letter as the new baseline.",
     "publishConflict": "The letter cannot be published because its baseline has changed. {{message}}",
     "reloadSuccess": "The letter '{{name}}' was reloaded.",
     "reloadError": "The letter could not be reloaded: {{reason}}"

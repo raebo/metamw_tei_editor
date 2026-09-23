@@ -17,6 +17,7 @@ const CloseTabWithContent = (props: DefaultDialogProps) => {
   const tabLetterId = useSelector((state: RootState) => state.editorLetter.tabToCloseId);
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
   const pinnedLetter = statePinnedLetters.find((letter) => letter.id === tabLetterId);
+  const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
 
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -27,6 +28,7 @@ const CloseTabWithContent = (props: DefaultDialogProps) => {
   }, [props]);
 
   const closeTab = async () => {
+    if (figureUploadInProgress) return;
     if (!tabLetterId || !pinnedLetter) {
       enqueueSnackbar('No valid if value for letter given.', {
         variant: 'error',
@@ -58,8 +60,8 @@ const CloseTabWithContent = (props: DefaultDialogProps) => {
   return (
     <>
       <DialogContent>
-        Für dieses Tab existieren ungespeicherte Änderungen. Möchten Sie den Brief zurücksetzen und
-        das Tab schließen?
+        Für dieses Tab existieren ungespeicherte Änderungen. Möchten Sie den Brief einschließlich unpublizierter Bild-Uploads zurücksetzen
+        und das Tab schließen?
       </DialogContent>
       <DialogActions>
         <Button
@@ -75,6 +77,7 @@ const CloseTabWithContent = (props: DefaultDialogProps) => {
           size={EditorConstants.styles.panel.buttonSize}
           variant="contained"
           onClick={() => closeTab()}
+          disabled={figureUploadInProgress}
           color="primary"
         >
           Brief Schließen

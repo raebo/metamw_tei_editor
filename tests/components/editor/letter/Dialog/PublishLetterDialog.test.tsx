@@ -5,10 +5,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import '@src/i18n';
 import i18n from '@src/i18n';
 import PublishLetterDialog from '@src/components/editor/letter/Dialog/Components/PublishLetterDialog';
-import editorLetterReducer, {
-  setEditorLetter,
-  setEditorPinnedLetters,
-} from '@src/redux/slices/editor.letter.slice';
+import editorLetterReducer, { setEditorLetter, setEditorPinnedLetters } from '@src/redux/slices/editor.letter.slice';
 import { EditorUtils } from '@src/utils/editor';
 import { LetterChangedSincePinnedError } from '@src/utils/editor/backendService';
 
@@ -33,11 +30,7 @@ describe('PublishLetterDialog conflict handling', () => {
 
     render(
       <Provider store={store}>
-        <PublishLetterDialog
-          xmlDoc={document.implementation.createDocument(null, 'root')}
-          onSave={jest.fn()}
-          onClose={onClose}
-        />
+        <PublishLetterDialog xmlDoc={document.implementation.createDocument(null, 'root')} onSave={jest.fn()} onClose={onClose} />
       </Provider>,
     );
 
@@ -63,21 +56,13 @@ describe('PublishLetterDialog conflict handling', () => {
         ],
       }),
     );
-    jest
-      .spyOn(EditorUtils.backendService, 'publishLetter')
-      .mockRejectedValue(new LetterChangedSincePinnedError('Backend conflict'));
-    const rebaseLetter = jest
-      .spyOn(EditorUtils.backendService, 'rebaseLetter')
-      .mockResolvedValue('<TEI />');
+    jest.spyOn(EditorUtils.backendService, 'publishLetter').mockRejectedValue(new LetterChangedSincePinnedError('Backend conflict'));
+    const rebaseLetter = jest.spyOn(EditorUtils.backendService, 'rebaseLetter').mockResolvedValue('<TEI />');
     const onClose = jest.fn();
 
     render(
       <Provider store={store}>
-        <PublishLetterDialog
-          xmlDoc={document.implementation.createDocument(null, 'root')}
-          onSave={jest.fn()}
-          onClose={onClose}
-        />
+        <PublishLetterDialog xmlDoc={document.implementation.createDocument(null, 'root')} onSave={jest.fn()} onClose={onClose} />
       </Provider>,
     );
 
@@ -86,7 +71,7 @@ describe('PublishLetterDialog conflict handling', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Neu laden' }));
     expect(rebaseLetter).not.toHaveBeenCalled();
-    expect(screen.getByText(/alle lokalen Änderungen verworfen/)).toBeInTheDocument();
+    expect(screen.getByText(/unpublizierter Bild-Uploads verworfen/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Neu laden' }));
     await waitFor(() => expect(rebaseLetter).toHaveBeenCalledWith(7));

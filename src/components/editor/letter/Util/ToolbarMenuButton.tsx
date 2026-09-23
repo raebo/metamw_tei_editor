@@ -6,33 +6,24 @@ type ToolbarMenuButtonProps = {
   selected?: boolean;
   onClick: (event: React.MouseEvent<HTMLDivElement>) => void;
   icon?: React.ReactNode;
+  disabled?: boolean;
 };
 
-export const ToolbarMenuButton: React.FC<ToolbarMenuButtonProps> = ({
-  title,
-  selected = false,
-  onClick,
-  icon,
-}) => {
+export const ToolbarMenuButton: React.FC<ToolbarMenuButtonProps> = ({ title, selected = false, onClick, icon, disabled = false }) => {
   const theme = useTheme();
 
   return (
     <Tooltip title={title} placement="right">
       <ListItemButton
+        disabled={disabled}
         selected={selected}
         onClick={onClick}
         sx={{
           border: `1px solid ${theme.palette.toolbarButton.borderColor}`,
-          bgcolor: selected
-            ? theme.palette.toolbarButton.activeBg
-            : theme.palette.toolbarButton.inactiveBg,
-          color: selected
-            ? theme.palette.toolbarButton.activeColor
-            : theme.palette.toolbarButton.inactiveColor,
+          bgcolor: selected ? theme.palette.toolbarButton.activeBg : theme.palette.toolbarButton.inactiveBg,
+          color: selected ? theme.palette.toolbarButton.activeColor : theme.palette.toolbarButton.inactiveColor,
           borderRadius: 1,
-          '&:hover': selected
-            ? { bgcolor: theme.palette.toolbarButton.hoverBg }
-            : { bgcolor: theme.palette.toolbarButton.hoverBg },
+          '&:hover': selected ? { bgcolor: theme.palette.toolbarButton.hoverBg } : { bgcolor: theme.palette.toolbarButton.hoverBg },
         }}
       >
         <ListItemIcon>{icon}</ListItemIcon>

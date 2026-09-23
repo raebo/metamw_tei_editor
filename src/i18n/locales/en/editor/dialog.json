@@ -16,6 +16,7 @@
     "addTeiHeader": "Add/Edit Letter Header",
     "addWritingPart": "Add Writing Act",
     "attachmentAdd": "Add Attachment",
+    "figureUpload": "Insert Image",
     "closeTabWithContent": "Close Tab with Content?",
     "dateWhenAdd": "Mark Date 'WHEN'",
     "dateWhenCustomAdd": "Mark Date 'WHEN CUSTOM'",
@@ -43,6 +44,40 @@
   },
   "buttons": {
     "cancel": "Cancel"
+  },
+  "figureUpload": {
+    "contextAction": "Insert image",
+    "anchor": "Insertion anchor: {{anchor}}",
+    "fields": {
+      "image": "Select image file",
+      "category": "Category",
+      "position": "Insertion position",
+      "head": "Heading (optional)",
+      "description": "Image description (optional)"
+    },
+    "categories": {
+      "notation": "Notation",
+      "drawing": "Drawing"
+    },
+    "positions": {
+      "before": "Before the selected element",
+      "after": "After the selected element",
+      "append": "Inside the selected element"
+    },
+    "submit": "Upload image",
+    "uploading": "Uploading image …",
+    "success": "The image was inserted.",
+    "errors": {
+      "fileType": "Select a JPEG or PNG file. SVG files are not supported.",
+      "fileSize": "The file exceeds the maximum size of 10 MiB.",
+      "http401": "Your session has expired. Please sign in again.",
+      "http404": "The letter is no longer pinned or the insertion point was not found.",
+      "http409": "A filename conflict occurred. Reload the current working copy and try again.",
+      "http413": "The file is too large for the server.",
+      "http415": "Only genuine JPEG and PNG files are allowed; SVG is not supported.",
+      "http422": "The image data could not be validated. Check your entries.",
+      "generic": "The image could not be uploaded. Please try again."
+    }
   },
   "autocomplete": {
     "chooseEntry": "Select Entry"

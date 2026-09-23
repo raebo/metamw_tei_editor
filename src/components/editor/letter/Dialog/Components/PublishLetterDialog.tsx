@@ -24,6 +24,7 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
   const [conflictMessage, setConflictMessage] = React.useState<string>();
   const [confirmRebase, setConfirmRebase] = React.useState(false);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
   const pinnedLetter = useSelector((state: RootState) =>
     state.editorLetter.pinnedLetters.find((letter) => letter.id === state.editorLetter.letter.id),
   );
@@ -37,6 +38,7 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
   }, [props]);
 
   const publishLetter = async () => {
+    if (figureUploadInProgress) return;
     if (!stateEditorLetter?.id) {
       enqueueSnackbar('Letter could not publish on backend side: No letter id found', {
         variant: 'error',
@@ -60,17 +62,14 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
         return;
       }
       setErrorMessage(MiscUtils.misc.getErrorMessage(error));
-      enqueueSnackbar(
-        'Letter could not publisheed on backend side. Please check the details.' +
-          MiscUtils.misc.getErrorMessage(error),
-        {
-          variant: 'error',
-        },
-      );
+      enqueueSnackbar('Letter could not publisheed on backend side. Please check the details.' + MiscUtils.misc.getErrorMessage(error), {
+        variant: 'error',
+      });
     }
   };
 
   const reloadLetter = async () => {
+    if (figureUploadInProgress) return;
     if (!stateEditorLetter.id) return;
     if (pinnedLetter?.contentChanged && !confirmRebase) {
       setConfirmRebase(true);
@@ -91,18 +90,14 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
           </Alert>
         </DialogContent>
         <DialogActions>
-          <Button
-            size={EditorConstants.styles.panel.buttonSize}
-            variant="outlined"
-            onClick={props.onClose}
-            color="primary"
-          >
+          <Button size={EditorConstants.styles.panel.buttonSize} variant="outlined" onClick={props.onClose} color="primary">
             {t('editor:common.staleness.cancel')}
           </Button>
           <Button
             size={EditorConstants.styles.panel.buttonSize}
             variant="contained"
             onClick={() => void reloadLetter()}
+            disabled={figureUploadInProgress}
             color="primary"
           >
             {t('editor:common.staleness.reload')}
@@ -117,8 +112,7 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
       <DialogContent>
         Sind Sie sicher, dass Sie den aktuellen Brief im Backend veröffentlichen möchten?
         <Alert severity="warning" sx={{ mt: 2 }}>
-          ACHTUNG: Diese Aktion kann nicht rückgängig gemacht werden und der Brief wird im
-          Dateisystem überschrieben!!!
+          ACHTUNG: Diese Aktion kann nicht rückgängig gemacht werden und der Brief wird im Dateisystem überschrieben!!!
         </Alert>
         {errorMessage && (
           <Alert severity="error" sx={{ mt: 2 }}>
@@ -127,12 +121,7 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
         )}
       </DialogContent>
       <DialogActions>
-        <Button
-          size={EditorConstants.styles.panel.buttonSize}
-          variant="outlined"
-          onClick={props.onClose}
-          color="primary"
-        >
+        <Button size={EditorConstants.styles.panel.buttonSize} variant="outlined" onClick={props.onClose} color="primary">
           Abbrechen
         </Button>
         <Button
@@ -140,6 +129,7 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
           size={EditorConstants.styles.panel.buttonSize}
           variant="contained"
           onClick={() => publishLetter()}
+          disabled={figureUploadInProgress}
           color="primary"
         >
           Veröffentlichen

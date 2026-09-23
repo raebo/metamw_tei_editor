@@ -6,11 +6,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import { useAppDispatch } from '@src/redux/hooks';
 import { EditorUtils } from '@src/utils/editor';
-import {
-  setEditorPinnedLetterContentChanged,
-  setEditorSelectedItem,
-  setReloadLetterContent,
-} from '@src/redux/slices/editor.letter.slice';
+import { setEditorPinnedLetterContentChanged, setEditorSelectedItem, setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { enqueueSnackbar } from 'notistack';
 import { EditorConstants } from '@src/constants/editor';
 import { DefaultDialogProps } from '../EditorFormDialog';
@@ -20,6 +16,7 @@ const ResetLetterDialog = (props: DefaultDialogProps) => {
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
   const selectedItem = useSelector((state: RootState) => state.editorLetter.selectedItem);
+  const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
 
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -44,6 +41,7 @@ const ResetLetterDialog = (props: DefaultDialogProps) => {
   }, [dispatch, selectedItem.left, selectedItem.right]);
 
   const resetLetter = async () => {
+    if (figureUploadInProgress) return;
     if (!stateEditorLetter || !stateEditorLetter.id) {
       enqueueSnackbar('Letter could not reset on backend side: No letter id found', {
         variant: 'error',
@@ -55,9 +53,7 @@ const ResetLetterDialog = (props: DefaultDialogProps) => {
     try {
       await EditorUtils.backendService.resetLetter(stateEditorLetter.id);
       dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-      dispatch(
-        setEditorPinnedLetterContentChanged({ id: stateEditorLetter.id, contentChanged: false }),
-      );
+      dispatch(setEditorPinnedLetterContentChanged({ id: stateEditorLetter.id, contentChanged: false }));
 
       enqueueSnackbar(`Der Brief '${stateEditorLetter.name}' wurde zurückgesetzt!`, {
         variant: 'success',
@@ -73,7 +69,7 @@ const ResetLetterDialog = (props: DefaultDialogProps) => {
   return (
     <>
       <DialogContent>
-        Sind Sie sicher, dass Sie alle bisherigen Anpassungen verwerfen möchten?
+        Sind Sie sicher, dass Sie alle bisherigen Anpassungen einschließlich unpublizierter Bild-Uploads verwerfen möchten?
       </DialogContent>
       <DialogActions>
         <Button
@@ -89,6 +85,7 @@ const ResetLetterDialog = (props: DefaultDialogProps) => {
           size={EditorConstants.styles.panel.buttonSize}
           variant="contained"
           onClick={() => resetLetter()}
+          disabled={figureUploadInProgress}
           color="primary"
         >
           Zurücksetzen

@@ -56,6 +56,8 @@ interface EditorLetterSlice {
     elementKey: string | null;
   };
   changeLetterViewMode: boolean;
+  figureUploadInProgress: boolean;
+  focusedFigureXmlId: string | null;
 }
 
 const initialState: EditorLetterSlice = {
@@ -109,6 +111,8 @@ const initialState: EditorLetterSlice = {
     elementKey: null,
   },
   changeLetterViewMode: false,
+  figureUploadInProgress: false,
+  focusedFigureXmlId: null,
 };
 
 const EditorLetterSlice = createSlice({
@@ -146,10 +150,7 @@ const EditorLetterSlice = createSlice({
     setEditorPinnedLetters(state, action) {
       state.pinnedLetters = [...action.payload.pinnedLetters];
     },
-    setEditorPinnedLetterViewMode(
-      state,
-      action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>,
-    ) {
+    setEditorPinnedLetterViewMode(state, action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>) {
       const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
       if (letter) {
         letter.viewMode = action.payload.viewMode;
@@ -182,10 +183,7 @@ const EditorLetterSlice = createSlice({
     clearSelectedIdentifier(state) {
       state.letter.selectedIdentifier = null;
     },
-    setEditorPinnedLetterContentChanged(
-      state,
-      action: PayloadAction<{ id: number; contentChanged: boolean }>,
-    ) {
+    setEditorPinnedLetterContentChanged(state, action: PayloadAction<{ id: number; contentChanged: boolean }>) {
       const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
       if (letter) {
         letter.contentChanged = action.payload.contentChanged;
@@ -231,6 +229,12 @@ const EditorLetterSlice = createSlice({
     setTabToCloseId(state, action: PayloadAction<{ tabToCloseId: number | null }>) {
       state.tabToCloseId = action.payload.tabToCloseId;
     },
+    setFigureUploadInProgress(state, action: PayloadAction<boolean>) {
+      state.figureUploadInProgress = action.payload;
+    },
+    setFocusedFigureXmlId(state, action: PayloadAction<string | null>) {
+      state.focusedFigureXmlId = action.payload;
+    },
   },
 });
 
@@ -258,6 +262,8 @@ export const {
   setLetterReference,
   setNodeClicked,
   setTabToCloseId,
+  setFigureUploadInProgress,
+  setFocusedFigureXmlId,
 } = EditorLetterSlice.actions;
 
 export default EditorLetterSlice.reducer;

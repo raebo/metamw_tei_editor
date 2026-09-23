@@ -20,14 +20,13 @@ import { useTranslation } from 'react-i18next';
 const LetterViewContainer = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const stateLetterFontSize = useSelector(
-    (state: RootState) => state.auth.settings?.letterFontSize,
-  );
+  const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const xmlContentRef = useRef<HTMLDivElement | null>(null);
   const [anchorPosition, setAnchorPosition] = useState<null | { top: number; left: number }>(null);
 
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const focusedFigureXmlId = useSelector((state: RootState) => state.editorLetter.focusedFigureXmlId);
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
 
   const [letterState, setLetterState] = useState<LetterState>({
@@ -37,10 +36,29 @@ const LetterViewContainer = () => {
     redoAvailable: false,
   });
 
-  const reloadLetterContent = useSelector(
-    (state: RootState) => state.editorLetter.reloadLetterContent,
-  );
+  const reloadLetterContent = useSelector((state: RootState) => state.editorLetter.reloadLetterContent);
   const isDebugMode = process.env.REACT_DEBUG_MODE === 'true';
+
+  useEffect(() => {
+    if (!focusedFigureXmlId || !stateEditorLetter.xmlContent) return;
+    setLetterState({
+      viewMode: stateEditorLetter.viewMode,
+      xmlContent: stateEditorLetter.xmlContent,
+      undoAvailable: stateEditorLetter.undoAvailable,
+      redoAvailable: stateEditorLetter.redoAvailable,
+    });
+  }, [focusedFigureXmlId, stateEditorLetter]);
+
+  useEffect(() => {
+    if (!focusedFigureXmlId || !xmlContentRef.current) return;
+    const figure = Array.from(xmlContentRef.current.querySelectorAll('figure')).find(
+      (element) => element.getAttribute('xml:id') === focusedFigureXmlId,
+    );
+    if (figure instanceof HTMLElement) {
+      figure.focus();
+      figure.scrollIntoView?.({ block: 'center' });
+    }
+  }, [focusedFigureXmlId, letterState.xmlContent]);
 
   useEffect(() => {
     const loadLetterData = async () => {
@@ -54,9 +72,7 @@ const LetterViewContainer = () => {
         });
         return;
       }
-      const hasPinnedLetters = statePinnedLetters.some(
-        (letter) => letter.id === stateEditorLetter.id && letter.isPinned == true,
-      );
+      const hasPinnedLetters = statePinnedLetters.some((letter) => letter.id === stateEditorLetter.id && letter.isPinned == true);
 
       let letterData: EditorLetterData | null;
 
@@ -76,10 +92,7 @@ const LetterViewContainer = () => {
     };
 
     loadLetterData().catch((error) => {
-      enqueueSnackbar(
-        'Fehler beim Laden des Briefinhalts: ' + MiscUtils.misc.getErrorMessage(error),
-        { variant: 'error' },
-      );
+      enqueueSnackbar('Fehler beim Laden des Briefinhalts: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
     });
   }, [stateEditorLetter.id, stateEditorLetter.viewMode, statePinnedLetters]);
 
@@ -88,9 +101,7 @@ const LetterViewContainer = () => {
       let letterData: EditorLetterData | null = null;
       if (stateEditorLetter.id === null) return;
 
-      const hasPinnedLetters = statePinnedLetters.some(
-        (letter) => letter.id === stateEditorLetter.id && letter.isPinned == true,
-      );
+      const hasPinnedLetters = statePinnedLetters.some((letter) => letter.id === stateEditorLetter.id && letter.isPinned == true);
 
       if (hasPinnedLetters) {
         letterData = await fetchPinnedLetterData(stateEditorLetter.id);
@@ -117,10 +128,7 @@ const LetterViewContainer = () => {
 
     if (reloadLetterContent && stateEditorLetter?.id !== null) {
       void reloadNewData().catch((error) => {
-        enqueueSnackbar(
-          'Fehler beim Neuladen des Briefinhalts: ' + MiscUtils.misc.getErrorMessage(error),
-          { variant: 'error' },
-        );
+        enqueueSnackbar('Fehler beim Neuladen des Briefinhalts: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       });
     }
   }, [dispatch, reloadLetterContent, stateEditorLetter, statePinnedLetters]);
@@ -132,13 +140,15 @@ const LetterViewContainer = () => {
         <XMLDisplayParser
           xmlContentRef={xmlContentRef}
           xmlString={letterState.xmlContent}
+          letterId={stateEditorLetter.id}
+          focusedFigureXmlId={focusedFigureXmlId}
           onRightClickMarked={(pos) => setAnchorPosition(pos)}
         />
       );
     } else {
       return <></>;
     }
-  }, [letterState]);
+  }, [focusedFigureXmlId, letterState, stateEditorLetter.id]);
 
   return (
     <div className="letter-view-container">
@@ -147,12 +157,7 @@ const LetterViewContainer = () => {
           {letterState.xmlContent ? (
             <>
               {letterState.viewMode === 'WYSIWYG' && (
-                <div
-                  className="letter-xml"
-                  id="letterXml"
-                  ref={containerRef}
-                  style={{ fontSize: `${stateLetterFontSize}%` }}
-                >
+                <div className="letter-xml" id="letterXml" ref={containerRef} style={{ fontSize: `${stateLetterFontSize}%` }}>
                   <div ref={xmlContentRef} id="letterXmlContent" style={{ padding: 20 }}>
                     {letterState.xmlContent && parserXmlMemo}
                   </div>
@@ -172,9 +177,7 @@ const LetterViewContainer = () => {
                   />
                 </div>
               )}
-              {letterState.viewMode === 'CODE' && letterState.xmlContent && (
-                <LetterViewCode xmlString={letterState.xmlContent} />
-              )}
+              {letterState.viewMode === 'CODE' && letterState.xmlContent && <LetterViewCode xmlString={letterState.xmlContent} />}
             </>
           ) : (
             <p>

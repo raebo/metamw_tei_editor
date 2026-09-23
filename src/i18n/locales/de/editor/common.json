@@ -1,4 +1,10 @@
 {
+  "figure": {
+    "defaultAlt": "Abbildung im Brief",
+    "loading": "Abbildung wird geladen",
+    "unavailable": "Abbildung konnte nicht geladen werden",
+    "retry": "Erneut laden"
+  },
   "letterViewContainer" : {
     "title": "Briefansicht",
     "noLetter": "Keine Brief zur Anzeige vorhanden. Bitte wählen Sie einen Brief aus der Suche auf der linken Seite aus.",
@@ -24,7 +30,7 @@
     "reload": "Neu laden",
     "cancel": "Abbrechen",
     "confirmTitle": "Lokale Änderungen verwerfen?",
-    "confirmBody": "Der Brief wurde zwischenzeitlich geändert. Beim Neuladen werden alle lokalen Änderungen verworfen und der aktuelle Briefstand wird als neue Grundlage übernommen.",
+    "confirmBody": "Der Brief wurde zwischenzeitlich geändert. Beim Neuladen werden alle lokalen Änderungen einschließlich unpublizierter Bild-Uploads verworfen und der aktuelle Briefstand wird als neue Grundlage übernommen.",
     "publishConflict": "Der Brief kann nicht veröffentlicht werden, weil sich seine Grundlage geändert hat. {{message}}",
     "reloadSuccess": "Der Brief '{{name}}' wurde neu geladen.",
     "reloadError": "Der Brief konnte nicht neu geladen werden: {{reason}}"

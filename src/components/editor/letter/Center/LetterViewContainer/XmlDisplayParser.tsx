@@ -1,8 +1,11 @@
 import React, { useCallback, useEffect } from 'react';
+import FigureImage from './FigureImage';
 
 type XmlDisplayParserProps = {
   xmlContentRef: React.RefObject<HTMLDivElement> | null;
   xmlString: string;
+  letterId?: number | null;
+  focusedFigureXmlId?: string | null;
   onRightClickMarked?: (pos: { top: number; left: number }) => void | null;
 };
 
@@ -45,24 +48,17 @@ const UNWRAP_TAGS = new Set(['a', 'button', 'form']);
 // handler below). In particular there is no legitimate use of `href`/`src`/`xlink:href`/
 // `formaction`/... or any `on*` event handler attribute, so none of those are ever passed
 // through - regardless of what the source XML contains.
-const ALLOWED_ATTRIBUTES = new Set([
-  'class',
-  'style',
-  'xml:id',
-  'xml:lang',
-  'data-key',
-  'key',
-  'n',
-  'rend',
-  'resp',
-  'subtype',
-  'type',
-]);
+const ALLOWED_ATTRIBUTES = new Set(['class', 'style', 'xml:id', 'xml:lang', 'data-key', 'key', 'n', 'rend', 'resp', 'subtype', 'type']);
 
 // Defensive check on top of the attribute allowlist: even for the allowed `style` attribute,
 // reject any declaration that could trigger a network request or code execution (url(...),
 // legacy IE expression(...), @import, javascript: URLs).
 const UNSAFE_STYLE_VALUE = /url\(|expression\(|@import|javascript:/i;
+const FIGURE_ALIGNMENT_CLASSES: Record<string, string> = {
+  center: 'tei-figure-align-center',
+  left: 'tei-figure-align-left',
+  right: 'tei-figure-align-right',
+};
 
 const parseInlineStyle = (styleValue: string): React.CSSProperties => {
   return styleValue.split(';').reduce((styleObj, styleProp) => {
@@ -95,14 +91,29 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         return null;
       }
 
-      const children = Array.from(element.childNodes).map((child, index) =>
-        renderNode(child, [...sourcePath, index]),
-      );
+      if (tagName === 'graphic') {
+        const figure = element.parentElement;
+        if (figure?.tagName.toLowerCase() !== 'figure') {
+          return null;
+        }
+
+        const figureXmlId = figure.getAttribute('xml:id');
+        const figDesc = Array.from(figure.children).find((child) => child.tagName.toLowerCase() === 'figdesc');
+
+        return (
+          <FigureImage
+            key={`graphic-${sourcePath.join('.')}`}
+            letterId={props.letterId ?? null}
+            figureXmlId={figureXmlId}
+            description={figDesc?.textContent ?? null}
+          />
+        );
+      }
+
+      const children = Array.from(element.childNodes).map((child, index) => renderNode(child, [...sourcePath, index]));
 
       if (UNWRAP_TAGS.has(tagName)) {
-        return (
-          <React.Fragment key={`${element.tagName}-${Math.random()}`}>{children}</React.Fragment>
-        );
+        return <React.Fragment key={`${element.tagName}-${Math.random()}`}>{children}</React.Fragment>;
       }
 
       const TagName = element.tagName as keyof JSX.IntrinsicElements;
@@ -114,7 +125,13 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
           }
 
           if (attr.name === 'style') {
-            acc.style = parseInlineStyle(attr.value);
+            if (attr.value === 'display_none') {
+              acc.style = { display: 'none' };
+            } else if (tagName === 'figure' && FIGURE_ALIGNMENT_CLASSES[attr.value]) {
+              acc.className = FIGURE_ALIGNMENT_CLASSES[attr.value];
+            } else {
+              acc.style = parseInlineStyle(attr.value);
+            }
           } else if (attr.name === 'key') {
             // A literal object property named "key" is always intercepted by React as the
             // reconciliation key and never reaches the DOM, however it is merged in - so the
@@ -131,12 +148,13 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         {} as Record<string, any>,
       );
 
+      if (tagName === 'figure' && element.getAttribute('xml:id') === props.focusedFigureXmlId) {
+        attributes.className = [attributes.className, 'tei-figure--focused'].filter(Boolean).join(' ');
+        attributes.tabIndex = -1;
+      }
+
       return (
-        <TagName
-          key={`${element.tagName}-${Math.random()}`}
-          {...attributes}
-          data-editor-xml-path={sourcePath.join('.')}
-        >
+        <TagName key={`${element.tagName}-${Math.random()}`} {...attributes} data-editor-xml-path={sourcePath.join('.')}>
           {children}
         </TagName>
       );
@@ -172,10 +190,7 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
     };
   }, [handleNativeContextMenu, props.xmlContentRef]);
 
-  const containerProps =
-    props.xmlContentRef && props.xmlContentRef.current
-      ? { onContextMenu: handleReactContextMenu }
-      : {};
+  const containerProps = props.xmlContentRef && props.xmlContentRef.current ? { onContextMenu: handleReactContextMenu } : {};
 
   const doc = parseXml(props.xmlString);
   const root = doc.documentElement;

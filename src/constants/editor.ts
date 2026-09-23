@@ -17,13 +17,7 @@ export type ValidLeftClickNodeType =
   | 'creation'
   | 'protagCreation';
 
-export type EditorDateType =
-  | 'when'
-  | 'when-custom'
-  | 'notAfter'
-  | 'notBefore'
-  | 'from-to'
-  | 'notBefore-notAfter';
+export type EditorDateType = 'when' | 'when-custom' | 'notAfter' | 'notBefore' | 'from-to' | 'notBefore-notAfter';
 export type DateCertainty = 'high' | 'medium' | 'low';
 export type LetterState = {
   viewMode: 'CODE' | 'WYSIWYG' | null;
@@ -79,11 +73,7 @@ export type ContentAddrLine = {
   rendType: string | null;
 };
 
-export const validParagraphClasses = [
-  'PARAGRAPH_LEFT',
-  'PARAGRAPH_RIGHT',
-  'PARAGRAPH_CENTER',
-] as const;
+export const validParagraphClasses = ['PARAGRAPH_LEFT', 'PARAGRAPH_RIGHT', 'PARAGRAPH_CENTER'] as const;
 
 export type ParagraphClass = (typeof validParagraphClasses)[number];
 
@@ -111,6 +101,7 @@ const dialogTypes = {
   ADD_TEI_HEADER: 'ADD_TEI_HEADER',
   ADD_WRITING_PART: 'ADD_WRITING_PART',
   ATTACHMENT_ADD: 'ATTACHMENT_ADD',
+  FIGURE_UPLOAD: 'FIGURE_UPLOAD',
   CLOSE_TAB_WITH_CONTENT: 'CLOSE_TAB_WITH_CONTENT',
   DATE_FROM_TO_ADD: 'DATE_FROM_TO_ADD',
   DATE_NOT_BEFORE_AFTER_ADD: 'DATE_NOT_BEFORE_AFTER_ADD',
@@ -133,8 +124,7 @@ const dialogTypes = {
   SOURCE_DESC_HANDWRITING: 'SOURCE_DESC_HANDWRITING',
 };
 
-export type TmpIdPrefix =
-  (typeof EditorConstants.tmpIdPrefixes)[keyof typeof EditorConstants.tmpIdPrefixes];
+export type TmpIdPrefix = (typeof EditorConstants.tmpIdPrefixes)[keyof typeof EditorConstants.tmpIdPrefixes];
 
 export const EditorConstants = {
   ALLOWED_PARENT_TAG: "div[type='act_of_writing']",

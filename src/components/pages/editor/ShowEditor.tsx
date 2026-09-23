@@ -21,12 +21,7 @@ const LetterViewContainer = React.lazy(() =>
 );
 import { letterExists } from '@src/services/editor/apiLetterRequest.service';
 import LetterTabs from '@src/components/editor/letter/Center/LetterTabs';
-import {
-  setDialogType,
-  setEditorLetter,
-  setEditorPinnedLetters,
-  setEditorSelectedItem,
-} from '@src/redux/slices/editor.letter.slice';
+import { setDialogType, setEditorLetter, setEditorPinnedLetters, setEditorSelectedItem } from '@src/redux/slices/editor.letter.slice';
 import { fetchPinnedLetters } from '@src/services/editor/apiPinnedLettersRequest.service';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
@@ -36,10 +31,7 @@ import EntityPlaceContainer from '@src/components/editor/letter/Right/EntityPlac
 import EntityLetterContainer from '@src/components/editor/letter/Right/EntityLetter/EntityLetterContainer';
 import EditorFormDialog from '@src/components/editor/letter/Dialog/EditorFormDialog';
 import useNoteClickHandler from '@src/components/editor/letter/Center/hooks/useNoteClickHandler';
-import {
-  setEditorDialogAndReferenceThunk,
-  setEditorPinnedLettersViewModeThunk,
-} from '@src/redux/thunks/editor.letter.thunk';
+import { setEditorDialogAndReferenceThunk, setEditorPinnedLettersViewModeThunk } from '@src/redux/thunks/editor.letter.thunk';
 import { enqueueSnackbar } from 'notistack';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
@@ -78,9 +70,7 @@ interface MappingDependencies {
   xmlRefCenter: React.RefObject<HTMLDivElement>;
 }
 
-const createComponentMappingLeft = (
-  deps: MappingDependencies,
-): Record<string, ComponentMappingItem> => ({
+const createComponentMappingLeft = (deps: MappingDependencies): Record<string, ComponentMappingItem> => ({
   [EditorConstants.compMappingLeft.NEW_LETTER]: {
     name: EditorConstants.compMappingLeft.NEW_LETTER,
     showContainer: false,
@@ -112,9 +102,7 @@ const createComponentMappingLeft = (
   },
 });
 
-const createComponentMappingRight = (
-  deps: MappingDependencies,
-): Record<string, ComponentMappingItem> => ({
+const createComponentMappingRight = (deps: MappingDependencies): Record<string, ComponentMappingItem> => ({
   [EditorConstants.compMappingRight.ASSIGNED]: {
     name: EditorConstants.compMappingRight.ASSIGNED,
     showContainer: true,
@@ -183,18 +171,11 @@ const createComponentMappingRight = (
 // always re-fire the action - otherwise the first click after closing the dialog
 // silently toggles this value back to null instead of reopening it, requiring a
 // second click to work again.
-export const valueForSide = (
-  newValue: string | null,
-  selectedComponent: ComponentMappingItem | null,
-): string | null => {
+export const valueForSide = (newValue: string | null, selectedComponent: ComponentMappingItem | null): string | null => {
   if (newValue === null) {
     return null;
   }
-  if (
-    selectedComponent !== null &&
-    selectedComponent.name === newValue &&
-    selectedComponent.showContainer
-  ) {
+  if (selectedComponent !== null && selectedComponent.name === newValue && selectedComponent.showContainer) {
     return null;
   }
   return newValue;
@@ -211,18 +192,15 @@ const ShowEditor = () => {
   const xmlRefCenter = useRef<HTMLDivElement>(null);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
   const selectedItem = useSelector((state: RootState) => state.editorLetter.selectedItem);
+  const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showLeftContainer, setShowLeftContainer] = useState<boolean>(false);
   const [showRightContainer, setShowRightContainer] = useState<boolean>(false);
 
   const [selectedItemLeft, setSelectedItemLeft] = useState<false | string>(false);
   const [selectedItemRight, setSelectedItemRight] = useState<false | string>(false);
-  const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem | null>(
-    null,
-  );
-  const [selectedComponentRight, setSelectedComponentRight] = useState<ComponentMappingItem | null>(
-    null,
-  );
+  const [selectedComponentLeft, setSelectedComponentLeft] = useState<ComponentMappingItem | null>(null);
+  const [selectedComponentRight, setSelectedComponentRight] = useState<ComponentMappingItem | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -433,10 +411,7 @@ const ShowEditor = () => {
 
       const onMouseMove = (moveEvent: MouseEvent) => {
         const deltaVw = ((moveEvent.clientX - startX) / window.innerWidth) * 100;
-        const newWidth = Math.min(
-          Math.max(startWidth + deltaVw, LEFT_EDITOR_MIN_WIDTH),
-          LEFT_EDITOR_MAX_WIDTH,
-        );
+        const newWidth = Math.min(Math.max(startWidth + deltaVw, LEFT_EDITOR_MIN_WIDTH), LEFT_EDITOR_MAX_WIDTH);
         setLeftEditorWidth(newWidth);
       };
 
@@ -566,12 +541,7 @@ const ShowEditor = () => {
             maxWidth: '60vw',
             backgroundColor: '#ffffff',
             transition: 'width 0.3s',
-            width:
-              showLeftContainer && showRightContainer
-                ? '60%'
-                : showLeftContainer || showRightContainer
-                  ? '80%'
-                  : '90%',
+            width: showLeftContainer && showRightContainer ? '60%' : showLeftContainer || showRightContainer ? '80%' : '90%',
           }}
         >
           <div ref={xmlRefCenter}>
@@ -634,6 +604,7 @@ const ShowEditor = () => {
 
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarRight.publishLetter')}
+              disabled={figureUploadInProgress}
               selected={selectedItemRight === EditorConstants.compMappingRight.PUBLISH_LETTER}
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
               icon={<CloudUploadOutlinedIcon />}
@@ -652,6 +623,7 @@ const ShowEditor = () => {
 
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarRight.resetLetter')}
+              disabled={figureUploadInProgress}
               selected={stateEditorLetter.undoAvailable || stateEditorLetter.redoAvailable}
               onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
               icon={<RestartAltIcon />}
@@ -660,11 +632,7 @@ const ShowEditor = () => {
         </Box>
       </Box>
       <EditorFormDialog xmlRef={xmlRefCenter} open={false} />i
-      <UserActionMenu
-        anchorEl={anchorEl}
-        open={anchorEl !== null}
-        handleClose={userActionMenuHandleClose}
-      />
+      <UserActionMenu anchorEl={anchorEl} open={anchorEl !== null} handleClose={userActionMenuHandleClose} />
       <EditorKeyHandle />
       <LetterFontSizeHandle />
       <LetterStalenessMonitor />
