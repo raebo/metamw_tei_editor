@@ -25,7 +25,9 @@ const ContextMenuHarness = () => {
     const div = document.createElement('div');
     const paragraph = document.createElement('p');
     div.setAttribute('xml:id', 'act_1');
+    div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
+    paragraph.dataset.editorXmlPath = '0.0.0.0';
     paragraph.textContent = 'Text';
     div.appendChild(paragraph);
     body.appendChild(div);
@@ -68,6 +70,45 @@ describe('RightClickActionMenu figure upload action', () => {
 
     expect(store.getState().editorLetter.dialogType).toBe('FIGURE_UPLOAD');
     expect(store.getState().editorLetter.letterReference.elementXmlId).toBe('paragraph_1');
+  });
+
+  it('opens the paragraph structure dialog with the source path and requested operation', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('p')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Absätze und Abschnitte|Paragraphs and sections/,
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Absatz danach einfügen|Insert paragraph after/,
+      }),
+    );
+
+    const state = store.getState().editorLetter;
+    expect(state.dialogType).toBe('PARAGRAPH_STRUCTURE');
+    expect(state.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'paragraph-insert',
+    });
   });
 
   it('does not offer another figure upload while one is running', () => {

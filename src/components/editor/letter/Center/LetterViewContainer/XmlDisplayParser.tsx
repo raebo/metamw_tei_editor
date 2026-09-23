@@ -78,6 +78,13 @@ const FIGURE_SUBTYPE_CLASSES: Record<string, string> = {
   'three-quarter_page': 'tei-figure-subtype-three-quarter-page',
   full_page: 'tei-figure-subtype-full-page',
 };
+const PARAGRAPH_STYLE_CLASSES: Record<string, string> = {
+  paragraph_without_indent: 'tei-paragraph-without-indent',
+  paragraph_without_indent_indented: 'tei-paragraph-without-indent-indented',
+  paragraph_hanging: 'tei-paragraph-hanging',
+  'paragraph centered': 'tei-paragraph-centered',
+  paragraph_right: 'tei-paragraph-right',
+};
 
 const appendClassName = (attributes: Record<string, any>, className?: string) => {
   if (!className) return;
@@ -165,6 +172,8 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
               acc.style = { display: 'none' };
             } else if (tagName === 'figure' && FIGURE_ALIGNMENT_CLASSES[attr.value]) {
               appendClassName(acc, FIGURE_ALIGNMENT_CLASSES[attr.value]);
+            } else if (tagName === 'p') {
+              appendClassName(acc, PARAGRAPH_STYLE_CLASSES[attr.value]);
             } else if (tagName !== 'figure') {
               acc.style = parseInlineStyle(attr.value);
             }

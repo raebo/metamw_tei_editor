@@ -17,6 +17,7 @@
     "addWritingPart": "Add Writing Act",
     "attachmentAdd": "Add Attachment",
     "figureUpload": "Insert Image",
+    "paragraphStructure": "Edit paragraph and section structure",
     "closeTabWithContent": "Close Tab with Content?",
     "dateWhenAdd": "Mark Date 'WHEN'",
     "dateWhenCustomAdd": "Mark Date 'WHEN CUSTOM'",
@@ -78,6 +79,43 @@
       "http415": "Only genuine JPEG and PNG files are allowed; SVG is not supported.",
       "http422": "The image data could not be validated. Check your entries.",
       "generic": "The image could not be uploaded. Please try again."
+    }
+  },
+  "paragraphStructure": {
+    "contextAction": "Paragraphs and sections",
+    "actions": {
+      "insertParagraph": "Insert paragraph after …",
+      "convertParagraph": "Change paragraph format …",
+      "splitParagraph": "Separate selection as paragraph …",
+      "insertChildSection": "Insert subsection …",
+      "insertSiblingSection": "Insert sibling section after …",
+      "editSection": "Edit section heading …"
+    },
+    "operations": {
+      "paragraph-insert": "A new paragraph is inserted after the selected paragraph.",
+      "paragraph-convert": "The selected paragraph is converted to the chosen variant.",
+      "paragraph-split": "The selected text is separated into its own paragraph.",
+      "section-child": "A new subsection is created inside the selected section.",
+      "section-sibling": "A new section at the same level is created after the selected section.",
+      "section-edit": "The heading of the selected section is changed."
+    },
+    "fields": {
+      "variant": "Paragraph variant",
+      "paragraphText": "Paragraph text",
+      "heading": "Section heading"
+    },
+    "variants": {
+      "indented": "Indented paragraph",
+      "without-indent": "Paragraph without indent",
+      "hanging": "Hanging paragraph without indent",
+      "centered": "Centered paragraph",
+      "right": "Right-aligned paragraph",
+      "without-indent-indented": "Indented paragraph without first-line indent"
+    },
+    "submit": "Apply change",
+    "success": "The paragraph or section structure was updated.",
+    "errors": {
+      "context": "The editing context is no longer available."
     }
   },
   "autocomplete": {

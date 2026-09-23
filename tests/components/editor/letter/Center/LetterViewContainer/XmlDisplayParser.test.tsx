@@ -187,6 +187,26 @@ describe('XMLDisplayParser', () => {
     expect(figure?.className).toBe('');
   });
 
+  it('maps supported paragraph styles to classes and ignores unknown style values', () => {
+    const { container } = renderXml(`<div>
+      <p style="paragraph_without_indent">one</p>
+      <p style="paragraph_without_indent_indented">two</p>
+      <p style="paragraph_hanging">three</p>
+      <p style="paragraph centered">four</p>
+      <p style="paragraph_right">five</p>
+      <p style="position: fixed; color: red">unsafe</p>
+    </div>`);
+
+    const paragraphs = Array.from(container.querySelectorAll('p'));
+    expect(paragraphs[0]).toHaveClass('tei-paragraph-without-indent');
+    expect(paragraphs[1]).toHaveClass('tei-paragraph-without-indent-indented');
+    expect(paragraphs[2]).toHaveClass('tei-paragraph-hanging');
+    expect(paragraphs[3]).toHaveClass('tei-paragraph-centered');
+    expect(paragraphs[4]).toHaveClass('tei-paragraph-right');
+    expect(paragraphs[5]).not.toHaveAttribute('style');
+    expect(paragraphs[5]?.className).toBe('');
+  });
+
   it('shows a local placeholder and makes no request for a figure without xml:id', () => {
     render(
       <XMLDisplayParser

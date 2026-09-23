@@ -24,6 +24,7 @@ function getTabTextColor(theme: Theme, { isPinned, isActive }: { isPinned: boole
 const LetterTabs = () => {
   const dispatch = useAppDispatch();
   const statePinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
+  const stateEditorLetterId = useSelector((state: RootState) => state.editorLetter.letter.id);
   const changeLetterViewMode = useSelector((state: RootState) => state.editorLetter.changeLetterViewMode);
   const stateActiveTab = useSelector((state: RootState) => state.editorLetter.tabNumber);
   const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
@@ -45,24 +46,29 @@ const LetterTabs = () => {
 
   useEffect(() => {
     if (statePinnedLetters.length > 0 && !changeLetterViewMode) {
-      dispatch(
-        setEditorLetter({
-          letter: {
-            id: statePinnedLetters[0].id,
-            name: statePinnedLetters[0].name,
-            viewMode: statePinnedLetters[0].viewMode,
-          },
-        }),
+      const activeLetterIndex = statePinnedLetters.findIndex(
+        (letter) => letter.id === stateEditorLetterId,
       );
-      if (stateActiveTab === null) {
-        setActiveTab(0);
-      } else {
-        setActiveTab(stateActiveTab);
-      }
-    }
+      const fallbackIndex =
+        stateActiveTab >= 0 && stateActiveTab < statePinnedLetters.length ? stateActiveTab : 0;
+      const nextActiveIndex = activeLetterIndex >= 0 ? activeLetterIndex : fallbackIndex;
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statePinnedLetters]);
+      if (activeLetterIndex < 0) {
+        const nextActiveLetter = statePinnedLetters[nextActiveIndex];
+        dispatch(
+          setEditorLetter({
+            letter: {
+              id: nextActiveLetter.id,
+              name: nextActiveLetter.name,
+              viewMode: nextActiveLetter.viewMode,
+            },
+          }),
+        );
+      }
+
+      setActiveTab(nextActiveIndex);
+    }
+  }, [changeLetterViewMode, dispatch, stateActiveTab, stateEditorLetterId, statePinnedLetters]);
 
   const handleTabChange = (_: React.SyntheticEvent, newTabValue: number) => {
     const newPinnedLetter = statePinnedLetters[newTabValue];

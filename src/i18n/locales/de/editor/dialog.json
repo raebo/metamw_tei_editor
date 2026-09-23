@@ -17,6 +17,7 @@
     "addWritingPart": "Schreibakt Hinzufügen",
     "attachmentAdd": "Beilage Hinzufügen",
     "figureUpload": "Bild einfügen",
+    "paragraphStructure": "Absatz- und Abschnittsstruktur bearbeiten",
     "closeTabWithContent": "Tab mit Inhalt Schließen?",
     "dateWhenAdd": "Datum 'WHEN' Auszeichnen",
     "dateWhenCustomAdd": "Datum 'WHEN CUSTOM' Auszeichnen",
@@ -78,6 +79,43 @@
       "http415": "Nur echte JPEG- und PNG-Dateien sind erlaubt; SVG wird nicht unterstützt.",
       "http422": "Die Bilddaten konnten nicht validiert werden. Bitte prüfen Sie Ihre Eingaben.",
       "generic": "Das Bild konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut."
+    }
+  },
+  "paragraphStructure": {
+    "contextAction": "Absätze und Abschnitte",
+    "actions": {
+      "insertParagraph": "Absatz danach einfügen …",
+      "convertParagraph": "Absatzformat ändern …",
+      "splitParagraph": "Auswahl als Absatz abtrennen …",
+      "insertChildSection": "Unterabschnitt einfügen …",
+      "insertSiblingSection": "Gleichrangigen Abschnitt danach einfügen …",
+      "editSection": "Abschnittsüberschrift bearbeiten …"
+    },
+    "operations": {
+      "paragraph-insert": "Ein neuer Absatz wird nach dem ausgewählten Absatz eingefügt.",
+      "paragraph-convert": "Der ausgewählte Absatz wird in die gewählte Variante umgewandelt.",
+      "paragraph-split": "Der markierte Text wird als eigener Absatz abgetrennt.",
+      "section-child": "Ein neuer Unterabschnitt wird innerhalb des ausgewählten Abschnitts angelegt.",
+      "section-sibling": "Ein neuer Abschnitt gleicher Ebene wird nach dem ausgewählten Abschnitt angelegt.",
+      "section-edit": "Die Überschrift des ausgewählten Abschnitts wird geändert."
+    },
+    "fields": {
+      "variant": "Absatzvariante",
+      "paragraphText": "Absatztext",
+      "heading": "Abschnittsüberschrift"
+    },
+    "variants": {
+      "indented": "Absatz mit Einzug",
+      "without-indent": "Absatz ohne Einzug",
+      "hanging": "Absatz ohne Einzug hängend",
+      "centered": "Absatz zentriert",
+      "right": "Absatz rechtsbündig",
+      "without-indent-indented": "Absatz ohne Einzug eingerückt"
+    },
+    "submit": "Änderung übernehmen",
+    "success": "Die Absatz- oder Abschnittsstruktur wurde aktualisiert.",
+    "errors": {
+      "context": "Der Bearbeitungskontext ist nicht mehr verfügbar."
     }
   },
   "autocomplete": {
