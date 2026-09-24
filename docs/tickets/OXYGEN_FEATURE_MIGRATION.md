@@ -128,18 +128,35 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
   lokal ab. Struktur-, Dialog-, Kontextmenü-, Shortcut-, Rendering-, URL- und XSS-Regressionstests
   decken die Akzeptanzkriterien ab; die zugehörigen CSV-Zeilen sind als implementiert markiert.
 
-### OXY-005 – XML-IDs und TEI-Elementdokumentation
+### OXY-005A – XML-IDs konfigurieren und erzeugen
 
 - Status: Offen
 - Priorität: P3
-- Oxygen-Aktionen: `id.options`, `generate.ids`, `show.TEIp5.documentation`
-- Ausgangslage: Oxygen bietet ID-Konfiguration, automatische ID-Erzeugung und kontextsensitive
-  TEI-Dokumentation.
-- Ziel: Fachlich klären und implementieren, welche Elemente automatisch IDs erhalten und wie die
-  passende TEI-Dokumentation aus der Weboberfläche geöffnet wird.
-- Akzeptanzkriterien: Generierte IDs sind dokumentweit eindeutig und stabil; externe
-  Dokumentationslinks werden sicher geöffnet.
-- Tests: ID-Kollisionen, wiederholte Ausführung und URL-Erzeugung für Elementnamen.
+- Oxygen-Aktionen: `id.options`, `generate.ids`
+- Ausgangslage: Oxygen bietet eine Konfiguration der Elemente, die automatisch eine ID erhalten,
+  sowie eine dokumentweite ID-Erzeugung. Der Webeditor erzeugt bislang nur in einzelnen
+  Fachworkflows IDs.
+- Ziel: Fachlich festlegen und konfigurierbar abbilden, welche TEI-Elemente automatisch IDs
+  erhalten, und fehlende IDs dokumentweit erzeugen.
+- Akzeptanzkriterien: Generierte IDs sind dokumentweit eindeutig und stabil; bestehende IDs bleiben
+  unverändert; eine wiederholte Ausführung erzeugt weder neue IDs noch Duplikate.
+- Tests: Konfigurierte und nicht konfigurierte Elemente, ID-Kollisionen, bestehende IDs und
+  wiederholte Ausführung.
+
+### OXY-005B – Kontextbezogene TEI-P5-Dokumentation öffnen
+
+- Status: Offen
+- Priorität: P3
+- Oxygen-Aktionen: `show.TEIp5.documentation`
+- Ausgangslage: Oxygen kann für das aktuell ausgewählte Element unmittelbar die passende
+  TEI-P5-Elementdokumentation öffnen. Im Webeditor fehlt diese Funktion.
+- Ziel: Für das aktuell ausgewählte TEI-Element einen validierten Link zur passenden
+  TEI-P5-Dokumentation erzeugen und aus der Weboberfläche öffnen.
+- Akzeptanzkriterien: Der Link entspricht dem ausgewählten Element; externe Links werden sicher in
+  einem neuen Browserkontext geöffnet; unbekannte oder nicht unterstützte Elemente werden
+  verständlich behandelt.
+- Tests: URL-Erzeugung für Elementnamen, ausgewählter Kontext, unbekannte Elemente und sicheres
+  Öffnen externer Links.
 
 ### OXY-006 – Kommentararten und Anmerkungen vervollständigen
 

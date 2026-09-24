@@ -21,9 +21,9 @@ table.split.below,${i18n(table.split.below)},Beschreibung nur als Oxygen-i18n-Sc
 table.split.above,${i18n(table.split.above)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(table.split.above_description)},,yes,OXY-003,implemented
 delete.table.column,${i18n(delete.table.columns)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(delete.table.columns_description)},,yes,OXY-003,implemented
 delete.table.row,${i18n(delete.table.rows)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(delete.table.rows_description)},,yes,OXY-003,implemented
-id.options,ID-Optionen,Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(id.options_description)},,no,OXY-005,open
-generate.ids,ID's generieren,Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(generate.ids_description)},Alt+Shift+H,no,OXY-005,open
-show.TEIp5.documentation,${i18n(show.TEIp5.documentation)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(show.TEIp5.documentation_description)},,no,OXY-005,open
+id.options,ID-Optionen,Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(id.options_description)},,no,OXY-005A,open
+generate.ids,ID's generieren,Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(generate.ids_description)},Alt+Shift+H,no,OXY-005A,open
+show.TEIp5.documentation,${i18n(show.TEIp5.documentation)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(show.TEIp5.documentation_description)},,no,OXY-005B,open
 sort,${i18n(sort)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(sort_description)},,yes,OXY-002,implemented
 sort_table,${i18n(sort)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(sort_description)},,yes,OXY-003,implemented
 insert.table.row.above,${i18n(insert.table.row.above)},Beschreibung nur als Oxygen-i18n-Schlüssel hinterlegt: ${i18n(insert.table.row.above_description)},,yes,OXY-003,implemented
