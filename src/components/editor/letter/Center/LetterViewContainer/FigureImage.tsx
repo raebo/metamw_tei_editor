@@ -6,11 +6,13 @@ import CloseIcon from '@mui/icons-material/Close';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import type { FigureImageMap, ImageMapZone } from '@src/utils/editor/graphicStructure';
 
 interface FigureImageProps {
   letterId: number | null;
   figureXmlId: string | null;
   description: string | null;
+  imageMap: FigureImageMap | null;
 }
 
 type FigureImageStatus = 'loading' | 'ready' | 'not-found' | 'error';
@@ -23,13 +25,55 @@ const responseStatus = (error: unknown): number | undefined =>
     ? (error as { response?: { status?: number } }).response?.status
     : undefined;
 
-const FigureImage = ({ letterId, figureXmlId, description }: FigureImageProps) => {
+const polygonStyle = (zone: Extract<ImageMapZone, { shape: 'polygon' }>, imageMap: FigureImageMap): React.CSSProperties | null => {
+  const coordinates = zone.points
+    .trim()
+    .split(/\s+/)
+    .map((pair) => pair.split(',').map(Number));
+  if (
+    coordinates.length < 3 ||
+    coordinates.some(
+      (pair) =>
+        pair.length !== 2 ||
+        pair.some((value) => !Number.isFinite(value)) ||
+        pair[0] < 0 ||
+        pair[1] < 0 ||
+        pair[0] > imageMap.width ||
+        pair[1] > imageMap.height,
+    )
+  )
+    return null;
+  const points = coordinates.map(([x, y]) => `${(x / imageMap.width) * 100}% ${(y / imageMap.height) * 100}%`).join(', ');
+  return { inset: 0, clipPath: `polygon(${points})` };
+};
+
+const zoneStyle = (zone: ImageMapZone, imageMap: FigureImageMap): React.CSSProperties | null => {
+  if (imageMap.width <= 0 || imageMap.height <= 0) return null;
+  if (zone.shape === 'polygon') return polygonStyle(zone, imageMap);
+  if (
+    [zone.ulx, zone.uly, zone.lrx, zone.lry].some((value) => !Number.isFinite(value) || value < 0) ||
+    zone.ulx >= zone.lrx ||
+    zone.uly >= zone.lry ||
+    zone.lrx > imageMap.width ||
+    zone.lry > imageMap.height
+  )
+    return null;
+  return {
+    left: `${(zone.ulx / imageMap.width) * 100}%`,
+    top: `${(zone.uly / imageMap.height) * 100}%`,
+    width: `${((zone.lrx - zone.ulx) / imageMap.width) * 100}%`,
+    height: `${((zone.lry - zone.uly) / imageMap.height) * 100}%`,
+  };
+};
+
+const FigureImage = ({ letterId, figureXmlId, description, imageMap }: FigureImageProps) => {
   const { t } = useTranslation();
   const [status, setStatus] = useState<FigureImageStatus>(letterId === null || !figureXmlId ? 'not-found' : 'loading');
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewZoom, setPreviewZoom] = useState(1);
+  const [areasVisible, setAreasVisible] = useState(false);
   const objectUrlRef = useRef<string | null>(null);
   const previewTitleId = useId();
 
@@ -80,6 +124,10 @@ const FigureImage = ({ letterId, figureXmlId, description }: FigureImageProps) =
   }, [figureXmlId, letterId, retryCount, revokeObjectUrl]);
 
   const altText = description?.trim() || t('editor:common.figure.defaultAlt');
+  const validZones =
+    imageMap?.zones
+      .map((zone) => ({ zone, style: zoneStyle(zone, imageMap) }))
+      .filter((entry): entry is { zone: ImageMapZone; style: React.CSSProperties } => entry.style !== null) ?? [];
 
   if (status === 'loading') {
     return (
@@ -127,7 +175,30 @@ const FigureImage = ({ letterId, figureXmlId, description }: FigureImageProps) =
             setStatus('error');
           }}
         />
+        {areasVisible &&
+          validZones.map(({ zone, style }, index) => (
+            <span key={zone.id || index} className="tei-image-map-area" style={style} title={zone.label || zone.id} aria-hidden="true" />
+          ))}
       </button>
+      {validZones.length > 0 && (
+        <>
+          <button
+            type="button"
+            className="tei-image-map-toggle"
+            aria-expanded={areasVisible}
+            onClick={() => setAreasVisible((visible) => !visible)}
+          >
+            {t(areasVisible ? 'editor:dialog.graphicStructure.hideAreas' : 'editor:dialog.graphicStructure.toggleAreas')}
+          </button>
+          {areasVisible && (
+            <ol className="tei-image-map-area-list">
+              {validZones.map(({ zone }, index) => (
+                <li key={zone.id || index}>{zone.label || zone.id}</li>
+              ))}
+            </ol>
+          )}
+        </>
+      )}
       <Dialog
         open={previewOpen}
         onClose={() => setPreviewOpen(false)}

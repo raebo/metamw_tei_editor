@@ -140,6 +140,37 @@ describe('XMLDisplayParser', () => {
     expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:figure-image');
   });
 
+  it('renders facsimile zones as toggleable safe overlays without exposing facsimile or SVG markup', async () => {
+    const { container } = render(
+      <XMLDisplayParser
+        xmlContentRef={null}
+        letterId={123}
+        xmlString={`<TEI>
+          <facsimile><surface xml:id="surface_1" ulx="0" uly="0" lrx="1000" lry="500">
+            <graphic url="file:/images/map.svg" mimeType="image/svg+xml"/>
+            <zone xml:id="zone_1" n="Signature" ulx="100" uly="50" lrx="300" lry="150"/>
+            <zone xml:id="zone_2" n="Seal" points="500,100 700,100 600,300"/>
+          </surface></facsimile>
+          <text><body><figure xml:id="figure_map" facs="#surface_1"><graphic url="file:/images/map.svg" mimeType="image/svg+xml"/><figDesc>Map</figDesc><svg><script>alert(1)</script></svg></figure></body></text>
+        </TEI>`}
+      />,
+    );
+
+    await screen.findByRole('img', { name: 'Map' });
+    expect(mockFetchFigureImage).toHaveBeenCalledWith(123, 'figure_map', expect.any(AbortSignal));
+    expect(container.querySelector('facsimile')).toBeNull();
+    expect(container.querySelector('svg')).toBeNull();
+    expect(container.querySelector('.tei-image-map-area')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'editor:dialog.graphicStructure.toggleAreas' }));
+    expect(container.querySelectorAll('.tei-image-map-area')).toHaveLength(2);
+    expect(screen.getByText('Signature')).toBeInTheDocument();
+    expect(screen.getByText('Seal')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'editor:dialog.graphicStructure.hideAreas' }));
+    expect(container.querySelector('.tei-image-map-area')).toBeNull();
+  });
+
   it('opens and closes an enlarged preview without loading the image again', async () => {
     render(
       <XMLDisplayParser

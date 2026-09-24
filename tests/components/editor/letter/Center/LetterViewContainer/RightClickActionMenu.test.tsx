@@ -12,7 +12,7 @@ jest.mock('notistack', () => ({
 }));
 
 const sourceXml =
-  '<TEI><text><body><div xml:id="act_1"><p xml:id="paragraph_1">Text</p><list type="ordered"><item>First</item></list><table rows="1" cols="1"><row><cell>A</cell></row></table></div></body></text></TEI>';
+  '<TEI><text><body><div xml:id="act_1"><p xml:id="paragraph_1">Text</p><list type="ordered"><item>First</item></list><table rows="1" cols="1"><row><cell>A</cell></row></table><figure xml:id="figure_1"><graphic url="file:/images/test.png"/></figure></div></body></text></TEI>';
 
 const ContextMenuHarness = () => {
   const xmlContentRef = useRef<HTMLDivElement>(null);
@@ -31,6 +31,7 @@ const ContextMenuHarness = () => {
     const table = document.createElement('table');
     const row = document.createElement('tr');
     const cell = document.createElement('td');
+    const figure = document.createElement('figure');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -49,9 +50,12 @@ const ContextMenuHarness = () => {
     cell.dataset.editorXmlPath = '0.0.0.2.0.0';
     cell.dataset.editorTeiElement = 'cell';
     cell.textContent = 'A';
+    figure.dataset.editorXmlPath = '0.0.0.3';
+    figure.setAttribute('xml:id', 'figure_1');
+    figure.textContent = 'Figure';
     row.appendChild(cell);
     table.appendChild(row);
-    div.append(paragraph, list, tableCaret, table);
+    div.append(paragraph, list, tableCaret, table, figure);
     body.appendChild(div);
     text.appendChild(body);
     tei.appendChild(text);
@@ -72,6 +76,64 @@ const ContextMenuHarness = () => {
 };
 
 describe('RightClickActionMenu figure upload action', () => {
+  it('opens the explicit block graphic dialog from the paragraph context menu', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('p')!, { button: 2, clientX: 20, clientY: 30 });
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Grafische Elemente|Graphic elements/ }));
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Grafisches Element danach|Insert graphic element after/,
+      }),
+    );
+
+    expect(store.getState().editorLetter.dialogType).toBe('GRAPHIC_STRUCTURE');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'graphic-block',
+    });
+  });
+
+  it('opens image-map editing for an existing figure', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('figure')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Grafische Elemente|Graphic elements/ }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Bildkarte bearbeiten|Edit image map/ }));
+
+    expect(store.getState().editorLetter.dialogType).toBe('GRAPHIC_STRUCTURE');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'figure',
+      elementXmlId: '0.0.0.3',
+      elementKey: 'image-map-edit',
+    });
+  });
+
   it('opens the upload dialog for the nearest uniquely identified body element', async () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
     store.dispatch(

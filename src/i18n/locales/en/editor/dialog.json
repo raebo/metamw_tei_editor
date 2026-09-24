@@ -17,6 +17,7 @@
     "addWritingPart": "Add Writing Act",
     "attachmentAdd": "Add Attachment",
     "figureUpload": "Insert Image",
+    "graphicStructure": "Edit graphic and image map",
     "listStructure": "Edit list structure",
     "paragraphStructure": "Edit paragraph and section structure",
     "tableStructure": "Edit table structure",
@@ -81,6 +82,89 @@
       "http415": "Only genuine JPEG and PNG files are allowed; SVG is not supported.",
       "http422": "The image data could not be validated. Check your entries.",
       "generic": "The image could not be uploaded. Please try again."
+    }
+  },
+  "graphicStructure": {
+    "contextAction": "Graphic elements",
+    "actions": {
+      "block": "Insert graphic element after …",
+      "inline": "Insert inline graphic element …",
+      "imageMap": "Edit image map …"
+    },
+    "operations": {
+      "graphic-block": "A standalone graphic element is inserted after the selected element.",
+      "graphic-inline-copy": "An inline graphic element is inserted inside the selected paragraph.",
+      "image-map-edit": "Rectangular or polygonal image-map areas can be created and edited."
+    },
+    "fields": {
+      "type": "Graphic element type",
+      "url": "Internal or secure graphic reference",
+      "mimeType": "Media type",
+      "rend": "Position in the original source",
+      "subtype": "Size",
+      "alignment": "Alignment in the edited letter",
+      "head": "Title",
+      "headVisible": "Show title",
+      "description": "Description",
+      "descriptionVisible": "Show description",
+      "mapWidth": "Image surface width",
+      "mapHeight": "Image surface height",
+      "zoneId": "Area XML ID",
+      "shape": "Shape",
+      "zoneLabel": "Label",
+      "zoneTarget": "Internal target (optional)",
+      "points": "Polygon points"
+    },
+    "types": {
+      "notated_Music": "Musical notation",
+      "drawing": "Drawing",
+      "table": "Table",
+      "formula": "Formula"
+    },
+    "rend": {
+      "inline_big_size": "Within the text line",
+      "below": "Below the text line",
+      "above": "Above the text line",
+      "bottom": "At the bottom of the page",
+      "top": "At the top of the page",
+      "margin": "In the margin",
+      "overleaf": "On the other side of the leaf",
+      "inspace": "In a predefined area",
+      "opposite": "On the opposite side"
+    },
+    "subtypes": {
+      "eighth_page": "Up to one eighth of the letter width",
+      "quarter_page": "Up to one quarter of the letter width",
+      "half_page": "Up to half the letter width",
+      "three-quarter_page": "Up to three quarters of the letter width",
+      "full_page": "Full letter width"
+    },
+    "alignments": {
+      "center": "Centred",
+      "left": "Left",
+      "right": "Right"
+    },
+    "mimeTypes": {
+      "auto": "Automatic"
+    },
+    "shapes": {
+      "rectangle": "Rectangle",
+      "polygon": "Polygon"
+    },
+    "urlHint": "SVG is only referenced and loaded through the protected image route; no SVG file is uploaded.",
+    "svgSafety": "SVG content is never inserted as active markup and is displayed only as an image source through the protected route.",
+    "area": "Image area {{number}}",
+    "addArea": "Add image area",
+    "removeArea": "Remove image area",
+    "deleteMap": "Delete image map",
+    "submit": "Apply change",
+    "success": "The graphic element was updated.",
+    "mapDeleted": "The image map was deleted.",
+    "toggleAreas": "Show image areas",
+    "hideAreas": "Hide image areas",
+    "errors": {
+      "context": "The editing context is no longer available.",
+      "figureContext": "A figure must be selected for this action."
     }
   },
   "paragraphStructure": {

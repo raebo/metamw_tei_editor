@@ -1,5 +1,11 @@
-import { contentMarkedKeyHandleDefinitions } from '@src/components/editor/letter/Center/lib/keyHandlerDefinitions';
+import {
+  allTimesAvailableKeyHandleDefinitions,
+  contentMarkedKeyHandleDefinitions,
+} from '@src/components/editor/letter/Center/lib/keyHandlerDefinitions';
 import { EditorConstants } from '@src/constants/editor';
+import { configureStore } from '@reduxjs/toolkit';
+import editorLetterReducer from '@src/redux/slices/editor.letter.slice';
+import type { RootState } from '@src/redux/redux.store';
 
 const paragraphShortcuts = [
   ['ctrl+shift+p', null],
@@ -24,5 +30,30 @@ describe('paragraph shortcut definitions', () => {
     expect(selectedParagraph).toBeDefined();
     expect(selectedParagraph?.getAttribute('style')).toBe(expectedStyle);
     expect(definition.operationType).toBe(EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED);
+  });
+});
+
+describe('graphic shortcut definitions', () => {
+  it.each([
+    ['ctrl+shift+j', 'graphic-block'],
+    ['alt+shift+j', 'graphic-inline-copy'],
+  ] as const)('opens the graphic dialog for %s at the selected XML path', (shortcut, operation) => {
+    document.body.innerHTML = '<tei><text><body><p data-editor-xml-path="0.0.0">Text</p></body></text></tei>';
+    const text = document.querySelector('p')!.firstChild!;
+    const selection = window.getSelection()!;
+    const range = document.createRange();
+    range.selectNodeContents(text);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+
+    allTimesAvailableKeyHandleDefinitions[shortcut].openDialogAction?.(store.dispatch, store.getState as unknown as () => RootState);
+
+    expect(store.getState().editorLetter.dialogType).toBe(EditorConstants.dialogTypes.GRAPHIC_STRUCTURE);
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: '0.0.0',
+      elementKey: operation,
+    });
   });
 });

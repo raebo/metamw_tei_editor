@@ -5,6 +5,37 @@ import { EditorConstants } from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
 import { setContentTextIsMarked, setReloadLetterContent, setXmlLetterContent } from '@src/redux/slices/editor.letter.slice';
+import { setEditorDialogAndReferenceThunk } from '@src/redux/thunks/editor.letter.thunk';
+import type { GraphicStructureOperation } from '@src/components/editor/letter/Dialog/Components/GraphicStructureDialog';
+
+const selectedXmlPathElement = (): HTMLElement | null => {
+  const selectionNode = window.getSelection()?.anchorNode ?? null;
+  const selectionElement = selectionNode?.nodeType === Node.ELEMENT_NODE ? (selectionNode as HTMLElement) : selectionNode?.parentElement;
+  const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const candidate =
+    selectionElement?.closest<HTMLElement>('[data-editor-xml-path]') ?? activeElement?.closest<HTMLElement>('[data-editor-xml-path]');
+  if (!candidate?.closest('body')) return null;
+  return candidate.closest<HTMLElement>('p[data-editor-xml-path]') ?? candidate;
+};
+
+const openGraphicStructureDialog = (dispatch: AppDispatch, operation: GraphicStructureOperation): void => {
+  const anchor = selectedXmlPathElement();
+  const sourcePath = anchor?.dataset.editorXmlPath;
+  if (!anchor || sourcePath === undefined) {
+    enqueueSnackbar('Bitte wählen Sie zuerst eine Einfügeposition im Brieftext aus.', {
+      variant: 'error',
+    });
+    return;
+  }
+  dispatch(
+    setEditorDialogAndReferenceThunk({
+      dialogType: EditorConstants.dialogTypes.GRAPHIC_STRUCTURE,
+      elementType: anchor.localName,
+      elementXmlId: sourcePath,
+      elementKey: operation,
+    }),
+  );
+};
 
 export const filterForKeyHandleDefinitions = (keyHandleDefinitions: Record<string, EditorKeyHandleItem>, keyCombination: string) => {
   const filteredKeyHandle = Object.values(keyHandleDefinitions).filter((item) => item.key === keyCombination)[0];
@@ -295,6 +326,20 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     openDialogAction: (dispatch: AppDispatch) => {
       return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_PROVENANCE_ENTRY);
     },
+  },
+  'ctrl+shift+j': {
+    key: 'ctrl+shift+j',
+    description: 'Grafisches Element hinzufügen',
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => openGraphicStructureDialog(dispatch, 'graphic-block'),
+  },
+  'alt+shift+j': {
+    key: 'alt+shift+j',
+    description: 'Grafisches Inline-Element hinzufügen',
+    component: null,
+    action: null,
+    openDialogAction: (dispatch: AppDispatch) => openGraphicStructureDialog(dispatch, 'graphic-inline-copy'),
   },
 };
 

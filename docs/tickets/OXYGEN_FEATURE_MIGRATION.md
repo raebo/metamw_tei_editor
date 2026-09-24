@@ -103,30 +103,30 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-004 – Bilder, grafische Elemente, Image-Maps und SVG
 
-- Status: Teilweise umgesetzt
+- Status: Umgesetzt und getestet
 - Priorität: P2
-- Umgesetzte Oxygen-Aktionen: `insert image`, `Grafisches Inline-Element (in Textzeile)`
-- Offene Oxygen-Aktionen: `edit.image.map`, `imagemap.expand.area`,
+- Oxygen-Aktionen: `insert image`, `edit.image.map`, `imagemap.expand.area`,
   `imagemap.collapse.area`, `Grafisches Element`, `SVG einbinden`,
+  `Grafisches Inline-Element (in Textzeile)` und
   `Grafisches Inline-Element (in Textzeile) - Kopie`
-- Umgesetzter Teilumfang: F-110 und F-111 stellen vorhandene Figures über die geschützte
+- Bisheriger Teilumfang: F-110 und F-111 stellen vorhandene Figures über die geschützte
   JWT-Route dar und ermöglichen das Einfügen von JPEG-/PNG-Dateien mit Kategorie, Position,
-  Überschrift und Beschreibung. Die Inline-Aktionen werden durch denselben gemeinsamen
+  Überschrift und Beschreibung. Die bisherige Inline-Aktion wird durch denselben gemeinsamen
   Uploadworkflow abgedeckt. F-112 ergänzt die vergrößerte, barrierefrei bedienbare
   Bildvorschau. Die Umsetzung liegt in den Commits `af5c0e6`, `ff26412` und `09a04c7`; die
-  zugehörigen Matrixzeilen sind einzeln als implementiert aufgelöst. Die fachlich redundante
-  Oxygen-Kopie der Inline-Aktion bleibt wegen ihres noch nicht zugeordneten Shortcuts
-  `Alt+Shift+J` offen.
-- Verbleibendes Ziel: Eine fachlich explizite Blockgrafik-Variante sowie die benötigte
-  SVG-/Image-Map-Unterstützung sicher bereitstellen. Die Anzeige bereits publizierter
-  SVG-Altbestände als reine Bildquelle erfüllt die Oxygen-Aktion `SVG einbinden` nicht; ein
-  SVG-Upload und die Übernahme aktiver SVG-Inhalte bleiben ausgeschlossen, bis dafür ein
-  eigener Sicherheits- und Produktentscheid vorliegt.
-- Akzeptanzkriterien für den offenen Teil: Block- und Inline-Layout sind in der UI eindeutig
-  auswählbar und erzeugen die freigegebene TEI-Struktur; Image-Map-Bereiche können sicher
-  angelegt und bearbeitet werden; eine etwaige SVG-Einbindung verhindert aktive Inhalte.
-- Tests für den offenen Teil: Blockgrafik gegenüber Inline-Grafik, Image-Map-Erstellung und
-  -Bearbeitung, ungültige Attribute beziehungsweise URLs sowie SVG-/XSS-Regressionen.
+  zugehörigen Matrixzeilen sind einzeln als implementiert aufgelöst.
+- Umsetzungsstand des ergänzten Teilumfangs: Das Kontextmenü und die Oxygen-Shortcuts
+  `Ctrl+Shift+J` beziehungsweise `Alt+Shift+J` öffnen einen gemeinsamen Dialog für die explizite
+  Blockgrafik- und Inline-Kopie-Variante. Der Dialog erzeugt die freigegebenen `figure`-,
+  `graphic`-, `head`- und `figDesc`-Strukturen und validiert Grafikreferenzen. Bestehende
+  SVG-Ressourcen können mit `mimeType="image/svg+xml"` referenziert werden; ihre Anzeige erfolgt
+  weiterhin ausschließlich als passive `<img>`-Quelle über die geschützte JWT-Route. SVG-Upload,
+  aktive SVG-Knoten und direkte Browserzugriffe auf `graphic/@url` bleiben ausgeschlossen.
+  Bildkarten werden TEI-konform als `facsimile`/`surface` mit rechteckigen oder polygonalen
+  `zone`-Bereichen angelegt, bearbeitet und gelöscht. Die WYSIWYG-Ansicht stellt gültige Bereiche
+  als kontrolliert berechnete Overlays dar und bildet die Oxygen-Aktionen zum Ein- und Ausblenden
+  lokal ab. Struktur-, Dialog-, Kontextmenü-, Shortcut-, Rendering-, URL- und XSS-Regressionstests
+  decken die Akzeptanzkriterien ab; die zugehörigen CSV-Zeilen sind als implementiert markiert.
 
 ### OXY-005 – XML-IDs und TEI-Elementdokumentation
 

@@ -28,12 +28,31 @@ note {
 }
 
 .tei-figure-preview-trigger {
+  position: relative;
   display: block;
   max-width: 100%;
   padding: 0;
   border: 0;
   background: transparent;
   cursor: zoom-in;
+}
+
+.tei-image-map-area {
+  position: absolute;
+  z-index: 1;
+  box-sizing: border-box;
+  border: 2px solid #005ea8;
+  background: rgb(0 94 168 / 18%);
+  pointer-events: none;
+}
+
+.tei-image-map-toggle {
+  display: inline-block;
+  margin-top: 0.35rem;
+}
+
+.tei-image-map-area-list {
+  margin-top: 0.25rem;
 }
 
 .tei-figure-preview-trigger:focus-visible {

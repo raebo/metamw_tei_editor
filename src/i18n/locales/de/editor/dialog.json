@@ -17,6 +17,7 @@
     "addWritingPart": "Schreibakt Hinzufügen",
     "attachmentAdd": "Beilage Hinzufügen",
     "figureUpload": "Bild einfügen",
+    "graphicStructure": "Grafik und Bildkarte bearbeiten",
     "listStructure": "Listenstruktur bearbeiten",
     "paragraphStructure": "Absatz- und Abschnittsstruktur bearbeiten",
     "tableStructure": "Tabellenstruktur bearbeiten",
@@ -81,6 +82,89 @@
       "http415": "Nur echte JPEG- und PNG-Dateien sind erlaubt; SVG wird nicht unterstützt.",
       "http422": "Die Bilddaten konnten nicht validiert werden. Bitte prüfen Sie Ihre Eingaben.",
       "generic": "Das Bild konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut."
+    }
+  },
+  "graphicStructure": {
+    "contextAction": "Grafische Elemente",
+    "actions": {
+      "block": "Grafisches Element danach einfügen …",
+      "inline": "Grafisches Inline-Element einfügen …",
+      "imageMap": "Bildkarte bearbeiten …"
+    },
+    "operations": {
+      "graphic-block": "Ein eigenständiges grafisches Element wird nach dem ausgewählten Element eingefügt.",
+      "graphic-inline-copy": "Ein grafisches Inline-Element wird innerhalb des ausgewählten Absatzes eingefügt.",
+      "image-map-edit": "Rechteckige oder polygonale Bereiche der Bildkarte können angelegt und bearbeitet werden."
+    },
+    "fields": {
+      "type": "Art des grafischen Elements",
+      "url": "Interne oder sichere Grafikreferenz",
+      "mimeType": "Medientyp",
+      "rend": "Position in der originalen Editionsvorlage",
+      "subtype": "Größe",
+      "alignment": "Ausrichtung im edierten Brief",
+      "head": "Titel",
+      "headVisible": "Titel anzeigen",
+      "description": "Beschreibung",
+      "descriptionVisible": "Beschreibung anzeigen",
+      "mapWidth": "Breite der Bildfläche",
+      "mapHeight": "Höhe der Bildfläche",
+      "zoneId": "XML-ID des Bereichs",
+      "shape": "Form",
+      "zoneLabel": "Bezeichnung",
+      "zoneTarget": "Internes Ziel (optional)",
+      "points": "Polygonpunkte"
+    },
+    "types": {
+      "notated_Music": "Musikalische Noten",
+      "drawing": "Zeichnung",
+      "table": "Tabelle",
+      "formula": "Formel"
+    },
+    "rend": {
+      "inline_big_size": "Innerhalb der Textzeile",
+      "below": "Unterhalb der Textzeile",
+      "above": "Oberhalb der Textzeile",
+      "bottom": "Im Fußbereich der Seite",
+      "top": "Im Kopfbereich der Seite",
+      "margin": "Im Randbereich",
+      "overleaf": "Auf der anderen Blattseite",
+      "inspace": "In einem vordefinierten Bereich",
+      "opposite": "Auf der gegenüberliegenden Seite"
+    },
+    "subtypes": {
+      "eighth_page": "Bis zu einem Achtel der Briefbreite",
+      "quarter_page": "Bis zu einem Viertel der Briefbreite",
+      "half_page": "Bis zur halben Briefbreite",
+      "three-quarter_page": "Bis zu drei Vierteln der Briefbreite",
+      "full_page": "Ganze Briefbreite"
+    },
+    "alignments": {
+      "center": "Mittig",
+      "left": "Links",
+      "right": "Rechts"
+    },
+    "mimeTypes": {
+      "auto": "Automatisch"
+    },
+    "shapes": {
+      "rectangle": "Rechteck",
+      "polygon": "Polygon"
+    },
+    "urlHint": "SVG wird nur referenziert und über die geschützte Bildroute geladen; ein SVG-Upload findet nicht statt.",
+    "svgSafety": "SVG-Inhalte werden niemals als aktives Markup übernommen, sondern ausschließlich als Bildquelle über die geschützte Route dargestellt.",
+    "area": "Bildbereich {{number}}",
+    "addArea": "Bildbereich hinzufügen",
+    "removeArea": "Bildbereich entfernen",
+    "deleteMap": "Bildkarte löschen",
+    "submit": "Änderung übernehmen",
+    "success": "Das grafische Element wurde aktualisiert.",
+    "mapDeleted": "Die Bildkarte wurde gelöscht.",
+    "toggleAreas": "Bildbereiche anzeigen",
+    "hideAreas": "Bildbereiche ausblenden",
+    "errors": {
+      "context": "Der Bearbeitungskontext ist nicht mehr verfügbar.",
+      "figureContext": "Für diese Aktion muss eine Figure ausgewählt sein."
     }
   },
   "paragraphStructure": {

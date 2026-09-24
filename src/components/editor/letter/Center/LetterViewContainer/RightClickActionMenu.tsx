@@ -22,6 +22,7 @@ import { findFigureAnchor } from '@src/utils/editor/figureAnchor';
 import type { ParagraphStructureOperation } from '@src/utils/editor/paragraphStructure';
 import type { ListStructureOperation } from '@src/utils/editor/listStructure';
 import type { TableStructureOperation } from '@src/utils/editor/tableStructure';
+import type { GraphicStructureOperation } from '@src/components/editor/letter/Dialog/Components/GraphicStructureDialog';
 
 const SECTION_SELECTOR =
   'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
@@ -242,6 +243,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const tableAnchor = tableCaretAnchor ?? tableElementAnchor;
       const rowAnchor = targetElement?.closest<HTMLElement>('[data-editor-tei-element="row"][data-editor-xml-path]');
       const cellAnchor = targetElement?.closest<HTMLElement>('[data-editor-tei-element="cell"][data-editor-xml-path]');
+      const renderedFigureAnchor = targetElement?.closest<HTMLElement>('figure[data-editor-xml-path]');
       const structureActions: NonNullable<MenuItemType['subMenu']> = [];
       const listActions: NonNullable<MenuItemType['subMenu']> = [];
       const tableActions: NonNullable<MenuItemType['subMenu']> = [];
@@ -249,6 +251,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const tableRowActions: NonNullable<MenuItemType['subMenu']> = [];
       const tableColumnActions: NonNullable<MenuItemType['subMenu']> = [];
       const wholeTableActions: NonNullable<MenuItemType['subMenu']> = [];
+      const graphicActions: NonNullable<MenuItemType['subMenu']> = [];
 
       const openStructureDialog = (operation: ParagraphStructureOperation, anchor: HTMLElement) => {
         const sourcePath = anchor.dataset.editorXmlPath;
@@ -283,6 +286,19 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           setEditorDialogAndReferenceThunk({
             dialogType: EditorConstants.dialogTypes.TABLE_STRUCTURE,
             elementType,
+            elementXmlId: sourcePath,
+            elementKey: operation,
+          }),
+        );
+      };
+
+      const openGraphicDialog = (operation: GraphicStructureOperation, anchor: HTMLElement) => {
+        const sourcePath = anchor.dataset.editorXmlPath;
+        if (sourcePath === undefined) return;
+        dispatch(
+          setEditorDialogAndReferenceThunk({
+            dialogType: EditorConstants.dialogTypes.GRAPHIC_STRUCTURE,
+            elementType: anchor.localName,
             elementXmlId: sourcePath,
             elementKey: operation,
           }),
@@ -530,6 +546,34 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           label: t('editor:dialog.tableStructure.contextAction'),
           hasSubMenu: true,
           subMenu: tableActions,
+        });
+        isClickable = true;
+      }
+
+      if (paragraphAnchor?.closest('body')) {
+        graphicActions.push(
+          {
+            label: t('editor:dialog.graphicStructure.actions.block'),
+            action: () => openGraphicDialog('graphic-block', paragraphAnchor),
+          },
+          {
+            label: t('editor:dialog.graphicStructure.actions.inline'),
+            action: () => openGraphicDialog('graphic-inline-copy', paragraphAnchor),
+          },
+        );
+      }
+      if (renderedFigureAnchor?.closest('body')) {
+        graphicActions.push({
+          label: t('editor:dialog.graphicStructure.actions.imageMap'),
+          action: () => openGraphicDialog('image-map-edit', renderedFigureAnchor),
+        });
+      }
+      if (graphicActions.length > 0) {
+        if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
+        menuItemsToAdd.push({
+          label: t('editor:dialog.graphicStructure.contextAction'),
+          hasSubMenu: true,
+          subMenu: graphicActions,
         });
         isClickable = true;
       }

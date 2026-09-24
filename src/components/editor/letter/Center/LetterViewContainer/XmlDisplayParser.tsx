@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import FigureImage from './FigureImage';
+import { readFigureImageMap } from '@src/utils/editor/graphicStructure';
 
 type XmlDisplayParserProps = {
   xmlContentRef: React.RefObject<HTMLDivElement> | null;
@@ -84,9 +85,11 @@ const FIGURE_REND_CLASSES: Record<string, string> = {
   margin: 'tei-figure-rend-block',
   overleaf: 'tei-figure-rend-block',
   inspace: 'tei-figure-rend-block',
+  opposite: 'tei-figure-rend-block',
 };
 const FIGURE_SUBTYPE_CLASSES: Record<string, string> = {
   inline: 'tei-figure-subtype-inline',
+  inline_graphic: 'tei-figure-subtype-inline',
   eighth_page: 'tei-figure-subtype-eighth-page',
   quarter_page: 'tei-figure-subtype-quarter-page',
   half_page: 'tei-figure-subtype-half-page',
@@ -142,6 +145,8 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         return null;
       }
 
+      if (tagName === 'facsimile') return null;
+
       if (tagName === 'graphic') {
         const figure = element.parentElement;
         if (figure?.tagName.toLowerCase() !== 'figure') {
@@ -157,6 +162,7 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
             letterId={props.letterId ?? null}
             figureXmlId={figureXmlId}
             description={figDesc?.textContent ?? null}
+            imageMap={readFigureImageMap(figure)}
           />
         );
       }
@@ -171,6 +177,7 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
             letterId={props.letterId ?? null}
             figureXmlId={null}
             description={figDesc?.textContent ?? null}
+            imageMap={readFigureImageMap(element)}
           />,
         );
       }
