@@ -32,6 +32,8 @@ const ContextMenuHarness = () => {
     const row = document.createElement('tr');
     const cell = document.createElement('td');
     const figure = document.createElement('figure');
+    const manuscriptCaret = document.createElement('button');
+    const manuscriptAnnotation = document.createElement('p');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -53,13 +55,19 @@ const ContextMenuHarness = () => {
     figure.dataset.editorXmlPath = '0.0.0.3';
     figure.setAttribute('xml:id', 'figure_1');
     figure.textContent = 'Figure';
+    manuscriptCaret.dataset.editorManuscriptAnnotationReference = 'script_annotation_1';
+    manuscriptCaret.textContent = '▶';
+    manuscriptAnnotation.className = 'tei-manuscript-annotation';
+    manuscriptAnnotation.dataset.editorXmlPath = '1.0.0.0.0.0.0';
+    manuscriptAnnotation.setAttribute('xml:id', 'script_annotation_1');
+    manuscriptAnnotation.textContent = 'Paper and ink';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
     body.appendChild(div);
     text.appendChild(body);
     tei.appendChild(text);
-    xmlContentRef.current.appendChild(tei);
+    xmlContentRef.current.append(tei, manuscriptCaret, manuscriptAnnotation);
   }, []);
 
   return (
@@ -109,6 +117,64 @@ describe('RightClickActionMenu figure upload action', () => {
       elementXmlId: '0.0.0.0',
       elementKey: 'caret:0:2',
     });
+  });
+
+  it.each([
+    [/Anmerkung zur Handschrift bearbeiten|Edit manuscript annotation/, 'edit'],
+    [/Anmerkung zur Handschrift löschen|Delete manuscript annotation/, 'delete'],
+  ] as const)('opens the manuscript annotation action %s from its caret', async (label, mode) => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('[data-editor-manuscript-annotation-reference]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    const selectedAction = await screen.findByRole('menuitem', { name: label });
+    expect(screen.getAllByRole('menuitem')).toHaveLength(2);
+    fireEvent.click(selectedAction);
+
+    expect(store.getState().editorLetter.dialogType).toBe('MANUSCRIPT_ANNOTATION');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: 'script_annotation_1',
+      elementKey: mode,
+    });
+  });
+
+  it('shows only manuscript actions when right-clicking the annotation text', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('p.tei-manuscript-annotation')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+
+    const items = await screen.findAllByRole('menuitem');
+    expect(items).toHaveLength(2);
+    expect(items[0]).toHaveTextContent(/Anmerkung zur Handschrift bearbeiten|Edit manuscript annotation/);
+    expect(items[1]).toHaveTextContent(/Anmerkung zur Handschrift löschen|Delete manuscript annotation/);
   });
 
   it('opens foreign-hand annotation editing from its separate numbered anchor', async () => {

@@ -214,6 +214,47 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
 
       setDisplayMenuItems([]);
       const targetNode = event.target as Node;
+      const targetElement = targetNode.nodeType === Node.ELEMENT_NODE ? (targetNode as HTMLElement) : targetNode.parentElement;
+      const manuscriptAnnotationMarker = targetElement?.closest<HTMLElement>('[data-editor-manuscript-annotation-reference]');
+      const manuscriptAnnotationContent = targetElement?.closest<HTMLElement>('p.tei-manuscript-annotation[data-editor-xml-path]');
+      const manuscriptSourcePath = manuscriptAnnotationContent?.dataset.editorXmlPath;
+      const manuscriptAnnotationReference =
+        manuscriptAnnotationMarker?.dataset.editorManuscriptAnnotationReference ||
+        manuscriptAnnotationContent?.getAttribute('xml:id') ||
+        (manuscriptSourcePath ? `path:${manuscriptSourcePath}` : null);
+      if (manuscriptAnnotationReference) {
+        const openManuscriptAnnotationDialog = (elementKey: 'edit' | 'delete') => {
+          dispatch(
+            setEditorDialogAndReferenceThunk({
+              dialogType: EditorConstants.dialogTypes.MANUSCRIPT_ANNOTATION,
+              elementType: 'p',
+              elementXmlId: manuscriptAnnotationReference,
+              elementKey,
+            }),
+          );
+        };
+        setDisplayMenuItems([
+          {
+            label: t('editor:dialog.manuscriptAnnotation.editAction'),
+            action: () => openManuscriptAnnotationDialog('edit'),
+          },
+          {
+            label: t('editor:dialog.manuscriptAnnotation.deleteAction'),
+            action: () => openManuscriptAnnotationDialog('delete'),
+          },
+        ]);
+        props.setAnchorPosition({ top: event.clientY, left: event.clientX });
+        dispatch(
+          setEditorNodeClickedAndContentLeftRightThunk({
+            nodeClicked: true,
+            textIsMarked: false,
+            contentLeft: null,
+            contentRight: null,
+          }),
+        );
+        return;
+      }
+
       const menuItemsToAdd: MenuItemType[] = [];
       let isClickable = false;
 
@@ -234,7 +275,6 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         );
       }
 
-      const targetElement = targetNode.nodeType === Node.ELEMENT_NODE ? (targetNode as HTMLElement) : targetNode.parentElement;
       const paragraphAnchor = targetElement?.closest<HTMLElement>('p[data-editor-xml-path]');
       const sectionAnchor = targetElement?.closest<HTMLElement>(SECTION_SELECTOR);
       const listAnchor = targetElement?.closest<HTMLElement>('list[data-editor-xml-path]');

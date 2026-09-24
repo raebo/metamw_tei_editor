@@ -15,6 +15,13 @@ const Harness = () => {
         <button type="button" data-editor-foreign-annotation-id="note_1" aria-label="Anmerkung 1">
           1
         </button>
+        <button
+          type="button"
+          data-editor-manuscript-annotation-reference="script_annotation_1"
+          aria-label="Handschriftenanmerkung bearbeiten"
+        >
+          ▶
+        </button>
       </div>
       <LeftClickAnnotationAction xmlContentRef={xmlContentRef} setLetterState={jest.fn<void, [LetterState]>()} />
     </>
@@ -36,6 +43,26 @@ describe('LeftClickAnnotationAction', () => {
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'note',
       elementXmlId: 'note_1',
+      elementKey: 'edit',
+    });
+  });
+
+  it('opens a manuscript annotation from its caret', () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    render(
+      <Provider store={store}>
+        <Harness />
+      </Provider>,
+    );
+
+    const caret = screen.getByRole('button', { name: 'Handschriftenanmerkung bearbeiten' });
+    expect(fireEvent.mouseUp(caret)).toBe(true);
+    fireEvent.click(caret);
+
+    expect(store.getState().editorLetter.dialogType).toBe('MANUSCRIPT_ANNOTATION');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: 'script_annotation_1',
       elementKey: 'edit',
     });
   });

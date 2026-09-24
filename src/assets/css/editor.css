@@ -78,6 +78,26 @@ note.tei-foreign-hand-annotation:focus-visible {
   outline: 2px solid var(--secondary-color);
   outline-offset: 2px;
 }
+
+.tei-manuscript-annotation-caret {
+  display: inline-block;
+  padding: 0;
+  border: 0;
+  margin-right: 0.35em;
+  background: transparent;
+  color: var(--secondary-color);
+  cursor: pointer;
+  font-size: 70%;
+}
+
+.tei-manuscript-annotation-caret:focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
+.tei-manuscript-annotation {
+  cursor: pointer;
+}
 .tei-figure-image {
   display: block;
   max-width: 100%;

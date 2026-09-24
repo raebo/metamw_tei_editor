@@ -88,3 +88,18 @@ describe('foreign-hand annotation shortcut definition', () => {
     });
   });
 });
+
+describe('manuscript annotation shortcut definition', () => {
+  it('opens Ctrl+Shift+D in creation mode without requiring a text selection', () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+
+    allTimesAvailableKeyHandleDefinitions['ctrl+shift+d'].openDialogAction?.(store.dispatch, store.getState as unknown as () => RootState);
+
+    expect(store.getState().editorLetter.dialogType).toBe(EditorConstants.dialogTypes.MANUSCRIPT_ANNOTATION);
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'scriptDesc',
+      elementXmlId: '',
+      elementKey: 'create',
+    });
+  });
+});

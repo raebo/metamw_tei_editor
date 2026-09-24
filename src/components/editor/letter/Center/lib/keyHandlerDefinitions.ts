@@ -59,6 +59,17 @@ const openForeignHandAnnotationDialog = (dispatch: AppDispatch, getState: () => 
   }
 };
 
+const openManuscriptAnnotationDialog = (dispatch: AppDispatch): void => {
+  dispatch(
+    setEditorDialogAndReferenceThunk({
+      dialogType: EditorConstants.dialogTypes.MANUSCRIPT_ANNOTATION,
+      elementType: 'scriptDesc',
+      elementXmlId: '',
+      elementKey: 'create',
+    }),
+  );
+};
+
 export const filterForKeyHandleDefinitions = (keyHandleDefinitions: Record<string, EditorKeyHandleItem>, keyCombination: string) => {
   const filteredKeyHandle = Object.values(keyHandleDefinitions).filter((item) => item.key === keyCombination)[0];
 
@@ -171,6 +182,13 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     openDialogAction: (dispatch: AppDispatch) => {
       return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_TEI_HEADER);
     },
+  },
+  'ctrl+shift+d': {
+    key: 'ctrl+shift+d',
+    description: 'Anmerkung zur Handschrift hinzufügen',
+    component: null,
+    action: null,
+    openDialogAction: openManuscriptAnnotationDialog,
   },
   'alt+d': {
     key: 'alt+d',

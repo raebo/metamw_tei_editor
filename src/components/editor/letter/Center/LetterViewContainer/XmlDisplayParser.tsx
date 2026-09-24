@@ -2,6 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import FigureImage from './FigureImage';
 import { readFigureImageMap } from '@src/utils/editor/graphicStructure';
+import { manuscriptAnnotationReference } from '@src/utils/editor/manuscriptAnnotation';
 
 type XmlDisplayParserProps = {
   xmlContentRef: React.RefObject<HTMLDivElement> | null;
@@ -249,6 +250,7 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
       }
 
       const isForeignHandAnnotation = tagName === 'note' && element.getAttribute('type') === 'note';
+      const isManuscriptAnnotation = tagName === 'p' && element.parentElement?.localName.toLowerCase() === 'scriptdesc';
       const annotationNumber = isForeignHandAnnotation ? element.getAttribute('n') : null;
       const annotationLabel = isForeignHandAnnotation
         ? t('editor:dialog.foreignHandAnnotation.anchorLabel', {
@@ -261,6 +263,10 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         attributes.tabIndex = 0;
         attributes.role = 'note';
         attributes['aria-label'] = annotationLabel;
+        attributes.contentEditable = false;
+      }
+      if (isManuscriptAnnotation) {
+        appendClassName(attributes, 'tei-manuscript-annotation');
         attributes.contentEditable = false;
       }
 
@@ -320,6 +326,26 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
               contentEditable={false}
             >
               {annotationNumber ?? '?'}
+            </button>
+            {renderedElement}
+          </React.Fragment>
+        );
+      }
+      if (isManuscriptAnnotation) {
+        const reference = manuscriptAnnotationReference(element, sourcePath.join('.'));
+        const label = t('editor:dialog.manuscriptAnnotation.editAction');
+        return (
+          <React.Fragment key={`manuscript-annotation-${sourcePath.join('.')}`}>
+            <button
+              type="button"
+              className="tei-manuscript-annotation-caret"
+              data-editor-manuscript-annotation-reference={reference}
+              title={label}
+              aria-label={label}
+              aria-haspopup="dialog"
+              contentEditable={false}
+            >
+              ▶
             </button>
             {renderedElement}
           </React.Fragment>

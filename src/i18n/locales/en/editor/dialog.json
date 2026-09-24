@@ -20,6 +20,7 @@
     "foreignHandAnnotation": "Edit foreign-hand annotation",
     "graphicStructure": "Edit graphic and image map",
     "listStructure": "Edit list structure",
+    "manuscriptAnnotation": "Edit manuscript annotation",
     "paragraphStructure": "Edit paragraph and section structure",
     "tableStructure": "Edit table structure",
     "closeTabWithContent": "Close Tab with Content?",
@@ -139,6 +140,27 @@
       "deleted": "The annotation was deleted."
     },
     "legacyValue": "Unknown existing value: {{value}}"
+  },
+  "manuscriptAnnotation": {
+    "contextAction": "Add manuscript annotation",
+    "editAction": "Edit manuscript annotation",
+    "deleteAction": "Delete manuscript annotation",
+    "contract": "The annotation is stored as a separate paragraph under physDesc/scriptDesc. Existing descriptions remain unchanged.",
+    "fields": {
+      "content": "Annotation text"
+    },
+    "buttons": {
+      "add": "Add annotation",
+      "update": "Update",
+      "delete": "Delete",
+      "cancelDelete": "Cancel",
+      "confirmDelete": "Delete permanently"
+    },
+    "success": {
+      "added": "The manuscript annotation was added.",
+      "updated": "The manuscript annotation was updated.",
+      "deleted": "The manuscript annotation was deleted."
+    }
   },
   "figureUpload": {
     "contextAction": "Insert image",

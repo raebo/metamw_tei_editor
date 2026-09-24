@@ -227,7 +227,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-006C – Handschriftenanmerkungen verwalten
 
-- Status: Offen
+- Status: Umgesetzt
 - Priorität: P1
 - Oxygen-Aktionen: `Anmerkungen zur Handschrift hinzufügen`
 - Ausgangslage: Oxygen verwaltet allgemeine Handschriftenanmerkungen im TEI-Header unter
@@ -239,6 +239,16 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
   Nutzereingaben werden ausschließlich über sichere DOM-Operationen gespeichert.
 - Tests: Fehlende, teilweise und vollständig vorhandene Headerstruktur, mehrere Anmerkungen,
   Bearbeitung, Löschung, leere Inhalte und XML-/XSS-Sicherheitsfälle.
+- Umsetzung: `Ctrl+Shift+D` und der Eintrag unter „Brief Header Bearbeitung“ öffnen den Dialog zum
+  Anlegen. Die Struktur `teiHeader/fileDesc/sourceDesc/msDesc/physDesc/scriptDesc` wird nur dort
+  ergänzt, wo Elemente fehlen; vorhandene Beschreibungen und Geschwisterelemente bleiben erhalten.
+  Jede Anmerkung wird als eigener Absatz mit stabiler `xml:id` gespeichert. Vorhandene Einträge
+  erhalten in der WYSIWYG-Ansicht einen Caret, über den sie per Linksklick bearbeitet oder nach
+  Bestätigung einzeln gelöscht werden können. Zusätzlich bietet das Rechtsklick-Kontextmenü auf
+  Caret und Anmerkungstext getrennte Aktionen zum Bearbeiten und Löschen; die Löschaktion öffnet
+  unmittelbar die Sicherheitsabfrage. Bestandsabsätze ohne `xml:id` werden über ihren Quellpfad
+  geöffnet und erhalten beim ersten Speichern eine stabile ID. Inhalte werden ausschließlich über
+  `textContent` geschrieben.
 
 ### OXY-007 – Fußnoten und Fußnotenreferenzen
 

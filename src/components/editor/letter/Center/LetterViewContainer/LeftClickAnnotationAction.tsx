@@ -190,20 +190,23 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
     );
   }, [dispatch]);
 
-  const handleForeignAnnotationClick = useCallback(
+  const handleEditorAnnotationClick = useCallback(
     (event: MouseEvent) => {
       const target = event.target instanceof Element ? event.target : null;
-      const marker = target?.closest<HTMLElement>('[data-editor-foreign-annotation-id]');
-      const xmlId = marker?.dataset.editorForeignAnnotationId;
-      if (!marker || !xmlId) return;
+      const foreignMarker = target?.closest<HTMLElement>('[data-editor-foreign-annotation-id]');
+      const manuscriptMarker = target?.closest<HTMLElement>('[data-editor-manuscript-annotation-reference]');
+      const reference = foreignMarker?.dataset.editorForeignAnnotationId ?? manuscriptMarker?.dataset.editorManuscriptAnnotationReference;
+      if (!reference) return;
 
       event.preventDefault();
       event.stopPropagation();
       dispatch(
         setEditorDialogAndReferenceThunk({
-          dialogType: EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION,
-          elementType: 'note',
-          elementXmlId: xmlId,
+          dialogType: foreignMarker
+            ? EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION
+            : EditorConstants.dialogTypes.MANUSCRIPT_ANNOTATION,
+          elementType: foreignMarker ? 'note' : 'p',
+          elementXmlId: reference,
           elementKey: 'edit',
         }),
       );
@@ -213,8 +216,6 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
 
   const handleNodeLeftClick = useCallback(
     async (event: MouseEvent) => {
-      event.preventDefault();
-
       const targetNode = event.target as Node;
 
       const xmlId = (targetNode as Element).getAttribute('xml:id');
@@ -226,6 +227,7 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
 
       if (!validNodeList.includes((targetNode as Element).nodeName.toLowerCase())) return;
 
+      event.preventDefault();
       selectedNodeXmlIdRef.current = xmlId;
 
       try {
@@ -252,13 +254,13 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
     if (!el) return;
 
     el.addEventListener('mouseup', handleNodeLeftClick);
-    el.addEventListener('click', handleForeignAnnotationClick);
+    el.addEventListener('click', handleEditorAnnotationClick);
 
     return () => {
       el.removeEventListener('mouseup', handleNodeLeftClick);
-      el.removeEventListener('click', handleForeignAnnotationClick);
+      el.removeEventListener('click', handleEditorAnnotationClick);
     };
-  }, [handleForeignAnnotationClick, handleNodeLeftClick, props.xmlContentRef, xmlContentRef]);
+  }, [handleEditorAnnotationClick, handleNodeLeftClick, props.xmlContentRef, xmlContentRef]);
 
   return <></>;
 };

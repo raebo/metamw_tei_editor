@@ -43,6 +43,7 @@ import ParagraphStructureDialog from './Components/ParagraphStructureDialog';
 import TableStructureDialog from './Components/TableStructureDialog';
 import GraphicStructureDialog from './Components/GraphicStructureDialog';
 import ForeignHandAnnotationDialog from './Components/ForeignHandAnnotationDialog';
+import ManuscriptAnnotationDialog from './Components/ManuscriptAnnotationDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -79,6 +80,7 @@ const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION]: t('editor:dialog.titles.foreignHandAnnotation'),
   [EditorConstants.dialogTypes.GRAPHIC_STRUCTURE]: t('editor:dialog.titles.graphicStructure'),
   [EditorConstants.dialogTypes.LIST_STRUCTURE]: t('editor:dialog.titles.listStructure'),
+  [EditorConstants.dialogTypes.MANUSCRIPT_ANNOTATION]: t('editor:dialog.titles.manuscriptAnnotation'),
   [EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE]: t('editor:dialog.titles.paragraphStructure'),
   [EditorConstants.dialogTypes.TABLE_STRUCTURE]: t('editor:dialog.titles.tableStructure'),
   [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: t('editor:dialog.titles.closeTabWithContent'),
@@ -121,6 +123,7 @@ const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) 
   [EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION]: (props) => <ForeignHandAnnotationDialog {...props} />,
   [EditorConstants.dialogTypes.GRAPHIC_STRUCTURE]: (props) => <GraphicStructureDialog {...props} />,
   [EditorConstants.dialogTypes.LIST_STRUCTURE]: (props) => <ListStructureDialog {...props} />,
+  [EditorConstants.dialogTypes.MANUSCRIPT_ANNOTATION]: (props) => <ManuscriptAnnotationDialog {...props} />,
   [EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE]: (props) => <ParagraphStructureDialog {...props} />,
   [EditorConstants.dialogTypes.TABLE_STRUCTURE]: (props) => <TableStructureDialog {...props} />,
   [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: (props) => <CloseTabWithContent {...props} />,

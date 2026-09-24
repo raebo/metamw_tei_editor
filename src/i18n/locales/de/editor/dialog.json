@@ -20,6 +20,7 @@
     "foreignHandAnnotation": "Anmerkung fremder Hand bearbeiten",
     "graphicStructure": "Grafik und Bildkarte bearbeiten",
     "listStructure": "Listenstruktur bearbeiten",
+    "manuscriptAnnotation": "Anmerkung zur Handschrift bearbeiten",
     "paragraphStructure": "Absatz- und Abschnittsstruktur bearbeiten",
     "tableStructure": "Tabellenstruktur bearbeiten",
     "closeTabWithContent": "Tab mit Inhalt Schließen?",
@@ -139,6 +140,27 @@
       "deleted": "Die Anmerkung wurde gelöscht."
     },
     "legacyValue": "Unbekannter Bestandswert: {{value}}"
+  },
+  "manuscriptAnnotation": {
+    "contextAction": "Anmerkung zur Handschrift hinzufügen",
+    "editAction": "Anmerkung zur Handschrift bearbeiten",
+    "deleteAction": "Anmerkung zur Handschrift löschen",
+    "contract": "Die Anmerkung wird als eigener Absatz unter physDesc/scriptDesc gespeichert. Bestehende Beschreibungen bleiben unverändert.",
+    "fields": {
+      "content": "Anmerkungstext"
+    },
+    "buttons": {
+      "add": "Anmerkung hinzufügen",
+      "update": "Aktualisieren",
+      "delete": "Löschen",
+      "cancelDelete": "Abbrechen",
+      "confirmDelete": "Endgültig löschen"
+    },
+    "success": {
+      "added": "Die Handschriftenanmerkung wurde hinzugefügt.",
+      "updated": "Die Handschriftenanmerkung wurde aktualisiert.",
+      "deleted": "Die Handschriftenanmerkung wurde gelöscht."
+    }
   },
   "figureUpload": {
     "contextAction": "Bild einfügen",

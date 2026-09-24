@@ -74,6 +74,9 @@ const EditorKeyHandle = () => {
 
   useEffect(() => {
     const globalKeyListener = async (event: KeyboardEvent) => {
+      if (stateLetterContent.textIsMarked && findKeyHandleDefinition(normalizeKeyEvent(event), contentMarkedKeyHandleDefinitions)) {
+        return;
+      }
       await handleFunction(event, allTimesAvailableKeyHandleDefinitions);
     };
     document.addEventListener('keydown', globalKeyListener, false);

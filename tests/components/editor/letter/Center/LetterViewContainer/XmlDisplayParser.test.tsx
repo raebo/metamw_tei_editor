@@ -86,6 +86,21 @@ describe('XMLDisplayParser', () => {
     expect(note).toHaveAttribute('data-editor-xml-path', '0.0.0.0.1');
   });
 
+  it('renders a clickable caret for each manuscript annotation', () => {
+    const { container } = renderXml(
+      '<TEI><teiHeader><fileDesc><sourceDesc><msDesc><physDesc><scriptDesc><p xml:id="script_annotation_1">Paper and ink</p><p>Legacy</p></scriptDesc></physDesc></msDesc></sourceDesc></fileDesc></teiHeader></TEI>',
+    );
+
+    const carets = container.querySelectorAll('[data-editor-manuscript-annotation-reference]');
+    const annotations = container.querySelectorAll('scriptdesc > p');
+    expect(carets).toHaveLength(2);
+    expect(carets[0]).toHaveAttribute('data-editor-manuscript-annotation-reference', 'script_annotation_1');
+    expect(carets[1].getAttribute('data-editor-manuscript-annotation-reference')).toMatch(/^path:/);
+    expect(carets[0]).toHaveAttribute('aria-label', 'editor:dialog.manuscriptAnnotation.editAction');
+    expect(annotations[0]).toHaveClass('tei-manuscript-annotation');
+    expect(annotations[0]).toHaveTextContent('Paper and ink');
+  });
+
   it('renders a focusable caret and selectable HTML cells for every TEI table', () => {
     const { container } = renderXml(
       '<TEI><text><body><div><table rows="1" cols="1"><row><cell>A</cell></row></table></div></body></text></TEI>',
