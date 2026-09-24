@@ -3,14 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import { EditorUtils } from '@src/utils/editor';
 import Button from '@mui/material/Button';
-import {
-  Divider,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextareaAutosize,
-} from '@mui/material';
+import { Divider, FormControl, InputLabel, MenuItem, Select, TextField, TextareaAutosize } from '@mui/material';
 import { EditorConstants } from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
 import DialogActions from '@mui/material/DialogActions';
@@ -18,14 +11,15 @@ import DialogContent from '@mui/material/DialogContent';
 import { DefaultDialogProps } from '../EditorFormDialog';
 import { MiscUtils } from '@src/utils/misc';
 import SanitizedHtml from '@src/components/support/SanitizedHtml';
+import { useTranslation } from 'react-i18next';
 
 const EditNoteDialog = (props: DefaultDialogProps) => {
-  const stateLetterReference = useSelector(
-    (state: RootState) => state.editorLetter.letterReference,
-  );
+  const { t } = useTranslation();
+  const stateLetterReference = useSelector((state: RootState) => state.editorLetter.letterReference);
   const [noteContent, setNoteContent] = useState('');
   const [noteType, setNoteType] = useState('');
   const [noteLanguage, setNoteLanguage] = useState('');
+  const [noteResponsibility, setNoteResponsibility] = useState('');
   const noteTypeItems = EditorConstants.noteTypeItems;
   const noteLanguages = EditorConstants.noteTypeLanguages;
   const [noteParentContent, setNoteParentContent] = useState('');
@@ -43,61 +37,40 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
 
         setNoteContent(note?.textContent?.trim() || '');
         setNoteXmlId(xmlId);
-
-        const currentNoteTypes = noteTypeItems.filter(
-          (item) => item.value === note.getAttribute('type'),
-        );
-        if (currentNoteTypes.any()) {
-          setNoteType(currentNoteTypes[0].value);
-        }
-
-        const currentNoteLangs = noteLanguages.filter(
-          (item) => item.value === note.getAttribute('xml:lang'),
-        );
-        if (currentNoteLangs.any()) {
-          setNoteLanguage(currentNoteLangs[0].value);
-        }
+        setNoteType(note.getAttribute('type') ?? '');
+        setNoteLanguage(note.getAttribute('xml:lang') ?? '');
+        setNoteResponsibility(note.getAttribute('resp') ?? '');
       }
     };
 
     if (stateLetterReference.elementXmlId) {
       initNoteContent(stateLetterReference.elementXmlId);
     }
+  }, [stateLetterReference.elementXmlId, xmlDoc]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stateLetterReference]);
+  const selectedTypeIsUnknown = noteType !== '' && !noteTypeItems.some((item) => item.value === noteType);
+  const selectedLanguageIsUnknown = noteLanguage !== '' && !noteLanguages.some((item) => item.value === noteLanguage);
 
   const handleDeleteNote = () => {
     try {
       EditorUtils.markupGeneration.deleteNoteMarkup(xmlDoc, noteXmlId);
 
-      props.onSave(xmlDoc, EditorConstants.changeTypes.note.REMOVED, 'Note deleted', null);
+      props.onSave(xmlDoc, EditorConstants.changeTypes.note.REMOVED, t('editor:dialog.comment.success.deleted'), null);
     } catch (error) {
-      enqueueSnackbar('Error durign deletion of note: ' + MiscUtils.misc.getErrorMessage(error), {
-        variant: 'error',
-      });
+      enqueueSnackbar(t('editor:dialog.comment.errors.delete', { reason: MiscUtils.misc.getErrorMessage(error) }), { variant: 'error' });
       props.onClose();
     }
   };
 
   const handleUpdateNote = () => {
     try {
-      EditorUtils.markupGeneration.updateNoteMarkup(
-        xmlDoc,
-        noteXmlId,
-        noteType,
-        noteLanguage,
-        noteContent,
-      );
+      EditorUtils.markupGeneration.updateNoteMarkup(xmlDoc, noteXmlId, noteType, noteLanguage, noteContent);
 
-      props.onSave(
-        xmlDoc,
-        EditorConstants.changeTypes.note.CONTENT_CHANGED,
-        'Note content changed',
-        noteXmlId,
-      );
-    } catch {
-      enqueueSnackbar('No xml content found', { variant: 'error' });
+      props.onSave(xmlDoc, EditorConstants.changeTypes.note.CONTENT_CHANGED, t('editor:dialog.comment.success.updated'), noteXmlId);
+    } catch (error) {
+      enqueueSnackbar(t('editor:dialog.comment.errors.save', { reason: MiscUtils.misc.getErrorMessage(error) }), {
+        variant: 'error',
+      });
       props.onClose();
     }
   };
@@ -110,47 +83,52 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
         </div>
         <div className="form-item form-item--key">
           <FormControl variant="filled" sx={{ m: 1, minWidth: 120, width: '100%' }}>
-            <InputLabel id="editor-dialog-edit-note-type">Kommentar (Typ)</InputLabel>
+            <InputLabel id="editor-dialog-edit-note-type">{t('editor:dialog.comment.fields.type')}</InputLabel>
             <Select
               value={noteType}
               disabled={deleteButtonsVisible}
-              labelId="editor-dialog-edit-note-label"
+              labelId="editor-dialog-edit-note-type"
               id="editor-dialog-edit-note-select"
               onChange={(event) => setNoteType(event.target.value)}
             >
               {noteTypeItems.map((item) => (
                 <MenuItem key={item.value} value={item.value}>
-                  {item.label}
+                  {t(item.labelKey)}
                 </MenuItem>
               ))}
+              {selectedTypeIsUnknown && <MenuItem value={noteType}>{t('editor:dialog.comment.legacyValue', { value: noteType })}</MenuItem>}
             </Select>
           </FormControl>
         </div>
         <div className="form-item form-item--key">
           <FormControl variant="filled" sx={{ m: 1, minWidth: 120, width: '100%' }}>
-            <InputLabel id="auto-anno-snippet-reference-type">Kommentar (Sprache)</InputLabel>
+            <InputLabel id="editor-dialog-edit-note-language">{t('editor:dialog.comment.fields.language')}</InputLabel>
             <Select
               value={noteLanguage}
               disabled={deleteButtonsVisible}
-              labelId="demo-simple-select-filled-label"
-              id="demo-simple-select-filled"
+              labelId="editor-dialog-edit-note-language"
+              id="editor-dialog-edit-note-language-select"
               onChange={(event) => setNoteLanguage(event.target.value)}
             >
               {noteLanguages.map((item) => (
                 <MenuItem key={item.value} value={item.value}>
-                  {item.label}
+                  {t(item.labelKey)}
                 </MenuItem>
               ))}
+              {selectedLanguageIsUnknown && (
+                <MenuItem value={noteLanguage}>{t('editor:dialog.comment.legacyValue', { value: noteLanguage })}</MenuItem>
+              )}
             </Select>
           </FormControl>
         </div>
+        <TextField fullWidth disabled margin="normal" label={t('editor:dialog.comment.fields.responsibility')} value={noteResponsibility} />
         <div className="form-item form-item--key" style={{ margin: 5 }}>
           <TextareaAutosize
-            aria-label="comment"
+            aria-label={t('editor:dialog.comment.fields.content')}
             minRows={10}
             maxRows={20}
             disabled={deleteButtonsVisible}
-            placeholder="Kommentar"
+            placeholder={t('editor:dialog.comment.fields.content')}
             style={{ width: '100%', padding: 8 }}
             value={noteContent}
             onChange={(e) => setNoteContent(e.target.value)}
@@ -169,7 +147,7 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
             }}
             style={{ marginTop: 8 }}
           >
-            Löschen
+            {t('editor:dialog.comment.buttons.delete')}
           </Button>
         )}
         {!deleteButtonsVisible && (
@@ -181,7 +159,7 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
             style={{ marginTop: 8 }}
             disabled={!noteContent.trim() || noteType === '' || noteLanguage === ''}
           >
-            Aktualisieren
+            {t('editor:dialog.comment.buttons.update')}
           </Button>
         )}
 
@@ -195,7 +173,7 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
             }}
             style={{ marginTop: 8 }}
           >
-            Abbrechen
+            {t('editor:dialog.comment.buttons.cancelDelete')}
           </Button>
         )}
 
@@ -207,7 +185,7 @@ const EditNoteDialog = (props: DefaultDialogProps) => {
             onClick={handleDeleteNote}
             style={{ marginTop: 8 }}
           >
-            Löschen
+            {t('editor:dialog.comment.buttons.confirmDelete')}
           </Button>
         )}
       </DialogActions>

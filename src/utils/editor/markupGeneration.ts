@@ -10,11 +10,7 @@ import {
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { EditorConstants } from '@src/constants/editor';
 
-const generateSettlementNode = (data: {
-  key: string | null;
-  name: string | null;
-  type: string | null;
-}): Element => {
+const generateSettlementNode = (data: { key: string | null; name: string | null; type: string | null }): Element => {
   if (data.key === null || data.name === null || data.type === null) {
     throw new Error('generateSettlementNode missing key name or type is null');
   }
@@ -67,11 +63,7 @@ export const markupGeneration = {
     // Replace the marked span with the enriched replacement node
     spanNode.parentNode?.replaceChild(clonedReplacement, spanNode);
   },
-  addAttachmentMarkup: (
-    xmlDoc: XMLDocument,
-    attachmentType: string,
-    attachmentName: string,
-  ): { contentChanged: boolean } => {
+  addAttachmentMarkup: (xmlDoc: XMLDocument, attachmentType: string, attachmentName: string): { contentChanged: boolean } => {
     const teiHeader = xmlDoc.querySelector('teiHeader');
     if (!teiHeader) return { contentChanged: false };
 
@@ -86,10 +78,7 @@ export const markupGeneration = {
 
     const existingBiblEntries = listBibl.querySelectorAll('bibl');
 
-    if (
-      existingBiblEntries.length === 1 &&
-      existingBiblEntries[0].getAttribute('type') === 'none'
-    ) {
+    if (existingBiblEntries.length === 1 && existingBiblEntries[0].getAttribute('type') === 'none') {
       existingBiblEntries[0].setAttribute('type', attachmentType);
       existingBiblEntries[0].textContent = attachmentName;
     } else {
@@ -212,10 +201,7 @@ export const markupGeneration = {
 
     EditorUtils.markupGeneration.replaceMarkedNode(nodeToUpdate, titleNode);
   },
-  addGbLetterMarkup: (
-    nodeToUpdate: Element,
-    markupLetterData: [{ letterKey: string; letterName: string; authors: SnippetEntity[] }],
-  ) => {
+  addGbLetterMarkup: (nodeToUpdate: Element, markupLetterData: [{ letterKey: string; letterName: string; authors: SnippetEntity[] }]) => {
     const titleNode = document.createElementNS(EditorConstants.TEI_NS, 'title');
     titleNode.setAttribute('xml:id', EditorUtils.markupGeneration.generateXmlId('title'));
 
@@ -239,11 +225,7 @@ export const markupGeneration = {
 
     EditorUtils.markupGeneration.replaceMarkedNode(nodeToUpdate, titleNode);
   },
-  addPersonMarkup: (
-    xmlDoc: Document,
-    peopleMarkupData: MarkupPersonData[],
-    rendType: HiRendType,
-  ): string => {
+  addPersonMarkup: (xmlDoc: Document, peopleMarkupData: MarkupPersonData[], rendType: HiRendType): string => {
     const markedSpan = xmlDoc.querySelectorAll('span.marked');
     if (!markedSpan) throw new Error('No marked span found in the document');
 
@@ -281,16 +263,26 @@ export const markupGeneration = {
     userLogin: string,
     noteContent: string,
     commentType: string,
+    noteLanguage: string,
   ): { xmlId: string } => {
     if (!xmlDoc) {
       throw new Error('No xml document provided');
     }
 
+    const normalizedContent = noteContent.trim();
+    if (!normalizedContent) throw new Error('Comment content is required');
+    if (!userLogin.trim()) throw new Error('Comment responsibility is required');
+    if (!EditorConstants.noteTypeItems.some((item) => item.value === commentType)) {
+      throw new Error('Unsupported comment type');
+    }
+    if (!EditorConstants.noteTypeLanguages.some((item) => item.value === noteLanguage)) {
+      throw new Error('Unsupported comment language');
+    }
+
     const xmlId = EditorUtils.markupGeneration.generateXmlId('note');
     const markedSpan = xmlDoc.querySelector('span.marked');
 
-    if (!markedSpan || !markedSpan.parentNode)
-      throw new Error('no markedSpan found in markupGeneration');
+    if (!markedSpan || !markedSpan.parentNode) throw new Error('no markedSpan found in markupGeneration');
 
     const content = markedSpan.textContent || '';
 
@@ -299,11 +291,11 @@ export const markupGeneration = {
     noteElement.setAttribute('resp', userLogin);
     noteElement.setAttribute('type', commentType);
     noteElement.setAttribute('xml:id', xmlId);
-    noteElement.setAttribute('xml:lang', 'de');
-    noteElement.textContent = `${content} - ${noteContent}`; // Prefix comment with span content
+    noteElement.setAttribute('xml:lang', noteLanguage);
+    noteElement.textContent = normalizedContent;
 
     // Replace <span> with its inner text
-    const textNode = document.createTextNode(content);
+    const textNode = xmlDoc.createTextNode(content);
     markedSpan.parentNode.replaceChild(textNode, markedSpan);
 
     // Insert <note> after the text
@@ -326,12 +318,23 @@ export const markupGeneration = {
       throw new Error(`Note with xml:id ${xmlId} not found`);
     }
 
+    const normalizedContent = noteContent.trim();
+    const currentType = noteElement.getAttribute('type');
+    const currentLanguage = noteElement.getAttribute('xml:lang');
+    if (!normalizedContent) throw new Error('Comment content is required');
+    if (!EditorConstants.noteTypeItems.some((item) => item.value === noteType) && noteType !== currentType) {
+      throw new Error('Unsupported comment type');
+    }
+    if (!EditorConstants.noteTypeLanguages.some((item) => item.value === noteLanguage) && noteLanguage !== currentLanguage) {
+      throw new Error('Unsupported comment language');
+    }
+
     const oldNoteContent = noteElement.textContent;
-    const oldNoteType = noteElement.getAttribute('type');
+    const oldNoteType = currentType;
 
     noteElement.setAttribute('type', noteType);
     noteElement.setAttribute('xml:lang', noteLanguage);
-    noteElement.innerHTML = noteContent;
+    noteElement.textContent = normalizedContent;
 
     return {
       oldNoteType: oldNoteType,
@@ -391,8 +394,7 @@ export const markupGeneration = {
       writer: 1,
     };
     const sortedAuthorWriters = authorWriters.sort(
-      (a, b) =>
-        rolePriority[a.role as 'author' | 'writer'] - rolePriority[b.role as 'author' | 'writer'],
+      (a, b) => rolePriority[a.role as 'author' | 'writer'] - rolePriority[b.role as 'author' | 'writer'],
     );
 
     sortedAuthorWriters.forEach((authorWriter) => {
@@ -407,10 +409,7 @@ export const markupGeneration = {
     const paragraph = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'p');
     paragraph.setAttribute('style', 'paragraph_without_indent');
 
-    const startPI = xmlDoc.createProcessingInstruction(
-      'oxy_custom_start',
-      'type="oxy_content_highlight" color="235,192,230"',
-    );
+    const startPI = xmlDoc.createProcessingInstruction('oxy_custom_start', 'type="oxy_content_highlight" color="235,192,230"');
     const endPI = xmlDoc.createProcessingInstruction('oxy_custom_end', '');
 
     paragraph.appendChild(startPI);

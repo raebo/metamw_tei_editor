@@ -12,6 +12,13 @@ import { SESSION_EXPIRED_EVENT } from '@src/constants/auth';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
+const authStateUser = (user: AuthUser) => ({
+  id: user.id,
+  login: user.email,
+  firstName: user.first_name,
+  lastName: user.last_name,
+});
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true); // track fetch status
@@ -38,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { user } = await AuthService.getMe();
         setUser(user);
-        dispatch(setLoginState({ user }));
+        dispatch(setLoginState({ user: authStateUser(user) }));
       } catch {
         // 401 means not logged in, so clear state
         setUser(null);
@@ -55,18 +62,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const data = await AuthService.login(email, password);
 
       setUser(data.user);
-      dispatch(
-        setLoginState({
-          user: {
-            id: data.user.id,
-            email: data.user.email,
-            firstName: data.user.first_name,
-            lastName: data.user.last_name,
-            language: data.user.language,
-          },
-        }),
-        await i18n.changeLanguage(data.user.language),
-      );
+      await i18n.changeLanguage(data.user.language);
+      dispatch(setLoginState({ user: authStateUser(data.user) }));
 
       if (currentPath && currentPath !== '/login') {
         navigate(currentPath);
@@ -96,6 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await AuthService.refresh(isAuthenticated);
       const data = await AuthService.getMe();
       setUser(data.user);
+      dispatch(setLoginState({ user: authStateUser(data.user) }));
     } catch {
       setUser(null);
     } finally {

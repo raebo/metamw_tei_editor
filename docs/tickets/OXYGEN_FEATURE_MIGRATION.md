@@ -158,18 +158,61 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 - Tests: URL-Erzeugung für Elementnamen, ausgewählter Kontext, unbekannte Elemente und sicheres
   Öffnen externer Links.
 
-### OXY-006 – Kommentararten und Anmerkungen vervollständigen
+### OXY-006A – Kommentararten vervollständigen und absichern
+
+- Status: Umgesetzt und getestet
+- Priorität: P1
+- Oxygen-Aktionen: `Kommentar_Textk_Worterkl_Einzelst`
+- Ausgangslage: Der bestehende Kommentarworkflow unterstützt Themenkommentar, Textkonstitution,
+  Worterklärung und Einzelstellenkommentar. FMB-Gesamtkommentar und Übersetzung fehlen; beim
+  Anlegen wird die ausgewählte Sprache nicht gespeichert und beim Bearbeiten wird unbereinigter
+  Inhalt über `innerHTML` in das XML übernommen.
+- Ziel: Alle fachlichen Kommentararten über einen gemeinsamen, sicheren Dialog anlegen, bearbeiten
+  und löschen sowie vorhandene Kommentare vollständig rekonstruieren.
+- Akzeptanzkriterien: Kommentarart, Sprache und Verantwortlichkeit werden korrekt im TEI gespeichert;
+  bestehende `xml:id`- und `resp`-Werte bleiben beim Bearbeiten stabil; unbekannte Bestandswerte
+  gehen nicht unbemerkt verloren; Kommentarinhalt wird ausschließlich über sichere DOM-Operationen
+  verarbeitet.
+- Tests: Jede Kommentarart, Sprachen, Verantwortlichkeit, Bearbeitung, Löschung, unbekannte
+  Bestandswerte, fehlende Pflichtangaben und XML-/XSS-Sicherheitsfälle.
+- Umsetzung: Der gemeinsame Kommentarworkflow unterstützt FMB-Gesamtkommentar, Textkonstitution,
+  Worterklärung, Einzelstellenkommentar und Übersetzung. Die ausgewählte Sprache wird beim Anlegen
+  gespeichert; bestehende IDs und Verantwortlichkeiten bleiben beim Bearbeiten stabil. Unbekannte
+  Typ- und Sprachwerte aus Bestandsdaten werden sichtbar und verlustfrei erhalten. Kommentarinhalt
+  wird ausschließlich als Textknoten geschrieben. Dialog- und DOM-Regressionstests decken alle
+  konfigurierten Typen und Sprachen, Pflichtangaben, Bearbeitung, Löschung und XSS-Eingaben ab.
+
+### OXY-006B – Anmerkungen fremder Hand verwalten
 
 - Status: Offen
 - Priorität: P1
-- Oxygen-Aktionen: `Kommentar_Textk_Worterkl_Einzelst`, `Anmerkungen`,
-  `Anmerkungen zur Handschrift hinzufügen`
-- Ausgangslage: Kommentare sind teilweise vorhanden, decken aber FMB-Gesamtkommentar,
-  Übersetzung, fremde Hand, Position/Urheber und Handschriftenanmerkungen nicht vollständig ab.
-- Ziel: Den bestehenden Kommentarworkflow um alle fachlichen Varianten und Attribute erweitern.
-- Akzeptanzkriterien: Kommentarart, Sprache, Verantwortlichkeit, Position und Urheber werden korrekt
-  im TEI gespeichert und beim erneuten Öffnen vollständig rekonstruiert.
-- Tests: Jede Kommentarart, Bearbeitung, Löschung und fehlende Pflichtangaben.
+- Oxygen-Aktionen: `Anmerkungen`
+- Ausgangslage: Oxygen kann Anmerkungen fremder Hand an einer Textposition mit Angaben zu Urheber,
+  Position, Art und Nummerierung anlegen. Der Webeditor besitzt dafür keinen vollständigen
+  Workflow; die vorhandene allgemeine Kommentarfunktion bildet diese Semantik nicht ab.
+- Ziel: Anmerkungen fremder Hand an der gewählten Textposition anlegen, bearbeiten und löschen. Die
+  verbindlichen Werte und Kombinationen für `type`, `subtype`, `place`, `resp` und `n` werden vor
+  der Implementierung anhand der FMB-C-Vorgaben dokumentiert.
+- Akzeptanzkriterien: Urheber, Position, Art und Nummerierung werden korrekt gespeichert und beim
+  erneuten Öffnen vollständig rekonstruiert; bestehende IDs bleiben stabil; ungültige
+  Attributkombinationen und fehlende Pflichtangaben werden abgewiesen.
+- Tests: Alle freigegebenen Arten, Urheber und Positionen, Nummerierung, Bearbeitung, Löschung,
+  unbekannte Bestandswerte und ungültige Kombinationen.
+
+### OXY-006C – Handschriftenanmerkungen verwalten
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktionen: `Anmerkungen zur Handschrift hinzufügen`
+- Ausgangslage: Oxygen verwaltet allgemeine Handschriftenanmerkungen im TEI-Header unter
+  `physDesc`/`scriptDesc`. Der Webeditor stellt dafür keinen Dialog bereit.
+- Ziel: Die erforderliche Headerstruktur bei Bedarf ergänzen und Handschriftenanmerkungen anlegen,
+  bearbeiten und löschen, ohne bestehende Quellen- oder Handschriftenbeschreibung zu überschreiben.
+- Akzeptanzkriterien: Vorhandene `physDesc`-/`scriptDesc`-Teilstrukturen werden verlustfrei geladen
+  und ergänzt; mehrere Anmerkungen bleiben unterscheidbar; leere Pflichtinhalte werden abgewiesen;
+  Nutzereingaben werden ausschließlich über sichere DOM-Operationen gespeichert.
+- Tests: Fehlende, teilweise und vollständig vorhandene Headerstruktur, mehrere Anmerkungen,
+  Bearbeitung, Löschung, leere Inhalte und XML-/XSS-Sicherheitsfälle.
 
 ### OXY-007 – Fußnoten und Fußnotenreferenzen
 

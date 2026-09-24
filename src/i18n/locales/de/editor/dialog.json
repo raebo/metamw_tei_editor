@@ -44,10 +44,52 @@
     "setSuccessorLetter": "Nachfolgerbrief Festlegen"
   },
   "hints": {
-    "closing":  "Zum Schließen auf den Hintergrund klicken oder ESC drücken"
+    "closing": "Zum Schließen auf den Hintergrund klicken oder ESC drücken"
   },
   "buttons": {
     "cancel": "Abbrechen"
+  },
+  "comment": {
+    "fields": {
+      "type": "Kommentarart",
+      "language": "Kommentarsprache",
+      "responsibility": "Verantwortlichkeit",
+      "content": "Kommentartext"
+    },
+    "types": {
+      "these_comment": "FMB-Gesamtkommentar",
+      "single_place_comment": "Einzelstellenkommentar",
+      "text_constitution": "Kommentar Textkonstitution",
+      "word_description": "Worterklärung",
+      "translation": "Übersetzung"
+    },
+    "languages": {
+      "de": "Deutsch",
+      "en": "Englisch",
+      "fr": "Französisch",
+      "it": "Italienisch",
+      "span": "Spanisch",
+      "la": "Latein",
+      "grc": "Altgriechisch",
+      "yi": "Jiddisch"
+    },
+    "buttons": {
+      "add": "Kommentar einfügen",
+      "update": "Aktualisieren",
+      "delete": "Löschen",
+      "cancelDelete": "Abbrechen",
+      "confirmDelete": "Endgültig löschen"
+    },
+    "success": {
+      "added": "Der Kommentar wurde hinzugefügt.",
+      "updated": "Der Kommentar wurde aktualisiert.",
+      "deleted": "Der Kommentar wurde gelöscht."
+    },
+    "errors": {
+      "save": "Der Kommentar konnte nicht gespeichert werden: {{reason}}",
+      "delete": "Der Kommentar konnte nicht gelöscht werden: {{reason}}"
+    },
+    "legacyValue": "Unbekannter Bestandswert: {{value}}"
   },
   "figureUpload": {
     "contextAction": "Bild einfügen",
@@ -324,9 +366,7 @@
   "autocomplete": {
     "chooseEntry": "Eintrag Auswählen"
   },
-  "assignLetterDialog": {
-
-  },
+  "assignLetterDialog": {},
   "newLetterDialog": {
     "steps": {
       "letterName": "Briefname",
@@ -443,7 +483,6 @@
         "submit": "Eintrag Hinzufügen",
         "cancel": "Abbrechen"
       }
-
     },
     "manageRismEntryDialog": {
       "headline": "RISM Sigel Ersetzen",
@@ -453,12 +492,12 @@
       }
     }
   },
-  "creationContainer" : {
+  "creationContainer": {
     "addCreationDialog": {
       "headline": "Werk Auszeichnen und Hinzufügen",
       "success": "Das Werk wurde erfolgreich ausgezeichnet",
       "errorSubmit": "Beim Auszeichnen des Werkes trat ein Fehler auf",
-      "label" : {
+      "label": {
         "latintype": "Latintype Buchstaben",
         "existingAuthor": "Vorhandener Autor",
         "newAuthor": "Neuer Autor",
@@ -480,7 +519,7 @@
   },
   "personContainer": {
     "addPersonDialog": {
-      "headline" : "Person Auszeichnen und Hinzufügen",
+      "headline": "Person Auszeichnen und Hinzufügen",
       "success": "Person wurde erfolgreich ausgezeichnet",
       "error": "Beim Hinzufügen trat ein Fehler auf",
       "button": {

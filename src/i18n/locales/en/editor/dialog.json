@@ -49,6 +49,48 @@
   "buttons": {
     "cancel": "Cancel"
   },
+  "comment": {
+    "fields": {
+      "type": "Comment type",
+      "language": "Comment language",
+      "responsibility": "Responsibility",
+      "content": "Comment text"
+    },
+    "types": {
+      "these_comment": "FMB general comment",
+      "single_place_comment": "Passage comment",
+      "text_constitution": "Text constitution comment",
+      "word_description": "Word explanation",
+      "translation": "Translation"
+    },
+    "languages": {
+      "de": "German",
+      "en": "English",
+      "fr": "French",
+      "it": "Italian",
+      "span": "Spanish",
+      "la": "Latin",
+      "grc": "Ancient Greek",
+      "yi": "Yiddish"
+    },
+    "buttons": {
+      "add": "Insert comment",
+      "update": "Update",
+      "delete": "Delete",
+      "cancelDelete": "Cancel",
+      "confirmDelete": "Delete permanently"
+    },
+    "success": {
+      "added": "The comment was added.",
+      "updated": "The comment was updated.",
+      "deleted": "The comment was deleted."
+    },
+    "errors": {
+      "save": "The comment could not be saved: {{reason}}",
+      "delete": "The comment could not be deleted: {{reason}}"
+    },
+    "legacyValue": "Unknown existing value: {{value}}"
+  },
   "figureUpload": {
     "contextAction": "Insert image",
     "anchor": "Insertion anchor: {{anchor}}",
