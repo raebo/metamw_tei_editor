@@ -7,6 +7,7 @@ import { MiscUtils } from '@src/utils/misc';
 import { setContentTextIsMarked, setReloadLetterContent, setXmlLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { setEditorDialogAndReferenceThunk } from '@src/redux/thunks/editor.letter.thunk';
 import type { GraphicStructureOperation } from '@src/components/editor/letter/Dialog/Components/GraphicStructureDialog';
+import { captureForeignHandAnnotationCaret } from '@src/utils/editor/foreignHandAnnotation';
 
 const selectedXmlPathElement = (): HTMLElement | null => {
   const selectionNode = window.getSelection()?.anchorNode ?? null;
@@ -35,6 +36,27 @@ const openGraphicStructureDialog = (dispatch: AppDispatch, operation: GraphicStr
       elementKey: operation,
     }),
   );
+};
+
+const openForeignHandAnnotationDialog = (dispatch: AppDispatch, getState: () => RootState): void => {
+  const xmlContent = getState().editorLetter.letter.xmlContent;
+  if (!xmlContent) {
+    enqueueSnackbar('Kein Brieftext geladen.', { variant: 'error' });
+    return;
+  }
+  try {
+    const caret = captureForeignHandAnnotationCaret(xmlContent);
+    dispatch(
+      setEditorDialogAndReferenceThunk({
+        dialogType: EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION,
+        elementType: caret.elementType,
+        elementXmlId: caret.sourcePath,
+        elementKey: caret.reference,
+      }),
+    );
+  } catch (error) {
+    enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
+  }
 };
 
 export const filterForKeyHandleDefinitions = (keyHandleDefinitions: Record<string, EditorKeyHandleItem>, keyCombination: string) => {
@@ -134,6 +156,13 @@ export function generateKeyHandleAction(item: EditorKeyHandleItem) {
 }
 
 export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {
+  'ctrl+alt+a': {
+    key: 'ctrl+alt+a',
+    description: 'Anmerkung fremder Hand hinzufügen',
+    component: null,
+    action: null,
+    openDialogAction: openForeignHandAnnotationDialog,
+  },
   'alt+c': {
     key: 'alt+c',
     description: 'Header Hinzufügen',

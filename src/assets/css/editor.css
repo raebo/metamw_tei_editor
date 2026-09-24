@@ -21,6 +21,63 @@
 note {
     cursor: pointer;
 }
+
+note.tei-foreign-hand-annotation {
+  display: inline !important;
+  margin: 0 0.15em;
+  line-height: inherit;
+}
+
+note.tei-foreign-hand-annotation::before,
+note.tei-foreign-hand-annotation::after {
+  content: none;
+}
+
+.tei-foreign-hand-annotation-marker {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35em;
+  height: 1.35em;
+  box-sizing: border-box;
+  padding: 0 0.25em;
+  border: 1px solid var(--secondary-color);
+  border-radius: 999px;
+  margin: 0 0.2em;
+  background: var(--secondary-color);
+  color: #fff !important;
+  cursor: pointer;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 0.72em !important;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  vertical-align: super;
+}
+
+.tei-foreign-hand-annotation-content {
+  display: inline;
+  margin-left: 0.2em;
+  padding: 0.05em 0.2em;
+  background: rgb(255 253 185);
+}
+
+.tei-foreign-hand-annotation-number {
+  margin-right: 0.2em;
+  font-weight: 700;
+}
+
+note.tei-foreign-hand-annotation:hover .tei-foreign-hand-annotation-marker,
+note.tei-foreign-hand-annotation:focus .tei-foreign-hand-annotation-marker {
+  background: rgb(0 94 168 / 12%);
+}
+
+note.tei-foreign-hand-annotation:focus-visible {
+  border-radius: 0.35em;
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
 .tei-figure-image {
   display: block;
   max-width: 100%;

@@ -2,14 +2,11 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { EditorConstants, LetterState, type ValidLeftClickNodeType } from '@src/constants/editor';
 import { useAppDispatch } from '@src/redux/hooks';
 import { enqueueSnackbar } from 'notistack';
-import {
-  setClickedEntityNode,
-  setEditorSelectedItem,
-  setReadableLetter,
-} from '@src/redux/slices/editor.letter.slice';
+import { setClickedEntityNode, setEditorSelectedItem, setReadableLetter } from '@src/redux/slices/editor.letter.slice';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import { fetchLetterDataByName } from '@src/services/editor/apiLettersRequest.service';
+import { setEditorDialogAndReferenceThunk } from '@src/redux/thunks/editor.letter.thunk';
 
 interface UserActionMenuProps {
   xmlContentRef: React.RefObject<HTMLDivElement>;
@@ -20,9 +17,7 @@ const validNodeList: string[] = ['title', 'persname', 'placename'];
 
 const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
   const dispatch = useAppDispatch();
-  const editorSelectedRightItem = useSelector(
-    (state: RootState) => state.editorLetter.selectedItem.right,
-  );
+  const editorSelectedRightItem = useSelector((state: RootState) => state.editorLetter.selectedItem.right);
   const selectedNodeXmlIdRef = useRef<string>('');
   const selectedNodeTypeRef = useRef<ValidLeftClickNodeType | null>(null);
   const selectedKeyValueRef = useRef<string>('');
@@ -195,6 +190,27 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
     );
   }, [dispatch]);
 
+  const handleForeignAnnotationClick = useCallback(
+    (event: MouseEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      const marker = target?.closest<HTMLElement>('[data-editor-foreign-annotation-id]');
+      const xmlId = marker?.dataset.editorForeignAnnotationId;
+      if (!marker || !xmlId) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      dispatch(
+        setEditorDialogAndReferenceThunk({
+          dialogType: EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION,
+          elementType: 'note',
+          elementXmlId: xmlId,
+          elementKey: 'edit',
+        }),
+      );
+    },
+    [dispatch],
+  );
+
   const handleNodeLeftClick = useCallback(
     async (event: MouseEvent) => {
       event.preventDefault();
@@ -219,17 +235,13 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
 
         if (isLetter) {
           await handleLetterNodeClick();
-        } else if (
-          checkForPersNameNode(targetNode as Element) ||
-          checkForPlaceNameNode(targetNode as Element)
-        ) {
+        } else if (checkForPersNameNode(targetNode as Element) || checkForPlaceNameNode(targetNode as Element)) {
           handleEntityNodeClick();
         }
       } catch (error) {
-        enqueueSnackbar(
-          `${(targetNode as Element).attributes[0]} is not a valid left click node: ${(error as Error).message}`,
-          { variant: 'error' },
-        );
+        enqueueSnackbar(`${(targetNode as Element).attributes[0]} is not a valid left click node: ${(error as Error).message}`, {
+          variant: 'error',
+        });
       }
     },
     [handleEntityNodeClick, handleLetterNodeClick, isValidTitleNode],
@@ -240,11 +252,13 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
     if (!el) return;
 
     el.addEventListener('mouseup', handleNodeLeftClick);
+    el.addEventListener('click', handleForeignAnnotationClick);
 
     return () => {
       el.removeEventListener('mouseup', handleNodeLeftClick);
+      el.removeEventListener('click', handleForeignAnnotationClick);
     };
-  }, [handleNodeLeftClick, props.xmlContentRef, xmlContentRef]);
+  }, [handleForeignAnnotationClick, handleNodeLeftClick, props.xmlContentRef, xmlContentRef]);
 
   return <></>;
 };

@@ -66,8 +66,7 @@ export const getMenuItemsNoMarking = (
       }
 
       const children = Array.from(msDescNode.childNodes).filter(
-        (n): n is Element =>
-          n.nodeType === 1 && (n as Element).tagName.toUpperCase() === 'MSIDENTIFIER',
+        (n): n is Element => n.nodeType === 1 && (n as Element).tagName.toUpperCase() === 'MSIDENTIFIER',
       );
 
       const index = children.indexOf(msIdentifierNode);
@@ -148,17 +147,12 @@ export const getMenuItemsNoMarking = (
         if (!node) throw new Error('No node given as value');
 
         const targetNode = EditorUtils.xmlCheck.getAncestorByFilter(node, (n) =>
-          ['persName', 'placeName', 'title', 'date']
-            .map((x) => x.toLowerCase())
-            .includes(n.nodeName.toLowerCase()),
+          ['persName', 'placeName', 'title', 'date'].map((x) => x.toLowerCase()).includes(n.nodeName.toLowerCase()),
         );
 
         if (!targetNode) throw new Error('No annotation ancestor found');
 
-        const refNode = EditorUtils.xmlCheck.getNodeByPath(
-          currentDoc,
-          EditorUtils.xmlCheck.getNodePath(targetNode),
-        );
+        const refNode = EditorUtils.xmlCheck.getNodeByPath(currentDoc, EditorUtils.xmlCheck.getNodePath(targetNode));
 
         EditorUtils.textMarking.unwrapNode(refNode as Element);
 
@@ -268,9 +262,7 @@ export const getMenuItemsNoMarking = (
 
         if (!numberOfAct) throw new Error('No act number found on node');
 
-        dispatch(
-          setEditorLetterActOfWriting({ letter: { actOfWriting: { orderNumber: numberOfAct } } }),
-        );
+        dispatch(setEditorLetterActOfWriting({ letter: { actOfWriting: { orderNumber: numberOfAct } } }));
         dispatch(
           setDialogType({
             dialogType: EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER,
@@ -304,13 +296,9 @@ export const getMenuItemsNoMarking = (
         if (!addressType) throw new Error('No address type found on node');
 
         if (addressType === 'sender_address') {
-          dispatch(
-            setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER }),
-          );
+          dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_ADDRESS_SENDER }));
         } else if (addressType === 'address') {
-          dispatch(
-            setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT }),
-          );
+          dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_ADDRESS_RECIPIENT }));
         } else {
           enqueueSnackbar('Address type is not valid', { variant: 'error' });
         }
@@ -338,11 +326,7 @@ export const getMenuItemsNoMarking = (
           return;
         }
 
-        const xmlContent = EditorUtils.rightClickPathHandles.removeNode(
-          node,
-          ancNode.afterActionCallback,
-          ancNode.deleteNodeCallback,
-        );
+        const xmlContent = EditorUtils.rightClickPathHandles.removeNode(node, ancNode.afterActionCallback, ancNode.deleteNodeCallback);
 
         if (!xmlContent) {
           enqueueSnackbar('menuItems removeNode: No xml content found', { variant: 'error' });
@@ -370,9 +354,7 @@ export const getMenuItemsNoMarking = (
       try {
         if (!node) throw new Error('No node given as value');
 
-        dispatch(
-          setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER }),
-        );
+        dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_HEADER_AUTHOR_WRITER }));
       } catch (error) {
         enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       }
@@ -413,16 +395,10 @@ export const getMenuItemsNoMarking = (
 
         const xmlDoc = xmlDocRef.current;
         if (!xmlDoc) throw new Error('XML document not loaded');
-        EditorUtils.textMarking.addTmpIdToNode(
-          xmlDoc,
-          node as Element,
-          EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA,
-        );
+        EditorUtils.textMarking.addTmpIdToNode(xmlDoc, node as Element, EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA);
 
         const serializer = new XMLSerializer();
-        dispatch(
-          setXmlLetterContent({ content: { xmlContent: serializer.serializeToString(xmlDoc) } }),
-        );
+        dispatch(setXmlLetterContent({ content: { xmlContent: serializer.serializeToString(xmlDoc) } }));
 
         dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA }));
       } catch (error) {
@@ -442,13 +418,9 @@ export const getMenuItemsNoMarking = (
         EditorUtils.textMarking.addTmpIdToNode(xmlDoc, node as Element, 'MANAGE_GREETINGS_FORMULA');
 
         const serializer = new XMLSerializer();
-        dispatch(
-          setXmlLetterContent({ content: { xmlContent: serializer.serializeToString(xmlDoc) } }),
-        );
+        dispatch(setXmlLetterContent({ content: { xmlContent: serializer.serializeToString(xmlDoc) } }));
 
-        dispatch(
-          setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA }),
-        );
+        dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.MANAGE_GREETINGS_FORMULA }));
       } catch (error) {
         enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       }
@@ -467,10 +439,13 @@ export const getMenuItemsNoMarking = (
 
         dispatch(
           setEditorDialogAndReferenceThunk({
-            dialogType: EditorConstants.dialogTypes.EDIT_NOTE,
+            dialogType:
+              (node as Element).getAttribute('type') === 'note'
+                ? EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION
+                : EditorConstants.dialogTypes.EDIT_NOTE,
             elementType: 'note',
             elementXmlId: xmlId,
-            elementKey: null,
+            elementKey: (node as Element).getAttribute('type') === 'note' ? 'edit' : null,
           }),
         );
       } catch (error) {

@@ -184,7 +184,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-006B – Anmerkungen fremder Hand verwalten
 
-- Status: Offen
+- Status: Umgesetzt
 - Priorität: P1
 - Oxygen-Aktionen: `Anmerkungen`
 - Ausgangslage: Oxygen kann Anmerkungen fremder Hand an einer Textposition mit Angaben zu Urheber,
@@ -193,11 +193,37 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 - Ziel: Anmerkungen fremder Hand an der gewählten Textposition anlegen, bearbeiten und löschen. Die
   verbindlichen Werte und Kombinationen für `type`, `subtype`, `place`, `resp` und `n` werden vor
   der Implementierung anhand der FMB-C-Vorgaben dokumentiert.
+- Verbindliches TEI-Modell: `type="note"` ist fest. `subtype` wird auf `name`, `anonymus`,
+  `library`, `receiver` oder `editor` normalisiert. Bei `subtype="name"` wird der Schreiber über die
+  Autovervollständigung des JWT-Personenendpunkts gewählt und `resp` als stabile Referenz
+  `#PSN…` gespeichert; bei den vier kategorischen Urhebertypen ist `resp` nicht zulässig.
+  `place` verwendet die acht in Oxygen angebotenen TEI-Werte `bottom`, `below`, `above`, `top`,
+  `margin`, `overleaf`, `inspace` und `opposite`. `n` wird nach dem Anlegen und Löschen für alle
+  Fremdhand-Anmerkungen anhand ihrer Dokumentreihenfolge automatisch lückenlos als `1` bis `N`
+  vergeben und ist nicht manuell änderbar. Neue Anmerkungen erhalten außerdem eine stabile
+  `xml:id` und das vom Oxygen-Fragment verwendete `style="hidden"`.
+  Abweichende Bestandswerte für `subtype`, `place` und `resp` werden beim Öffnen kenntlich gemacht
+  und bleiben unverändert bearbeitbar, dürfen aber nicht als neue Werte erzeugt werden. Abweichende
+  `n`-Werte werden bei der nächsten Anlage oder Löschung in die automatische Reihenfolge überführt.
 - Akzeptanzkriterien: Urheber, Position, Art und Nummerierung werden korrekt gespeichert und beim
   erneuten Öffnen vollständig rekonstruiert; bestehende IDs bleiben stabil; ungültige
-  Attributkombinationen und fehlende Pflichtangaben werden abgewiesen.
+  Attributkombinationen und fehlende Pflichtangaben werden abgewiesen. Am Ankerpunkt zeigt die
+  WYSIWYG-Ansicht einen auswählbaren Anmerkungsmarker mit Nummer und Tooltip; ein Linksklick auf den
+  Marker öffnet die Bearbeitung. Nummer und Inhalt der eigentlichen Anmerkung bleiben zusätzlich
+  sichtbar.
 - Tests: Alle freigegebenen Arten, Urheber und Positionen, Nummerierung, Bearbeitung, Löschung,
   unbekannte Bestandswerte und ungültige Kombinationen.
+- Umsetzung: `Ctrl+Alt+A` und der Kontextmenübefehl bilden ein kollabiertes WYSIWYG-Caret auf die
+  genaue Textposition im XML ab. Der eigene Dialog legt Fremdhand-Anmerkungen an, rekonstruiert und
+  aktualisiert alle Metadaten unter Beibehaltung der `xml:id`, nummeriert nach Dokumentreihenfolge
+  und löscht erst nach Bestätigung. Obwohl das TEI-Element mit `style="hidden"` gespeichert wird,
+  rendert die WYSIWYG-Ansicht am Ankerpunkt eine editorseitige Referenznummer in eckigen Klammern;
+  deren Tooltip zeigt Nummer und Inhalt, ohne den Marker in das TEI-XML zu übernehmen. Direkt
+  anschließend wird die vollständige Anmerkung mit der Beschriftung „Anmerkung N:“ dargestellt,
+  sodass Anker und Inhalt über dieselbe Nummer eindeutig zugeordnet werden können.
+  Allgemeine Kommentare werden weiterhin getrennt behandelt. DOM-, Dialog-, Shortcut- und
+  Kontextmenütests decken alle Urhebertypen und Positionen, ungültige Kombinationen,
+  Bestandswerte sowie XML-/XSS-Sicherheit ab.
 
 ### OXY-006C – Handschriftenanmerkungen verwalten
 

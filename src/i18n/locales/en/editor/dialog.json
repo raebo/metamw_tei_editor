@@ -17,6 +17,7 @@
     "addWritingPart": "Add Writing Act",
     "attachmentAdd": "Add Attachment",
     "figureUpload": "Insert Image",
+    "foreignHandAnnotation": "Edit foreign-hand annotation",
     "graphicStructure": "Edit graphic and image map",
     "listStructure": "Edit list structure",
     "paragraphStructure": "Edit paragraph and section structure",
@@ -88,6 +89,54 @@
     "errors": {
       "save": "The comment could not be saved: {{reason}}",
       "delete": "The comment could not be deleted: {{reason}}"
+    },
+    "legacyValue": "Unknown existing value: {{value}}"
+  },
+  "foreignHandAnnotation": {
+    "contextAction": "Add foreign-hand annotation",
+    "editContextAction": "Edit foreign-hand annotation",
+    "contract": "TEI model: type=note; the author type determines whether a name is required. The number is derived automatically from document order.",
+    "numberHint": "The number is assigned automatically from document order.",
+    "anchorLabel": "Annotation {{number}}: {{content}}",
+    "contentLabel": "Annotation {{number}}:",
+    "personLoading": "Loading people …",
+    "noPeople": "No matching person found",
+    "personSearchError": "Person search failed: {{reason}}",
+    "fields": {
+      "subtype": "Author type",
+      "responsibility": "Select writer",
+      "place": "Position",
+      "number": "Number",
+      "content": "Annotation text"
+    },
+    "subtypes": {
+      "name": "Known writer",
+      "anonymus": "Unknown writer",
+      "library": "Library annotation",
+      "receiver": "Recipient",
+      "editor": "Printed-edition editor"
+    },
+    "places": {
+      "bottom": "Page footer",
+      "below": "Below the text line",
+      "above": "Above the text line",
+      "top": "Page header",
+      "margin": "Margin",
+      "overleaf": "Other side of the sheet",
+      "inspace": "Designated writer/editor area",
+      "opposite": "Opposite or front side"
+    },
+    "buttons": {
+      "add": "Insert annotation",
+      "update": "Update",
+      "delete": "Delete",
+      "cancelDelete": "Cancel",
+      "confirmDelete": "Delete permanently"
+    },
+    "success": {
+      "added": "The annotation was added.",
+      "updated": "The annotation was updated.",
+      "deleted": "The annotation was deleted."
     },
     "legacyValue": "Unknown existing value: {{value}}"
   },

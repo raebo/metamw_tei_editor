@@ -37,10 +37,18 @@ const LetterViewContainer = () => {
   });
 
   const reloadLetterContent = useSelector((state: RootState) => state.editorLetter.reloadLetterContent);
-  const activeLetterIsPinned = statePinnedLetters.some(
-    (letter) => letter.id === stateEditorLetter.id && letter.isPinned === true,
-  );
+  const activeLetterIsPinned = statePinnedLetters.some((letter) => letter.id === stateEditorLetter.id && letter.isPinned === true);
   const isDebugMode = process.env.REACT_DEBUG_MODE === 'true';
+
+  const preventDirectEdit = (event: React.SyntheticEvent) => event.preventDefault();
+  const preventMutationKey = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const mutatesContent =
+      event.key === 'Backspace' ||
+      event.key === 'Delete' ||
+      event.key === 'Enter' ||
+      (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey);
+    if (mutatesContent) event.preventDefault();
+  };
 
   useEffect(() => {
     if (!focusedFigureXmlId || !stateEditorLetter.xmlContent) return;
@@ -149,13 +157,7 @@ const LetterViewContainer = () => {
     return () => {
       cancelled = true;
     };
-  }, [
-    activeLetterIsPinned,
-    dispatch,
-    reloadLetterContent,
-    stateEditorLetter.id,
-    stateEditorLetter.viewMode,
-  ]);
+  }, [activeLetterIsPinned, dispatch, reloadLetterContent, stateEditorLetter.id, stateEditorLetter.viewMode]);
 
   // 👇 memoize XMLDisplayParser so it only re-renders if xmlContent changes
   const parserXmlMemo = useMemo(() => {
@@ -182,7 +184,20 @@ const LetterViewContainer = () => {
             <>
               {letterState.viewMode === 'WYSIWYG' && (
                 <div className="letter-xml" id="letterXml" ref={containerRef} style={{ fontSize: `${stateLetterFontSize}%` }}>
-                  <div ref={xmlContentRef} id="letterXmlContent" style={{ padding: 20 }}>
+                  <div
+                    ref={xmlContentRef}
+                    id="letterXmlContent"
+                    style={{ padding: 20 }}
+                    contentEditable
+                    suppressContentEditableWarning
+                    spellCheck={false}
+                    aria-readonly="true"
+                    onBeforeInput={preventDirectEdit}
+                    onCut={preventDirectEdit}
+                    onPaste={preventDirectEdit}
+                    onDrop={preventDirectEdit}
+                    onKeyDownCapture={preventMutationKey}
+                  >
                     {letterState.xmlContent && parserXmlMemo}
                   </div>
                   <RightClickActionMenu

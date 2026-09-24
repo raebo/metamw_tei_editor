@@ -42,6 +42,7 @@ import ListStructureDialog from './Components/ListStructureDialog';
 import ParagraphStructureDialog from './Components/ParagraphStructureDialog';
 import TableStructureDialog from './Components/TableStructureDialog';
 import GraphicStructureDialog from './Components/GraphicStructureDialog';
+import ForeignHandAnnotationDialog from './Components/ForeignHandAnnotationDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -75,6 +76,7 @@ const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.ADD_WRITING_PART]: t('editor:dialog.titles.addWritingPart'),
   [EditorConstants.dialogTypes.ATTACHMENT_ADD]: t('editor:dialog.titles.attachmentAdd'),
   [EditorConstants.dialogTypes.FIGURE_UPLOAD]: t('editor:dialog.titles.figureUpload'),
+  [EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION]: t('editor:dialog.titles.foreignHandAnnotation'),
   [EditorConstants.dialogTypes.GRAPHIC_STRUCTURE]: t('editor:dialog.titles.graphicStructure'),
   [EditorConstants.dialogTypes.LIST_STRUCTURE]: t('editor:dialog.titles.listStructure'),
   [EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE]: t('editor:dialog.titles.paragraphStructure'),
@@ -116,6 +118,7 @@ const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) 
   [EditorConstants.dialogTypes.ADD_TEI_HEADER]: (props) => <ManageTeiHeaderDialog {...props} />,
   [EditorConstants.dialogTypes.ATTACHMENT_ADD]: (props) => <AttachmentAddDialog {...props} />,
   [EditorConstants.dialogTypes.FIGURE_UPLOAD]: (props) => <FigureUploadDialog {...props} />,
+  [EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION]: (props) => <ForeignHandAnnotationDialog {...props} />,
   [EditorConstants.dialogTypes.GRAPHIC_STRUCTURE]: (props) => <GraphicStructureDialog {...props} />,
   [EditorConstants.dialogTypes.LIST_STRUCTURE]: (props) => <ListStructureDialog {...props} />,
   [EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE]: (props) => <ParagraphStructureDialog {...props} />,

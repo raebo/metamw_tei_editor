@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import FigureImage from './FigureImage';
 import { readFigureImageMap } from '@src/utils/editor/graphicStructure';
 
@@ -126,6 +127,8 @@ const parseInlineStyle = (styleValue: string): React.CSSProperties => {
 };
 
 const XMLDisplayParser = (props: XmlDisplayParserProps) => {
+  const { t } = useTranslation();
+
   const parseXml = (xmlString: string) => {
     const parser = new DOMParser();
 
@@ -245,6 +248,22 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         attributes.tabIndex = 0;
       }
 
+      const isForeignHandAnnotation = tagName === 'note' && element.getAttribute('type') === 'note';
+      const annotationNumber = isForeignHandAnnotation ? element.getAttribute('n') : null;
+      const annotationLabel = isForeignHandAnnotation
+        ? t('editor:dialog.foreignHandAnnotation.anchorLabel', {
+            number: annotationNumber ?? '?',
+            content: element.textContent?.trim() ?? '',
+          })
+        : null;
+      if (isForeignHandAnnotation) {
+        appendClassName(attributes, 'tei-foreign-hand-annotation');
+        attributes.tabIndex = 0;
+        attributes.role = 'note';
+        attributes['aria-label'] = annotationLabel;
+        attributes.contentEditable = false;
+      }
+
       if (tagName === 'figure' && element.getAttribute('xml:id') === props.focusedFigureXmlId) {
         appendClassName(attributes, 'tei-figure--focused');
         attributes.tabIndex = -1;
@@ -264,6 +283,18 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
               return sourceChild.nodeType === Node.ELEMENT_NODE && (sourceChild as Element).tagName.toLowerCase() === 'row';
             })
           : [];
+      const renderedChildren = isForeignHandAnnotation ? (
+        <span className="tei-foreign-hand-annotation-content">
+          <strong className="tei-foreign-hand-annotation-number">
+            {t('editor:dialog.foreignHandAnnotation.contentLabel', {
+              number: annotationNumber ?? '?',
+            })}
+          </strong>{' '}
+          {children}
+        </span>
+      ) : (
+        children
+      );
       const renderedElement = (
         <TagName key={`${element.tagName}-${Math.random()}`} {...attributes} data-editor-xml-path={sourcePath.join('.')}>
           {tagName === 'table' ? (
@@ -272,10 +303,28 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
               <tbody>{tableRows}</tbody>
             </>
           ) : (
-            children
+            renderedChildren
           )}
         </TagName>
       );
+      if (isForeignHandAnnotation) {
+        return (
+          <React.Fragment key={`foreign-hand-annotation-${sourcePath.join('.')}`}>
+            <button
+              type="button"
+              className="tei-foreign-hand-annotation-marker"
+              data-editor-foreign-annotation-id={element.getAttribute('xml:id') ?? ''}
+              title={annotationLabel ?? undefined}
+              aria-label={annotationLabel ?? undefined}
+              aria-haspopup="dialog"
+              contentEditable={false}
+            >
+              {annotationNumber ?? '?'}
+            </button>
+            {renderedElement}
+          </React.Fragment>
+        );
+      }
       if (tagName !== 'table') return renderedElement;
 
       return (

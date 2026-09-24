@@ -76,6 +76,73 @@ const ContextMenuHarness = () => {
 };
 
 describe('RightClickActionMenu figure upload action', () => {
+  it('opens foreign-hand annotation creation from a collapsed text caret', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+    const paragraph = container.querySelector('p')!;
+    const range = document.createRange();
+    range.setStart(paragraph.firstChild!, 2);
+    range.collapse(true);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    fireEvent.contextMenu(paragraph, { button: 2, clientX: 20, clientY: 30 });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Anmerkung fremder Hand|foreign-hand annotation/,
+      }),
+    );
+
+    expect(store.getState().editorLetter.dialogType).toBe('FOREIGN_HAND_ANNOTATION');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'caret:0:2',
+    });
+  });
+
+  it('opens foreign-hand annotation editing from its separate numbered anchor', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+    const marker = document.createElement('span');
+    marker.dataset.editorForeignAnnotationId = 'note_1';
+    marker.textContent = '1';
+    container.firstElementChild?.appendChild(marker);
+
+    fireEvent.contextMenu(marker, { button: 2, clientX: 20, clientY: 30 });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Anmerkung fremder Hand bearbeiten|Edit foreign-hand annotation/,
+      }),
+    );
+
+    expect(store.getState().editorLetter.dialogType).toBe('FOREIGN_HAND_ANNOTATION');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'note',
+      elementXmlId: 'note_1',
+      elementKey: 'edit',
+    });
+  });
+
   it('opens the explicit block graphic dialog from the paragraph context menu', async () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
     store.dispatch(

@@ -23,6 +23,7 @@ import type { ParagraphStructureOperation } from '@src/utils/editor/paragraphStr
 import type { ListStructureOperation } from '@src/utils/editor/listStructure';
 import type { TableStructureOperation } from '@src/utils/editor/tableStructure';
 import type { GraphicStructureOperation } from '@src/components/editor/letter/Dialog/Components/GraphicStructureDialog';
+import { captureForeignHandAnnotationCaret } from '@src/utils/editor/foreignHandAnnotation';
 
 const SECTION_SELECTOR =
   'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
@@ -244,6 +245,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const rowAnchor = targetElement?.closest<HTMLElement>('[data-editor-tei-element="row"][data-editor-xml-path]');
       const cellAnchor = targetElement?.closest<HTMLElement>('[data-editor-tei-element="cell"][data-editor-xml-path]');
       const renderedFigureAnchor = targetElement?.closest<HTMLElement>('figure[data-editor-xml-path]');
+      const foreignAnnotationAnchor = targetElement?.closest<HTMLElement>('note[type="note"]');
+      const foreignAnnotationMarker = targetElement?.closest<HTMLElement>('[data-editor-foreign-annotation-id]');
       const structureActions: NonNullable<MenuItemType['subMenu']> = [];
       const listActions: NonNullable<MenuItemType['subMenu']> = [];
       const tableActions: NonNullable<MenuItemType['subMenu']> = [];
@@ -252,6 +255,15 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const tableColumnActions: NonNullable<MenuItemType['subMenu']> = [];
       const wholeTableActions: NonNullable<MenuItemType['subMenu']> = [];
       const graphicActions: NonNullable<MenuItemType['subMenu']> = [];
+      let annotationCaret: ReturnType<typeof captureForeignHandAnnotationCaret> | null = null;
+
+      if (stateEditorLetter.xmlContent) {
+        try {
+          annotationCaret = captureForeignHandAnnotationCaret(stateEditorLetter.xmlContent);
+        } catch {
+          annotationCaret = null;
+        }
+      }
 
       const openStructureDialog = (operation: ParagraphStructureOperation, anchor: HTMLElement) => {
         const sourcePath = anchor.dataset.editorXmlPath;
@@ -578,6 +590,47 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         isClickable = true;
       }
 
+      if (annotationCaret) {
+        if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
+        menuItemsToAdd.push({
+          label: t('editor:dialog.foreignHandAnnotation.contextAction'),
+          keyShortcut: 'STRG+ALT+A',
+          action: () => {
+            dispatch(
+              setEditorDialogAndReferenceThunk({
+                dialogType: EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION,
+                elementType: annotationCaret!.elementType,
+                elementXmlId: annotationCaret!.sourcePath,
+                elementKey: annotationCaret!.reference,
+              }),
+            );
+          },
+        });
+        isClickable = true;
+      }
+
+      const foreignAnnotationXmlId =
+        foreignAnnotationMarker?.dataset.editorForeignAnnotationId || foreignAnnotationAnchor?.getAttribute('xml:id');
+      const hasExistingNoteAction = menuItemsToAdd.some((item) => item.identifier === EditorConstants.menuItemTypes.WRITING_ACT.EDIT_NOTE);
+      if (foreignAnnotationXmlId && !hasExistingNoteAction) {
+        if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
+        menuItemsToAdd.push({
+          identifier: EditorConstants.menuItemTypes.WRITING_ACT.EDIT_NOTE,
+          label: t('editor:dialog.foreignHandAnnotation.editContextAction'),
+          action: () => {
+            dispatch(
+              setEditorDialogAndReferenceThunk({
+                dialogType: EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION,
+                elementType: 'note',
+                elementXmlId: foreignAnnotationXmlId,
+                elementKey: 'edit',
+              }),
+            );
+          },
+        });
+        isClickable = true;
+      }
+
       if (!figureUploadInProgress && xmlDocRef.current && xmlContentRef.current) {
         const figureAnchor = findFigureAnchor(targetNode, xmlContentRef.current, xmlDocRef.current);
 
@@ -617,7 +670,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         }),
       );
     },
-    [dispatch, figureUploadInProgress, pathHandlers, props, t, xmlContentRef],
+    [dispatch, figureUploadInProgress, pathHandlers, props, stateEditorLetter.xmlContent, t, xmlContentRef],
   );
 
   /** CLOSE MENU */

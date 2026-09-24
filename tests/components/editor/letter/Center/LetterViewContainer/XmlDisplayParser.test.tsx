@@ -62,6 +62,30 @@ describe('XMLDisplayParser', () => {
     expect(list).toHaveAttribute('data-editor-xml-path', '0.0.0.0');
   });
 
+  it('renders a numbered anchor marker and the numbered foreign-hand annotation content', () => {
+    const { container } = renderXml(
+      '<TEI><text><body><div><p>Text<note xml:id="note_1" type="note" subtype="name" style="hidden" n="2">Internal note</note></p></div></body></text></TEI>',
+    );
+
+    const note = container.querySelector('note[type="note"]');
+    const marker = container.querySelector('[data-editor-foreign-annotation-id="note_1"]');
+    expect(note).toHaveClass('tei-foreign-hand-annotation');
+    expect(note).toHaveAttribute('tabindex', '0');
+    expect(note).toHaveAttribute('role', 'note');
+    expect(note).toHaveAttribute('contenteditable', 'false');
+    expect(note).toHaveAttribute('aria-label', 'editor:dialog.foreignHandAnnotation.anchorLabel');
+    expect(marker).toHaveTextContent('2');
+    expect(marker).toHaveAttribute('title', 'editor:dialog.foreignHandAnnotation.anchorLabel');
+    expect(marker).toHaveAttribute('contenteditable', 'false');
+    expect(note?.querySelector('.tei-foreign-hand-annotation-marker')).not.toBeInTheDocument();
+    expect(container.querySelector('svg')).not.toBeInTheDocument();
+    expect(note?.querySelector('.tei-foreign-hand-annotation-number')).toHaveTextContent(
+      'editor:dialog.foreignHandAnnotation.contentLabel',
+    );
+    expect(note?.querySelector('.tei-foreign-hand-annotation-content')).toHaveTextContent('Internal note');
+    expect(note).toHaveAttribute('data-editor-xml-path', '0.0.0.0.1');
+  });
+
   it('renders a focusable caret and selectable HTML cells for every TEI table', () => {
     const { container } = renderXml(
       '<TEI><text><body><div><table rows="1" cols="1"><row><cell>A</cell></row></table></div></body></text></TEI>',
