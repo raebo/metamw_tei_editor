@@ -114,6 +114,33 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
         ],
       },
+      { type: 'divider' as const },
+      {
+        label: t('editor:dialog.crossReference.contextAction'),
+        hasSubMenu: true,
+        subMenu: [
+          ['register', 'ctrl+alt+r'],
+          ['letter-annotation', 'ctrl+shift+r'],
+          ['external-url', 'ctrl+alt+u'],
+          ['internal-url', 'ctrl+shift+u'],
+          ['generic-target', 'ctrl+alt+z'],
+          ['generic-start', 'ctrl+shift+z'],
+        ].map(([kind, shortcut]) => ({
+          label: t(`editor:dialog.crossReference.kinds.${kind}`),
+          keyShortcut: shortcut,
+          action: () => {
+            props.setAnchorPosition(null);
+            dispatch(
+              setEditorDialogAndReferenceThunk({
+                dialogType: EditorConstants.dialogTypes.CROSS_REFERENCE,
+                elementType: kind,
+                elementXmlId: '',
+                elementKey: 'selection',
+              }),
+            );
+          },
+        })),
+      },
     ],
     [dispatch, props, t],
   );
@@ -215,6 +242,40 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       setDisplayMenuItems([]);
       const targetNode = event.target as Node;
       const targetElement = targetNode.nodeType === Node.ELEMENT_NODE ? (targetNode as HTMLElement) : targetNode.parentElement;
+      const crossReferenceTarget = targetElement?.closest<HTMLElement>('[data-editor-cross-reference-id]');
+      const crossReferenceId = crossReferenceTarget?.dataset.editorCrossReferenceId;
+      if (crossReferenceId) {
+        const openCrossReferenceDialog = (elementKey: 'edit' | 'delete') => {
+          dispatch(
+            setEditorDialogAndReferenceThunk({
+              dialogType: EditorConstants.dialogTypes.CROSS_REFERENCE,
+              elementType: crossReferenceTarget.localName,
+              elementXmlId: crossReferenceId,
+              elementKey,
+            }),
+          );
+        };
+        setDisplayMenuItems([
+          {
+            label: t('editor:dialog.crossReference.editAction'),
+            action: () => openCrossReferenceDialog('edit'),
+          },
+          {
+            label: t('editor:dialog.crossReference.deleteAction'),
+            action: () => openCrossReferenceDialog('delete'),
+          },
+        ]);
+        props.setAnchorPosition({ top: event.clientY, left: event.clientX });
+        dispatch(
+          setEditorNodeClickedAndContentLeftRightThunk({
+            nodeClicked: true,
+            textIsMarked: false,
+            contentLeft: null,
+            contentRight: null,
+          }),
+        );
+        return;
+      }
       const authorFootnoteTarget = targetElement?.closest<HTMLElement>('[data-editor-author-footnote-id]');
       const authorFootnoteId = authorFootnoteTarget?.dataset.editorAuthorFootnoteId;
       if (authorFootnoteId) {
@@ -695,6 +756,32 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
               }),
             );
           },
+        });
+
+        menuItemsToAdd.push({
+          label: t('editor:dialog.crossReference.contextAction'),
+          hasSubMenu: true,
+          subMenu: [
+            ['register', 'ctrl+alt+r'],
+            ['letter-annotation', 'ctrl+shift+r'],
+            ['external-url', 'ctrl+alt+u'],
+            ['internal-url', 'ctrl+shift+u'],
+            ['generic-target', 'ctrl+alt+z'],
+            ['generic-start', 'ctrl+shift+z'],
+          ].map(([kind, shortcut]) => ({
+            label: t(`editor:dialog.crossReference.kinds.${kind}`),
+            keyShortcut: shortcut,
+            action: () => {
+              dispatch(
+                setEditorDialogAndReferenceThunk({
+                  dialogType: EditorConstants.dialogTypes.CROSS_REFERENCE,
+                  elementType: kind,
+                  elementXmlId: annotationCaret!.sourcePath,
+                  elementKey: annotationCaret!.reference,
+                }),
+              );
+            },
+          })),
         });
       }
 

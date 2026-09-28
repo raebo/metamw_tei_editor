@@ -106,6 +106,22 @@ describe('XMLDisplayParser', () => {
     expect(note).toHaveTextContent('Author note');
   });
 
+  it('renders cross-references and empty target anchors as visible editor targets', () => {
+    const { container } = renderXml(
+      '<TEI><text><body><div><p>See <ref xml:id="ref_1" target="https://example.test">website</ref><link xml:id="link_1" target="#one #two"/><anchor type="cross-reference" xml:id="anchor_1"/></p></div></body></text></TEI>',
+    );
+
+    const reference = container.querySelector('[data-editor-cross-reference-id="ref_1"]');
+    const link = container.querySelector('[data-editor-cross-reference-id="link_1"]');
+    const anchor = container.querySelector('[data-editor-cross-reference-id="anchor_1"]');
+    expect(reference).toHaveClass('tei-cross-reference--ref');
+    expect(reference).toHaveTextContent('website');
+    expect(reference).toHaveAttribute('role', 'button');
+    expect(link).toHaveTextContent('↗ #one #two');
+    expect(anchor).toHaveTextContent('⚑ anchor_1');
+    expect(anchor).toHaveAttribute('contenteditable', 'false');
+  });
+
   it('renders a clickable caret for each manuscript annotation', () => {
     const { container } = renderXml(
       '<TEI><teiHeader><fileDesc><sourceDesc><msDesc><physDesc><scriptDesc><p xml:id="script_annotation_1">Paper and ink</p><p>Legacy</p></scriptDesc></physDesc></msDesc></sourceDesc></fileDesc></teiHeader></TEI>',

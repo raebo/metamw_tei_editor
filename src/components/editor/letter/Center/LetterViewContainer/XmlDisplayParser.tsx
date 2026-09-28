@@ -146,8 +146,9 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
     if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as Element;
       const tagName = element.tagName.toLowerCase();
+      const isBodyCrossReferenceLink = tagName === 'link' && Boolean(element.closest('body')) && Boolean(element.getAttribute('target'));
 
-      if (STRIP_WITH_CONTENT_TAGS.has(tagName)) {
+      if (STRIP_WITH_CONTENT_TAGS.has(tagName) && !isBodyCrossReferenceLink) {
         return null;
       }
 
@@ -200,7 +201,9 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         ? 'caption'
         : isAuthorFootnote
           ? 'div'
-          : (TABLE_ELEMENT_TAGS[tagName] ?? (element.tagName as keyof JSX.IntrinsicElements));
+          : isBodyCrossReferenceLink
+            ? 'span'
+            : (TABLE_ELEMENT_TAGS[tagName] ?? (element.tagName as keyof JSX.IntrinsicElements));
 
       const attributes = Array.from(element.attributes).reduce(
         (acc, attr) => {
@@ -263,6 +266,13 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
       const isAuthorFootnoteReference =
         tagName === 'ref' &&
         AUTHOR_FOOTNOTE_REFERENCE_TYPES.includes(element.getAttribute('type') as (typeof AUTHOR_FOOTNOTE_REFERENCE_TYPES)[number]);
+      const isCrossReference =
+        Boolean(element.closest('body')) &&
+        !isAuthorFootnoteReference &&
+        ((['ref', 'link'].includes(tagName) && Boolean(element.getAttribute('target'))) ||
+          (tagName === 'anchor' && element.getAttribute('type') === 'cross-reference'));
+      const crossReferenceTarget = tagName === 'anchor' ? (element.getAttribute('xml:id') ?? '?') : (element.getAttribute('target') ?? '?');
+      const crossReferenceId = element.getAttribute('xml:id') ?? `path:${sourcePath.join('.')}`;
       const authorFootnoteId = isAuthorFootnote
         ? element.getAttribute('xml:id')
         : isAuthorFootnoteReference
@@ -298,6 +308,19 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         attributes.role = isAuthorFootnote ? 'note' : 'button';
         attributes['aria-label'] = authorFootnoteLabel;
         attributes['data-editor-author-footnote-id'] = authorFootnoteId;
+        attributes.contentEditable = false;
+      }
+      if (isCrossReference) {
+        appendClassName(attributes, `tei-cross-reference tei-cross-reference--${tagName}`);
+        attributes.tabIndex = 0;
+        attributes.role = 'button';
+        attributes.title = t('editor:dialog.crossReference.anchorLabel', {
+          target: crossReferenceTarget,
+        });
+        attributes['aria-label'] = t('editor:dialog.crossReference.anchorLabel', {
+          target: crossReferenceTarget,
+        });
+        attributes['data-editor-cross-reference-id'] = crossReferenceId;
         attributes.contentEditable = false;
       }
 
@@ -337,6 +360,10 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
             })}
           </strong>{' '}
           {children}
+        </span>
+      ) : isCrossReference && children.length === 0 ? (
+        <span className="tei-cross-reference-marker" aria-hidden="true">
+          {tagName === 'anchor' ? '⚑' : '↗'} {crossReferenceTarget}
         </span>
       ) : (
         children

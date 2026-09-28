@@ -9,6 +9,7 @@ import { setEditorDialogAndReferenceThunk } from '@src/redux/thunks/editor.lette
 import type { GraphicStructureOperation } from '@src/components/editor/letter/Dialog/Components/GraphicStructureDialog';
 import { captureForeignHandAnnotationCaret } from '@src/utils/editor/foreignHandAnnotation';
 import { captureAuthorFootnoteCaret } from '@src/utils/editor/authorFootnote';
+import { captureCrossReferenceCaret, type CrossReferenceKind } from '@src/utils/editor/crossReference';
 
 const selectedXmlPathElement = (): HTMLElement | null => {
   const selectionNode = window.getSelection()?.anchorNode ?? null;
@@ -91,6 +92,44 @@ const openAuthorFootnoteDialog = (dispatch: AppDispatch, getState: () => RootSta
     enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
   }
 };
+
+const openCrossReferenceDialog =
+  (kind: CrossReferenceKind) =>
+  (dispatch: AppDispatch, getState: () => RootState): void => {
+    const xmlContent = getState().editorLetter.letter.xmlContent;
+    if (!xmlContent) {
+      enqueueSnackbar('Kein Brieftext geladen.', { variant: 'error' });
+      return;
+    }
+    try {
+      const xmlDoc = new DOMParser().parseFromString(xmlContent, 'application/xml');
+      if (xmlDoc.querySelector('parsererror')) throw new Error('The source XML is not well-formed.');
+      const hasMarkedSelection = Array.from(xmlDoc.getElementsByTagNameNS('*', 'span')).some((element) =>
+        (element.getAttribute('class') ?? '').split(/\s+/).includes('marked'),
+      );
+      const caret = hasMarkedSelection
+        ? { elementType: kind, sourcePath: '', reference: 'selection' }
+        : { ...captureCrossReferenceCaret(xmlContent), elementType: kind };
+      dispatch(
+        setEditorDialogAndReferenceThunk({
+          dialogType: EditorConstants.dialogTypes.CROSS_REFERENCE,
+          elementType: caret.elementType,
+          elementXmlId: caret.sourcePath,
+          elementKey: caret.reference,
+        }),
+      );
+    } catch (error) {
+      enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
+    }
+  };
+
+const crossReferenceShortcut = (key: string, description: string, kind: CrossReferenceKind): EditorKeyHandleItem => ({
+  key,
+  description,
+  component: null,
+  action: null,
+  openDialogAction: openCrossReferenceDialog(kind),
+});
 
 export const filterForKeyHandleDefinitions = (keyHandleDefinitions: Record<string, EditorKeyHandleItem>, keyCombination: string) => {
   const filteredKeyHandle = Object.values(keyHandleDefinitions).filter((item) => item.key === keyCombination)[0];
@@ -189,6 +228,12 @@ export function generateKeyHandleAction(item: EditorKeyHandleItem) {
 }
 
 export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {
+  'ctrl+alt+r': crossReferenceShortcut('ctrl+alt+r', 'Querverweis auf Registereinträge', 'register'),
+  'ctrl+shift+r': crossReferenceShortcut('ctrl+shift+r', 'Querverweis auf Briefauszeichnungen', 'letter-annotation'),
+  'ctrl+alt+u': crossReferenceShortcut('ctrl+alt+u', 'Querverweis auf externe URL', 'external-url'),
+  'ctrl+shift+u': crossReferenceShortcut('ctrl+shift+u', 'Querverweis auf interne URL', 'internal-url'),
+  'ctrl+alt+z': crossReferenceShortcut('ctrl+alt+z', 'Unspezifisches Querverweisziel', 'generic-target'),
+  'ctrl+shift+z': crossReferenceShortcut('ctrl+shift+z', 'Unspezifischer Querverweis', 'generic-start'),
   'ctrl+alt+a': {
     key: 'ctrl+alt+a',
     description: 'Anmerkung fremder Hand hinzufügen',
@@ -351,8 +396,8 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
       return EditorUtils.keyPressHandles.openDialog(dispatch, EditorConstants.dialogTypes.ADD_WRITING_PART);
     },
   },
-  'ctrl+shift+z': {
-    key: 'ctrl+shift+z',
+  'ctrl+y': {
+    key: 'ctrl+y',
     description: 'Historie -> Vorwärts',
     component: null,
     action: async (dispatch: AppDispatch, getState: () => RootState) => {
@@ -410,6 +455,12 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
 };
 
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {
+  'ctrl+alt+r': crossReferenceShortcut('ctrl+alt+r', 'Querverweis auf Registereinträge', 'register'),
+  'ctrl+shift+r': crossReferenceShortcut('ctrl+shift+r', 'Querverweis auf Briefauszeichnungen', 'letter-annotation'),
+  'ctrl+alt+u': crossReferenceShortcut('ctrl+alt+u', 'Querverweis auf externe URL', 'external-url'),
+  'ctrl+shift+u': crossReferenceShortcut('ctrl+shift+u', 'Querverweis auf interne URL', 'internal-url'),
+  'ctrl+alt+z': crossReferenceShortcut('ctrl+alt+z', 'Unspezifisches Querverweisziel', 'generic-target'),
+  'ctrl+shift+z': crossReferenceShortcut('ctrl+shift+z', 'Unspezifischer Querverweis', 'generic-start'),
   'ctrl+shift+p': {
     key: 'ctrl+shift+p',
     description: 'Auswahl als Absatz mit Einzug abtrennen',

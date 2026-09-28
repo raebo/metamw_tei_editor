@@ -16,6 +16,7 @@
     "addTeiHeader": "Header des Briefes Hinzufügen/Bearbeiten",
     "addWritingPart": "Schreibakt Hinzufügen",
     "authorFootnote": "Fußnote des Briefautors bearbeiten",
+    "crossReference": "Querverweis bearbeiten",
     "attachmentAdd": "Beilage Hinzufügen",
     "figureUpload": "Bild einfügen",
     "foreignHandAnnotation": "Anmerkung fremder Hand bearbeiten",
@@ -186,6 +187,49 @@
       "added": "Die Fußnote und ihre Referenz wurden hinzugefügt.",
       "updated": "Die Fußnote und ihre Referenz wurden aktualisiert.",
       "deleted": "Die Fußnote und ihre Referenz wurden gelöscht."
+    }
+  },
+  "crossReference": {
+    "contextAction": "Querverweise",
+    "editAction": "Querverweis bearbeiten",
+    "deleteAction": "Querverweis löschen",
+    "anchorLabel": "Querverweis auf {{target}}",
+    "kinds": {
+      "register": "Verweis auf Registereinträge",
+      "letter-annotation": "Verweis auf Briefauszeichnungen",
+      "external-url": "Verweis auf eine externe URL",
+      "internal-url": "Verweis auf eine interne Ressource",
+      "generic-target": "Freies Verweisziel",
+      "generic-start": "Freier Verweis"
+    },
+    "contract": {
+      "register": "Der Verweis wird hinter der aktuellen Textposition eingefügt. Mehrere Register-IDs können mit Leerzeichen getrennt werden.",
+      "letter-annotation": "Markierter Text wird mit dem Verweis auf eine oder mehrere Briefauszeichnungen verbunden. Ohne Markierung wird ein leerer Verweis eingefügt.",
+      "external-url": "Markierter Text wird mit einer geprüften HTTP(S)-Adresse verbunden. Ohne Markierung wird ein leerer Verweis eingefügt.",
+      "internal-url": "Markierter Text wird mit einem relativen internen Pfad verbunden. Ohne Markierung wird ein leerer Verweis eingefügt.",
+      "generic-target": "An der aktuellen Position wird ein Zielanker mit automatisch erzeugter xml:id eingefügt.",
+      "generic-start": "Der Verweis wird hinter der aktuellen Textposition eingefügt und kann auf mehrere Zielanker zeigen."
+    },
+    "fields": {
+      "target": "Ziel",
+      "generatedId": "Automatisch erzeugte xml:id"
+    },
+    "hints": {
+      "ids": "Eine oder mehrere IDs, mit Leerzeichen getrennt. Das führende # wird automatisch ergänzt.",
+      "external": "Vollständige URL mit https:// oder http:// ohne eingebettete Zugangsdaten.",
+      "internal": "Relativer Pfad, zum Beispiel ../ressourcen/datei.xml#eintrag."
+    },
+    "buttons": {
+      "add": "Querverweis einfügen",
+      "update": "Aktualisieren",
+      "delete": "Löschen",
+      "cancelDelete": "Abbrechen",
+      "confirmDelete": "Endgültig löschen"
+    },
+    "success": {
+      "added": "Der Querverweis wurde hinzugefügt.",
+      "updated": "Der Querverweis wurde aktualisiert.",
+      "deleted": "Der Querverweis wurde gelöscht."
     }
   },
   "figureUpload": {

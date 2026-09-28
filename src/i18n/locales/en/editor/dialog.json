@@ -16,6 +16,7 @@
     "addTeiHeader": "Add/Edit Letter Header",
     "addWritingPart": "Add Writing Act",
     "authorFootnote": "Edit author footnote",
+    "crossReference": "Edit cross-reference",
     "attachmentAdd": "Add Attachment",
     "figureUpload": "Insert Image",
     "foreignHandAnnotation": "Edit foreign-hand annotation",
@@ -186,6 +187,49 @@
       "added": "The footnote and its reference were added.",
       "updated": "The footnote and its reference were updated.",
       "deleted": "The footnote and its reference were deleted."
+    }
+  },
+  "crossReference": {
+    "contextAction": "Cross-references",
+    "editAction": "Edit cross-reference",
+    "deleteAction": "Delete cross-reference",
+    "anchorLabel": "Cross-reference to {{target}}",
+    "kinds": {
+      "register": "Reference to register entries",
+      "letter-annotation": "Reference to letter annotations",
+      "external-url": "Reference to an external URL",
+      "internal-url": "Reference to an internal resource",
+      "generic-target": "Generic reference target",
+      "generic-start": "Generic reference"
+    },
+    "contract": {
+      "register": "The reference is inserted after the current text position. Multiple register IDs can be separated with spaces.",
+      "letter-annotation": "Selected text is linked to one or more letter annotations. Without a selection, an empty reference is inserted.",
+      "external-url": "Selected text is linked to a validated HTTP(S) address. Without a selection, an empty reference is inserted.",
+      "internal-url": "Selected text is linked to a relative internal path. Without a selection, an empty reference is inserted.",
+      "generic-target": "A target anchor with an automatically generated xml:id is inserted at the current position.",
+      "generic-start": "The reference is inserted after the current text position and can point to multiple target anchors."
+    },
+    "fields": {
+      "target": "Target",
+      "generatedId": "Automatically generated xml:id"
+    },
+    "hints": {
+      "ids": "One or more IDs separated by spaces. The leading # is added automatically.",
+      "external": "Complete URL using https:// or http:// without embedded credentials.",
+      "internal": "Relative path, for example ../resources/file.xml#entry."
+    },
+    "buttons": {
+      "add": "Insert cross-reference",
+      "update": "Update",
+      "delete": "Delete",
+      "cancelDelete": "Cancel",
+      "confirmDelete": "Delete permanently"
+    },
+    "success": {
+      "added": "The cross-reference was added.",
+      "updated": "The cross-reference was updated.",
+      "deleted": "The cross-reference was deleted."
     }
   },
   "figureUpload": {

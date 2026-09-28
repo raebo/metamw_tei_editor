@@ -136,6 +136,32 @@ ref.tei-author-footnote-reference:focus-visible,
   outline-offset: 2px;
 }
 
+.tei-cross-reference {
+  display: inline !important;
+  color: var(--secondary-color);
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 0.15em;
+}
+
+.tei-cross-reference-marker {
+  display: inline-block;
+  margin: 0 0.15em;
+  padding: 0.05em 0.3em;
+  border: 1px solid currentColor;
+  border-radius: 0.2em;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.72em;
+  font-weight: 700;
+  line-height: 1.4;
+  vertical-align: baseline;
+}
+
+.tei-cross-reference:focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
 .tei-figure-image {
   display: block;
   max-width: 100%;

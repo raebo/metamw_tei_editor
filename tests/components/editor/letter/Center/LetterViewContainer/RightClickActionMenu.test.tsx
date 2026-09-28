@@ -36,6 +36,7 @@ const ContextMenuHarness = () => {
     const manuscriptAnnotation = document.createElement('p');
     const footnoteReference = document.createElement('ref');
     const footnote = document.createElement('note');
+    const crossReference = document.createElement('span');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -67,13 +68,15 @@ const ContextMenuHarness = () => {
     footnoteReference.textContent = '1';
     footnote.dataset.editorAuthorFootnoteId = 'fn_1';
     footnote.textContent = 'Author note';
+    crossReference.dataset.editorCrossReferenceId = 'link_1';
+    crossReference.textContent = '↗ #target';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
     body.appendChild(div);
     text.appendChild(body);
     tei.appendChild(text);
-    xmlContentRef.current.append(tei, manuscriptCaret, manuscriptAnnotation, footnoteReference, footnote);
+    xmlContentRef.current.append(tei, manuscriptCaret, manuscriptAnnotation, footnoteReference, footnote, crossReference);
   }, []);
 
   return (
@@ -155,6 +158,38 @@ describe('RightClickActionMenu figure upload action', () => {
     expect(store.getState().editorLetter.dialogType).toBe('ADD_FOOTNOTE_AUTHOR');
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'p',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'caret:0:2',
+    });
+  });
+
+  it('opens cross-reference creation from a collapsed text caret', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+    const paragraph = container.querySelector('p')!;
+    const selection = window.getSelection()!;
+    const range = document.createRange();
+    range.setStart(paragraph.firstChild!, 2);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    fireEvent.contextMenu(paragraph, { button: 2, clientX: 20, clientY: 30 });
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Querverweise|Cross-references/ }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Registereinträge|register entries/ }));
+
+    expect(store.getState().editorLetter.dialogType).toBe('CROSS_REFERENCE');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'register',
       elementXmlId: '0.0.0.0',
       elementKey: 'caret:0:2',
     });
@@ -559,5 +594,38 @@ describe('RightClickActionMenu figure upload action', () => {
     });
 
     expect(screen.queryByRole('menuitem', { name: /Bild einfügen|Insert image/ })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [/Querverweis bearbeiten|Edit cross-reference/, 'edit'],
+    [/Querverweis löschen|Delete cross-reference/, 'delete'],
+  ] as const)('shows only the cross-reference action %s on its marker', async (label, mode) => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('[data-editor-cross-reference-id]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    const selectedAction = await screen.findByRole('menuitem', { name: label });
+    expect(screen.getAllByRole('menuitem')).toHaveLength(2);
+    fireEvent.click(selectedAction);
+
+    expect(store.getState().editorLetter.dialogType).toBe('CROSS_REFERENCE');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'span',
+      elementXmlId: 'link_1',
+      elementKey: mode,
+    });
   });
 });

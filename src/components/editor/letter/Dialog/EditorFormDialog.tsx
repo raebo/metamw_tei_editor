@@ -6,7 +6,7 @@ import { Divider, Typography } from '@mui/material';
 import DialogActions from '@mui/material/DialogActions';
 import { EditorConstants } from '@src/constants/editor';
 import AddNoteDialog from './Components/AddNoteDialog';
-import { setDialogType, setReloadLetterContent, setXmlLetterContent } from '@src/redux/slices/editor.letter.slice';
+import { setContentTextIsMarked, setDialogType, setReloadLetterContent, setXmlLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
@@ -45,6 +45,7 @@ import GraphicStructureDialog from './Components/GraphicStructureDialog';
 import ForeignHandAnnotationDialog from './Components/ForeignHandAnnotationDialog';
 import ManuscriptAnnotationDialog from './Components/ManuscriptAnnotationDialog';
 import AuthorFootnoteDialog from './Components/AuthorFootnoteDialog';
+import CrossReferenceDialog from './Components/CrossReferenceDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -66,6 +67,7 @@ export interface DefaultDialogProps {
 
 const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR]: t('editor:dialog.titles.authorFootnote'),
+  [EditorConstants.dialogTypes.CROSS_REFERENCE]: t('editor:dialog.titles.crossReference'),
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: t('editor:dialog.titles.addGreetingsFormula'),
   [EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER]: t('editor:dialog.titles.setPrecursorLetter'),
   [EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER]: t('editor:dialog.titles.setSuccessorLetter'),
@@ -108,6 +110,7 @@ const DialogTitles: Record<string, string> = {
 
 const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) => React.ReactNode> = {
   [EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR]: (props) => <AuthorFootnoteDialog {...props} />,
+  [EditorConstants.dialogTypes.CROSS_REFERENCE]: (props) => <CrossReferenceDialog {...props} />,
   [EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER]: (props) => <ManagePreccSuccLetterDialog {...props} letterType={'precursor'} />,
   [EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER]: (props) => <ManagePreccSuccLetterDialog {...props} letterType={'successor'} />,
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: (props) => (
@@ -240,6 +243,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
         actionsOnSuccess: [
           setXmlLetterContent({ content: { xmlContent: xmlString } }),
           setReloadLetterContent({ reloadLetterContent: true }),
+          setContentTextIsMarked({ textIsMarked: false }),
         ],
         successMessage,
         errorMessage: t('error:editor.dialog.failedToPatchContent'),

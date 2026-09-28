@@ -25,6 +25,9 @@ const Harness = () => {
         <span role="button" data-editor-author-footnote-id="fn_1" aria-label="Fußnotenreferenz 1">
           1
         </span>
+        <span role="button" data-editor-cross-reference-id="link_1" aria-label="Querverweis auf #target">
+          ↗ #target
+        </span>
       </div>
       <LeftClickAnnotationAction xmlContentRef={xmlContentRef} setLetterState={jest.fn<void, [LetterState]>()} />
     </>
@@ -84,6 +87,24 @@ describe('LeftClickAnnotationAction', () => {
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'note',
       elementXmlId: 'fn_1',
+      elementKey: 'edit',
+    });
+  });
+
+  it('opens a cross-reference from its visible marker', () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    render(
+      <Provider store={store}>
+        <Harness />
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Querverweis auf #target' }));
+
+    expect(store.getState().editorLetter.dialogType).toBe('CROSS_REFERENCE');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'span',
+      elementXmlId: 'link_1',
       elementKey: 'edit',
     });
   });

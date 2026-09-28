@@ -120,6 +120,44 @@ const menuItems: MenuItem[] = [
       { label: 'Vermerk Hinzufügen', keyHandleItem: null, active: false },
     ],
   },
+  {
+    label: i18n.t('editor:dialog.crossReference.contextAction'),
+    active: true,
+    hasSubMenu: true,
+    keyHandleItem: null,
+    subMenu: [
+      {
+        label: i18n.t('editor:dialog.crossReference.kinds.register'),
+        keyHandleItem: filterKeyCombination('ctrl+alt+r'),
+        active: true,
+      },
+      {
+        label: i18n.t('editor:dialog.crossReference.kinds.letter-annotation'),
+        keyHandleItem: filterKeyCombination('ctrl+shift+r'),
+        active: true,
+      },
+      {
+        label: i18n.t('editor:dialog.crossReference.kinds.external-url'),
+        keyHandleItem: filterKeyCombination('ctrl+alt+u'),
+        active: true,
+      },
+      {
+        label: i18n.t('editor:dialog.crossReference.kinds.internal-url'),
+        keyHandleItem: filterKeyCombination('ctrl+shift+u'),
+        active: true,
+      },
+      {
+        label: i18n.t('editor:dialog.crossReference.kinds.generic-target'),
+        keyHandleItem: filterKeyCombination('ctrl+alt+z'),
+        active: true,
+      },
+      {
+        label: i18n.t('editor:dialog.crossReference.kinds.generic-start'),
+        keyHandleItem: filterKeyCombination('ctrl+shift+z'),
+        active: true,
+      },
+    ],
+  },
 ];
 
 const UserActionMenu = (props: UserActionMenuProps) => {

@@ -120,6 +120,62 @@ describe('author-footnote shortcut definition', () => {
   });
 });
 
+describe('cross-reference shortcut definitions', () => {
+  it('opens Ctrl+Alt+R with the exact collapsed caret and register kind', () => {
+    document.body.innerHTML = '<div><p data-editor-xml-path="0.0.0.0">Alpha Beta</p></div>';
+    const text = document.querySelector('p')!.firstChild!;
+    const selection = window.getSelection()!;
+    const range = document.createRange();
+    range.setStart(text, 5);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch({
+      type: 'editorLetter/setEditorLetter',
+      payload: {
+        letter: {
+          xmlContent: `<TEI xmlns="${EditorConstants.TEI_NS}"><text><body><div><p>Alpha Beta</p></div></body></text></TEI>`,
+        },
+      },
+    });
+
+    allTimesAvailableKeyHandleDefinitions['ctrl+alt+r'].openDialogAction?.(store.dispatch, store.getState as unknown as () => RootState);
+
+    expect(store.getState().editorLetter.dialogType).toBe(EditorConstants.dialogTypes.CROSS_REFERENCE);
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'register',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'caret:0:5',
+    });
+  });
+
+  it('opens a URL reference from the persisted marked selection', () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch({
+      type: 'editorLetter/setEditorLetter',
+      payload: {
+        letter: {
+          xmlContent: `<TEI xmlns="${EditorConstants.TEI_NS}"><text><body><div><p>Alpha <span class="marked">Beta</span></p></div></body></text></TEI>`,
+        },
+      },
+    });
+
+    contentMarkedKeyHandleDefinitions['ctrl+alt+u'].openDialogAction?.(store.dispatch, store.getState as unknown as () => RootState);
+
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'external-url',
+      elementXmlId: '',
+      elementKey: 'selection',
+    });
+  });
+
+  it('reserves the Oxygen Ctrl+Shift+Z shortcut and keeps redo on Ctrl+Y', () => {
+    expect(allTimesAvailableKeyHandleDefinitions['ctrl+shift+z'].description).toBe('Unspezifischer Querverweis');
+    expect(allTimesAvailableKeyHandleDefinitions['ctrl+y'].description).toBe('Historie -> Vorwärts');
+  });
+});
+
 describe('manuscript annotation shortcut definition', () => {
   it('opens Ctrl+Shift+D in creation mode without requiring a text selection', () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });

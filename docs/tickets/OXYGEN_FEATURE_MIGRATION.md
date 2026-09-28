@@ -130,7 +130,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-005A – XML-IDs konfigurieren und erzeugen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P3
 - Oxygen-Aktionen: `id.options`, `generate.ids`
 - Ausgangslage: Oxygen bietet eine Konfiguration der Elemente, die automatisch eine ID erhalten,
@@ -285,6 +285,14 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 - Akzeptanzkriterien: Targets werden passend normalisiert, Mehrfachziele unterstützt und ungültige
   beziehungsweise unsichere URLs abgewiesen.
 - Tests: Alle Zielarten, mehrere Targets, fehlendes Ziel und URL-Sicherheitsfälle.
+- Umsetzung: Alle sechs Oxygen-Aktionen stehen im Benutzer- und Kontextmenü sowie über die
+  historischen Tastenkürzel zur Verfügung. Markierter Text wird für Briefauszeichnungs- und
+  URL-Verweise mit `link` beziehungsweise `ref` umschlossen; Register- und generische Verweise
+  sowie automatisch nummerierte `anchor`-Ziele lassen sich am Cursor einfügen. Die Darstellung
+  macht auch leere Verweise und Ziele im WYSIWYG auswählbar; vorhandene Einträge können per
+  Links- oder Rechtsklick bearbeitet und gelöscht werden. Interne ID-Listen werden mit `#`
+  normalisiert, relative und externe URLs getrennt validiert. Da `Strg+Shift+Z` dem historischen
+  Oxygen-Kürzel für den generischen Verweisstart entspricht, verwendet „Vorwärts“ nun `Strg+Y`.
 
 ### OXY-009 – Sprach- und typografische Sonderauszeichnungen
 
