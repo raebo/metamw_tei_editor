@@ -195,7 +195,11 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
       const target = event.target instanceof Element ? event.target : null;
       const foreignMarker = target?.closest<HTMLElement>('[data-editor-foreign-annotation-id]');
       const manuscriptMarker = target?.closest<HTMLElement>('[data-editor-manuscript-annotation-reference]');
-      const reference = foreignMarker?.dataset.editorForeignAnnotationId ?? manuscriptMarker?.dataset.editorManuscriptAnnotationReference;
+      const footnoteTarget = target?.closest<HTMLElement>('[data-editor-author-footnote-id]');
+      const reference =
+        foreignMarker?.dataset.editorForeignAnnotationId ??
+        manuscriptMarker?.dataset.editorManuscriptAnnotationReference ??
+        footnoteTarget?.dataset.editorAuthorFootnoteId;
       if (!reference) return;
 
       event.preventDefault();
@@ -204,8 +208,10 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
         setEditorDialogAndReferenceThunk({
           dialogType: foreignMarker
             ? EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION
-            : EditorConstants.dialogTypes.MANUSCRIPT_ANNOTATION,
-          elementType: foreignMarker ? 'note' : 'p',
+            : manuscriptMarker
+              ? EditorConstants.dialogTypes.MANUSCRIPT_ANNOTATION
+              : EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR,
+          elementType: foreignMarker || footnoteTarget ? 'note' : 'p',
           elementXmlId: reference,
           elementKey: 'edit',
         }),

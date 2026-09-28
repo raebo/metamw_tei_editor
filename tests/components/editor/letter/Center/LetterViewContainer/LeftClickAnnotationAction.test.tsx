@@ -22,6 +22,9 @@ const Harness = () => {
         >
           ▶
         </button>
+        <span role="button" data-editor-author-footnote-id="fn_1" aria-label="Fußnotenreferenz 1">
+          1
+        </span>
       </div>
       <LeftClickAnnotationAction xmlContentRef={xmlContentRef} setLetterState={jest.fn<void, [LetterState]>()} />
     </>
@@ -63,6 +66,24 @@ describe('LeftClickAnnotationAction', () => {
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'p',
       elementXmlId: 'script_annotation_1',
+      elementKey: 'edit',
+    });
+  });
+
+  it('opens an author footnote from its reference marker', () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    render(
+      <Provider store={store}>
+        <Harness />
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Fußnotenreferenz 1' }));
+
+    expect(store.getState().editorLetter.dialogType).toBe('ADD_FOOTNOTE_AUTHOR');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'note',
+      elementXmlId: 'fn_1',
       elementKey: 'edit',
     });
   });

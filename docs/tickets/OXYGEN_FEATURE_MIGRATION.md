@@ -252,7 +252,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-007 – Fußnoten und Fußnotenreferenzen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P1
 - Oxygen-Aktionen: `Fußnote`, `Fußnotenreferenz`, `Fußnote des Briefautors - old`,
   `Fußnote - neu1`, `Fußnotenreferenz - neu1`, `Fußnote des Briefautors`,
@@ -263,6 +263,14 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 - Akzeptanzkriterien: IDs und Targets sind eindeutig und konsistent; bestehende Fußnoten können
   bearbeitet oder entfernt werden; Legacy-Varianten werden auf ein gemeinsames Modell migriert.
 - Tests: Erstellen, mehrere Fußnoten, Bearbeiten/Löschen und defekte Referenzen.
+- Umsetzung: `Ctrl+Alt+F`, das Aktionsmenü und das Kontextmenü öffnen einen gemeinsamen
+  Dialog. Beim Erstellen werden eine Referenz am Cursor und die zugehörige Fußnote atomar als
+  `ref[type="Footnotes_reference"]` und `div[type="footnotes_area"] > note[type="footnote"]`
+  angelegt. Eindeutige IDs sowie die wechselseitigen Targets werden synchron gehalten. Numerische
+  Marker folgen der Referenzreihenfolge; diplomatische Zeichen wie `*` bleiben erhalten. Referenz
+  und Fußnote sind in der WYSIWYG-Ansicht per Links- oder Rechtsklick bearbeitbar und werden
+  gemeinsam gelöscht. Legacy-Referenztypen und Targets mit oder ohne `#` werden beim Bearbeiten
+  auf das gemeinsame Modell normalisiert; defekte Paare werden mit einer Fehlermeldung abgewiesen.
 
 ### OXY-008 – Interne und externe Querverweise
 

@@ -15,6 +15,7 @@
     "addRismEntry": "RISM Eintrag Hinzufügen",
     "addTeiHeader": "Header des Briefes Hinzufügen/Bearbeiten",
     "addWritingPart": "Schreibakt Hinzufügen",
+    "authorFootnote": "Fußnote des Briefautors bearbeiten",
     "attachmentAdd": "Beilage Hinzufügen",
     "figureUpload": "Bild einfügen",
     "foreignHandAnnotation": "Anmerkung fremder Hand bearbeiten",
@@ -160,6 +161,31 @@
       "added": "Die Handschriftenanmerkung wurde hinzugefügt.",
       "updated": "Die Handschriftenanmerkung wurde aktualisiert.",
       "deleted": "Die Handschriftenanmerkung wurde gelöscht."
+    }
+  },
+  "authorFootnote": {
+    "contextAction": "Fußnote des Briefautors hinzufügen",
+    "editAction": "Fußnote bearbeiten",
+    "deleteAction": "Fußnote löschen",
+    "contract": "Die Referenz wird an der Cursorposition eingefügt und mit einer Fußnote im Fußnotenbereich verknüpft. Beide Elemente werden immer gemeinsam verwaltet.",
+    "markerHint": "Leer lassen für eine automatische Nummer oder das diplomatische Zeichen, zum Beispiel *, eintragen.",
+    "anchorLabel": "Fußnotenreferenz {{marker}}",
+    "contentLabel": "Fußnote {{marker}}:",
+    "fields": {
+      "marker": "Fußnotenzeichen (optional)",
+      "content": "Fußnotentext"
+    },
+    "buttons": {
+      "add": "Fußnote einfügen",
+      "update": "Aktualisieren",
+      "delete": "Löschen",
+      "cancelDelete": "Abbrechen",
+      "confirmDelete": "Endgültig löschen"
+    },
+    "success": {
+      "added": "Die Fußnote und ihre Referenz wurden hinzugefügt.",
+      "updated": "Die Fußnote und ihre Referenz wurden aktualisiert.",
+      "deleted": "Die Fußnote und ihre Referenz wurden gelöscht."
     }
   },
   "figureUpload": {

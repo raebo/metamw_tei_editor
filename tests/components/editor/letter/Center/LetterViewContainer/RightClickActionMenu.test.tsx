@@ -34,6 +34,8 @@ const ContextMenuHarness = () => {
     const figure = document.createElement('figure');
     const manuscriptCaret = document.createElement('button');
     const manuscriptAnnotation = document.createElement('p');
+    const footnoteReference = document.createElement('ref');
+    const footnote = document.createElement('note');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -61,13 +63,17 @@ const ContextMenuHarness = () => {
     manuscriptAnnotation.dataset.editorXmlPath = '1.0.0.0.0.0.0';
     manuscriptAnnotation.setAttribute('xml:id', 'script_annotation_1');
     manuscriptAnnotation.textContent = 'Paper and ink';
+    footnoteReference.dataset.editorAuthorFootnoteId = 'fn_1';
+    footnoteReference.textContent = '1';
+    footnote.dataset.editorAuthorFootnoteId = 'fn_1';
+    footnote.textContent = 'Author note';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
     body.appendChild(div);
     text.appendChild(body);
     tei.appendChild(text);
-    xmlContentRef.current.append(tei, manuscriptCaret, manuscriptAnnotation);
+    xmlContentRef.current.append(tei, manuscriptCaret, manuscriptAnnotation, footnoteReference, footnote);
   }, []);
 
   return (
@@ -112,6 +118,41 @@ describe('RightClickActionMenu figure upload action', () => {
     );
 
     expect(store.getState().editorLetter.dialogType).toBe('FOREIGN_HAND_ANNOTATION');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'caret:0:2',
+    });
+  });
+
+  it('opens author-footnote creation from a collapsed text caret', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+    const paragraph = container.querySelector('p')!;
+    const range = document.createRange();
+    range.setStart(paragraph.firstChild!, 2);
+    range.collapse(true);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    fireEvent.contextMenu(paragraph, { button: 2, clientX: 20, clientY: 30 });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Fußnote des Briefautors|author footnote/,
+      }),
+    );
+
+    expect(store.getState().editorLetter.dialogType).toBe('ADD_FOOTNOTE_AUTHOR');
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'p',
       elementXmlId: '0.0.0.0',
@@ -175,6 +216,39 @@ describe('RightClickActionMenu figure upload action', () => {
     expect(items).toHaveLength(2);
     expect(items[0]).toHaveTextContent(/Anmerkung zur Handschrift bearbeiten|Edit manuscript annotation/);
     expect(items[1]).toHaveTextContent(/Anmerkung zur Handschrift löschen|Delete manuscript annotation/);
+  });
+
+  it.each([
+    [/Fußnote bearbeiten|Edit footnote/, 'edit'],
+    [/Fußnote löschen|Delete footnote/, 'delete'],
+  ] as const)('shows only the author-footnote action %s on its reference', async (label, mode) => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('ref[data-editor-author-footnote-id]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    const selectedAction = await screen.findByRole('menuitem', { name: label });
+    expect(screen.getAllByRole('menuitem')).toHaveLength(2);
+    fireEvent.click(selectedAction);
+
+    expect(store.getState().editorLetter.dialogType).toBe('ADD_FOOTNOTE_AUTHOR');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'note',
+      elementXmlId: 'fn_1',
+      elementKey: mode,
+    });
   });
 
   it('opens foreign-hand annotation editing from its separate numbered anchor', async () => {

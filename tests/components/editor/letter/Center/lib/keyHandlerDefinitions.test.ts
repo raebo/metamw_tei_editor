@@ -89,6 +89,37 @@ describe('foreign-hand annotation shortcut definition', () => {
   });
 });
 
+describe('author-footnote shortcut definition', () => {
+  it('opens Ctrl+Alt+F with the exact collapsed caret reference', () => {
+    document.body.innerHTML = '<div><p data-editor-xml-path="0.0.0.0">Alpha Beta</p></div>';
+    const text = document.querySelector('p')!.firstChild!;
+    const selection = window.getSelection()!;
+    const range = document.createRange();
+    range.setStart(text, 5);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch({
+      type: 'editorLetter/setEditorLetter',
+      payload: {
+        letter: {
+          xmlContent: `<TEI xmlns="${EditorConstants.TEI_NS}"><text><body><div><p>Alpha Beta</p></div></body></text></TEI>`,
+        },
+      },
+    });
+
+    allTimesAvailableKeyHandleDefinitions['alt+ctrl+f'].openDialogAction?.(store.dispatch, store.getState as unknown as () => RootState);
+
+    expect(store.getState().editorLetter.dialogType).toBe(EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR);
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'caret:0:5',
+    });
+  });
+});
+
 describe('manuscript annotation shortcut definition', () => {
   it('opens Ctrl+Shift+D in creation mode without requiring a text selection', () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });

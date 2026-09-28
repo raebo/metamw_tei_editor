@@ -112,6 +112,11 @@ const menuItems: MenuItem[] = [
         keyHandleItem: filterKeyCombination('ctrl+shift+b'),
         active: true,
       },
+      {
+        label: i18n.t('editor:dialog.authorFootnote.contextAction'),
+        keyHandleItem: filterKeyCombination('alt+ctrl+f'),
+        active: true,
+      },
       { label: 'Vermerk Hinzufügen', keyHandleItem: null, active: false },
     ],
   },

@@ -44,6 +44,7 @@ import TableStructureDialog from './Components/TableStructureDialog';
 import GraphicStructureDialog from './Components/GraphicStructureDialog';
 import ForeignHandAnnotationDialog from './Components/ForeignHandAnnotationDialog';
 import ManuscriptAnnotationDialog from './Components/ManuscriptAnnotationDialog';
+import AuthorFootnoteDialog from './Components/AuthorFootnoteDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -64,6 +65,7 @@ export interface DefaultDialogProps {
 }
 
 const DialogTitles: Record<string, string> = {
+  [EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR]: t('editor:dialog.titles.authorFootnote'),
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: t('editor:dialog.titles.addGreetingsFormula'),
   [EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER]: t('editor:dialog.titles.setPrecursorLetter'),
   [EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER]: t('editor:dialog.titles.setSuccessorLetter'),
@@ -105,6 +107,7 @@ const DialogTitles: Record<string, string> = {
 };
 
 const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) => React.ReactNode> = {
+  [EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR]: (props) => <AuthorFootnoteDialog {...props} />,
   [EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER]: (props) => <ManagePreccSuccLetterDialog {...props} letterType={'precursor'} />,
   [EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER]: (props) => <ManagePreccSuccLetterDialog {...props} letterType={'successor'} />,
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: (props) => (

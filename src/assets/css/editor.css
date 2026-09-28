@@ -98,6 +98,44 @@ note.tei-foreign-hand-annotation:focus-visible {
 .tei-manuscript-annotation {
   cursor: pointer;
 }
+
+ref.tei-author-footnote-reference {
+  display: inline !important;
+  padding: 0 0.12em;
+  color: var(--secondary-color);
+  cursor: pointer;
+  font-size: 0.78em;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: underline;
+  vertical-align: super !important;
+}
+
+.tei-author-footnote {
+  display: block !important;
+  float: none !important;
+  margin: 0.45em 0 !important;
+  padding: 0.35em 0.5em;
+  border-left: 3px solid var(--secondary-color);
+  background: rgb(0 94 168 / 6%) !important;
+  cursor: pointer;
+  font-size: 0.9em !important;
+}
+
+.tei-author-footnote-content {
+  display: inline;
+}
+
+.tei-author-footnote-marker {
+  margin-right: 0.25em;
+}
+
+ref.tei-author-footnote-reference:focus-visible,
+.tei-author-footnote:focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
 .tei-figure-image {
   display: block;
   max-width: 100%;

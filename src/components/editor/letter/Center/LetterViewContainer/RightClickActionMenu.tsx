@@ -215,6 +215,40 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       setDisplayMenuItems([]);
       const targetNode = event.target as Node;
       const targetElement = targetNode.nodeType === Node.ELEMENT_NODE ? (targetNode as HTMLElement) : targetNode.parentElement;
+      const authorFootnoteTarget = targetElement?.closest<HTMLElement>('[data-editor-author-footnote-id]');
+      const authorFootnoteId = authorFootnoteTarget?.dataset.editorAuthorFootnoteId;
+      if (authorFootnoteId) {
+        const openAuthorFootnoteDialog = (elementKey: 'edit' | 'delete') => {
+          dispatch(
+            setEditorDialogAndReferenceThunk({
+              dialogType: EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR,
+              elementType: 'note',
+              elementXmlId: authorFootnoteId,
+              elementKey,
+            }),
+          );
+        };
+        setDisplayMenuItems([
+          {
+            label: t('editor:dialog.authorFootnote.editAction'),
+            action: () => openAuthorFootnoteDialog('edit'),
+          },
+          {
+            label: t('editor:dialog.authorFootnote.deleteAction'),
+            action: () => openAuthorFootnoteDialog('delete'),
+          },
+        ]);
+        props.setAnchorPosition({ top: event.clientY, left: event.clientX });
+        dispatch(
+          setEditorNodeClickedAndContentLeftRightThunk({
+            nodeClicked: true,
+            textIsMarked: false,
+            contentLeft: null,
+            contentRight: null,
+          }),
+        );
+        return;
+      }
       const manuscriptAnnotationMarker = targetElement?.closest<HTMLElement>('[data-editor-manuscript-annotation-reference]');
       const manuscriptAnnotationContent = targetElement?.closest<HTMLElement>('p.tei-manuscript-annotation[data-editor-xml-path]');
       const manuscriptSourcePath = manuscriptAnnotationContent?.dataset.editorXmlPath;
@@ -647,6 +681,21 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
         });
         isClickable = true;
+
+        menuItemsToAdd.push({
+          label: t('editor:dialog.authorFootnote.contextAction'),
+          keyShortcut: 'STRG+ALT+F',
+          action: () => {
+            dispatch(
+              setEditorDialogAndReferenceThunk({
+                dialogType: EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR,
+                elementType: annotationCaret!.elementType,
+                elementXmlId: annotationCaret!.sourcePath,
+                elementKey: annotationCaret!.reference,
+              }),
+            );
+          },
+        });
       }
 
       const foreignAnnotationXmlId =

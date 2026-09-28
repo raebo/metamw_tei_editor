@@ -86,6 +86,26 @@ describe('XMLDisplayParser', () => {
     expect(note).toHaveAttribute('data-editor-xml-path', '0.0.0.0.1');
   });
 
+  it('renders linked author-footnote references and content as selectable editor targets', () => {
+    const { container } = renderXml(
+      '<TEI><text><body><div><p>Text<ref type="Footnotes_reference" xml:id="fnr1" target="#fn1">*</ref></p></div><div type="footnotes_area"><note type="footnote" subtype="author" xml:id="fn1" target="fnr1" n="*">Author note</note></div></body></text></TEI>',
+    );
+
+    const reference = container.querySelector('ref');
+    const note = container.querySelector('.tei-author-footnote');
+    expect(reference).toHaveClass('tei-author-footnote-reference');
+    expect(reference).toHaveAttribute('target', '#fn1');
+    expect(reference).toHaveAttribute('data-editor-author-footnote-id', 'fn1');
+    expect(reference).toHaveAttribute('role', 'button');
+    expect(reference).toHaveTextContent('*');
+    expect(note?.tagName).toBe('DIV');
+    expect(note).toHaveClass('tei-author-footnote');
+    expect(note).toHaveAttribute('data-editor-author-footnote-id', 'fn1');
+    expect(note).toHaveAttribute('role', 'note');
+    expect(note).toHaveTextContent('editor:dialog.authorFootnote.contentLabel');
+    expect(note).toHaveTextContent('Author note');
+  });
+
   it('renders a clickable caret for each manuscript annotation', () => {
     const { container } = renderXml(
       '<TEI><teiHeader><fileDesc><sourceDesc><msDesc><physDesc><scriptDesc><p xml:id="script_annotation_1">Paper and ink</p><p>Legacy</p></scriptDesc></physDesc></msDesc></sourceDesc></fileDesc></teiHeader></TEI>',

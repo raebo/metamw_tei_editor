@@ -15,6 +15,7 @@
     "addRismEntry": "Add RISM Entry",
     "addTeiHeader": "Add/Edit Letter Header",
     "addWritingPart": "Add Writing Act",
+    "authorFootnote": "Edit author footnote",
     "attachmentAdd": "Add Attachment",
     "figureUpload": "Insert Image",
     "foreignHandAnnotation": "Edit foreign-hand annotation",
@@ -160,6 +161,31 @@
       "added": "The manuscript annotation was added.",
       "updated": "The manuscript annotation was updated.",
       "deleted": "The manuscript annotation was deleted."
+    }
+  },
+  "authorFootnote": {
+    "contextAction": "Add author footnote",
+    "editAction": "Edit footnote",
+    "deleteAction": "Delete footnote",
+    "contract": "The reference is inserted at the cursor and linked to a footnote in the footnote area. Both elements are always managed together.",
+    "markerHint": "Leave empty for an automatic number or enter the diplomatic sign, for example *.",
+    "anchorLabel": "Footnote reference {{marker}}",
+    "contentLabel": "Footnote {{marker}}:",
+    "fields": {
+      "marker": "Footnote marker (optional)",
+      "content": "Footnote text"
+    },
+    "buttons": {
+      "add": "Insert footnote",
+      "update": "Update",
+      "delete": "Delete",
+      "cancelDelete": "Cancel",
+      "confirmDelete": "Delete permanently"
+    },
+    "success": {
+      "added": "The footnote and its reference were added.",
+      "updated": "The footnote and its reference were updated.",
+      "deleted": "The footnote and its reference were deleted."
     }
   },
   "figureUpload": {

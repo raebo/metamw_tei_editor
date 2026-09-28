@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import FigureImage from './FigureImage';
 import { readFigureImageMap } from '@src/utils/editor/graphicStructure';
 import { manuscriptAnnotationReference } from '@src/utils/editor/manuscriptAnnotation';
+import { AUTHOR_FOOTNOTE_REFERENCE_TYPES } from '@src/utils/editor/authorFootnote';
 
 type XmlDisplayParserProps = {
   xmlContentRef: React.RefObject<HTMLDivElement> | null;
@@ -65,6 +66,7 @@ const ALLOWED_ATTRIBUTES = new Set([
   'role',
   'rows',
   'subtype',
+  'target',
   'type',
 ]);
 
@@ -191,7 +193,14 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
       }
 
       const isTableHead = tagName === 'head' && element.parentElement?.tagName.toLowerCase() === 'table';
-      const TagName = isTableHead ? 'caption' : (TABLE_ELEMENT_TAGS[tagName] ?? (element.tagName as keyof JSX.IntrinsicElements));
+      const isAuthorFootnote = tagName === 'note' && element.getAttribute('type') === 'footnote';
+      // Render author footnotes as regular HTML containers so legacy TEI print-layout
+      // rules for note[type="footnote"] cannot move their content out of view.
+      const TagName = isTableHead
+        ? 'caption'
+        : isAuthorFootnote
+          ? 'div'
+          : (TABLE_ELEMENT_TAGS[tagName] ?? (element.tagName as keyof JSX.IntrinsicElements));
 
       const attributes = Array.from(element.attributes).reduce(
         (acc, attr) => {
@@ -251,6 +260,20 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
 
       const isForeignHandAnnotation = tagName === 'note' && element.getAttribute('type') === 'note';
       const isManuscriptAnnotation = tagName === 'p' && element.parentElement?.localName.toLowerCase() === 'scriptdesc';
+      const isAuthorFootnoteReference =
+        tagName === 'ref' &&
+        AUTHOR_FOOTNOTE_REFERENCE_TYPES.includes(element.getAttribute('type') as (typeof AUTHOR_FOOTNOTE_REFERENCE_TYPES)[number]);
+      const authorFootnoteId = isAuthorFootnote
+        ? element.getAttribute('xml:id')
+        : isAuthorFootnoteReference
+          ? element.getAttribute('target')?.replace(/^#/, '')
+          : null;
+      const authorFootnoteMarker = isAuthorFootnote
+        ? (element.getAttribute('n') ?? '?')
+        : isAuthorFootnoteReference
+          ? element.textContent?.trim() || '?'
+          : null;
+      const authorFootnoteLabel = authorFootnoteId ? t('editor:dialog.authorFootnote.anchorLabel', { marker: authorFootnoteMarker }) : null;
       const annotationNumber = isForeignHandAnnotation ? element.getAttribute('n') : null;
       const annotationLabel = isForeignHandAnnotation
         ? t('editor:dialog.foreignHandAnnotation.anchorLabel', {
@@ -267,6 +290,14 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
       }
       if (isManuscriptAnnotation) {
         appendClassName(attributes, 'tei-manuscript-annotation');
+        attributes.contentEditable = false;
+      }
+      if (isAuthorFootnote || isAuthorFootnoteReference) {
+        appendClassName(attributes, isAuthorFootnote ? 'tei-author-footnote' : 'tei-author-footnote-reference');
+        attributes.tabIndex = 0;
+        attributes.role = isAuthorFootnote ? 'note' : 'button';
+        attributes['aria-label'] = authorFootnoteLabel;
+        attributes['data-editor-author-footnote-id'] = authorFootnoteId;
         attributes.contentEditable = false;
       }
 
@@ -294,6 +325,15 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
           <strong className="tei-foreign-hand-annotation-number">
             {t('editor:dialog.foreignHandAnnotation.contentLabel', {
               number: annotationNumber ?? '?',
+            })}
+          </strong>{' '}
+          {children}
+        </span>
+      ) : isAuthorFootnote ? (
+        <span className="tei-author-footnote-content">
+          <strong className="tei-author-footnote-marker">
+            {t('editor:dialog.authorFootnote.contentLabel', {
+              marker: authorFootnoteMarker,
             })}
           </strong>{' '}
           {children}
