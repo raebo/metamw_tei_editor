@@ -120,6 +120,23 @@ describe('XMLDisplayParser', () => {
     expect(foreign).toHaveTextContent('bonjour');
   });
 
+  it('renders only the abbreviation as a selectable target and keeps its expansion in the tooltip', () => {
+    const { container } = renderXml(
+      '<TEI><text><body><div><p><choice xml:id="choice_1"><abbr>S<hi rend="superscript">t</hi></abbr><expan style="hidden">"Saint"</expan></choice></p></div></body></text></TEI>',
+    );
+
+    const choice = container.querySelector('choice');
+    expect(choice).toHaveClass('tei-abbreviation');
+    expect(choice).toHaveAttribute('data-editor-abbreviation-reference', 'choice_1');
+    expect(choice).toHaveAttribute('role', 'button');
+    expect(choice).toHaveAttribute('contenteditable', 'false');
+    expect(choice).toHaveTextContent('St');
+    expect(choice).not.toHaveTextContent('Saint');
+    expect(choice).toHaveAttribute('title', 'editor:dialog.abbreviation.anchorLabel');
+    expect(choice?.querySelector('hi')).toHaveAttribute('rend', 'superscript');
+    expect(choice?.querySelector('expan')).toBeNull();
+  });
+
   it('renders cross-references and empty target anchors as visible editor targets', () => {
     const { container } = renderXml(
       '<TEI><text><body><div><p>See <ref xml:id="ref_1" target="https://example.test">website</ref><link xml:id="link_1" target="#one #two"/><anchor type="cross-reference" xml:id="anchor_1"/></p></div></body></text></TEI>',

@@ -409,3 +409,15 @@ ref.tei-author-footnote-reference:focus-visible,
   background-color: rgba(106, 27, 154, 0.12);
   outline: 1px solid rgba(106, 27, 154, 0.65);
 }
+
+.tei-abbreviation {
+  border-bottom: 2px dotted #1565c0;
+  cursor: pointer;
+  padding-bottom: 1px;
+}
+
+.tei-abbreviation:focus,
+.tei-abbreviation:hover {
+  background-color: rgba(21, 101, 192, 0.12);
+  outline: 1px solid rgba(21, 101, 192, 0.65);
+}

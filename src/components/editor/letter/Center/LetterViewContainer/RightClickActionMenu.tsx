@@ -130,6 +130,21 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           );
         },
       },
+      {
+        label: t('editor:dialog.abbreviation.contextAction'),
+        keyShortcut: 'ctrl+1',
+        action: () => {
+          props.setAnchorPosition(null);
+          dispatch(
+            setEditorDialogAndReferenceThunk({
+              dialogType: EditorConstants.dialogTypes.ABBREVIATION,
+              elementType: 'choice',
+              elementXmlId: '',
+              elementKey: 'create',
+            }),
+          );
+        },
+      },
       { type: 'divider' as const },
       {
         label: t('editor:dialog.crossReference.contextAction'),
@@ -259,6 +274,40 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const targetNode = event.target as Node;
       const targetElement = targetNode.nodeType === Node.ELEMENT_NODE ? (targetNode as HTMLElement) : targetNode.parentElement;
       const crossReferenceTarget = targetElement?.closest<HTMLElement>('[data-editor-cross-reference-id]');
+      const abbreviationTarget = targetElement?.closest<HTMLElement>('[data-editor-abbreviation-reference]');
+      const abbreviationReference = abbreviationTarget?.dataset.editorAbbreviationReference;
+      if (abbreviationReference) {
+        const openAbbreviationDialog = (elementKey: 'edit' | 'delete') => {
+          dispatch(
+            setEditorDialogAndReferenceThunk({
+              dialogType: EditorConstants.dialogTypes.ABBREVIATION,
+              elementType: 'choice',
+              elementXmlId: abbreviationReference,
+              elementKey,
+            }),
+          );
+        };
+        setDisplayMenuItems([
+          {
+            label: t('editor:dialog.abbreviation.editAction'),
+            action: () => openAbbreviationDialog('edit'),
+          },
+          {
+            label: t('editor:dialog.abbreviation.deleteAction'),
+            action: () => openAbbreviationDialog('delete'),
+          },
+        ]);
+        props.setAnchorPosition({ top: event.clientY, left: event.clientX });
+        dispatch(
+          setEditorNodeClickedAndContentLeftRightThunk({
+            nodeClicked: true,
+            textIsMarked: false,
+            contentLeft: null,
+            contentRight: null,
+          }),
+        );
+        return;
+      }
       const foreignTextTarget = targetElement?.closest<HTMLElement>('[data-editor-foreign-text-reference]');
       const foreignTextReference = foreignTextTarget?.dataset.editorForeignTextReference;
       if (foreignTextReference) {

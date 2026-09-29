@@ -146,6 +146,11 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
     if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as Element;
       const tagName = element.tagName.toLowerCase();
+      const abbreviationElement =
+        tagName === 'choice' ? Array.from(element.children).find((child) => child.localName.toLowerCase() === 'abbr') : undefined;
+      const expansionElement =
+        tagName === 'choice' ? Array.from(element.children).find((child) => child.localName.toLowerCase() === 'expan') : undefined;
+      const isAbbreviationChoice = Boolean(abbreviationElement && expansionElement);
       const isBodyCrossReferenceLink = tagName === 'link' && Boolean(element.closest('body')) && Boolean(element.getAttribute('target'));
 
       if (STRIP_WITH_CONTENT_TAGS.has(tagName) && !isBodyCrossReferenceLink) {
@@ -299,6 +304,18 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         attributes['aria-label'] = annotationLabel;
         attributes.contentEditable = false;
       }
+      if (isAbbreviationChoice) {
+        const rawExpansion = expansionElement?.textContent ?? '';
+        const expansion =
+          rawExpansion.startsWith('"') && rawExpansion.endsWith('"') && rawExpansion.length >= 2 ? rawExpansion.slice(1, -1) : rawExpansion;
+        appendClassName(attributes, 'tei-abbreviation');
+        attributes.tabIndex = 0;
+        attributes.role = 'button';
+        attributes.title = t('editor:dialog.abbreviation.anchorLabel', { expansion });
+        attributes['aria-label'] = attributes.title;
+        attributes['data-editor-abbreviation-reference'] = element.getAttribute('xml:id') ?? `path:${sourcePath.join('.')}`;
+        attributes.contentEditable = false;
+      }
       if (isForeignText) {
         appendClassName(attributes, 'tei-foreign-text');
         attributes.tabIndex = 0;
@@ -355,31 +372,35 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
               return sourceChild.nodeType === Node.ELEMENT_NODE && (sourceChild as Element).tagName.toLowerCase() === 'row';
             })
           : [];
-      const renderedChildren = isForeignHandAnnotation ? (
-        <span className="tei-foreign-hand-annotation-content">
-          <strong className="tei-foreign-hand-annotation-number">
-            {t('editor:dialog.foreignHandAnnotation.contentLabel', {
-              number: annotationNumber ?? '?',
-            })}
-          </strong>{' '}
-          {children}
-        </span>
-      ) : isAuthorFootnote ? (
-        <span className="tei-author-footnote-content">
-          <strong className="tei-author-footnote-marker">
-            {t('editor:dialog.authorFootnote.contentLabel', {
-              marker: authorFootnoteMarker,
-            })}
-          </strong>{' '}
-          {children}
-        </span>
-      ) : isCrossReference && children.length === 0 ? (
-        <span className="tei-cross-reference-marker" aria-hidden="true">
-          {tagName === 'anchor' ? '⚑' : '↗'} {crossReferenceTarget}
-        </span>
-      ) : (
-        children
-      );
+      const abbreviationChildIndex = abbreviationElement ? Array.from(element.childNodes).indexOf(abbreviationElement) : -1;
+      const renderedChildren =
+        isAbbreviationChoice && abbreviationChildIndex >= 0 ? (
+          children[abbreviationChildIndex]
+        ) : isForeignHandAnnotation ? (
+          <span className="tei-foreign-hand-annotation-content">
+            <strong className="tei-foreign-hand-annotation-number">
+              {t('editor:dialog.foreignHandAnnotation.contentLabel', {
+                number: annotationNumber ?? '?',
+              })}
+            </strong>{' '}
+            {children}
+          </span>
+        ) : isAuthorFootnote ? (
+          <span className="tei-author-footnote-content">
+            <strong className="tei-author-footnote-marker">
+              {t('editor:dialog.authorFootnote.contentLabel', {
+                marker: authorFootnoteMarker,
+              })}
+            </strong>{' '}
+            {children}
+          </span>
+        ) : isCrossReference && children.length === 0 ? (
+          <span className="tei-cross-reference-marker" aria-hidden="true">
+            {tagName === 'anchor' ? '⚑' : '↗'} {crossReferenceTarget}
+          </span>
+        ) : (
+          children
+        );
       const renderedElement = (
         <TagName key={`${element.tagName}-${Math.random()}`} {...attributes} data-editor-xml-path={sourcePath.join('.')}>
           {tagName === 'table' ? (

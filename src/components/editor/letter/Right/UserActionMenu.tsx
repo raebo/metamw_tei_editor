@@ -128,6 +128,11 @@ const menuItems: MenuItem[] = [
     keyHandleItem: null,
     subMenu: [
       {
+        label: i18n.t('editor:dialog.abbreviation.contextAction'),
+        keyHandleItem: filterKeyCombination('ctrl+1'),
+        active: true,
+      },
+      {
         label: i18n.t('editor:dialog.foreignText.contextAction'),
         keyHandleItem: filterKeyCombination('ctrl+alt+x'),
         active: true,

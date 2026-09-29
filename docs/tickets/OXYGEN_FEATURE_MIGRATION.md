@@ -319,7 +319,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009B – Abkürzungen auszeichnen und auflösen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P1
 - Oxygen-Aktion: `Abkürzungen`
 - Ausgangslage: Für Abkürzung und Auflösung existiert kein gemeinsamer Webeditor-Workflow.
@@ -328,6 +328,14 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
   die sichtbare Textform bleibt eindeutig; bestehende Inline-Auszeichnungen gehen nicht verloren.
 - Tests: Abkürzung mit Auflösung, Sonderzeichen, verschachtelte Auswahl, Bearbeitung, Entfernung und
   leere Auflösung.
+- Umsetzung: `Strg+1`, das Aktionsmenü und das Kontextmenü öffnen für eine markierte Abkürzung den
+  Auflösungsdialog. Oxygen-kompatibel wird `choice` mit sichtbarem `abbr` und einem verborgenen
+  `expan style="hidden"` erzeugt; die Auflösung steht wie in den Bestandsdaten in Anführungszeichen.
+  Vorhandene Inline-Auszeichnungen innerhalb von `abbr` bleiben beim Anlegen und Entfernen erhalten.
+  In der WYSIWYG-Ansicht ist ausschließlich die Abkürzung sichtbar, visuell markiert und per Links-
+  oder Rechtsklick bearbeitbar; die Auflösung erscheint zusätzlich im Tooltip. Bestandsstrukturen
+  ohne `xml:id` werden über ihren XML-Pfad aufgelöst und beim Bearbeiten mit einer stabilen ID ergänzt.
+  Leere Auflösungen sowie verschachtelte Abkürzungsstrukturen werden abgewiesen.
 
 ### OXY-009C – Bruchzahlen mit horizontaler Linie einfügen
 

@@ -38,6 +38,7 @@ const ContextMenuHarness = () => {
     const footnote = document.createElement('note');
     const crossReference = document.createElement('span');
     const foreignText = document.createElement('foreign');
+    const abbreviation = document.createElement('choice');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -73,13 +74,24 @@ const ContextMenuHarness = () => {
     crossReference.textContent = '↗ #target';
     foreignText.dataset.editorForeignTextReference = 'foreign_1';
     foreignText.textContent = 'bonjour';
+    abbreviation.dataset.editorAbbreviationReference = 'choice_1';
+    abbreviation.textContent = 'Ch';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
     body.appendChild(div);
     text.appendChild(body);
     tei.appendChild(text);
-    xmlContentRef.current.append(tei, manuscriptCaret, manuscriptAnnotation, footnoteReference, footnote, crossReference, foreignText);
+    xmlContentRef.current.append(
+      tei,
+      manuscriptCaret,
+      manuscriptAnnotation,
+      footnoteReference,
+      footnote,
+      crossReference,
+      foreignText,
+      abbreviation,
+    );
   }, []);
 
   return (
@@ -661,6 +673,39 @@ describe('RightClickActionMenu figure upload action', () => {
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'foreign',
       elementXmlId: 'foreign_1',
+      elementKey: mode,
+    });
+  });
+
+  it.each([
+    [/Abkürzung bearbeiten|Edit abbreviation/, 'edit'],
+    [/Abkürzungsauszeichnung löschen|Remove abbreviation markup/, 'delete'],
+  ] as const)('shows only the abbreviation action %s on its text', async (label, mode) => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('[data-editor-abbreviation-reference]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    const selectedAction = await screen.findByRole('menuitem', { name: label });
+    expect(screen.getAllByRole('menuitem')).toHaveLength(2);
+    fireEvent.click(selectedAction);
+
+    expect(store.getState().editorLetter.dialogType).toBe('ABBREVIATION');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'choice',
+      elementXmlId: 'choice_1',
       elementKey: mode,
     });
   });

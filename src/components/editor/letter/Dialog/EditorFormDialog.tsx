@@ -47,6 +47,7 @@ import ManuscriptAnnotationDialog from './Components/ManuscriptAnnotationDialog'
 import AuthorFootnoteDialog from './Components/AuthorFootnoteDialog';
 import CrossReferenceDialog from './Components/CrossReferenceDialog';
 import ForeignTextDialog from './Components/ForeignTextDialog';
+import AbbreviationDialog from './Components/AbbreviationDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -67,6 +68,7 @@ export interface DefaultDialogProps {
 }
 
 const DialogTitles: Record<string, string> = {
+  [EditorConstants.dialogTypes.ABBREVIATION]: t('editor:dialog.titles.abbreviation'),
   [EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR]: t('editor:dialog.titles.authorFootnote'),
   [EditorConstants.dialogTypes.CROSS_REFERENCE]: t('editor:dialog.titles.crossReference'),
   [EditorConstants.dialogTypes.FOREIGN_TEXT]: t('editor:dialog.titles.foreignText'),
@@ -111,6 +113,7 @@ const DialogTitles: Record<string, string> = {
 };
 
 const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) => React.ReactNode> = {
+  [EditorConstants.dialogTypes.ABBREVIATION]: (props) => <AbbreviationDialog {...props} />,
   [EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR]: (props) => <AuthorFootnoteDialog {...props} />,
   [EditorConstants.dialogTypes.CROSS_REFERENCE]: (props) => <CrossReferenceDialog {...props} />,
   [EditorConstants.dialogTypes.FOREIGN_TEXT]: (props) => <ForeignTextDialog {...props} />,

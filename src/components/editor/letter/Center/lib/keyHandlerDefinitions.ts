@@ -155,6 +155,30 @@ const openForeignTextDialog = (dispatch: AppDispatch, getState: () => RootState)
   );
 };
 
+const openAbbreviationDialog = (dispatch: AppDispatch, getState: () => RootState): void => {
+  const xmlContent = getState().editorLetter.letter.xmlContent;
+  if (!xmlContent) {
+    enqueueSnackbar('Kein Brieftext geladen.', { variant: 'error' });
+    return;
+  }
+  const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(xmlContent);
+  const markedSelection = Array.from(xmlDoc.getElementsByTagNameNS('*', 'span')).some((element) =>
+    (element.getAttribute('class') ?? '').split(/\s+/).includes('marked'),
+  );
+  if (!markedSelection) {
+    enqueueSnackbar('Bitte markieren Sie zuerst die Abkürzung.', { variant: 'error' });
+    return;
+  }
+  dispatch(
+    setEditorDialogAndReferenceThunk({
+      dialogType: EditorConstants.dialogTypes.ABBREVIATION,
+      elementType: 'choice',
+      elementXmlId: '',
+      elementKey: 'create',
+    }),
+  );
+};
+
 export const filterForKeyHandleDefinitions = (keyHandleDefinitions: Record<string, EditorKeyHandleItem>, keyCombination: string) => {
   const filteredKeyHandle = Object.values(keyHandleDefinitions).filter((item) => item.key === keyCombination)[0];
 
@@ -479,6 +503,13 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
 };
 
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {
+  'ctrl+1': {
+    key: 'ctrl+1',
+    description: 'Abkürzung auszeichnen und auflösen',
+    component: null,
+    action: null,
+    openDialogAction: openAbbreviationDialog,
+  },
   'ctrl+alt+x': {
     key: 'ctrl+alt+x',
     description: 'Fremdsprachigen Text auszeichnen',

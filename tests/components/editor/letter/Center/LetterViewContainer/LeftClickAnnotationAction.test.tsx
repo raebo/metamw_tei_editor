@@ -31,6 +31,9 @@ const Harness = () => {
         <span role="button" data-editor-foreign-text-reference="foreign_1" aria-label="Fremdsprachiger Text">
           bonjour
         </span>
+        <span role="button" data-editor-abbreviation-reference="choice_1" aria-label="Abkürzung – Auflösung: Church">
+          Ch
+        </span>
       </div>
       <LeftClickAnnotationAction xmlContentRef={xmlContentRef} setLetterState={jest.fn<void, [LetterState]>()} />
     </>
@@ -126,6 +129,24 @@ describe('LeftClickAnnotationAction', () => {
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'foreign',
       elementXmlId: 'foreign_1',
+      elementKey: 'edit',
+    });
+  });
+
+  it('opens abbreviation markup from its visible text', () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    render(
+      <Provider store={store}>
+        <Harness />
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abkürzung – Auflösung: Church' }));
+
+    expect(store.getState().editorLetter.dialogType).toBe('ABBREVIATION');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'choice',
+      elementXmlId: 'choice_1',
       elementKey: 'edit',
     });
   });

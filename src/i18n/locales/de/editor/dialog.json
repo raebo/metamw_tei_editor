@@ -6,6 +6,7 @@
     }
   },
   "titles": {
+    "abbreviation": "Abkürzung bearbeiten",
     "addGreetingsFormula": "Begrüßungsformel Hinzufügen",
     "addNewLetter": "Neuen Brief Hinzufügen",
     "addNote": "Kommentar Hinzufügen",
@@ -134,6 +135,35 @@
       "added": "Der fremdsprachige Text wurde ausgezeichnet.",
       "updated": "Die Sprachauszeichnung wurde aktualisiert.",
       "deleted": "Die Sprachauszeichnung wurde entfernt."
+    }
+  },
+  "abbreviation": {
+    "contextAction": "Abkürzung auszeichnen und auflösen",
+    "editAction": "Abkürzung bearbeiten",
+    "deleteAction": "Abkürzungsauszeichnung löschen",
+    "anchorLabel": "Abkürzung – Auflösung: {{expansion}}",
+    "contract": "TEI-Modell: Die markierte Abkürzung wird als abbr in choice gespeichert. Die ausgeschriebene Form wird Oxygen-kompatibel in einem verborgenen expan-Element abgelegt.",
+    "fields": {
+      "expansion": "Vollform oder Übersetzung der Abkürzung"
+    },
+    "errors": {
+      "expansionRequired": "Bitte geben Sie die Vollform oder Übersetzung der Abkürzung ein.",
+      "selectionMissing": "Die markierte Abkürzung konnte nicht gefunden werden.",
+      "selectionNested": "Die Auswahl enthält bereits eine Abkürzung oder liegt innerhalb einer Abkürzung.",
+      "elementMissing": "Die Abkürzungsauszeichnung konnte nicht gefunden werden.",
+      "structureInvalid": "Die vorhandene Abkürzung besitzt keine gültige choice-/abbr-/expan-Struktur."
+    },
+    "buttons": {
+      "add": "Abkürzung auszeichnen",
+      "update": "Aktualisieren",
+      "delete": "Löschen",
+      "cancelDelete": "Abbrechen",
+      "confirmDelete": "Endgültig löschen"
+    },
+    "success": {
+      "added": "Die Abkürzung wurde ausgezeichnet.",
+      "updated": "Die Auflösung wurde aktualisiert.",
+      "deleted": "Die Abkürzungsauszeichnung wurde entfernt."
     }
   },
   "foreignHandAnnotation": {

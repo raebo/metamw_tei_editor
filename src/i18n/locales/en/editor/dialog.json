@@ -6,6 +6,7 @@
     }
   },
   "titles": {
+    "abbreviation": "Edit abbreviation",
     "addGreetingsFormula": "Add Greeting Formula",
     "addNewLetter": "Add New Letter",
     "addNote": "Add Comment",
@@ -134,6 +135,35 @@
       "added": "The foreign-language text was marked.",
       "updated": "The language markup was updated.",
       "deleted": "The language markup was removed."
+    }
+  },
+  "abbreviation": {
+    "contextAction": "Mark and expand abbreviation",
+    "editAction": "Edit abbreviation",
+    "deleteAction": "Remove abbreviation markup",
+    "anchorLabel": "Abbreviation – expansion: {{expansion}}",
+    "contract": "TEI model: The selected abbreviation is stored as abbr inside choice. Its expanded form is stored in an Oxygen-compatible hidden expan element.",
+    "fields": {
+      "expansion": "Expanded form or translation"
+    },
+    "errors": {
+      "expansionRequired": "Enter the expanded form or translation of the abbreviation.",
+      "selectionMissing": "The selected abbreviation could not be found.",
+      "selectionNested": "The selection already contains an abbreviation or is inside an abbreviation.",
+      "elementMissing": "The abbreviation markup could not be found.",
+      "structureInvalid": "The existing abbreviation does not have a valid choice/abbr/expan structure."
+    },
+    "buttons": {
+      "add": "Mark abbreviation",
+      "update": "Update",
+      "delete": "Delete",
+      "cancelDelete": "Cancel",
+      "confirmDelete": "Delete permanently"
+    },
+    "success": {
+      "added": "The abbreviation was marked.",
+      "updated": "The expansion was updated.",
+      "deleted": "The abbreviation markup was removed."
     }
   },
   "foreignHandAnnotation": {
