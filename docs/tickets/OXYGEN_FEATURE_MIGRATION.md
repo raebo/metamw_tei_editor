@@ -294,22 +294,201 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
   normalisiert, relative und externe URLs getrennt validiert. Da `Strg+Shift+Z` dem historischen
   Oxygen-Kürzel für den generischen Verweisstart entspricht, verwendet „Vorwärts“ nun `Strg+Y`.
 
-### OXY-009 – Sprach- und typografische Sonderauszeichnungen
+### OXY-009A – Fremdsprachigen Text auszeichnen
 
 - Status: Offen
 - Priorität: P1
-- Oxygen-Aktionen: `Fremdsprachiger Text`, `Abkürzungen`, `Bruchzahlen horizontale Linie`,
-  `Bruchzahlen vertikaler Slash`, `Bruchzahlen vertikal ohne Slash`, `Hochstellung`,
-  `Tiefstellung`, `Unterstrich auf Grundline`, `Latintype`, `Antiqua in Drucken`,
-  `Frakturschrift in Drucken`, `Gesperrte Schrift in Drucken`, `Kapitälchen in Drucken`,
-  `Zeilenumbruch`, `Sonderzeichen einfügen für Mehrfachauszeichnung`,
-  `Der Brief ist vollständig in lateinischen Buchstaben ...`
-- Ausgangslage: Der Schnellformatierer unterstützt nur fett, kursiv und einfache Unterstreichung.
-- Ziel: Die fehlenden sprachlichen und typografischen TEI-Auszeichnungen über ein konsistentes
-  Formatierungsmenü bereitstellen.
-- Akzeptanzkriterien: Attribute und verschachtelte Strukturen entsprechen den FMB-C-Vorgaben;
-  Mehrfachauszeichnungen verändern vorhandenes Markup nicht unbeabsichtigt.
-- Tests: Jede Formatklasse, verschachtelte Auswahl, Rücknahme und kollabierte Auswahl.
+- Oxygen-Aktion: `Fremdsprachiger Text`
+- Ausgangslage: Die kombinierte Oxygen-Aktion für fremdsprachigen Text und dessen Übersetzung fehlt
+  im Webeditor.
+- Ziel: Eine markierte Textpassage mit den von FMB-C vorgesehenen Sprachangaben auszeichnen und die
+  zugehörige Übersetzung erfassen beziehungsweise ergänzen.
+- Akzeptanzkriterien: Sprache und Übersetzung werden in der vorgegebenen TEI-Struktur gespeichert;
+  vorhandene Auszeichnungen innerhalb der Auswahl bleiben erhalten; fehlende Pflichtangaben und
+  nicht unterstützte Sprachen werden verständlich abgewiesen.
+- Tests: Sprache mit und ohne Übersetzung, verschachtelte Auszeichnung, Bearbeitung, Entfernung und
+  ungültige Eingaben.
+
+### OXY-009B – Abkürzungen auszeichnen und auflösen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Abkürzungen`
+- Ausgangslage: Für Abkürzung und Auflösung existiert kein gemeinsamer Webeditor-Workflow.
+- Ziel: Eine markierte Abkürzung zusammen mit ihrer ausgeschriebenen Form gemäß FMB-C erfassen.
+- Akzeptanzkriterien: Abkürzung und Auflösung werden als zusammengehörige TEI-Struktur gespeichert;
+  die sichtbare Textform bleibt eindeutig; bestehende Inline-Auszeichnungen gehen nicht verloren.
+- Tests: Abkürzung mit Auflösung, Sonderzeichen, verschachtelte Auswahl, Bearbeitung, Entfernung und
+  leere Auflösung.
+
+### OXY-009C – Bruchzahlen mit horizontaler Linie einfügen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Bruchzahlen horizontale Linie`
+- Ausgangslage: Die horizontale FMB-C-Bruchdarstellung kann am Cursor nicht erzeugt werden.
+- Ziel: Zähler und Nenner abfragen und die vorgesehene horizontale Bruchstruktur am Cursor einfügen.
+- Akzeptanzkriterien: Zähler, Nenner und Darstellungsvariante werden korrekt gespeichert; die
+  empfohlenen Abstände vor und nach dem Bruch werden eingehalten, ohne vorhandenen Text zu löschen.
+- Tests: Ein- und mehrstellige Werte, Einfügen zwischen Textknoten, Dokumentrand und fehlende Werte.
+
+### OXY-009D – Bruchzahlen mit vertikalem Slash einfügen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Bruchzahlen vertikaler Slash`
+- Ausgangslage: Die vertikale FMB-C-Bruchdarstellung mit Slash fehlt im Webeditor.
+- Ziel: Zähler und Nenner abfragen und als vertikalen Bruch mit Slash am Cursor einfügen.
+- Akzeptanzkriterien: Die erzeugte TEI-Struktur unterscheidet diese Variante eindeutig von den
+  beiden übrigen Bruchdarstellungen; der Cursor wird exakt auf die XML-Position abgebildet.
+- Tests: Ein- und mehrstellige Werte, Einfügen innerhalb eines Absatzes, Dokumentrand und fehlende
+  Werte.
+
+### OXY-009E – Vertikale Bruchzahlen ohne Slash einfügen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Bruchzahlen vertikal ohne Slash`
+- Ausgangslage: Die vertikale FMB-C-Bruchdarstellung ohne Slash fehlt im Webeditor.
+- Ziel: Zähler und Nenner abfragen und als vertikalen Bruch ohne Slash am Cursor einfügen.
+- Akzeptanzkriterien: Die erzeugte TEI-Struktur bildet ausschließlich die Variante ohne Slash ab;
+  die empfohlenen umgebenden Abstände werden erhalten beziehungsweise ergänzt.
+- Tests: Ein- und mehrstellige Werte, benachbarte Interpunktion, Dokumentrand und fehlende Werte.
+
+### OXY-009F – Hochstellung auszeichnen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Hochstellung`
+- Ausgangslage: Markierter Text kann nicht als Hochstellung nach FMB-C ausgezeichnet werden.
+- Ziel: Die markierte Passage über Schnellformatierer, Kontextmenü und `Strg+5` hochstellen.
+- Akzeptanzkriterien: Die vorgesehene TEI-Auszeichnung wird ohne Textverlust gesetzt und kann wieder
+  entfernt werden; verschachtelte Inline-Auszeichnungen bleiben intakt.
+- Tests: Ein Zeichen, mehrere Zeichen, verschachtelte Auswahl, Umschalten und ungültige Auswahl.
+
+### OXY-009G – Tiefstellung auszeichnen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Tiefstellung`
+- Ausgangslage: Markierter Text kann nicht als Tiefstellung nach FMB-C ausgezeichnet werden.
+- Ziel: Die markierte Passage über Schnellformatierer, Kontextmenü und `Strg+6` tiefstellen.
+- Akzeptanzkriterien: Die vorgesehene TEI-Auszeichnung wird ohne Textverlust gesetzt und kann wieder
+  entfernt werden; Hoch- und Tiefstellung bleiben semantisch unterscheidbar.
+- Tests: Ein Zeichen, mehrere Zeichen, verschachtelte Auswahl, Umschalten und ungültige Auswahl.
+
+### OXY-009H – Unterstrich auf der Grundlinie auszeichnen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Unterstrich auf Grundline`
+- Ausgangslage: Die vorhandene einfache Unterstreichung bildet die spezielle FMB-C-Variante nicht
+  eindeutig ab.
+- Ziel: Eine markierte Passage als Unterstrich auf der Grundlinie auszeichnen und diese Variante in
+  der WYSIWYG-Ansicht erkennbar darstellen.
+- Akzeptanzkriterien: Der genaue FMB-C-Attributwert wird gespeichert; andere Unterstreichungsarten
+  werden nicht unbeabsichtigt verändert; die Auszeichnung ist umkehrbar.
+- Tests: Einzelne und verschachtelte Auswahl, Abgrenzung zu vorhandener Unterstreichung, Umschalten
+  und Entfernung.
+
+### OXY-009I – Lateinische Schrift auszeichnen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Latintype`
+- Ausgangslage: Einzelne Passagen in lateinischer Schrift lassen sich nicht gesondert kennzeichnen.
+- Ziel: Markierten Text über Menü und `Strg+8` mit der vorgesehenen FMB-C-Latintype auszeichnen.
+- Akzeptanzkriterien: Die lokale Schriftauszeichnung ist von der Kennzeichnung eines vollständig
+  lateinisch geschriebenen Briefes getrennt; vorhandenes Inline-Markup bleibt erhalten.
+- Tests: Einzelwort, Passage, verschachtelte Auswahl, Umschalten und Abgrenzung zu OXY-009P.
+
+### OXY-009J – Antiqua in Drucken auszeichnen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Antiqua in Drucken`
+- Ausgangslage: Antiqua-Passagen in gedruckten Vorlagen können im Webeditor nicht ausgezeichnet
+  werden.
+- Ziel: Eine markierte Passage über Menü und `Strg+Alt+G` als Antiqua in Drucken kennzeichnen.
+- Akzeptanzkriterien: Der genaue FMB-C-Attributwert wird gesetzt, in der WYSIWYG-Ansicht dargestellt
+  und unabhängig von anderen Druckschriften wieder entfernt.
+- Tests: Einfache und verschachtelte Auswahl, Umschalten sowie Abgrenzung zu Fraktur und Latintype.
+
+### OXY-009K – Frakturschrift in Drucken auszeichnen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Frakturschrift in Drucken`
+- Ausgangslage: Fraktur-Passagen in gedruckten Vorlagen können im Webeditor nicht ausgezeichnet
+  werden.
+- Ziel: Eine markierte Passage über Menü und `Strg+Alt+H` als Frakturschrift kennzeichnen.
+- Akzeptanzkriterien: Der genaue FMB-C-Attributwert wird gesetzt, sichtbar dargestellt und
+  unabhängig von anderen Druckschriften wieder entfernt.
+- Tests: Einfache und verschachtelte Auswahl, Umschalten sowie Abgrenzung zu Antiqua.
+
+### OXY-009L – Gesperrte Schrift in Drucken auszeichnen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Gesperrte Schrift in Drucken`
+- Ausgangslage: Gesperrt gesetzte Druckpassagen können im Webeditor nicht semantisch markiert werden.
+- Ziel: Eine markierte Passage über Menü und `Strg+Alt+J` als gesperrte Schrift kennzeichnen.
+- Akzeptanzkriterien: Der FMB-C-Wert wird korrekt gespeichert und durch passende Buchstabenabstände
+  visualisiert, ohne den eigentlichen Text durch zusätzliche Leerzeichen zu verändern.
+- Tests: Wörter, Interpunktion, verschachtelte Auswahl, Umschalten und Entfernung.
+
+### OXY-009M – Kapitälchen in Drucken auszeichnen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Kapitälchen in Drucken`
+- Ausgangslage: Kapitälchen in gedruckten Vorlagen sind nicht als eigene Auszeichnung verfügbar.
+- Ziel: Eine markierte Passage über Menü und `Strg+K` als Kapitälchen kennzeichnen.
+- Akzeptanzkriterien: Der genaue FMB-C-Wert wird gespeichert und in der WYSIWYG-Ansicht als
+  Kapitälchen dargestellt; Groß-/Kleinschreibung des Quelltexts bleibt unverändert.
+- Tests: Gemischte Schreibweise, verschachtelte Auswahl, Umschalten und Entfernung.
+
+### OXY-009N – Zeilenumbruch einfügen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Zeilenumbruch`
+- Ausgangslage: Ein FMB-C-Zeilenumbruch kann insbesondere in `title` und `incipit` nicht gezielt am
+  Cursor eingefügt werden.
+- Ziel: Über Menü und `Strg+W` ein `lb` an der exakten Cursorposition in den zulässigen
+  Header-Kontexten einfügen.
+- Akzeptanzkriterien: Der Text wird am Cursor verlustfrei geteilt; unzulässige Positionen werden
+  abgewiesen; der Umbruch ist in WYSIWYG sichtbar, auswählbar und löschbar.
+- Tests: `title`, `incipit`, Textanfang, Textende, verschachtelte Inline-Elemente und unzulässiger
+  Kontext.
+
+### OXY-009O – Stellvertreterzeichen für Mehrfachauszeichnungen einfügen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Sonderzeichen einfügen für Mehrfachauszeichnung`
+- Ausgangslage: Dieselbe verdeckte Textpassage kann nicht unmittelbar mehreren unterschiedlichen
+  Auszeichnungskategorien zugeordnet werden.
+- Ziel: Das FMB-C-Stellvertreterzeichen `ↂ` hinter einer bereits ausgezeichneten Passage einfügen,
+  damit es anschließend mit einer weiteren Kategorie ausgezeichnet werden kann.
+- Akzeptanzkriterien: Das Zeichen wird an der exakten Position und ohne Veränderung der vorhandenen
+  Auszeichnung eingefügt; mehrere Stellvertreter hintereinander sind möglich und auswählbar.
+- Tests: Einmalige und wiederholte Einfügung, verschachtelte Ausgangspassage, Dokumentrand und
+  anschließende weitere Auszeichnung.
+
+### OXY-009P – Vollständig lateinisch geschriebenen Brief kennzeichnen
+
+- Status: Offen
+- Priorität: P1
+- Oxygen-Aktion: `Der Brief ist vollständig in lateinischen Buchstaben ...`
+- Ausgangslage: Die dokumentweite FMB-C-Kennzeichnung für vollständig lateinisch geschriebene
+  Briefe fehlt.
+- Ziel: Die vorgesehene Kennzeichnung auf den vollständigen Brief anwenden und wieder entfernen,
+  ohne jede Textpassage einzeln auszeichnen zu müssen.
+- Akzeptanzkriterien: Die Kennzeichnung wird genau einmal am vorgesehenen TEI-Element gespeichert;
+  wiederholtes Auslösen erzeugt keine Duplikate; lokale Latintype-Auszeichnungen bleiben erhalten.
+- Tests: Setzen, erneutes Setzen, Entfernen, bestehende lokale Latintype und unvollständige
+  Dokumentstruktur.
 
 ### OXY-010 – Rekonstruierten Briefinhalt auszeichnen
 
