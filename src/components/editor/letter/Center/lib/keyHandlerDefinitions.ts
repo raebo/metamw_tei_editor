@@ -131,6 +131,30 @@ const crossReferenceShortcut = (key: string, description: string, kind: CrossRef
   openDialogAction: openCrossReferenceDialog(kind),
 });
 
+const openForeignTextDialog = (dispatch: AppDispatch, getState: () => RootState): void => {
+  const xmlContent = getState().editorLetter.letter.xmlContent;
+  if (!xmlContent) {
+    enqueueSnackbar('Kein Brieftext geladen.', { variant: 'error' });
+    return;
+  }
+  const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(xmlContent);
+  const markedSelection = Array.from(xmlDoc.getElementsByTagNameNS('*', 'span')).some((element) =>
+    (element.getAttribute('class') ?? '').split(/\s+/).includes('marked'),
+  );
+  if (!markedSelection) {
+    enqueueSnackbar('Bitte markieren Sie zuerst den fremdsprachigen Text.', { variant: 'error' });
+    return;
+  }
+  dispatch(
+    setEditorDialogAndReferenceThunk({
+      dialogType: EditorConstants.dialogTypes.FOREIGN_TEXT,
+      elementType: 'foreign',
+      elementXmlId: '',
+      elementKey: 'create',
+    }),
+  );
+};
+
 export const filterForKeyHandleDefinitions = (keyHandleDefinitions: Record<string, EditorKeyHandleItem>, keyCombination: string) => {
   const filteredKeyHandle = Object.values(keyHandleDefinitions).filter((item) => item.key === keyCombination)[0];
 
@@ -455,6 +479,13 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
 };
 
 export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleItem> = {
+  'ctrl+alt+x': {
+    key: 'ctrl+alt+x',
+    description: 'Fremdsprachigen Text auszeichnen',
+    component: null,
+    action: null,
+    openDialogAction: openForeignTextDialog,
+  },
   'ctrl+alt+r': crossReferenceShortcut('ctrl+alt+r', 'Querverweis auf Registereinträge', 'register'),
   'ctrl+shift+r': crossReferenceShortcut('ctrl+shift+r', 'Querverweis auf Briefauszeichnungen', 'letter-annotation'),
   'ctrl+alt+u': crossReferenceShortcut('ctrl+alt+u', 'Querverweis auf externe URL', 'external-url'),

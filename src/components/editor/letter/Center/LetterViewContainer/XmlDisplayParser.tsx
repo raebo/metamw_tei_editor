@@ -262,6 +262,7 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
       }
 
       const isForeignHandAnnotation = tagName === 'note' && element.getAttribute('type') === 'note';
+      const isForeignText = tagName === 'foreign';
       const isManuscriptAnnotation = tagName === 'p' && element.parentElement?.localName.toLowerCase() === 'scriptdesc';
       const isAuthorFootnoteReference =
         tagName === 'ref' &&
@@ -296,6 +297,17 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         attributes.tabIndex = 0;
         attributes.role = 'note';
         attributes['aria-label'] = annotationLabel;
+        attributes.contentEditable = false;
+      }
+      if (isForeignText) {
+        appendClassName(attributes, 'tei-foreign-text');
+        attributes.tabIndex = 0;
+        attributes.role = 'button';
+        attributes.title = t('editor:dialog.foreignText.anchorLabel', {
+          language: element.getAttribute('xml:lang') ?? '?',
+        });
+        attributes['aria-label'] = attributes.title;
+        attributes['data-editor-foreign-text-reference'] = element.getAttribute('xml:id') ?? `path:${sourcePath.join('.')}`;
         attributes.contentEditable = false;
       }
       if (isManuscriptAnnotation) {

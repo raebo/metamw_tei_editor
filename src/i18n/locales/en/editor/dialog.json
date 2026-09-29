@@ -17,6 +17,7 @@
     "addWritingPart": "Add Writing Act",
     "authorFootnote": "Edit author footnote",
     "crossReference": "Edit cross-reference",
+    "foreignText": "Edit foreign-language text",
     "attachmentAdd": "Add Attachment",
     "figureUpload": "Insert Image",
     "foreignHandAnnotation": "Edit foreign-hand annotation",
@@ -94,6 +95,46 @@
       "delete": "The comment could not be deleted: {{reason}}"
     },
     "legacyValue": "Unknown existing value: {{value}}"
+  },
+  "foreignText": {
+    "formattingMenu": "Language and typographic markup",
+    "contextAction": "Mark foreign-language text",
+    "editAction": "Edit foreign-language text",
+    "deleteAction": "Remove foreign-language markup",
+    "anchorLabel": "Foreign-language text ({{language}})",
+    "contract": "TEI model: The selected passage is wrapped in foreign; xml:lang contains the selected language code. A translation can subsequently be added using the “Translation” comment type.",
+    "legacyLanguage": "Existing value: {{language}}",
+    "fields": {
+      "language": "Language"
+    },
+    "errors": {
+      "languageRequired": "Enter a language tag.",
+      "languageInvalid": "Enter a valid IANA language tag, for example fr or de-CH.",
+      "selectionMissing": "The selected text passage could not be found.",
+      "selectionNested": "The text is already marked as foreign-language text. Edit the existing markup instead.",
+      "elementMissing": "The foreign-language markup could not be found."
+    },
+    "languages": {
+      "fr": "French",
+      "en": "English",
+      "it": "Italian",
+      "es": "Spanish",
+      "grc": "Ancient Greek",
+      "la": "Latin",
+      "he": "Hebrew"
+    },
+    "buttons": {
+      "add": "Add markup",
+      "update": "Update",
+      "delete": "Delete",
+      "cancelDelete": "Cancel",
+      "confirmDelete": "Delete permanently"
+    },
+    "success": {
+      "added": "The foreign-language text was marked.",
+      "updated": "The language markup was updated.",
+      "deleted": "The language markup was removed."
+    }
   },
   "foreignHandAnnotation": {
     "contextAction": "Add foreign-hand annotation",

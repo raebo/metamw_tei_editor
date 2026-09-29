@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import {
   allTimesAvailableKeyHandleDefinitions,
+  contentMarkedKeyHandleDefinitions,
   filterForKeyHandleDefinitions,
   generateKeyHandleAction,
 } from '../Center/lib/keyHandlerDefinitions';
@@ -33,7 +34,7 @@ type MenuItem = {
 
 const filterKeyCombination = (key: string): EditorKeyHandleItem | null => {
   try {
-    return filterForKeyHandleDefinitions(allTimesAvailableKeyHandleDefinitions, key);
+    return filterForKeyHandleDefinitions({ ...allTimesAvailableKeyHandleDefinitions, ...contentMarkedKeyHandleDefinitions }, key);
   } catch (error) {
     enqueueSnackbar(`Error while filtering key combination "${key} error: ${MiscUtils.misc.getErrorMessage(error)}`, { variant: 'error' });
   }
@@ -118,6 +119,19 @@ const menuItems: MenuItem[] = [
         active: true,
       },
       { label: 'Vermerk Hinzufügen', keyHandleItem: null, active: false },
+    ],
+  },
+  {
+    label: i18n.t('editor:dialog.foreignText.formattingMenu'),
+    active: true,
+    hasSubMenu: true,
+    keyHandleItem: null,
+    subMenu: [
+      {
+        label: i18n.t('editor:dialog.foreignText.contextAction'),
+        keyHandleItem: filterKeyCombination('ctrl+alt+x'),
+        active: true,
+      },
     ],
   },
   {

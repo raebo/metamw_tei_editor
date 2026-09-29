@@ -397,3 +397,15 @@ ref.tei-author-footnote-reference:focus-visible,
 .tei-table-cell[data-tei-role='label'] {
   font-weight: 700;
 }
+
+.tei-foreign-text {
+  border-bottom: 2px dotted #6a1b9a;
+  cursor: pointer;
+  padding-bottom: 1px;
+}
+
+.tei-foreign-text:focus,
+.tei-foreign-text:hover {
+  background-color: rgba(106, 27, 154, 0.12);
+  outline: 1px solid rgba(106, 27, 154, 0.65);
+}

@@ -37,6 +37,7 @@ const ContextMenuHarness = () => {
     const footnoteReference = document.createElement('ref');
     const footnote = document.createElement('note');
     const crossReference = document.createElement('span');
+    const foreignText = document.createElement('foreign');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -70,13 +71,15 @@ const ContextMenuHarness = () => {
     footnote.textContent = 'Author note';
     crossReference.dataset.editorCrossReferenceId = 'link_1';
     crossReference.textContent = '↗ #target';
+    foreignText.dataset.editorForeignTextReference = 'foreign_1';
+    foreignText.textContent = 'bonjour';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
     body.appendChild(div);
     text.appendChild(body);
     tei.appendChild(text);
-    xmlContentRef.current.append(tei, manuscriptCaret, manuscriptAnnotation, footnoteReference, footnote, crossReference);
+    xmlContentRef.current.append(tei, manuscriptCaret, manuscriptAnnotation, footnoteReference, footnote, crossReference, foreignText);
   }, []);
 
   return (
@@ -625,6 +628,39 @@ describe('RightClickActionMenu figure upload action', () => {
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'span',
       elementXmlId: 'link_1',
+      elementKey: mode,
+    });
+  });
+
+  it.each([
+    [/Fremdsprachigen Text bearbeiten|Edit foreign-language text/, 'edit'],
+    [/Fremdsprachige Auszeichnung löschen|Remove foreign-language markup/, 'delete'],
+  ] as const)('shows only the foreign-text action %s on its text', async (label, mode) => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('[data-editor-foreign-text-reference]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    const selectedAction = await screen.findByRole('menuitem', { name: label });
+    expect(screen.getAllByRole('menuitem')).toHaveLength(2);
+    fireEvent.click(selectedAction);
+
+    expect(store.getState().editorLetter.dialogType).toBe('FOREIGN_TEXT');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'foreign',
+      elementXmlId: 'foreign_1',
       elementKey: mode,
     });
   });

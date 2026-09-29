@@ -106,6 +106,20 @@ describe('XMLDisplayParser', () => {
     expect(note).toHaveTextContent('Author note');
   });
 
+  it('renders foreign-language text as a selectable editor target', () => {
+    const { container } = renderXml(
+      '<TEI><text><body><div><p><foreign xml:id="foreign_1" xml:lang="fr">bonjour</foreign></p></div></body></text></TEI>',
+    );
+
+    const foreign = container.querySelector('foreign');
+    expect(foreign).toHaveClass('tei-foreign-text');
+    expect(foreign).toHaveAttribute('xml:lang', 'fr');
+    expect(foreign).toHaveAttribute('data-editor-foreign-text-reference', 'foreign_1');
+    expect(foreign).toHaveAttribute('role', 'button');
+    expect(foreign).toHaveAttribute('contenteditable', 'false');
+    expect(foreign).toHaveTextContent('bonjour');
+  });
+
   it('renders cross-references and empty target anchors as visible editor targets', () => {
     const { container } = renderXml(
       '<TEI><text><body><div><p>See <ref xml:id="ref_1" target="https://example.test">website</ref><link xml:id="link_1" target="#one #two"/><anchor type="cross-reference" xml:id="anchor_1"/></p></div></body></text></TEI>',

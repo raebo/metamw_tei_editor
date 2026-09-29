@@ -46,6 +46,7 @@ import ForeignHandAnnotationDialog from './Components/ForeignHandAnnotationDialo
 import ManuscriptAnnotationDialog from './Components/ManuscriptAnnotationDialog';
 import AuthorFootnoteDialog from './Components/AuthorFootnoteDialog';
 import CrossReferenceDialog from './Components/CrossReferenceDialog';
+import ForeignTextDialog from './Components/ForeignTextDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -68,6 +69,7 @@ export interface DefaultDialogProps {
 const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR]: t('editor:dialog.titles.authorFootnote'),
   [EditorConstants.dialogTypes.CROSS_REFERENCE]: t('editor:dialog.titles.crossReference'),
+  [EditorConstants.dialogTypes.FOREIGN_TEXT]: t('editor:dialog.titles.foreignText'),
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: t('editor:dialog.titles.addGreetingsFormula'),
   [EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER]: t('editor:dialog.titles.setPrecursorLetter'),
   [EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER]: t('editor:dialog.titles.setSuccessorLetter'),
@@ -111,6 +113,7 @@ const DialogTitles: Record<string, string> = {
 const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) => React.ReactNode> = {
   [EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR]: (props) => <AuthorFootnoteDialog {...props} />,
   [EditorConstants.dialogTypes.CROSS_REFERENCE]: (props) => <CrossReferenceDialog {...props} />,
+  [EditorConstants.dialogTypes.FOREIGN_TEXT]: (props) => <ForeignTextDialog {...props} />,
   [EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER]: (props) => <ManagePreccSuccLetterDialog {...props} letterType={'precursor'} />,
   [EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER]: (props) => <ManagePreccSuccLetterDialog {...props} letterType={'successor'} />,
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: (props) => (

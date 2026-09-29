@@ -176,6 +176,29 @@ describe('cross-reference shortcut definitions', () => {
   });
 });
 
+describe('foreign-text shortcut definition', () => {
+  it('opens Ctrl+Alt+X for the persisted marked selection', () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch({
+      type: 'editorLetter/setEditorLetter',
+      payload: {
+        letter: {
+          xmlContent: `<TEI xmlns="${EditorConstants.TEI_NS}"><text><body><div><p><span class="marked">Bonjour</span></p></div></body></text></TEI>`,
+        },
+      },
+    });
+
+    contentMarkedKeyHandleDefinitions['ctrl+alt+x'].openDialogAction?.(store.dispatch, store.getState as unknown as () => RootState);
+
+    expect(store.getState().editorLetter.dialogType).toBe(EditorConstants.dialogTypes.FOREIGN_TEXT);
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'foreign',
+      elementXmlId: '',
+      elementKey: 'create',
+    });
+  });
+});
+
 describe('manuscript annotation shortcut definition', () => {
   it('opens Ctrl+Shift+D in creation mode without requiring a text selection', () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });

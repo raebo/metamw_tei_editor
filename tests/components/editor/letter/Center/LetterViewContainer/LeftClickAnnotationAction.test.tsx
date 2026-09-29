@@ -28,6 +28,9 @@ const Harness = () => {
         <span role="button" data-editor-cross-reference-id="link_1" aria-label="Querverweis auf #target">
           ↗ #target
         </span>
+        <span role="button" data-editor-foreign-text-reference="foreign_1" aria-label="Fremdsprachiger Text">
+          bonjour
+        </span>
       </div>
       <LeftClickAnnotationAction xmlContentRef={xmlContentRef} setLetterState={jest.fn<void, [LetterState]>()} />
     </>
@@ -105,6 +108,24 @@ describe('LeftClickAnnotationAction', () => {
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'span',
       elementXmlId: 'link_1',
+      elementKey: 'edit',
+    });
+  });
+
+  it('opens foreign-language markup from its text', () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    render(
+      <Provider store={store}>
+        <Harness />
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Fremdsprachiger Text' }));
+
+    expect(store.getState().editorLetter.dialogType).toBe('FOREIGN_TEXT');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'foreign',
+      elementXmlId: 'foreign_1',
       elementKey: 'edit',
     });
   });

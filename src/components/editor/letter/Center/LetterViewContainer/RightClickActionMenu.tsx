@@ -116,6 +116,22 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       },
       { type: 'divider' as const },
       {
+        label: t('editor:dialog.foreignText.contextAction'),
+        keyShortcut: 'ctrl+alt+x',
+        action: () => {
+          props.setAnchorPosition(null);
+          dispatch(
+            setEditorDialogAndReferenceThunk({
+              dialogType: EditorConstants.dialogTypes.FOREIGN_TEXT,
+              elementType: 'foreign',
+              elementXmlId: '',
+              elementKey: 'create',
+            }),
+          );
+        },
+      },
+      { type: 'divider' as const },
+      {
         label: t('editor:dialog.crossReference.contextAction'),
         hasSubMenu: true,
         subMenu: [
@@ -243,6 +259,40 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const targetNode = event.target as Node;
       const targetElement = targetNode.nodeType === Node.ELEMENT_NODE ? (targetNode as HTMLElement) : targetNode.parentElement;
       const crossReferenceTarget = targetElement?.closest<HTMLElement>('[data-editor-cross-reference-id]');
+      const foreignTextTarget = targetElement?.closest<HTMLElement>('[data-editor-foreign-text-reference]');
+      const foreignTextReference = foreignTextTarget?.dataset.editorForeignTextReference;
+      if (foreignTextReference) {
+        const openForeignTextDialog = (elementKey: 'edit' | 'delete') => {
+          dispatch(
+            setEditorDialogAndReferenceThunk({
+              dialogType: EditorConstants.dialogTypes.FOREIGN_TEXT,
+              elementType: 'foreign',
+              elementXmlId: foreignTextReference,
+              elementKey,
+            }),
+          );
+        };
+        setDisplayMenuItems([
+          {
+            label: t('editor:dialog.foreignText.editAction'),
+            action: () => openForeignTextDialog('edit'),
+          },
+          {
+            label: t('editor:dialog.foreignText.deleteAction'),
+            action: () => openForeignTextDialog('delete'),
+          },
+        ]);
+        props.setAnchorPosition({ top: event.clientY, left: event.clientX });
+        dispatch(
+          setEditorNodeClickedAndContentLeftRightThunk({
+            nodeClicked: true,
+            textIsMarked: false,
+            contentLeft: null,
+            contentRight: null,
+          }),
+        );
+        return;
+      }
       const crossReferenceId = crossReferenceTarget?.dataset.editorCrossReferenceId;
       if (crossReferenceId) {
         const openCrossReferenceDialog = (elementKey: 'edit' | 'delete') => {

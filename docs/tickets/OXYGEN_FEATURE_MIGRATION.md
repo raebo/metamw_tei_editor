@@ -296,18 +296,26 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009A – Fremdsprachigen Text auszeichnen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P1
 - Oxygen-Aktion: `Fremdsprachiger Text`
-- Ausgangslage: Die kombinierte Oxygen-Aktion für fremdsprachigen Text und dessen Übersetzung fehlt
-  im Webeditor.
-- Ziel: Eine markierte Textpassage mit den von FMB-C vorgesehenen Sprachangaben auszeichnen und die
-  zugehörige Übersetzung erfassen beziehungsweise ergänzen.
-- Akzeptanzkriterien: Sprache und Übersetzung werden in der vorgegebenen TEI-Struktur gespeichert;
-  vorhandene Auszeichnungen innerhalb der Auswahl bleiben erhalten; fehlende Pflichtangaben und
-  nicht unterstützte Sprachen werden verständlich abgewiesen.
-- Tests: Sprache mit und ohne Übersetzung, verschachtelte Auszeichnung, Bearbeitung, Entfernung und
-  ungültige Eingaben.
+- Ausgangslage: Die Oxygen-Aktion für fremdsprachigen Text fehlt im Webeditor. Der im
+  Oxygen-Framework erwähnte Übersetzungsschritt ist bereits über die Kommentarart `translation`
+  aus OXY-006A abgedeckt und gehört nicht zur erzeugten `foreign`-Struktur.
+- Ziel: Eine markierte Textpassage mit `foreign` umschließen und den zugehörigen IANA-Sprach-Tag in
+  `xml:lang` speichern.
+- Akzeptanzkriterien: Die in Oxygen vorgesehenen Sprachen werden über eine Combobox angeboten und
+  als normierter Sprachcode gespeichert; Textinhalt bleibt beim Anlegen und Entfernen erhalten;
+  vorhandene Auszeichnungen können bearbeitet und gelöscht werden; verschachtelte
+  `foreign`-Elemente werden verhindert. Abweichende Bestandswerte bleiben sichtbar und erhaltbar.
+- Tests: Alle Combobox-Werte, Anlegen, Bearbeiten, Entfernen, abweichender Bestandswert,
+  Legacy-Element ohne `xml:id`, verschachtelte Auszeichnung sowie Menü- und Shortcut-Aufruf.
+- Umsetzung: `Strg+Alt+X`, das Aktionsmenü und das Kontextmenü öffnen für markierten Text einen
+  eigenen Sprachdialog mit der aus der Headerbearbeitung bekannten Combobox. Das erzeugte `foreign`
+  erhält einen normalisierten `xml:lang`-Wert und eine stabile `xml:id`. In der WYSIWYG-Ansicht ist
+  die Passage visuell hervorgehoben und per Links- oder Rechtsklick bearbeitbar beziehungsweise
+  löschbar. Bestandsauszeichnungen ohne ID werden über ihren XML-Pfad geöffnet und beim Bearbeiten
+  mit einer stabilen ID ergänzt.
 
 ### OXY-009B – Abkürzungen auszeichnen und auflösen
 

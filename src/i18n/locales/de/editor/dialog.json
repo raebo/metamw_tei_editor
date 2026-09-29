@@ -17,6 +17,7 @@
     "addWritingPart": "Schreibakt Hinzufügen",
     "authorFootnote": "Fußnote des Briefautors bearbeiten",
     "crossReference": "Querverweis bearbeiten",
+    "foreignText": "Fremdsprachigen Text bearbeiten",
     "attachmentAdd": "Beilage Hinzufügen",
     "figureUpload": "Bild einfügen",
     "foreignHandAnnotation": "Anmerkung fremder Hand bearbeiten",
@@ -94,6 +95,46 @@
       "delete": "Der Kommentar konnte nicht gelöscht werden: {{reason}}"
     },
     "legacyValue": "Unbekannter Bestandswert: {{value}}"
+  },
+  "foreignText": {
+    "formattingMenu": "Sprach- und typografische Auszeichnungen",
+    "contextAction": "Fremdsprachigen Text auszeichnen",
+    "editAction": "Fremdsprachigen Text bearbeiten",
+    "deleteAction": "Fremdsprachige Auszeichnung löschen",
+    "anchorLabel": "Fremdsprachiger Text ({{language}})",
+    "contract": "TEI-Modell: Die markierte Passage wird mit foreign umschlossen; xml:lang enthält den ausgewählten Sprachcode. Eine Übersetzung kann anschließend als Kommentarart „Übersetzung“ ergänzt werden.",
+    "legacyLanguage": "Bestandswert: {{language}}",
+    "fields": {
+      "language": "Sprache"
+    },
+    "errors": {
+      "languageRequired": "Bitte geben Sie einen Sprach-Tag an.",
+      "languageInvalid": "Bitte geben Sie einen gültigen IANA-Sprach-Tag ein, zum Beispiel fr oder de-CH.",
+      "selectionMissing": "Die markierte Textpassage konnte nicht gefunden werden.",
+      "selectionNested": "Der Text ist bereits als fremdsprachig ausgezeichnet. Bearbeiten Sie stattdessen die vorhandene Auszeichnung.",
+      "elementMissing": "Die fremdsprachige Auszeichnung konnte nicht gefunden werden."
+    },
+    "languages": {
+      "fr": "Französisch",
+      "en": "Englisch",
+      "it": "Italienisch",
+      "es": "Spanisch",
+      "grc": "Altgriechisch",
+      "la": "Latein",
+      "he": "Hebräisch"
+    },
+    "buttons": {
+      "add": "Auszeichnung einfügen",
+      "update": "Aktualisieren",
+      "delete": "Löschen",
+      "cancelDelete": "Abbrechen",
+      "confirmDelete": "Endgültig löschen"
+    },
+    "success": {
+      "added": "Der fremdsprachige Text wurde ausgezeichnet.",
+      "updated": "Die Sprachauszeichnung wurde aktualisiert.",
+      "deleted": "Die Sprachauszeichnung wurde entfernt."
+    }
   },
   "foreignHandAnnotation": {
     "contextAction": "Anmerkung fremder Hand hinzufügen",

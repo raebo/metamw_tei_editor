@@ -197,11 +197,13 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
       const manuscriptMarker = target?.closest<HTMLElement>('[data-editor-manuscript-annotation-reference]');
       const footnoteTarget = target?.closest<HTMLElement>('[data-editor-author-footnote-id]');
       const crossReferenceTarget = target?.closest<HTMLElement>('[data-editor-cross-reference-id]');
+      const foreignTextTarget = target?.closest<HTMLElement>('[data-editor-foreign-text-reference]');
       const reference =
         foreignMarker?.dataset.editorForeignAnnotationId ??
         manuscriptMarker?.dataset.editorManuscriptAnnotationReference ??
         footnoteTarget?.dataset.editorAuthorFootnoteId ??
-        crossReferenceTarget?.dataset.editorCrossReferenceId;
+        crossReferenceTarget?.dataset.editorCrossReferenceId ??
+        foreignTextTarget?.dataset.editorForeignTextReference;
       if (!reference) return;
 
       event.preventDefault();
@@ -212,10 +214,19 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
             ? EditorConstants.dialogTypes.FOREIGN_HAND_ANNOTATION
             : manuscriptMarker
               ? EditorConstants.dialogTypes.MANUSCRIPT_ANNOTATION
-              : crossReferenceTarget
-                ? EditorConstants.dialogTypes.CROSS_REFERENCE
-                : EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR,
-          elementType: foreignMarker || footnoteTarget ? 'note' : crossReferenceTarget ? crossReferenceTarget.localName : 'p',
+              : foreignTextTarget
+                ? EditorConstants.dialogTypes.FOREIGN_TEXT
+                : crossReferenceTarget
+                  ? EditorConstants.dialogTypes.CROSS_REFERENCE
+                  : EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR,
+          elementType:
+            foreignMarker || footnoteTarget
+              ? 'note'
+              : foreignTextTarget
+                ? 'foreign'
+                : crossReferenceTarget
+                  ? crossReferenceTarget.localName
+                  : 'p',
           elementXmlId: reference,
           elementKey: 'edit',
         }),
