@@ -145,7 +145,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-005B – Kontextbezogene TEI-P5-Dokumentation öffnen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P3
 - Oxygen-Aktionen: `show.TEIp5.documentation`
 - Ausgangslage: Oxygen kann für das aktuell ausgewählte Element unmittelbar die passende
@@ -157,6 +157,13 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
   verständlich behandelt.
 - Tests: URL-Erzeugung für Elementnamen, ausgewählter Kontext, unbekannte Elemente und sicheres
   Öffnen externer Links.
+- Umsetzung: Das Rechtsklick-Kontextmenü bietet für jedes über seinen XML-Pfad auflösbare
+  TEI-Element einen Eintrag zur offiziellen englischen TEI-P5-Elementreferenz an. Der tatsächliche
+  XML-Knoten wird aus dem Quell-Dokument ermittelt, sodass beispielsweise ein als HTML-`td`
+  dargestelltes TEI-`cell` auf die Dokumentation von `cell` verweist. URLs werden ausschließlich
+  aus der festen HTTPS-Domain der TEI Guidelines und einem validierten Elementnamen gebildet und
+  mit `noopener,noreferrer` in einem neuen Browserkontext geöffnet. Nicht auflösbare Elemente und
+  Elemente aus fremden XML-Namespaces führen zu einer verständlichen Warnung statt zu einem Link.
 
 ### OXY-006A – Kommentararten vervollständigen und absichern
 

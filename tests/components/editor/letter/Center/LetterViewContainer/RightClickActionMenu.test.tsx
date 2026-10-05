@@ -10,6 +10,7 @@ import editorLetterReducer, {
   setFigureUploadInProgress,
 } from '@src/redux/slices/editor.letter.slice';
 import type { LetterState } from '@src/constants/editor';
+import { enqueueSnackbar } from 'notistack';
 
 jest.mock('notistack', () => ({
   enqueueSnackbar: jest.fn(),
@@ -112,6 +113,79 @@ const ContextMenuHarness = () => {
 };
 
 describe('RightClickActionMenu figure upload action', () => {
+  beforeEach(() => jest.clearAllMocks());
+  afterEach(() => jest.restoreAllMocks());
+
+  it('opens the TEI P5 documentation for the selected source element securely', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const openWindow = jest.spyOn(window, 'open').mockImplementation(() => null);
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('td')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /TEI-P5-Dokumentation: <cell>|TEI P5 documentation: <cell>/,
+      }),
+    );
+
+    expect(openWindow).toHaveBeenCalledWith(
+      'https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-cell.html',
+      '_blank',
+      'noopener,noreferrer',
+    );
+  });
+
+  it('explains when the selected XML element is not supported by TEI P5', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const unsupportedXml =
+      '<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:custom="urn:custom"><text><body><div><custom:p>Text</custom:p></div></body></text></TEI>';
+    store.dispatch(
+      setEditorLetter({
+        letter: {
+          id: 7,
+          name: 'FMB-7',
+          viewMode: 'WYSIWYG',
+          xmlContent: unsupportedXml,
+        },
+      }),
+    );
+    const openWindow = jest.spyOn(window, 'open').mockImplementation(() => null);
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('p')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /TEI-P5-Dokumentation: <p>|TEI P5 documentation: <p>/,
+      }),
+    );
+
+    expect(openWindow).not.toHaveBeenCalled();
+    expect(enqueueSnackbar).toHaveBeenCalledWith(expect.stringMatching(/<p>/), {
+      variant: 'warning',
+    });
+  });
+
   it('clears a marked selection from its context menu without changing the text', async () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
     const markedXml = sourceXml.replace('Text', 'Te<span class="marked">xt</span>');

@@ -2,6 +2,10 @@
   "selection": {
     "clearAction": "Clear selection"
   },
+  "teiDocumentation": {
+    "contextAction": "TEI P5 documentation: <{{element}}>",
+    "unsupportedElement": "No supported TEI P5 documentation is available for the <{{element}}> element."
+  },
   "authentication": {
     "inactivity": {
       "title": "Session expiring",

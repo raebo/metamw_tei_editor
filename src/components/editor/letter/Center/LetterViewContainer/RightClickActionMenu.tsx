@@ -24,6 +24,7 @@ import type { ListStructureOperation } from '@src/utils/editor/listStructure';
 import type { TableStructureOperation } from '@src/utils/editor/tableStructure';
 import type { GraphicStructureOperation } from '@src/components/editor/letter/Dialog/Components/GraphicStructureDialog';
 import { captureForeignHandAnnotationCaret } from '@src/utils/editor/foreignHandAnnotation';
+import { openTeiP5Documentation, resolveTeiElementByPath } from '@src/utils/editor/teiDocumentation';
 
 const SECTION_SELECTOR =
   'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
@@ -965,6 +966,28 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           });
           isClickable = true;
         }
+      }
+
+      const documentationAnchor = targetElement?.closest<HTMLElement>('[data-editor-xml-path]');
+      if (documentationAnchor) {
+        const documentationElement = resolveTeiElementByPath(xmlDocRef.current, documentationAnchor.dataset.editorXmlPath);
+        const elementName = documentationElement?.localName ?? documentationAnchor.localName;
+
+        if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
+        menuItemsToAdd.push({
+          label: t('editor:dialog.teiDocumentation.contextAction', { element: elementName }),
+          action: () => {
+            if (!documentationElement || !openTeiP5Documentation(documentationElement)) {
+              enqueueSnackbar(
+                t('editor:dialog.teiDocumentation.unsupportedElement', {
+                  element: elementName,
+                }),
+                { variant: 'warning' },
+              );
+            }
+          },
+        });
+        isClickable = true;
       }
 
       if (!isClickable) {
