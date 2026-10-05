@@ -1,4 +1,7 @@
 {
+  "selection": {
+    "clearAction": "Clear selection"
+  },
   "authentication": {
     "inactivity": {
       "title": "Session expiring",

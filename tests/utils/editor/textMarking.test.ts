@@ -128,6 +128,59 @@ describe('textMarking.isValidSelection', () => {
   });
 });
 
+describe('textMarking.removeMarkedSpans', () => {
+  test('normalizes adjacent text nodes so the same text can be selected again', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>As <span class="marked">six weeks</span> have elapsed</p>';
+    const paragraph = root.querySelector('p')!;
+
+    expect(paragraph.childNodes).toHaveLength(3);
+
+    textMarking.removeMarkedSpans(root);
+
+    expect(paragraph.querySelector('span.marked')).not.toBeInTheDocument();
+    expect(paragraph.childNodes).toHaveLength(1);
+    expect(paragraph.firstChild).toBeInstanceOf(Text);
+    expect(paragraph.firstChild?.nodeValue).toBe('As six weeks have elapsed');
+  });
+
+  test('allows the same passage to be mapped again after clearing the selection', () => {
+    const sourceXml =
+      '<TEI><text><body><div><p>As six weeks have elapsed without tiding from you<note style="hidden">M. S. – Manuscript.</note> and send it.</p></div></body></text></TEI>';
+    const root = document.createElement('div');
+    const paragraph = document.createElement('p');
+    paragraph.dataset.editorXmlPath = '0.0.0.0';
+    paragraph.append(
+      document.createTextNode('As six weeks have elapsed without tiding from you'),
+      document.createElement('note'),
+      document.createTextNode(' and send it.'),
+    );
+    root.appendChild(paragraph);
+
+    const markPassage = (xml: string): Document => {
+      const range = document.createRange();
+      range.setStart(paragraph.firstChild!, 3);
+      range.setEnd(paragraph.firstChild!, 12);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+
+      const markedXml = textMarking.createMarkedXmlDocument(xml, root, range);
+      textMarking.markValidSelection(selection, range);
+      return markedXml;
+    };
+
+    const firstMarkedXml = markPassage(sourceXml);
+    textMarking.removeMarkedSpans(root);
+    textMarking.removeMarkedSpans(firstMarkedXml.documentElement);
+
+    const cleanedXml = new XMLSerializer().serializeToString(firstMarkedXml);
+    const secondMarkedXml = markPassage(cleanedXml);
+
+    expect(secondMarkedXml.querySelector('span.marked')?.textContent).toBe('six weeks');
+  });
+});
+
 describe('unwrapNode', () => {
   beforeEach(() => {
     // Mock the recursive unwrapNode call

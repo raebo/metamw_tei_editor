@@ -3,16 +3,12 @@ import { EditorUtils } from './index';
 
 export const textMarking = {
   createMarkedXmlDocument(xmlString: string, renderedRoot: HTMLElement, range: Range): Document {
-    if (
-      range.startContainer !== range.endContainer ||
-      range.startContainer.nodeType !== Node.TEXT_NODE
-    ) {
+    if (range.startContainer !== range.endContainer || range.startContainer.nodeType !== Node.TEXT_NODE) {
       throw new Error('The selection must be contained in one text node.');
     }
 
     const renderedTextNode = range.startContainer;
-    const renderedParent =
-      renderedTextNode.parentElement?.closest<HTMLElement>('[data-editor-xml-path]');
+    const renderedParent = renderedTextNode.parentElement?.closest<HTMLElement>('[data-editor-xml-path]');
     if (!renderedParent) {
       throw new Error('Could not map the selected text to the source XML.');
     }
@@ -22,9 +18,7 @@ export const textMarking = {
       throw new Error('The source XML is not well-formed.');
     }
 
-    const sourcePath = renderedParent.dataset.editorXmlPath
-      ? renderedParent.dataset.editorXmlPath.split('.').map(Number)
-      : [];
+    const sourcePath = renderedParent.dataset.editorXmlPath ? renderedParent.dataset.editorXmlPath.split('.').map(Number) : [];
     let sourceParent: Node | null = xmlDoc.documentElement;
     for (const index of sourcePath) {
       sourceParent = sourceParent?.childNodes[index] ?? null;
@@ -35,9 +29,7 @@ export const textMarking = {
     }
 
     const renderedSiblingIndex = Array.from(renderedParent.childNodes)
-      .filter(
-        (node) => node.nodeType === Node.TEXT_NODE && node.nodeValue === renderedTextNode.nodeValue,
-      )
+      .filter((node) => node.nodeType === Node.TEXT_NODE && node.nodeValue === renderedTextNode.nodeValue)
       .indexOf(renderedTextNode as ChildNode);
     const matchingSourceTextNodes = Array.from(sourceParent.childNodes).filter(
       (node) => node.nodeType === Node.TEXT_NODE && node.nodeValue === renderedTextNode.nodeValue,
@@ -118,7 +110,7 @@ export const textMarking = {
       throw new Error('markedSpanEntries: root is null');
     }
 
-    return root.querySelectorAll('#letterXml > * span.marked');
+    return root.querySelectorAll('span.marked');
   },
   markedSpanEntry(root: Element | null): Element | null {
     if (root === null) {
@@ -139,10 +131,14 @@ export const textMarking = {
     if (!markedSpans) return;
 
     markedSpans.forEach((span) => {
+      const parent = span.parentNode;
+      if (!parent) return;
+
       while (span.firstChild) {
-        span.parentNode?.insertBefore(span.firstChild, span);
+        parent.insertBefore(span.firstChild, span);
       }
-      span.parentNode?.removeChild(span);
+      parent.removeChild(span);
+      parent.normalize();
     });
   },
   unwrapNode: (node: Element): void => {

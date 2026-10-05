@@ -1,10 +1,14 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import '@src/i18n';
 import RightClickActionMenu from '@src/components/editor/letter/Center/LetterViewContainer/RightClickActionMenu';
-import editorLetterReducer, { setEditorLetter, setFigureUploadInProgress } from '@src/redux/slices/editor.letter.slice';
+import editorLetterReducer, {
+  setContentTextIsMarked,
+  setEditorLetter,
+  setFigureUploadInProgress,
+} from '@src/redux/slices/editor.letter.slice';
 import type { LetterState } from '@src/constants/editor';
 
 jest.mock('notistack', () => ({
@@ -108,6 +112,63 @@ const ContextMenuHarness = () => {
 };
 
 describe('RightClickActionMenu figure upload action', () => {
+  it('clears a marked selection from its context menu without changing the text', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const markedXml = sourceXml.replace('Text', 'Te<span class="marked">xt</span>');
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: markedXml },
+      }),
+    );
+    store.dispatch(setContentTextIsMarked({ textIsMarked: true }));
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+    const paragraph = container.querySelector('p')!;
+    paragraph.innerHTML = 'Te<span class="marked">xt</span>';
+
+    fireEvent.contextMenu(paragraph.querySelector('span.marked')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Markierung aufheben|Clear selection/ }));
+
+    await waitFor(() => expect(store.getState().editorLetter.content.textIsMarked).toBe(false));
+    expect(store.getState().editorLetter.letter.xmlContent).not.toContain('class="marked"');
+    expect(paragraph.querySelector('span.marked')).not.toBeInTheDocument();
+    expect(paragraph.childNodes).toHaveLength(1);
+    expect(paragraph).toHaveTextContent('Text');
+  });
+
+  it('clears a marked selection with Escape', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const markedXml = sourceXml.replace('Text', 'Te<span class="marked">xt</span>');
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: markedXml },
+      }),
+    );
+    store.dispatch(setContentTextIsMarked({ textIsMarked: true }));
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+    const paragraph = container.querySelector('p')!;
+    paragraph.innerHTML = 'Te<span class="marked">xt</span>';
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    await waitFor(() => expect(store.getState().editorLetter.content.textIsMarked).toBe(false));
+    expect(store.getState().editorLetter.letter.xmlContent).not.toContain('class="marked"');
+    expect(paragraph.querySelector('span.marked')).not.toBeInTheDocument();
+    expect(paragraph.childNodes).toHaveLength(1);
+    expect(paragraph).toHaveTextContent('Text');
+  });
+
   it('opens foreign-hand annotation creation from a collapsed text caret', async () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
     store.dispatch(

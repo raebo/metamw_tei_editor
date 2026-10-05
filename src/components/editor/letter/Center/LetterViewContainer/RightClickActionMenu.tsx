@@ -39,6 +39,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const contentTextIsMarked = useSelector((state: RootState) => state.editorLetter.content.textIsMarked);
   const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
   const xmlContentRef = props.xmlContentRef;
 
@@ -50,6 +51,33 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   const [openNestedSubmenuIndex, setOpenNestedSubmenuIndex] = useState<number | null>(null);
 
   const xmlDocRef = useRef<XMLDocument | null>(null);
+
+  const clearMarkedSelection = useCallback(() => {
+    try {
+      window.getSelection()?.removeAllRanges();
+      EditorUtils.textMarking.removeMarkedSpans(xmlContentRef.current);
+
+      let xmlContent = stateEditorLetter.xmlContent;
+      if (xmlContent) {
+        const xmlDoc = EditorUtils.xmlCheck.extractTeiDocumentFromString(xmlContent);
+        EditorUtils.textMarking.removeMarkedSpans(xmlDoc.documentElement);
+        xmlContent = new XMLSerializer().serializeToString(xmlDoc);
+      }
+
+      dispatch(
+        setEditorMarkedAndContentLeftRightThunk({
+          textIsMarked: false,
+          contentLeft: null,
+          contentRight: null,
+          xmlContent,
+        }),
+      );
+      setDisplayMenuItems([]);
+      props.setAnchorPosition(null);
+    } catch (err) {
+      enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
+    }
+  }, [dispatch, props, stateEditorLetter.xmlContent, xmlContentRef]);
 
   /** CACHE MENU ITEMS */
   const menuItemsMarked = useMemo(
@@ -172,8 +200,14 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
         })),
       },
+      { type: 'divider' as const },
+      {
+        label: t('editor:dialog.selection.clearAction'),
+        keyShortcut: 'Esc',
+        action: clearMarkedSelection,
+      },
     ],
-    [dispatch, props, t],
+    [clearMarkedSelection, dispatch, props, t],
   );
 
   const menuItemsNoMarking: MenuItemType[] = useMemo(
@@ -273,6 +307,11 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       setDisplayMenuItems([]);
       const targetNode = event.target as Node;
       const targetElement = targetNode.nodeType === Node.ELEMENT_NODE ? (targetNode as HTMLElement) : targetNode.parentElement;
+      if (targetElement?.closest('span.marked')) {
+        setDisplayMenuItems(menuItemsMarked);
+        props.setAnchorPosition({ top: event.clientY, left: event.clientX });
+        return;
+      }
       const crossReferenceTarget = targetElement?.closest<HTMLElement>('[data-editor-cross-reference-id]');
       const abbreviationTarget = targetElement?.closest<HTMLElement>('[data-editor-abbreviation-reference]');
       const abbreviationReference = abbreviationTarget?.dataset.editorAbbreviationReference;
@@ -945,7 +984,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         }),
       );
     },
-    [dispatch, figureUploadInProgress, pathHandlers, props, stateEditorLetter.xmlContent, t, xmlContentRef],
+    [dispatch, figureUploadInProgress, menuItemsMarked, pathHandlers, props, stateEditorLetter.xmlContent, t, xmlContentRef],
   );
 
   /** CLOSE MENU */
@@ -971,6 +1010,20 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       el.removeEventListener('contextmenu', handleNoMarkupRightClick, { capture: true });
     };
   }, [props.xmlContentRef, handleMouseUpMarkedElements, handleNoMarkupRightClick, xmlContentRef]);
+
+  useEffect(() => {
+    if (!contentTextIsMarked) return;
+
+    const handleClearSelectionShortcut = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      clearMarkedSelection();
+    };
+
+    document.addEventListener('keydown', handleClearSelectionShortcut, true);
+    return () => document.removeEventListener('keydown', handleClearSelectionShortcut, true);
+  }, [clearMarkedSelection, contentTextIsMarked]);
 
   const SndMenuItemStylesSpan = {
     fontSize: '0.575rem',

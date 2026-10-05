@@ -1,4 +1,7 @@
 {
+  "selection": {
+    "clearAction": "Markierung aufheben"
+  },
   "authentication": {
     "inactivity": {
       "title": "Sitzung läuft ab",
