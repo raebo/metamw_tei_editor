@@ -274,7 +274,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-008 – Interne und externe Querverweise
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P1
 - Oxygen-Aktionen: `Querverweise auf Registereinträge`, `Querverweise auf Briefauszeichnungen`,
   `Querverweise auf externe URLs`, `Querverweise auf interne URLs`,
