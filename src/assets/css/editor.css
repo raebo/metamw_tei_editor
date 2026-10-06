@@ -421,3 +421,14 @@ ref.tei-author-footnote-reference:focus-visible,
   background-color: rgba(21, 101, 192, 0.12);
   outline: 1px solid rgba(21, 101, 192, 0.65);
 }
+
+.tei-horizontal-fraction {
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.tei-horizontal-fraction:focus,
+.tei-horizontal-fraction:hover {
+  background-color: rgba(0, 121, 107, 0.12);
+  outline: 1px solid rgba(0, 121, 107, 0.65);
+}

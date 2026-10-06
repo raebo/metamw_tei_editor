@@ -25,6 +25,7 @@ import type { TableStructureOperation } from '@src/utils/editor/tableStructure';
 import type { GraphicStructureOperation } from '@src/components/editor/letter/Dialog/Components/GraphicStructureDialog';
 import { captureForeignHandAnnotationCaret } from '@src/utils/editor/foreignHandAnnotation';
 import { openTeiP5Documentation, resolveTeiElementByPath } from '@src/utils/editor/teiDocumentation';
+import { captureHorizontalFractionCaret } from '@src/utils/editor/horizontalFraction';
 
 const SECTION_SELECTOR =
   'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
@@ -313,6 +314,40 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         props.setAnchorPosition({ top: event.clientY, left: event.clientX });
         return;
       }
+      const horizontalFractionTarget = targetElement?.closest<HTMLElement>('[data-editor-horizontal-fraction-reference]');
+      const horizontalFractionReference = horizontalFractionTarget?.dataset.editorHorizontalFractionReference;
+      if (horizontalFractionReference) {
+        const openHorizontalFractionDialog = (elementKey: 'edit' | 'delete') => {
+          dispatch(
+            setEditorDialogAndReferenceThunk({
+              dialogType: EditorConstants.dialogTypes.HORIZONTAL_FRACTION,
+              elementType: 'formula',
+              elementXmlId: horizontalFractionReference,
+              elementKey,
+            }),
+          );
+        };
+        setDisplayMenuItems([
+          {
+            label: t('editor:dialog.horizontalFraction.editAction'),
+            action: () => openHorizontalFractionDialog('edit'),
+          },
+          {
+            label: t('editor:dialog.horizontalFraction.deleteAction'),
+            action: () => openHorizontalFractionDialog('delete'),
+          },
+        ]);
+        props.setAnchorPosition({ top: event.clientY, left: event.clientX });
+        dispatch(
+          setEditorNodeClickedAndContentLeftRightThunk({
+            nodeClicked: true,
+            textIsMarked: false,
+            contentLeft: null,
+            contentRight: null,
+          }),
+        );
+        return;
+      }
       const crossReferenceTarget = targetElement?.closest<HTMLElement>('[data-editor-cross-reference-id]');
       const abbreviationTarget = targetElement?.closest<HTMLElement>('[data-editor-abbreviation-reference]');
       const abbreviationReference = abbreviationTarget?.dataset.editorAbbreviationReference;
@@ -530,12 +565,18 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const wholeTableActions: NonNullable<MenuItemType['subMenu']> = [];
       const graphicActions: NonNullable<MenuItemType['subMenu']> = [];
       let annotationCaret: ReturnType<typeof captureForeignHandAnnotationCaret> | null = null;
+      let horizontalFractionCaret: ReturnType<typeof captureHorizontalFractionCaret> | null = null;
 
       if (stateEditorLetter.xmlContent) {
         try {
           annotationCaret = captureForeignHandAnnotationCaret(stateEditorLetter.xmlContent);
         } catch {
           annotationCaret = null;
+        }
+        try {
+          horizontalFractionCaret = captureHorizontalFractionCaret(stateEditorLetter.xmlContent);
+        } catch {
+          horizontalFractionCaret = null;
         }
       }
 
@@ -922,6 +963,31 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
             },
           })),
         });
+      }
+
+      if (horizontalFractionCaret) {
+        if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
+        menuItemsToAdd.push({
+          label: t('editor:dialog.horizontalFraction.contextAction'),
+          hasSubMenu: true,
+          subMenu: [
+            {
+              label: t('editor:dialog.horizontalFraction.horizontalAction'),
+              keyShortcut: 'STRG+2',
+              action: () => {
+                dispatch(
+                  setEditorDialogAndReferenceThunk({
+                    dialogType: EditorConstants.dialogTypes.HORIZONTAL_FRACTION,
+                    elementType: horizontalFractionCaret!.elementType,
+                    elementXmlId: horizontalFractionCaret!.sourcePath,
+                    elementKey: horizontalFractionCaret!.reference,
+                  }),
+                );
+              },
+            },
+          ],
+        });
+        isClickable = true;
       }
 
       const foreignAnnotationXmlId =

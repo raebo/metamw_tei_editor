@@ -44,6 +44,7 @@ const ContextMenuHarness = () => {
     const crossReference = document.createElement('span');
     const foreignText = document.createElement('foreign');
     const abbreviation = document.createElement('choice');
+    const horizontalFraction = document.createElement('formula');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -81,6 +82,8 @@ const ContextMenuHarness = () => {
     foreignText.textContent = 'bonjour';
     abbreviation.dataset.editorAbbreviationReference = 'choice_1';
     abbreviation.textContent = 'Ch';
+    horizontalFraction.dataset.editorHorizontalFractionReference = 'formula_1';
+    horizontalFraction.textContent = '½';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
@@ -96,6 +99,7 @@ const ContextMenuHarness = () => {
       crossReference,
       foreignText,
       abbreviation,
+      horizontalFraction,
     );
   }, []);
 
@@ -310,6 +314,71 @@ describe('RightClickActionMenu figure upload action', () => {
       elementType: 'p',
       elementXmlId: '0.0.0.0',
       elementKey: 'caret:0:2',
+    });
+  });
+
+  it('opens horizontal-fraction creation from a collapsed text caret', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+    const paragraph = container.querySelector('p')!;
+    const range = document.createRange();
+    range.setStart(paragraph.firstChild!, 2);
+    range.collapse(true);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    fireEvent.contextMenu(paragraph, { button: 2, clientX: 20, clientY: 30 });
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Bruchzahlen|Fractions/ }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: /horizontaler Linie|horizontal bar/ }));
+
+    expect(store.getState().editorLetter.dialogType).toBe('HORIZONTAL_FRACTION');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'caret:0:2',
+    });
+  });
+
+  it('shows only edit and delete actions for an existing horizontal fraction', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('[data-editor-horizontal-fraction-reference]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+
+    const menuItems = await screen.findAllByRole('menuitem');
+    expect(menuItems).toHaveLength(2);
+    expect(menuItems[0]).toHaveTextContent(/Bruchzahl bearbeiten|Edit fraction/);
+    expect(menuItems[1]).toHaveTextContent(/Bruchzahl löschen|Delete fraction/);
+    fireEvent.click(menuItems[1]);
+
+    expect(store.getState().editorLetter.dialogType).toBe('HORIZONTAL_FRACTION');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'formula',
+      elementXmlId: 'formula_1',
+      elementKey: 'delete',
     });
   });
 

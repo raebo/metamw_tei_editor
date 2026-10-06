@@ -48,6 +48,7 @@ import AuthorFootnoteDialog from './Components/AuthorFootnoteDialog';
 import CrossReferenceDialog from './Components/CrossReferenceDialog';
 import ForeignTextDialog from './Components/ForeignTextDialog';
 import AbbreviationDialog from './Components/AbbreviationDialog';
+import HorizontalFractionDialog from './Components/HorizontalFractionDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -72,6 +73,7 @@ const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR]: t('editor:dialog.titles.authorFootnote'),
   [EditorConstants.dialogTypes.CROSS_REFERENCE]: t('editor:dialog.titles.crossReference'),
   [EditorConstants.dialogTypes.FOREIGN_TEXT]: t('editor:dialog.titles.foreignText'),
+  [EditorConstants.dialogTypes.HORIZONTAL_FRACTION]: t('editor:dialog.titles.horizontalFraction'),
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: t('editor:dialog.titles.addGreetingsFormula'),
   [EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER]: t('editor:dialog.titles.setPrecursorLetter'),
   [EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER]: t('editor:dialog.titles.setSuccessorLetter'),
@@ -117,6 +119,7 @@ const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) 
   [EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR]: (props) => <AuthorFootnoteDialog {...props} />,
   [EditorConstants.dialogTypes.CROSS_REFERENCE]: (props) => <CrossReferenceDialog {...props} />,
   [EditorConstants.dialogTypes.FOREIGN_TEXT]: (props) => <ForeignTextDialog {...props} />,
+  [EditorConstants.dialogTypes.HORIZONTAL_FRACTION]: (props) => <HorizontalFractionDialog {...props} />,
   [EditorConstants.dialogTypes.MANAGE_PRECURSOR_LETTER]: (props) => <ManagePreccSuccLetterDialog {...props} letterType={'precursor'} />,
   [EditorConstants.dialogTypes.MANAGE_SUCCESSOR_LETTER]: (props) => <ManagePreccSuccLetterDialog {...props} letterType={'successor'} />,
   [EditorConstants.dialogTypes.ADD_GREETINGS_FORMULA]: (props) => (

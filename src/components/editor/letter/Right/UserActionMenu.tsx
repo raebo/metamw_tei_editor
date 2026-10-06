@@ -137,6 +137,11 @@ const menuItems: MenuItem[] = [
         keyHandleItem: filterKeyCombination('ctrl+alt+x'),
         active: true,
       },
+      {
+        label: i18n.t('editor:dialog.horizontalFraction.horizontalAction'),
+        keyHandleItem: filterKeyCombination('ctrl+2'),
+        active: true,
+      },
     ],
   },
   {

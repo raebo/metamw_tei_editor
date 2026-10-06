@@ -26,6 +26,7 @@
     "authorFootnote": "Edit author footnote",
     "crossReference": "Edit cross-reference",
     "foreignText": "Edit foreign-language text",
+    "horizontalFraction": "Insert fraction with horizontal bar",
     "attachmentAdd": "Add Attachment",
     "figureUpload": "Insert Image",
     "foreignHandAnnotation": "Edit foreign-hand annotation",
@@ -265,6 +266,30 @@
       "added": "The footnote and its reference were added.",
       "updated": "The footnote and its reference were updated.",
       "deleted": "The footnote and its reference were deleted."
+    }
+  },
+  "horizontalFraction": {
+    "contextAction": "Fractions",
+    "horizontalAction": "Fraction with horizontal bar",
+    "editAction": "Edit fraction",
+    "deleteAction": "Delete fraction",
+    "anchorLabel": "Fraction {{numerator}} over {{denominator}}",
+    "contract": "The fraction is inserted into the paragraph at the cursor position or updated at its existing position. Required spaces are managed automatically.",
+    "fields": {
+      "numerator": "Numerator",
+      "denominator": "Denominator"
+    },
+    "buttons": {
+      "add": "Insert fraction",
+      "update": "Update",
+      "delete": "Delete",
+      "cancelDelete": "Cancel",
+      "confirmDelete": "Delete permanently"
+    },
+    "success": {
+      "added": "The fraction was inserted.",
+      "updated": "The fraction was updated.",
+      "deleted": "The fraction was deleted."
     }
   },
   "crossReference": {
