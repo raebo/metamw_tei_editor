@@ -4,7 +4,7 @@
 
 **Quelle:** [20261002_annotationen_auswertung_hartrumpf.md](20261002_annotationen_auswertung_hartrumpf.md). Das angefragte Dokument liegt im Repository unter `docs/tickets/`, nicht unter `doc/`.
 
-**Ziel:** Automatische Annotationen direkt im geöffneten Brief starten, fortlaufend anzeigen, prüfen und nachbearbeiten. Der separate bisherige Annotationsbereich wird dadurch ersetzt. Die Kennungen `AA-01` bis `AA-11` sind vorläufige Planungskennungen, keine bereits angelegten Tracker-Tickets.
+**Ziel:** Automatische Annotationen direkt im geöffneten Brief starten, fortlaufend anzeigen, prüfen und nachbearbeiten. Der separate bisherige Annotationsbereich wird dadurch ersetzt. Die Kennungen `AA-01` bis `AA-13` sind vorläufige Planungskennungen, keine bereits angelegten Tracker-Tickets.
 
 ## Grundlage und Abgrenzung
 
@@ -14,82 +14,127 @@ Die Backend-Anforderungen wurden mit der Rails-Anwendung unter `../metamw/` abge
 
 Nicht zum Umfang gehören die beiläufig erwähnten Matomo-Daten und Terminnotizen. Die im Quelldokument enthaltene frühere Bitte um Diagramme ist Kontext; dieses Dokument liefert die jetzt angefragte Ticketplanung.
 
+## Verbindliche Ergänzung: Modus `AutomaticAnnotations`
+
+Die nachträgliche Vorgabe ersetzt die Aktivierung über das Kontextmenü und die bisher nur empfohlene Bearbeitungssperre:
+
+- Der Editor erhält einen eigenen Modus `AutomaticAnnotations`, unabhängig von der Darstellung als WYSIWYG oder Code.
+- Ein sichtbarer Modus-Button öffnet im normalen Editor eine Sicherheitsabfrage zum Start. Erst nach Bestätigung wird die Sitzung initialisiert. Der zuvor gesetzte Cursor bestimmt weiterhin die Startposition; der Button muss diese Auswahl erhalten.
+- Im aktiven Modus öffnet derselbe Button eine Sicherheitsabfrage zum Beenden. Abbrechen, Escape oder Schließen einer der beiden Abfragen verändert den Modus nicht und sendet keinen Start-/Stoppauftrag.
+- Solange der Modus aktiv ist, sind ausschließlich die Prüfung/Bearbeitung automatischer Annotationen und die dafür notwendigen Speicher-/Feedbackaktionen erlaubt. Alle anderen Bearbeitungen sind gesperrt: Freitext/XML, Formatierung, manuelle Auszeichnungen, Metadaten, Uploads, allgemeines Speichern, Undo/Redo, Reset, Rebase und Veröffentlichung. Auch bereits geöffnete Dialoge, Tastenkürzel und direkte API-Aufrufe dürfen die Sperre nicht umgehen.
+- Der Briefwechsel bleibt gesperrt. Start und Ende müssen mit dem Backend abgestimmt sein; während eines Übergangs darf keine konkurrierende Bearbeitung erfolgen. Ein fehlgeschlagener oder unklarer Stopp gibt die Bearbeitung nicht frei; nach einem unklaren Requestausgang wird der Serverstatus abgefragt.
+- **Suchende und Modusende werden getrennt:** Wenn Sempria keine weiteren Treffer findet, endet die Suche. Der Modus bleibt zur Prüfung aktiv, bis der Benutzer ihn über Button und Sicherheitsabfrage beendet. Damit erfolgt auch der reguläre Abschluss über den geforderten Weg. Technische Sitzungsabläufe werden separat über den Serverstatus behandelt.
+
+Diese Regeln sind Anforderungen für die Umsetzung; der Modus ist mit diesem Dokument noch nicht implementiert.
+
 ## Ergebnis des Backend-Scans
 
 Die Anwendung verwendet laut `.ruby-version` Ruby 2.7.7 und laut `Gemfile.lock` Rails 5.2.8.1. Active Job ist bereits auf `delayed_job` konfiguriert; für diese Funktion ist daher zunächst keine neue Queue-Infrastruktur erforderlich.
 
 | Bereich | Im Backend vorhanden | Konsequenz für die Tickets |
 | --- | --- | --- |
-| Start und Ergebniseingang | `LetterAutomaticAnnotationsController` → `LetterAutomaticAnnotations::NewForm` → `Sempria::LetterAnnotationService`; Start per HTTP-GET mit Briefname/Präfix, anschließend Prüfung von XML-Dateien in `ANNOTATION_PATH` anhand ihrer Dateizeiten | Kein vorhandener interaktiver Start mit XML-Ausschnitt und Cursoranker. AA-03/AA-04 benötigen einen neuen Ablauf. Der bisherige Start ist kein eigener Annotation-Background-Job. |
+| Start und Ergebniseingang | `LetterAutomaticAnnotationsController` → `LetterAutomaticAnnotations::NewForm` → `Sempria::LetterAnnotationService`; Start per HTTP-GET mit Briefname/Präfix, anschließend Prüfung von XML-Dateien in `ANNOTATION_PATH` anhand ihrer Dateizeiten | Kein vorhandener interaktiver Start mit XML-Ausschnitt und Cursoranker. AA-04/AA-05 benötigen einen neuen Ablauf. Der bisherige Start ist kein eigener Annotation-Background-Job. |
 | Annotationsdaten | `LetterAutoAnnoJob`, `LetterAutoAnnoLetter`, `LetterAutoAnnoSnippet`, `LetterAutoSnippetReference`; Original-/Arbeits-XML, `xml_id`, Kandidaten, finale Entität und Status | Daten und Zuordnungen wiederverwenden/migrieren. Startanker, Editor-Arbeitskopiebezug, Versionsvertrag, Feedbackzustellung und Entscheidungshistorie fehlen in diesen Tabellen. |
 | Trefferextraktion | `Sempria::ExtractXmlContent` liest `persName`/`placeName` mit `producer`; Kandidaten für Person, Settlement, Institution und Sight; auch `open_no_recommendation` | Neue Einzelergebnisse strikt und namespace-bewusst verarbeiten. Die vier Typen und Treffer ohne Kandidaten bilden die belegte Ausgangsbasis; weitere Typen fachlich entscheiden. |
-| Entscheidungen | `Jwt::AutomaticAnnoSnippetsController` und `Sempria::HandleAnnotationSnippetService` ändern Entität/Status; XML wird separat über `AutomaticAnnoLettersController#set_xml_content` geschrieben | Im geprüften Entscheidungspfad wird kein Feedback an Sempria gesendet. AA-06 benötigt eine gemeinsame Entscheidungsoperation und verlässliche Feedbackzustellung. |
+| Entscheidungen | `Jwt::AutomaticAnnoSnippetsController` und `Sempria::HandleAnnotationSnippetService` ändern Entität/Status; XML wird separat über `AutomaticAnnoLettersController#set_xml_content` geschrieben | Im geprüften Entscheidungspfad wird kein Feedback an Sempria gesendet. AA-07 benötigt eine gemeinsame Entscheidungsoperation und verlässliche Feedbackzustellung. |
 | Editor-Arbeitsstand | `Editor::Letter#xml_content` als Basis, `xml_content_current` als Arbeitskopie; `Editor::UserPinnedLetter` ordnet Benutzer zu; `EditorTrackChangesService` schreibt Historie | Bestätigte Annotationen sollten in die vorhandene Arbeitskopie und Historie integriert werden, nicht in einen dritten vollständigen Briefstand. |
 | Veröffentlichung | `EditorPublishLetterService` nutzt `Letter.publish!` mit Sperre auf dem Brief und Konfliktprüfung; `staleness` und `rebase` existieren bereits | Veröffentlichung bleibt eine eigene Aktion. Zusätzlicher Versionsschutz ist für gleichzeitige Änderungen derselben Arbeitskopie und Annotationsentscheidungen nötig. |
-| Alte Dateiausgabe | `HandleAnnotationLetterService#write_content` schreibt atomar eine Datei mit Präfix `sempria-` und entfernt danach die Eingangsdatei aus `ANNOTATION_PATH` | Das ist nicht der Editor-Publish-Pfad. AA-10 muss neben Datenbankständen auch diese Zwischen-/Ausgabedateien und die Sempria-Revert-Funktion berücksichtigen. |
+| Alte Dateiausgabe | `HandleAnnotationLetterService#write_content` schreibt atomar eine Datei mit Präfix `sempria-` und entfernt danach die Eingangsdatei aus `ANNOTATION_PATH` | Das ist nicht der Editor-Publish-Pfad. AA-11 muss neben Datenbankständen auch diese Zwischen-/Ausgabedateien und die Sempria-Revert-Funktion berücksichtigen. |
 | Sperren | `locking_user_id`/`locked_at` am Annotationsbrief; `set_locking_user` übernimmt einen Benutzerparameter, bestimmte Briefaktionen prüfen die Sperre | Keine gemeinsame Editor-/Annotationssperre. Sitzungseigentümer aus dem authentifizierten Benutzer ableiten und Regeln auch für Snippet- und Editor-Schreiboperationen durchsetzen. |
 
-**Empfohlener technischer Zuschnitt:** Sitzungen auf einen kanonischen `Letter` und die konkrete `Editor::Letter`-Arbeitskopie beziehen; Vorschläge und Feedback separat persistieren; bestätigte Änderungen über den Editor-Änderungsdienst übernehmen; Veröffentlichung über den vorhandenen Publish-Pfad. Die Sitzungshistorie darf nicht allein von einer löschbaren Arbeitskopie abhängen. Ob die vorhandenen Annotationsmodelle erweitert oder neue Sitzungsmodelle mit Bestandsübernahme eingeführt werden, wird in AA-02 entschieden. Für die erste Version bietet sich inkrementelles Polling an; ein bestehender Streaming-Vertrag für Annotationen wurde nicht gefunden.
+**Empfohlener technischer Zuschnitt:** Sitzungen auf einen kanonischen `Letter` und die konkrete `Editor::Letter`-Arbeitskopie beziehen; Vorschläge und Feedback separat persistieren; bestätigte Änderungen über den Editor-Änderungsdienst übernehmen; Veröffentlichung über den vorhandenen Publish-Pfad. Die Sitzungshistorie darf nicht allein von einer löschbaren Arbeitskopie abhängen. Ob die vorhandenen Annotationsmodelle erweitert oder neue Sitzungsmodelle mit Bestandsübernahme eingeführt werden, wird in AA-03 entschieden. Für die erste Version bietet sich inkrementelles Polling an; ein bestehender Streaming-Vertrag für Annotationen wurde nicht gefunden.
 
-**Externe Abhängigkeit:** Aus dem Rails-Code lässt sich nicht ableiten, ob Sempria bereits XML-Ausschnitte, einzelne Treffer, Entscheidungsfeedback und Abbruch unterstützt. Der dort implementierte Datei-/Batch-Vertrag genügt dem Zielablauf nicht. Die Abstimmung aus AA-01 ist Voraussetzung für die reale Sempria-Anbindung; ein Prototyp kann gegen einen vereinbarten Testadapter entstehen.
+**Externe Abhängigkeit:** Aus dem Rails-Code lässt sich nicht ableiten, ob Sempria bereits XML-Ausschnitte, einzelne Treffer, Entscheidungsfeedback und Abbruch unterstützt. Der dort implementierte Datei-/Batch-Vertrag genügt dem Zielablauf nicht. Die Abstimmung aus AA-02 ist Voraussetzung für die reale Sempria-Anbindung; ein Prototyp kann gegen einen vereinbarten Testadapter entstehen.
 
 ## Fachliche Klärungen und Arbeitsannahmen
 
-1. **Suchablauf:** Die ersten Notizen verlangen eine Benutzerentscheidung vor dem nächsten Vorschlag. Die spätere Ablaufplanung und Zusammenfassung beschreiben eine parallel weiterlaufende Suche. Arbeitsannahme ist die spätere Variante; AA-01 muss klären, wie bereits berechnete Vorschläge auf neues Feedback reagieren.
+1. **Suchablauf:** Die ersten Notizen verlangen eine Benutzerentscheidung vor dem nächsten Vorschlag. Die spätere Ablaufplanung und Zusammenfassung beschreiben eine parallel weiterlaufende Suche. Arbeitsannahme ist die spätere Variante; AA-02 muss klären, wie bereits berechnete Vorschläge auf neues Feedback reagieren.
 2. **Startposition:** „Ab dem ausgewählten Markup“ wird vorläufig als Beginn des per Cursor bestimmten TEI-Elements verstanden. Ob stattdessen exakt die Zeichenposition gemeint ist, muss abgestimmt werden. Ein bloßer Ausschnitt des XML-Strings ist kein verlässlicher TEI-Teilbaum.
 3. **Vorschlag oder bestätigte Annotation:** Die Darstellung im Brief soll automatisch aktualisiert werden. Offen ist, ob ungeprüfte Vorschläge bereits im gespeicherten Brief-XML stehen. Empfehlung: Vorschläge separat speichern und im Editor sichtbar darstellen; erst bestätigte Änderungen in den maßgeblichen Briefstand übernehmen.
-4. **Bearbeitung während der Suche:** Die Quelle erlaubt die Bearbeitung von Vorschlägen, sagt aber erst nach Ende wieder allgemeine Bearbeitung zu. Empfehlung für die erste Version: Annotationsprüfung erlauben, sonstige strukturelle/XML-Änderungen während des Modus sperren. Ungespeicherte Änderungen vor dem Start kontrolliert sichern.
-5. **Ende und Nachbearbeitung:** Suchende ist nicht gleich abgeschlossene Prüfung. Empfehlung: Offene Vorschläge bleiben nach Suchende oder manuellem Stopp erhalten und können auch nach erneutem Öffnen geprüft werden. Nachträgliches Feedback muss Sempria auch ohne laufende Suche erreichen können.
+4. **Bearbeitung im Modus – festgelegt:** Im Modus `AutomaticAnnotations` sind alle anderen Änderungen gemäß obiger Ergänzung gesperrt, auch nach Ende der Suche. Noch zu klären ist ausschließlich der Umgang mit ungespeicherten Änderungen vor der Aktivierung; sie dürfen nicht stillschweigend verloren gehen.
+5. **Ende und Nachbearbeitung:** Die Suche kann automatisch enden; das reguläre Modusende erfolgt über denselben Button mit Sicherheitsabfrage. Empfehlung: Offene Vorschläge bleiben nach Modusende erhalten und können auch nach erneutem Öffnen geprüft werden. Für spätere Änderungen wird der Modus über den bestätigten Buttonstart erneut betreten; eine reine Nachprüfung vorhandener Vorschläge darf nicht automatisch einen neuen Suchlauf auslösen. Nachträgliches Feedback muss Sempria auch ohne laufende Suche erreichen können.
 6. **Bestandsdaten:** Fachlich festlegen, ob offene alte Vorgänge übernommen, vor dem Wechsel abgeschlossen oder lesbar archiviert werden. Bereits bestätigte Briefauszeichnungen müssen erhalten bleiben.
 
 ## Ticketübersicht
 
 | Kennung | Titel | Abhängigkeiten |
 | --- | --- | --- |
-| AA-01 | Ablauf, Zustände und Schnittstellen abstimmen | – |
-| AA-02 | Annotationssitzungen und Vorschläge bereitstellen | AA-01 |
-| AA-03 | Startposition und Aktivierung im Editor integrieren | AA-02 |
-| AA-04 | Schrittweise Sempria-Suche im Backend ausführen | AA-02 |
-| AA-05 | Neue Vorschläge abrufen und im Brief hervorheben | AA-03, AA-04 |
-| AA-06 | Vorschläge bearbeiten, akzeptieren und verwerfen | AA-05 |
-| AA-07 | Übersicht und nachträgliche Korrekturen integrieren | AA-06 |
-| AA-08 | Briefstand, Speicherung und konkurrierende Änderungen absichern | AA-02; gemeinsam mit AA-05/AA-06 entwickeln |
-| AA-09 | Modus beenden, Navigation sperren und Sitzungen wiederherstellen | AA-03, AA-04; mit AA-08 abstimmen |
-| AA-10 | Bestehendes Annotationssystem ablösen | AA-05 bis AA-09, Bestandsentscheidung aus AA-01 |
-| AA-11 | Gesamtablauf und Ablösung abnehmen | AA-03 bis AA-10 |
+| AA-01 | Modus AutomaticAnnotations als Grundlage einführen | –; zuerst umsetzen und abnehmen |
+| AA-02 | Ablauf, Zustände und Schnittstellen abstimmen | AA-01 |
+| AA-03 | Annotationssitzungen und Vorschläge bereitstellen | AA-01, AA-02 |
+| AA-04 | Startposition und Suchinitialisierung an den Modus anbinden | AA-01, AA-03 |
+| AA-05 | Schrittweise Sempria-Suche im Backend ausführen | AA-01, AA-03 |
+| AA-06 | Neue Vorschläge abrufen und im Brief hervorheben | AA-01, AA-04, AA-05 |
+| AA-07 | Vorschläge bearbeiten, akzeptieren und verwerfen | AA-01, AA-06 |
+| AA-08 | Übersicht und nachträgliche Korrekturen integrieren | AA-01, AA-07 |
+| AA-09 | Briefstand, Speicherung und konkurrierende Änderungen absichern | AA-01, AA-03; gemeinsam mit AA-06/AA-07 entwickeln |
+| AA-10 | Suchabbruch und Wiederherstellung an den Modus anbinden | AA-01, AA-04, AA-05; mit AA-09 abstimmen |
+| AA-11 | Bestehendes Annotationssystem ablösen | AA-01, AA-06 bis AA-10, Bestandsentscheidung aus AA-02; Umschaltung nach AA-12 |
+| AA-12 | Gesamtablauf und Ablösung abnehmen | AA-01, AA-04 bis AA-10 und Migrationsvorbereitung aus AA-11 |
+| AA-13 | Ungenutzten Annotationscode in Frontend und Backend entfernen | AA-01, AA-11 einschließlich Umschaltung, AA-12 |
 
-Alle Tickets gehören zur vollständigen Ablösung. Ein erster technischer Durchstich umfasst Start → erster Vorschlag → Entscheidung → Feedback → Stopp; er ersetzt noch nicht das bestehende System.
+**Umsetzungsreihenfolge:** AA-01 ist das erste, eigenständig prüfbare Grundlagen-Ticket. Alle weiteren Erweiterungen bauen auf seinem aktiven Modus und seinen zentralen Sperren auf; die bisherigen Kennungen wurden entsprechend um eins erhöht. AA-03, AA-04, AA-09 und AA-10 erweitern diese Grundlage, sie führen keinen zweiten Modus oder unabhängige Sperren ein.
 
-## AA-01 – Ablauf, Zustände und Schnittstellen abstimmen
+Alle Tickets gehören zur vollständigen Ablösung. Zuerst wird der Modus ohne Sempria-Anbindung abgenommen. Danach folgt der technische Durchstich Start → erster Vorschlag → Entscheidung → Feedback → Stopp. AA-11 bereitet die Migration vor, AA-12 nimmt den neuen Ablauf und den Migrationsprobelauf ab; erst danach erfolgt die Umschaltung aus AA-11. AA-13 entfernt anschließend den nachweislich ungenutzten Code und prüft den bereinigten Stand erneut.
+
+## AA-01 – Modus AutomaticAnnotations als Grundlage einführen
+
+**Priorität:** zuerst umsetzen und abnehmen. **Abhängigkeiten:** keine späteren Annotations-Tickets; unabhängig vom externen Sempria-Vertrag prüfbar.
+
+**Ziel:** Der Editor besitzt einen expliziten Modus `AutomaticAnnotations`, auf dem sämtliche folgenden Annotationsfunktionen aufbauen.
+
+**Frontend / Umfang:**
+- Zentralen Editor-Modus mit den Übergängen Start/Ende einführen, getrennt von WYSIWYG-/Codeansicht und dem späteren Suchstatus.
+- Einen sichtbaren Button für Start und Beenden mit jeweils eigener Sicherheitsabfrage integrieren. Erst Bestätigen sendet den Auftrag; Abbrechen, Escape und Schließen ändern nichts. Die vorhandene Cursorposition bleibt beim Fokuswechsel erhalten.
+- Während des aktiven Modus alle anderen Änderungen und den Briefwechsel sperren, einschließlich Codebearbeitung, Metadaten, manueller Auszeichnungen, Uploads, allgemeinem Speichern, Undo/Redo, Reset, Rebase, Veröffentlichung, Tastenkürzeln und bereits geöffneten Dialogen.
+- Eine zentrale Prüfung für zulässige Aktionen bereitstellen. Spätere Tickets dürfen ausschließlich ihre gezielten Annotationsaktionen ergänzen; das Ausblenden einzelner Bedienelemente genügt nicht.
+- Übergänge gegen Doppelklicks absichern; bei unklarem Serverstatus keine Bearbeitung freigeben. Beim Neuladen den Modus vom Backend wiederherstellen. Für diese erste Ausbaustufe den Start bei ungespeicherten oder noch laufenden Änderungen verhindern und verständlich darauf hinweisen.
+
+**Notwendige Backend-Änderungen:**
+- Einen minimalen persistenten Moduszustand mit kanonischem Brief, konkreter `Editor::Letter`-Arbeitskopie, authentifiziertem Eigentümer und Zustandskennung bereitstellen. Idempotente Operationen für Aktivieren, Statusabfrage und Beenden sowie atomaren Sperrerwerb/-freigabe implementieren. AA-03 ergänzt später Vorschläge und Suchdaten auf dieser Grundlage.
+- Die vorhandene Cookie-Authentifizierung nutzen und Eigentümer-/Briefrechte prüfen. Gleichzeitige Aktivierungen für denselben Brief verhindern; Freigabe nur durch berechtigte Operationen, mit definiertem Umgang mit abgelaufenen/verwaisten Modussitzungen.
+- Eine gemeinsame serverseitige Modusprüfung für die betroffenen Schreibpfade ergänzen, insbesondere `Jwt::Editor::PinnedLettersController`, `LetterChangesController` und Figure-Uploads. Direkte API-Aufrufe und weitere Clients dürfen die Sperre nicht umgehen. Bereits laufende Schreibvorgänge und Aktivierung müssen über denselben Sperrmechanismus koordiniert werden.
+- Neue Annotationsoperationen dürfen später nur über ausdrücklich autorisierte interne Pfade schreiben, nicht über ein frei übermittelbares Umgehungsflag. Die Modusaktivierung dieses Grundlagen-Tickets benötigt weder einen Sempria-Auftrag noch Vorschlagsdaten.
+
+**Akzeptanzkriterien:** Der Modus lässt sich ohne Sempria-Anbindung über Button und bestätigte Sicherheitsabfrage aktivieren und beenden. Abbrechen beider Abfragen sendet keinen Auftrag. Im aktiven Modus ist kein anderer Bearbeitungsweg nutzbar; direkte Requests und konkurrierende Clients werden ebenfalls abgewiesen. Nach Neuladen bleiben Modus und Sperren erhalten. Fehlgeschlagenes/unklares Beenden gibt keine Bearbeitung frei; nach bestätigtem Ende sind die normalen Funktionen wieder nutzbar. Frontend- und Backend-Tests decken Bestätigung/Abbruch, Übergänge, konkurrierende Requests, Sperren und Wiederherstellung ab.
+
+**Abgrenzung:** Startposition als Suchbereich, Sempria-Kommunikation, Vorschläge und Feedback werden in den Folgetickets ergänzt. Der Modus kann daher vollständig vor diesen Erweiterungen umgesetzt und geprüft werden.
+
+## AA-02 – Ablauf, Zustände und Schnittstellen abstimmen
 
 **Ziel:** Fachabteilung, Frontend, Rails-Backend und Sempria arbeiten mit einem eindeutigen Prozessmodell.
 
 **Frontend / Umfang:**
-- Start, laufende Suche, Prüfung, Nachbearbeitung und Ende als Ablauf skizzieren; die sechs offenen Punkte oben entscheiden.
+- Start, laufende Suche, Prüfung, Nachbearbeitung und Ende als Ablauf skizzieren; offene Punkte oben entscheiden und die verbindlichen Modusregeln berücksichtigen.
 - Unterstützte Annotationstypen und bearbeitbare Felder festlegen, einschließlich vorhandener Auszeichnungen und überschneidender Treffer.
-- Deutsche Status- und Fehlermeldungen sowie Verhalten von Codeansicht, Undo/Redo und allgemeiner Bearbeitung bestimmen.
+- Deutsche Status- und Fehlermeldungen sowie die Darstellung gesperrter Funktionen bestimmen. Die Bearbeitungssperre selbst und beide Sicherheitsabfragen sind verbindlich.
 
 **Notwendige Backend-Änderungen / Vorarbeit:**
 - Sempria-Vertrag für Start, nächsten Treffer, Feedback, Korrektur früheren Feedbacks, Suchende und Abbruch prüfen und dokumentieren. Fehlende Funktionen als externe Sempria-Abhängigkeiten ausweisen.
 - Sitzungs-, Vorschlags- und Rückmeldestatus getrennt definieren. Beispiel: Suche läuft/beendet/gestoppt/fehlgeschlagen; Vorschlag offen/akzeptiert/verworfen; Rückmeldung ausstehend/zugestellt/fehlgeschlagen.
+- Zusätzlich den aktiven Editormodus getrennt vom Suchstatus führen: `AutomaticAnnotations` bleibt nach Suchende aktiv, bis das bestätigte Beenden serverseitig abgeschlossen ist.
 - Referenzen auf Briefversion und Fundstelle, Reihenfolge der Ergebnisse, Fehlerschema sowie Polling oder Push vertraglich festlegen.
 - **Konkreter Ausgangspunkt:** `app/services/sempria/letter_annotation_service.rb` übermittelt derzeit Briefname/Präfix und `force`, aber keinen XML-Inhalt, Startanker oder Benutzerentscheid. Den neuen Vertrag ausdrücklich gegen diese Lücke abstimmen; keine bereits vorhandene Schritt-/Feedback-API unterstellen.
 - Das vorhandene `Sempria::Support::AnnoStatusHandling` leitet Brief-/Jobabschluss aus geschlossenen Vorschlägen ab. Beim neuen Ablauf Suchende unabhängig vom Prüfabschluss definieren. Auch die Bedeutung von „akzeptiert“, „in Arbeitskopie gespeichert“ und „veröffentlicht“ sowie spätere Rücknahmen trennen.
 
 **Akzeptanzkriterien:** Ein abgestimmter Ablauf und Beispielnachrichten für Start, Treffer, Entscheidung, Korrektur und Ende liegen vor. Parallelität und Wirkung späterer Entscheidungen sind ausdrücklich entschieden. Die Beispiele decken auch „kein Treffer“ und Sempria-Ausfall ab.
 
-## AA-02 – Annotationssitzungen und Vorschläge bereitstellen
+## AA-03 – Annotationssitzungen und Vorschläge bereitstellen
+
+**Aufbau auf AA-01:** Den bereits vorhandenen Moduszustand um Annotationssitzung, Suchdaten und Vorschläge erweitern; Modus und Sperrmechanismus wiederverwenden.
 
 **Ziel:** Der Editor kann einen nachvollziehbaren Annotationsvorgang für einen konkreten Brief verwalten.
 
 **Frontend / Umfang:**
 - Typisierte, an der API-Grenze validierte Verträge und einen briefbezogenen Sitzungszustand ergänzen.
 - Sitzungsstatus, Vorschläge und ausgewählte Annotation vom bestehenden Altmodul entkoppeln.
+- `AutomaticAnnotations` als expliziten Editor-Modus mit Übergängen für Start/Ende modellieren; zentrale Prüfungen für erlaubte Aktionen daraus ableiten, statt nur einzelne Buttons zu deaktivieren.
 
 **Notwendige Backend-Änderungen:**
 - Persistente Sitzung mit Briefbezug, Benutzer, Ausgangsversion, Startanker, Suchfortschritt, Status und externer Sempria-Referenz einführen oder vorhandenes Modell erweitern.
 - Vorschläge mit stabiler ID, Fundstellenanker, XML/Entitätsdaten, Ausgangsversion, Prüfstatus und Herkunft speichern; Entscheidungen und Feedbackzustellung nachvollziehbar halten.
 - Operationen für Start, Lesen einer Sitzung, Ermitteln der aktiven Sitzung und inkrementelles Lesen von Vorschlägen bereitstellen.
+- Den Modus und seine Schreibsperre serverseitig führen und beim Lesen/Wiederöffnen zurückgeben; ein abgeschlossener Suchjob darf diese Sperre nicht selbst freigeben. Erneuter Moduseintritt zur Nachprüfung muss ohne neuen Sempria-Suchauftrag möglich sein.
 - Schreibberechtigung und Sitzungseigentümer serverseitig prüfen; doppelte Starts und konkurrierende aktive Sitzungen für denselben Brief verhindern. Cookie-basierte Authentifizierung weiterverwenden.
 - **Modelle/Migration:** Die vier bestehenden Annotationsmodelle und `db/structure.sql` als Ausgangsbasis verwenden. `LetterAutoAnnoLetter` besitzt nur `letter_name`, keinen direkten `Letter`-/Editor-Arbeitskopie-Fremdschlüssel. Für neue Sitzungen diese Bezüge, einen beständigen Eigentümer, Ausgangsrevision und externe Laufkennung ergänzen; Altdaten anhand des Brief-/Dateinamens zuordnen.
 - Der vorhandene eindeutige Index auf `(letter_auto_anno_letter_id, xml_id)` schützt nur Snippets innerhalb eines Annotationsbriefs. Atomare Vergabe einer aktiven Sitzung und Idempotenz des Starts zusätzlich absichern. Die globale Prüfung auf irgendeinen offenen Job in `LetterAutomaticAnnotations::NewForm#no_running_job` ist keine nebenläufigkeitssichere Sperre pro Brief.
@@ -97,33 +142,37 @@ Alle Tickets gehören zur vollständigen Ablösung. Ein erster technischer Durch
 
 **Akzeptanzkriterien:** Wiederholter Start erzeugt keinen zweiten Lauf. Unberechtigte Zugriffe werden abgewiesen. Nach Neuladen sind Sitzung und bisherige Vorschläge wieder abrufbar. Automatisierte Vertrags- und Berechtigungstests decken diese Fälle ab.
 
-## AA-03 – Startposition und Aktivierung im Editor integrieren
+## AA-04 – Startposition und Suchinitialisierung an den Modus anbinden
 
-**Ziel:** Benutzer starten die Annotation direkt an einer gewählten Stelle im TEI-Body.
+**Aufbau auf AA-01:** Den bestehenden Button und seine Sicherheitsabfrage um Startposition und Suchinitialisierung erweitern; kein zweiter Aktivierungsweg.
+
+**Ziel:** Benutzer aktivieren `AutomaticAnnotations` über einen Button mit Sicherheitsabfrage; die Suche beginnt an einer gewählten Stelle im TEI-Body.
 
 **Frontend / Umfang:**
-- Per Linksklick gesetzten Cursor bzw. Elementanker für den Rechtsklick im Kontextmenü erhalten.
-- Aktion „Automatische Annotationen ab hier starten“ und sichtbaren Status-/Stopp-Button ergänzen.
-- Start nur bei gültiger Position, Schreibberechtigung und geeignetem Briefstand erlauben; ungespeicherte Änderungen gemäß AA-01 behandeln.
-- Bestehende Auswahl-, Kontextmenü- und Dialogfunktionen berücksichtigen; Texte über i18n pflegen.
+- Per Linksklick gesetzten Cursor bzw. Elementanker beim Betätigen des Modus-Buttons und Öffnen der Sicherheitsabfrage erhalten.
+- Sichtbaren Modus-Button ergänzen: inaktiv „Automatische Annotationen starten“, aktiv „Automatische Annotationen beenden“. Start ausschließlich nach ausdrücklicher Bestätigung; kein zusätzlicher Start über das Kontextmenü.
+- Die Startabfrage nennt den betroffenen Brief und weist darauf hin, dass andere Bearbeitungen und der Briefwechsel bis zum Beenden gesperrt werden. Abbrechen, Escape und Schließen starten keine Sitzung.
+- Start nur bei gültiger Position, Schreibberechtigung und geeignetem Briefstand erlauben; ungespeicherte Änderungen gemäß AA-02 behandeln.
+- Bestehende Auswahl- und Dialogfunktionen berücksichtigen; Texte über i18n pflegen. Offene Bearbeitungen vor Aktivierung kontrolliert abschließen oder den Start verhindern; ihre Dialoge dürfen nach Aktivierung keine fremden Änderungen speichern.
 
 **Notwendige Backend-Änderungen:**
 - Startanker gegen die übergebene bzw. gesicherte Briefversion und den TEI-Body prüfen; veraltete oder unauflösbare Anker ablehnen.
 - Inhalt vom vereinbarten Startpunkt bis zum Ende als gültiges, für Sempria geeignetes XML mit erforderlichem Kontext und Namespaces erzeugen.
 - Sitzung starten und ihre Kennung samt bestätigter Briefversion zurückgeben; keinen direkten Browserzugriff auf Sempria voraussetzen.
+- Moduseintritt und Schreibsperre atomar mit der Initialisierung sichern. Bei abgelehntem Start bleibt der Normalmodus erhalten; bei verloren gegangener Antwort klärt eine Statusabfrage, ob der Start bereits erfolgt ist.
 - **Integration:** Die konkrete Benutzer-Arbeitskopie über `Editor::UserPinnedLetter.for_user_and_letter` auflösen. Als Eingabe `Editor::Letter#xml_content_current` verwenden, nachdem ausstehende Editoränderungen gespeichert und der Versionsbezug geprüft wurden; ein Start nur anhand des kanonischen Briefnamens würde diese Änderungen nicht berücksichtigen.
 - `Jwt::Editor::PinnedLettersController#set_content`/`EditorTrackChangesService` für das Sichern vorhandener Bearbeitungen nutzen. Start als eigene schreibende API-Operation ergänzen; die bestehende Rails-HTML-Form für Namenspräfixe nicht als neuen Editorstart verwenden.
 
-**Akzeptanzkriterien:** Start am Anfang und mitten im Brief funktioniert. Bereiche vor dem Startpunkt werden nicht zur Annotation ausgewählt. Klicks außerhalb des Body und ungültiges XML starten keine Suche. Fehlgeschlagene Starts hinterlassen keinen aktiven UI-Modus.
+**Akzeptanzkriterien:** Buttonklick allein startet keine Sitzung; erst die Bestätigung aktiviert `AutomaticAnnotations`. Abbrechen/Escape/Schließen sendet keinen Startauftrag. Start am Anfang und mitten im Brief funktioniert, die Position bleibt trotz Fokuswechsel erhalten. Bereiche vor dem Startpunkt werden nicht zur Annotation ausgewählt. Ungültige Positionen und ungültiges XML starten keine Suche. Doppelte Bestätigung erzeugt keinen zweiten Lauf. Abgelehnte Starts lassen den Normalmodus unverändert; unklare Ergebnisse werden mit dem Server abgeglichen. Nach erfolgreicher Aktivierung sind andere Änderungen gesperrt.
 
-## AA-04 – Schrittweise Sempria-Suche im Backend ausführen
+## AA-05 – Schrittweise Sempria-Suche im Backend ausführen
 
 **Ziel:** Sempria liefert fortlaufend Vorschläge, während Benutzer vorhandene Vorschläge prüfen können.
 
 **Frontend / Umfang:** Suchaktivität, ausbleibende Treffer und technische Fehler unterscheidbar darstellen; keine unbestätigten Prozentangaben verwenden.
 
 **Notwendige Backend-Änderungen:**
-- Sempria-Adapter und asynchrone Verarbeitung für den in AA-01 vereinbarten Ablauf implementieren; lang laufende Suche vom HTTP-Request entkoppeln.
+- Sempria-Adapter und asynchrone Verarbeitung für den in AA-02 vereinbarten Ablauf implementieren; lang laufende Suche vom HTTP-Request entkoppeln.
 - Ergebnisse validieren, auf Brief und Sitzung abbilden und schrittweise speichern/bereitstellen.
 - Feedback und Suche in eine definierte Reihenfolge bringen; veraltete bzw. durch Entscheidungen ungültig gewordene Vorschläge kennzeichnen oder neu berechnen lassen.
 - Zeitüberschreitungen, begrenzte Wiederholungen, doppelte Ergebnisse und das explizite Signal „keine weiteren Treffer“ behandeln.
@@ -131,9 +180,9 @@ Alle Tickets gehören zur vollständigen Ablösung. Ein erster technischer Durch
 - **Adapter:** Den jetzigen Ablauf `LetterAnnotationService#check_status` → Datei lesen → `ExtractXmlContent.extract_content` für interaktive Sitzungen ersetzen. Ergebnis-IDs und Laufkennung statt bloßer Dateizeitvergleiche einsetzen. `ExtractXmlContent` dient als Referenz für Kandidatenzuordnung, nicht unverändert als inkrementeller Importer.
 - `LetterAnnotationService#process!` überspringt externe Aufrufe in Test und Development. Der neue Adapter benötigt ausdrücklich steuerbare Fakes und getrennte Integrationstests; das Anlegen eines alten Jobs belegt noch keinen erfolgreichen Sempria-Aufruf.
 
-**Akzeptanzkriterien:** Mehrere Treffer werden vor Suchende verfügbar. Die Suche verhält sich bei Feedback während eines laufenden Schritts gemäß AA-01. Wiederholte Antworten erzeugen keine Duplikate. Fehler werden nicht als erfolgreiches Suchende ausgegeben. Adaptertests verwenden vereinbarte Sempria-Beispiele.
+**Akzeptanzkriterien:** Mehrere Treffer werden vor Suchende verfügbar. Die Suche verhält sich bei Feedback während eines laufenden Schritts gemäß AA-02. Wiederholte Antworten erzeugen keine Duplikate. Fehler werden nicht als erfolgreiches Suchende ausgegeben. Adaptertests verwenden vereinbarte Sempria-Beispiele.
 
-## AA-05 – Neue Vorschläge abrufen und im Brief hervorheben
+## AA-06 – Neue Vorschläge abrufen und im Brief hervorheben
 
 **Ziel:** Neue Auszeichnungen werden ohne manuelles Neuladen sichtbar und sind eindeutig auswählbar.
 
@@ -151,7 +200,7 @@ Alle Tickets gehören zur vollständigen Ablösung. Ein erster technischer Durch
 
 **Akzeptanzkriterien:** Jeder Treffer erscheint einmal an der richtigen Stelle. Neue Ergebnisse setzen ein geöffnetes Bearbeitungsformular nicht zurück. Ungültiges oder manipuliertes XML wird sicher zurückgewiesen. Ereignisse eines beendeten oder anderen Laufs verändern den Brief nicht.
 
-## AA-06 – Vorschläge bearbeiten, akzeptieren und verwerfen
+## AA-07 – Vorschläge bearbeiten, akzeptieren und verwerfen
 
 **Ziel:** Jede Benutzerentscheidung wirkt konsistent auf Brief, Vorschlagsstatus und Sempria-Feedback.
 
@@ -162,6 +211,7 @@ Alle Tickets gehören zur vollständigen Ablösung. Ein erster technischer Durch
 
 **Notwendige Backend-Änderungen:**
 - Eine konsistente Entscheidungsoperation bereitstellen: Vorschlag, erwartete Version, Entscheidung und ggf. korrigierte Daten entgegennehmen und validieren.
+- Änderungen nur für den Eigentümer des aktiven Modus `AutomaticAnnotations` erlauben und auf die betreffende Annotation begrenzen; beliebige zusätzliche Briefänderungen im Request zurückweisen.
 - Briefänderung und Prüfstatus gemeinsam absichern; die bisher getrennten Aufrufe für Entität, Gesamt-XML und Status nicht unverändert als neue Schreibkette übernehmen.
 - Feedback dauerhaft zur Zustellung vormerken und mit Vorschlags-/Entscheidungskennung an Sempria senden; Wiederholungen dürfen die fachliche Wirkung nicht verdoppeln.
 - Bei Ablehnung nur die betreffende vorgeschlagene Auszeichnung entfernen, nicht Brieftext oder unabhängige Auszeichnungen.
@@ -171,14 +221,15 @@ Alle Tickets gehören zur vollständigen Ablösung. Ein erster technischer Durch
 
 **Akzeptanzkriterien:** Alle drei Aktionen ergeben den vereinbarten Briefstand und korrektes Feedback. Ein Sempria-Ausfall verliert keine gespeicherte Entscheidung und bleibt sichtbar. Wiederholung nach Verbindungsabbruch erzeugt keine doppelte Änderung. Versionskonflikte führen nicht zu Teiländerungen.
 
-## AA-07 – Übersicht und nachträgliche Korrekturen integrieren
+## AA-08 – Übersicht und nachträgliche Korrekturen integrieren
 
 **Ziel:** Benutzer können alle gefundenen Auszeichnungen über eine Seitenleiste wiederfinden und später bearbeiten.
 
 **Frontend / Umfang:**
 - Übersicht mit Textkontext, Typ, Prüfstatus und ggf. ausstehender Rückmeldung bereitstellen; Auswahl springt zur Fundstelle.
 - Offene, akzeptierte, bearbeitete und verworfene Vorschläge nachvollziehbar anzeigen; Filter und Zähler vorsehen.
-- Entscheidungen erneut öffnen und gemäß AA-01 korrigieren können, auch nach Suchende und erneutem Öffnen des Briefes.
+- Entscheidungen erneut öffnen und gemäß AA-02 korrigieren können, auch nach Suchende und erneutem Öffnen des Briefes.
+- Nach Modusende bleibt die Übersicht lesbar. Zum Ändern vorhandener Entscheidungen zunächst über denselben Modus-Button mit Sicherheitsabfrage wieder in `AutomaticAnnotations` wechseln; dabei keine neue Suche ungefragt starten.
 
 **Notwendige Backend-Änderungen:**
 - Briefbezogenen Zugriff auf bisherige Sitzungen und Vorschläge bereitstellen, bei Bedarf mit Pagination und Statusfiltern.
@@ -189,56 +240,62 @@ Alle Tickets gehören zur vollständigen Ablösung. Ein erster technischer Durch
 
 **Akzeptanzkriterien:** Bereits geprüfte Vorschläge bleiben auffindbar. Eine nachträgliche Änderung aktualisiert Brief, Übersicht und Feedback konsistent. Nicht mehr vorhandene Fundstellen werden verständlich angezeigt und führen nicht zu Änderungen an anderen Stellen.
 
-## AA-08 – Briefstand, Speicherung und konkurrierende Änderungen absichern
+## AA-09 – Briefstand, Speicherung und konkurrierende Änderungen absichern
+
+**Aufbau auf AA-01:** Die bereits durchgesetzten Modussperren um die erlaubten Annotations-Schreibpfade und deren Versions-/Historienkonsistenz erweitern.
 
 **Ziel:** Annotationsverarbeitung und Editor verwenden einen abgestimmten Briefstand ohne verlorene Änderungen.
 
 **Frontend / Umfang:**
-- Annotationsänderungen mit Editor-State, Änderungsmarkierung, Speichern und Undo/Redo gemäß AA-01 verbinden.
+- Annotationsänderungen mit Editor-State, Änderungsmarkierung und dem gezielten Speichern von Entscheidungen verbinden; allgemeines Speichern und Undo/Redo bleiben im Modus gesperrt.
 - Bestehende Erkennung veralteter Briefe und Neuladen/Rebase mit laufenden Sitzungen abstimmen.
-- Gleichzeitige strukturelle Änderungen, Codebearbeitung, Uploads und Veröffentlichung gemäß vereinbarter Modusregeln behandeln.
+- Alle anderen Bearbeitungswege zentral sperren: strukturelle Änderungen, Code-/Freitextbearbeitung, Formatierung, manuelle Auszeichnungen, Metadaten, Uploads, Reset, Rebase und Veröffentlichung. Die Sperre gilt auch für Tastenkürzel, Kontextmenüs und bereits geöffnete Dialoge.
 
 **Notwendige Backend-Änderungen:**
 - Maßgeblichen Speicherstand und Übergang von Vorschlag zu dauerhaftem TEI definieren; getrennte Annotations- und Editorstände konsolidieren bzw. kontrolliert synchronisieren.
 - Versionsprüfung und atomare Schreibvorgänge für betroffene Editor- und Annotationsoperationen sicherstellen; vorhandene Sperren konsistent nutzen/erweitern.
+- Eine gemeinsame serverseitige Modusprüfung vor den betroffenen Schreiboperationen ergänzen, insbesondere `PinnedLettersController#set_content`, `#publish`, `#reset_letter`, `#rebase`, Unpin, `LetterChangesController#undo`/`#redo` und Figure-Uploads. Direkte Requests und weitere Clients dürfen den gesperrten Briefstand ebenfalls nicht verändern. Nur autorisierte, auf die Annotation begrenzte Entscheidungs-/Ergebnisoperationen dürfen intern den Änderungsdienst nutzen; kein vom Client frei setzbares Umgehungsflag.
 - TEI validieren und fremde Attribute, Namespaces, IDs sowie bestehende manuelle Annotationen bewahren. Nur eigene temporäre Darstellungsdaten ausschließen.
-- Bestehende Validierungs-, Speicher-, Veröffentlichungs- und gegebenenfalls Suchindexprozesse gezielt anbinden; Veröffentlichung ungeprüfter Vorschläge nach der Entscheidung aus AA-01 behandeln.
+- Bestehende Validierungs-, Speicher-, Veröffentlichungs- und gegebenenfalls Suchindexprozesse gezielt anbinden; Veröffentlichung ungeprüfter Vorschläge nach der Entscheidung aus AA-02 behandeln.
 - **Arbeitskopie/Historie:** `EditorTrackChangesService`, `Editor::LetterChange` und `Editor::LetterChangeDetail` integrieren; nötige Annotations-Änderungstypen ergänzen. Neue Revisionsprüfung unter einer gemeinsamen Schreibsperre für Entscheidungen, `set_content` und Hintergrundänderungen vorsehen. Die vorhandene `stale?`-Prüfung vergleicht nur kanonischen Brief und Basisstand, nicht zwei konkurrierende Bearbeitungen derselben Arbeitskopie.
 - **Publish/Datei:** `EditorPublishLetterService` mit `Letter#lock!`, `Letter.publish!` und HTTP-409-Konfliktbehandlung beibehalten. Nicht bei jeder Entscheidung den alten `sempria-`-Dateiexport auslösen. `LetterStorage::AtomicWriteService` stellt atomaren Austausch und strikte XML-Prüfung bereit, aber allein weder vollständige TEI-Fachvalidierung noch dauerhafte Versionierung; hierfür den bestehenden Publish-/Sicherungspfad nutzen und die Fehlerfälle testen.
-- **Undo/Reset/Rebase:** `LetterUndoRedoService`, `EditorResetLetterService`, `EditorRebaseLetterService` und `EditorPinnedLetterService` einbeziehen. Ein Rückgängigmachen einer bestätigten Annotation muss entweder eine neue Entscheidung samt Feedback erzeugen oder für diese Änderung ausdrücklich gesperrt sein; XML und Sempria dürfen nicht auseinanderlaufen. Unpin/Rebase darf die unabhängige Annotationshistorie nicht löschen.
+- **Undo/Reset/Rebase:** `LetterUndoRedoService`, `EditorResetLetterService`, `EditorRebaseLetterService` und `EditorPinnedLetterService` einbeziehen. Diese allgemeinen Aktionen sind im aktiven Modus gesperrt. Auch nach Modusende darf ein Rückgängigmachen einer bestätigten Annotation XML und Sempria nicht auseinanderlaufen lassen: als neue Entscheidung samt Feedback behandeln oder für diese Änderung sperren. Unpin/Rebase darf die unabhängige Annotationshistorie nicht löschen.
 
-**Akzeptanzkriterien:** Gleichzeitige Änderung aus einem zweiten Client wird erkannt. Ein alter Gesamt-XML-Stand überschreibt keine neuere Entscheidung. Ungültiges TEI hinterlässt weder einen geänderten Brief noch einen irreführenden Prüfstatus. XML-Roundtrip- und Konflikttests sichern diese Fälle ab.
+**Akzeptanzkriterien:** Während `AutomaticAnnotations` sind sämtliche anderen Änderungen sowohl über Oberfläche/Tastatur als auch über direkte API-Aufrufe und weitere Clients gesperrt. Annotationsentscheidungen funktionieren weiterhin über ihren begrenzten Schreibpfad. Ein alter Gesamt-XML-Stand überschreibt keine neuere Entscheidung. Ungültiges TEI hinterlässt weder einen geänderten Brief noch einen irreführenden Prüfstatus. XML-Roundtrip-, Modussperr- und Konflikttests sichern diese Fälle ab.
 
-## AA-09 – Modus beenden, Navigation sperren und Sitzungen wiederherstellen
+## AA-10 – Suchabbruch und Wiederherstellung an den Modus anbinden
+
+**Aufbau auf AA-01:** Das vorhandene bestätigte Modusende und die Wiederherstellung mit laufenden Suchjobs, Vorschlägen und Feedback koordinieren. Button, Sicherheitsabfrage und Navigationssperre bestehen bereits.
 
 **Ziel:** Der aktive Modus hält den Benutzer beim aktuellen Brief und lässt sich verlässlich beenden.
 
 **Frontend / Umfang:**
 - Briefwechsel über Tabs, Suche, Favoriten, interne Links und Routennavigation während des Modus verhindern; Schließen des aktiven Brieftabs entsprechend behandeln.
-- Manuelles Beenden über den Status-Button und automatisches Ende bei ausgeschöpfter Suche anzeigen.
-- Nach bestätigtem Ende Navigation und reguläre Bearbeitung freigeben; offene Vorschläge gemäß AA-01 erhalten.
+- Beenden über denselben Modus-Button wie beim Start: Sicherheitsabfrage öffnen und erst nach Bestätigung den Stopp-/Endauftrag senden. Die Abfrage erklärt, dass die Suche gestoppt wird und gespeicherte Entscheidungen erhalten bleiben. Noch nicht gespeicherte Annotationsbearbeitungen müssen vor Abschluss kontrolliert behandelt werden.
+- Abbrechen, Escape oder Schließen der Abfrage lässt `AutomaticAnnotations` unverändert aktiv. Nach Suchende „Suche abgeschlossen“ anzeigen; der Modus und seine Bearbeitungssperre bleiben bis zum bestätigten Beenden bestehen.
+- Nach bestätigtem Ende Navigation und reguläre Bearbeitung freigeben; offene Vorschläge gemäß AA-02 erhalten.
 - Neuladen, Verbindungsabbruch, Sitzungsablauf und Logout behandeln. Beim Wiederöffnen den Serverstatus abfragen; einen Browserabbruch nicht als zuverlässig zugestellten Stopp betrachten.
 
 **Notwendige Backend-Änderungen:**
-- Idempotente Stoppoperation, definierte Endzustände und Freigabe der zugehörigen Sperren implementieren.
+- Idempotente Stopp-/Modusendeoperation, definierte Endzustände und atomare Freigabe der zugehörigen Sperren implementieren. Auch nach bereits abgeschlossener Suche muss diese Operation den Modus beenden können. Suchende allein gibt keine Bearbeitung frei.
 - Laufende Hintergrundarbeit abbrechen bzw. begrenzen und verspätete Ergebnisse nach Stopp von weiteren Briefänderungen ausschließen.
 - Verwaiste Sitzungen durch vereinbarte Ablauf-/Wiederaufnahmebedingungen behandeln; gespeicherte Entscheidungen und ausstehendes Feedback erhalten.
 - **Sperren/Lebenszyklus:** `AutomaticAnnoLettersController#set_locking_user` nicht unverändert übernehmen: Es setzt/löscht derzeit einen übermittelten Benutzer, während Snippet-Schreibaktionen die Briefsperrprüfung nicht aufrufen. Erwerb, Verlängerung und Freigabe an den authentifizierten Sitzungseigentümer und eine atomare Zustandsprüfung binden. Editor-Schreiboperationen müssen dieselben Modusregeln berücksichtigen.
 - `Sempria::RemoveJobAndLettersService` löscht Jobs, Annotationsbriefe und Eingangsdateien; dies ist kein geeigneter Stopp. Stattdessen Endzustand speichern und jeden verzögerten Suchjob vor Ergebnisübernahme erneut auf Laufkennung und Endzustand prüfen. Bereits gespeichertes Feedback auch nach Stopp weiter zustellen.
 
-**Akzeptanzkriterien:** Ein aktiver Lauf erlaubt keinen regulären Briefwechsel. Stopp funktioniert auch während eines laufenden Sempria-Aufrufs. Keine Treffer beendet den Modus automatisch. Nach Neuladen wird kein zweiter Lauf gestartet; ein abgebrochener Browser hinterlässt keine dauerhafte Sperre.
+**Akzeptanzkriterien:** Der aktive Modus erlaubt keinen regulären Briefwechsel. Ein Klick auf den Modus-Button zeigt zunächst die Sicherheitsabfrage; Abbrechen/Escape/Schließen sendet keinen Endauftrag und hält alle Sperren aufrecht. Bestätigtes Beenden funktioniert während eines Sempria-Aufrufs und nach Suchende. Erst die serverseitig bestätigte Beendigung gibt reguläre Bearbeitung und Navigation frei; bei Fehler oder unklarem Ausgang bleiben sie bis zum Statusabgleich gesperrt. Keine Treffer beendet nur die Suche. Nach Neuladen werden Modus und Sperre wiederhergestellt, ohne einen zweiten Lauf zu starten; ein abgebrochener Browser hinterlässt keine dauerhafte Sperre.
 
-## AA-10 – Bestehendes Annotationssystem ablösen
+## AA-11 – Bestehendes Annotationssystem ablösen
 
 **Ziel:** Nach der Umstellung gibt es einen verbindlichen Annotationsworkflow in der Editoransicht.
 
 **Frontend / Umfang:**
-- Alten Navigationseinstieg, separate Ansichten, ungenutzte Redux-Zustände und Service-Aufrufe nach erfolgreicher Abnahme entfernen.
+- Alten Navigationseinstieg und separate Ansichten nach erfolgreicher Abnahme außer Betrieb nehmen; die Entfernung ungenutzter Implementierung erfolgt ausdrücklich in AA-13.
 - Bestehende Links auf sinnvolle neue Ziele umleiten bzw. einen verständlichen Hinweis anzeigen.
-- Wiederverwendete Entitätssuche und Dialoge aus dem Altmodul lösen; Hilfetexte aktualisieren.
+- Wiederverwendete Entitätssuche und Dialoge für die Codebereinigung in AA-13 erfassen; Hilfetexte zum neuen Ablauf aktualisieren.
 
 **Notwendige Backend-Änderungen:**
-- Alte Jobs, Annotationsbriefe, XML-Zwischenstände, Entscheidungen und Sperren inventarisieren; die in AA-01 gewählte Übernahme-/Archivierungsregel implementieren.
+- Alte Jobs, Annotationsbriefe, XML-Zwischenstände, Entscheidungen und Sperren inventarisieren; die in AA-02 gewählte Übernahme-/Archivierungsregel implementieren.
 - Alte Datensätze eindeutig den Editorbriefen zuordnen. Fehlende Zuordnungen separat ausweisen und nicht stillschweigend verwerfen.
 - Bisherige Routen unter `/jwt/automatic_annotations` und `/jwt/automatic_annotation_letters` samt Schreib-/Reset-Aktionen kontrolliert stilllegen, sobald alle Verbraucher umgestellt sind.
 - Umschaltung und Rückfallverfahren vorbereiten; neue Entscheidungen bei einem Rückfall sichern. Keine parallelen, unkoordinierten Schreibwege zulassen.
@@ -248,12 +305,13 @@ Alle Tickets gehören zur vollständigen Ablösung. Ein erster technischer Durch
 
 **Akzeptanzkriterien:** Übernommene oder archivierte Bestandsdaten sind nachprüfbar vollständig. Bestehende bestätigte Annotationen bleiben unverändert. Alte Einstiege führen nicht mehr in den bisherigen Workflow. Ein Migrationsprobelauf und eine geprüfte Rückfallbeschreibung liegen vor.
 
-## AA-11 – Gesamtablauf und Ablösung abnehmen
+## AA-12 – Gesamtablauf und Ablösung abnehmen
 
 **Ziel:** Die integrierte Lösung ist fachlich nutzbar und für die Ablösung des Altverfahrens abgesichert.
 
 **Frontend / Umfang:**
 - Durchgängige Tests für Start ab gewählter Position, mehrere Treffer, alle Entscheidungen, spätere Korrektur, Navigation, Stopp und Wiederöffnung ergänzen.
+- Beide Sicherheitsabfragen einschließlich Abbrechen/Escape/Schließen, Doppelbestätigung und fehlgeschlagener/unklarer Requests testen. Die vollständige Sperre anderer Änderungen über Buttons, Tastenkürzel, Codeansicht, offene Dialoge und direkte API-Aufrufe nachweisen. Suchende darf den Modus nicht unbemerkt verlassen.
 - Lange Briefe, viele Vorschläge, vorhandene Annotationen und verschachteltes TEI in die Abnahme aufnehmen.
 - Deutsche Texte, Tastaturbedienbarkeit, Fokusverhalten und sichtbare Rückmeldung ohne reine Farbcodierung prüfen.
 
@@ -266,6 +324,26 @@ Alle Tickets gehören zur vollständigen Ablösung. Ein erster technischer Durch
 - Rails-Implementierungen gemäß Backend-`AGENTS.md` zunächst gezielt im Compose-Service `web` testen, anschließend vollständig mit `docker compose run -e RAILS_ENV=test web bundle exec parallel_rspec -n 16 spec/` (vorbereitete Worker-Testdatenbanken vorausgesetzt). Keine Host-Ruby-Tests als Ersatz ausweisen.
 
 **Akzeptanzkriterien:** Fachliche Abnahme am vereinbarten Briefbestand dokumentiert. Kein stiller Verlust von Entscheidungen oder Briefänderungen in den Fehlerfällen. Gezielt betroffene Tests und TypeScript-Prüfung sind erfolgreich; erforderliche Backend-Prüfungen und der Migrationsprobelauf sind dokumentiert. Die Abschaltung des Altverfahrens erfolgt erst nach dieser Abnahme.
+
+## AA-13 – Ungenutzten Annotationscode in Frontend und Backend entfernen
+
+**Ziel:** Nach Ablösung des bisherigen Verfahrens verbleibt nur Annotationscode, der im neuen Ablauf oder von anderen aktiven Funktionen tatsächlich verwendet wird.
+
+**Abhängigkeiten:** AA-01, abgeschlossene Umschaltung und Bestandsbehandlung aus AA-11 sowie Abnahme aus AA-12. Dieses Ticket entfernt Code; es ist kein Auftrag zum pauschalen Löschen historischer Daten.
+
+**Frontend / Umfang:**
+- Verwendungen der alten Annotationskomponenten, Routen, Layouts, Services, Hooks, Redux-Slices/Thunks, Typen, Schemas, XML-Helfer, Styles und i18n-Texte erfassen und die nicht mehr verwendeten Teile entfernen.
+- Insbesondere `src/components/auto_anno/`, `src/services/auto_anno/`, `AutoAnnoLayout`, `useAutoAnnoLetterLock`, `auto.letter.snippet.slice`, `auto.snippet.thunks` und die bisherigen Routen in `src/App.tsx` prüfen. Gemeinsam genutzte Bausteine vor dem Löschen herauslösen und ihre Imports aktualisieren.
+- Nicht mehr benötigte Altverfahrens-Tests und Mocks entfernen; weiterhin relevante Regressionstests auf die neue Implementierung übertragen. Abhängigkeiten nur entfernen, wenn kein aktiver Verbraucher verbleibt.
+
+**Notwendige Backend-Änderungen:**
+- Nachgewiesen ungenutzte `Jwt::AutomaticAnno*Controller`, Rails-HTML-Controller/-Forms/-Views, CoffeeScript-Assets, Serializer und alte Sempria-Batch-, Export-, Reset- und Sperrfunktionen entfernen. Routen, Asset-Registrierungen, Tasks, Jobs, Konfiguration und Dokumentation entsprechend bereinigen; dynamische Rails-Verwendungen zusätzlich zur Textsuche prüfen.
+- Die Verwendung von `Sempria::LetterAnnotationService`, `ExtractXmlContent`, `HandleAnnotationLetterService`, `HandleAnnotationSnippetService`, `RemoveJobAndLettersService` und `RevertLettersService` einzeln nachweisen. Im neuen Ablauf weiterverwendete Services/Funktionen bleiben erhalten oder werden in einen gemeinsamen Bereich verschoben.
+- Besonders `Search::JwtSearchService` und die dort verwendeten Serializer aus `Jwt::LetterAutoAnnoSnippets` schützen: Die aktive Editor-Entitätssuche muss nach der Bereinigung unverändert funktionieren.
+- Alte Models nur entfernen, wenn Migration/Archivierung und laufende Verbraucher sie nicht mehr benötigen. Ein Entfernen von Tabellen, Spalten, Archivzugriffen oder Dateien benötigt die konkrete Bestandsentscheidung aus AA-11 und eine eigene nachvollziehbare Migration; Codebereinigung darf keine Entscheidungen oder Briefstände verlieren.
+- Veraltete Specs/Factories/Fixtures gezielt bereinigen und weiterhin relevante XML-, Status-, Rechte- und Speicherschutztests auf die neuen Pfade übertragen. Die bestehende Delayed-Job-Infrastruktur und gemeinsam genutzte Speicher-/Publish-Dienste bleiben Bestandteil der Anwendung.
+
+**Akzeptanzkriterien:** Eine geprüfte Liste dokumentiert entfernte und begründet weiterverwendete Bestandteile für beide Repositories. Es bestehen keine verwaisten Imports, Routen auf gelöschte Controller, Asset-Einträge oder laufenden Jobs auf entfernte Klassen. Alte Annotationsfunktionen sind nicht mehr aufrufbar; vereinbarte Weiterleitungen bleiben gültig. Der neue Modus samt Annotationsablauf sowie Editor-Entitätssuche und Veröffentlichung funktionieren auf dem bereinigten Stand. Frontend-Typecheck, betroffene Tests, Lint-Prüfung ohne zusätzliche Warnungen und Build sowie gezielte Rails-Specs und die vollständige Backend-Suite mit 16 Workern sind erfolgreich. Bestandsdaten bleiben entsprechend AA-11 erhalten.
 
 ## Technische Anknüpfungspunkte im aktuellen Frontend
 
