@@ -199,13 +199,15 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
       const crossReferenceTarget = target?.closest<HTMLElement>('[data-editor-cross-reference-id]');
       const abbreviationTarget = target?.closest<HTMLElement>('[data-editor-abbreviation-reference]');
       const foreignTextTarget = target?.closest<HTMLElement>('[data-editor-foreign-text-reference]');
+      const horizontalFractionTarget = target?.closest<HTMLElement>('[data-editor-horizontal-fraction-reference]');
       const reference =
         foreignMarker?.dataset.editorForeignAnnotationId ??
         manuscriptMarker?.dataset.editorManuscriptAnnotationReference ??
         footnoteTarget?.dataset.editorAuthorFootnoteId ??
         crossReferenceTarget?.dataset.editorCrossReferenceId ??
         abbreviationTarget?.dataset.editorAbbreviationReference ??
-        foreignTextTarget?.dataset.editorForeignTextReference;
+        foreignTextTarget?.dataset.editorForeignTextReference ??
+        horizontalFractionTarget?.dataset.editorHorizontalFractionReference;
       if (!reference) return;
 
       event.preventDefault();
@@ -220,9 +222,11 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
                 ? EditorConstants.dialogTypes.ABBREVIATION
                 : foreignTextTarget
                   ? EditorConstants.dialogTypes.FOREIGN_TEXT
-                  : crossReferenceTarget
-                    ? EditorConstants.dialogTypes.CROSS_REFERENCE
-                    : EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR,
+                  : horizontalFractionTarget
+                    ? EditorConstants.dialogTypes.HORIZONTAL_FRACTION
+                    : crossReferenceTarget
+                      ? EditorConstants.dialogTypes.CROSS_REFERENCE
+                      : EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR,
           elementType:
             foreignMarker || footnoteTarget
               ? 'note'
@@ -230,9 +234,11 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
                 ? 'choice'
                 : foreignTextTarget
                   ? 'foreign'
-                  : crossReferenceTarget
-                    ? crossReferenceTarget.localName
-                    : 'p',
+                  : horizontalFractionTarget
+                    ? 'formula'
+                    : crossReferenceTarget
+                      ? crossReferenceTarget.localName
+                      : 'p',
           elementXmlId: reference,
           elementKey: 'edit',
         }),

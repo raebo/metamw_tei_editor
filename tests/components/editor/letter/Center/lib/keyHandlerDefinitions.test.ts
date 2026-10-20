@@ -120,6 +120,37 @@ describe('author-footnote shortcut definition', () => {
   });
 });
 
+describe('horizontal-fraction shortcut definition', () => {
+  it('opens Ctrl+2 with the exact collapsed caret reference', () => {
+    document.body.innerHTML = '<div><p data-editor-xml-path="0.0.0.0">Alpha Beta</p></div>';
+    const text = document.querySelector('p')!.firstChild!;
+    const selection = window.getSelection()!;
+    const range = document.createRange();
+    range.setStart(text, 5);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch({
+      type: 'editorLetter/setEditorLetter',
+      payload: {
+        letter: {
+          xmlContent: `<TEI xmlns="${EditorConstants.TEI_NS}"><text><body><div><p>Alpha Beta</p></div></body></text></TEI>`,
+        },
+      },
+    });
+
+    allTimesAvailableKeyHandleDefinitions['ctrl+2'].openDialogAction?.(store.dispatch, store.getState as unknown as () => RootState);
+
+    expect(store.getState().editorLetter.dialogType).toBe(EditorConstants.dialogTypes.HORIZONTAL_FRACTION);
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'caret:0:5',
+    });
+  });
+});
+
 describe('cross-reference shortcut definitions', () => {
   it('opens Ctrl+Alt+R with the exact collapsed caret and register kind', () => {
     document.body.innerHTML = '<div><p data-editor-xml-path="0.0.0.0">Alpha Beta</p></div>';

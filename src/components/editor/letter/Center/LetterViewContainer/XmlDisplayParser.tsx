@@ -151,6 +151,15 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
       const expansionElement =
         tagName === 'choice' ? Array.from(element.children).find((child) => child.localName.toLowerCase() === 'expan') : undefined;
       const isAbbreviationChoice = Boolean(abbreviationElement && expansionElement);
+      const horizontalFractionNumerator =
+        tagName === 'formula' && element.getAttribute('rend') === 'fraction_bar'
+          ? Array.from(element.children).find((child) => child.getAttribute('rend') === 'supbar')
+          : undefined;
+      const horizontalFractionDenominator =
+        tagName === 'formula' && element.getAttribute('rend') === 'fraction_bar'
+          ? Array.from(element.children).find((child) => child.getAttribute('rend') === 'subbar')
+          : undefined;
+      const isHorizontalFraction = Boolean(horizontalFractionNumerator && horizontalFractionDenominator);
       const isBodyCrossReferenceLink = tagName === 'link' && Boolean(element.closest('body')) && Boolean(element.getAttribute('target'));
 
       if (STRIP_WITH_CONTENT_TAGS.has(tagName) && !isBodyCrossReferenceLink) {
@@ -325,6 +334,20 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         });
         attributes['aria-label'] = attributes.title;
         attributes['data-editor-foreign-text-reference'] = element.getAttribute('xml:id') ?? `path:${sourcePath.join('.')}`;
+        attributes.contentEditable = false;
+      }
+      if (isHorizontalFraction) {
+        const numerator = horizontalFractionNumerator?.textContent ?? '';
+        const denominator = horizontalFractionDenominator?.textContent ?? '';
+        appendClassName(attributes, 'tei-horizontal-fraction');
+        attributes.tabIndex = 0;
+        attributes.role = 'button';
+        attributes.title = t('editor:dialog.horizontalFraction.anchorLabel', {
+          numerator,
+          denominator,
+        });
+        attributes['aria-label'] = attributes.title;
+        attributes['data-editor-horizontal-fraction-reference'] = element.getAttribute('xml:id') ?? `path:${sourcePath.join('.')}`;
         attributes.contentEditable = false;
       }
       if (isManuscriptAnnotation) {

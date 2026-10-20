@@ -137,6 +137,22 @@ describe('XMLDisplayParser', () => {
     expect(choice?.querySelector('expan')).toBeNull();
   });
 
+  it('renders a horizontal fraction as one selectable editor target', () => {
+    const { container } = renderXml(
+      '<TEI><text><body><p>Amount <formula rend="fraction_bar" xml:id="formula_1"><hi rend="supbar">3</hi><hi rend="barbar">/</hi><hi rend="subbar">8</hi></formula> due</p></body></text></TEI>',
+    );
+
+    const formula = container.querySelector('formula');
+    expect(formula).toHaveClass('tei-horizontal-fraction');
+    expect(formula).toHaveAttribute('data-editor-horizontal-fraction-reference', 'formula_1');
+    expect(formula).toHaveAttribute('role', 'button');
+    expect(formula).toHaveAttribute('tabindex', '0');
+    expect(formula).toHaveAttribute('contenteditable', 'false');
+    expect(formula).toHaveAttribute('title', 'editor:dialog.horizontalFraction.anchorLabel');
+    expect(formula?.querySelector('[rend="supbar"]')).toHaveTextContent('3');
+    expect(formula?.querySelector('[rend="subbar"]')).toHaveTextContent('8');
+  });
+
   it('renders cross-references and empty target anchors as visible editor targets', () => {
     const { container } = renderXml(
       '<TEI><text><body><div><p>See <ref xml:id="ref_1" target="https://example.test">website</ref><link xml:id="link_1" target="#one #two"/><anchor type="cross-reference" xml:id="anchor_1"/></p></div></body></text></TEI>',

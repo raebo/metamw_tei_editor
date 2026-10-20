@@ -34,6 +34,9 @@ const Harness = () => {
         <span role="button" data-editor-abbreviation-reference="choice_1" aria-label="Abkürzung – Auflösung: Church">
           Ch
         </span>
+        <span role="button" data-editor-horizontal-fraction-reference="formula_1" aria-label="Bruchzahl 1 über 2">
+          ½
+        </span>
       </div>
       <LeftClickAnnotationAction xmlContentRef={xmlContentRef} setLetterState={jest.fn<void, [LetterState]>()} />
     </>
@@ -147,6 +150,24 @@ describe('LeftClickAnnotationAction', () => {
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'choice',
       elementXmlId: 'choice_1',
+      elementKey: 'edit',
+    });
+  });
+
+  it('opens a horizontal fraction from its visible representation', () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    render(
+      <Provider store={store}>
+        <Harness />
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Bruchzahl 1 über 2' }));
+
+    expect(store.getState().editorLetter.dialogType).toBe('HORIZONTAL_FRACTION');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'formula',
+      elementXmlId: 'formula_1',
       elementKey: 'edit',
     });
   });

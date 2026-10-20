@@ -346,14 +346,45 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009C – Bruchzahlen mit horizontaler Linie einfügen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P1
 - Oxygen-Aktion: `Bruchzahlen horizontale Linie`
 - Ausgangslage: Die horizontale FMB-C-Bruchdarstellung kann am Cursor nicht erzeugt werden.
 - Ziel: Zähler und Nenner abfragen und die vorgesehene horizontale Bruchstruktur am Cursor einfügen.
+- Bedienablauf:
+  1. Der Benutzer setzt den Cursor an der gewünschten Position innerhalb eines Absatzes im
+     TEI-Body. Eine Textauswahl ist nicht erforderlich und wird nicht ersetzt.
+  2. Über das Rechtsklick-Kontextmenü wird `Bruchzahlen` und anschließend
+     `Bruchzahl mit horizontaler Linie` gewählt. Alternativ kann `Strg+2` verwendet werden.
+  3. Ein Dialog fragt Zähler und Nenner als Pflichtfelder ab.
+  4. Nach der Bestätigung wird an der gespeicherten Cursorposition eine
+     `formula[rend="fraction_bar"]`-Struktur mit `hi[rend="supbar"]` für den Zähler,
+     `hi[rend="barbar"]` für den verborgenen Trenner und `hi[rend="subbar"]` für den Nenner
+     eingefügt.
+  5. Fehlende Leerzeichen unmittelbar vor und nach der Bruchzahl werden automatisch ergänzt;
+     bereits vorhandene Leerzeichen und der umgebende Text bleiben erhalten.
+  6. Der Dialog wird geschlossen und die aktualisierte Bruchdarstellung erscheint im WYSIWYG-
+     Editor. Bei einer aktiven Textauswahl oder einer Position außerhalb eines Body-Absatzes wird
+     die Aktion nicht ausgeführt und ein verständlicher Hinweis angezeigt.
+  7. Eine vorhandene Bruchzahl ist in der WYSIWYG-Ansicht als zusammengehöriges Element
+     auswählbar. Ein Linksklick öffnet den Dialog mit vorausgefülltem Zähler und Nenner.
+  8. Ein Rechtsklick auf die Bruchzahl zeigt ausschließlich die beiden kontextbezogenen Aktionen
+     `Bruchzahl bearbeiten` und `Bruchzahl löschen`. Das Löschen erfordert eine Bestätigung.
 - Akzeptanzkriterien: Zähler, Nenner und Darstellungsvariante werden korrekt gespeichert; die
   empfohlenen Abstände vor und nach dem Bruch werden eingehalten, ohne vorhandenen Text zu löschen.
-- Tests: Ein- und mehrstellige Werte, Einfügen zwischen Textknoten, Dokumentrand und fehlende Werte.
+  Bestehende Bruchzahlen können bearbeitet und nach Bestätigung gelöscht werden; dabei werden
+  ausschließlich die unmittelbar angrenzenden Leerzeichen normalisiert.
+- Tests: Ein- und mehrstellige Werte, Einfügen zwischen Textknoten, Dokumentrand, fehlende Werte,
+  WYSIWYG-Auswahl, vorausgefüllte Bearbeitung, Löschbestätigung und Leerzeichennormalisierung.
+- Umsetzung: Das Rechtsklick-Kontextmenü bietet am kollabierten Cursor die Gruppe `Bruchzahlen`
+  mit der horizontalen Variante an; `Strg+2` und das Aktionsmenü öffnen denselben Dialog. Zähler
+  und Nenner werden ausschließlich als Textknoten in die vorhandene FMB-C-Struktur geschrieben.
+  Die Cursorposition wird über den XML-Pfad und den Textknotenoffset auf das Quelldokument
+  abgebildet. Fehlende umgebende Leerzeichen werden ergänzt, vorhandener Text und vorhandene
+  Leerzeichen bleiben erhalten. Eine Textauswahl, ein Kontext außerhalb eines Body-Absatzes,
+  verschachtelte Brüche sowie leere oder ungültige Werte werden ohne XML-Änderung abgewiesen.
+  Vorhandene Brüche sind per Links- und Rechtsklick erreichbar; Bearbeiten erhält ihre stabile ID,
+  während Löschen die benachbarten Textknoten verlustfrei zusammenführt.
 
 ### OXY-009D – Bruchzahlen mit vertikalem Slash einfügen
 
