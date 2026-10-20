@@ -5,16 +5,39 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import { EditorConstants } from '@src/constants/editor';
 import {
-  deleteHorizontalFraction,
-  insertHorizontalFraction,
-  readHorizontalFraction,
-  resolveHorizontalFraction,
-  updateHorizontalFraction,
+  deleteFraction,
+  insertFraction,
+  readFraction,
+  resolveFraction,
+  updateFraction,
+  type FractionVariant,
 } from '@src/utils/editor/horizontalFraction';
 import { MiscUtils } from '@src/utils/misc';
 import type { DefaultDialogProps } from '../EditorFormDialog';
 
-const HorizontalFractionDialog = (props: DefaultDialogProps) => {
+type HorizontalFractionDialogProps = DefaultDialogProps & {
+  variant?: FractionVariant;
+};
+
+const changeTypesByVariant: Record<FractionVariant, { added: string; changed: string; removed: string }> = {
+  horizontal: {
+    added: EditorConstants.changeTypes.misc.BODY_HORIZONTAL_FRACTION_ADDED,
+    changed: EditorConstants.changeTypes.misc.BODY_HORIZONTAL_FRACTION_CHANGED,
+    removed: EditorConstants.changeTypes.misc.BODY_HORIZONTAL_FRACTION_REMOVED,
+  },
+  'vertical-slash': {
+    added: EditorConstants.changeTypes.misc.BODY_VERTICAL_SLASH_FRACTION_ADDED,
+    changed: EditorConstants.changeTypes.misc.BODY_VERTICAL_SLASH_FRACTION_CHANGED,
+    removed: EditorConstants.changeTypes.misc.BODY_VERTICAL_SLASH_FRACTION_REMOVED,
+  },
+  'vertical-noslash': {
+    added: EditorConstants.changeTypes.misc.BODY_VERTICAL_NOSLASH_FRACTION_ADDED,
+    changed: EditorConstants.changeTypes.misc.BODY_VERTICAL_NOSLASH_FRACTION_CHANGED,
+    removed: EditorConstants.changeTypes.misc.BODY_VERTICAL_NOSLASH_FRACTION_REMOVED,
+  },
+};
+
+const HorizontalFractionDialog = ({ variant = 'horizontal', ...props }: HorizontalFractionDialogProps) => {
   const { t } = useTranslation();
   const reference = useSelector((state: RootState) => state.editorLetter.letterReference);
   const editing = reference.elementKey === 'edit' || reference.elementKey === 'delete';
@@ -28,30 +51,32 @@ const HorizontalFractionDialog = (props: DefaultDialogProps) => {
   useEffect(() => {
     if (!editing || !reference.elementXmlId) return;
     try {
-      const selected = resolveHorizontalFraction(props.xmlDoc, reference.elementXmlId);
-      const data = readHorizontalFraction(selected);
+      const selected = resolveFraction(props.xmlDoc, reference.elementXmlId, variant);
+      const data = readFraction(selected);
       setFormula(selected);
       setNumerator(data.numerator);
       setDenominator(data.denominator);
     } catch (error) {
       setErrorMessage(MiscUtils.misc.getErrorMessage(error));
     }
-  }, [editing, props.xmlDoc, reference.elementXmlId]);
+  }, [editing, props.xmlDoc, reference.elementXmlId, variant]);
 
   const save = () => {
     setErrorMessage(null);
     try {
       const saved = editing
-        ? updateHorizontalFraction(formula ?? resolveHorizontalFraction(props.xmlDoc, reference.elementXmlId ?? ''), {
-            numerator,
-            denominator,
-          })
-        : insertHorizontalFraction(props.xmlDoc, reference.elementXmlId ?? '', reference.elementKey ?? '', { numerator, denominator });
+        ? updateFraction(
+            formula ?? resolveFraction(props.xmlDoc, reference.elementXmlId ?? '', variant),
+            {
+              numerator,
+              denominator,
+            },
+            variant,
+          )
+        : insertFraction(props.xmlDoc, reference.elementXmlId ?? '', reference.elementKey ?? '', { numerator, denominator }, variant);
       props.onSave(
         props.xmlDoc,
-        editing
-          ? EditorConstants.changeTypes.misc.BODY_HORIZONTAL_FRACTION_CHANGED
-          : EditorConstants.changeTypes.misc.BODY_HORIZONTAL_FRACTION_ADDED,
+        editing ? changeTypesByVariant[variant].changed : changeTypesByVariant[variant].added,
         t(editing ? 'editor:dialog.horizontalFraction.success.updated' : 'editor:dialog.horizontalFraction.success.added'),
         saved.getAttribute('xml:id'),
       );
@@ -63,13 +88,8 @@ const HorizontalFractionDialog = (props: DefaultDialogProps) => {
   const remove = () => {
     setErrorMessage(null);
     try {
-      deleteHorizontalFraction(formula ?? resolveHorizontalFraction(props.xmlDoc, reference.elementXmlId ?? ''));
-      props.onSave(
-        props.xmlDoc,
-        EditorConstants.changeTypes.misc.BODY_HORIZONTAL_FRACTION_REMOVED,
-        t('editor:dialog.horizontalFraction.success.deleted'),
-        null,
-      );
+      deleteFraction(formula ?? resolveFraction(props.xmlDoc, reference.elementXmlId ?? '', variant), variant);
+      props.onSave(props.xmlDoc, changeTypesByVariant[variant].removed, t('editor:dialog.horizontalFraction.success.deleted'), null);
     } catch (error) {
       setErrorMessage(MiscUtils.misc.getErrorMessage(error));
     }
@@ -77,7 +97,7 @@ const HorizontalFractionDialog = (props: DefaultDialogProps) => {
 
   return (
     <Stack spacing={2} sx={{ pt: 1 }}>
-      <Alert severity="info">{t('editor:dialog.horizontalFraction.contract')}</Alert>
+      <Alert severity="info">{t(`editor:dialog.horizontalFraction.contract.${variant}`)}</Alert>
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       <TextField
         required

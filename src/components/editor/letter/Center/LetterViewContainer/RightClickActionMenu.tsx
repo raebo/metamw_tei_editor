@@ -25,10 +25,16 @@ import type { TableStructureOperation } from '@src/utils/editor/tableStructure';
 import type { GraphicStructureOperation } from '@src/components/editor/letter/Dialog/Components/GraphicStructureDialog';
 import { captureForeignHandAnnotationCaret } from '@src/utils/editor/foreignHandAnnotation';
 import { openTeiP5Documentation, resolveTeiElementByPath } from '@src/utils/editor/teiDocumentation';
-import { captureHorizontalFractionCaret } from '@src/utils/editor/horizontalFraction';
+import { captureFractionCaret } from '@src/utils/editor/horizontalFraction';
 
 const SECTION_SELECTOR =
   'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
+
+const fractionDialogType = (variant?: string): string => {
+  if (variant === 'vertical-slash') return EditorConstants.dialogTypes.VERTICAL_SLASH_FRACTION;
+  if (variant === 'vertical-noslash') return EditorConstants.dialogTypes.VERTICAL_NOSLASH_FRACTION;
+  return EditorConstants.dialogTypes.HORIZONTAL_FRACTION;
+};
 
 interface UserActionMenuProps {
   xmlContentRef: React.RefObject<HTMLDivElement>;
@@ -314,15 +320,19 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         props.setAnchorPosition({ top: event.clientY, left: event.clientX });
         return;
       }
-      const horizontalFractionTarget = targetElement?.closest<HTMLElement>('[data-editor-horizontal-fraction-reference]');
-      const horizontalFractionReference = horizontalFractionTarget?.dataset.editorHorizontalFractionReference;
-      if (horizontalFractionReference) {
-        const openHorizontalFractionDialog = (elementKey: 'edit' | 'delete') => {
+      const fractionTarget = targetElement?.closest<HTMLElement>(
+        '[data-editor-fraction-reference], [data-editor-horizontal-fraction-reference]',
+      );
+      const fractionReference =
+        fractionTarget?.dataset.editorFractionReference ?? fractionTarget?.dataset.editorHorizontalFractionReference;
+      const fractionVariant = fractionTarget?.dataset.editorFractionVariant;
+      if (fractionReference) {
+        const openFractionDialog = (elementKey: 'edit' | 'delete') => {
           dispatch(
             setEditorDialogAndReferenceThunk({
-              dialogType: EditorConstants.dialogTypes.HORIZONTAL_FRACTION,
+              dialogType: fractionDialogType(fractionVariant),
               elementType: 'formula',
-              elementXmlId: horizontalFractionReference,
+              elementXmlId: fractionReference,
               elementKey,
             }),
           );
@@ -330,11 +340,11 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         setDisplayMenuItems([
           {
             label: t('editor:dialog.horizontalFraction.editAction'),
-            action: () => openHorizontalFractionDialog('edit'),
+            action: () => openFractionDialog('edit'),
           },
           {
             label: t('editor:dialog.horizontalFraction.deleteAction'),
-            action: () => openHorizontalFractionDialog('delete'),
+            action: () => openFractionDialog('delete'),
           },
         ]);
         props.setAnchorPosition({ top: event.clientY, left: event.clientX });
@@ -565,7 +575,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const wholeTableActions: NonNullable<MenuItemType['subMenu']> = [];
       const graphicActions: NonNullable<MenuItemType['subMenu']> = [];
       let annotationCaret: ReturnType<typeof captureForeignHandAnnotationCaret> | null = null;
-      let horizontalFractionCaret: ReturnType<typeof captureHorizontalFractionCaret> | null = null;
+      let fractionCaret: ReturnType<typeof captureFractionCaret> | null = null;
 
       if (stateEditorLetter.xmlContent) {
         try {
@@ -574,9 +584,9 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           annotationCaret = null;
         }
         try {
-          horizontalFractionCaret = captureHorizontalFractionCaret(stateEditorLetter.xmlContent);
+          fractionCaret = captureFractionCaret(stateEditorLetter.xmlContent);
         } catch {
-          horizontalFractionCaret = null;
+          fractionCaret = null;
         }
       }
 
@@ -965,7 +975,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         });
       }
 
-      if (horizontalFractionCaret) {
+      if (fractionCaret) {
         if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
         menuItemsToAdd.push({
           label: t('editor:dialog.horizontalFraction.contextAction'),
@@ -978,9 +988,37 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
                 dispatch(
                   setEditorDialogAndReferenceThunk({
                     dialogType: EditorConstants.dialogTypes.HORIZONTAL_FRACTION,
-                    elementType: horizontalFractionCaret!.elementType,
-                    elementXmlId: horizontalFractionCaret!.sourcePath,
-                    elementKey: horizontalFractionCaret!.reference,
+                    elementType: fractionCaret!.elementType,
+                    elementXmlId: fractionCaret!.sourcePath,
+                    elementKey: fractionCaret!.reference,
+                  }),
+                );
+              },
+            },
+            {
+              label: t('editor:dialog.horizontalFraction.verticalSlashAction'),
+              keyShortcut: 'STRG+3',
+              action: () => {
+                dispatch(
+                  setEditorDialogAndReferenceThunk({
+                    dialogType: EditorConstants.dialogTypes.VERTICAL_SLASH_FRACTION,
+                    elementType: fractionCaret!.elementType,
+                    elementXmlId: fractionCaret!.sourcePath,
+                    elementKey: fractionCaret!.reference,
+                  }),
+                );
+              },
+            },
+            {
+              label: t('editor:dialog.horizontalFraction.verticalNoSlashAction'),
+              keyShortcut: 'STRG+4',
+              action: () => {
+                dispatch(
+                  setEditorDialogAndReferenceThunk({
+                    dialogType: EditorConstants.dialogTypes.VERTICAL_NOSLASH_FRACTION,
+                    elementType: fractionCaret!.elementType,
+                    elementXmlId: fractionCaret!.sourcePath,
+                    elementKey: fractionCaret!.reference,
                   }),
                 );
               },

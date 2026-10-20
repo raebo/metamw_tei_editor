@@ -27,6 +27,8 @@
     "crossReference": "Querverweis bearbeiten",
     "foreignText": "Fremdsprachigen Text bearbeiten",
     "horizontalFraction": "Bruchzahl mit horizontaler Linie einfügen",
+    "verticalSlashFraction": "Vertikale Bruchzahl mit Slash einfügen",
+    "verticalNoSlashFraction": "Vertikale Bruchzahl ohne Slash einfügen",
     "attachmentAdd": "Beilage Hinzufügen",
     "figureUpload": "Bild einfügen",
     "foreignHandAnnotation": "Anmerkung fremder Hand bearbeiten",
@@ -271,10 +273,16 @@
   "horizontalFraction": {
     "contextAction": "Bruchzahlen",
     "horizontalAction": "Bruchzahl mit horizontaler Linie",
+    "verticalSlashAction": "Vertikale Bruchzahl mit Slash",
+    "verticalNoSlashAction": "Vertikale Bruchzahl ohne Slash",
     "editAction": "Bruchzahl bearbeiten",
     "deleteAction": "Bruchzahl löschen",
     "anchorLabel": "Bruchzahl {{numerator}} über {{denominator}}",
-    "contract": "Die Bruchzahl wird an der Cursorposition in den Absatz eingefügt beziehungsweise an ihrer bestehenden Position aktualisiert. Erforderliche Leerzeichen werden automatisch verwaltet.",
+    "contract": {
+      "horizontal": "Die Bruchzahl mit horizontaler Linie wird an der Cursorposition eingefügt beziehungsweise an ihrer bestehenden Position aktualisiert. Erforderliche Leerzeichen werden automatisch verwaltet.",
+      "vertical-slash": "Die vertikale Bruchzahl mit Slash wird an der Cursorposition eingefügt beziehungsweise an ihrer bestehenden Position aktualisiert. Erforderliche Leerzeichen werden automatisch verwaltet.",
+      "vertical-noslash": "Die vertikale Bruchzahl ohne Slash wird an der Cursorposition eingefügt beziehungsweise an ihrer bestehenden Position aktualisiert. Erforderliche Leerzeichen werden automatisch verwaltet."
+    },
     "fields": {
       "numerator": "Zähler",
       "denominator": "Nenner"

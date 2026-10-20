@@ -388,26 +388,49 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009D – Bruchzahlen mit vertikalem Slash einfügen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P1
 - Oxygen-Aktion: `Bruchzahlen vertikaler Slash`
 - Ausgangslage: Die vertikale FMB-C-Bruchdarstellung mit Slash fehlt im Webeditor.
 - Ziel: Zähler und Nenner abfragen und als vertikalen Bruch mit Slash am Cursor einfügen.
+- Bedienablauf: Der Benutzer setzt den Cursor innerhalb eines Body-Absatzes und wählt im
+  Rechtsklick-Menü `Bruchzahlen` → `Vertikale Bruchzahl mit Slash` oder verwendet `Strg+3`.
+  Der Dialog fragt Zähler und Nenner ab. Vorhandene Brüche dieser Variante öffnen sich per
+  Linksklick zur Bearbeitung; per Rechtsklick stehen ausschließlich Bearbeiten und Löschen zur
+  Verfügung.
 - Akzeptanzkriterien: Die erzeugte TEI-Struktur unterscheidet diese Variante eindeutig von den
   beiden übrigen Bruchdarstellungen; der Cursor wird exakt auf die XML-Position abgebildet.
-- Tests: Ein- und mehrstellige Werte, Einfügen innerhalb eines Absatzes, Dokumentrand und fehlende
-  Werte.
+  Bestehende Brüche können bearbeitet und nach Bestätigung gelöscht werden.
+- Tests: Ein- und mehrstellige Werte, Einfügen innerhalb eines Absatzes, Dokumentrand, fehlende
+  Werte, WYSIWYG-Auswahl, Bearbeitung und Löschung.
+- Umsetzung: Die Aktion erzeugt `formula[rend="fraction_slash"]` mit
+  `hi[rend="supslash"]`, einem leeren `hi[rend="barslash"]` und `hi[rend="subslash"]`.
+  Der Slash wird wie in den FMB-C-Bestandsdaten über das vorhandene Stylesheet dargestellt.
+  Cursorabbildung, sichere Textknoten, stabile `xml:id`, Abstandsnormalisierung und Löschlogik
+  werden mit den anderen Bruchvarianten geteilt.
 
 ### OXY-009E – Vertikale Bruchzahlen ohne Slash einfügen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P1
 - Oxygen-Aktion: `Bruchzahlen vertikal ohne Slash`
 - Ausgangslage: Die vertikale FMB-C-Bruchdarstellung ohne Slash fehlt im Webeditor.
 - Ziel: Zähler und Nenner abfragen und als vertikalen Bruch ohne Slash am Cursor einfügen.
+- Bedienablauf: Der Benutzer setzt den Cursor innerhalb eines Body-Absatzes und wählt im
+  Rechtsklick-Menü `Bruchzahlen` → `Vertikale Bruchzahl ohne Slash` oder verwendet `Strg+4`.
+  Der gemeinsame Dialog fragt Zähler und Nenner ab. Vorhandene Brüche dieser Variante öffnen sich
+  per Linksklick zur Bearbeitung; per Rechtsklick stehen ausschließlich Bearbeiten und Löschen zur
+  Verfügung.
 - Akzeptanzkriterien: Die erzeugte TEI-Struktur bildet ausschließlich die Variante ohne Slash ab;
-  die empfohlenen umgebenden Abstände werden erhalten beziehungsweise ergänzt.
-- Tests: Ein- und mehrstellige Werte, benachbarte Interpunktion, Dokumentrand und fehlende Werte.
+  die empfohlenen umgebenden Abstände werden erhalten beziehungsweise ergänzt. Bestehende Brüche
+  können bearbeitet und nach Bestätigung gelöscht werden.
+- Tests: Ein- und mehrstellige Werte, benachbarte Interpunktion, Dokumentrand, fehlende Werte,
+  WYSIWYG-Auswahl, Bearbeitung und Löschung.
+- Umsetzung: Die Aktion erzeugt `formula[rend="fraction_noslash"]` mit
+  `hi[rend="supnoslash"]`, dem ausgeblendeten FMB-C-Trennelement `hi[rend="barnoslash"]` und
+  `hi[rend="subnoslash"]`. Die WYSIWYG-Darstellung verwendet die bestehenden FMB-C-Styles.
+  Cursorabbildung, sichere Textknoten, stabile `xml:id`, Abstandsnormalisierung und Löschlogik
+  werden mit den anderen Bruchvarianten geteilt.
 
 ### OXY-009F – Hochstellung auszeichnen
 

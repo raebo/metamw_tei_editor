@@ -27,6 +27,8 @@
     "crossReference": "Edit cross-reference",
     "foreignText": "Edit foreign-language text",
     "horizontalFraction": "Insert fraction with horizontal bar",
+    "verticalSlashFraction": "Insert vertical fraction with slash",
+    "verticalNoSlashFraction": "Insert vertical fraction without slash",
     "attachmentAdd": "Add Attachment",
     "figureUpload": "Insert Image",
     "foreignHandAnnotation": "Edit foreign-hand annotation",
@@ -271,10 +273,16 @@
   "horizontalFraction": {
     "contextAction": "Fractions",
     "horizontalAction": "Fraction with horizontal bar",
+    "verticalSlashAction": "Vertical fraction with slash",
+    "verticalNoSlashAction": "Vertical fraction without slash",
     "editAction": "Edit fraction",
     "deleteAction": "Delete fraction",
     "anchorLabel": "Fraction {{numerator}} over {{denominator}}",
-    "contract": "The fraction is inserted into the paragraph at the cursor position or updated at its existing position. Required spaces are managed automatically.",
+    "contract": {
+      "horizontal": "The fraction with a horizontal bar is inserted at the cursor position or updated at its existing position. Required spaces are managed automatically.",
+      "vertical-slash": "The vertical fraction with a slash is inserted at the cursor position or updated at its existing position. Required spaces are managed automatically.",
+      "vertical-noslash": "The vertical fraction without a slash is inserted at the cursor position or updated at its existing position. Required spaces are managed automatically."
+    },
     "fields": {
       "numerator": "Numerator",
       "denominator": "Denominator"

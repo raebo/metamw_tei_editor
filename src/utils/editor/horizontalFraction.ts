@@ -1,16 +1,53 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EditorConstants } from '@src/constants/editor';
 
-export type HorizontalFractionData = {
+export type FractionData = {
   numerator: string;
   denominator: string;
 };
 
-export type HorizontalFractionCaret = {
+export type FractionCaret = {
   elementType: string;
   sourcePath: string;
   reference: string;
 };
+
+export type FractionVariant = 'horizontal' | 'vertical-slash' | 'vertical-noslash';
+
+type FractionStructure = {
+  formulaRend: string;
+  numeratorRend: string;
+  separatorRend: string;
+  separatorText: string;
+  denominatorRend: string;
+};
+
+export const FRACTION_STRUCTURES: Record<FractionVariant, FractionStructure> = {
+  horizontal: {
+    formulaRend: 'fraction_bar',
+    numeratorRend: 'supbar',
+    separatorRend: 'barbar',
+    separatorText: '/',
+    denominatorRend: 'subbar',
+  },
+  'vertical-slash': {
+    formulaRend: 'fraction_slash',
+    numeratorRend: 'supslash',
+    separatorRend: 'barslash',
+    separatorText: '',
+    denominatorRend: 'subslash',
+  },
+  'vertical-noslash': {
+    formulaRend: 'fraction_noslash',
+    numeratorRend: 'supnoslash',
+    separatorRend: 'barnoslash',
+    separatorText: '/',
+    denominatorRend: 'subnoslash',
+  },
+};
+
+export type HorizontalFractionData = FractionData;
+export type HorizontalFractionCaret = FractionCaret;
 
 const CARET_REFERENCE_PATTERN = /^caret:(\d+):(\d+)$/;
 
@@ -54,7 +91,7 @@ const resolveSourceElement = (xmlDoc: Document, encodedPath: string): Element =>
   return current;
 };
 
-const normalizeData = (data: HorizontalFractionData): HorizontalFractionData => {
+const normalizeData = (data: FractionData): FractionData => {
   const normalized = {
     numerator: data.numerator.trim(),
     denominator: data.denominator.trim(),
@@ -71,44 +108,52 @@ const normalizeData = (data: HorizontalFractionData): HorizontalFractionData => 
 const directChildByRend = (formula: Element, rend: string): Element | null =>
   Array.from(formula.children).find((child) => child.localName.toLowerCase() === 'hi' && child.getAttribute('rend') === rend) ?? null;
 
-const validateFraction = (formula: Element): { numerator: Element; separator: Element; denominator: Element } => {
-  if (formula.localName.toLowerCase() !== 'formula' || formula.getAttribute('rend') !== 'fraction_bar') {
-    throw new Error('The selected element is not a horizontal fraction.');
+const structureForFormula = (formula: Element): [FractionVariant, FractionStructure] => {
+  const entry = Object.entries(FRACTION_STRUCTURES).find(([, structure]) => structure.formulaRend === formula.getAttribute('rend'));
+  if (formula.localName.toLowerCase() !== 'formula' || !entry) {
+    throw new Error('The selected element is not a supported fraction.');
   }
-  const numerator = directChildByRend(formula, 'supbar');
-  const separator = directChildByRend(formula, 'barbar');
-  const denominator = directChildByRend(formula, 'subbar');
-  if (!numerator || !separator || !denominator) {
-    throw new Error('The horizontal fraction structure is invalid.');
-  }
-  return { numerator, separator, denominator };
+  return entry as [FractionVariant, FractionStructure];
 };
 
-const createFractionElement = (xmlDoc: Document, data: HorizontalFractionData): Element => {
+const validateFraction = (
+  formula: Element,
+  expectedVariant?: FractionVariant,
+): { variant: FractionVariant; numerator: Element; separator: Element; denominator: Element } => {
+  const [variant, structure] = structureForFormula(formula);
+  if (expectedVariant && variant !== expectedVariant) throw new Error('The selected fraction has a different display variant.');
+  const numerator = directChildByRend(formula, structure.numeratorRend);
+  const separator = directChildByRend(formula, structure.separatorRend);
+  const denominator = directChildByRend(formula, structure.denominatorRend);
+  if (!numerator || !separator || !denominator) {
+    throw new Error('The fraction structure is invalid.');
+  }
+  return { variant, numerator, separator, denominator };
+};
+
+const createFractionElement = (xmlDoc: Document, variant: FractionVariant, data: FractionData): Element => {
+  const structure = FRACTION_STRUCTURES[variant];
   const formula = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'formula');
   formula.setAttribute('xml:id', `formula_${uuidv4()}`);
-  formula.setAttribute('rend', 'fraction_bar');
+  formula.setAttribute('rend', structure.formulaRend);
 
   const numerator = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'hi');
-  numerator.setAttribute('rend', 'supbar');
+  numerator.setAttribute('rend', structure.numeratorRend);
   numerator.textContent = data.numerator;
 
   const separator = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'hi');
-  separator.setAttribute('rend', 'barbar');
-  separator.textContent = '/';
+  separator.setAttribute('rend', structure.separatorRend);
+  separator.textContent = structure.separatorText;
 
   const denominator = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'hi');
-  denominator.setAttribute('rend', 'subbar');
+  denominator.setAttribute('rend', structure.denominatorRend);
   denominator.textContent = data.denominator;
 
   formula.append(numerator, separator, denominator);
   return formula;
 };
 
-export const captureHorizontalFractionCaret = (
-  xmlString: string,
-  selection: Selection | null = window.getSelection(),
-): HorizontalFractionCaret => {
+export const captureFractionCaret = (xmlString: string, selection: Selection | null = window.getSelection()): FractionCaret => {
   if (!selection || selection.rangeCount !== 1 || !selection.isCollapsed) {
     throw new Error('Please place the cursor at one position in the letter text.');
   }
@@ -146,11 +191,12 @@ export const captureHorizontalFractionCaret = (
   };
 };
 
-export const insertHorizontalFraction = (
+export const insertFraction = (
   xmlDoc: Document,
   sourcePath: string,
   caretReference: string,
-  rawData: HorizontalFractionData,
+  rawData: FractionData,
+  variant: FractionVariant,
 ): Element => {
   const caretMatch = CARET_REFERENCE_PATTERN.exec(caretReference);
   if (!caretMatch) throw new Error('The fraction caret reference is invalid.');
@@ -163,7 +209,7 @@ export const insertHorizontalFraction = (
   }
 
   const data = normalizeData(rawData);
-  const formula = createFractionElement(xmlDoc, data);
+  const formula = createFractionElement(xmlDoc, variant, data);
   const sourceText = sourceTextNode.nodeValue ?? '';
   const prefix = sourceText.slice(0, offset);
   const suffix = sourceText.slice(offset);
@@ -173,11 +219,20 @@ export const insertHorizontalFraction = (
   return formula;
 };
 
-export const resolveHorizontalFraction = (xmlDoc: Document, reference: string): Element => {
+export const resolveFraction = (xmlDoc: Document, reference: string, expectedVariant?: FractionVariant): Element => {
   const formula = elementByPath(xmlDoc, reference) ?? elementByXmlId(xmlDoc, reference.replace(/^#/, ''));
-  if (!formula) throw new Error('The horizontal fraction could not be found.');
-  validateFraction(formula);
+  if (!formula) throw new Error('The fraction could not be found.');
+  validateFraction(formula, expectedVariant);
   return formula;
+};
+
+export const readFraction = (formula: Element): FractionData & { variant: FractionVariant } => {
+  const { variant, numerator, denominator } = validateFraction(formula);
+  return {
+    variant,
+    numerator: numerator.textContent ?? '',
+    denominator: denominator.textContent ?? '',
+  };
 };
 
 export const readHorizontalFraction = (formula: Element): HorizontalFractionData => {
@@ -188,18 +243,18 @@ export const readHorizontalFraction = (formula: Element): HorizontalFractionData
   };
 };
 
-export const updateHorizontalFraction = (formula: Element, rawData: HorizontalFractionData): Element => {
-  const { numerator, separator, denominator } = validateFraction(formula);
+export const updateFraction = (formula: Element, rawData: FractionData, expectedVariant?: FractionVariant): Element => {
+  const { variant, numerator, separator, denominator } = validateFraction(formula, expectedVariant);
   const data = normalizeData(rawData);
   numerator.textContent = data.numerator;
-  separator.textContent = '/';
+  separator.textContent = FRACTION_STRUCTURES[variant].separatorText;
   denominator.textContent = data.denominator;
   if (!formula.getAttribute('xml:id')) formula.setAttribute('xml:id', `formula_${uuidv4()}`);
   return formula;
 };
 
-export const deleteHorizontalFraction = (formula: Element): void => {
-  validateFraction(formula);
+export const deleteFraction = (formula: Element, expectedVariant?: FractionVariant): void => {
+  validateFraction(formula, expectedVariant);
   const parent = formula.parentNode;
   if (!parent) throw new Error('The horizontal fraction has no parent element.');
 
@@ -224,3 +279,19 @@ export const deleteHorizontalFraction = (formula: Element): void => {
     next.nodeValue = (next.nodeValue ?? '').trimStart();
   }
 };
+
+export const captureHorizontalFractionCaret = captureFractionCaret;
+
+export const insertHorizontalFraction = (
+  xmlDoc: Document,
+  sourcePath: string,
+  caretReference: string,
+  rawData: HorizontalFractionData,
+): Element => insertFraction(xmlDoc, sourcePath, caretReference, rawData, 'horizontal');
+
+export const resolveHorizontalFraction = (xmlDoc: Document, reference: string): Element => resolveFraction(xmlDoc, reference, 'horizontal');
+
+export const updateHorizontalFraction = (formula: Element, rawData: HorizontalFractionData): Element =>
+  updateFraction(formula, rawData, 'horizontal');
+
+export const deleteHorizontalFraction = (formula: Element): void => deleteFraction(formula, 'horizontal');

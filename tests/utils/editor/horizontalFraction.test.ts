@@ -1,10 +1,16 @@
 import { EditorConstants } from '@src/constants/editor';
 import {
   captureHorizontalFractionCaret,
+  deleteFraction,
   deleteHorizontalFraction,
+  FRACTION_STRUCTURES,
+  insertFraction,
   insertHorizontalFraction,
+  readFraction,
   readHorizontalFraction,
+  resolveFraction,
   resolveHorizontalFraction,
+  updateFraction,
   updateHorizontalFraction,
 } from '@src/utils/editor/horizontalFraction';
 
@@ -160,5 +166,53 @@ describe('horizontal fractions', () => {
     expect(paragraph.childNodes).toHaveLength(2);
     expect(paragraph.childNodes[1].nodeValue).toBe(' due');
     expect(paragraph.textContent).toBe('Amount due');
+  });
+});
+
+describe('vertical fractions', () => {
+  it.each([
+    ['vertical-slash', 'fraction_slash', 'supslash', 'barslash', '', 'subslash'],
+    ['vertical-noslash', 'fraction_noslash', 'supnoslash', 'barnoslash', '/', 'subnoslash'],
+  ] as const)(
+    'inserts, reads and updates the %s FMB-C structure',
+    (variant, formulaRend, numeratorRend, separatorRend, separatorText, denominatorRend) => {
+      const xmlDoc = tei('<p>Amountdue</p>');
+      const formula = insertFraction(xmlDoc, '0.0.0', 'caret:0:6', { numerator: '1', denominator: '2' }, variant);
+
+      expect(formula.getAttribute('rend')).toBe(formulaRend);
+      expect(Array.from(formula.children).map((child) => [child.getAttribute('rend'), child.textContent])).toEqual([
+        [numeratorRend, '1'],
+        [separatorRend, separatorText],
+        [denominatorRend, '2'],
+      ]);
+      expect(readFraction(resolveFraction(xmlDoc, formula.getAttribute('xml:id')!, variant))).toEqual({
+        variant,
+        numerator: '1',
+        denominator: '2',
+      });
+
+      updateFraction(formula, { numerator: '12', denominator: '35' }, variant);
+      expect(readFraction(formula)).toEqual({ variant, numerator: '12', denominator: '35' });
+      expect(formula.querySelector(`[rend="${separatorRend}"]`)?.textContent).toBe(separatorText);
+    },
+  );
+
+  it.each(['vertical-slash', 'vertical-noslash'] as const)('deletes a %s fraction and normalizes adjacent spaces', (variant) => {
+    const xmlDoc = tei('<p>Amountdue</p>');
+    const formula = insertFraction(xmlDoc, '0.0.0', 'caret:0:6', { numerator: '1', denominator: '2' }, variant);
+
+    deleteFraction(formula, variant);
+
+    expect(xmlDoc.getElementsByTagNameNS('*', 'p')[0].textContent).toBe('Amount due');
+  });
+
+  it('rejects resolving a fraction as the wrong variant', () => {
+    const xmlDoc = tei('<p>Text</p>');
+    const formula = insertFraction(xmlDoc, '0.0.0', 'caret:0:2', { numerator: '1', denominator: '2' }, 'vertical-slash');
+
+    expect(() => resolveFraction(xmlDoc, formula.getAttribute('xml:id')!, 'vertical-noslash')).toThrow(
+      'The selected fraction has a different display variant.',
+    );
+    expect(FRACTION_STRUCTURES.horizontal.formulaRend).toBe('fraction_bar');
   });
 });

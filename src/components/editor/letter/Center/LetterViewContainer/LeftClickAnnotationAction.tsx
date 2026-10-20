@@ -15,6 +15,12 @@ interface UserActionMenuProps {
 
 const validNodeList: string[] = ['title', 'persname', 'placename'];
 
+const fractionDialogType = (variant?: string): string => {
+  if (variant === 'vertical-slash') return EditorConstants.dialogTypes.VERTICAL_SLASH_FRACTION;
+  if (variant === 'vertical-noslash') return EditorConstants.dialogTypes.VERTICAL_NOSLASH_FRACTION;
+  return EditorConstants.dialogTypes.HORIZONTAL_FRACTION;
+};
+
 const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
   const dispatch = useAppDispatch();
   const editorSelectedRightItem = useSelector((state: RootState) => state.editorLetter.selectedItem.right);
@@ -199,7 +205,7 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
       const crossReferenceTarget = target?.closest<HTMLElement>('[data-editor-cross-reference-id]');
       const abbreviationTarget = target?.closest<HTMLElement>('[data-editor-abbreviation-reference]');
       const foreignTextTarget = target?.closest<HTMLElement>('[data-editor-foreign-text-reference]');
-      const horizontalFractionTarget = target?.closest<HTMLElement>('[data-editor-horizontal-fraction-reference]');
+      const fractionTarget = target?.closest<HTMLElement>('[data-editor-fraction-reference], [data-editor-horizontal-fraction-reference]');
       const reference =
         foreignMarker?.dataset.editorForeignAnnotationId ??
         manuscriptMarker?.dataset.editorManuscriptAnnotationReference ??
@@ -207,7 +213,8 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
         crossReferenceTarget?.dataset.editorCrossReferenceId ??
         abbreviationTarget?.dataset.editorAbbreviationReference ??
         foreignTextTarget?.dataset.editorForeignTextReference ??
-        horizontalFractionTarget?.dataset.editorHorizontalFractionReference;
+        fractionTarget?.dataset.editorFractionReference ??
+        fractionTarget?.dataset.editorHorizontalFractionReference;
       if (!reference) return;
 
       event.preventDefault();
@@ -222,8 +229,8 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
                 ? EditorConstants.dialogTypes.ABBREVIATION
                 : foreignTextTarget
                   ? EditorConstants.dialogTypes.FOREIGN_TEXT
-                  : horizontalFractionTarget
-                    ? EditorConstants.dialogTypes.HORIZONTAL_FRACTION
+                  : fractionTarget
+                    ? fractionDialogType(fractionTarget.dataset.editorFractionVariant)
                     : crossReferenceTarget
                       ? EditorConstants.dialogTypes.CROSS_REFERENCE
                       : EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR,
@@ -234,7 +241,7 @@ const LeftClickAnnotationAction = (props: UserActionMenuProps) => {
                 ? 'choice'
                 : foreignTextTarget
                   ? 'foreign'
-                  : horizontalFractionTarget
+                  : fractionTarget
                     ? 'formula'
                     : crossReferenceTarget
                       ? crossReferenceTarget.localName

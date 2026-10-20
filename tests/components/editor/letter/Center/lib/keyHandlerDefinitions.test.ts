@@ -120,8 +120,12 @@ describe('author-footnote shortcut definition', () => {
   });
 });
 
-describe('horizontal-fraction shortcut definition', () => {
-  it('opens Ctrl+2 with the exact collapsed caret reference', () => {
+describe('fraction shortcut definitions', () => {
+  it.each([
+    ['ctrl+2', EditorConstants.dialogTypes.HORIZONTAL_FRACTION],
+    ['ctrl+3', EditorConstants.dialogTypes.VERTICAL_SLASH_FRACTION],
+    ['ctrl+4', EditorConstants.dialogTypes.VERTICAL_NOSLASH_FRACTION],
+  ])('opens %s with the exact collapsed caret reference', (shortcut, dialogType) => {
     document.body.innerHTML = '<div><p data-editor-xml-path="0.0.0.0">Alpha Beta</p></div>';
     const text = document.querySelector('p')!.firstChild!;
     const selection = window.getSelection()!;
@@ -140,9 +144,9 @@ describe('horizontal-fraction shortcut definition', () => {
       },
     });
 
-    allTimesAvailableKeyHandleDefinitions['ctrl+2'].openDialogAction?.(store.dispatch, store.getState as unknown as () => RootState);
+    allTimesAvailableKeyHandleDefinitions[shortcut].openDialogAction?.(store.dispatch, store.getState as unknown as () => RootState);
 
-    expect(store.getState().editorLetter.dialogType).toBe(EditorConstants.dialogTypes.HORIZONTAL_FRACTION);
+    expect(store.getState().editorLetter.dialogType).toBe(dialogType);
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'p',
       elementXmlId: '0.0.0.0',

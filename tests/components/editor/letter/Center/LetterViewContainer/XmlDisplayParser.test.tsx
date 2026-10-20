@@ -143,7 +143,9 @@ describe('XMLDisplayParser', () => {
     );
 
     const formula = container.querySelector('formula');
-    expect(formula).toHaveClass('tei-horizontal-fraction');
+    expect(formula).toHaveClass('tei-fraction', 'tei-fraction--horizontal', 'tei-horizontal-fraction');
+    expect(formula).toHaveAttribute('data-editor-fraction-reference', 'formula_1');
+    expect(formula).toHaveAttribute('data-editor-fraction-variant', 'horizontal');
     expect(formula).toHaveAttribute('data-editor-horizontal-fraction-reference', 'formula_1');
     expect(formula).toHaveAttribute('role', 'button');
     expect(formula).toHaveAttribute('tabindex', '0');
@@ -151,6 +153,38 @@ describe('XMLDisplayParser', () => {
     expect(formula).toHaveAttribute('title', 'editor:dialog.horizontalFraction.anchorLabel');
     expect(formula?.querySelector('[rend="supbar"]')).toHaveTextContent('3');
     expect(formula?.querySelector('[rend="subbar"]')).toHaveTextContent('8');
+  });
+
+  it.each([
+    [
+      'vertical fraction with slash',
+      'fraction_slash',
+      'vertical-slash',
+      '<hi rend="supslash">3</hi><hi rend="barslash"/><hi rend="subslash">8</hi>',
+      'supslash',
+      'subslash',
+    ],
+    [
+      'vertical fraction without slash',
+      'fraction_noslash',
+      'vertical-noslash',
+      '<hi rend="supnoslash">3</hi><hi rend="barnoslash">/</hi><hi rend="subnoslash">8</hi>',
+      'supnoslash',
+      'subnoslash',
+    ],
+  ])('renders a %s as one selectable editor target', (_label, rend, variant, contents, numeratorRend, denominatorRend) => {
+    const { container } = renderXml(
+      `<TEI><text><body><p>Amount <formula rend="${rend}" xml:id="formula_1">${contents}</formula> due</p></body></text></TEI>`,
+    );
+
+    const formula = container.querySelector('formula');
+    expect(formula).toHaveClass('tei-fraction', `tei-fraction--${variant}`);
+    expect(formula).toHaveAttribute('data-editor-fraction-reference', 'formula_1');
+    expect(formula).toHaveAttribute('data-editor-fraction-variant', variant);
+    expect(formula).toHaveAttribute('role', 'button');
+    expect(formula).toHaveAttribute('contenteditable', 'false');
+    expect(formula?.querySelector(`[rend="${numeratorRend}"]`)).toHaveTextContent('3');
+    expect(formula?.querySelector(`[rend="${denominatorRend}"]`)).toHaveTextContent('8');
   });
 
   it('renders cross-references and empty target anchors as visible editor targets', () => {

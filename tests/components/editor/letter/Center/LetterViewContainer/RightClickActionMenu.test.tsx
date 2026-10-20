@@ -45,6 +45,8 @@ const ContextMenuHarness = () => {
     const foreignText = document.createElement('foreign');
     const abbreviation = document.createElement('choice');
     const horizontalFraction = document.createElement('formula');
+    const verticalSlashFraction = document.createElement('formula');
+    const verticalNoSlashFraction = document.createElement('formula');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -83,7 +85,15 @@ const ContextMenuHarness = () => {
     abbreviation.dataset.editorAbbreviationReference = 'choice_1';
     abbreviation.textContent = 'Ch';
     horizontalFraction.dataset.editorHorizontalFractionReference = 'formula_1';
+    horizontalFraction.dataset.editorFractionReference = 'formula_1';
+    horizontalFraction.dataset.editorFractionVariant = 'horizontal';
     horizontalFraction.textContent = '½';
+    verticalSlashFraction.dataset.editorFractionReference = 'formula_2';
+    verticalSlashFraction.dataset.editorFractionVariant = 'vertical-slash';
+    verticalSlashFraction.textContent = '¾';
+    verticalNoSlashFraction.dataset.editorFractionReference = 'formula_3';
+    verticalNoSlashFraction.dataset.editorFractionVariant = 'vertical-noslash';
+    verticalNoSlashFraction.textContent = '⅝';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
@@ -100,6 +110,8 @@ const ContextMenuHarness = () => {
       foreignText,
       abbreviation,
       horizontalFraction,
+      verticalSlashFraction,
+      verticalNoSlashFraction,
     );
   }, []);
 
@@ -349,6 +361,41 @@ describe('RightClickActionMenu figure upload action', () => {
     });
   });
 
+  it.each([
+    [/mit Slash|with slash/, 'VERTICAL_SLASH_FRACTION'],
+    [/ohne Slash|without slash/, 'VERTICAL_NOSLASH_FRACTION'],
+  ])('opens vertical-fraction creation for %s from a collapsed text caret', async (actionName, dialogType) => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+    const paragraph = container.querySelector('p')!;
+    const range = document.createRange();
+    range.setStart(paragraph.firstChild!, 2);
+    range.collapse(true);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    fireEvent.contextMenu(paragraph, { button: 2, clientX: 20, clientY: 30 });
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Bruchzahlen|Fractions/ }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: actionName }));
+
+    expect(store.getState().editorLetter.dialogType).toBe(dialogType);
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'caret:0:2',
+    });
+  });
+
   it('shows only edit and delete actions for an existing horizontal fraction', async () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
     store.dispatch(
@@ -379,6 +426,40 @@ describe('RightClickActionMenu figure upload action', () => {
       elementType: 'formula',
       elementXmlId: 'formula_1',
       elementKey: 'delete',
+    });
+  });
+
+  it.each([
+    ['formula_2', 'VERTICAL_SLASH_FRACTION'],
+    ['formula_3', 'VERTICAL_NOSLASH_FRACTION'],
+  ])('shows isolated actions for existing vertical fraction %s', async (reference, dialogType) => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector(`[data-editor-fraction-reference="${reference}"]`)!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+
+    const menuItems = await screen.findAllByRole('menuitem');
+    expect(menuItems).toHaveLength(2);
+    fireEvent.click(menuItems[0]);
+
+    expect(store.getState().editorLetter.dialogType).toBe(dialogType);
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'formula',
+      elementXmlId: reference,
+      elementKey: 'edit',
     });
   });
 

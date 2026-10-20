@@ -10,7 +10,7 @@ import type { GraphicStructureOperation } from '@src/components/editor/letter/Di
 import { captureForeignHandAnnotationCaret } from '@src/utils/editor/foreignHandAnnotation';
 import { captureAuthorFootnoteCaret } from '@src/utils/editor/authorFootnote';
 import { captureCrossReferenceCaret, type CrossReferenceKind } from '@src/utils/editor/crossReference';
-import { captureHorizontalFractionCaret } from '@src/utils/editor/horizontalFraction';
+import { captureFractionCaret } from '@src/utils/editor/horizontalFraction';
 
 const selectedXmlPathElement = (): HTMLElement | null => {
   const selectionNode = window.getSelection()?.anchorNode ?? null;
@@ -180,26 +180,28 @@ const openAbbreviationDialog = (dispatch: AppDispatch, getState: () => RootState
   );
 };
 
-const openHorizontalFractionDialog = (dispatch: AppDispatch, getState: () => RootState): void => {
-  const xmlContent = getState().editorLetter.letter.xmlContent;
-  if (!xmlContent) {
-    enqueueSnackbar('Kein Brieftext geladen.', { variant: 'error' });
-    return;
-  }
-  try {
-    const caret = captureHorizontalFractionCaret(xmlContent);
-    dispatch(
-      setEditorDialogAndReferenceThunk({
-        dialogType: EditorConstants.dialogTypes.HORIZONTAL_FRACTION,
-        elementType: caret.elementType,
-        elementXmlId: caret.sourcePath,
-        elementKey: caret.reference,
-      }),
-    );
-  } catch (error) {
-    enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
-  }
-};
+const openFractionDialog =
+  (dialogType: string) =>
+  (dispatch: AppDispatch, getState: () => RootState): void => {
+    const xmlContent = getState().editorLetter.letter.xmlContent;
+    if (!xmlContent) {
+      enqueueSnackbar('Kein Brieftext geladen.', { variant: 'error' });
+      return;
+    }
+    try {
+      const caret = captureFractionCaret(xmlContent);
+      dispatch(
+        setEditorDialogAndReferenceThunk({
+          dialogType,
+          elementType: caret.elementType,
+          elementXmlId: caret.sourcePath,
+          elementKey: caret.reference,
+        }),
+      );
+    } catch (error) {
+      enqueueSnackbar(MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
+    }
+  };
 
 export const filterForKeyHandleDefinitions = (keyHandleDefinitions: Record<string, EditorKeyHandleItem>, keyCombination: string) => {
   const filteredKeyHandle = Object.values(keyHandleDefinitions).filter((item) => item.key === keyCombination)[0];
@@ -303,7 +305,21 @@ export const allTimesAvailableKeyHandleDefinitions: Record<string, EditorKeyHand
     description: 'Bruchzahl mit horizontaler Linie einfügen',
     component: null,
     action: null,
-    openDialogAction: openHorizontalFractionDialog,
+    openDialogAction: openFractionDialog(EditorConstants.dialogTypes.HORIZONTAL_FRACTION),
+  },
+  'ctrl+3': {
+    key: 'ctrl+3',
+    description: 'Vertikale Bruchzahl mit Slash einfügen',
+    component: null,
+    action: null,
+    openDialogAction: openFractionDialog(EditorConstants.dialogTypes.VERTICAL_SLASH_FRACTION),
+  },
+  'ctrl+4': {
+    key: 'ctrl+4',
+    description: 'Vertikale Bruchzahl ohne Slash einfügen',
+    component: null,
+    action: null,
+    openDialogAction: openFractionDialog(EditorConstants.dialogTypes.VERTICAL_NOSLASH_FRACTION),
   },
   'ctrl+alt+r': crossReferenceShortcut('ctrl+alt+r', 'Querverweis auf Registereinträge', 'register'),
   'ctrl+shift+r': crossReferenceShortcut('ctrl+shift+r', 'Querverweis auf Briefauszeichnungen', 'letter-annotation'),

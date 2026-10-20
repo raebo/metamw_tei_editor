@@ -34,8 +34,29 @@ const Harness = () => {
         <span role="button" data-editor-abbreviation-reference="choice_1" aria-label="Abkürzung – Auflösung: Church">
           Ch
         </span>
-        <span role="button" data-editor-horizontal-fraction-reference="formula_1" aria-label="Bruchzahl 1 über 2">
+        <span
+          role="button"
+          data-editor-fraction-reference="formula_1"
+          data-editor-fraction-variant="horizontal"
+          aria-label="Bruchzahl 1 über 2"
+        >
           ½
+        </span>
+        <span
+          role="button"
+          data-editor-fraction-reference="formula_2"
+          data-editor-fraction-variant="vertical-slash"
+          aria-label="Vertikale Bruchzahl 3 über 4 mit Slash"
+        >
+          ¾
+        </span>
+        <span
+          role="button"
+          data-editor-fraction-reference="formula_3"
+          data-editor-fraction-variant="vertical-noslash"
+          aria-label="Vertikale Bruchzahl 5 über 8 ohne Slash"
+        >
+          ⅝
         </span>
       </div>
       <LeftClickAnnotationAction xmlContentRef={xmlContentRef} setLetterState={jest.fn<void, [LetterState]>()} />
@@ -168,6 +189,27 @@ describe('LeftClickAnnotationAction', () => {
     expect(store.getState().editorLetter.letterReference).toEqual({
       elementType: 'formula',
       elementXmlId: 'formula_1',
+      elementKey: 'edit',
+    });
+  });
+
+  it.each([
+    ['Vertikale Bruchzahl 3 über 4 mit Slash', 'VERTICAL_SLASH_FRACTION', 'formula_2'],
+    ['Vertikale Bruchzahl 5 über 8 ohne Slash', 'VERTICAL_NOSLASH_FRACTION', 'formula_3'],
+  ])('opens %s from its visible representation', (accessibleName, dialogType, elementXmlId) => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    render(
+      <Provider store={store}>
+        <Harness />
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: accessibleName }));
+
+    expect(store.getState().editorLetter.dialogType).toBe(dialogType);
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'formula',
+      elementXmlId,
       elementKey: 'edit',
     });
   });

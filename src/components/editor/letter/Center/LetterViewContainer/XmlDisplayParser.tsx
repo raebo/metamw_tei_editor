@@ -113,6 +113,20 @@ const TABLE_ELEMENT_TAGS: Partial<Record<string, keyof JSX.IntrinsicElements>> =
   row: 'tr',
 };
 
+const FRACTION_RENDERING = {
+  fraction_bar: { variant: 'horizontal', numeratorRend: 'supbar', denominatorRend: 'subbar' },
+  fraction_slash: {
+    variant: 'vertical-slash',
+    numeratorRend: 'supslash',
+    denominatorRend: 'subslash',
+  },
+  fraction_noslash: {
+    variant: 'vertical-noslash',
+    numeratorRend: 'supnoslash',
+    denominatorRend: 'subnoslash',
+  },
+} as const;
+
 const appendClassName = (attributes: Record<string, any>, className?: string) => {
   if (!className) return;
   attributes.className = [attributes.className, className].filter(Boolean).join(' ');
@@ -151,15 +165,15 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
       const expansionElement =
         tagName === 'choice' ? Array.from(element.children).find((child) => child.localName.toLowerCase() === 'expan') : undefined;
       const isAbbreviationChoice = Boolean(abbreviationElement && expansionElement);
-      const horizontalFractionNumerator =
-        tagName === 'formula' && element.getAttribute('rend') === 'fraction_bar'
-          ? Array.from(element.children).find((child) => child.getAttribute('rend') === 'supbar')
-          : undefined;
-      const horizontalFractionDenominator =
-        tagName === 'formula' && element.getAttribute('rend') === 'fraction_bar'
-          ? Array.from(element.children).find((child) => child.getAttribute('rend') === 'subbar')
-          : undefined;
-      const isHorizontalFraction = Boolean(horizontalFractionNumerator && horizontalFractionDenominator);
+      const fractionRendering =
+        tagName === 'formula' ? FRACTION_RENDERING[element.getAttribute('rend') as keyof typeof FRACTION_RENDERING] : undefined;
+      const fractionNumerator = fractionRendering
+        ? Array.from(element.children).find((child) => child.getAttribute('rend') === fractionRendering.numeratorRend)
+        : undefined;
+      const fractionDenominator = fractionRendering
+        ? Array.from(element.children).find((child) => child.getAttribute('rend') === fractionRendering.denominatorRend)
+        : undefined;
+      const isFraction = Boolean(fractionRendering && fractionNumerator && fractionDenominator);
       const isBodyCrossReferenceLink = tagName === 'link' && Boolean(element.closest('body')) && Boolean(element.getAttribute('target'));
 
       if (STRIP_WITH_CONTENT_TAGS.has(tagName) && !isBodyCrossReferenceLink) {
@@ -336,10 +350,13 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         attributes['data-editor-foreign-text-reference'] = element.getAttribute('xml:id') ?? `path:${sourcePath.join('.')}`;
         attributes.contentEditable = false;
       }
-      if (isHorizontalFraction) {
-        const numerator = horizontalFractionNumerator?.textContent ?? '';
-        const denominator = horizontalFractionDenominator?.textContent ?? '';
-        appendClassName(attributes, 'tei-horizontal-fraction');
+      if (isFraction && fractionRendering) {
+        const numerator = fractionNumerator?.textContent ?? '';
+        const denominator = fractionDenominator?.textContent ?? '';
+        appendClassName(attributes, `tei-fraction tei-fraction--${fractionRendering.variant}`);
+        if (fractionRendering.variant === 'horizontal') {
+          appendClassName(attributes, 'tei-horizontal-fraction');
+        }
         attributes.tabIndex = 0;
         attributes.role = 'button';
         attributes.title = t('editor:dialog.horizontalFraction.anchorLabel', {
@@ -347,7 +364,12 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
           denominator,
         });
         attributes['aria-label'] = attributes.title;
-        attributes['data-editor-horizontal-fraction-reference'] = element.getAttribute('xml:id') ?? `path:${sourcePath.join('.')}`;
+        const fractionReference = element.getAttribute('xml:id') ?? `path:${sourcePath.join('.')}`;
+        attributes['data-editor-fraction-reference'] = fractionReference;
+        attributes['data-editor-fraction-variant'] = fractionRendering.variant;
+        if (fractionRendering.variant === 'horizontal') {
+          attributes['data-editor-horizontal-fraction-reference'] = fractionReference;
+        }
         attributes.contentEditable = false;
       }
       if (isManuscriptAnnotation) {

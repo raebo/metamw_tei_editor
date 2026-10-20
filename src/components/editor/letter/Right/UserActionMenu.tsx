@@ -142,6 +142,16 @@ const menuItems: MenuItem[] = [
         keyHandleItem: filterKeyCombination('ctrl+2'),
         active: true,
       },
+      {
+        label: i18n.t('editor:dialog.horizontalFraction.verticalSlashAction'),
+        keyHandleItem: filterKeyCombination('ctrl+3'),
+        active: true,
+      },
+      {
+        label: i18n.t('editor:dialog.horizontalFraction.verticalNoSlashAction'),
+        keyHandleItem: filterKeyCombination('ctrl+4'),
+        active: true,
+      },
     ],
   },
   {
