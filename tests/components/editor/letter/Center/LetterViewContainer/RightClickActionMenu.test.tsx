@@ -11,6 +11,7 @@ import editorLetterReducer, {
 } from '@src/redux/slices/editor.letter.slice';
 import type { LetterState } from '@src/constants/editor';
 import { enqueueSnackbar } from 'notistack';
+import { EditorUtils } from '@src/utils/editor';
 
 jest.mock('notistack', () => ({
   enqueueSnackbar: jest.fn(),
@@ -47,6 +48,7 @@ const ContextMenuHarness = () => {
     const horizontalFraction = document.createElement('formula');
     const verticalSlashFraction = document.createElement('formula');
     const verticalNoSlashFraction = document.createElement('formula');
+    const superscript = document.createElement('hi');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -94,6 +96,9 @@ const ContextMenuHarness = () => {
     verticalNoSlashFraction.dataset.editorFractionReference = 'formula_3';
     verticalNoSlashFraction.dataset.editorFractionVariant = 'vertical-noslash';
     verticalNoSlashFraction.textContent = '⅝';
+    superscript.dataset.editorInlineFormatReference = 'super_1';
+    superscript.dataset.editorInlineFormat = 'superscript';
+    superscript.textContent = '1st';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
@@ -112,6 +117,7 @@ const ContextMenuHarness = () => {
       horizontalFraction,
       verticalSlashFraction,
       verticalNoSlashFraction,
+      superscript,
     );
   }, []);
 
@@ -993,5 +999,45 @@ describe('RightClickActionMenu figure upload action', () => {
       elementXmlId: 'choice_1',
       elementKey: mode,
     });
+  });
+
+  it('shows only the remove action for existing superscript markup', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const patchContent = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue({} as never);
+    store.dispatch(
+      setEditorLetter({
+        letter: {
+          id: 7,
+          name: 'FMB-7',
+          viewMode: 'WYSIWYG',
+          xmlContent:
+            '<TEI><text><body><div xml:id="act_1"><p xml:id="paragraph_1">Text<hi xml:id="super_1" rend="superscript">1st</hi></p></div></body></text></TEI>',
+        },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('[data-editor-inline-format="superscript"]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+
+    const removeAction = await screen.findByRole('menuitem', {
+      name: /Hochstellung entfernen|Remove superscript/,
+    });
+    expect(removeAction).toBeInTheDocument();
+    expect(screen.getAllByRole('menuitem')).toHaveLength(1);
+    fireEvent.click(removeAction);
+
+    await waitFor(() => expect(patchContent).toHaveBeenCalledTimes(1));
+    const persistedXml = patchContent.mock.calls[0][0];
+    expect(persistedXml).not.toContain('rend="superscript"');
+    expect(persistedXml).toContain('Text1st');
+    expect(store.getState().editorLetter.letter.xmlContent).toBe(persistedXml);
   });
 });

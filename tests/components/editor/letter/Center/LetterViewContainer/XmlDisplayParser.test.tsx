@@ -155,6 +155,19 @@ describe('XMLDisplayParser', () => {
     expect(formula?.querySelector('[rend="subbar"]')).toHaveTextContent('8');
   });
 
+  it('renders superscript markup as a selectable but still text-selectable editor target', () => {
+    const { container } = renderXml('<TEI><text><body><p>Saint <hi xml:id="super_1" rend="superscript">1st</hi></p></body></text></TEI>');
+
+    const superscript = container.querySelector('hi[rend="superscript"]');
+    expect(superscript).toHaveClass('tei-inline-format', 'tei-superscript');
+    expect(superscript).toHaveAttribute('data-editor-inline-format-reference', 'super_1');
+    expect(superscript).toHaveAttribute('data-editor-inline-format', 'superscript');
+    expect(superscript).toHaveAttribute('role', 'button');
+    expect(superscript).toHaveAttribute('tabindex', '0');
+    expect(superscript).not.toHaveAttribute('contenteditable', 'false');
+    expect(superscript).toHaveTextContent('1st');
+  });
+
   it.each([
     [
       'vertical fraction with slash',

@@ -63,7 +63,7 @@ Abkürzungen,Abkürzungen,Auszuzeichnende bzw. aufzulösende Abkürzung markiere
 Bruchzahlen horizontale Linie,Bruchzahlen horizontale Linie,"Cursor an die Textstelle setzen, wo die Bruchzahl eingefügt werden soll und Shortkey oder Menübefehl auslösen. Beachte: rechts und links vom Cursor jeweils ein Leerzeichen setzen",Ctrl+2,yes,OXY-009C,implemented
 Bruchzahlen vertikaler Slash,Bruchzahlen vertikaler Slash,"Cursor an die Textstelle setzen, wo die Bruchzahl eingefügt werden soll und Shortkey oder Menübefehl auslösen",Ctrl+3,yes,OXY-009D,implemented
 Bruchzahlen vertikal ohne Slash,Bruchzahlen vertikal ohne Slash,"Cursor an die Textstelle setzen, wo die Bruchzahl eingefügt werden soll und Shortkey oder Menübefehl auslösen. Beachte: rechts und links vom Cursor jeweils ein Leerzeichen setzen.",Ctrl+4,yes,OXY-009E,implemented
-Hochstellung,Hochstellung,Hochzustellende Zeichen markieren und Shortkey oder Menübefehl auslösen.,Ctrl+5,no,OXY-009F,open
+Hochstellung,Hochstellung,Hochzustellende Zeichen markieren und Shortkey oder Menübefehl auslösen.,Ctrl+5,yes,OXY-009F,implemented
 Tiefstellung,Tiefstellung,Hochzustellende Zeichen markieren und Shortkey auslösen. Tiefzustellende Zeichen markieren und Shortkey oder Menübefehl auslösen.,Ctrl+6,no,OXY-009G,open
 Unterstrich auf Grundline,Unterstrich auf Grundline,Unterstrich markieren und Shortkey oder Menübefehl auslösen.,Ctrl+7,no,OXY-009H,open
 Latintype,Lateinische Schrift,Text mit lateinischer Schrift markieren und Shortkey oder Menübefehl auslösen.,Ctrl+8,no,OXY-009I,open

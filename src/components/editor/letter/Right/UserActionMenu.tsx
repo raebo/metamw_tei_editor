@@ -138,6 +138,11 @@ const menuItems: MenuItem[] = [
         active: true,
       },
       {
+        label: i18n.t('editor:dialog.inlineFormatting.superscript.applyAction'),
+        keyHandleItem: filterKeyCombination('ctrl+5'),
+        active: true,
+      },
+      {
         label: i18n.t('editor:dialog.horizontalFraction.horizontalAction'),
         keyHandleItem: filterKeyCombination('ctrl+2'),
         active: true,

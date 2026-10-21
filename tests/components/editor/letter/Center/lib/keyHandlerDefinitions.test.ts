@@ -257,6 +257,24 @@ describe('abbreviation shortcut definition', () => {
   });
 });
 
+describe('superscript shortcut definition', () => {
+  it('maps Ctrl+5 to the FMB-C superscript markup', () => {
+    const xmlDoc = new DOMParser().parseFromString(
+      '<TEI><text><body><p>Saint <span class="marked">1<hi rend="italic">st</hi></span></p></body></text></TEI>',
+      'application/xml',
+    );
+    const definition = contentMarkedKeyHandleDefinitions['ctrl+5'];
+
+    definition.xmlAction?.(xmlDoc);
+
+    const superscript = xmlDoc.querySelector('hi[rend="superscript"]');
+    expect(superscript?.textContent).toBe('1st');
+    expect(superscript?.querySelector('hi[rend="italic"]')?.textContent).toBe('st');
+    expect(xmlDoc.querySelector('span.marked')).toBeNull();
+    expect(definition.operationType).toBe(EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED);
+  });
+});
+
 describe('manuscript annotation shortcut definition', () => {
   it('opens Ctrl+Shift+D in creation mode without requiring a text selection', () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });

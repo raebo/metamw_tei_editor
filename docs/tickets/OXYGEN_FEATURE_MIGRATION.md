@@ -434,14 +434,32 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009F – Hochstellung auszeichnen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P1
 - Oxygen-Aktion: `Hochstellung`
 - Ausgangslage: Markierter Text kann nicht als Hochstellung nach FMB-C ausgezeichnet werden.
 - Ziel: Die markierte Passage über Schnellformatierer, Kontextmenü und `Strg+5` hochstellen.
+- Bedienablauf:
+  1. Der Benutzer markiert die hochzustellenden Zeichen in der WYSIWYG-Ansicht.
+  2. Die Auszeichnung wird über `Strg+5`, das Aktionsmenü unter
+     `Sprach- und typografische Auszeichnungen` oder den Eintrag `Text hochstellen` im
+     Rechtsklick-Kontextmenü der Auswahl angewendet.
+  3. Der Webeditor ersetzt ausschließlich den temporären Auswahlmarker durch
+     `hi[rend="superscript"]`; Text und enthaltene Inline-Auszeichnungen bleiben erhalten.
+  4. Eine bestehende Hochstellung kann mit der rechten Maustaste ausgewählt und über den einzigen
+     kontextbezogenen Eintrag `Hochstellung entfernen` wieder aufgehoben werden. Dabei wird nur das
+     `hi`-Element entfernt, nicht sein Inhalt.
 - Akzeptanzkriterien: Die vorgesehene TEI-Auszeichnung wird ohne Textverlust gesetzt und kann wieder
   entfernt werden; verschachtelte Inline-Auszeichnungen bleiben intakt.
 - Tests: Ein Zeichen, mehrere Zeichen, verschachtelte Auswahl, Umschalten und ungültige Auswahl.
+- Umsetzung: Die gemeinsame Inline-Formatierungslogik erzeugt Oxygen-kompatibles
+  `hi[rend="superscript"]`, übernimmt sämtliche Kindknoten der Auswahl und verhindert
+  verschachtelte Hochstellungen. Vorhandene Auszeichnungen werden in der WYSIWYG-Ansicht über eine
+  stabile XML-ID oder ersatzweise ihren XML-Pfad referenziert. Die Entfernen-Aktion löst nur den
+  Hochstellungs-Wrapper auf und persistiert die Änderung als `CONTENT_FORMAT_CHANGED`. Gezielt
+  geprüft sind Anlegen mit verschachteltem Markup, ungültige und verschachtelte Auswahl,
+  pfad- und ID-basierte Auflösung, verlustfreies Entfernen, Shortcut-Zuordnung, Rendering und das
+  isolierte Kontextmenü.
 
 ### OXY-009G – Tiefstellung auszeichnen
 

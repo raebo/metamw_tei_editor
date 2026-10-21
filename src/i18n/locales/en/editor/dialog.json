@@ -2,6 +2,14 @@
   "selection": {
     "clearAction": "Clear selection"
   },
+  "inlineFormatting": {
+    "superscript": {
+      "applyAction": "Superscript text",
+      "removeAction": "Remove superscript",
+      "anchorLabel": "Superscript text",
+      "removed": "The superscript was removed."
+    }
+  },
   "teiDocumentation": {
     "contextAction": "TEI P5 documentation: <{{element}}>",
     "unsupportedElement": "No supported TEI P5 documentation is available for the <{{element}}> element."

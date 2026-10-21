@@ -11,6 +11,7 @@ import { captureForeignHandAnnotationCaret } from '@src/utils/editor/foreignHand
 import { captureAuthorFootnoteCaret } from '@src/utils/editor/authorFootnote';
 import { captureCrossReferenceCaret, type CrossReferenceKind } from '@src/utils/editor/crossReference';
 import { captureFractionCaret } from '@src/utils/editor/horizontalFraction';
+import { applyInlineFormatting } from '@src/utils/editor/inlineFormatting';
 
 const selectedXmlPathElement = (): HTMLElement | null => {
   const selectionNode = window.getSelection()?.anchorNode ?? null;
@@ -242,7 +243,7 @@ export const findKeyHandleDefinition = (
   return null;
 };
 
-async function runXmlAction(
+export async function runXmlAction(
   dispatch: AppDispatch,
   getState: () => RootState,
   xmlAction: (xmlDoc: Document) => void,
@@ -561,6 +562,14 @@ export const contentMarkedKeyHandleDefinitions: Record<string, EditorKeyHandleIt
     component: null,
     action: null,
     openDialogAction: openForeignTextDialog,
+  },
+  'ctrl+5': {
+    key: 'ctrl+5',
+    description: 'Text hochstellen',
+    component: null,
+    xmlAction: (xmlDoc) => applyInlineFormatting(xmlDoc, 'superscript'),
+    operationType: EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED,
+    successMessage: 'Der markierte Text wurde hochgestellt.',
   },
   'ctrl+alt+r': crossReferenceShortcut('ctrl+alt+r', 'Querverweis auf Registereinträge', 'register'),
   'ctrl+shift+r': crossReferenceShortcut('ctrl+shift+r', 'Querverweis auf Briefauszeichnungen', 'letter-annotation'),

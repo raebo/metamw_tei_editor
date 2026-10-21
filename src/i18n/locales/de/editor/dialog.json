@@ -2,6 +2,14 @@
   "selection": {
     "clearAction": "Markierung aufheben"
   },
+  "inlineFormatting": {
+    "superscript": {
+      "applyAction": "Text hochstellen",
+      "removeAction": "Hochstellung entfernen",
+      "anchorLabel": "Hochgestellter Text",
+      "removed": "Die Hochstellung wurde entfernt."
+    }
+  },
   "teiDocumentation": {
     "contextAction": "TEI-P5-Dokumentation: <{{element}}>",
     "unsupportedElement": "Für das Element <{{element}}> ist keine unterstützte TEI-P5-Dokumentation verfügbar."

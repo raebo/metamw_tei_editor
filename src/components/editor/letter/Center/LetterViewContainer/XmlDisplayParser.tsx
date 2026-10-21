@@ -291,6 +291,7 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
 
       const isForeignHandAnnotation = tagName === 'note' && element.getAttribute('type') === 'note';
       const isForeignText = tagName === 'foreign';
+      const isSuperscript = tagName === 'hi' && element.getAttribute('rend') === 'superscript';
       const isManuscriptAnnotation = tagName === 'p' && element.parentElement?.localName.toLowerCase() === 'scriptdesc';
       const isAuthorFootnoteReference =
         tagName === 'ref' &&
@@ -349,6 +350,15 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         attributes['aria-label'] = attributes.title;
         attributes['data-editor-foreign-text-reference'] = element.getAttribute('xml:id') ?? `path:${sourcePath.join('.')}`;
         attributes.contentEditable = false;
+      }
+      if (isSuperscript) {
+        appendClassName(attributes, 'tei-inline-format tei-superscript');
+        attributes.tabIndex = 0;
+        attributes.role = 'button';
+        attributes.title = t('editor:dialog.inlineFormatting.superscript.anchorLabel');
+        attributes['aria-label'] = attributes.title;
+        attributes['data-editor-inline-format-reference'] = element.getAttribute('xml:id') ?? `path:${sourcePath.join('.')}`;
+        attributes['data-editor-inline-format'] = 'superscript';
       }
       if (isFraction && fractionRendering) {
         const numerator = fractionNumerator?.textContent ?? '';

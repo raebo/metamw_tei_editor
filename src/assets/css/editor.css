@@ -79,6 +79,16 @@ note.tei-foreign-hand-annotation:focus-visible {
   outline-offset: 2px;
 }
 
+.tei-inline-format {
+  cursor: context-menu;
+}
+
+.tei-inline-format:focus-visible {
+  border-radius: 0.15em;
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
 .tei-manuscript-annotation-caret {
   display: inline-block;
   padding: 0;

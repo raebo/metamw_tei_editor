@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { Menu, MenuItem, Divider, Box, MenuList, Paper, Popper } from '@mui/material';
 import { createContextMenuItems, MenuItemType } from '@src/components/editor/letter/Util/ContextMenuLetterItems';
 import { useAppDispatch } from '@src/redux/hooks';
-import { useSelector } from 'react-redux';
+import { useSelector, useStore } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import { EditorConstants, LetterState } from '@src/constants/editor';
 import { EditorUtils } from '@src/utils/editor';
@@ -26,6 +26,12 @@ import type { GraphicStructureOperation } from '@src/components/editor/letter/Di
 import { captureForeignHandAnnotationCaret } from '@src/utils/editor/foreignHandAnnotation';
 import { openTeiP5Documentation, resolveTeiElementByPath } from '@src/utils/editor/teiDocumentation';
 import { captureFractionCaret } from '@src/utils/editor/horizontalFraction';
+import {
+  contentMarkedKeyHandleDefinitions,
+  generateKeyHandleAction,
+  runXmlAction,
+} from '@src/components/editor/letter/Center/lib/keyHandlerDefinitions';
+import { removeInlineFormatting, resolveInlineFormatting } from '@src/utils/editor/inlineFormatting';
 
 const SECTION_SELECTOR =
   'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
@@ -46,6 +52,7 @@ interface UserActionMenuProps {
 const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
+  const reduxStore = useStore();
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
   const contentTextIsMarked = useSelector((state: RootState) => state.editorLetter.content.textIsMarked);
   const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
@@ -59,6 +66,29 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   const [openNestedSubmenuIndex, setOpenNestedSubmenuIndex] = useState<number | null>(null);
 
   const xmlDocRef = useRef<XMLDocument | null>(null);
+
+  const runMarkedAction = useCallback(
+    (shortcut: string) => {
+      const definition = contentMarkedKeyHandleDefinitions[shortcut];
+      if (!definition) return;
+      const action = generateKeyHandleAction(definition);
+      void action?.(dispatch, () => reduxStore.getState() as RootState);
+    },
+    [dispatch, reduxStore],
+  );
+
+  const removeSuperscript = useCallback(
+    (reference: string) => {
+      void runXmlAction(
+        dispatch,
+        () => reduxStore.getState() as RootState,
+        (xmlDoc) => removeInlineFormatting(resolveInlineFormatting(xmlDoc, reference, 'superscript'), 'superscript'),
+        EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED,
+        t('editor:dialog.inlineFormatting.superscript.removed'),
+      );
+    },
+    [dispatch, reduxStore, t],
+  );
 
   const clearMarkedSelection = useCallback(() => {
     try {
@@ -181,6 +211,14 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           );
         },
       },
+      {
+        label: t('editor:dialog.inlineFormatting.superscript.applyAction'),
+        keyShortcut: 'ctrl+5',
+        action: () => {
+          props.setAnchorPosition(null);
+          runMarkedAction('ctrl+5');
+        },
+      },
       { type: 'divider' as const },
       {
         label: t('editor:dialog.crossReference.contextAction'),
@@ -215,7 +253,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         action: clearMarkedSelection,
       },
     ],
-    [clearMarkedSelection, dispatch, props, t],
+    [clearMarkedSelection, dispatch, props, runMarkedAction, t],
   );
 
   const menuItemsNoMarking: MenuItemType[] = useMemo(
@@ -318,6 +356,26 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       if (targetElement?.closest('span.marked')) {
         setDisplayMenuItems(menuItemsMarked);
         props.setAnchorPosition({ top: event.clientY, left: event.clientX });
+        return;
+      }
+      const inlineFormatTarget = targetElement?.closest<HTMLElement>('[data-editor-inline-format-reference]');
+      const inlineFormatReference = inlineFormatTarget?.dataset.editorInlineFormatReference;
+      if (inlineFormatReference && inlineFormatTarget.dataset.editorInlineFormat === 'superscript') {
+        setDisplayMenuItems([
+          {
+            label: t('editor:dialog.inlineFormatting.superscript.removeAction'),
+            action: () => removeSuperscript(inlineFormatReference),
+          },
+        ]);
+        props.setAnchorPosition({ top: event.clientY, left: event.clientX });
+        dispatch(
+          setEditorNodeClickedAndContentLeftRightThunk({
+            nodeClicked: true,
+            textIsMarked: false,
+            contentLeft: null,
+            contentRight: null,
+          }),
+        );
         return;
       }
       const fractionTarget = targetElement?.closest<HTMLElement>(
@@ -1111,7 +1169,17 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         }),
       );
     },
-    [dispatch, figureUploadInProgress, menuItemsMarked, pathHandlers, props, stateEditorLetter.xmlContent, t, xmlContentRef],
+    [
+      dispatch,
+      figureUploadInProgress,
+      menuItemsMarked,
+      pathHandlers,
+      props,
+      removeSuperscript,
+      stateEditorLetter.xmlContent,
+      t,
+      xmlContentRef,
+    ],
   );
 
   /** CLOSE MENU */
