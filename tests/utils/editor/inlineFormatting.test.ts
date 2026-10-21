@@ -75,6 +75,19 @@ describe('inline formatting', () => {
     expect(xmlDoc.querySelector('hi[rend="antiqua"]')).toBeNull();
   });
 
+  it('creates Oxygen-compatible Fraktur markup without changing Antiqua', () => {
+    const xmlDoc = parse(
+      '<body><p><hi rend="Antiqua">Leipzig</hi> <span class="marked">Allgemeine <hi rend="italic">Zeitung</hi></span></p></body>',
+    );
+
+    const gothic = applyInlineFormatting(xmlDoc, 'gothic');
+
+    expect(gothic.getAttribute('rend')).toBe('gothic');
+    expect(gothic.textContent).toBe('Allgemeine Zeitung');
+    expect(gothic.querySelector('hi[rend="italic"]')?.textContent).toBe('Zeitung');
+    expect(xmlDoc.querySelector('hi[rend="Antiqua"]')?.textContent).toBe('Leipzig');
+  });
+
   it.each([
     ['a missing selection', '<body><p>Text</p></body>', 'selectionMissing'],
     ['a selection outside the body', '<teiHeader><span class="marked">Text</span></teiHeader>', 'selectionInvalid'],
@@ -107,6 +120,12 @@ describe('inline formatting', () => {
     const xmlDoc = parse('<body><p><hi rend="Antiqua"><span class="marked">Leipziger</span></hi></p></body>');
 
     expect(() => applyInlineFormatting(xmlDoc, 'antiqua')).toThrow(new InlineFormattingError('selectionNested'));
+  });
+
+  it('rejects a selection nested in an existing Fraktur passage', () => {
+    const xmlDoc = parse('<body><p><hi rend="gothic"><span class="marked">Zeitung</span></hi></p></body>');
+
+    expect(() => applyInlineFormatting(xmlDoc, 'gothic')).toThrow(new InlineFormattingError('selectionNested'));
   });
 
   it('resolves a legacy superscript by XML path and removes only its wrapper', () => {
@@ -177,5 +196,18 @@ describe('inline formatting', () => {
     expect(xmlDoc.querySelector('hi[rend="Antiqua"]')).toBeNull();
     expect(xmlDoc.querySelector('hi[rend="latintype"]')?.textContent).toBe('Amicus');
     expect(xmlDoc.querySelector('p')?.textContent).toBe('AmicusLeipziger');
+  });
+
+  it('removes only the Fraktur wrapper and preserves Antiqua', () => {
+    const xmlDoc = parse(
+      '<body><p><hi xml:id="antiqua_1" rend="Antiqua">Leipzig</hi><hi xml:id="gothic_1" rend="gothic">Zeitung</hi></p></body>',
+    );
+    const gothic = resolveInlineFormatting(xmlDoc, 'gothic_1', 'gothic');
+
+    removeInlineFormatting(gothic, 'gothic');
+
+    expect(xmlDoc.querySelector('hi[rend="gothic"]')).toBeNull();
+    expect(xmlDoc.querySelector('hi[rend="Antiqua"]')?.textContent).toBe('Leipzig');
+    expect(xmlDoc.querySelector('p')?.textContent).toBe('LeipzigZeitung');
   });
 });

@@ -32,6 +32,12 @@
       "removeAction": "Remove Antiqua markup",
       "anchorLabel": "Antiqua in printed text",
       "removed": "The Antiqua markup was removed."
+    },
+    "gothic": {
+      "applyAction": "Mark print text as Fraktur",
+      "removeAction": "Remove Fraktur markup",
+      "anchorLabel": "Fraktur in printed text",
+      "removed": "The Fraktur markup was removed."
     }
   },
   "teiDocumentation": {

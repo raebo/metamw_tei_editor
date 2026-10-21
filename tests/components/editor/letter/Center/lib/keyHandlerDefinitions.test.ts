@@ -348,6 +348,24 @@ describe('Antiqua shortcut definition', () => {
   });
 });
 
+describe('Fraktur shortcut definition', () => {
+  it('maps Ctrl+Alt+H to the Oxygen-compatible FMB-C gothic markup', () => {
+    const xmlDoc = new DOMParser().parseFromString(
+      '<TEI><text><body><p><span class="marked">Allgemeine <hi rend="italic">Zeitung</hi></span></p></body></text></TEI>',
+      'application/xml',
+    );
+    const definition = contentMarkedKeyHandleDefinitions['ctrl+alt+h'];
+
+    definition.xmlAction?.(xmlDoc);
+
+    const gothic = xmlDoc.querySelector('hi[rend="gothic"]');
+    expect(gothic?.textContent).toBe('Allgemeine Zeitung');
+    expect(gothic?.querySelector('hi[rend="italic"]')?.textContent).toBe('Zeitung');
+    expect(xmlDoc.querySelector('span.marked')).toBeNull();
+    expect(definition.operationType).toBe(EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED);
+  });
+});
+
 describe('manuscript annotation shortcut definition', () => {
   it('opens Ctrl+Shift+D in creation mode without requiring a text selection', () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });

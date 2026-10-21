@@ -551,7 +551,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009J – Antiqua in Drucken auszeichnen
 
-- Status: Umgesetzt und automatisiert getestet; manuelle Abnahme ausstehend
+- Status: Umgesetzt und abgenommen
 - Priorität: P1
 - Oxygen-Aktion: `Antiqua in Drucken`
 - Ausgangslage: Antiqua-Passagen in gedruckten Vorlagen können im Webeditor nicht ausgezeichnet
@@ -580,15 +580,33 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009K – Frakturschrift in Drucken auszeichnen
 
-- Status: Offen
+- Status: Umgesetzt und automatisiert getestet; manuelle Abnahme ausstehend
 - Priorität: P1
 - Oxygen-Aktion: `Frakturschrift in Drucken`
 - Ausgangslage: Fraktur-Passagen in gedruckten Vorlagen können im Webeditor nicht ausgezeichnet
   werden.
 - Ziel: Eine markierte Passage über Menü und `Strg+Alt+H` als Frakturschrift kennzeichnen.
+- Bedienablauf:
+  1. Der Benutzer markiert die Fraktur-Passage einer gedruckten Vorlage in der
+     WYSIWYG-Ansicht.
+  2. Die Auszeichnung wird über `Strg+Alt+H`, das Aktionsmenü unter
+     `Sprach- und typografische Auszeichnungen` oder den Eintrag
+     `Frakturschrift in Drucken auszeichnen` im Rechtsklick-Kontextmenü der Auswahl angewendet.
+  3. Der Webeditor ersetzt ausschließlich den temporären Auswahlmarker durch
+     `hi[rend="gothic"]`; Text und enthaltene Inline-Auszeichnungen bleiben erhalten.
+  4. Eine bestehende Frakturschrift-Auszeichnung kann mit der rechten Maustaste ausgewählt und
+     über den einzigen kontextbezogenen Eintrag `Frakturschrift-Auszeichnung entfernen`
+     aufgehoben werden. Dabei wird nur das `hi`-Element entfernt, nicht sein Inhalt.
 - Akzeptanzkriterien: Der genaue FMB-C-Attributwert wird gesetzt, sichtbar dargestellt und
   unabhängig von anderen Druckschriften wieder entfernt.
 - Tests: Einfache und verschachtelte Auswahl, Umschalten sowie Abgrenzung zu Antiqua.
+- Umsetzung: Der genaue XML-Wert wurde im aktuellen Oxygen-Framework als
+  `hi[rend="gothic"]` verifiziert. Die gemeinsame Inline-Formatierungslogik erzeugt und entfernt
+  diese Auszeichnung verlustfrei. Die WYSIWYG-Ansicht stellt sie mit einer Frakturschrift-
+  Font-Fallback-Kette sowie einer dezenten Hintergrund- und Unterkantenmarkierung dar und macht
+  sie für das isolierte Kontextmenü auswählbar. Antiqua,
+  Latintype und andere `rend`-Werte bleiben unverändert. Änderungen werden wie die übrigen
+  Inline-Formatierungen als `CONTENT_FORMAT_CHANGED` an das Backend übergeben.
 
 ### OXY-009L – Gesperrte Schrift in Drucken auszeichnen
 

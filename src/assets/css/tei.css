@@ -1410,6 +1410,11 @@ font-size: 0.8em;
 
 }
 
+hi[rend="gothic"] {
+  display: inline;
+  font-family: "UnifrakturCook", "UnifrakturMaguntia", "Old English Text MT", "Papyrus", fantasy;
+}
+
 
 
 hi[rend="bold"] {

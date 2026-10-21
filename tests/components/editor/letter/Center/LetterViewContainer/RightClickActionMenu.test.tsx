@@ -53,6 +53,7 @@ const ContextMenuHarness = () => {
     const groundline = document.createElement('hi');
     const latintype = document.createElement('hi');
     const antiqua = document.createElement('hi');
+    const gothic = document.createElement('hi');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -115,6 +116,9 @@ const ContextMenuHarness = () => {
     antiqua.dataset.editorInlineFormatReference = 'antiqua_1';
     antiqua.dataset.editorInlineFormat = 'antiqua';
     antiqua.textContent = 'Leipziger';
+    gothic.dataset.editorInlineFormatReference = 'gothic_1';
+    gothic.dataset.editorInlineFormat = 'gothic';
+    gothic.textContent = 'Zeitung';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
@@ -138,6 +142,7 @@ const ContextMenuHarness = () => {
       groundline,
       latintype,
       antiqua,
+      gothic,
     );
   }, []);
 
@@ -1222,6 +1227,47 @@ describe('RightClickActionMenu figure upload action', () => {
     expect(persistedXml).not.toContain('rend="Antiqua"');
     expect(persistedXml).toContain('Leipziger');
     expect(persistedXml).toContain('rend="latintype"');
+    expect(store.getState().editorLetter.letter.xmlContent).toBe(persistedXml);
+  });
+
+  it('shows only the remove action for existing Fraktur markup', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const patchContent = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue({} as never);
+    store.dispatch(
+      setEditorLetter({
+        letter: {
+          id: 7,
+          name: 'FMB-7',
+          viewMode: 'WYSIWYG',
+          xmlContent:
+            '<TEI><text><body><div xml:id="act_1"><p xml:id="paragraph_1"><hi xml:id="gothic_1" rend="gothic">Zeitung</hi><hi xml:id="antiqua_1" rend="Antiqua">Leipzig</hi></p></div></body></text></TEI>',
+        },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('[data-editor-inline-format="gothic"]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+
+    const removeAction = await screen.findByRole('menuitem', {
+      name: /Frakturschrift-Auszeichnung entfernen|Remove Fraktur markup/,
+    });
+    expect(removeAction).toBeInTheDocument();
+    expect(screen.getAllByRole('menuitem')).toHaveLength(1);
+    fireEvent.click(removeAction);
+
+    await waitFor(() => expect(patchContent).toHaveBeenCalledTimes(1));
+    const persistedXml = patchContent.mock.calls[0][0];
+    expect(persistedXml).not.toContain('rend="gothic"');
+    expect(persistedXml).toContain('Zeitung');
+    expect(persistedXml).toContain('rend="Antiqua"');
     expect(store.getState().editorLetter.letter.xmlContent).toBe(persistedXml);
   });
 });

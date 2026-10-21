@@ -32,6 +32,12 @@
       "removeAction": "Antiqua-Auszeichnung entfernen",
       "anchorLabel": "Antiqua in einem Druck",
       "removed": "Die Antiqua-Auszeichnung wurde entfernt."
+    },
+    "gothic": {
+      "applyAction": "Frakturschrift in Drucken auszeichnen",
+      "removeAction": "Frakturschrift-Auszeichnung entfernen",
+      "anchorLabel": "Frakturschrift in einem Druck",
+      "removed": "Die Frakturschrift-Auszeichnung wurde entfernt."
     }
   },
   "teiDocumentation": {

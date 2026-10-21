@@ -220,6 +220,19 @@ describe('XMLDisplayParser', () => {
     expect(antiqua).toHaveTextContent('Leipziger');
   });
 
+  it('renders Fraktur markup as a distinct selectable editor target', () => {
+    const { container } = renderXml('<TEI><text><body><p><hi xml:id="gothic_1" rend="gothic">Zeitung</hi></p></body></text></TEI>');
+
+    const gothic = container.querySelector('hi[rend="gothic"]');
+    expect(gothic).toHaveClass('tei-inline-format', 'tei-gothic');
+    expect(gothic).toHaveAttribute('data-editor-inline-format-reference', 'gothic_1');
+    expect(gothic).toHaveAttribute('data-editor-inline-format', 'gothic');
+    expect(gothic).toHaveAttribute('role', 'button');
+    expect(gothic).toHaveAttribute('tabindex', '0');
+    expect(gothic).not.toHaveAttribute('contenteditable', 'false');
+    expect(gothic).toHaveTextContent('Zeitung');
+  });
+
   it.each([
     [
       'vertical fraction with slash',

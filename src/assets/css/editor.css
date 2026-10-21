@@ -83,6 +83,19 @@ note.tei-foreign-hand-annotation:focus-visible {
   cursor: context-menu;
 }
 
+.tei-gothic {
+  padding-inline: 0.08em;
+  border-bottom: 2px dotted #795548;
+  border-radius: 0.15em;
+  background-color: rgb(121 85 72 / 14%);
+  box-decoration-break: clone;
+}
+
+.tei-gothic:hover,
+.tei-gothic:focus {
+  background-color: rgb(121 85 72 / 24%);
+}
+
 .tei-inline-format:focus-visible {
   border-radius: 0.15em;
   outline: 2px solid var(--secondary-color);

@@ -251,6 +251,14 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           runMarkedAction('ctrl+alt+g');
         },
       },
+      {
+        label: t('editor:dialog.inlineFormatting.gothic.applyAction'),
+        keyShortcut: 'ctrl+alt+h',
+        action: () => {
+          props.setAnchorPosition(null);
+          runMarkedAction('ctrl+alt+h');
+        },
+      },
       { type: 'divider' as const },
       {
         label: t('editor:dialog.crossReference.contextAction'),
@@ -399,7 +407,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           inlineFormat === 'subscript' ||
           inlineFormat === 'groundline' ||
           inlineFormat === 'latintype' ||
-          inlineFormat === 'antiqua')
+          inlineFormat === 'antiqua' ||
+          inlineFormat === 'gothic')
       ) {
         setDisplayMenuItems([
           {
