@@ -26,6 +26,12 @@
       "removeAction": "Remove Latin script markup",
       "anchorLabel": "Text in Latin script",
       "removed": "The Latin script markup was removed."
+    },
+    "antiqua": {
+      "applyAction": "Mark print text as Antiqua",
+      "removeAction": "Remove Antiqua markup",
+      "anchorLabel": "Antiqua in printed text",
+      "removed": "The Antiqua markup was removed."
     }
   },
   "teiDocumentation": {

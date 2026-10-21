@@ -551,15 +551,32 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009J – Antiqua in Drucken auszeichnen
 
-- Status: Offen
+- Status: Umgesetzt und automatisiert getestet; manuelle Abnahme ausstehend
 - Priorität: P1
 - Oxygen-Aktion: `Antiqua in Drucken`
 - Ausgangslage: Antiqua-Passagen in gedruckten Vorlagen können im Webeditor nicht ausgezeichnet
   werden.
 - Ziel: Eine markierte Passage über Menü und `Strg+Alt+G` als Antiqua in Drucken kennzeichnen.
+- Bedienablauf:
+  1. Der Benutzer markiert die Antiqua-Passage einer gedruckten Vorlage in der WYSIWYG-Ansicht.
+  2. Die Auszeichnung wird über `Strg+Alt+G`, das Aktionsmenü unter
+     `Sprach- und typografische Auszeichnungen` oder den Eintrag
+     `Antiqua in Drucken auszeichnen` im Rechtsklick-Kontextmenü der Auswahl angewendet.
+  3. Der Webeditor ersetzt ausschließlich den temporären Auswahlmarker durch
+     `hi[rend="Antiqua"]`; Text und enthaltene Inline-Auszeichnungen bleiben erhalten.
+  4. Eine bestehende Antiqua-Auszeichnung kann mit der rechten Maustaste ausgewählt und über den
+     einzigen kontextbezogenen Eintrag `Antiqua-Auszeichnung entfernen` aufgehoben werden. Dabei
+     wird nur das `hi`-Element entfernt, nicht sein Inhalt.
 - Akzeptanzkriterien: Der genaue FMB-C-Attributwert wird gesetzt, in der WYSIWYG-Ansicht dargestellt
   und unabhängig von anderen Druckschriften wieder entfernt.
 - Tests: Einfache und verschachtelte Auswahl, Umschalten sowie Abgrenzung zu Fraktur und Latintype.
+- Umsetzung: Der XML-Wert wurde anhand der Oxygen-Aktion und der vorhandenen FMB-C-Styles als
+  case-sensitives `hi[rend="Antiqua"]` bestätigt. Intern verwendet die gemeinsame
+  Inline-Formatierungslogik den Schlüssel `antiqua` und bildet ihn gezielt auf `Antiqua` ab.
+  Bestehende Auszeichnungen werden über eine XML-ID oder ersatzweise ihren XML-Pfad referenziert
+  und verlustfrei entfernt; Latintype und andere `rend`-Werte bleiben unverändert. Gezielt geprüft
+  sind die exakte Großschreibung, verschachteltes Inline-Markup, verschachtelte Auswahl,
+  Shortcut-Zuordnung, Rendering, Entfernung und das isolierte Kontextmenü.
 
 ### OXY-009K – Frakturschrift in Drucken auszeichnen
 

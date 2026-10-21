@@ -52,6 +52,7 @@ const ContextMenuHarness = () => {
     const subscript = document.createElement('hi');
     const groundline = document.createElement('hi');
     const latintype = document.createElement('hi');
+    const antiqua = document.createElement('hi');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -111,6 +112,9 @@ const ContextMenuHarness = () => {
     latintype.dataset.editorInlineFormatReference = 'latin_1';
     latintype.dataset.editorInlineFormat = 'latintype';
     latintype.textContent = 'Amicus';
+    antiqua.dataset.editorInlineFormatReference = 'antiqua_1';
+    antiqua.dataset.editorInlineFormat = 'antiqua';
+    antiqua.textContent = 'Leipziger';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
@@ -133,6 +137,7 @@ const ContextMenuHarness = () => {
       subscript,
       groundline,
       latintype,
+      antiqua,
     );
   }, []);
 
@@ -1176,6 +1181,47 @@ describe('RightClickActionMenu figure upload action', () => {
     expect(persistedXml).not.toContain('rend="latintype"');
     expect(persistedXml).toContain('Amicus');
     expect(persistedXml).toContain('rend="italic"');
+    expect(store.getState().editorLetter.letter.xmlContent).toBe(persistedXml);
+  });
+
+  it('shows only the remove action for existing Antiqua markup', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const patchContent = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue({} as never);
+    store.dispatch(
+      setEditorLetter({
+        letter: {
+          id: 7,
+          name: 'FMB-7',
+          viewMode: 'WYSIWYG',
+          xmlContent:
+            '<TEI><text><body><div xml:id="act_1"><p xml:id="paragraph_1"><hi xml:id="antiqua_1" rend="Antiqua">Leipziger</hi><hi xml:id="latin_1" rend="latintype">Amicus</hi></p></div></body></text></TEI>',
+        },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('[data-editor-inline-format="antiqua"]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+
+    const removeAction = await screen.findByRole('menuitem', {
+      name: /Antiqua-Auszeichnung entfernen|Remove Antiqua markup/,
+    });
+    expect(removeAction).toBeInTheDocument();
+    expect(screen.getAllByRole('menuitem')).toHaveLength(1);
+    fireEvent.click(removeAction);
+
+    await waitFor(() => expect(patchContent).toHaveBeenCalledTimes(1));
+    const persistedXml = patchContent.mock.calls[0][0];
+    expect(persistedXml).not.toContain('rend="Antiqua"');
+    expect(persistedXml).toContain('Leipziger');
+    expect(persistedXml).toContain('rend="latintype"');
     expect(store.getState().editorLetter.letter.xmlContent).toBe(persistedXml);
   });
 });

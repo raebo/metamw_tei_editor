@@ -207,6 +207,19 @@ describe('XMLDisplayParser', () => {
     expect(latintype).toHaveTextContent('Amicus');
   });
 
+  it('renders case-sensitive Antiqua markup as a distinct selectable editor target', () => {
+    const { container } = renderXml('<TEI><text><body><p><hi xml:id="antiqua_1" rend="Antiqua">Leipziger</hi></p></body></text></TEI>');
+
+    const antiqua = container.querySelector('hi[rend="Antiqua"]');
+    expect(antiqua).toHaveClass('tei-inline-format', 'tei-antiqua');
+    expect(antiqua).toHaveAttribute('data-editor-inline-format-reference', 'antiqua_1');
+    expect(antiqua).toHaveAttribute('data-editor-inline-format', 'antiqua');
+    expect(antiqua).toHaveAttribute('role', 'button');
+    expect(antiqua).toHaveAttribute('tabindex', '0');
+    expect(antiqua).not.toHaveAttribute('contenteditable', 'false');
+    expect(antiqua).toHaveTextContent('Leipziger');
+  });
+
   it.each([
     [
       'vertical fraction with slash',

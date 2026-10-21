@@ -61,6 +61,20 @@ describe('inline formatting', () => {
     expect(xmlDoc.querySelector('body')?.hasAttribute('rend')).toBe(false);
   });
 
+  it('creates case-sensitive FMB-C Antiqua markup without changing latintype', () => {
+    const xmlDoc = parse(
+      '<body><p><hi rend="latintype">Amicus</hi> <span class="marked">Leip<hi rend="italic">ziger</hi></span></p></body>',
+    );
+
+    const antiqua = applyInlineFormatting(xmlDoc, 'antiqua');
+
+    expect(antiqua.getAttribute('rend')).toBe('Antiqua');
+    expect(antiqua.textContent).toBe('Leipziger');
+    expect(antiqua.querySelector('hi[rend="italic"]')?.textContent).toBe('ziger');
+    expect(xmlDoc.querySelector('hi[rend="latintype"]')?.textContent).toBe('Amicus');
+    expect(xmlDoc.querySelector('hi[rend="antiqua"]')).toBeNull();
+  });
+
   it.each([
     ['a missing selection', '<body><p>Text</p></body>', 'selectionMissing'],
     ['a selection outside the body', '<teiHeader><span class="marked">Text</span></teiHeader>', 'selectionInvalid'],
@@ -87,6 +101,12 @@ describe('inline formatting', () => {
     const xmlDoc = parse('<body><p><hi rend="latintype"><span class="marked">Amicus</span></hi></p></body>');
 
     expect(() => applyInlineFormatting(xmlDoc, 'latintype')).toThrow(new InlineFormattingError('selectionNested'));
+  });
+
+  it('rejects a selection nested in an existing Antiqua passage', () => {
+    const xmlDoc = parse('<body><p><hi rend="Antiqua"><span class="marked">Leipziger</span></hi></p></body>');
+
+    expect(() => applyInlineFormatting(xmlDoc, 'antiqua')).toThrow(new InlineFormattingError('selectionNested'));
   });
 
   it('resolves a legacy superscript by XML path and removes only its wrapper', () => {
@@ -144,5 +164,18 @@ describe('inline formatting', () => {
     expect(xmlDoc.querySelector('hi[rend="latintype"]')).toBeNull();
     expect(xmlDoc.querySelector('hi[rend="italic"]')?.textContent).toBe('certus');
     expect(xmlDoc.querySelector('p')?.textContent).toBe('Amicuscertus');
+  });
+
+  it('removes only the Antiqua wrapper and preserves latintype', () => {
+    const xmlDoc = parse(
+      '<body><p><hi xml:id="latin_1" rend="latintype">Amicus</hi><hi xml:id="antiqua_1" rend="Antiqua">Leipziger</hi></p></body>',
+    );
+    const antiqua = resolveInlineFormatting(xmlDoc, 'antiqua_1', 'antiqua');
+
+    removeInlineFormatting(antiqua, 'antiqua');
+
+    expect(xmlDoc.querySelector('hi[rend="Antiqua"]')).toBeNull();
+    expect(xmlDoc.querySelector('hi[rend="latintype"]')?.textContent).toBe('Amicus');
+    expect(xmlDoc.querySelector('p')?.textContent).toBe('AmicusLeipziger');
   });
 });

@@ -158,6 +158,11 @@ const menuItems: MenuItem[] = [
         active: true,
       },
       {
+        label: i18n.t('editor:dialog.inlineFormatting.antiqua.applyAction'),
+        keyHandleItem: filterKeyCombination('ctrl+alt+g'),
+        active: true,
+      },
+      {
         label: i18n.t('editor:dialog.horizontalFraction.horizontalAction'),
         keyHandleItem: filterKeyCombination('ctrl+2'),
         active: true,

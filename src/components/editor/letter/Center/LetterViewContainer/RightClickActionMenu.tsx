@@ -243,6 +243,14 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           runMarkedAction('ctrl+8');
         },
       },
+      {
+        label: t('editor:dialog.inlineFormatting.antiqua.applyAction'),
+        keyShortcut: 'ctrl+alt+g',
+        action: () => {
+          props.setAnchorPosition(null);
+          runMarkedAction('ctrl+alt+g');
+        },
+      },
       { type: 'divider' as const },
       {
         label: t('editor:dialog.crossReference.contextAction'),
@@ -387,7 +395,11 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const inlineFormat = inlineFormatTarget?.dataset.editorInlineFormat;
       if (
         inlineFormatReference &&
-        (inlineFormat === 'superscript' || inlineFormat === 'subscript' || inlineFormat === 'groundline' || inlineFormat === 'latintype')
+        (inlineFormat === 'superscript' ||
+          inlineFormat === 'subscript' ||
+          inlineFormat === 'groundline' ||
+          inlineFormat === 'latintype' ||
+          inlineFormat === 'antiqua')
       ) {
         setDisplayMenuItems([
           {

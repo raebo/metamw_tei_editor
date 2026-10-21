@@ -26,6 +26,12 @@
       "removeAction": "Auszeichnung als lateinische Schrift entfernen",
       "anchorLabel": "Text in lateinischer Schrift",
       "removed": "Die Auszeichnung als lateinische Schrift wurde entfernt."
+    },
+    "antiqua": {
+      "applyAction": "Antiqua in Drucken auszeichnen",
+      "removeAction": "Antiqua-Auszeichnung entfernen",
+      "anchorLabel": "Antiqua in einem Druck",
+      "removed": "Die Antiqua-Auszeichnung wurde entfernt."
     }
   },
   "teiDocumentation": {

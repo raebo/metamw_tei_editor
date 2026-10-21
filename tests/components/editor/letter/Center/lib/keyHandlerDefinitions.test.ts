@@ -329,6 +329,25 @@ describe('latintype shortcut definition', () => {
   });
 });
 
+describe('Antiqua shortcut definition', () => {
+  it('maps Ctrl+Alt+G to the case-sensitive FMB-C Antiqua markup', () => {
+    const xmlDoc = new DOMParser().parseFromString(
+      '<TEI><text><body><p><span class="marked">Leip<hi rend="italic">ziger</hi></span></p></body></text></TEI>',
+      'application/xml',
+    );
+    const definition = contentMarkedKeyHandleDefinitions['ctrl+alt+g'];
+
+    definition.xmlAction?.(xmlDoc);
+
+    const antiqua = xmlDoc.querySelector('hi[rend="Antiqua"]');
+    expect(antiqua?.textContent).toBe('Leipziger');
+    expect(antiqua?.querySelector('hi[rend="italic"]')?.textContent).toBe('ziger');
+    expect(xmlDoc.querySelector('hi[rend="antiqua"]')).toBeNull();
+    expect(xmlDoc.querySelector('span.marked')).toBeNull();
+    expect(definition.operationType).toBe(EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED);
+  });
+});
+
 describe('manuscript annotation shortcut definition', () => {
   it('opens Ctrl+Shift+D in creation mode without requiring a text selection', () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
