@@ -1,6 +1,6 @@
 import { EditorConstants } from '@src/constants/editor';
 
-export type InlineFormat = 'superscript' | 'subscript' | 'groundline';
+export type InlineFormat = 'superscript' | 'subscript' | 'groundline' | 'latintype';
 
 export type InlineFormattingErrorCode = 'selectionMissing' | 'selectionInvalid' | 'selectionNested' | 'elementMissing';
 
@@ -15,6 +15,7 @@ const FORMAT_REND: Record<InlineFormat, string> = {
   superscript: 'superscript',
   subscript: 'subscript',
   groundline: 'groundline',
+  latintype: 'latintype',
 };
 
 const elementByXmlId = (xmlDoc: Document, xmlId: string): Element | null =>

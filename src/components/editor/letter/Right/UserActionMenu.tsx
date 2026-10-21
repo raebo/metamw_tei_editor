@@ -153,6 +153,11 @@ const menuItems: MenuItem[] = [
         active: true,
       },
       {
+        label: i18n.t('editor:dialog.inlineFormatting.latintype.applyAction'),
+        keyHandleItem: filterKeyCombination('ctrl+8'),
+        active: true,
+      },
+      {
         label: i18n.t('editor:dialog.horizontalFraction.horizontalAction'),
         keyHandleItem: filterKeyCombination('ctrl+2'),
         active: true,

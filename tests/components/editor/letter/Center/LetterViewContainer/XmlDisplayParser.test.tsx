@@ -194,6 +194,19 @@ describe('XMLDisplayParser', () => {
     expect(groundline).toHaveTextContent('underlined');
   });
 
+  it('renders local latintype markup as a distinct selectable editor target', () => {
+    const { container } = renderXml('<TEI><text><body><p><hi xml:id="latin_1" rend="latintype">Amicus</hi></p></body></text></TEI>');
+
+    const latintype = container.querySelector('hi[rend="latintype"]');
+    expect(latintype).toHaveClass('tei-inline-format', 'tei-latintype');
+    expect(latintype).toHaveAttribute('data-editor-inline-format-reference', 'latin_1');
+    expect(latintype).toHaveAttribute('data-editor-inline-format', 'latintype');
+    expect(latintype).toHaveAttribute('role', 'button');
+    expect(latintype).toHaveAttribute('tabindex', '0');
+    expect(latintype).not.toHaveAttribute('contenteditable', 'false');
+    expect(latintype).toHaveTextContent('Amicus');
+  });
+
   it.each([
     [
       'vertical fraction with slash',

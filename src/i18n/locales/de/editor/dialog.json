@@ -20,6 +20,12 @@
       "removeAction": "Unterstrich auf der Grundlinie entfernen",
       "anchorLabel": "Auf der Grundlinie unterstrichener Text",
       "removed": "Der Unterstrich auf der Grundlinie wurde entfernt."
+    },
+    "latintype": {
+      "applyAction": "Lateinische Schrift auszeichnen",
+      "removeAction": "Auszeichnung als lateinische Schrift entfernen",
+      "anchorLabel": "Text in lateinischer Schrift",
+      "removed": "Die Auszeichnung als lateinische Schrift wurde entfernt."
     }
   },
   "teiDocumentation": {

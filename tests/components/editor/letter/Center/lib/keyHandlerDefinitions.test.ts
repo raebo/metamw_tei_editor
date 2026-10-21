@@ -311,6 +311,24 @@ describe('groundline shortcut definition', () => {
   });
 });
 
+describe('latintype shortcut definition', () => {
+  it('maps Ctrl+8 to the local FMB-C latintype markup', () => {
+    const xmlDoc = new DOMParser().parseFromString(
+      '<TEI><text><body><p><span class="marked">Amicus <hi rend="italic">certus</hi></span></p></body></text></TEI>',
+      'application/xml',
+    );
+    const definition = contentMarkedKeyHandleDefinitions['ctrl+8'];
+
+    definition.xmlAction?.(xmlDoc);
+
+    const latintype = xmlDoc.querySelector('hi[rend="latintype"]');
+    expect(latintype?.textContent).toBe('Amicus certus');
+    expect(latintype?.querySelector('hi[rend="italic"]')?.textContent).toBe('certus');
+    expect(xmlDoc.querySelector('span.marked')).toBeNull();
+    expect(definition.operationType).toBe(EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED);
+  });
+});
+
 describe('manuscript annotation shortcut definition', () => {
   it('opens Ctrl+Shift+D in creation mode without requiring a text selection', () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });

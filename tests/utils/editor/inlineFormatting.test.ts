@@ -48,6 +48,19 @@ describe('inline formatting', () => {
     expect(xmlDoc.querySelector('p')?.textContent).toBe('regular groundline');
   });
 
+  it('creates local FMB-C latintype markup without adding a document-wide classification', () => {
+    const xmlDoc = parse('<body><p><span class="marked">Amicus <hi rend="italic">certus</hi></span></p></body>');
+
+    const latintype = applyInlineFormatting(xmlDoc, 'latintype');
+
+    expect(latintype.getAttribute('rend')).toBe('latintype');
+    expect(latintype.textContent).toBe('Amicus certus');
+    expect(latintype.querySelector('hi[rend="italic"]')?.textContent).toBe('certus');
+    expect(xmlDoc.documentElement.hasAttribute('rend')).toBe(false);
+    expect(xmlDoc.querySelector('text')?.hasAttribute('rend')).toBe(false);
+    expect(xmlDoc.querySelector('body')?.hasAttribute('rend')).toBe(false);
+  });
+
   it.each([
     ['a missing selection', '<body><p>Text</p></body>', 'selectionMissing'],
     ['a selection outside the body', '<teiHeader><span class="marked">Text</span></teiHeader>', 'selectionInvalid'],
@@ -68,6 +81,12 @@ describe('inline formatting', () => {
     const xmlDoc = parse('<body><p><hi rend="groundline"><span class="marked">Text</span></hi></p></body>');
 
     expect(() => applyInlineFormatting(xmlDoc, 'groundline')).toThrow(new InlineFormattingError('selectionNested'));
+  });
+
+  it('rejects a selection nested in an existing latintype passage', () => {
+    const xmlDoc = parse('<body><p><hi rend="latintype"><span class="marked">Amicus</span></hi></p></body>');
+
+    expect(() => applyInlineFormatting(xmlDoc, 'latintype')).toThrow(new InlineFormattingError('selectionNested'));
   });
 
   it('resolves a legacy superscript by XML path and removes only its wrapper', () => {
@@ -112,5 +131,18 @@ describe('inline formatting', () => {
     expect(xmlDoc.querySelector('hi[rend="underline"]')?.textContent).toBe('regular');
     expect(xmlDoc.querySelector('p')?.textContent).toBe('regularground');
     expect(() => resolveInlineFormatting(xmlDoc, 'under_1', 'groundline')).toThrow(new InlineFormattingError('elementMissing'));
+  });
+
+  it('removes only the local latintype wrapper', () => {
+    const xmlDoc = parse(
+      '<body><p><hi xml:id="latin_1" rend="latintype">Amicus</hi><hi xml:id="italic_1" rend="italic">certus</hi></p></body>',
+    );
+    const latintype = resolveInlineFormatting(xmlDoc, 'latin_1', 'latintype');
+
+    removeInlineFormatting(latintype, 'latintype');
+
+    expect(xmlDoc.querySelector('hi[rend="latintype"]')).toBeNull();
+    expect(xmlDoc.querySelector('hi[rend="italic"]')?.textContent).toBe('certus');
+    expect(xmlDoc.querySelector('p')?.textContent).toBe('Amicuscertus');
   });
 });

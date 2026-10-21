@@ -523,14 +523,31 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009I – Lateinische Schrift auszeichnen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P1
 - Oxygen-Aktion: `Latintype`
 - Ausgangslage: Einzelne Passagen in lateinischer Schrift lassen sich nicht gesondert kennzeichnen.
 - Ziel: Markierten Text über Menü und `Strg+8` mit der vorgesehenen FMB-C-Latintype auszeichnen.
+- Bedienablauf:
+  1. Der Benutzer markiert die Passage in lateinischer Schrift in der WYSIWYG-Ansicht.
+  2. Die lokale Auszeichnung wird über `Strg+8`, das Aktionsmenü unter
+     `Sprach- und typografische Auszeichnungen` oder den Eintrag
+     `Lateinische Schrift auszeichnen` im Rechtsklick-Kontextmenü der Auswahl angewendet.
+  3. Der Webeditor ersetzt ausschließlich den temporären Auswahlmarker durch
+     `hi[rend="latintype"]`; Text und enthaltene Inline-Auszeichnungen bleiben erhalten.
+  4. Eine bestehende Latintype-Auszeichnung kann mit der rechten Maustaste ausgewählt und über den
+     einzigen kontextbezogenen Eintrag `Auszeichnung als lateinische Schrift entfernen` aufgehoben
+     werden. Dabei wird nur das lokale `hi`-Element entfernt, nicht sein Inhalt.
 - Akzeptanzkriterien: Die lokale Schriftauszeichnung ist von der Kennzeichnung eines vollständig
   lateinisch geschriebenen Briefes getrennt; vorhandenes Inline-Markup bleibt erhalten.
 - Tests: Einzelwort, Passage, verschachtelte Auswahl, Umschalten und Abgrenzung zu OXY-009P.
+- Umsetzung: Die gemeinsame Inline-Formatierungslogik erzeugt den in den FMB-C-Styles verwendeten
+  Wert `hi[rend="latintype"]`. Die WYSIWYG-Darstellung verwendet die vorhandene Latintype-Schrift.
+  Bestehende lokale Auszeichnungen werden über eine XML-ID oder ersatzweise ihren XML-Pfad
+  referenziert und verlustfrei entfernt. Die Aktion verändert keine Attribute an `TEI`, `text` oder
+  `body` und bleibt damit von der dokumentweiten Kennzeichnung aus OXY-009P getrennt. Gezielt
+  geprüft sind verschachteltes Inline-Markup, verschachtelte Auswahl, Shortcut-Zuordnung,
+  Rendering, Entfernung und das isolierte Kontextmenü.
 
 ### OXY-009J – Antiqua in Drucken auszeichnen
 

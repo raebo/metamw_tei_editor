@@ -235,6 +235,14 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           runMarkedAction('ctrl+7');
         },
       },
+      {
+        label: t('editor:dialog.inlineFormatting.latintype.applyAction'),
+        keyShortcut: 'ctrl+8',
+        action: () => {
+          props.setAnchorPosition(null);
+          runMarkedAction('ctrl+8');
+        },
+      },
       { type: 'divider' as const },
       {
         label: t('editor:dialog.crossReference.contextAction'),
@@ -377,7 +385,10 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const inlineFormatTarget = targetElement?.closest<HTMLElement>('[data-editor-inline-format-reference]');
       const inlineFormatReference = inlineFormatTarget?.dataset.editorInlineFormatReference;
       const inlineFormat = inlineFormatTarget?.dataset.editorInlineFormat;
-      if (inlineFormatReference && (inlineFormat === 'superscript' || inlineFormat === 'subscript' || inlineFormat === 'groundline')) {
+      if (
+        inlineFormatReference &&
+        (inlineFormat === 'superscript' || inlineFormat === 'subscript' || inlineFormat === 'groundline' || inlineFormat === 'latintype')
+      ) {
         setDisplayMenuItems([
           {
             label: t(`editor:dialog.inlineFormatting.${inlineFormat}.removeAction`),
