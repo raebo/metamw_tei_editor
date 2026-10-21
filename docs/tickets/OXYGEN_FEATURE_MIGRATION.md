@@ -463,14 +463,31 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009G – Tiefstellung auszeichnen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P1
 - Oxygen-Aktion: `Tiefstellung`
 - Ausgangslage: Markierter Text kann nicht als Tiefstellung nach FMB-C ausgezeichnet werden.
 - Ziel: Die markierte Passage über Schnellformatierer, Kontextmenü und `Strg+6` tiefstellen.
+- Bedienablauf:
+  1. Der Benutzer markiert die tiefzustellenden Zeichen in der WYSIWYG-Ansicht.
+  2. Die Auszeichnung wird über `Strg+6`, das Aktionsmenü unter
+     `Sprach- und typografische Auszeichnungen` oder den Eintrag `Text tiefstellen` im
+     Rechtsklick-Kontextmenü der Auswahl angewendet.
+  3. Der Webeditor ersetzt ausschließlich den temporären Auswahlmarker durch
+     `hi[rend="subscript"]`; Text und enthaltene Inline-Auszeichnungen bleiben erhalten.
+  4. Eine bestehende Tiefstellung kann mit der rechten Maustaste ausgewählt und über den einzigen
+     kontextbezogenen Eintrag `Tiefstellung entfernen` wieder aufgehoben werden. Dabei wird nur das
+     `hi`-Element entfernt, nicht sein Inhalt.
 - Akzeptanzkriterien: Die vorgesehene TEI-Auszeichnung wird ohne Textverlust gesetzt und kann wieder
   entfernt werden; Hoch- und Tiefstellung bleiben semantisch unterscheidbar.
 - Tests: Ein Zeichen, mehrere Zeichen, verschachtelte Auswahl, Umschalten und ungültige Auswahl.
+- Umsetzung: Die gemeinsame Inline-Formatierungslogik erzeugt Oxygen-kompatibles
+  `hi[rend="subscript"]`, übernimmt sämtliche Kindknoten der Auswahl und verhindert verschachtelte
+  Tiefstellungen. Vorhandene Auszeichnungen werden in der WYSIWYG-Ansicht über eine stabile XML-ID
+  oder ersatzweise ihren XML-Pfad referenziert. Die Entfernen-Aktion löst ausschließlich den
+  Tiefstellungs-Wrapper auf und lässt benachbarte Hochstellungen unverändert. Gezielt geprüft sind
+  Anlegen mit verschachteltem Markup, ungültige und verschachtelte Auswahl, verlustfreies Entfernen,
+  Shortcut-Zuordnung, Rendering und das isolierte Kontextmenü.
 
 ### OXY-009H – Unterstrich auf der Grundlinie auszeichnen
 

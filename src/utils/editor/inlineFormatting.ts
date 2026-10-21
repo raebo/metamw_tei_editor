@@ -1,6 +1,6 @@
 import { EditorConstants } from '@src/constants/editor';
 
-export type InlineFormat = 'superscript';
+export type InlineFormat = 'superscript' | 'subscript';
 
 export type InlineFormattingErrorCode = 'selectionMissing' | 'selectionInvalid' | 'selectionNested' | 'elementMissing';
 
@@ -13,6 +13,7 @@ export class InlineFormattingError extends Error {
 
 const FORMAT_REND: Record<InlineFormat, string> = {
   superscript: 'superscript',
+  subscript: 'subscript',
 };
 
 const elementByXmlId = (xmlDoc: Document, xmlId: string): Element | null =>

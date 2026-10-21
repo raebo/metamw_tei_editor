@@ -22,6 +22,18 @@ describe('inline formatting', () => {
     expect(xmlDoc.querySelector('p')?.textContent).toBe('Saint 1st letter');
   });
 
+  it('wraps the selection in an Oxygen-compatible subscript without changing an adjacent superscript', () => {
+    const xmlDoc = parse('<body><p>H<span class="marked">2<hi rend="italic">O</hi></span><hi rend="superscript">+</hi></p></body>');
+
+    const subscript = applyInlineFormatting(xmlDoc, 'subscript');
+
+    expect(subscript.getAttribute('rend')).toBe('subscript');
+    expect(subscript.textContent).toBe('2O');
+    expect(subscript.querySelector('hi[rend="italic"]')?.textContent).toBe('O');
+    expect(xmlDoc.querySelector('hi[rend="superscript"]')?.textContent).toBe('+');
+    expect(xmlDoc.querySelector('p')?.textContent).toBe('H2O+');
+  });
+
   it.each([
     ['a missing selection', '<body><p>Text</p></body>', 'selectionMissing'],
     ['a selection outside the body', '<teiHeader><span class="marked">Text</span></teiHeader>', 'selectionInvalid'],
@@ -30,6 +42,12 @@ describe('inline formatting', () => {
     const xmlDoc = parse(content);
 
     expect(() => applyInlineFormatting(xmlDoc, 'superscript')).toThrow(new InlineFormattingError(code));
+  });
+
+  it('rejects a selection nested in an existing subscript', () => {
+    const xmlDoc = parse('<body><p><hi rend="subscript"><span class="marked">2</span></hi></p></body>');
+
+    expect(() => applyInlineFormatting(xmlDoc, 'subscript')).toThrow(new InlineFormattingError('selectionNested'));
   });
 
   it('resolves a legacy superscript by XML path and removes only its wrapper', () => {
@@ -48,5 +66,17 @@ describe('inline formatting', () => {
 
     expect(resolveInlineFormatting(xmlDoc, 'super_1', 'superscript').textContent).toBe('1');
     expect(() => resolveInlineFormatting(xmlDoc, 'italic_1', 'superscript')).toThrow(new InlineFormattingError('elementMissing'));
+  });
+
+  it('resolves and removes only the requested subscript wrapper', () => {
+    const xmlDoc = parse('<body><p>H<hi xml:id="sub_1" rend="subscript">2</hi><hi xml:id="super_1" rend="superscript">+</hi></p></body>');
+    const subscript = resolveInlineFormatting(xmlDoc, 'sub_1', 'subscript');
+
+    removeInlineFormatting(subscript, 'subscript');
+
+    expect(xmlDoc.querySelector('hi[rend="subscript"]')).toBeNull();
+    expect(xmlDoc.querySelector('hi[rend="superscript"]')?.textContent).toBe('+');
+    expect(xmlDoc.querySelector('p')?.textContent).toBe('H2+');
+    expect(() => resolveInlineFormatting(xmlDoc, 'super_1', 'subscript')).toThrow(new InlineFormattingError('elementMissing'));
   });
 });

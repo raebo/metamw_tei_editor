@@ -275,6 +275,24 @@ describe('superscript shortcut definition', () => {
   });
 });
 
+describe('subscript shortcut definition', () => {
+  it('maps Ctrl+6 to the FMB-C subscript markup', () => {
+    const xmlDoc = new DOMParser().parseFromString(
+      '<TEI><text><body><p>H<span class="marked">2<hi rend="italic">O</hi></span></p></body></text></TEI>',
+      'application/xml',
+    );
+    const definition = contentMarkedKeyHandleDefinitions['ctrl+6'];
+
+    definition.xmlAction?.(xmlDoc);
+
+    const subscript = xmlDoc.querySelector('hi[rend="subscript"]');
+    expect(subscript?.textContent).toBe('2O');
+    expect(subscript?.querySelector('hi[rend="italic"]')?.textContent).toBe('O');
+    expect(xmlDoc.querySelector('span.marked')).toBeNull();
+    expect(definition.operationType).toBe(EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED);
+  });
+});
+
 describe('manuscript annotation shortcut definition', () => {
   it('opens Ctrl+Shift+D in creation mode without requiring a text selection', () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });

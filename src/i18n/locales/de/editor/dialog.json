@@ -8,6 +8,12 @@
       "removeAction": "Hochstellung entfernen",
       "anchorLabel": "Hochgestellter Text",
       "removed": "Die Hochstellung wurde entfernt."
+    },
+    "subscript": {
+      "applyAction": "Text tiefstellen",
+      "removeAction": "Tiefstellung entfernen",
+      "anchorLabel": "Tiefgestellter Text",
+      "removed": "Die Tiefstellung wurde entfernt."
     }
   },
   "teiDocumentation": {

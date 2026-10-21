@@ -31,7 +31,7 @@ import {
   generateKeyHandleAction,
   runXmlAction,
 } from '@src/components/editor/letter/Center/lib/keyHandlerDefinitions';
-import { removeInlineFormatting, resolveInlineFormatting } from '@src/utils/editor/inlineFormatting';
+import { removeInlineFormatting, resolveInlineFormatting, type InlineFormat } from '@src/utils/editor/inlineFormatting';
 
 const SECTION_SELECTOR =
   'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
@@ -77,14 +77,14 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
     [dispatch, reduxStore],
   );
 
-  const removeSuperscript = useCallback(
-    (reference: string) => {
+  const removeInlineFormat = useCallback(
+    (reference: string, format: InlineFormat) => {
       void runXmlAction(
         dispatch,
         () => reduxStore.getState() as RootState,
-        (xmlDoc) => removeInlineFormatting(resolveInlineFormatting(xmlDoc, reference, 'superscript'), 'superscript'),
+        (xmlDoc) => removeInlineFormatting(resolveInlineFormatting(xmlDoc, reference, format), format),
         EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED,
-        t('editor:dialog.inlineFormatting.superscript.removed'),
+        t(`editor:dialog.inlineFormatting.${format}.removed`),
       );
     },
     [dispatch, reduxStore, t],
@@ -217,6 +217,14 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         action: () => {
           props.setAnchorPosition(null);
           runMarkedAction('ctrl+5');
+        },
+      },
+      {
+        label: t('editor:dialog.inlineFormatting.subscript.applyAction'),
+        keyShortcut: 'ctrl+6',
+        action: () => {
+          props.setAnchorPosition(null);
+          runMarkedAction('ctrl+6');
         },
       },
       { type: 'divider' as const },
@@ -360,11 +368,12 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       }
       const inlineFormatTarget = targetElement?.closest<HTMLElement>('[data-editor-inline-format-reference]');
       const inlineFormatReference = inlineFormatTarget?.dataset.editorInlineFormatReference;
-      if (inlineFormatReference && inlineFormatTarget.dataset.editorInlineFormat === 'superscript') {
+      const inlineFormat = inlineFormatTarget?.dataset.editorInlineFormat;
+      if (inlineFormatReference && (inlineFormat === 'superscript' || inlineFormat === 'subscript')) {
         setDisplayMenuItems([
           {
-            label: t('editor:dialog.inlineFormatting.superscript.removeAction'),
-            action: () => removeSuperscript(inlineFormatReference),
+            label: t(`editor:dialog.inlineFormatting.${inlineFormat}.removeAction`),
+            action: () => removeInlineFormat(inlineFormatReference, inlineFormat),
           },
         ]);
         props.setAnchorPosition({ top: event.clientY, left: event.clientX });
@@ -1175,7 +1184,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       menuItemsMarked,
       pathHandlers,
       props,
-      removeSuperscript,
+      removeInlineFormat,
       stateEditorLetter.xmlContent,
       t,
       xmlContentRef,

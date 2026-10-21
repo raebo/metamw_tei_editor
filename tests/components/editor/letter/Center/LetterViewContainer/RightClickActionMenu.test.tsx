@@ -49,6 +49,7 @@ const ContextMenuHarness = () => {
     const verticalSlashFraction = document.createElement('formula');
     const verticalNoSlashFraction = document.createElement('formula');
     const superscript = document.createElement('hi');
+    const subscript = document.createElement('hi');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -99,6 +100,9 @@ const ContextMenuHarness = () => {
     superscript.dataset.editorInlineFormatReference = 'super_1';
     superscript.dataset.editorInlineFormat = 'superscript';
     superscript.textContent = '1st';
+    subscript.dataset.editorInlineFormatReference = 'sub_1';
+    subscript.dataset.editorInlineFormat = 'subscript';
+    subscript.textContent = '2';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
@@ -118,6 +122,7 @@ const ContextMenuHarness = () => {
       verticalSlashFraction,
       verticalNoSlashFraction,
       superscript,
+      subscript,
     );
   }, []);
 
@@ -1038,6 +1043,47 @@ describe('RightClickActionMenu figure upload action', () => {
     const persistedXml = patchContent.mock.calls[0][0];
     expect(persistedXml).not.toContain('rend="superscript"');
     expect(persistedXml).toContain('Text1st');
+    expect(store.getState().editorLetter.letter.xmlContent).toBe(persistedXml);
+  });
+
+  it('shows only the remove action for existing subscript markup', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const patchContent = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue({} as never);
+    store.dispatch(
+      setEditorLetter({
+        letter: {
+          id: 7,
+          name: 'FMB-7',
+          viewMode: 'WYSIWYG',
+          xmlContent:
+            '<TEI><text><body><div xml:id="act_1"><p xml:id="paragraph_1">H<hi xml:id="sub_1" rend="subscript">2</hi><hi xml:id="super_1" rend="superscript">+</hi></p></div></body></text></TEI>',
+        },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('[data-editor-inline-format="subscript"]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+
+    const removeAction = await screen.findByRole('menuitem', {
+      name: /Tiefstellung entfernen|Remove subscript/,
+    });
+    expect(removeAction).toBeInTheDocument();
+    expect(screen.getAllByRole('menuitem')).toHaveLength(1);
+    fireEvent.click(removeAction);
+
+    await waitFor(() => expect(patchContent).toHaveBeenCalledTimes(1));
+    const persistedXml = patchContent.mock.calls[0][0];
+    expect(persistedXml).not.toContain('rend="subscript"');
+    expect(persistedXml).toContain('H2');
+    expect(persistedXml).toContain('rend="superscript"');
     expect(store.getState().editorLetter.letter.xmlContent).toBe(persistedXml);
   });
 });

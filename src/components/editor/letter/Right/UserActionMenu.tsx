@@ -143,6 +143,11 @@ const menuItems: MenuItem[] = [
         active: true,
       },
       {
+        label: i18n.t('editor:dialog.inlineFormatting.subscript.applyAction'),
+        keyHandleItem: filterKeyCombination('ctrl+6'),
+        active: true,
+      },
+      {
         label: i18n.t('editor:dialog.horizontalFraction.horizontalAction'),
         keyHandleItem: filterKeyCombination('ctrl+2'),
         active: true,

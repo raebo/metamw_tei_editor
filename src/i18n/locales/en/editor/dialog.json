@@ -8,6 +8,12 @@
       "removeAction": "Remove superscript",
       "anchorLabel": "Superscript text",
       "removed": "The superscript was removed."
+    },
+    "subscript": {
+      "applyAction": "Subscript text",
+      "removeAction": "Remove subscript",
+      "anchorLabel": "Subscript text",
+      "removed": "The subscript was removed."
     }
   },
   "teiDocumentation": {

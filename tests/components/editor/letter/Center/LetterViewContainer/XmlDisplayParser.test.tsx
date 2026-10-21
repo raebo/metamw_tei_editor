@@ -168,6 +168,19 @@ describe('XMLDisplayParser', () => {
     expect(superscript).toHaveTextContent('1st');
   });
 
+  it('renders subscript markup as a distinct selectable editor target', () => {
+    const { container } = renderXml('<TEI><text><body><p>H<hi xml:id="sub_1" rend="subscript">2</hi>O</p></body></text></TEI>');
+
+    const subscript = container.querySelector('hi[rend="subscript"]');
+    expect(subscript).toHaveClass('tei-inline-format', 'tei-subscript');
+    expect(subscript).toHaveAttribute('data-editor-inline-format-reference', 'sub_1');
+    expect(subscript).toHaveAttribute('data-editor-inline-format', 'subscript');
+    expect(subscript).toHaveAttribute('role', 'button');
+    expect(subscript).toHaveAttribute('tabindex', '0');
+    expect(subscript).not.toHaveAttribute('contenteditable', 'false');
+    expect(subscript).toHaveTextContent('2');
+  });
+
   it.each([
     [
       'vertical fraction with slash',
