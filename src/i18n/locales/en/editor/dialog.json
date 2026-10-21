@@ -14,6 +14,12 @@
       "removeAction": "Remove subscript",
       "anchorLabel": "Subscript text",
       "removed": "The subscript was removed."
+    },
+    "groundline": {
+      "applyAction": "Underline on the baseline",
+      "removeAction": "Remove baseline underline",
+      "anchorLabel": "Text underlined on the baseline",
+      "removed": "The baseline underline was removed."
     }
   },
   "teiDocumentation": {

@@ -14,6 +14,12 @@
       "removeAction": "Tiefstellung entfernen",
       "anchorLabel": "Tiefgestellter Text",
       "removed": "Die Tiefstellung wurde entfernt."
+    },
+    "groundline": {
+      "applyAction": "Unterstrich auf der Grundlinie",
+      "removeAction": "Unterstrich auf der Grundlinie entfernen",
+      "anchorLabel": "Auf der Grundlinie unterstrichener Text",
+      "removed": "Der Unterstrich auf der Grundlinie wurde entfernt."
     }
   },
   "teiDocumentation": {

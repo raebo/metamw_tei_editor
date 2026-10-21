@@ -34,6 +34,20 @@ describe('inline formatting', () => {
     expect(xmlDoc.querySelector('p')?.textContent).toBe('H2O+');
   });
 
+  it('creates the FMB-C groundline markup without changing a regular underline', () => {
+    const xmlDoc = parse(
+      '<body><p><hi rend="underline">regular</hi> <span class="marked">ground<hi rend="italic">line</hi></span></p></body>',
+    );
+
+    const groundline = applyInlineFormatting(xmlDoc, 'groundline');
+
+    expect(groundline.getAttribute('rend')).toBe('groundline');
+    expect(groundline.textContent).toBe('groundline');
+    expect(groundline.querySelector('hi[rend="italic"]')?.textContent).toBe('line');
+    expect(xmlDoc.querySelector('hi[rend="underline"]')?.textContent).toBe('regular');
+    expect(xmlDoc.querySelector('p')?.textContent).toBe('regular groundline');
+  });
+
   it.each([
     ['a missing selection', '<body><p>Text</p></body>', 'selectionMissing'],
     ['a selection outside the body', '<teiHeader><span class="marked">Text</span></teiHeader>', 'selectionInvalid'],
@@ -48,6 +62,12 @@ describe('inline formatting', () => {
     const xmlDoc = parse('<body><p><hi rend="subscript"><span class="marked">2</span></hi></p></body>');
 
     expect(() => applyInlineFormatting(xmlDoc, 'subscript')).toThrow(new InlineFormattingError('selectionNested'));
+  });
+
+  it('rejects a selection nested in an existing groundline underline', () => {
+    const xmlDoc = parse('<body><p><hi rend="groundline"><span class="marked">Text</span></hi></p></body>');
+
+    expect(() => applyInlineFormatting(xmlDoc, 'groundline')).toThrow(new InlineFormattingError('selectionNested'));
   });
 
   it('resolves a legacy superscript by XML path and removes only its wrapper', () => {
@@ -78,5 +98,19 @@ describe('inline formatting', () => {
     expect(xmlDoc.querySelector('hi[rend="superscript"]')?.textContent).toBe('+');
     expect(xmlDoc.querySelector('p')?.textContent).toBe('H2+');
     expect(() => resolveInlineFormatting(xmlDoc, 'super_1', 'subscript')).toThrow(new InlineFormattingError('elementMissing'));
+  });
+
+  it('removes only the groundline wrapper and preserves a regular underline', () => {
+    const xmlDoc = parse(
+      '<body><p><hi xml:id="under_1" rend="underline">regular</hi><hi xml:id="ground_1" rend="groundline">ground</hi></p></body>',
+    );
+    const groundline = resolveInlineFormatting(xmlDoc, 'ground_1', 'groundline');
+
+    removeInlineFormatting(groundline, 'groundline');
+
+    expect(xmlDoc.querySelector('hi[rend="groundline"]')).toBeNull();
+    expect(xmlDoc.querySelector('hi[rend="underline"]')?.textContent).toBe('regular');
+    expect(xmlDoc.querySelector('p')?.textContent).toBe('regularground');
+    expect(() => resolveInlineFormatting(xmlDoc, 'under_1', 'groundline')).toThrow(new InlineFormattingError('elementMissing'));
   });
 });

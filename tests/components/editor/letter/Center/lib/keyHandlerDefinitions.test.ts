@@ -293,6 +293,24 @@ describe('subscript shortcut definition', () => {
   });
 });
 
+describe('groundline shortcut definition', () => {
+  it('maps Ctrl+7 to the FMB-C groundline markup', () => {
+    const xmlDoc = new DOMParser().parseFromString(
+      '<TEI><text><body><p><span class="marked">ground<hi rend="italic">line</hi></span></p></body></text></TEI>',
+      'application/xml',
+    );
+    const definition = contentMarkedKeyHandleDefinitions['ctrl+7'];
+
+    definition.xmlAction?.(xmlDoc);
+
+    const groundline = xmlDoc.querySelector('hi[rend="groundline"]');
+    expect(groundline?.textContent).toBe('groundline');
+    expect(groundline?.querySelector('hi[rend="italic"]')?.textContent).toBe('line');
+    expect(xmlDoc.querySelector('span.marked')).toBeNull();
+    expect(definition.operationType).toBe(EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED);
+  });
+});
+
 describe('manuscript annotation shortcut definition', () => {
   it('opens Ctrl+Shift+D in creation mode without requiring a text selection', () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });

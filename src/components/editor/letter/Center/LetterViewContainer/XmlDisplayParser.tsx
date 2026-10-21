@@ -293,7 +293,8 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
       const isForeignHandAnnotation = tagName === 'note' && element.getAttribute('type') === 'note';
       const isForeignText = tagName === 'foreign';
       const rend = element.getAttribute('rend');
-      const inlineFormat: InlineFormat | null = tagName === 'hi' && (rend === 'superscript' || rend === 'subscript') ? rend : null;
+      const inlineFormat: InlineFormat | null =
+        tagName === 'hi' && (rend === 'superscript' || rend === 'subscript' || rend === 'groundline') ? rend : null;
       const isManuscriptAnnotation = tagName === 'p' && element.parentElement?.localName.toLowerCase() === 'scriptdesc';
       const isAuthorFootnoteReference =
         tagName === 'ref' &&

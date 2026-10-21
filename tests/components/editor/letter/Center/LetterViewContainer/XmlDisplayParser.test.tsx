@@ -181,6 +181,19 @@ describe('XMLDisplayParser', () => {
     expect(subscript).toHaveTextContent('2');
   });
 
+  it('renders groundline markup as a distinct selectable editor target', () => {
+    const { container } = renderXml('<TEI><text><body><p><hi xml:id="ground_1" rend="groundline">underlined</hi></p></body></text></TEI>');
+
+    const groundline = container.querySelector('hi[rend="groundline"]');
+    expect(groundline).toHaveClass('tei-inline-format', 'tei-groundline');
+    expect(groundline).toHaveAttribute('data-editor-inline-format-reference', 'ground_1');
+    expect(groundline).toHaveAttribute('data-editor-inline-format', 'groundline');
+    expect(groundline).toHaveAttribute('role', 'button');
+    expect(groundline).toHaveAttribute('tabindex', '0');
+    expect(groundline).not.toHaveAttribute('contenteditable', 'false');
+    expect(groundline).toHaveTextContent('underlined');
+  });
+
   it.each([
     [
       'vertical fraction with slash',

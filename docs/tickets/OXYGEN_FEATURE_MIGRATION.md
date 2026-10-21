@@ -491,17 +491,35 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009H – Unterstrich auf der Grundlinie auszeichnen
 
-- Status: Offen
+- Status: Umgesetzt und getestet
 - Priorität: P1
 - Oxygen-Aktion: `Unterstrich auf Grundline`
 - Ausgangslage: Die vorhandene einfache Unterstreichung bildet die spezielle FMB-C-Variante nicht
   eindeutig ab.
 - Ziel: Eine markierte Passage als Unterstrich auf der Grundlinie auszeichnen und diese Variante in
   der WYSIWYG-Ansicht erkennbar darstellen.
+- Bedienablauf:
+  1. Der Benutzer markiert die auf der Grundlinie zu unterstreichende Passage in der
+     WYSIWYG-Ansicht.
+  2. Die Auszeichnung wird über `Strg+7`, das Aktionsmenü unter
+     `Sprach- und typografische Auszeichnungen` oder den Eintrag
+     `Unterstrich auf der Grundlinie` im Rechtsklick-Kontextmenü der Auswahl angewendet.
+  3. Der Webeditor ersetzt ausschließlich den temporären Auswahlmarker durch
+     `hi[rend="groundline"]`; Text und enthaltene Inline-Auszeichnungen bleiben erhalten.
+  4. Eine bestehende Auszeichnung kann mit der rechten Maustaste ausgewählt und über den einzigen
+     kontextbezogenen Eintrag `Unterstrich auf der Grundlinie entfernen` wieder aufgehoben werden.
+     Dabei wird nur das `hi`-Element entfernt, nicht sein Inhalt.
 - Akzeptanzkriterien: Der genaue FMB-C-Attributwert wird gespeichert; andere Unterstreichungsarten
   werden nicht unbeabsichtigt verändert; die Auszeichnung ist umkehrbar.
 - Tests: Einzelne und verschachtelte Auswahl, Abgrenzung zu vorhandener Unterstreichung, Umschalten
   und Entfernung.
+- Umsetzung: Die gemeinsame Inline-Formatierungslogik erzeugt den in den FMB-C-Styles und
+  Bestandsdaten verwendeten Wert `hi[rend="groundline"]`. Die WYSIWYG-Darstellung verwendet die
+  vorhandenen FMB-C-Styles. Bestehende Auszeichnungen werden über eine XML-ID oder ersatzweise den
+  XML-Pfad referenziert; beim Entfernen wird ausschließlich der `groundline`-Wrapper aufgelöst.
+  Reguläre Auszeichnungen mit `hi[rend="underline"]` bleiben unverändert. Gezielt geprüft sind
+  Anlegen mit verschachteltem Markup, verschachtelte Auswahl, Shortcut-Zuordnung, Rendering,
+  verlustfreies Entfernen und das isolierte Kontextmenü.
 
 ### OXY-009I – Lateinische Schrift auszeichnen
 

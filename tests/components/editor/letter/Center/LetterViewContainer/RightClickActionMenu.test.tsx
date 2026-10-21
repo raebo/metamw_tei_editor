@@ -50,6 +50,7 @@ const ContextMenuHarness = () => {
     const verticalNoSlashFraction = document.createElement('formula');
     const superscript = document.createElement('hi');
     const subscript = document.createElement('hi');
+    const groundline = document.createElement('hi');
     div.setAttribute('xml:id', 'act_1');
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
@@ -103,6 +104,9 @@ const ContextMenuHarness = () => {
     subscript.dataset.editorInlineFormatReference = 'sub_1';
     subscript.dataset.editorInlineFormat = 'subscript';
     subscript.textContent = '2';
+    groundline.dataset.editorInlineFormatReference = 'ground_1';
+    groundline.dataset.editorInlineFormat = 'groundline';
+    groundline.textContent = 'underlined';
     row.appendChild(cell);
     table.appendChild(row);
     div.append(paragraph, list, tableCaret, table, figure);
@@ -123,6 +127,7 @@ const ContextMenuHarness = () => {
       verticalNoSlashFraction,
       superscript,
       subscript,
+      groundline,
     );
   }, []);
 
@@ -1084,6 +1089,47 @@ describe('RightClickActionMenu figure upload action', () => {
     expect(persistedXml).not.toContain('rend="subscript"');
     expect(persistedXml).toContain('H2');
     expect(persistedXml).toContain('rend="superscript"');
+    expect(store.getState().editorLetter.letter.xmlContent).toBe(persistedXml);
+  });
+
+  it('shows only the remove action for existing groundline markup', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const patchContent = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue({} as never);
+    store.dispatch(
+      setEditorLetter({
+        letter: {
+          id: 7,
+          name: 'FMB-7',
+          viewMode: 'WYSIWYG',
+          xmlContent:
+            '<TEI><text><body><div xml:id="act_1"><p xml:id="paragraph_1"><hi xml:id="under_1" rend="underline">regular</hi><hi xml:id="ground_1" rend="groundline">ground</hi></p></div></body></text></TEI>',
+        },
+      }),
+    );
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('[data-editor-inline-format="groundline"]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+
+    const removeAction = await screen.findByRole('menuitem', {
+      name: /Unterstrich auf der Grundlinie entfernen|Remove baseline underline/,
+    });
+    expect(removeAction).toBeInTheDocument();
+    expect(screen.getAllByRole('menuitem')).toHaveLength(1);
+    fireEvent.click(removeAction);
+
+    await waitFor(() => expect(patchContent).toHaveBeenCalledTimes(1));
+    const persistedXml = patchContent.mock.calls[0][0];
+    expect(persistedXml).not.toContain('rend="groundline"');
+    expect(persistedXml).toContain('ground');
+    expect(persistedXml).toContain('rend="underline"');
     expect(store.getState().editorLetter.letter.xmlContent).toBe(persistedXml);
   });
 });
