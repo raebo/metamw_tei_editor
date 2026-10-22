@@ -19,6 +19,7 @@
     "clearAction": "Markierung aufheben"
   },
   "inlineFormatting": {
+    "contextMenu": "Schriftformatierung",
     "superscript": {
       "applyAction": "Text hochstellen",
       "removeAction": "Hochstellung entfernen",

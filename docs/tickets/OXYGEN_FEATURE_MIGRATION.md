@@ -580,7 +580,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-009K – Frakturschrift in Drucken auszeichnen
 
-- Status: Umgesetzt und automatisiert getestet; manuelle Abnahme ausstehend
+- Status: Umgesetzt und abgenommen
 - Priorität: P1
 - Oxygen-Aktion: `Frakturschrift in Drucken`
 - Ausgangslage: Fraktur-Passagen in gedruckten Vorlagen können im Webeditor nicht ausgezeichnet

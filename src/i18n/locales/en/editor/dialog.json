@@ -19,6 +19,7 @@
     "clearAction": "Clear selection"
   },
   "inlineFormatting": {
+    "contextMenu": "Text formatting",
     "superscript": {
       "applyAction": "Superscript text",
       "removeAction": "Remove superscript",

@@ -233,6 +233,46 @@ describe('RightClickActionMenu figure upload action', () => {
     });
   });
 
+  it('groups the six font actions in a submenu and applies the selected formatting', async () => {
+    const patch = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue(true);
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const markedXml = sourceXml.replace('Text', 'Te<span class="marked">xt</span>');
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: markedXml },
+      }),
+    );
+    store.dispatch(setContentTextIsMarked({ textIsMarked: true }));
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+    const marked = document.createElement('span');
+    marked.className = 'marked';
+    marked.textContent = 'xt';
+    container.querySelector('p')!.replaceChildren(document.createTextNode('Te'), marked);
+    fireEvent.contextMenu(marked, { button: 2, clientX: 20, clientY: 30 });
+    const labels = [
+      /Text hochstellen|Superscript text/i,
+      /Text tiefstellen|Subscript text/i,
+      /Unterstrich auf der Grundlinie|Underline on the baseline/i,
+      /Lateinische Schrift auszeichnen|Mark as Latin script/i,
+      /Antiqua.*auszeichnen|Mark print text as Antiqua/i,
+      /Frakturschrift.*auszeichnen|Mark print text as Fraktur/i,
+    ];
+    for (const name of labels)
+      expect(screen.queryByRole('menuitem', { name })).not.toBeInTheDocument();
+    fireEvent.click(
+      await screen.findByRole('menuitem', { name: /Schriftformatierung|Text formatting/ }),
+    );
+    for (const name of labels) expect(screen.getByRole('menuitem', { name })).toBeVisible();
+    fireEvent.click(screen.getByRole('menuitem', { name: labels[0] }));
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
+    expect(patch.mock.calls[0][0]).toContain('rend="superscript"');
+    expect(patch.mock.calls[0][2]).toBe('CONTENT_FORMAT_CHANGED');
+  });
+
   it('clears a marked selection from its context menu without changing the text', async () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
     const markedXml = sourceXml.replace('Text', 'Te<span class="marked">xt</span>');

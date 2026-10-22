@@ -296,52 +296,58 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         },
       },
       {
-        label: t('editor:dialog.inlineFormatting.superscript.applyAction'),
-        keyShortcut: 'ctrl+5',
-        action: () => {
-          props.setAnchorPosition(null);
-          runMarkedAction('ctrl+5');
-        },
-      },
-      {
-        label: t('editor:dialog.inlineFormatting.subscript.applyAction'),
-        keyShortcut: 'ctrl+6',
-        action: () => {
-          props.setAnchorPosition(null);
-          runMarkedAction('ctrl+6');
-        },
-      },
-      {
-        label: t('editor:dialog.inlineFormatting.groundline.applyAction'),
-        keyShortcut: 'ctrl+7',
-        action: () => {
-          props.setAnchorPosition(null);
-          runMarkedAction('ctrl+7');
-        },
-      },
-      {
-        label: t('editor:dialog.inlineFormatting.latintype.applyAction'),
-        keyShortcut: 'ctrl+8',
-        action: () => {
-          props.setAnchorPosition(null);
-          runMarkedAction('ctrl+8');
-        },
-      },
-      {
-        label: t('editor:dialog.inlineFormatting.antiqua.applyAction'),
-        keyShortcut: 'ctrl+alt+g',
-        action: () => {
-          props.setAnchorPosition(null);
-          runMarkedAction('ctrl+alt+g');
-        },
-      },
-      {
-        label: t('editor:dialog.inlineFormatting.gothic.applyAction'),
-        keyShortcut: 'ctrl+alt+h',
-        action: () => {
-          props.setAnchorPosition(null);
-          runMarkedAction('ctrl+alt+h');
-        },
+        label: t('editor:dialog.inlineFormatting.contextMenu'),
+        hasSubMenu: true,
+        subMenu: [
+          {
+            label: t('editor:dialog.inlineFormatting.superscript.applyAction'),
+            keyShortcut: 'ctrl+5',
+            action: () => {
+              props.setAnchorPosition(null);
+              runMarkedAction('ctrl+5');
+            },
+          },
+          {
+            label: t('editor:dialog.inlineFormatting.subscript.applyAction'),
+            keyShortcut: 'ctrl+6',
+            action: () => {
+              props.setAnchorPosition(null);
+              runMarkedAction('ctrl+6');
+            },
+          },
+          {
+            label: t('editor:dialog.inlineFormatting.groundline.applyAction'),
+            keyShortcut: 'ctrl+7',
+            action: () => {
+              props.setAnchorPosition(null);
+              runMarkedAction('ctrl+7');
+            },
+          },
+          {
+            label: t('editor:dialog.inlineFormatting.latintype.applyAction'),
+            keyShortcut: 'ctrl+8',
+            action: () => {
+              props.setAnchorPosition(null);
+              runMarkedAction('ctrl+8');
+            },
+          },
+          {
+            label: t('editor:dialog.inlineFormatting.antiqua.applyAction'),
+            keyShortcut: 'ctrl+alt+g',
+            action: () => {
+              props.setAnchorPosition(null);
+              runMarkedAction('ctrl+alt+g');
+            },
+          },
+          {
+            label: t('editor:dialog.inlineFormatting.gothic.applyAction'),
+            keyShortcut: 'ctrl+alt+h',
+            action: () => {
+              props.setAnchorPosition(null);
+              runMarkedAction('ctrl+alt+h');
+            },
+          },
+        ],
       },
       { type: 'divider' as const },
       {
