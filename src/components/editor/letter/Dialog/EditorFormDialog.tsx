@@ -40,6 +40,7 @@ import AddProvenanceDialog from '@src/components/editor/letter/Dialog/Components
 import FigureUploadDialog from './Components/FigureUploadDialog';
 import ListStructureDialog from './Components/ListStructureDialog';
 import ParagraphStructureDialog from './Components/ParagraphStructureDialog';
+import SectionAddressLineDialog from './Components/SectionAddressLineDialog';
 import TableStructureDialog from './Components/TableStructureDialog';
 import GraphicStructureDialog from './Components/GraphicStructureDialog';
 import ForeignHandAnnotationDialog from './Components/ForeignHandAnnotationDialog';
@@ -69,6 +70,7 @@ export interface DefaultDialogProps {
 }
 
 const DialogTitles: Record<string, string> = {
+  [EditorConstants.dialogTypes.SECTION_ADDRESS_LINE]: t('editor:dialog.sectionAddressLine.title'),
   [EditorConstants.dialogTypes.ABBREVIATION]: t('editor:dialog.titles.abbreviation'),
   [EditorConstants.dialogTypes.ADD_FOOTNOTE_AUTHOR]: t('editor:dialog.titles.authorFootnote'),
   [EditorConstants.dialogTypes.CROSS_REFERENCE]: t('editor:dialog.titles.crossReference'),
@@ -143,6 +145,9 @@ const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) 
   [EditorConstants.dialogTypes.GRAPHIC_STRUCTURE]: (props) => <GraphicStructureDialog {...props} />,
   [EditorConstants.dialogTypes.LIST_STRUCTURE]: (props) => <ListStructureDialog {...props} />,
   [EditorConstants.dialogTypes.MANUSCRIPT_ANNOTATION]: (props) => <ManuscriptAnnotationDialog {...props} />,
+  [EditorConstants.dialogTypes.SECTION_ADDRESS_LINE]: (props) => (
+    <SectionAddressLineDialog {...props} />
+  ),
   [EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE]: (props) => <ParagraphStructureDialog {...props} />,
   [EditorConstants.dialogTypes.TABLE_STRUCTURE]: (props) => <TableStructureDialog {...props} />,
   [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: (props) => <CloseTabWithContent {...props} />,

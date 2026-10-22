@@ -1,4 +1,20 @@
 {
+  "sectionAddressLine": {
+    "title": "Adresszeile",
+    "insert": "Adresszeile einfügen",
+    "edit": "Adresszeile bearbeiten",
+    "delete": "Adresszeile löschen",
+    "content": "Text der Adresszeile",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "confirmDelete": "Diese Adresszeile löschen?",
+    "inserted": "Adresszeile eingefügt.",
+    "saved": "Adresszeile gespeichert.",
+    "deleted": "Adresszeile gelöscht.",
+    "marker": "Adresszeile: Menü öffnen",
+    "sectionMenu": "Abschnittsmenü öffnen",
+    "error": "Die Adresszeile konnte nicht bearbeitet werden. Bitte prüfen Sie die XML-Struktur und verwenden Sie einzeiligen Text."
+  },
   "selection": {
     "clearAction": "Markierung aufheben"
   },

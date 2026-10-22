@@ -1,4 +1,20 @@
 {
+  "sectionAddressLine": {
+    "title": "Address line",
+    "insert": "Insert address line",
+    "edit": "Edit address line",
+    "delete": "Delete address line",
+    "content": "Address line text",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirmDelete": "Delete this address line?",
+    "inserted": "Address line inserted.",
+    "saved": "Address line saved.",
+    "deleted": "Address line deleted.",
+    "marker": "Address line: open menu",
+    "sectionMenu": "Open section menu",
+    "error": "The address line could not be edited. Check the XML structure and use single-line text."
+  },
   "selection": {
     "clearAction": "Clear selection"
   },

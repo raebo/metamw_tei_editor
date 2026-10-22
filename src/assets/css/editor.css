@@ -458,3 +458,37 @@ ref.tei-author-footnote-reference:focus-visible,
   background-color: rgba(0, 121, 107, 0.12);
   outline: 1px solid rgba(0, 121, 107, 0.65);
 }
+
+/* Editor-only controls for section menus and postal address lines. */
+#letterXml .tei-section-with-caret::before {
+  content: none;
+}
+
+.tei-section-caret,
+.tei-address-line-marker {
+  display: inline-block;
+  padding: 0;
+  border: 0;
+  margin-right: 0.4em;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.75em;
+}
+
+.tei-section-caret:focus-visible,
+.tei-address-line-marker:focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
+.tei-section-address-block > p {
+  margin: 0;
+  text-indent: 0;
+}
+
+.tei-section-address-line {
+  display: block;
+  min-height: 1.2em;
+  cursor: context-menu;
+}

@@ -20,6 +20,11 @@ import { rightClickPathHandles } from '@src/utils/editor/rightClickPathHandles';
 import { useTranslation } from 'react-i18next';
 import { findFigureAnchor } from '@src/utils/editor/figureAnchor';
 import type { ParagraphStructureOperation } from '@src/utils/editor/paragraphStructure';
+import {
+  canInsertSectionAddressLine,
+  insertSectionAddressLine,
+  resolveAddressSource,
+} from '@src/utils/editor/sectionAddressLine';
 import type { ListStructureOperation } from '@src/utils/editor/listStructure';
 import type { TableStructureOperation } from '@src/utils/editor/tableStructure';
 import type { GraphicStructureOperation } from '@src/components/editor/letter/Dialog/Components/GraphicStructureDialog';
@@ -66,6 +71,85 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   const [openNestedSubmenuIndex, setOpenNestedSubmenuIndex] = useState<number | null>(null);
 
   const xmlDocRef = useRef<XMLDocument | null>(null);
+
+  const addressSectionReference = useRef<string | null>(null);
+  const addressInsertPending = useRef(false);
+
+  const getAddressSectionReference = useCallback((target: Element | null): string | null => {
+    const section = target?.closest<HTMLElement>(SECTION_SELECTOR);
+    const source = resolveTeiElementByPath(xmlDocRef.current, section?.dataset.editorXmlPath);
+    if (!source || !canInsertSectionAddressLine(source)) return null;
+    return source.getAttribute('xml:id') ?? `path:${section!.dataset.editorXmlPath}`;
+  }, []);
+
+  const insertAddressLine = useCallback(
+    async (reference: string) => {
+      if (addressInsertPending.current) return;
+      addressInsertPending.current = true;
+      try {
+        await runXmlAction(
+          dispatch,
+          () => reduxStore.getState() as RootState,
+          (doc) => {
+            insertSectionAddressLine(resolveAddressSource(doc, reference));
+          },
+          EditorConstants.changeTypes.misc.ADDRLINE_ADDED,
+          t('editor:dialog.sectionAddressLine.inserted'),
+        );
+      } finally {
+        addressInsertPending.current = false;
+      }
+    },
+    [dispatch, reduxStore, t],
+  );
+
+  useEffect(() => {
+    addressSectionReference.current = null;
+  }, [stateEditorLetter.id, stateEditorLetter.xmlContent]);
+
+  useEffect(() => {
+    const rememberSection = (event: MouseEvent) => {
+      if (event.button !== 0) return;
+      const target = event.target instanceof Element ? event.target : null;
+      addressSectionReference.current =
+        target && xmlContentRef.current?.contains(target)
+          ? getAddressSectionReference(target)
+          : null;
+    };
+    const insertFromShortcut = (event: KeyboardEvent) => {
+      if (
+        event.key.toLowerCase() !== 'c' ||
+        !event.ctrlKey ||
+        !event.altKey ||
+        event.shiftKey ||
+        event.metaKey ||
+        event.repeat ||
+        event.isComposing ||
+        event.defaultPrevented ||
+        !addressSectionReference.current
+      )
+        return;
+      const state = (reduxStore.getState() as RootState).editorLetter;
+      const target = event.target instanceof Element ? event.target : null;
+      if (
+        state.dialogType ||
+        state.figureUploadInProgress ||
+        state.letter.viewMode !== 'WYSIWYG' ||
+        target?.closest('input, textarea, select, [role="dialog"]') ||
+        (target && target !== document.body && !xmlContentRef.current?.contains(target))
+      )
+        return;
+      event.preventDefault();
+      event.stopPropagation();
+      void insertAddressLine(addressSectionReference.current);
+    };
+    document.addEventListener('click', rememberSection, true);
+    document.addEventListener('keydown', insertFromShortcut, true);
+    return () => {
+      document.removeEventListener('click', rememberSection, true);
+      document.removeEventListener('keydown', insertFromShortcut, true);
+    };
+  }, [getAddressSectionReference, insertAddressLine, reduxStore, xmlContentRef]);
 
   const runMarkedAction = useCallback(
     (shortcut: string) => {
@@ -393,6 +477,37 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       setDisplayMenuItems([]);
       const targetNode = event.target as Node;
       const targetElement = targetNode.nodeType === Node.ELEMENT_NODE ? (targetNode as HTMLElement) : targetNode.parentElement;
+      const addressLineTarget = targetElement?.closest<HTMLElement>(
+        '[data-editor-address-line-reference]',
+      );
+      const addressLineReference = addressLineTarget?.dataset.editorAddressLineReference;
+      if (addressLineReference) {
+        const openAddressLine = (operation: 'edit' | 'delete') =>
+          dispatch(
+            setEditorDialogAndReferenceThunk({
+              dialogType: EditorConstants.dialogTypes.SECTION_ADDRESS_LINE,
+              elementType: 'addrLine',
+              elementXmlId: addressLineReference,
+              elementKey: operation,
+            }),
+          );
+        setDisplayMenuItems([
+          {
+            label: t('editor:dialog.sectionAddressLine.edit'),
+            action: () => {
+              openAddressLine('edit');
+            },
+          },
+          {
+            label: t('editor:dialog.sectionAddressLine.delete'),
+            action: () => {
+              openAddressLine('delete');
+            },
+          },
+        ]);
+        props.setAnchorPosition({ top: event.clientY, left: event.clientX });
+        return;
+      }
       if (targetElement?.closest('span.marked')) {
         setDisplayMenuItems(menuItemsMarked);
         props.setAnchorPosition({ top: event.clientY, left: event.clientX });
@@ -663,6 +778,17 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
 
       const paragraphAnchor = targetElement?.closest<HTMLElement>('p[data-editor-xml-path]');
       const sectionAnchor = targetElement?.closest<HTMLElement>(SECTION_SELECTOR);
+      const addressReference = getAddressSectionReference(targetElement);
+      if (addressReference) {
+        menuItemsToAdd.push({
+          label: t('editor:dialog.sectionAddressLine.insert'),
+          keyShortcut: 'Ctrl+Alt+C',
+          action: () => {
+            void insertAddressLine(addressReference);
+          },
+        });
+        isClickable = true;
+      }
       const listAnchor = targetElement?.closest<HTMLElement>('list[data-editor-xml-path]');
       const itemAnchor = targetElement?.closest<HTMLElement>('item[data-editor-xml-path]');
       const tableCaretAnchor = targetElement?.closest<HTMLElement>('[data-editor-table-caret]');
@@ -1225,6 +1351,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       pathHandlers,
       props,
       removeInlineFormat,
+      getAddressSectionReference,
+      insertAddressLine,
       stateEditorLetter.xmlContent,
       t,
       xmlContentRef,
