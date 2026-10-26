@@ -33,8 +33,7 @@ export namespace rightClickPathHandles {
         const nodeToDelete = node.parentNode;
         const baseNode = nodeToDelete?.parentNode;
 
-        if (!nodeToDelete || !baseNode)
-          throw new Error('rightClickPathHandles nodeToDelete or baseNode cannot be null');
+        if (!nodeToDelete || !baseNode) throw new Error('rightClickPathHandles nodeToDelete or baseNode cannot be null');
 
         baseNode.removeChild(nodeToDelete);
 
@@ -62,10 +61,8 @@ export namespace rightClickPathHandles {
           nodeToDelete = node;
         }
 
-        if (!baseParentNode)
-          throw new Error('rightClickPathHandles deleteNodeCallback No parent node found');
-        if (!nodeToDelete)
-          throw new Error('rightClickPathHandles deleteNodeCallback No node to delete found');
+        if (!baseParentNode) throw new Error('rightClickPathHandles deleteNodeCallback No parent node found');
+        if (!nodeToDelete) throw new Error('rightClickPathHandles deleteNodeCallback No node to delete found');
 
         baseParentNode.removeChild(nodeToDelete);
 
@@ -89,10 +86,7 @@ export namespace rightClickPathHandles {
         listBibl.removeChild(biblNode);
 
         if (listBibl.children.length === 0) {
-          const noneBibl = (listBibl as Element).ownerDocument!.createElementNS(
-            EditorConstants.TEI_NS,
-            'bibl',
-          );
+          const noneBibl = (listBibl as Element).ownerDocument!.createElementNS(EditorConstants.TEI_NS, 'bibl');
           noneBibl.setAttribute('type', 'none');
           listBibl.appendChild(noneBibl);
         }
@@ -148,10 +142,7 @@ export namespace rightClickPathHandles {
       nodeType: nodeTypes.get(NodeTypes.WRITING_ACT),
       checkElementDetails: (nodeElement: Element): boolean => {
         // console.log("Checking writing act for", nodeElement.nodeName.toLowerCase() === 'div' && nodeElement.getAttribute("type") === "act_of_writing");
-        return (
-          nodeElement.nodeName.toLowerCase() === 'div' &&
-          nodeElement.getAttribute('type') === 'act_of_writing'
-        );
+        return nodeElement.nodeName.toLowerCase() === 'div' && nodeElement.getAttribute('type') === 'act_of_writing';
       },
       afterActionCallback: (xmlDoc: Document, _node: Node) => xmlCheck.serializeDocument(xmlDoc),
     },
@@ -256,6 +247,7 @@ export namespace rightClickPathHandles {
   export const removeAnnotationFromNode = (): NodeAncestorPath[] => [
     {
       parentPath: [
+        'tei text body div p persName',
         'tei text body div p persName name',
         'tei text body div p * persName',
         'tei text body div p * persName name',
@@ -391,10 +383,7 @@ export namespace rightClickPathHandles {
     },
   ];
 
-  export const getNodeAncestorPath = (node: Node): string[] => [
-    node.nodeName,
-    ...xmlCheck.getAncestorNodeNames(node),
-  ];
+  export const getNodeAncestorPath = (node: Node): string[] => [node.nodeName, ...xmlCheck.getAncestorNodeNames(node)];
 
   export const findAncestorPathNode = (node: Node): NodeAncestorPath => {
     const path = getNodeAncestorPath(node).reverse().join(' ');
@@ -432,9 +421,7 @@ export namespace rightClickPathHandles {
     {
       paths: EditorUtils.rightClickPathHandles.removeAnnotationFromNode(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.REMOVE_ANNOTATION,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.REMOVE_ANNOTATION);
         return item ? [item] : [];
       },
     },
@@ -449,107 +436,77 @@ export namespace rightClickPathHandles {
     {
       paths: EditorUtils.rightClickPathHandles.manageProvenanceEntryPaths(),
       getMenuItems: (_node: Node) => [
-        menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_PROVENANCE_ENTRY,
-        ),
+        menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_PROVENANCE_ENTRY),
       ],
     },
     {
       paths: EditorUtils.rightClickPathHandles.managePrecursorEntry(),
       getMenuItems: (_node: Node) => [
-        menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_PRECURSOR_LETTER,
-        ),
+        menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_PRECURSOR_LETTER),
       ],
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageSuccesorEntry(),
       getMenuItems: (_node: Node) => [
-        menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_SUCCESSOR_LETTER,
-        ),
+        menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_SUCCESSOR_LETTER),
       ],
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageWritingActPaths(),
       getMenuItems: (node: Node) =>
         [
-          menuItemsNoMarking.find(
-            (i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_AUTHOR_WRITER,
-          )!,
-          menuItemsNoMarking.find(
-            (i) =>
-              i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'MOVE_UP'),
-          )!,
-          menuItemsNoMarking.find(
-            (i) =>
-              i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'MOVE_DOWN'),
-          )!,
+          menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_AUTHOR_WRITER)!,
+          menuItemsNoMarking.find((i) => i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'MOVE_UP'))!,
+          menuItemsNoMarking.find((i) => i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'MOVE_DOWN'))!,
         ].filter(Boolean) as MenuItemType[],
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageGreetingsFormulaPaths(),
       getMenuItems: (node: Node) =>
         [
-          menuItemsNoMarking.find(
-            (i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.ADD_GREETINGS_FORMULA,
-          )!,
-          menuItemsNoMarking.find(
-            (i) => i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'SALUTE'),
-          )!,
+          menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.ADD_GREETINGS_FORMULA)!,
+          menuItemsNoMarking.find((i) => i.identifier === EditorUtils.miscContentCheck.nodeRightClickMenu(node, 'SALUTE'))!,
         ].filter(Boolean) as MenuItemType[],
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageBodyNotePaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.EDIT_NOTE,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.WRITING_ACT.EDIT_NOTE);
         return item ? [item] : [];
       },
     },
     {
       paths: EditorUtils.rightClickPathHandles.deletableAncestorPaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.DELETE_NODE,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.DELETE_NODE);
         return item ? [item] : [];
       },
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageAuthorWriterAncestorPaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_WRITER_AUTHOR_HEADER,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_WRITER_AUTHOR_HEADER);
         return item ? [item] : [];
       },
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageTextLetterAddressPaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_TEXT_ADDRESS,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_TEXT_ADDRESS);
         return item ? [item] : [];
       },
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageHeaderLanguagesPaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_HEADER_LANGUAGES,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_HEADER_LANGUAGES);
         return item ? [item] : [];
       },
     },
     {
       paths: EditorUtils.rightClickPathHandles.manageReceiverAncestorPaths(),
       getMenuItems: (_node: Node) => {
-        const item = menuItemsNoMarking.find(
-          (i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_RECEIVER,
-        );
+        const item = menuItemsNoMarking.find((i) => i.identifier === EditorConstants.menuItemTypes.MANAGE_RECEIVER);
         return item ? [item] : [];
       },
     },

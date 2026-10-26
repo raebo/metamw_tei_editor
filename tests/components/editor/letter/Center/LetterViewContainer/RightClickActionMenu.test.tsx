@@ -18,7 +18,7 @@ jest.mock('notistack', () => ({
 }));
 
 const sourceXml =
-  '<TEI><text><body><div xml:id="act_1" type="act_of_writing" n="1"><p xml:id="paragraph_1">Text</p><list type="ordered"><item>First</item></list><table rows="1" cols="1"><row><cell>A</cell></row></table><figure xml:id="figure_1"><graphic url="file:/images/test.png"/></figure><div1><head>Heading</head><p>Section text</p></div1></div><div xml:id="act_2" type="act_of_writing" n="2"><p>Second act</p></div></body></text></TEI>';
+  '<TEI><text><body><div xml:id="act_1" type="act_of_writing" n="1"><p xml:id="paragraph_1">Text</p><list type="ordered"><item>First</item></list><table rows="1" cols="1"><row><cell>A</cell></row></table><figure xml:id="figure_1"><graphic url="file:/images/test.png"/></figure><div1><head>Heading</head><p>Section text</p></div1><p><persName xml:id="person_1">Felix</persName></p></div><div xml:id="act_2" type="act_of_writing" n="2"><p>Second act</p></div></body></text></TEI>';
 
 const ContextMenuHarness = () => {
   const xmlContentRef = useRef<HTMLDivElement>(null);
@@ -42,6 +42,8 @@ const ContextMenuHarness = () => {
     const section = document.createElement('div1');
     const sectionHead = document.createElement('head');
     const sectionParagraph = document.createElement('p');
+    const annotationParagraph = document.createElement('p');
+    const personAnnotation = document.createElement('persName');
     const manuscriptCaret = document.createElement('button');
     const manuscriptAnnotation = document.createElement('p');
     const footnoteReference = document.createElement('ref');
@@ -92,6 +94,11 @@ const ContextMenuHarness = () => {
     sectionParagraph.dataset.editorXmlPath = '0.0.0.4.1';
     sectionParagraph.textContent = 'Section text';
     section.append(sectionHead, sectionParagraph);
+    annotationParagraph.dataset.editorXmlPath = '0.0.0.5';
+    personAnnotation.dataset.editorXmlPath = '0.0.0.5.0';
+    personAnnotation.setAttribute('xml:id', 'person_1');
+    personAnnotation.textContent = 'Felix';
+    annotationParagraph.appendChild(personAnnotation);
     manuscriptCaret.dataset.editorManuscriptAnnotationReference = 'script_annotation_1';
     manuscriptCaret.textContent = '▶';
     manuscriptAnnotation.className = 'tei-manuscript-annotation';
@@ -138,7 +145,7 @@ const ContextMenuHarness = () => {
     gothic.textContent = 'Zeitung';
     row.appendChild(cell);
     table.appendChild(row);
-    div.append(paragraph, list, tableCaret, table, figure, section);
+    div.append(paragraph, list, tableCaret, table, figure, section, annotationParagraph);
     body.append(div, secondDiv);
     text.appendChild(body);
     tei.appendChild(text);
@@ -820,6 +827,76 @@ describe('RightClickActionMenu figure upload action', () => {
       elementXmlId: '0.0.0.0',
       elementKey: 'paragraph-insert',
     });
+  });
+
+  it('opens paragraph content editing for a plain paragraph', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('p')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Absätze und Abschnitte|Paragraphs and sections/,
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Absatzinhalt bearbeiten oder leeren|Edit or clear paragraph content/,
+      }),
+    );
+
+    expect(store.getState().editorLetter.dialogType).toBe('PARAGRAPH_STRUCTURE');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'p',
+      elementXmlId: '0.0.0.0',
+      elementKey: 'paragraph-edit',
+    });
+  });
+
+  it('removes an annotation through its stable source path and preserves its text', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const patchContent = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue(true);
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('persName')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Auszeichnung Entfernen|Remove Annotation/,
+      }),
+    );
+
+    await waitFor(() => expect(patchContent).toHaveBeenCalledTimes(1));
+    const persistedDocument = new DOMParser().parseFromString(patchContent.mock.calls[0][0], 'application/xml');
+    expect(persistedDocument.querySelector('persName')).toBeNull();
+    expect(persistedDocument.querySelectorAll('body > div:first-child > p')[1]?.textContent).toBe('Felix');
   });
 
   it('adds a paragraph directly to the selected writing act without choosing a subsection', async () => {

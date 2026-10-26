@@ -7,6 +7,7 @@ export type SectionPosition = 'child' | 'sibling';
 export type ParagraphStructureOperation =
   | 'paragraph-insert'
   | 'paragraph-append'
+  | 'paragraph-edit'
   | 'paragraph-convert'
   | 'paragraph-split'
   | 'section-child'

@@ -68,6 +68,28 @@ describe('ParagraphStructureDialog', () => {
     expect(onSave).toHaveBeenCalledWith(xmlDoc, EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED, expect.any(String));
   });
 
+  it('prefills an existing paragraph and allows clearing its complete content', () => {
+    const xmlDoc = parseXml('<TEI><text><body><div><p xml:id="p_1">Incorrect text</p></div></body></text></TEI>');
+    const store = buildStore('0.0.0.0', 'paragraph-edit');
+    const onSave = jest.fn();
+
+    render(
+      <Provider store={store}>
+        <ParagraphStructureDialog xmlDoc={xmlDoc} onSave={onSave} onClose={jest.fn()} />
+      </Provider>,
+    );
+
+    const paragraphText = screen.getByRole('textbox', { name: 'Absatztext' });
+    expect(paragraphText).toHaveValue('Incorrect text');
+    fireEvent.change(paragraphText, { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Änderung übernehmen' }));
+
+    const paragraph = xmlDoc.querySelector('p')!;
+    expect(paragraph.textContent).toBe('');
+    expect(paragraph.getAttribute('xml:id')).toBe('p_1');
+    expect(onSave).toHaveBeenCalledWith(xmlDoc, EditorConstants.changeTypes.MANUAL_CODE_CHANGE, expect.any(String));
+  });
+
   it('splits the marked selection without requiring a source path', () => {
     const xmlDoc = parseXml('<TEI><text><body><div><p>Before <span class="marked">Selected</span> after</p></div></body></text></TEI>');
     const store = buildStore('', 'paragraph-split');

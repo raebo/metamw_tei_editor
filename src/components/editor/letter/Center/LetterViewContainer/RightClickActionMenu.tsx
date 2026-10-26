@@ -886,6 +886,13 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       };
 
       if (paragraphAnchor?.closest('body')) {
+        const paragraphSource = resolveTeiElementByPath(xmlDocRef.current, paragraphAnchor.dataset.editorXmlPath);
+        if (paragraphSource?.children.length === 0) {
+          structureActions.push({
+            label: t('editor:dialog.paragraphStructure.actions.editParagraphContent'),
+            action: () => openStructureDialog('paragraph-edit', paragraphAnchor),
+          });
+        }
         structureActions.push(
           {
             label: t('editor:dialog.paragraphStructure.actions.insertParagraph'),

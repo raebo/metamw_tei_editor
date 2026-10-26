@@ -521,6 +521,7 @@
     "actions": {
       "insertParagraph": "Absatz danach einfügen …",
       "appendParagraph": "Absatz in diesem Abschnitt hinzufügen …",
+      "editParagraphContent": "Absatzinhalt bearbeiten oder leeren …",
       "convertParagraph": "Absatzformat ändern …",
       "splitParagraph": "Auswahl als Absatz abtrennen …",
       "insertChildSection": "Strukturellen Unterabschnitt (div) einfügen …",
@@ -534,6 +535,7 @@
     "operations": {
       "paragraph-insert": "Ein neuer Absatz wird nach dem ausgewählten Absatz eingefügt.",
       "paragraph-append": "Ein neuer Absatz wird direkt im ausgewählten Abschnitt angelegt; es wird kein zusätzlicher div-Container erzeugt.",
+      "paragraph-edit": "Der Text des Absatzes kann geändert oder vollständig geleert werden. Ein leerer Absatz bleibt anschließend in der WYSIWYG-Ansicht befüllbar.",
       "paragraph-convert": "Der ausgewählte Absatz wird in die gewählte Variante umgewandelt.",
       "paragraph-split": "Der markierte Text wird als eigener Absatz abgetrennt.",
       "section-child": "Ein neuer Unterabschnitt wird innerhalb des ausgewählten Abschnitts angelegt.",

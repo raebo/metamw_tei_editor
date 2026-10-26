@@ -16,6 +16,7 @@ import {
   splitMarkedParagraph,
   type ParagraphStructureOperation,
   type ParagraphVariant,
+  updatePlainParagraphText,
   updateSectionHeading,
 } from '@src/utils/editor/paragraphStructure';
 import { MiscUtils } from '@src/utils/misc';
@@ -46,6 +47,11 @@ const ParagraphStructureDialog = (props: DefaultDialogProps) => {
       const sourceElement = resolveSourceElement(props.xmlDoc, sourcePath);
       if (operation === 'paragraph-convert') {
         setVariant(paragraphVariantFromElement(sourceElement));
+      } else if (operation === 'paragraph-edit') {
+        if (sourceElement.children.length > 0) {
+          throw new Error('Paragraphs with embedded markup cannot be edited directly.');
+        }
+        setParagraphText(sourceElement.textContent ?? '');
       } else if (operation === 'section-edit') {
         const directHead = Array.from(sourceElement.children).find((child) => child.localName.toLowerCase() === 'head');
         setHeading(directHead?.textContent ?? '');
@@ -77,6 +83,9 @@ const ParagraphStructureDialog = (props: DefaultDialogProps) => {
           case 'paragraph-append':
             appendParagraphToSection(sourceElement, variant, paragraphText);
             break;
+          case 'paragraph-edit':
+            updatePlainParagraphText(props.xmlDoc, sourcePath, paragraphText);
+            break;
           case 'paragraph-convert':
             convertParagraph(sourceElement, variant);
             break;
@@ -92,7 +101,13 @@ const ParagraphStructureDialog = (props: DefaultDialogProps) => {
         }
       }
 
-      props.onSave(props.xmlDoc, EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED, t('editor:dialog.paragraphStructure.success'));
+      props.onSave(
+        props.xmlDoc,
+        operation === 'paragraph-edit'
+          ? EditorConstants.changeTypes.MANUAL_CODE_CHANGE
+          : EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED,
+        t('editor:dialog.paragraphStructure.success'),
+      );
     } catch (error) {
       setErrorMessage(MiscUtils.misc.getErrorMessage(error));
     }
@@ -125,7 +140,7 @@ const ParagraphStructureDialog = (props: DefaultDialogProps) => {
           ))}
         </TextField>
       )}
-      {(operation === 'paragraph-insert' || operation === 'paragraph-append' || isSectionInsert) && (
+      {(operation === 'paragraph-insert' || operation === 'paragraph-append' || operation === 'paragraph-edit' || isSectionInsert) && (
         <TextField
           multiline
           minRows={2}

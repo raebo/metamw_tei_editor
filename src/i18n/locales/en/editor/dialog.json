@@ -521,6 +521,7 @@
     "actions": {
       "insertParagraph": "Insert paragraph after …",
       "appendParagraph": "Add paragraph to this section …",
+      "editParagraphContent": "Edit or clear paragraph content …",
       "convertParagraph": "Change paragraph format …",
       "splitParagraph": "Separate selection as paragraph …",
       "insertChildSection": "Insert structural subsection (div) …",
@@ -534,6 +535,7 @@
     "operations": {
       "paragraph-insert": "A new paragraph is inserted after the selected paragraph.",
       "paragraph-append": "A new paragraph is created directly in the selected section without an additional div container.",
+      "paragraph-edit": "The paragraph text can be changed or cleared completely. An empty paragraph remains editable in the WYSIWYG view.",
       "paragraph-convert": "The selected paragraph is converted to the chosen variant.",
       "paragraph-split": "The selected text is separated into its own paragraph.",
       "section-child": "A new subsection is created inside the selected section.",

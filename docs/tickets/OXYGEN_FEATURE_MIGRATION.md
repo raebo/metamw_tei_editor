@@ -65,7 +65,9 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
   hierarchisch als Kind oder gleichrangig angelegt werden. Ein `head` wird nur noch bei
   tatsächlich eingegebener Überschrift erzeugt und kann über das Abschnittskontextmenü wieder
   entfernt werden. Neue Absätze dürfen leer angelegt und anschließend direkt in der WYSIWYG-Ansicht
-  beschrieben oder mit reinem Text befüllt werden. Die direkte Bearbeitung ist bewusst auf `p`
+  beschrieben oder mit reinem Text befüllt werden. Der Inhalt eines bestehenden einfachen Absatzes
+  kann über das Kontextmenü in einem vorausgefüllten Dialog geändert oder vollständig geleert und
+  danach in der WYSIWYG-Ansicht neu befüllt werden. Die direkte Bearbeitung ist bewusst auf `p`
   ohne eingebettete TEI-Elemente begrenzt und schreibt über den XML-Pfad in das Quell-XML zurück,
   statt das gerenderte HTML zu serialisieren.
 

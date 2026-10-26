@@ -11,6 +11,7 @@ import {
 import { MiscUtils } from '@src/utils/misc';
 import { setEditorDialogAndReferenceThunk } from '@src/redux/thunks/editor.letter.thunk';
 import i18n from 'i18next';
+import { resolveSourceElement } from '@src/utils/editor/paragraphStructure';
 
 const t = i18n.t.bind(i18n);
 
@@ -146,17 +147,19 @@ export const getMenuItemsNoMarking = (
         }
         if (!node) throw new Error('No node given as value');
 
-        const targetNode = EditorUtils.xmlCheck.getAncestorByFilter(node, (n) =>
-          ['persName', 'placeName', 'title', 'date'].map((x) => x.toLowerCase()).includes(n.nodeName.toLowerCase()),
-        );
+        const annotationNames = ['persName', 'placeName', 'title', 'date'].map((name) => name.toLowerCase());
+        const isAnnotation = (candidate: Node): boolean => annotationNames.includes(candidate.nodeName.toLowerCase());
+        const targetNode = (isAnnotation(node) ? node : EditorUtils.xmlCheck.getAncestorByFilter(node, isAnnotation)) as Element | null;
 
         if (!targetNode) throw new Error('No annotation ancestor found');
 
-        const refNode = EditorUtils.xmlCheck.getNodeByPath(currentDoc, EditorUtils.xmlCheck.getNodePath(targetNode));
-
-        EditorUtils.textMarking.unwrapNode(refNode as Element);
-
+        const sourcePath = targetNode.getAttribute('data-editor-xml-path');
+        const refNode =
+          sourcePath !== null
+            ? resolveSourceElement(currentDoc, sourcePath)
+            : EditorUtils.xmlCheck.getNodeByPath(currentDoc, EditorUtils.xmlCheck.getNodePath(targetNode));
         if (!refNode) throw new Error('No refNode found in current XML document');
+        EditorUtils.textMarking.unwrapNode(refNode as Element);
 
         await EditorUtils.backendOrchestrator.patchWithDispatch(
           dispatch,
