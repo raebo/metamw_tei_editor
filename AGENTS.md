@@ -37,6 +37,40 @@ Hinweis: `yarn tsc --noEmit` und `yarn eslint src tests --max-warnings=0` sind f
 - Keine grossflaechige automatische Formatierung zusammen mit fachlichen Aenderungen.
 - Code-Bezeichner (Variablen, Funktionen, Klassen, Komponenten, Hooks, Typen, Interfaces, Dateien, Ordner) sind englisch zu benennen; **Code-Kommentare sind ebenfalls ausnahmslos auf Englisch zu verfassen**, auch inline-Kommentare und Erklaerungen zu Bugfixes. Ausnahme: sichtbare UI-Texte (deutsch/i18n) und diese Projektdokumente (`AGENTS.md`, `audit.md`) bleiben deutsch.
 
+## Verbindlicher JWT-API-Vertrag (F-153)
+
+- Die einzige kanonische OpenAPI-Datei liegt im Backend-Repository unter
+  `docs/openapi/jwt.yaml`. Den Pfad aus `OPENAPI_SPEC_PATH` in der Umgebung
+  beziehungsweise der lokalen `.env` aufloesen. Relative Pfade gelten ab
+  Frontend-Repository-Root; Standard bei benachbarten Checkouts:
+  `../metamw_edge_version/docs/openapi/jwt.yaml`. Nur diesen Eintrag lesen,
+  keine anderen Environment-Werte oder Secrets ausgeben.
+- Vor jeder Aenderung an JWT-Aufrufen, Request-Daten, Response-Parsern, Typen,
+  Statusbehandlung oder Authentifizierung den betreffenden Vertrag lesen.
+  HTTP-Methode, Pfad, Parameter, Feldnamen/-typen, null, leere Listen und
+  Verschachtelungen exakt beachten; keine Antwortstruktur erraten.
+- Jede Vertragsaenderung an JWT-Requests oder -Responses muss im selben Patch
+  in der kanonischen Backend-Datei dokumentiert werden, einschliesslich
+  Beispielen, Erfolgs-/Fehlercodes und passenden Frontend-/Backend-Tests.
+  Bei einer reinen Anpassung an den bereits dokumentierten Vertrag ist keine
+  kuenstliche Schemaaenderung noetig; auf den verwendeten Vertrag verweisen.
+- Den Vergleich von altem/neuem Vertrag, notwendige Client-Anpassungen und
+  Rollout-Reihenfolge im Ticket dokumentieren. Arbeitsbaum, Backend-Commit und
+  ausgerollten Stand unterscheiden. Keine automatische Fortschreibung von
+  unerwarteten oder fehlerhaften Antworten als verbindlichen Vertrag.
+- Frontend-Tests muessen relevante Erfolgs-, Leer-/null- und Fehlerfaelle anhand
+  der dokumentierten Antworten abdecken. Nur ausdruecklich dokumentierte 404
+  als fachliches Nichtvorhandensein behandeln; 401/5xx nicht in leere Listen
+  oder verfuegbare Briefnamen umdeuten.
+- Keine unabhaengige OpenAPI-Kopie im Frontend pflegen. Ist die Datei nicht
+  erreichbar, Pfad/Checkout klaeren, statt einen zweiten Vertrag zu erfinden.
+  `OPENAPI_SPEC_PATH` ist ausschliesslich fuer lokale Werkzeuge und Agents:
+  nicht in PUBLIC_ENV_ALLOWLIST, REACT_APP_-Variablen oder Browserbundle aufnehmen.
+- Vor Abnahme den lokalen Backend-Abgleich ausfuehren:
+  `docker compose run --rm -e RAILS_ENV=test web bin/rails runner
+  script/check_jwt_openapi.rb` im Backend-Repository. Der Routenabgleich ersetzt
+  keine Frontend-Parser- und Integrationstests.
+
 ## TypeScript und React
 
 - `strict` beibehalten; kein neues `any`, `@ts-ignore` oder untypisiertes API-Ergebnis ohne Begruendung.

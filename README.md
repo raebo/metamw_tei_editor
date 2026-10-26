@@ -116,3 +116,22 @@ mkcert installieren und Zertifikate erstellen:
     mkcert -install
     mkdir certs && cd certs
     mkcert editor.metamw.local backend.metamw.local
+
+## Lokaler JWT-API-Vertrag
+
+Die kanonische Datei liegt im benachbarten Backend unter
+`docs/openapi/jwt.yaml`. In der lokalen `.env` konfigurieren:
+
+```dotenv
+OPENAPI_SPEC_PATH=../metamw_edge_version/docs/openapi/jwt.yaml
+```
+
+Relative Pfade beziehen sich auf dieses Frontend-Repository. Es handelt sich
+um einen lokalen Dateipfad fuer Werkzeuge und Agents, keine API-URL und keine
+Browservariable. Nicht in die Environment-Allowlist aufnehmen und keine
+unabhaengige Kopie pflegen. Die verbindlichen Regeln fuer JWT-Requests,
+Response-Parser, Vertragsaenderungen und Tests stehen in `AGENTS.md`.
+
+Die Datei beschreibt den Backend-Arbeitsbaum, nicht automatisch den produktiv
+ausgerollten Stand. Parser-Tests mit den dokumentierten Responses erstellen;
+vor dem Test gegen ein Backend dessen Version abgleichen.
