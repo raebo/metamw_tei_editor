@@ -1,0 +1,307 @@
+# Arbeitsplan zur Angleichung des Frontends an die JWT-OpenAPI
+
+**Stand:** 26.10.2026
+
+**Status:** Arbeitsplanung
+
+**Prioritaet des Gesamtvorhabens:** P1
+
+## Ausgangslage
+
+Die verbindliche API-Beschreibung liegt im Backend unter
+`../metamw_edge_version/docs/openapi/jwt.yaml`. Die ermittelten Abweichungen sind
+in [JWT_OPENAPI_FRONTEND_GAP_ANALYSIS.md](../audit/JWT_OPENAPI_FRONTEND_GAP_ANALYSIS.md)
+dokumentiert.
+
+Dieser Plan trennt zwischen:
+
+- Frontend-Korrekturen, die gegen den bestehenden Vertrag sofort umgesetzt werden koennen;
+- abgestimmten Aenderungen, bei denen Backend, OpenAPI und Frontend gemeinsam angepasst
+  werden muessen;
+- Qualitaetssicherung, die erneute Abweichungen verhindern soll.
+
+Die Kennungen `JWT-101` bis `JWT-303` sind vorlaeufige Arbeitskennungen und keine bereits
+angelegten Tracker-Tickets.
+
+## Zielbild
+
+- Jeder vom Frontend verwendete JWT-Endpunkt ist in der OpenAPI beschrieben.
+- Request-Pfade, Parameter, Bodies, Statuscodes und Responses entsprechen dem Vertrag.
+- API-Antworten werden an der Systemgrenze typisiert und validiert.
+- Erwartbare Fachfehler werden von Authentifizierungs-, Netzwerk- und Serverfehlern
+  unterschieden.
+- Gekoppelte Vertragsaenderungen werden zuerst im Backend samt OpenAPI bereitgestellt und
+  danach im Frontend aktiviert.
+
+## Reihenfolge und Abhaengigkeiten
+
+| Reihenfolge | Paket | Prioritaet | Verantwortlich | Abhaengigkeit |
+| --- | --- | --- | --- | --- |
+| 1 | JWT-101 Sperr-Requests korrigieren | P1 | Frontend | keine |
+| 2 | JWT-102 Entitaetssuche vereinheitlichen | P1 | Frontend | keine |
+| 3 | JWT-103 Annotationsantworten an den Vertrag angleichen | P1 | Frontend | JWT-102 |
+| 4 | JWT-104 Protagonistenwerk-Kategorie korrekt adressieren | P1 | Frontend | keine |
+| 5 | JWT-105 URLs und Parameter kanonisieren | P2 | Frontend | keine |
+| 6 | JWT-106 Briefdaten und Fehlerbehandlung haerten | P2 | Frontend | keine |
+| 7 | JWT-201 Favoriten-Vertrag festlegen | P1 | Backend + Frontend | fachliche Entscheidung |
+| 8 | JWT-202 Pinning idempotent gestalten | P2 | Backend + Frontend | Vertragsentscheidung |
+| 9 | JWT-203 Entitaetserstellung stabilisieren | P2 | Backend + Frontend | Vertragsentscheidung |
+| 10 | JWT-204 OpenAPI-Schemata korrigieren | P2 | Backend | JWT-203 beruecksichtigen |
+| 11 | JWT-301 API-Grenzen vollstaendig typisieren | P2 | Frontend | JWT-101 bis JWT-204 |
+| 12 | JWT-302 Vertragspruefung automatisieren | P2 | Backend + Frontend | stabile Vertraege |
+| 13 | JWT-303 Gemeinsame Abnahme und Bereinigung | P2 | Backend + Frontend | alle vorherigen Pakete |
+
+## Phase 1 – Unmittelbare Frontend-Korrekturen
+
+### JWT-101 – Sperr-Requests korrigieren
+
+**Ziel:** Das Frontend sendet fuer Sperren exakt den dokumentierten Request-Body.
+
+**Umfang:**
+
+- `automatic_anno_letter.userId` sowohl im normalen Axios-Aufruf als auch im
+  Keepalive-/Beacon-Pfad senden.
+- Gemeinsamen typisierten Request-Mapper verwenden, damit beide Transportwege denselben
+  Body erzeugen.
+- Fehlerantworten nicht als erfolgreiche Sperrung oder Entsperrung behandeln.
+
+**Tests:** Request-Test fuer Setzen und Loesen der Sperre sowie fuer den Keepalive-Pfad;
+Fehlerfaelle fuer 401, 404 und 422.
+
+**Abnahme:** Der Backend-Request wird nicht mehr wegen eines fehlenden Wrapper-Objekts
+abgelehnt und beide Frontend-Pfade senden strukturell identische Daten.
+
+### JWT-102 – Entitaetssuche vereinheitlichen
+
+**Ziel:** Alle Entitaetstypen werden aus der dokumentierten verschachtelten Antwort gelesen.
+
+**Umfang:**
+
+- Eine gemeinsame validierte Antwortsstruktur fuer `person`, `settlement`, `sight`,
+  `institution`, `creation` und `protag_creation` einfuehren.
+- `entityKey` und `entityName`, bei Personen zusaetzlich `entityLastName` und
+  `entityFirstName`, in das interne Darstellungsmodell abbilden.
+- Die allgemeine Editorsuche und die Suche der automatischen Annotationen auf denselben
+  Parser umstellen.
+- Trefferhervorhebung als React-Nodes erhalten; keine HTML-Strings einfuehren.
+
+**Tests:** Je Kategorie mindestens eine gueltige Antwort, leere Trefferlisten, unbekannte
+Kategorie und fehlerhafte Antwort; Regressionstest fuer die Trefferhervorhebung.
+
+**Abnahme:** Alle sechs Kategorien zeigen Treffer an und lehnen ungueltige Antworten
+kontrolliert ab.
+
+### JWT-103 – Annotationsantworten an den Vertrag angleichen
+
+**Ziel:** Jobs, Briefe, Snippets und Entitaeten der automatischen Annotationen koennen die
+dokumentierten Feldnamen, Nullwerte und gemischten Typen verarbeiten.
+
+**Umfang:**
+
+- Zod-Schemata mit der OpenAPI vergleichen und Feldnamen wie `service_identifier`
+  korrekt abbilden.
+- Dokumentierte Nullwerte und Varianten explizit behandeln.
+- Transportmodelle von UI-Modellen trennen; Normalisierung nur in zentralen Mappern.
+- Ungueltige Daten mit einer nachvollziehbaren Fehlermeldung abbrechen.
+
+**Tests:** Vertragsbeispiele, Nullwerte, optionale Felder, unterschiedliche ID-Typen und
+ungueltige Antworten.
+
+**Abnahme:** Dokumentierte Responses werden ohne Casts verarbeitet; Abweichungen werden
+nicht stillschweigend verschluckt.
+
+### JWT-104 – Protagonistenwerk-Kategorie korrekt adressieren
+
+**Ziel:** Die Detailabfrage verwendet den dokumentierten Pfadparameter.
+
+**Umfang:** Aufruf auf
+`/jwt/editor/protag_creation_categories/{category_id}` umstellen, den Wert URL-kodieren und
+den nicht dokumentierten Query-Parameter entfernen.
+
+**Tests:** Service-Test fuer Pfadbildung sowie Fehlerantworten 404 und 422.
+
+**Abnahme:** Der Request trifft die dokumentierte Rails-Route mit der gewaehlten Kategorie.
+
+### JWT-105 – URLs und Parameter kanonisieren
+
+**Ziel:** Semantisch identische Requests besitzen eine einheitliche URL-Form.
+
+**Umfang:**
+
+- Nicht dokumentierte abschliessende Slashes entfernen.
+- Fehlenden fuehrenden Slash beim Aktualisieren der Benutzersprache ergaenzen.
+- Alle dynamischen Pfad- und Querywerte mit `encodeURIComponent` oder Axios-Parametern
+  uebertragen.
+- Eine kleine gemeinsame URL-Hilfe nur einfuehren, wenn dadurch echte Duplikation
+  entfaellt.
+
+**Tests:** Sonderzeichen, Leerzeichen, Umlaute und Slash-Zeichen in Parametern.
+
+**Abnahme:** Alle verwendeten Pfade entsprechen der OpenAPI und dynamische Werte koennen
+keine URL-Struktur veraendern.
+
+### JWT-106 – Briefdaten und Fehlerbehandlung haerten
+
+**Ziel:** Nullwerte und Statuscodes werden fachlich korrekt behandelt.
+
+**Umfang:**
+
+- Frontend-Typen fuer dokumentierte nullable Felder der Briefe korrigieren.
+- `GET /letters/by_name/{letter_name}`: ausschliesslich 404 mit
+  `letter_not_found` als freien Namen behandeln; 401, Netzwerk- und Serverfehler anzeigen.
+- `getMe` und `refresh` duerfen nicht jeden Fehler in eine vermeintlich fehlende Sitzung
+  umwandeln.
+- Konvertierungen in Letter-Mappern zentralisieren.
+
+**Tests:** 200, 401, 404, 422, 500, Netzwerkfehler sowie nullable Felder.
+
+**Abnahme:** Technische Fehler fuehren weder zu einer falschen Namensfreigabe noch zu einem
+unbegruendeten Logout.
+
+## Phase 2 – Abgestimmte Vertragsaenderungen
+
+Fuer jedes Paket dieser Phase gilt dieselbe Reihenfolge: fachliche Entscheidung,
+Backend-Implementierung, OpenAPI-Anpassung und Backend-Vertragstest, danach
+Frontend-Umstellung und gemeinsame Abnahme. Eine inkompatible Frontend-Aenderung darf nicht
+vor dem passenden Backend ausgerollt werden.
+
+### JWT-201 – Favoriten-Vertrag festlegen
+
+**Problem:** Das Frontend sendet Favoritenparameter an die Briefsuche, die das Backend
+ignoriert; ein eigener dokumentierter Favoriten-Endpunkt fehlt.
+
+**Entscheidung:** Entweder einen expliziten idempotenten Favoriten-Endpunkt bereitstellen
+oder die nicht funktionsfaehige Frontend-Funktion entfernen. Die Suchroute darf nicht als
+verdeckte Schreiboperation verwendet werden.
+
+**Abnahme:** Favorisieren und Entfernen sind dokumentiert, getestet und nach erneutem Laden
+stabil; alternativ ist die Funktion vollstaendig aus der UI entfernt.
+
+### JWT-202 – Pinning idempotent gestalten
+
+**Problem:** Das Frontend sendet `isPinned`, waehrend das Backend diesen Wert ignoriert und
+den Zustand lediglich umschaltet.
+
+**Empfehlung:** Einen expliziten Zielzustand im Request dokumentieren und serverseitig
+idempotent setzen. Wiederholte identische Requests duerfen den Zustand nicht zurueckdrehen.
+
+**Abnahme:** Doppelte Requests und Wiederholungen nach einem unklaren Netzwerkergebnis
+erzeugen den beabsichtigten Zustand.
+
+### JWT-203 – Entitaetserstellung stabilisieren
+
+**Problem:** `entity_type` wird vom Frontend als Queryparameter gesendet, ist laut Vertrag
+aber Bestandteil des Bodys. Zugleich ist die Response fuer neue IDs nicht eindeutig.
+
+**Empfehlung:** Request gemaess OpenAPI als `entity_type` plus `entityData` senden und eine
+stabile Response mit eindeutig benanntem skalarem Schluessel festlegen, zum Beispiel
+`entityKey`.
+
+**Abnahme:** Alle unterstuetzten Entitaetsarten verwenden denselben Request-Rahmen und eine
+validierbare Response.
+
+### JWT-204 – OpenAPI-Schemata korrigieren
+
+**Ziel:** Nachweislich gueltiges Backend-Verhalten und Vertrag stimmen ueberein.
+
+**Umfang:**
+
+- Nullable `xml_id` fuer `set_content` dokumentieren, sofern `null` fachlich weiterhin
+  erlaubt bleibt; andernfalls Backend und Frontend auf einen Pflichtwert umstellen.
+- `PinnedLetter.id` einheitlich als Integer serialisieren und dokumentieren.
+- `content_type` beim Figure-Upload auf JPEG und PNG begrenzen.
+- Entscheiden, ob optionale Figure-Metadaten `rend` und `subtype` Bestandteil des
+  oeffentlichen Vertrags werden.
+
+**Abnahme:** OpenAPI-Beispiele passieren die Backend-Vertragstests und das Frontend benoetigt
+keine widerspruechlichen Sondertypen.
+
+## Phase 3 – Absicherung und Abschluss
+
+### JWT-301 – API-Grenzen vollstaendig typisieren
+
+**Ziel:** Verbleibende `any`-Typen und ungepruefte Casts an JWT-Responses entfernen.
+
+**Vorgehen:** Endpunktweise vorgehen, Transporttypen aus der OpenAPI ableiten und nur an
+zentralen Mappern in UI-Modelle konvertieren. Diese Arbeit beginnt nach den fachlichen
+Vertragsentscheidungen, damit keine instabilen Typen zementiert werden.
+
+**Abnahme:** Keine neue untypisierte JWT-Antwort; bekannte Altfunde sind beseitigt oder mit
+einem konkreten Folgeticket begruendet.
+
+### JWT-302 – Vertragspruefung automatisieren
+
+**Ziel:** Neue Drift wird in der Continuous Integration sichtbar.
+
+**Umfang:**
+
+- Backend-Routen weiterhin gegen die kanonische OpenAPI pruefen.
+- Fuer kritische Frontend-Services Contract-Fixtures aus dokumentierten Beispielen testen.
+- Optional einen OpenAPI-Type-Generator evaluieren; generierten Code nur einfuehren, wenn
+  reproduzierbare Versionierung und ein klarer Mapping-Layer feststehen.
+- Eine Aenderung der OpenAPI muss betroffene Frontend-Tests sichtbar machen.
+
+**Abnahme:** Ein absichtlich veraenderter Request oder eine inkompatible Response laesst
+mindestens einen automatisierten Check scheitern.
+
+### JWT-303 – Gemeinsame Abnahme und Bereinigung
+
+**Ziel:** Alle 65 dokumentierten Operationen sind entweder genutzt, bewusst ungenutzt oder
+als veraltet gekennzeichnet.
+
+**Umfang:**
+
+- Route-fuer-Route-Abgleich wiederholen.
+- Veraltete Endpunkte fuer gepinnte Briefe und andere nachweislich ungenutzte Operationen
+  im Backend deprecaten oder entfernen, sofern kein weiterer Client existiert.
+- End-to-End-Smoke-Test fuer Anmeldung, Briefsuche, Briefbearbeitung, Entitaetssuche,
+  Figures und automatische Annotationen durchfuehren.
+- Abweichungsanalyse aktualisieren und erledigte Punkte mit Commit oder Ticket belegen.
+
+**Abnahme:** Es verbleibt keine undokumentierte Abweichung ohne Verantwortlichen und
+Folgeticket.
+
+## Test- und Freigabematrix
+
+Jedes Implementierungsticket prueft mindestens:
+
+- dokumentierten Erfolgsfall und leere Antwort;
+- 401/403 getrennt von 404 und Validierungsfehlern;
+- 500 sowie Netzwerkabbruch ohne falschen Fachzustand;
+- nullable und optionale Felder;
+- wiederholte Requests bei zustandsaendernden Operationen;
+- ungueltige oder unerwartete API-Antworten an der Systemgrenze.
+
+Vor Abschluss eines Frontend-Tickets sind mindestens die gezielten Jest-Tests und
+`yarn tsc --noEmit` auszufuehren. ESLint darf keine neuen Fehler oder Warnungen erzeugen.
+Bei Backend-/OpenAPI-Aenderungen muss zusaetzlich der dort dokumentierte
+JWT-OpenAPI-Routencheck erfolgreich sein.
+
+## Branch- und Rolloutstrategie
+
+- Fuer die Umsetzung einen eigenen Basisbranch `feature/jwt-openapi-alignment` vom dafuer
+  vorgesehenen Integrationsbranch anlegen. Der aktuelle Oxygen-Branch sollte nicht dauerhaft
+  als fachlich unpassende Basis dienen.
+- Jedes Arbeitspaket als kleinen Feature- oder Bugfix-Branch umsetzen und nach Abnahme in
+  den Basisbranch uebernehmen.
+- Reine Frontend-Korrekturen aus Phase 1 koennen unabhaengig ausgeliefert werden.
+- Bei Phase 2 zuerst eine rueckwaertskompatible Backend-Version samt OpenAPI ausrollen,
+  danach das Frontend umstellen und erst anschliessend alte Varianten entfernen.
+
+## Empfohlener naechster Schritt
+
+Als erstes wird **JWT-101 – Sperr-Requests korrigieren** umgesetzt. Die Abweichung betrifft
+eine schreibende Operation, ist klar gegen den vorhandenen Vertrag belegt und kann ohne
+weitere fachliche Entscheidung mit einem kleinen Regressionstest geschlossen werden.
+
+Danach sollten JWT-102 und JWT-103 zusammenhaengend bearbeitet werden, weil beide dieselbe
+Entitaetsstruktur im Umfeld der automatischen Annotationen betreffen.
+
+## Definition of Done fuer das Gesamtvorhaben
+
+- Alle in der Abweichungsanalyse aufgefuehrten Punkte sind umgesetzt oder als bewusst
+  akzeptierte Vertragsentscheidung dokumentiert.
+- OpenAPI, Backend-Verhalten und Frontend-Validierung stimmen ueberein.
+- Gezielte Tests, TypeScript-Pruefung und Lint-Pruefung sind erfolgreich.
+- Gekoppelte Aenderungen besitzen eine dokumentierte kompatible Rolloutreihenfolge.
+- Die erneute Route-fuer-Route-Pruefung findet keine unbegruendete Luecke.
