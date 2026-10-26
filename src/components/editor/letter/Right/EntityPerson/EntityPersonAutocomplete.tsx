@@ -25,17 +25,12 @@ const EntityPersonAutocomplete = (props: EntityPersonAutocompleteProps) => {
   useEffect(() => {
     const fetchDefaultPeople = async () => {
       try {
-        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(
-          null,
-          EntityType.PERSON,
-        );
+        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.PERSON);
 
         if (defaultPeople === undefined) {
           enqueueSnackbar('No people found', { variant: 'error' });
         } else {
-          setAutocompletePeople(
-            defaultPeople.filter((item) => !entriesToExclude.has(item.entityKey)),
-          );
+          setAutocompletePeople(defaultPeople.filter((item) => !entriesToExclude.has(item.entityKey)));
         }
       } catch (error) {
         enqueueSnackbar(`Error fetching people: ${(error as Error).message}`, { variant: 'error' });
@@ -48,15 +43,10 @@ const EntityPersonAutocomplete = (props: EntityPersonAutocompleteProps) => {
   const searchForPeople = useCallback(
     async (inputValue: string) => {
       try {
-        const responsePeoples: SnippetEntity[] | undefined = await searchEditortEntities(
-          inputValue,
-          EntityType.PERSON,
-        );
+        const responsePeoples: SnippetEntity[] | undefined = await searchEditortEntities(inputValue, EntityType.PERSON);
 
         if (responsePeoples) {
-          setAutocompletePeople(
-            responsePeoples.filter((item) => !entriesToExclude.has(item.entityKey)),
-          );
+          setAutocompletePeople(responsePeoples.filter((item) => !entriesToExclude.has(item.entityKey)));
         }
       } catch (err) {
         enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
@@ -86,34 +76,23 @@ const EntityPersonAutocomplete = (props: EntityPersonAutocompleteProps) => {
         isOptionEqualToValue={(option, value) => option.entityId === value.entityId}
         onChange={(_, newValue) => setAutoCompletePerson(newValue)}
         onInputChange={(_, inputValue, reason) => {
-          if (
-            inputValue &&
-            reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
-          ) {
+          if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
             void debouncedSearchForPeople(inputValue);
           }
         }}
         getOptionLabel={() => ''}
-        filterOptions={(options, { inputValue }) =>
-          options.filter((option) =>
-            option.entityName.toLowerCase().includes(inputValue.toLowerCase()),
-          )
-        }
+        filterOptions={(serverOptions) => serverOptions}
         renderOption={(props, option, { inputValue }) => {
           return (
             <li {...props}>
               <div>
-                <HighlightedText text={option.entityName} query={inputValue} />
+                <HighlightedText text={option.entityName} query={inputValue} matchIndividualTerms />
               </div>
             </li>
           );
         }}
         renderInput={(params) => (
-          <TextField
-            {...params}
-            label={t('editor:dialog.personContainer.addPersonDialog.label.chooseEntry')}
-            variant="outlined"
-          />
+          <TextField {...params} label={t('editor:dialog.personContainer.addPersonDialog.label.chooseEntry')} variant="outlined" />
         )}
         fullWidth
       />

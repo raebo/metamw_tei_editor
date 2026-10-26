@@ -2,16 +2,9 @@ import initApi from '../apiRequest.service';
 import { SnippetEntity } from '../mappings/autoAnnoMappings';
 import { EditorConstants } from '@src/constants/editor';
 
-export const setLetterFavourite = async (
-  letterId: number,
-  isFavourite: boolean,
-): Promise<boolean> => {
+export const setLetterFavourite = async (letterId: number, isFavourite: boolean): Promise<boolean> => {
   try {
-    await initApi
-      .initApi()
-      .get(
-        `/jwt/editor/letters/search?searchValue=FOOOBAR&letterId=${letterId}&isFavourite=${isFavourite}`,
-      );
+    await initApi.initApi().get(`/jwt/editor/letters/search?searchValue=FOOOBAR&letterId=${letterId}&isFavourite=${isFavourite}`);
 
     return true;
   } catch (err) {
@@ -43,16 +36,13 @@ export const letterContent = async (letterId: number): Promise<string> => {
 };
 
 export const fetchEntityKey = async (entityType: string): Promise<string> => {
-  const entityKey =
-    EditorConstants.ENTITY_TYPES[entityType as keyof typeof EditorConstants.ENTITY_TYPES];
+  const entityKey = EditorConstants.ENTITY_TYPES[entityType as keyof typeof EditorConstants.ENTITY_TYPES];
   if (!entityKey) {
     throw new Error(`Unsupported entity type: ${entityType}`);
   }
 
   try {
-    const response = await initApi
-      .initApi()
-      .get(`/jwt/editor/entities/fetch_entity_key?entity_type=${entityType.toLowerCase()}`);
+    const response = await initApi.initApi().get(`/jwt/editor/entities/fetch_entity_key?entity_type=${entityType.toLowerCase()}`);
 
     return response?.data?.entity_key;
   } catch {
@@ -60,12 +50,36 @@ export const fetchEntityKey = async (entityType: string): Promise<string> => {
   }
 };
 
-export const searchEditortEntities = async (
-  searchString: string | null,
-  entityType: string,
-): Promise<SnippetEntity[] | undefined> => {
-  const entityKey =
-    EditorConstants.ENTITY_TYPES[entityType as keyof typeof EditorConstants.ENTITY_TYPES];
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const optionalString = (value: unknown): string | undefined => (typeof value === 'string' ? value : undefined);
+
+const mapEditorEntity = (value: unknown, entityType: string): SnippetEntity | null => {
+  if (!isRecord(value)) return null;
+
+  const entityId = typeof value.entityId === 'number' ? value.entityId : value.id;
+  if (typeof entityId !== 'number' || typeof value.entityKey !== 'string' || typeof value.entityName !== 'string') {
+    return null;
+  }
+
+  return {
+    entityId,
+    entityType: optionalString(value.entityType) ?? entityType,
+    entityKey: value.entityKey,
+    entityName: value.entityName,
+    entityFirstName: optionalString(value.entityFirstName),
+    entityLastName: optionalString(value.entityLastName),
+    entityDisplayName: optionalString(value.entityDisplayName) ?? value.entityName,
+    entitySettlementKind: optionalString(value.entitySettlementKind),
+    entityParentName: optionalString(value.entityParentName),
+    entityPlaceCountryName: optionalString(value.entityPlaceCountryName),
+    entityKind: optionalString(value.entityKind),
+    extraData: isRecord(value.extraData) ? value.extraData : {},
+  };
+};
+
+export const searchEditortEntities = async (searchString: string | null, entityType: string): Promise<SnippetEntity[] | undefined> => {
+  const entityKey = EditorConstants.ENTITY_TYPES[entityType as keyof typeof EditorConstants.ENTITY_TYPES];
   if (!entityKey) {
     throw new Error(`Unsupported entity type: ${entityType}`);
   }
@@ -85,13 +99,12 @@ export const searchEditortEntities = async (
 
     const response = await initApi
       .initApi()
-      .post(
-        '/jwt/editor/entities/search?per_page=20',
-        { search_data },
-        { headers: { 'Content-Type': 'application/json' } },
-      );
+      .post('/jwt/editor/entities/search?per_page=20', { search_data }, { headers: { 'Content-Type': 'application/json' } });
 
-    return response?.data?.[entityKey.toLowerCase()]?.entries || undefined;
+    const entries: unknown = response?.data?.[entityKey.toLowerCase()]?.entries;
+    if (!Array.isArray(entries)) return undefined;
+
+    return entries.map((entry) => mapEditorEntity(entry, entityType)).filter((entry): entry is SnippetEntity => entry !== null);
   } catch (err) {
     throw new Error('Error fetching data for search entity: ' + err);
   }

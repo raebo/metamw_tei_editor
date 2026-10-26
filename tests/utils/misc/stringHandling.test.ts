@@ -2,9 +2,7 @@ import { stringHandling } from '@src/utils/misc/stringHandling';
 
 describe('stringHandling.splitByQuery', () => {
   it('returns the whole input as a single non-matched segment when there is no query', () => {
-    expect(stringHandling.splitByQuery('Anna Mustermann', '')).toEqual([
-      { text: 'Anna Mustermann', matched: false },
-    ]);
+    expect(stringHandling.splitByQuery('Anna Mustermann', '')).toEqual([{ text: 'Anna Mustermann', matched: false }]);
   });
 
   it('splits around a single case-insensitive match, preserving the original casing', () => {
@@ -23,9 +21,7 @@ describe('stringHandling.splitByQuery', () => {
   });
 
   it('returns the input unmatched when the query does not occur', () => {
-    expect(stringHandling.splitByQuery('Anna Mustermann', 'xyz')).toEqual([
-      { text: 'Anna Mustermann', matched: false },
-    ]);
+    expect(stringHandling.splitByQuery('Anna Mustermann', 'xyz')).toEqual([{ text: 'Anna Mustermann', matched: false }]);
   });
 
   it('escapes regex special characters in the query instead of throwing', () => {
@@ -52,5 +48,16 @@ describe('stringHandling.splitByQuery', () => {
     // None of the segments contain HTML markup - they are the raw, unescaped substrings of the
     // input, safe to hand to React (which escapes text children automatically).
     expect(segments.every((segment) => typeof segment.text === 'string')).toBe(true);
+  });
+});
+
+describe('stringHandling.splitByQueryTerms', () => {
+  it('highlights each search term independently and preserves text between matches', () => {
+    expect(stringHandling.splitByQueryTerms('Mendelssohn Bartholdy (bis 1816), Jacob Ludwig Felix', 'bartholdy felix')).toEqual([
+      { text: 'Mendelssohn ', matched: false },
+      { text: 'Bartholdy', matched: true },
+      { text: ' (bis 1816), Jacob Ludwig ', matched: false },
+      { text: 'Felix', matched: true },
+    ]);
   });
 });

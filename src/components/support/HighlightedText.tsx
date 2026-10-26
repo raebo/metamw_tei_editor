@@ -5,6 +5,7 @@ export interface HighlightedTextProps {
   text: string;
   query: string;
   style?: React.CSSProperties;
+  matchIndividualTerms?: boolean;
 }
 
 const HIGHLIGHT_STYLE: React.CSSProperties = { fontWeight: 700, backgroundColor: 'yellow' };
@@ -15,8 +16,10 @@ const HIGHLIGHT_STYLE: React.CSSProperties = { fontWeight: 700, backgroundColor:
  * so this deliberately never touches dangerouslySetInnerHTML/innerHTML - React escapes the
  * segments for us instead.
  */
-const HighlightedText: React.FC<HighlightedTextProps> = ({ text, query, style }) => {
-  const segments = MiscUtils.stringHandling.splitByQuery(text, query);
+const HighlightedText: React.FC<HighlightedTextProps> = ({ text, query, style, matchIndividualTerms = false }) => {
+  const segments = matchIndividualTerms
+    ? MiscUtils.stringHandling.splitByQueryTerms(text, query)
+    : MiscUtils.stringHandling.splitByQuery(text, query);
 
   return (
     <div style={style}>

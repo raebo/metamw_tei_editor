@@ -37,10 +37,7 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
   useEffect(() => {
     const fetchDefaultPlaces = async () => {
       try {
-        const defaultPlaces: SnippetEntity[] | undefined = await searchEditortEntities(
-          null,
-          EntityType.SETTLEMENT,
-        );
+        const defaultPlaces: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.SETTLEMENT);
 
         if (defaultPlaces === undefined) {
           enqueueSnackbar('No places found', { variant: 'error' });
@@ -62,10 +59,7 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
       const { name, key } = EditorUtils.teiHeaderContent.extractWritingPlace(teiHeader);
 
       if (name && key) {
-        const place: SnippetEntity[] | undefined = await searchEditortEntities(
-          key,
-          EntityType.SETTLEMENT,
-        );
+        const place: SnippetEntity[] | undefined = await searchEditortEntities(key, EntityType.SETTLEMENT);
         if (place && place[0]) {
           onChange({ writingPlace: place[0], writingPlaceAutoAvailable: true });
         }
@@ -82,10 +76,7 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
       const { name, key } = EditorUtils.teiHeaderContent.extractReceivingPlace(teiHeader);
 
       if (name && key) {
-        const place: SnippetEntity[] | undefined = await searchEditortEntities(
-          key,
-          EntityType.SETTLEMENT,
-        );
+        const place: SnippetEntity[] | undefined = await searchEditortEntities(key, EntityType.SETTLEMENT);
         if (place && place[0]) {
           onChange({ receivingPlace: place[0], receivingPlaceAutoAvailable: true });
         }
@@ -139,31 +130,22 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
           isOptionEqualToValue={(option, value) => option.entityId === value.entityId}
           onChange={(_, newValue) => setAutocmplSelectedOption(newValue)}
           onInputChange={(_, inputValue, reason) => {
-            if (
-              inputValue &&
-              reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
-            ) {
+            if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
               void debouncedSearchForPlacess(inputValue);
             }
           }}
           getOptionLabel={(option) => option.entityName || ''}
-          filterOptions={(options, { inputValue }) =>
-            options.filter((option) =>
-              option.entityName.toLowerCase().includes(inputValue.toLowerCase()),
-            )
-          }
+          filterOptions={(serverOptions) => serverOptions}
           renderOption={(props, option, { inputValue }) => {
             return (
               <li {...props}>
                 <div>
-                  <HighlightedText text={option.entityName} query={inputValue} />
+                  <HighlightedText text={option.entityName} query={inputValue} matchIndividualTerms />
                 </div>
               </li>
             );
           }}
-          renderInput={(params) => (
-            <TextField {...params} label={props.textFieldValue} variant="outlined" />
-          )}
+          renderInput={(params) => <TextField {...params} label={props.textFieldValue} variant="outlined" />}
           fullWidth
         />
       </div>

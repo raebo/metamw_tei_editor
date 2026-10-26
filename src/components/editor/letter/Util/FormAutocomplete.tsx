@@ -3,6 +3,7 @@ import { Autocomplete, TextField } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
+import HighlightedText from '@src/components/support/HighlightedText';
 
 interface FormAutocompleteProps {
   entityType: string;
@@ -58,6 +59,7 @@ const FormAutocomplete = (props: FormAutocompleteProps) => {
         freeSolo={false}
         disabled={props.isDisabled}
         options={options} // Dynamic options
+        filterOptions={(serverOptions) => serverOptions}
         value={props.selectedValue ? props.selectedValue : null}
         loading={loading} // Display loading indicator
         onInputChange={(event, value) => setInputValue(value)} // Update input value
@@ -70,9 +72,9 @@ const FormAutocomplete = (props: FormAutocompleteProps) => {
             props.afterClickHandler?.(null);
           }
         }}
-        renderOption={(props, option) => (
+        renderOption={(props, option, { inputValue }) => (
           <li {...props} key={option.entityKey}>
-            <strong>{option.entityName}</strong>
+            <HighlightedText text={option.entityName} query={inputValue} matchIndividualTerms />
           </li>
         )}
         getOptionLabel={(option) => (typeof option === 'string' ? option : option.entityName)}

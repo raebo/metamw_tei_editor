@@ -22,10 +22,7 @@ const TeiHeaderWritingPerson = (props: NewLetterDialogProps) => {
   useEffect(() => {
     const fetchDefaultPeople = async () => {
       try {
-        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(
-          null,
-          EntityType.PERSON,
-        );
+        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.PERSON);
 
         if (defaultPeople === undefined) {
           enqueueSnackbar('No people found', { variant: 'error' });
@@ -69,31 +66,22 @@ const TeiHeaderWritingPerson = (props: NewLetterDialogProps) => {
           isOptionEqualToValue={(option, value) => option.entityId === value.entityId}
           onChange={(_, newValue) => setSelectedOption(newValue)}
           onInputChange={(_, inputValue, reason) => {
-            if (
-              inputValue &&
-              reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
-            ) {
+            if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
               void debouncedSearchForPeople(inputValue);
             }
           }}
           getOptionLabel={(option) => option.entityName || ''}
-          filterOptions={(options, { inputValue }) =>
-            options.filter((option) =>
-              option.entityName.toLowerCase().includes(inputValue.toLowerCase()),
-            )
-          }
+          filterOptions={(serverOptions) => serverOptions}
           renderOption={(props, option, { inputValue }) => {
             return (
               <li {...props}>
                 <div>
-                  <HighlightedText text={option.entityName} query={inputValue} />
+                  <HighlightedText text={option.entityName} query={inputValue} matchIndividualTerms />
                 </div>
               </li>
             );
           }}
-          renderInput={(params) => (
-            <TextField {...params} label={'Schreiber Auswählen'} variant="outlined" />
-          )}
+          renderInput={(params) => <TextField {...params} label={'Schreiber Auswählen'} variant="outlined" />}
           fullWidth
         />
       </div>

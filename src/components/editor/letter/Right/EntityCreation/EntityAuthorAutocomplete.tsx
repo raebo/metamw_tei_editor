@@ -20,10 +20,7 @@ const EntityAuthorAutocomplete = (props: EntityAuthorAutocompleteProps) => {
   useEffect(() => {
     const fetchDefaultPeople = async () => {
       try {
-        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(
-          null,
-          EntityType.PERSON,
-        );
+        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.PERSON);
 
         if (defaultPeople === undefined) {
           enqueueSnackbar('No people found', { variant: 'error' });
@@ -40,10 +37,7 @@ const EntityAuthorAutocomplete = (props: EntityAuthorAutocompleteProps) => {
 
   const searchForPeople = async (inputValue: string) => {
     try {
-      const responsePeoples: SnippetEntity[] | undefined = await searchEditortEntities(
-        inputValue,
-        EntityType.PERSON,
-      );
+      const responsePeoples: SnippetEntity[] | undefined = await searchEditortEntities(inputValue, EntityType.PERSON);
 
       if (responsePeoples) {
         setAutocompletePeople(responsePeoples);
@@ -74,35 +68,22 @@ const EntityAuthorAutocomplete = (props: EntityAuthorAutocompleteProps) => {
         isOptionEqualToValue={(option, value) => option.entityId === value.entityId}
         onChange={(_, newValue) => setAutoCompletePerson(newValue)}
         onInputChange={(_, inputValue, reason) => {
-          if (
-            inputValue &&
-            reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
-          ) {
+          if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
             void debouncedSearchForPeople(inputValue);
           }
         }}
         getOptionLabel={() => ''}
-        filterOptions={(options, { inputValue }) =>
-          options.filter((option) =>
-            option.entityName.toLowerCase().includes(inputValue.toLowerCase()),
-          )
-        }
+        filterOptions={(serverOptions) => serverOptions}
         renderOption={(props, option, { inputValue }) => {
           return (
             <li {...props}>
               <div>
-                <HighlightedText text={option.entityName} query={inputValue} />
+                <HighlightedText text={option.entityName} query={inputValue} matchIndividualTerms />
               </div>
             </li>
           );
         }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={t('editor:dialog.autocomplete.chooseEntry')}
-            variant="outlined"
-          />
-        )}
+        renderInput={(params) => <TextField {...params} label={t('editor:dialog.autocomplete.chooseEntry')} variant="outlined" />}
         fullWidth
       />
     </>

@@ -41,17 +41,12 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
   useEffect(() => {
     const fetchDefaultPlaces = async (placeType: 'SIGHT' | 'INSTITUTION' | 'SETTLEMENT') => {
       try {
-        const defaultPlaces: SnippetEntity[] | undefined = await searchEditortEntities(
-          null,
-          placeType,
-        );
+        const defaultPlaces: SnippetEntity[] | undefined = await searchEditortEntities(null, placeType);
 
         if (defaultPlaces === undefined) {
           enqueueSnackbar('No places found', { variant: 'error' });
         } else {
-          setAutocompletePlaces(
-            defaultPlaces.filter((item) => !entriesToExclude.has(item.entityKey)),
-          );
+          setAutocompletePlaces(defaultPlaces.filter((item) => !entriesToExclude.has(item.entityKey)));
         }
       } catch {
         enqueueSnackbar('Error fetching places', { variant: 'error' });
@@ -78,10 +73,7 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
         throw new Error('Place type is null');
       }
 
-      const responsePlaces: SnippetEntity[] | undefined = await searchEditortEntities(
-        inputValue,
-        currentProps.placeType,
-      );
+      const responsePlaces: SnippetEntity[] | undefined = await searchEditortEntities(inputValue, currentProps.placeType);
 
       if (responsePlaces) {
         const excludeKeys = new Set(currentProps.addedPlaceEntries.map((item) => item.key));
@@ -145,10 +137,7 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
           setAutoCompletePlace(newValue);
         }}
         onInputChange={(_, inputValue, reason) => {
-          if (
-            inputValue &&
-            reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
-          ) {
+          if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
             void debouncedSearchForPlaces(inputValue);
           }
         }}
@@ -156,27 +145,17 @@ const EntityPlaceAutocomplete = (props: EntityPlaceAutocompleteProps) => {
           if (typeof option === 'string') return option;
           return option?.entityName ?? '';
         }}
-        filterOptions={(options, { inputValue }) =>
-          options.filter((option) =>
-            option.entityName.toLowerCase().includes(inputValue.toLowerCase()),
-          )
-        }
+        filterOptions={(serverOptions) => serverOptions}
         renderOption={(props, option, { inputValue }) => {
           return (
             <li {...props}>
               <div>
-                <HighlightedText text={option.entityName} query={inputValue} />
+                <HighlightedText text={option.entityName} query={inputValue} matchIndividualTerms />
               </div>
             </li>
           );
         }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={t('editor:dialog.autocomplete.chooseEntry')}
-            variant="outlined"
-          />
-        )}
+        renderInput={(params) => <TextField {...params} label={t('editor:dialog.autocomplete.chooseEntry')} variant="outlined" />}
         fullWidth
       />
     </>

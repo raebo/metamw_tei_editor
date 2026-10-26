@@ -143,7 +143,7 @@ const ParagraphStructureDialog = (props: DefaultDialogProps) => {
       {(operation === 'paragraph-insert' || operation === 'paragraph-append' || operation === 'paragraph-edit' || isSectionInsert) && (
         <TextField
           multiline
-          minRows={2}
+          minRows={operation === 'paragraph-edit' ? 5 : 2}
           label={t('editor:dialog.paragraphStructure.fields.paragraphText')}
           value={paragraphText}
           onChange={(event) => setParagraphText(event.target.value)}

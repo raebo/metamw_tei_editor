@@ -17,6 +17,14 @@ describe('HighlightedText', () => {
     expect(highlighted).toHaveStyle({ fontWeight: 700, backgroundColor: 'yellow' });
   });
 
+  it('highlights separate words from a server-side multi-word search', () => {
+    const { container } = render(
+      <HighlightedText text="Mendelssohn Bartholdy (bis 1816), Jacob Ludwig Felix" query="bartholdy felix" matchIndividualTerms />,
+    );
+
+    expect(Array.from(container.querySelectorAll('span')).map((span) => span.textContent)).toEqual(['Bartholdy', 'Felix']);
+  });
+
   // Regression: this used to be `dangerouslySetInnerHTML={{ __html: highlightText(...) }}`,
   // so a backend-provided name like this would have been rendered as a live <img> element and
   // executed its onerror handler. HighlightedText must render it as inert text instead.
@@ -32,9 +40,7 @@ describe('HighlightedText', () => {
   it('renders an XSS payload contained in the query itself as plain text', () => {
     const payload = '<svg onload=alert(1)>';
 
-    const { container } = render(
-      <HighlightedText text={`Anna ${payload} Mustermann`} query={payload} />,
-    );
+    const { container } = render(<HighlightedText text={`Anna ${payload} Mustermann`} query={payload} />);
 
     expect(container.querySelector('svg')).not.toBeInTheDocument();
     expect(container.textContent).toBe(`Anna ${payload} Mustermann`);
