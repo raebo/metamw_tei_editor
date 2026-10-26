@@ -36,7 +36,7 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 
 ### OXY-001 – Absatz- und Abschnittsstrukturen bearbeiten
 
-- Status: Umgesetzt und abgenommen
+- Status: Umgesetzt; Nachbesserung automatisiert getestet, manuelle Abnahme ausstehend
 - Priorität: P1
 - Oxygen-Aktionen: `paragraph`, `section`, `paragraph ohne Einzug hängend`,
   `paragraph zentriert`, `paragraph rechts`, `paragraph ohne Einzug`,
@@ -46,12 +46,28 @@ Ein Umsetzungsticket ist erst abgeschlossen, wenn:
 - Ziel: Absätze einfügen, teilen und in die vorgesehenen Einzugs-/Ausrichtungsvarianten umwandeln;
   zulässige Abschnittsebenen kontextabhängig anlegen.
 - Akzeptanzkriterien: Alle genannten Varianten erzeugen die vorgesehenen `p`-/`div*`-Strukturen;
-  unzulässige Einfügepositionen werden verhindert; bestehender Text bleibt erhalten.
-- Tests: Einfügen, Umschließen/Teilen, Umwandeln und ungültiger Kontext.
+  neue einfache Absätze können anschließend direkt beschrieben oder mit reinem Text befüllt
+  werden; ein Absatz kann direkt in einem bestehenden Abschnitt oder Schreibakt angelegt werden,
+  ohne dafür einen zusätzlichen `div`-Container zu erzeugen; Abschnittsüberschriften sind optional
+  und löschbar; unzulässige Einfügepositionen werden verhindert; bestehender Text und eingebettetes
+  TEI-Markup bleiben erhalten.
+- Tests: Einfügen, direkte Texteingabe und Plain-Text-Paste, Umschließen/Teilen, Umwandeln,
+  optionale und entfernbare Abschnittsüberschrift sowie ungültiger Kontext.
 - Umsetzungsstand: Absatzvarianten sind über Kontextmenü und Oxygen-kompatible Shortcuts
-  erreichbar. Abschnitte können hierarchisch als Kind oder gleichrangig angelegt und ihre
-  Überschriften bearbeitet werden. Die manuelle Abnahme wurde erfolgreich durchgeführt und die
-  zugehörigen CSV-Zeilen wurden als implementiert markiert.
+  erreichbar. Das Abschnittskontextmenü unterscheidet ausdrücklich zwischen einem direkten `p`
+  und einem strukturellen Unterabschnitt (`div`/`divN`). Am Caret eines Schreibakts kann außerdem
+  der vorhandene Dialog zum Anlegen eines weiteren `act_of_writing` geöffnet werden; Autorinnen,
+  Autoren und Schreiber des ausgewählten Schreibakts sind darin bereits vorausgewählt. Der neue
+  Schreibakt wird unmittelbar hinter dem auslösenden Schreibakt eingefügt; alle folgenden
+  Schreibakte werden danach in Dokumentreihenfolge neu nummeriert. Die bereits vorhandenen
+  Verschiebeoperationen für Schreibakte sind im selben Kontextmenü eindeutig als „nach oben“ und
+  „nach unten“ erreichbar und nummerieren die Schreibakte ebenfalls neu. Abschnitte können
+  hierarchisch als Kind oder gleichrangig angelegt werden. Ein `head` wird nur noch bei
+  tatsächlich eingegebener Überschrift erzeugt und kann über das Abschnittskontextmenü wieder
+  entfernt werden. Neue Absätze dürfen leer angelegt und anschließend direkt in der WYSIWYG-Ansicht
+  beschrieben oder mit reinem Text befüllt werden. Die direkte Bearbeitung ist bewusst auf `p`
+  ohne eingebettete TEI-Elemente begrenzt und schreibt über den XML-Pfad in das Quell-XML zurück,
+  statt das gerenderte HTML zu serialisieren.
 
 ### OXY-002 – Listen und Listeneinträge bearbeiten
 

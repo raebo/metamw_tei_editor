@@ -520,14 +520,20 @@
     "contextAction": "Absätze und Abschnitte",
     "actions": {
       "insertParagraph": "Absatz danach einfügen …",
+      "appendParagraph": "Absatz in diesem Abschnitt hinzufügen …",
       "convertParagraph": "Absatzformat ändern …",
       "splitParagraph": "Auswahl als Absatz abtrennen …",
-      "insertChildSection": "Unterabschnitt einfügen …",
+      "insertChildSection": "Strukturellen Unterabschnitt (div) einfügen …",
       "insertSiblingSection": "Gleichrangigen Abschnitt danach einfügen …",
-      "editSection": "Abschnittsüberschrift bearbeiten …"
+      "editSection": "Abschnittsüberschrift bearbeiten …",
+      "deleteSectionHeading": "Abschnittsüberschrift löschen",
+      "addWritingAct": "Weiteren Schreibakt hinzufügen …",
+      "moveWritingActUp": "Schreibakt nach oben verschieben",
+      "moveWritingActDown": "Schreibakt nach unten verschieben"
     },
     "operations": {
       "paragraph-insert": "Ein neuer Absatz wird nach dem ausgewählten Absatz eingefügt.",
+      "paragraph-append": "Ein neuer Absatz wird direkt im ausgewählten Abschnitt angelegt; es wird kein zusätzlicher div-Container erzeugt.",
       "paragraph-convert": "Der ausgewählte Absatz wird in die gewählte Variante umgewandelt.",
       "paragraph-split": "Der markierte Text wird als eigener Absatz abgetrennt.",
       "section-child": "Ein neuer Unterabschnitt wird innerhalb des ausgewählten Abschnitts angelegt.",
@@ -549,6 +555,9 @@
     },
     "submit": "Änderung übernehmen",
     "success": "Die Absatz- oder Abschnittsstruktur wurde aktualisiert.",
+    "paragraphTextSaved": "Der Absatztext wurde gespeichert.",
+    "sectionHeadingRemoved": "Die Abschnittsüberschrift wurde gelöscht.",
+    "emptyParagraphPlaceholder": "Text eingeben oder einfügen …",
     "errors": {
       "context": "Der Bearbeitungskontext ist nicht mehr verfügbar."
     }

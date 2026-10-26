@@ -102,6 +102,24 @@ note.tei-foreign-hand-annotation:focus-visible {
   outline-offset: 2px;
 }
 
+.tei-editable-paragraph {
+  min-height: 1.4em;
+  white-space: pre-wrap;
+}
+
+.tei-editable-paragraph:empty::before {
+  color: rgb(0 0 0 / 45%);
+  content: attr(data-editor-placeholder);
+  font-style: italic;
+  pointer-events: none;
+}
+
+.tei-editable-paragraph:focus {
+  border-radius: 0.15em;
+  outline: 1px dashed var(--secondary-color);
+  outline-offset: 2px;
+}
+
 .tei-manuscript-annotation-caret {
   display: inline-block;
   padding: 0;

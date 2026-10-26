@@ -6,6 +6,7 @@ export type SectionPosition = 'child' | 'sibling';
 
 export type ParagraphStructureOperation =
   | 'paragraph-insert'
+  | 'paragraph-append'
   | 'paragraph-convert'
   | 'paragraph-split'
   | 'section-child'
@@ -116,13 +117,40 @@ export const resolveSourceElement = (xmlDoc: Document, encodedPath: string): Ele
 
 export const insertParagraphAfter = (paragraph: Element, variant: ParagraphVariant, text: string): Element => {
   assertParagraph(paragraph);
-  if (!text.trim()) throw new Error('Paragraph text must not be empty.');
   if (!paragraph.parentNode) throw new Error('The paragraph has no parent element.');
 
   const newParagraph = createParagraph(paragraph.ownerDocument, variant);
-  newParagraph.textContent = text.trim();
+  const normalizedText = text.trim();
+  if (normalizedText) newParagraph.textContent = normalizedText;
   paragraph.parentNode.insertBefore(newParagraph, paragraph.nextSibling);
   return newParagraph;
+};
+
+export const appendParagraphToSection = (section: Element, variant: ParagraphVariant, text: string): Element => {
+  assertInLetterBody(section);
+  const sectionName = localName(section);
+  if (sectionName !== 'body' && !SECTION_TAG_PATTERN.test(sectionName)) {
+    throw new Error('The selected element is not a section.');
+  }
+
+  const newParagraph = createParagraph(section.ownerDocument, variant);
+  const normalizedText = text.trim();
+  if (normalizedText) newParagraph.textContent = normalizedText;
+
+  const firstChildSection = Array.from(section.children).find((child) => SECTION_TAG_PATTERN.test(localName(child)));
+  section.insertBefore(newParagraph, firstChildSection ?? null);
+  return newParagraph;
+};
+
+export const updatePlainParagraphText = (xmlDoc: Document, encodedPath: string, text: string): Element => {
+  const paragraph = resolveSourceElement(xmlDoc, encodedPath);
+  assertParagraph(paragraph);
+  if (paragraph.children.length > 0) {
+    throw new Error('Paragraphs with embedded markup cannot be edited directly.');
+  }
+
+  paragraph.textContent = text.replace(/\r\n?/g, '\n');
+  return paragraph;
 };
 
 export const convertParagraph = (paragraph: Element, variant: ParagraphVariant): Element => {
@@ -197,9 +225,6 @@ export const canInsertSiblingSection = (section: Element): boolean => {
 
 export const insertSection = (section: Element, position: SectionPosition, heading: string, paragraphText: string): Element => {
   assertInLetterBody(section);
-  if (!heading.trim() && !paragraphText.trim()) {
-    throw new Error('A section requires a heading or paragraph text.');
-  }
 
   let tagName: string;
   let parent: Node;
@@ -220,11 +245,16 @@ export const insertSection = (section: Element, position: SectionPosition, headi
   }
 
   const newSection = section.ownerDocument.createElementNS(EditorConstants.TEI_NS, tagName);
-  const head = section.ownerDocument.createElementNS(EditorConstants.TEI_NS, 'head');
   const paragraph = section.ownerDocument.createElementNS(EditorConstants.TEI_NS, 'p');
-  head.textContent = heading.trim();
-  paragraph.textContent = paragraphText.trim();
-  newSection.append(head, paragraph);
+  const normalizedHeading = heading.trim();
+  const normalizedParagraphText = paragraphText.trim();
+  if (normalizedHeading) {
+    const head = section.ownerDocument.createElementNS(EditorConstants.TEI_NS, 'head');
+    head.textContent = normalizedHeading;
+    newSection.appendChild(head);
+  }
+  if (normalizedParagraphText) paragraph.textContent = normalizedParagraphText;
+  newSection.appendChild(paragraph);
   parent.insertBefore(newSection, reference);
   return newSection;
 };
@@ -242,5 +272,17 @@ export const updateSectionHeading = (section: Element, heading: string): Element
     section.insertBefore(head, section.firstChild);
   }
   head.textContent = heading.trim();
+  return section;
+};
+
+export const removeSectionHeading = (section: Element): Element => {
+  assertInLetterBody(section);
+  if (!SECTION_TAG_PATTERN.test(localName(section)) || section.getAttribute('type') === 'act_of_writing') {
+    throw new Error('The selected element is not an editable section.');
+  }
+
+  const head = Array.from(section.children).find((child) => localName(child) === 'head');
+  if (!head) throw new Error('The selected section has no heading.');
+  head.remove();
   return section;
 };

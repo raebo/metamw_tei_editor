@@ -50,6 +50,24 @@ describe('ParagraphStructureDialog', () => {
     expect(onSave).toHaveBeenCalledWith(xmlDoc, EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED, expect.any(String));
   });
 
+  it('appends an empty paragraph directly to the selected writing act', () => {
+    const xmlDoc = parseXml('<TEI><text><body><div type="act_of_writing"><p>First</p></div></body></text></TEI>');
+    const store = buildStore('0.0.0', 'paragraph-append');
+    const onSave = jest.fn();
+
+    render(
+      <Provider store={store}>
+        <ParagraphStructureDialog xmlDoc={xmlDoc} onSave={onSave} onClose={jest.fn()} />
+      </Provider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Änderung übernehmen' }));
+
+    const writingAct = xmlDoc.querySelector('div[type="act_of_writing"]')!;
+    expect(writingAct.querySelectorAll(':scope > p')).toHaveLength(2);
+    expect(writingAct.querySelectorAll(':scope > div')).toHaveLength(0);
+    expect(onSave).toHaveBeenCalledWith(xmlDoc, EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED, expect.any(String));
+  });
+
   it('splits the marked selection without requiring a source path', () => {
     const xmlDoc = parseXml('<TEI><text><body><div><p>Before <span class="marked">Selected</span> after</p></div></body></text></TEI>');
     const store = buildStore('', 'paragraph-split');

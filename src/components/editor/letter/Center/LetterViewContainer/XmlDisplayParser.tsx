@@ -5,11 +5,7 @@ import { readFigureImageMap } from '@src/utils/editor/graphicStructure';
 import { manuscriptAnnotationReference } from '@src/utils/editor/manuscriptAnnotation';
 import { AUTHOR_FOOTNOTE_REFERENCE_TYPES } from '@src/utils/editor/authorFootnote';
 import type { InlineFormat } from '@src/utils/editor/inlineFormatting';
-import {
-  canInsertSectionAddressLine,
-  isAddressLineBlock,
-  isSectionAddressLine,
-} from '@src/utils/editor/sectionAddressLine';
+import { canInsertSectionAddressLine, isAddressLineBlock, isSectionAddressLine } from '@src/utils/editor/sectionAddressLine';
 
 type XmlDisplayParserProps = {
   xmlContentRef: React.RefObject<HTMLDivElement> | null;
@@ -282,8 +278,7 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
       );
 
       const sectionWithCaret =
-        canInsertSectionAddressLine(element) &&
-        !['address', 'sender_address'].includes(element.getAttribute('type') ?? '');
+        canInsertSectionAddressLine(element) && !['address', 'sender_address'].includes(element.getAttribute('type') ?? '');
       const sectionAddressLine = isSectionAddressLine(element);
       const addressLineReference = element.getAttribute('xml:id') ?? `path:${sourcePath.join('.')}`;
       if (sectionWithCaret) appendClassName(attributes, 'tei-section-with-caret');
@@ -292,6 +287,18 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
         appendClassName(attributes, 'tei-section-address-line');
         attributes['data-editor-address-line-reference'] = addressLineReference;
         attributes.contentEditable = false;
+      }
+      const isPlainEditableParagraph =
+        tagName === 'p' && Boolean(element.closest('body')) && !sectionAddressLine && element.children.length === 0;
+      if (isPlainEditableParagraph) {
+        appendClassName(attributes, 'tei-editable-paragraph');
+        attributes['data-editor-plain-paragraph'] = 'true';
+        attributes['data-editor-placeholder'] = t('editor:dialog.paragraphStructure.emptyParagraphPlaceholder');
+        attributes.contentEditable = true;
+        attributes.suppressContentEditableWarning = true;
+        attributes.tabIndex = 0;
+        attributes.role = 'textbox';
+        attributes['aria-multiline'] = true;
       }
 
       const openMarkerMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -504,9 +511,7 @@ const XMLDisplayParser = (props: XmlDisplayParserProps) => {
               type="button"
               className={sectionAddressLine ? 'tei-address-line-marker' : 'tei-section-caret'}
               data-editor-section-caret={sectionWithCaret ? 'true' : undefined}
-              aria-label={t(
-                `editor:dialog.sectionAddressLine.${sectionAddressLine ? 'marker' : 'sectionMenu'}`,
-              )}
+              aria-label={t(`editor:dialog.sectionAddressLine.${sectionAddressLine ? 'marker' : 'sectionMenu'}`)}
               aria-haspopup="menu"
               contentEditable={false}
               onClick={openMarkerMenu}

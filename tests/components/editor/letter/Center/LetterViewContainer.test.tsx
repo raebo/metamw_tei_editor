@@ -8,6 +8,8 @@ import authReducer from '@src/redux/slices/authentication.slice';
 import editorLetterReducer, { setEditorLetter, setEditorPinnedLetters } from '@src/redux/slices/editor.letter.slice';
 import { fetchPinnedLetterData } from '@src/services/editor/apiPinnedLettersRequest.service';
 import type { EditorLetterData } from '@src/services/mappings/editorMappings';
+import { EditorUtils } from '@src/utils/editor';
+import { EditorConstants } from '@src/constants/editor';
 
 jest.mock('@src/services/editor/apiPinnedLettersRequest.service', () => ({
   fetchPinnedLetterData: jest.fn(),
@@ -19,7 +21,20 @@ jest.mock('@src/services/editor/apiLettersRequest.service', () => ({
 
 jest.mock('@src/components/editor/letter/Center/LetterViewContainer/XmlDisplayParser', () => ({
   __esModule: true,
-  default: ({ xmlString }: { xmlString: string }) => <div data-testid="xml-output">{xmlString}</div>,
+  default: ({ xmlString }: { xmlString: string }) => {
+    const content = new DOMParser().parseFromString(xmlString, 'application/xml').querySelector('p')?.textContent ?? '';
+    return (
+      <p
+        contentEditable
+        suppressContentEditableWarning
+        data-testid="xml-output"
+        data-editor-xml-path="0.0.0"
+        data-editor-plain-paragraph="true"
+      >
+        {content}
+      </p>
+    );
+  },
 }));
 
 jest.mock('@src/components/editor/letter/Center/LetterViewContainer/RightClickActionMenu', () => ({
@@ -58,7 +73,7 @@ const letterData = (id: number, name: string): EditorLetterData => ({
 });
 
 describe('LetterViewContainer', () => {
-  it('shows a caret-capable WYSIWYG surface while blocking direct mutations', async () => {
+  it('shows a partially editable WYSIWYG surface while blocking mutations outside plain paragraphs', async () => {
     mockFetchPinnedLetterData.mockResolvedValue(letterData(1, 'fmb-1821-01-31-01'));
     const store = configureStore({
       reducer: { auth: authReducer, editorLetter: editorLetterReducer },
@@ -91,12 +106,70 @@ describe('LetterViewContainer', () => {
     await screen.findByTestId('xml-output');
     const surface = document.getElementById('letterXmlContent')!;
     expect(surface).toHaveAttribute('contenteditable', 'true');
-    expect(surface).toHaveAttribute('aria-readonly', 'true');
+    expect(surface).toHaveAttribute('aria-readonly', 'false');
     expect(fireEvent.keyDown(surface, { key: 'x' })).toBe(false);
     expect(fireEvent.keyDown(surface, { key: 'Backspace' })).toBe(false);
     expect(fireEvent.keyDown(surface, { key: 'a', ctrlKey: true, altKey: true })).toBe(true);
     expect(fireEvent.paste(surface)).toBe(false);
     expect(fireEvent.drop(surface)).toBe(false);
+  });
+
+  it('persists typed and pasted plain-paragraph text on blur without serializing the rendered DOM', async () => {
+    const data = letterData(1, 'Initial text');
+    mockFetchPinnedLetterData.mockResolvedValue(data);
+    const patchContent = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue(true);
+    const store = configureStore({
+      reducer: { auth: authReducer, editorLetter: editorLetterReducer },
+    });
+    store.dispatch(
+      setEditorPinnedLetters({
+        pinnedLetters: [
+          {
+            id: 1,
+            name: data.name,
+            contentChanged: false,
+            isPinned: true,
+            viewMode: 'WYSIWYG',
+          },
+        ],
+      }),
+    );
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 1, name: data.name, viewMode: 'WYSIWYG', xmlContent: data.xmlContent },
+      }),
+    );
+
+    render(
+      <Provider store={store}>
+        <LetterViewContainer />
+      </Provider>,
+    );
+
+    const paragraph = await screen.findByTestId('xml-output');
+    expect(fireEvent.keyDown(paragraph, { key: 'x' })).toBe(true);
+    expect(fireEvent.keyDown(paragraph, { key: 'Enter' })).toBe(false);
+    paragraph.textContent = 'Typed and ';
+    fireEvent.input(paragraph);
+    const range = document.createRange();
+    range.selectNodeContents(paragraph);
+    range.collapse(false);
+    window.getSelection()?.removeAllRanges();
+    window.getSelection()?.addRange(range);
+    expect(
+      fireEvent.paste(paragraph, {
+        clipboardData: { getData: () => 'pasted paragraph text' },
+      }),
+    ).toBe(false);
+    expect(paragraph).toHaveTextContent('Typed and pasted paragraph text');
+    fireEvent.blur(paragraph);
+
+    await waitFor(() => expect(patchContent).toHaveBeenCalledTimes(1));
+    const persistedXml = patchContent.mock.calls[0][0];
+    const persistedDocument = new DOMParser().parseFromString(persistedXml, 'application/xml');
+    expect(persistedDocument.querySelector('p')?.textContent).toBe('Typed and pasted paragraph text');
+    expect(patchContent.mock.calls[0][2]).toBe(EditorConstants.changeTypes.MANUAL_CODE_CHANGE);
+    patchContent.mockRestore();
   });
 
   it('ignores a stale response from the previously active letter', async () => {

@@ -375,19 +375,24 @@ export const markupGeneration = {
       targetNode.textContent = selectedLetter.title;
     }
   },
-  insertActOfWritingBlock: (xmlDoc: XMLDocument, authorWriters: ActOfWritingElement[]): void => {
-    const nValue = xmlDoc.querySelectorAll("div[type='act_of_writing']").length + 1;
-
+  insertActOfWritingBlock: (xmlDoc: XMLDocument, authorWriters: ActOfWritingElement[], afterWritingAct: Element | null = null): Element => {
     const bodyTag = xmlDoc.querySelector('text > body');
 
     if (!bodyTag) {
       throw new Error('Could not insert act_of_writing block, because no <body> tag was found.');
     }
+    if (
+      afterWritingAct &&
+      (afterWritingAct.parentElement !== bodyTag ||
+        afterWritingAct.localName.toLowerCase() !== 'div' ||
+        afterWritingAct.getAttribute('type') !== 'act_of_writing')
+    ) {
+      throw new Error('Could not insert act_of_writing block after the selected element.');
+    }
 
     const div = xmlDoc.createElementNS(EditorConstants.TEI_NS, 'div');
     div.setAttribute('type', 'act_of_writing');
-    div.setAttribute('n', nValue.toString());
-    div.setAttribute('xml:id', EditorUtils.markupGeneration.generateXmlId('div'));
+    div.setAttribute('xml:id', `div_${uuidv4()}`);
 
     const rolePriority: Record<'author' | 'writer', number> = {
       author: 0,
@@ -418,7 +423,12 @@ export const markupGeneration = {
 
     div.appendChild(paragraph);
 
-    bodyTag.appendChild(div); // or use some custom selector
+    bodyTag.insertBefore(div, afterWritingAct?.nextSibling ?? null);
+    Array.from(bodyTag.children)
+      .filter((child) => child.localName.toLowerCase() === 'div' && child.getAttribute('type') === 'act_of_writing')
+      .forEach((writingAct, index) => writingAct.setAttribute('n', String(index + 1)));
+
+    return div;
   },
   addSaluteMarkup: (referencedNode: Element, saluteNode: Element): void => {
     let prevSibling: Element | null = referencedNode.previousElementSibling;

@@ -53,6 +53,23 @@ describe('XMLDisplayParser', () => {
     expect(marked).toHaveTextContent('selected text');
   });
 
+  it('marks only plain body paragraphs as directly editable', () => {
+    const { container } = renderXml(
+      '<TEI><text><body><div><p/><p>Plain text</p><p>Text <hi rend="italic">marked</hi></p></div></body></text></TEI>',
+    );
+    const paragraphs = container.querySelectorAll('p');
+
+    expect(paragraphs[0]).toHaveClass('tei-editable-paragraph');
+    expect(paragraphs[0]).toHaveAttribute('data-editor-plain-paragraph', 'true');
+    expect(paragraphs[0]).toHaveAttribute('data-editor-placeholder');
+    expect(paragraphs[0]).toHaveAttribute('contenteditable', 'true');
+    expect(paragraphs[0]).toHaveAttribute('role', 'textbox');
+    expect(paragraphs[0]).toHaveAttribute('aria-multiline', 'true');
+    expect(paragraphs[0]).toHaveAttribute('tabindex', '0');
+    expect(paragraphs[1]).toHaveClass('tei-editable-paragraph');
+    expect(paragraphs[2]).not.toHaveAttribute('data-editor-plain-paragraph');
+  });
+
   it('renders an empty list as a focusable editor target', () => {
     const { container } = renderXml('<TEI><text><body><div><list type="ordered"/></div></body></text></TEI>');
 

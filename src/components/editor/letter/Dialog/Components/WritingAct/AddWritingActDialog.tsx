@@ -2,18 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DefaultDialogProps } from '@src/components/editor/letter/Dialog/EditorFormDialog';
 import { EditorConstants, EntityType, HeaderPerson } from '@src/constants/editor';
 import FormAutocomplete from '@src/components/editor/letter/Util/FormAutocomplete';
-import {
-  Box,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Typography,
-} from '@mui/material';
+import { Box, Checkbox, Divider, FormControlLabel, FormGroup, IconButton, List, ListItem, ListItemText, Typography } from '@mui/material';
 import DynamicDataDisplay from '@src/components/support/DynamicDataDisplay';
 import { DISPLAY_NAME_MAP } from '@src/utils/entityMappings';
 import { fetchMetamwEntityData } from '@src/services/auto_anno/apiMetaMw.service';
@@ -30,9 +19,38 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
 import { MiscUtils } from '@src/utils/misc';
+import { resolveSourceElement } from '@src/utils/editor/paragraphStructure';
+
+const isWritingAct = (element: Element): boolean =>
+  element.localName.toLowerCase() === 'div' && element.getAttribute('type') === 'act_of_writing';
+
+const directWritingActPeople = (writingAct: Element, role: 'author' | 'writer'): HeaderPerson[] =>
+  Array.from(writingAct.children)
+    .filter(
+      (child) =>
+        child.localName.toLowerCase() === 'docauthor' &&
+        child.getAttribute('resp') === role &&
+        Boolean(child.getAttribute('data-key')) &&
+        Boolean(child.textContent?.trim()),
+    )
+    .map((child) => ({
+      key: child.getAttribute('data-key')!,
+      name: child.textContent!.trim(),
+    }));
+
+const referencedWritingAct = (xmlDoc: XMLDocument, sourcePath: string | null): Element | null => {
+  if (!sourcePath) return null;
+  try {
+    const referencedElement = resolveSourceElement(xmlDoc, sourcePath);
+    return isWritingAct(referencedElement) ? referencedElement : null;
+  } catch {
+    return null;
+  }
+};
 
 const AddWritingActDialog = (props: DefaultDialogProps) => {
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const letterReference = useSelector((state: RootState) => state.editorLetter.letterReference);
 
   const [authors, setAuthors] = React.useState<HeaderPerson[]>([]);
   const [writers, setWriters] = React.useState<HeaderPerson[]>([]);
@@ -47,12 +65,24 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
   const xmlDoc = props.xmlDoc;
 
   useEffect(() => {
+    if (!xmlDoc) return;
+
+    let sourceWritingAct = referencedWritingAct(xmlDoc, letterReference.elementXmlId);
+
+    if (!sourceWritingAct) {
+      const writingActs = Array.from(xmlDoc.getElementsByTagNameNS('*', 'div')).filter(isWritingAct);
+      sourceWritingAct = writingActs.at(-1) ?? null;
+    }
+
+    if (!sourceWritingAct) return;
+    setAuthors(directWritingActPeople(sourceWritingAct, 'author'));
+    setWriters(directWritingActPeople(sourceWritingAct, 'writer'));
+  }, [letterReference.elementXmlId, xmlDoc]);
+
+  useEffect(() => {
     const fetchDefaultPeople = async () => {
       try {
-        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(
-          null,
-          EntityType.PERSON,
-        );
+        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.PERSON);
 
         if (defaultPeople === undefined) {
           enqueueSnackbar('No people found', { variant: 'error' });
@@ -79,12 +109,9 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
       const result = await fetchMetamwEntityData(reference.key);
       setDisplayData(result);
     } catch (error) {
-      enqueueSnackbar(
-        `Error fetching data for entity with key: ${reference.key} ${MiscUtils.misc.getErrorMessage(error)}`,
-        {
-          variant: 'error',
-        },
-      );
+      enqueueSnackbar(`Error fetching data for entity with key: ${reference.key} ${MiscUtils.misc.getErrorMessage(error)}`, {
+        variant: 'error',
+      });
     }
   };
 
@@ -106,10 +133,7 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
         enqueueSnackbar('Author already added', { variant: 'warning' });
         return;
       }
-      setAuthors((prev) => [
-        ...prev,
-        { key: selectedPerson.entityKey, name: selectedPerson.entityName },
-      ]);
+      setAuthors((prev) => [...prev, { key: selectedPerson.entityKey, name: selectedPerson.entityName }]);
     }
 
     if (roleWriter) {
@@ -117,10 +141,7 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
         enqueueSnackbar('Writer already added', { variant: 'warning' });
         return;
       }
-      setWriters((prev) => [
-        ...prev,
-        { key: selectedPerson.entityKey, name: selectedPerson.entityName },
-      ]);
+      setWriters((prev) => [...prev, { key: selectedPerson.entityKey, name: selectedPerson.entityName }]);
     }
 
     setSelectedPerson(null);
@@ -149,14 +170,10 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
     });
 
     try {
-      markupGeneration.insertActOfWritingBlock(xmlDoc, authorWriters);
+      const insertionReference = referencedWritingAct(xmlDoc, letterReference.elementXmlId);
+      markupGeneration.insertActOfWritingBlock(xmlDoc, authorWriters, insertionReference);
 
-      props.onSave(
-        xmlDoc,
-        EditorConstants.changeTypes.misc.ACT_OF_WRITING_ADDED,
-        'Neuer Schreibakt wurde hinzugefügt',
-        null,
-      );
+      props.onSave(xmlDoc, EditorConstants.changeTypes.misc.ACT_OF_WRITING_ADDED, 'Neuer Schreibakt wurde hinzugefügt', null);
     } catch (error) {
       enqueueSnackbar('Error durign adding writing act: ' + MiscUtils.misc.getErrorMessage(error), {
         variant: 'error',
@@ -170,11 +187,7 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
     <>
       <DialogContent>
         <div className="autoSnippetFormRow">
-          {displayData !== null ? (
-            <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
-          ) : (
-            <></>
-          )}
+          {displayData !== null ? <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} /> : <></>}
         </div>
         <div className="autoSnippetFormRow" style={{ marginTop: '25px', width: '98%' }}>
           <Typography variant="h6">Autoren</Typography>
@@ -235,21 +248,11 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
             />
             <FormGroup>
               <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={roleAuthor}
-                    onChange={(e) => setRoleAuthor(e.target.checked)}
-                  />
-                }
+                control={<Checkbox checked={roleAuthor} onChange={(e) => setRoleAuthor(e.target.checked)} />}
                 label="Autor"
               />
               <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={roleWriter}
-                    onChange={(e) => setRoleWriter(e.target.checked)}
-                  />
-                }
+                control={<Checkbox checked={roleWriter} onChange={(e) => setRoleWriter(e.target.checked)} />}
                 label="Schreiber"
               />
             </FormGroup>

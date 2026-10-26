@@ -1,11 +1,14 @@
 import {
+  appendParagraphToSection,
   canInsertSiblingSection,
   childSectionTag,
   convertParagraph,
   insertParagraphAfter,
   insertSection,
+  removeSectionHeading,
   resolveSourceElement,
   splitMarkedParagraph,
+  updatePlainParagraphText,
   updateSectionHeading,
 } from '@src/utils/editor/paragraphStructure';
 
@@ -49,6 +52,38 @@ describe('paragraphStructure', () => {
     expect(paragraph.querySelector('hi')?.textContent).toBe('bold');
   });
 
+  it('inserts an empty paragraph that can be filled afterwards', () => {
+    const xmlDoc = parseXml(letterXml('<div><p>First</p></div>'));
+
+    const paragraph = insertParagraphAfter(xmlDoc.querySelector('p')!, 'indented', '');
+
+    expect(paragraph.textContent).toBe('');
+    expect(xmlDoc.querySelectorAll('p')).toHaveLength(2);
+  });
+
+  it('appends a paragraph directly to a writing act before nested sections', () => {
+    const xmlDoc = parseXml(letterXml('<div type="act_of_writing"><docAuthor>A</docAuthor><p>First</p><div><p>Nested</p></div></div>'));
+    const writingAct = xmlDoc.querySelector('div[type="act_of_writing"]')!;
+
+    const paragraph = appendParagraphToSection(writingAct, 'without-indent', 'Second');
+
+    expect(paragraph.parentElement).toBe(writingAct);
+    expect(paragraph.getAttribute('style')).toBe('paragraph_without_indent');
+    expect(Array.from(writingAct.children).map((child) => child.localName)).toEqual(['docAuthor', 'p', 'p', 'div']);
+    expect(writingAct.querySelectorAll(':scope > div')).toHaveLength(1);
+  });
+
+  it('updates only plain paragraph text and rejects paragraphs with embedded markup', () => {
+    const xmlDoc = parseXml(letterXml('<div><p xml:id="plain">Old</p><p xml:id="rich">Text <hi rend="italic">marked</hi></p></div>'));
+
+    const plain = updatePlainParagraphText(xmlDoc, '0.0.0.0', 'Copied\r\ntext');
+
+    expect(plain.textContent).toBe('Copied\ntext');
+    expect(plain.getAttribute('xml:id')).toBe('plain');
+    expect(() => updatePlainParagraphText(xmlDoc, '0.0.0.1', 'Replacement')).toThrow(/embedded markup/);
+    expect(xmlDoc.querySelector('[xml\\:id="rich"] hi')?.textContent).toBe('marked');
+  });
+
   it('splits a paragraph around the marked selection and keeps inline markup and a unique id', () => {
     const xmlDoc = parseXml(
       letterXml(
@@ -81,6 +116,17 @@ describe('paragraphStructure', () => {
     expect(div1.nextElementSibling).toBe(sibling);
   });
 
+  it('creates a section without a synthetic heading and keeps an empty editable paragraph', () => {
+    const xmlDoc = parseXml(letterXml('<div><p>Text</p></div>'));
+    const section = xmlDoc.querySelector('div')!;
+
+    const child = insertSection(section, 'child', '', '');
+
+    expect(child.querySelector(':scope > head')).toBeNull();
+    expect(child.querySelector(':scope > p')).not.toBeNull();
+    expect(child.querySelector(':scope > p')?.textContent).toBe('');
+  });
+
   it('rejects an invalid section level and edits an existing section heading', () => {
     const xmlDoc = parseXml(letterXml('<div7><head>Old</head><p>Text</p></div7>'));
     const div7 = xmlDoc.querySelector('div7')!;
@@ -90,6 +136,17 @@ describe('paragraphStructure', () => {
     expect(canInsertSiblingSection(div7)).toBe(true);
     updateSectionHeading(div7, 'New');
     expect(div7.querySelector('head')?.textContent).toBe('New');
+  });
+
+  it('removes only the direct section heading', () => {
+    const xmlDoc = parseXml(letterXml('<div1><head>Heading</head><p>Text</p><div2><head>Nested</head><p>Nested text</p></div2></div1>'));
+    const section = xmlDoc.querySelector('div1')!;
+
+    removeSectionHeading(section);
+
+    expect(section.querySelector(':scope > head')).toBeNull();
+    expect(section.querySelector(':scope > p')?.textContent).toBe('Text');
+    expect(section.querySelector('div2 > head')?.textContent).toBe('Nested');
   });
 
   it('resolves rendered source paths from the TEI document element', () => {

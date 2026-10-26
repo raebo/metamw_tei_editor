@@ -7,6 +7,7 @@ import { EditorConstants } from '@src/constants/editor';
 import type { DefaultDialogProps } from '../EditorFormDialog';
 import {
   PARAGRAPH_VARIANTS,
+  appendParagraphToSection,
   convertParagraph,
   insertParagraphAfter,
   insertSection,
@@ -19,7 +20,12 @@ import {
 } from '@src/utils/editor/paragraphStructure';
 import { MiscUtils } from '@src/utils/misc';
 
-const PARAGRAPH_OPERATIONS = new Set<ParagraphStructureOperation>(['paragraph-insert', 'paragraph-convert', 'paragraph-split']);
+const PARAGRAPH_OPERATIONS = new Set<ParagraphStructureOperation>([
+  'paragraph-insert',
+  'paragraph-append',
+  'paragraph-convert',
+  'paragraph-split',
+]);
 
 const ParagraphStructureDialog = (props: DefaultDialogProps) => {
   const { t } = useTranslation();
@@ -51,11 +57,9 @@ const ParagraphStructureDialog = (props: DefaultDialogProps) => {
 
   const submitDisabled = useMemo(() => {
     if (!operation || errorMessage) return true;
-    if (operation === 'paragraph-insert') return !paragraphText.trim();
-    if (isSectionInsert) return !heading.trim() && !paragraphText.trim();
     if (operation === 'section-edit') return !heading.trim();
     return false;
-  }, [errorMessage, heading, isSectionInsert, operation, paragraphText]);
+  }, [errorMessage, heading, operation]);
 
   const save = () => {
     if (!props.xmlDoc || !operation) return;
@@ -69,6 +73,9 @@ const ParagraphStructureDialog = (props: DefaultDialogProps) => {
         switch (operation) {
           case 'paragraph-insert':
             insertParagraphAfter(sourceElement, variant, paragraphText);
+            break;
+          case 'paragraph-append':
+            appendParagraphToSection(sourceElement, variant, paragraphText);
             break;
           case 'paragraph-convert':
             convertParagraph(sourceElement, variant);
@@ -118,9 +125,8 @@ const ParagraphStructureDialog = (props: DefaultDialogProps) => {
           ))}
         </TextField>
       )}
-      {(operation === 'paragraph-insert' || isSectionInsert) && (
+      {(operation === 'paragraph-insert' || operation === 'paragraph-append' || isSectionInsert) && (
         <TextField
-          required={operation === 'paragraph-insert'}
           multiline
           minRows={2}
           label={t('editor:dialog.paragraphStructure.fields.paragraphText')}

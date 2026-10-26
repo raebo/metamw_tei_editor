@@ -520,14 +520,20 @@
     "contextAction": "Paragraphs and sections",
     "actions": {
       "insertParagraph": "Insert paragraph after …",
+      "appendParagraph": "Add paragraph to this section …",
       "convertParagraph": "Change paragraph format …",
       "splitParagraph": "Separate selection as paragraph …",
-      "insertChildSection": "Insert subsection …",
+      "insertChildSection": "Insert structural subsection (div) …",
       "insertSiblingSection": "Insert sibling section after …",
-      "editSection": "Edit section heading …"
+      "editSection": "Edit section heading …",
+      "deleteSectionHeading": "Delete section heading",
+      "addWritingAct": "Add another writing act …",
+      "moveWritingActUp": "Move writing act up",
+      "moveWritingActDown": "Move writing act down"
     },
     "operations": {
       "paragraph-insert": "A new paragraph is inserted after the selected paragraph.",
+      "paragraph-append": "A new paragraph is created directly in the selected section without an additional div container.",
       "paragraph-convert": "The selected paragraph is converted to the chosen variant.",
       "paragraph-split": "The selected text is separated into its own paragraph.",
       "section-child": "A new subsection is created inside the selected section.",
@@ -549,6 +555,9 @@
     },
     "submit": "Apply change",
     "success": "The paragraph or section structure was updated.",
+    "paragraphTextSaved": "The paragraph text was saved.",
+    "sectionHeadingRemoved": "The section heading was deleted.",
+    "emptyParagraphPlaceholder": "Type or paste text …",
     "errors": {
       "context": "The editing context is no longer available."
     }

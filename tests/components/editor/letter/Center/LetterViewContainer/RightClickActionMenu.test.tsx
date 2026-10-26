@@ -18,7 +18,7 @@ jest.mock('notistack', () => ({
 }));
 
 const sourceXml =
-  '<TEI><text><body><div xml:id="act_1"><p xml:id="paragraph_1">Text</p><list type="ordered"><item>First</item></list><table rows="1" cols="1"><row><cell>A</cell></row></table><figure xml:id="figure_1"><graphic url="file:/images/test.png"/></figure></div></body></text></TEI>';
+  '<TEI><text><body><div xml:id="act_1" type="act_of_writing" n="1"><p xml:id="paragraph_1">Text</p><list type="ordered"><item>First</item></list><table rows="1" cols="1"><row><cell>A</cell></row></table><figure xml:id="figure_1"><graphic url="file:/images/test.png"/></figure><div1><head>Heading</head><p>Section text</p></div1></div><div xml:id="act_2" type="act_of_writing" n="2"><p>Second act</p></div></body></text></TEI>';
 
 const ContextMenuHarness = () => {
   const xmlContentRef = useRef<HTMLDivElement>(null);
@@ -30,6 +30,7 @@ const ContextMenuHarness = () => {
     const text = document.createElement('text');
     const body = document.createElement('body');
     const div = document.createElement('div');
+    const secondDiv = document.createElement('div');
     const paragraph = document.createElement('p');
     const list = document.createElement('list');
     const item = document.createElement('item');
@@ -38,6 +39,9 @@ const ContextMenuHarness = () => {
     const row = document.createElement('tr');
     const cell = document.createElement('td');
     const figure = document.createElement('figure');
+    const section = document.createElement('div1');
+    const sectionHead = document.createElement('head');
+    const sectionParagraph = document.createElement('p');
     const manuscriptCaret = document.createElement('button');
     const manuscriptAnnotation = document.createElement('p');
     const footnoteReference = document.createElement('ref');
@@ -55,6 +59,13 @@ const ContextMenuHarness = () => {
     const antiqua = document.createElement('hi');
     const gothic = document.createElement('hi');
     div.setAttribute('xml:id', 'act_1');
+    div.setAttribute('type', 'act_of_writing');
+    div.setAttribute('n', '1');
+    secondDiv.setAttribute('xml:id', 'act_2');
+    secondDiv.setAttribute('type', 'act_of_writing');
+    secondDiv.setAttribute('n', '2');
+    secondDiv.dataset.editorXmlPath = '0.0.1';
+    secondDiv.textContent = 'Second act';
     div.dataset.editorXmlPath = '0.0.0';
     paragraph.setAttribute('xml:id', 'paragraph_1');
     paragraph.dataset.editorXmlPath = '0.0.0.0';
@@ -75,6 +86,12 @@ const ContextMenuHarness = () => {
     figure.dataset.editorXmlPath = '0.0.0.3';
     figure.setAttribute('xml:id', 'figure_1');
     figure.textContent = 'Figure';
+    section.dataset.editorXmlPath = '0.0.0.4';
+    sectionHead.dataset.editorXmlPath = '0.0.0.4.0';
+    sectionHead.textContent = 'Heading';
+    sectionParagraph.dataset.editorXmlPath = '0.0.0.4.1';
+    sectionParagraph.textContent = 'Section text';
+    section.append(sectionHead, sectionParagraph);
     manuscriptCaret.dataset.editorManuscriptAnnotationReference = 'script_annotation_1';
     manuscriptCaret.textContent = '▶';
     manuscriptAnnotation.className = 'tei-manuscript-annotation';
@@ -121,8 +138,8 @@ const ContextMenuHarness = () => {
     gothic.textContent = 'Zeitung';
     row.appendChild(cell);
     table.appendChild(row);
-    div.append(paragraph, list, tableCaret, table, figure);
-    body.appendChild(div);
+    div.append(paragraph, list, tableCaret, table, figure, section);
+    body.append(div, secondDiv);
     text.appendChild(body);
     tei.appendChild(text);
     xmlContentRef.current.append(
@@ -261,11 +278,8 @@ describe('RightClickActionMenu figure upload action', () => {
       /Antiqua.*auszeichnen|Mark print text as Antiqua/i,
       /Frakturschrift.*auszeichnen|Mark print text as Fraktur/i,
     ];
-    for (const name of labels)
-      expect(screen.queryByRole('menuitem', { name })).not.toBeInTheDocument();
-    fireEvent.click(
-      await screen.findByRole('menuitem', { name: /Schriftformatierung|Text formatting/ }),
-    );
+    for (const name of labels) expect(screen.queryByRole('menuitem', { name })).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Schriftformatierung|Text formatting/ }));
     for (const name of labels) expect(screen.getByRole('menuitem', { name })).toBeVisible();
     fireEvent.click(screen.getByRole('menuitem', { name: labels[0] }));
     await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
@@ -806,6 +820,160 @@ describe('RightClickActionMenu figure upload action', () => {
       elementXmlId: '0.0.0.0',
       elementKey: 'paragraph-insert',
     });
+  });
+
+  it('adds a paragraph directly to the selected writing act without choosing a subsection', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('div[type="act_of_writing"]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Absätze und Abschnitte|Paragraphs and sections/,
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Absatz in diesem Abschnitt hinzufügen|Add paragraph to this section/,
+      }),
+    );
+
+    expect(store.getState().editorLetter.dialogType).toBe('PARAGRAPH_STRUCTURE');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'div',
+      elementXmlId: '0.0.0',
+      elementKey: 'paragraph-append',
+    });
+  });
+
+  it('opens the existing writing-act dialog from a writing act context menu', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('div[type="act_of_writing"]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Absätze und Abschnitte|Paragraphs and sections/,
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Weiteren Schreibakt hinzufügen|Add another writing act/,
+      }),
+    );
+
+    expect(store.getState().editorLetter.dialogType).toBe('ADD_WRITING_PART');
+    expect(store.getState().editorLetter.letterReference).toEqual({
+      elementType: 'div',
+      elementXmlId: '0.0.0',
+      elementKey: null,
+    });
+  });
+
+  it('moves a writing act from the visible section submenu and keeps numbering sequential', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const patchContent = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue(true);
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('div[type="act_of_writing"][n="1"]')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Absätze und Abschnitte|Paragraphs and sections/,
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Schreibakt nach unten verschieben|Move writing act down/,
+      }),
+    );
+
+    await waitFor(() => expect(patchContent).toHaveBeenCalledTimes(1));
+    const persistedDocument = new DOMParser().parseFromString(patchContent.mock.calls[0][0], 'application/xml');
+    const writingActs = Array.from(persistedDocument.querySelectorAll('body > div[type="act_of_writing"]'));
+    expect(writingActs.map((writingAct) => writingAct.getAttribute('xml:id'))).toEqual(['act_2', 'act_1']);
+    expect(writingActs.map((writingAct) => writingAct.getAttribute('n'))).toEqual(['1', '2']);
+  });
+
+  it('deletes only the selected section heading through the structure context menu', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    const patchContent = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue(true);
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('div1')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Absätze und Abschnitte|Paragraphs and sections/,
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Abschnittsüberschrift löschen|Delete section heading/,
+      }),
+    );
+
+    await waitFor(() => expect(patchContent).toHaveBeenCalledTimes(1));
+    const persistedXml = patchContent.mock.calls[0][0];
+    const persistedDocument = new DOMParser().parseFromString(persistedXml, 'application/xml');
+    const section = persistedDocument.querySelector('div1')!;
+    expect(section.querySelector(':scope > head')).toBeNull();
+    expect(section.querySelector(':scope > p')?.textContent).toBe('Section text');
+    patchContent.mockRestore();
   });
 
   it('opens the list structure dialog for an existing list item', async () => {

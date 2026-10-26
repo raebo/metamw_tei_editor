@@ -12,21 +12,16 @@ function currentWritingAct(xmlDoc: XMLDocument, numberOfWritingAct: number): Ele
 }
 
 function allWritingActs(xmlDoc: XMLDocument): Element[] {
-  const textNode = xmlDoc.children[0].children[1];
-  if (!textNode) throw new Error('No text node found in XML document.');
-
-  const bodyNode = Array.from(textNode.children).find(
-    (child) => child.nodeName.toLowerCase() === 'body',
-  );
-
+  const bodyNode = xmlDoc.querySelector('text > body');
   if (!bodyNode) throw new Error('No body node found in text.');
 
   return Array.from(bodyNode.children).filter((bodyChild) => {
-    return (
-      bodyChild.nodeName.toLowerCase() === 'div' &&
-      bodyChild.getAttribute('type') === 'act_of_writing'
-    );
+    return bodyChild.nodeName.toLowerCase() === 'div' && bodyChild.getAttribute('type') === 'act_of_writing';
   });
+}
+
+function renumberWritingActs(xmlDoc: XMLDocument): void {
+  allWritingActs(xmlDoc).forEach((writingAct, index) => writingAct.setAttribute('n', String(index + 1)));
 }
 
 export const writingActContent = {
@@ -39,10 +34,7 @@ export const writingActContent = {
     if (!parentChildren) return false;
 
     const allWritingActsList = Array.from(parentChildren).filter((bodyChild) => {
-      return (
-        bodyChild.nodeName.toLowerCase() === 'div' &&
-        bodyChild.getAttribute('type') === 'act_of_writing'
-      );
+      return bodyChild.nodeName.toLowerCase() === 'div' && bodyChild.getAttribute('type') === 'act_of_writing';
     });
 
     return numberOfWritingAct > 1 && allWritingActsList.length > 1;
@@ -56,10 +48,7 @@ export const writingActContent = {
     if (!parentChildren) return false;
 
     const allWritingActsList = Array.from(parentChildren).filter((bodyChild) => {
-      return (
-        bodyChild.nodeName.toLowerCase() === 'div' &&
-        bodyChild.getAttribute('type') === 'act_of_writing'
-      );
+      return bodyChild.nodeName.toLowerCase() === 'div' && bodyChild.getAttribute('type') === 'act_of_writing';
     });
 
     return numberOfWritingAct < allWritingActsList.length; //minimal position is 1
@@ -68,50 +57,33 @@ export const writingActContent = {
     if (!xmlDoc) throw new Error('No XML document provided.');
 
     const resolved = currentWritingAct(xmlDoc, Number(node.getAttribute('n')));
-    if (!resolved) throw new Error('Node not found in xmlDoc.');
-
-    const prevSibling = resolved.previousElementSibling;
-    if (!prevSibling) throw new Error('No previous sibling found.');
+    const writingActs = allWritingActs(xmlDoc);
+    const currentIndex = writingActs.indexOf(resolved);
+    const previousWritingAct = writingActs[currentIndex - 1];
+    if (!previousWritingAct) throw new Error('No previous writing act found.');
 
     const parent = resolved.parentNode;
     if (!parent) throw new Error('No parent node found.');
 
-    parent.insertBefore(resolved, prevSibling);
-
-    const nResolved = resolved.getAttribute('n');
-    const nNext = prevSibling.getAttribute('n');
-
-    if (nResolved !== null && nNext !== null) {
-      resolved.setAttribute('n', nNext);
-      prevSibling.setAttribute('n', nResolved);
-    }
+    parent.insertBefore(resolved, previousWritingAct);
+    renumberWritingActs(xmlDoc);
   },
   moveActDown: (xmlDoc: XMLDocument | null, node: Element): void => {
     if (!xmlDoc) throw new Error('No XML document provided.');
 
     const resolved = currentWritingAct(xmlDoc, Number(node.getAttribute('n')));
-    if (!resolved) throw new Error('Node not found in xmlDoc.');
-
-    const nextSibling = resolved.nextElementSibling;
-    if (!nextSibling) throw new Error('No next sibling found.');
+    const writingActs = allWritingActs(xmlDoc);
+    const currentIndex = writingActs.indexOf(resolved);
+    const nextWritingAct = writingActs[currentIndex + 1];
+    if (!nextWritingAct) throw new Error('No next writing act found.');
 
     const parent = resolved.parentNode;
     if (!parent) throw new Error('No parent node found.');
 
-    parent.insertBefore(nextSibling, resolved);
-
-    const nResolved = resolved.getAttribute('n');
-    const nNext = nextSibling.getAttribute('n');
-
-    if (nResolved !== null && nNext !== null) {
-      resolved.setAttribute('n', nNext);
-      nextSibling.setAttribute('n', nResolved);
-    }
+    parent.insertBefore(nextWritingAct, resolved);
+    renumberWritingActs(xmlDoc);
   },
-  extractAuthorsWriters: (
-    xmlDoc: XMLDocument,
-    numberOfWritingAct: number | null,
-  ): { authors: HeaderPerson[]; writers: HeaderPerson[] } => {
+  extractAuthorsWriters: (xmlDoc: XMLDocument, numberOfWritingAct: number | null): { authors: HeaderPerson[]; writers: HeaderPerson[] } => {
     if (!numberOfWritingAct) throw new Error('No writing act number provided.');
 
     const authors: HeaderPerson[] = [];
@@ -143,22 +115,14 @@ export const writingActContent = {
 
     return { authors, writers };
   },
-  setAuthorsWriters: (
-    xmlDoc: XMLDocument,
-    numberOfWritingAct: number | null,
-    authors: HeaderPerson[],
-    writers: HeaderPerson[],
-  ): void => {
+  setAuthorsWriters: (xmlDoc: XMLDocument, numberOfWritingAct: number | null, authors: HeaderPerson[], writers: HeaderPerson[]): void => {
     const newChildNodes: Element[] = [];
     if (!numberOfWritingAct) throw new Error('No writing act number provided.');
 
     const writingAct = currentWritingAct(xmlDoc, numberOfWritingAct);
 
     Array.from(writingAct.children).forEach((child) => {
-      if (
-        child.nodeName === 'docAuthor' &&
-        (child.getAttribute('resp') === 'author' || child.getAttribute('resp') === 'writer')
-      ) {
+      if (child.nodeName === 'docAuthor' && (child.getAttribute('resp') === 'author' || child.getAttribute('resp') === 'writer')) {
         writingAct.removeChild(child);
       }
     });

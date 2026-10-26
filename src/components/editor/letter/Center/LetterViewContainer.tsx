@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fetchLetterData } from '@src/services/editor/apiLettersRequest.service';
 import XMLDisplayParser from './LetterViewContainer/XmlDisplayParser';
-import { useSelector } from 'react-redux';
+import { useSelector, useStore } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import { Alert } from '@mui/material';
 import { useAppDispatch } from '@src/redux/hooks';
-import { LetterState } from '@src/constants/editor';
+import { EditorConstants, LetterState } from '@src/constants/editor';
 import { fetchPinnedLetterData } from '@src/services/editor/apiPinnedLettersRequest.service';
 import LetterViewCode from './LetterViewCode';
 import { setReloadXmlContentLetterThunk } from '@src/redux/thunks/editor.letter.thunk';
@@ -16,13 +16,17 @@ import { MiscUtils } from '@src/utils/misc';
 import type { EditorLetterData } from '@src/services/mappings/editorMappings';
 import LeftClickAnnotationAction from '@src/components/editor/letter/Center/LetterViewContainer/LeftClickAnnotationAction';
 import { useTranslation } from 'react-i18next';
+import { runXmlAction } from './lib/keyHandlerDefinitions';
+import { updatePlainParagraphText } from '@src/utils/editor/paragraphStructure';
 
 const LetterViewContainer = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
+  const reduxStore = useStore();
   const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const xmlContentRef = useRef<HTMLDivElement | null>(null);
+  const pendingParagraphEdits = useRef(new Map<string, string>());
   const [anchorPosition, setAnchorPosition] = useState<null | { top: number; left: number }>(null);
 
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
@@ -40,14 +44,92 @@ const LetterViewContainer = () => {
   const activeLetterIsPinned = statePinnedLetters.some((letter) => letter.id === stateEditorLetter.id && letter.isPinned === true);
   const isDebugMode = process.env.REACT_DEBUG_MODE === 'true';
 
-  const preventDirectEdit = (event: React.SyntheticEvent) => event.preventDefault();
+  const editableParagraphForTarget = useCallback((target: EventTarget | null): HTMLElement | null => {
+    const targetElement = target instanceof Element ? target : null;
+    const paragraph = targetElement?.closest<HTMLElement>('p[data-editor-plain-paragraph="true"]') ?? null;
+    return paragraph && xmlContentRef.current?.contains(paragraph) ? paragraph : null;
+  }, []);
+
+  const preventDirectEdit = (event: React.SyntheticEvent) => {
+    const paragraph = editableParagraphForTarget(event.target);
+    const inputType = 'inputType' in event.nativeEvent ? String(event.nativeEvent.inputType) : '';
+    if (paragraph && inputType !== 'insertParagraph' && inputType !== 'insertLineBreak') return;
+    event.preventDefault();
+  };
   const preventMutationKey = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (editableParagraphForTarget(event.target)) {
+      if (event.key === 'Enter') event.preventDefault();
+      return;
+    }
     const mutatesContent =
       event.key === 'Backspace' ||
       event.key === 'Delete' ||
       event.key === 'Enter' ||
       (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey);
     if (mutatesContent) event.preventDefault();
+  };
+
+  const rememberParagraphEdit = useCallback((paragraph: HTMLElement) => {
+    const sourcePath = paragraph.dataset.editorXmlPath;
+    if (sourcePath === undefined) return;
+    pendingParagraphEdits.current.set(sourcePath, paragraph.textContent ?? '');
+  }, []);
+
+  const handleParagraphInput = (event: React.FormEvent<HTMLDivElement>) => {
+    const paragraph = editableParagraphForTarget(event.target);
+    if (paragraph) rememberParagraphEdit(paragraph);
+  };
+
+  const handleParagraphPaste = (event: React.ClipboardEvent<HTMLDivElement>) => {
+    const paragraph = editableParagraphForTarget(event.target);
+    if (!paragraph) {
+      event.preventDefault();
+      return;
+    }
+
+    event.preventDefault();
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount !== 1) return;
+    const range = selection.getRangeAt(0);
+    const commonAncestor = range.commonAncestorContainer;
+    if (commonAncestor !== paragraph && !paragraph.contains(commonAncestor)) return;
+
+    range.deleteContents();
+    const insertedText = document.createTextNode(event.clipboardData.getData('text/plain').replace(/\r\n?/g, '\n'));
+    range.insertNode(insertedText);
+    range.setStartAfter(insertedText);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    paragraph.normalize();
+    rememberParagraphEdit(paragraph);
+  };
+
+  const saveParagraphEdit = useCallback(
+    async (paragraph: HTMLElement) => {
+      const sourcePath = paragraph.dataset.editorXmlPath;
+      if (sourcePath === undefined) return;
+      const text = pendingParagraphEdits.current.get(sourcePath);
+      if (text === undefined) return;
+      pendingParagraphEdits.current.delete(sourcePath);
+
+      const result = await runXmlAction(
+        dispatch,
+        () => reduxStore.getState() as RootState,
+        (xmlDoc) => {
+          updatePlainParagraphText(xmlDoc, sourcePath, text);
+        },
+        EditorConstants.changeTypes.MANUAL_CODE_CHANGE,
+        t('editor:dialog.paragraphStructure.paragraphTextSaved'),
+      );
+      if (result === null) pendingParagraphEdits.current.set(sourcePath, text);
+    },
+    [dispatch, reduxStore, t],
+  );
+
+  const handleParagraphBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    const paragraph = editableParagraphForTarget(event.target);
+    if (paragraph) void saveParagraphEdit(paragraph);
   };
 
   useEffect(() => {
@@ -191,12 +273,14 @@ const LetterViewContainer = () => {
                     contentEditable
                     suppressContentEditableWarning
                     spellCheck={false}
-                    aria-readonly="true"
+                    aria-readonly="false"
                     onBeforeInput={preventDirectEdit}
                     onCut={preventDirectEdit}
-                    onPaste={preventDirectEdit}
+                    onPaste={handleParagraphPaste}
                     onDrop={preventDirectEdit}
                     onKeyDownCapture={preventMutationKey}
+                    onInput={handleParagraphInput}
+                    onBlurCapture={handleParagraphBlur}
                   >
                     {letterState.xmlContent && parserXmlMemo}
                   </div>

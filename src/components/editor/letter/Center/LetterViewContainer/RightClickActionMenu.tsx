@@ -19,12 +19,8 @@ import { debounce } from 'lodash-es';
 import { rightClickPathHandles } from '@src/utils/editor/rightClickPathHandles';
 import { useTranslation } from 'react-i18next';
 import { findFigureAnchor } from '@src/utils/editor/figureAnchor';
-import type { ParagraphStructureOperation } from '@src/utils/editor/paragraphStructure';
-import {
-  canInsertSectionAddressLine,
-  insertSectionAddressLine,
-  resolveAddressSource,
-} from '@src/utils/editor/sectionAddressLine';
+import { removeSectionHeading, resolveSourceElement, type ParagraphStructureOperation } from '@src/utils/editor/paragraphStructure';
+import { canInsertSectionAddressLine, insertSectionAddressLine, resolveAddressSource } from '@src/utils/editor/sectionAddressLine';
 import type { ListStructureOperation } from '@src/utils/editor/listStructure';
 import type { TableStructureOperation } from '@src/utils/editor/tableStructure';
 import type { GraphicStructureOperation } from '@src/components/editor/letter/Dialog/Components/GraphicStructureDialog';
@@ -111,10 +107,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
     const rememberSection = (event: MouseEvent) => {
       if (event.button !== 0) return;
       const target = event.target instanceof Element ? event.target : null;
-      addressSectionReference.current =
-        target && xmlContentRef.current?.contains(target)
-          ? getAddressSectionReference(target)
-          : null;
+      addressSectionReference.current = target && xmlContentRef.current?.contains(target) ? getAddressSectionReference(target) : null;
     };
     const insertFromShortcut = (event: KeyboardEvent) => {
       if (
@@ -169,6 +162,19 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         (xmlDoc) => removeInlineFormatting(resolveInlineFormatting(xmlDoc, reference, format), format),
         EditorConstants.changeTypes.misc.CONTENT_FORMAT_CHANGED,
         t(`editor:dialog.inlineFormatting.${format}.removed`),
+      );
+    },
+    [dispatch, reduxStore, t],
+  );
+
+  const deleteSectionHeading = useCallback(
+    (sourcePath: string) => {
+      void runXmlAction(
+        dispatch,
+        () => reduxStore.getState() as RootState,
+        (xmlDoc) => removeSectionHeading(resolveSourceElement(xmlDoc, sourcePath)),
+        EditorConstants.changeTypes.misc.BODY_STRUCTURE_CHANGED,
+        t('editor:dialog.paragraphStructure.sectionHeadingRemoved'),
       );
     },
     [dispatch, reduxStore, t],
@@ -483,9 +489,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       setDisplayMenuItems([]);
       const targetNode = event.target as Node;
       const targetElement = targetNode.nodeType === Node.ELEMENT_NODE ? (targetNode as HTMLElement) : targetNode.parentElement;
-      const addressLineTarget = targetElement?.closest<HTMLElement>(
-        '[data-editor-address-line-reference]',
-      );
+      const addressLineTarget = targetElement?.closest<HTMLElement>('[data-editor-address-line-reference]');
       const addressLineReference = addressLineTarget?.dataset.editorAddressLineReference;
       if (addressLineReference) {
         const openAddressLine = (operation: 'edit' | 'delete') =>
@@ -898,6 +902,61 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         const sectionName = sectionAnchor.localName.toLowerCase();
         const sectionLevel = sectionName === 'div' ? 0 : Number(sectionName.slice(3));
         const isWritingAct = sectionAnchor.getAttribute('type') === 'act_of_writing';
+        const sectionSource = resolveTeiElementByPath(xmlDocRef.current, sectionAnchor.dataset.editorXmlPath);
+        const hasHeading = Boolean(
+          sectionSource && Array.from(sectionSource.children).some((child) => child.localName.toLowerCase() === 'head'),
+        );
+
+        structureActions.push({
+          label: t('editor:dialog.paragraphStructure.actions.appendParagraph'),
+          action: () => openStructureDialog('paragraph-append', sectionAnchor),
+        });
+
+        if (isWritingAct) {
+          structureActions.push({
+            label: t('editor:dialog.paragraphStructure.actions.addWritingAct'),
+            action: () => {
+              const sourcePath = sectionAnchor.dataset.editorXmlPath;
+              if (sourcePath === undefined) return;
+              dispatch(
+                setEditorDialogAndReferenceThunk({
+                  dialogType: EditorConstants.dialogTypes.ADD_WRITING_PART,
+                  elementType: sectionAnchor.localName,
+                  elementXmlId: sourcePath,
+                  elementKey: null,
+                }),
+              );
+            },
+          });
+
+          const writingActs = sectionSource?.parentElement
+            ? Array.from(sectionSource.parentElement.children).filter(
+                (child) => child.localName.toLowerCase() === 'div' && child.getAttribute('type') === 'act_of_writing',
+              )
+            : [];
+          const writingActIndex = sectionSource ? writingActs.indexOf(sectionSource) : -1;
+          const addMoveAction = (identifier: string, label: string) => {
+            const moveItem = menuItemsNoMarking.find((item) => item.identifier === identifier);
+            if (!moveItem?.action) return;
+            structureActions.push({
+              label,
+              action: () => moveItem.action?.({ node: sectionAnchor }),
+            });
+          };
+
+          if (writingActIndex > 0) {
+            addMoveAction(
+              EditorConstants.menuItemTypes.WRITING_ACT.MOVE_UP,
+              t('editor:dialog.paragraphStructure.actions.moveWritingActUp'),
+            );
+          }
+          if (writingActIndex >= 0 && writingActIndex < writingActs.length - 1) {
+            addMoveAction(
+              EditorConstants.menuItemTypes.WRITING_ACT.MOVE_DOWN,
+              t('editor:dialog.paragraphStructure.actions.moveWritingActDown'),
+            );
+          }
+        }
 
         if (sectionName === 'div' || (sectionLevel >= 1 && sectionLevel < 7)) {
           structureActions.push({
@@ -916,6 +975,15 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
               action: () => openStructureDialog('section-edit', sectionAnchor),
             },
           );
+          if (hasHeading) {
+            structureActions.push({
+              label: t('editor:dialog.paragraphStructure.actions.deleteSectionHeading'),
+              action: () => {
+                const sourcePath = sectionAnchor.dataset.editorXmlPath;
+                if (sourcePath !== undefined) deleteSectionHeading(sourcePath);
+              },
+            });
+          }
         }
       }
 
@@ -1352,8 +1420,10 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
     },
     [
       dispatch,
+      deleteSectionHeading,
       figureUploadInProgress,
       menuItemsMarked,
+      menuItemsNoMarking,
       pathHandlers,
       props,
       removeInlineFormat,
