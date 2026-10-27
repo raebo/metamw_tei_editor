@@ -1,9 +1,13 @@
 # F-113 – Neu angelegte Briefe umbenennen oder verwerfen
 
-**Stand:** 26.10.2026
+**Stand:** 27.10.2026
 
-**Status:** Planung einschließlich Backend-Prüfung und Umfang der ersten Version
-abgestimmt; Umsetzung nicht begonnen.
+**Status:** Backend F-155 bis F-164 und Frontend FE1 bis FE3 sind lokal umgesetzt.
+F-164 erweitert im Backend-Arbeitsbaum den Vertrag auf die vollständige Kennung;
+Backend-Vollsuite und gezielte Tests sind grün; gemeinsame Live-Abnahme steht aus. Der
+letzte Commit ab80327 enthält weiterhin nur die frühere Nummernänderung.
+Backend-Übergabe: Commit `ab80327` auf `feature/f155-editor-letter-lifecycle`
+(lokal committed, nicht gepusht oder produktiv ausgerollt).
 
 **Priorität:** P2
 
@@ -453,7 +457,8 @@ Publish-Pfade abdecken und jede Rückstufung überleben.
 
 ### 2. Ersteller und Herkunft
 
-Der aktuelle Letter besitzt keine entsprechenden dauerhaften Felder.
+Zum ursprünglichen Prüfstand `6ffa83f3` besaß der Letter keine entsprechenden
+dauerhaften Felder. F-155 ergänzt diese inzwischen; siehe Umsetzungsstand unten.
 `Editor::Letter.last_change_by_user_id` wird bei Änderungen umgeschrieben;
 Arbeitskopien können geschlossen und später durch andere Personen neu angelegt
 werden. `last_saved_change_applied_at` wird bereits bei Anlage der Arbeitskopie
@@ -648,8 +653,9 @@ Backend-Repository, Stand 6ffa83f3:
 - `app/services/elasticsearch/export_letters_service.rb`, `export_notes_letter_service.rb`: Briefname als ES-ID und Notizmetadatum; Live-/Einzelexport unterscheiden.
 - `db/structure.sql`: FK-, NOT-NULL-, Index- und nicht automatisch bereinigte Tabellen.
 
-Diese Prüfung ändert ausschließlich Ticket-/Planungsdokumentation. Keine
-Rename-/Delete-Operation, Migration oder neue API implementiert. Die bisherigen
+Die ursprüngliche Prüfung änderte ausschließlich Ticket-/Planungsdokumentation.
+Der nachfolgende F-155-Implementierungsstand ist separat unten dokumentiert.
+Rename-/Delete-Operationen und neue API-Capabilities sind weiterhin nicht implementiert. Die bisherigen
 65 JWT-Operationen bleiben unverändert; zukünftige Änderungen müssen nach dem
 obigen Plan gemeinsam mit OpenAPI erfolgen.
 
@@ -660,3 +666,431 @@ Markdown-Codeblöcke und Formatierung geprüft. Frontend `yarn tsc --noEmit`
 erfolgreich; Backend `script/check_jwt_openapi.rb` bestätigt unverändert alle
 65 registrierten JWT-Operationen. Keine Anwendungsdateien geändert; keine
 Spec-Suite oder destruktiven Funktionstests für diese reine Analyse ausgeführt.
+
+
+## Backend-Umsetzungsstand F-155 vom 26.10.2026
+
+### Nachweis und Rollout
+
+- Backend-Branch: `feature/f155-editor-letter-lifecycle`.
+- Planungscommit: `4442822`; Implementierungscommit: `3cba0ea`.
+- Migration `20261026140000_add_letter_lifecycle_metadata` in der lokalen
+  Entwicklungsdatenbank angewendet; lokale Web- und Worker-Prozesse neu gestartet,
+  Healthcheck HTTP 200. Kein Produktivrollout und kein Push durch diesen Auftrag.
+- Backend-Nachweis: 54 gezielte Beispiele ohne Fehler; vollständige Spec-Suite
+  mit 16 Workern: 1727 Beispiele, 0 Fehler, 17 Pending. Migration Down/Up in der
+  Testumgebung geprüft; JWT-OpenAPI-Abgleich weiterhin 65 Operationen.
+
+### Bereits umgesetzt
+
+Am kanonischen `Letter` sind dauerhaft gespeichert:
+
+| Feld | Bedeutung und Verhalten |
+| --- | --- |
+| `created_by_user_id` | Serverseitig aus dem authentifizierten JWT-Ersteller gesetzt; bleibt bei Bearbeiterwechsel oder erneutem Pinning erhalten |
+| `created_via` | Bei JWT-Briefanlage `jwt_editor`; wird nicht aus Client-Eingaben übernommen |
+| `first_published_at` | Erster erfolgreich abgeschlossener Publish; bleibt bei Wiederholung und späterer Rückstufung auf draft erhalten |
+
+Die Lifecycle-Felder sind gegen gewöhnliche nachträgliche Modelländerungen
+geschützt. Ein fehlgeschlagener Publish beziehungsweise zurückgerollter
+Publish-Transaktionspfad hinterlässt keinen Erstpublish-Vermerk. Editor-Publish,
+Batch-Publish und Web-Publish setzen den Vermerk bei Erfolg. Bei älteren Briefen
+ist ein künftig gesetzter Zeitpunkt lediglich der erste seit Einführung
+beobachtete Publish und kein rekonstruierter historischer Erstpublish.
+
+Bestehende Briefe erhalten keinen automatischen Ersteller-/Herkunfts-Backfill.
+Leere neue Felder beweisen deshalb weiterhin nicht, dass ein Brief noch nie
+veröffentlicht wurde. Aktueller Pin, letzter Bearbeiter und allgemeines
+Schreibrecht ersetzen diesen Nachweis nicht.
+
+`Editor::LetterLifecyclePolicy` liefert intern Entscheidungen für `rename` und
+`discard` mit `allowed` und `reason_code`. Sie prüft den dauerhaft gespeicherten
+Ersteller, die JWT-Herkunft, den Publish-Vermerk und widersprüchliche Zustände.
+Mögliche interne Ablehnungsgründe sind `unauthenticated`, `letter_not_found`,
+`letter_provenance_unknown`, `not_letter_creator`, `letter_already_published`
+und `letter_state_inconsistent`. Dies ist erst die Lifecycle-Grundprüfung:
+Referenzen, konkurrierende Arbeitskopien und Schreibvorgänge müssen vor einer
+operativen Freigabe zusätzlich geprüft werden (F-156 bis F-160).
+
+### Verbindliche Auswirkungen auf das Frontend
+
+- **Für F-155 ist keine Änderung an Requests oder Response-Parsern notwendig.**
+  Die drei Metadatenfelder sind intern und werden nicht als zusätzliche
+  Letter-JSON-Felder ausgeliefert. Das Frontend soll sie weder beim Anlegen
+  senden noch für eine eigene Freigabe anfordern oder aus anderen Daten ableiten.
+- Die interne Policy ist noch keine über JWT verfügbare Capability. Fehlende
+  Capabilities bedeuten weiterhin: Aktionen deaktiviert, mit Hinweis auf die
+  noch nicht verfügbare Funktion; keine Erlaubnis aus `state`, Pin oder User-ID
+  berechnen.
+- `PATCH /jwt/editor/letters/{id}` und `DELETE /jwt/editor/letters/{id}` bleiben
+  geplante, noch nicht nutzbare Endpunkte. Die oben beschriebenen Responses und
+  Fehlercodes dieser Operationen sind bis F-160 kein freigegebener API-Vertrag.
+- Die kanonische `../metamw_edge_version/docs/openapi/jwt.yaml` beschreibt bereits
+  die serverseitige Create-/Publish-Semantik von F-155. Öffentliche Request- und
+  Response-Strukturen sowie Statuscodes bleiben in diesem Schritt unverändert.
+- Erst F-160 bindet die vollständigen Capabilities und Endpunkte an JWT an und
+  dokumentiert deren endgültige Schemata, Codes und Beispiele in OpenAPI.
+  Anschließend FE1 bis FE3 dagegen implementieren und gemeinsam abnehmen.
+
+### Nächster Backend-Schritt
+
+F-156 korrigiert die direkte Pin-Assoziation, bevor diese für Prüfungen oder
+Bereinigungen verwendet wird. Danach folgen Schreibkoordination (F-157),
+Discard (F-158), Rename (F-159), JWT/OpenAPI (F-160) und der gesonderte klassische
+Backend-Löschkontext (F-161). F-155 allein schaltet keine Lösch- oder
+Umbenennungsfunktion frei.
+
+Diese Ergänzung betrifft ausschließlich das Frontend-Ticket; kein Frontend-Code
+und keine Parser wurden geändert. Dokumentationsdiff und Formatierung geprüft;
+Frontend-Tests für diese reine Textänderung nicht erneut ausgeführt.
+
+
+## Backend-Vertrag F-155 bis F-160 – Umsetzung vom 27.10.2026
+
+Dieser Abschnitt aktualisiert den früheren Planungsstand: Die Backend-Services
+und JWT-Anbindung liegen jetzt im Arbeitsbaum von
+`metamw_edge_version`, Branch `feature/f155-editor-letter-lifecycle`.
+F-155 ist bereits als `3cba0ea` committed und lokal migriert; die Fortsetzung
+F-156 bis F-160 ist noch nicht committed oder produktiv ausgerollt.
+Maßgeblicher Vertrag ist `../metamw_edge_version/docs/openapi/jwt.yaml`, Version
+0.2.0, über `OPENAPI_SPEC_PATH`. Keine zweite Frontend-Vertragsdatei anlegen.
+
+### Öffentliche Antworten und Versionsschutz
+
+Letters Show/by_name/Listen/Suche/Recent, Pinned Show/Index und Create liefern
+zusätzlich am bisherigen Response-Root:
+
+```json
+{
+  "version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "capabilities": {
+    "rename": { "allowed": true, "reason_code": null },
+    "discard": { "allowed": true, "reason_code": null }
+  }
+}
+```
+
+`version` ist ein opaker tatsächlicher Snapshot, kein vom Frontend berechneter
+Wert. Der Beispielwert oben ist nur ein Platzhalter und nicht sendefähig.
+Die unveränderlichen Herkunfts-/Ersteller-/Erstpublishfelder bleiben intern.
+Capabilities sind benutzerspezifisch; nie aus Pinning/state/User-Heuristiken
+ableiten. Fehlende Fähigkeiten weiterhin als nicht verfügbar behandeln.
+
+Vor Rename oder Discard: ausstehende Autosaves und exklusive Requests beenden,
+Pinned Show neu laden und exakt dessen aktuellen Versionswert als Header senden:
+
+```http
+PATCH /jwt/editor/letters/17420
+X-Letter-Version: <version aus aktueller Show-Antwort>
+Content-Type: application/json
+
+{"letter":{"name":"fmb-1840-06-06-02"}}
+```
+
+```http
+DELETE /jwt/editor/letters/17420
+X-Letter-Version: <version aus aktueller Show-Antwort>
+```
+
+Numerische kanonische Letter-ID verwenden, nicht Editor-/Pin-ID oder Briefname.
+Keine PUT-Route, kein If-Match-/412-Vertrag. Fehlender/veralteter Versionsheader
+ergibt 409 `letter_version_conflict`. Nach Konflikt neu laden und die Aktion
+erneut fachlich bewerten, keine automatische Wiederholung mit blind aktualisierter
+Version. Nach Autosave, Undo/Redo, Upload, Reset oder Publish ist ein zuvor
+gespeicherter Versionswert möglicherweise veraltet.
+
+### Erfolgsfälle und Erhalt lokaler Bearbeitung
+
+- PATCH: 200 mit dem kanonischen Letter-Show-Objekt (`id`, `name`, `title`,
+  `xml_content`, `version`, `capabilities`), ohne zusätzlichen `letter`-Wrapper.
+  Die numerische ID bleibt erhalten. Nur die laufende zweistellige Nummer darf
+  geändert werden; Präfix und Datum bleiben gleich.
+- **Wichtig für FE2:** PATCH-`xml_content` ist der kanonische Briefstand und nicht
+  die persönliche aktuelle Bearbeitung. Der Backend-Service transformiert auch
+  die persönliche Arbeitskopie und sämtliche Undo-/Redo-Stände. Nach erfolgreichem
+  PATCH deshalb Pinned Show nachladen und dessen `xml_content` sowie Undo-/Redo-
+  Flags in den Editor übernehmen. Nicht den lokalen bearbeiteten Inhalt mit der
+  kanonischen PATCH-Baseline überschreiben. Autosave bis zum abgeschlossenen
+  Nachladen unterbrechen, damit keine alte Root-ID zurückgeschrieben wird.
+- Anschließend Tab-/Redux-Namen und Caches konsistent aktualisieren, Brief geöffnet
+  lassen. Bestehende Bildnamen und graphic-URLs bleiben unverändert.
+- DELETE: 204 ohne Body, daher keinen JSON-Parser aufrufen. Tabs, Pins und lokale
+  Such-/Briefzustände gezielt entfernen. Wiederholtes DELETE und by_name nach
+  erfolgreicher Entfernung liefern 404; Tab-Schließen bleibt eine andere Aktion.
+
+### Fehler und deaktivierte Aktionen
+
+| Status | Verbindliche Behandlung |
+| --- | --- |
+| 401 | Anmeldung fehlt/ist ungültig; keine freie Kennung oder leere Liste daraus ableiten |
+| 403 | `not_letter_creator`; allgemeines Schreibrecht gibt keine JWT-Freigabe |
+| 404 | `letter_not_found` für neue Mutationsendpunkte; Ressource existiert nicht |
+| 409 | Konflikt: Version, Erstpublish, unbekannte Herkunft, andere Arbeitskopie, Worker/Queue, Annotationen, Referenzen, Speicherdrift oder belegte/reservierte Kennung |
+| 422 | `invalid_letter_parameters` oder `invalid_letter_name`; kein allgemeiner Metadaten-PATCH |
+| 500 | `letter_operation_failed`; keine Exceptiontexte voraussetzen |
+| 503 | `letter_index_pending`: fachliche Datei-/DB-Änderung kann bereits committed sein, Such-/Staging-Abschluss steht aus; weder Erfolg anzeigen noch blind neu anlegen/wiederholen |
+
+Reason-Codes vollständig aus OpenAPI übernehmen und über i18n erklären. Bei
+`allowed=true` ist `reason_code=null`. Annotation-Datensätze bleiben zunächst
+konservativ ein Blocker (`letter_has_annotation_records`); sie beweisen keine
+Live-Anwesenheit. Stillgelegte Namen bleiben als Schutz gegen Reimport reserviert
+(`letter_name_retired`). `by_name` bleibt bei fehlendem aktivem Brief 404; das ist
+eine Verfügbarkeitshilfe, keine Garantie, dass eine stillgelegte Kennung erneut
+vergeben werden darf. Create kann deshalb ebenfalls diesen 409 liefern.
+
+Bei 503 den aktuellen Briefzustand neu lesen und den Betreiber auf den nötigen
+Recovery-Abschluss hinweisen. Betreiberbefehl im Backendcontainer:
+`bin/rails letters:recover_lifecycle`. Kein öffentlicher Restore-/Undo-Endpunkt
+für verworfene Briefe. Gesicherte Altstände und Audit bleiben erhalten.
+
+### Backend-Struktur und Abnahme
+
+Die zusammengehörigen Services liegen unter `Editor::LetterLifecycle` in
+`app/services/editor/letter_lifecycle/`; die dortige README erklärt alle Dateien.
+Dateijournal/Recovery bleiben `LetterStorage::LifecycleJournal`. Der gleichnamige
+globale Model-Concern `::LetterLifecycle` enthält weiterhin persistente Metadaten.
+
+Gezielte Backend-Tests und Rails-Autoloading sind geprüft; der abschließende
+16-Worker-Volltest läuft nach der Namespace-Umstellung erneut. Das F-113-Frontend
+muss noch gegen diesen konkreten Vertrag geprüft werden, insbesondere
+Versionsheader, PATCH-Baseline versus bearbeiteter Pinned-Inhalt, 204 ohne Parser
+und 503-Teilerfolg. Gemeinsame End-to-End-Abnahme und produktive Freischaltung
+stehen aus. Vor Live-Freischaltung Hardlink/fsync auf dem echten Mount prüfen.
+Keine Frontend-Anwendungsdateien durch diesen Backend-Auftrag geändert.
+
+
+### Abschließende Backend-Prüfung vom 27.10.2026
+
+Namespace `Editor::LetterLifecycle`: Rails-Autoloading grün, gezielt 47 Beispiele
+ohne Fehler. Endgültige Backend-Vollsuite mit 16 Workern: 1761 Beispiele,
+0 Fehler, 17 bestehende Pending. OpenAPI deckt 67 JWT-Operationen ab.
+Kein neuer Commit/Produktivrollout; Frontend-Integration und Live-Abnahme offen.
+
+
+### Vertragskorrekturen vor Frontend-Anbindung vom 27.10.2026 (F-160)
+
+Pinned Show liefert `id` jetzt als JSON-Integer aus dem kanonischen `Letter.id`,
+auch bei abweichender Editor-/Pin-ID. `PinnedLetter.id` ist in OpenAPI integer.
+GET, PATCH und DELETE auf `/jwt/editor/letters/{id}` dokumentieren denselben
+Integer-Pfadparameter. DELETE enthält ausschließlich Discard-spezifische Hinweise;
+die Rename-Aussagen zu Inhalt/Undo und unverändertem Präfix/Datum stehen nur bei
+PATCH. Der Ticketkopf beschreibt nun den aktuellen Backend-Stand.
+
+Vorher/nachher Pinned Show: `{"id":"17420", ...}` wird zu
+`{"id":17420, ...}`. Frontendtypen und Tests müssen die kanonische numerische ID
+verwenden; bestehende Clients mit festem String-Parser benötigen diese Anpassung.
+Es gibt keinen Migrationsbedarf für die Datenbank. Die weiteren Felder und der
+Versionsheader bleiben unverändert. Live-Rollout und gemeinsame Abnahme offen.
+
+
+### Backend-Übergabecommit nach Vertragsreview
+
+Commit **ab80327** – `F-156-F-160: add safe JWT letter rename and discard` –
+enthält die vollständige Backend-Umsetzung, Namespacierung und die korrigierten
+Integer-ID-Typen samt bereinigter DELETE-Beschreibung. Gezielt 28 Beispiele ohne
+Fehler; Vollsuite mit 16 Workern: 1762 Beispiele, 0 Fehler, 17 bestehende Pending.
+JWT-Routenabgleich: 67 Operationen vollständig. Keine zusätzliche Migration.
+Kein Push/Deployment. `.idea/dataSources.xml` und `letter_publish_copies/` sind
+nicht im Backend-Commit. Diese Frontend-Ticketergänzung ist weiterhin Bestandteil
+des Frontend-Arbeitsbaums; Frontend-Anwendungscode blieb durch den Backend-Auftrag
+unverändert. Gemeinsame Integration und Live-Abnahme stehen aus.
+
+
+## Frontend-Umsetzung vom 27.10.2026
+
+- Die dauerhaft sichtbaren Aktionen „Brief umbenennen“ und „Brief verwerfen“
+  werden ausschließlich über die vom Backend gelieferten Capabilities aktiviert.
+  Alle dokumentierten Sperrgründe sind deutsch und englisch erklärt; fehlende
+  Capabilities, laufende Lifecycle-Aktionen und Figure-Uploads sperren beide Wege.
+- Letter-, Such-, Pinned- und Create-Antworten übernehmen `capabilities` und das
+  64-stellige `version`-Token. Pinned Index und Pinned Show akzeptieren nur die
+  kanonische numerische `Letter.id`; die frühere String-Darstellung wird verworfen.
+- Rename prüft Format, gültiges Datum, unverändertes Präfix/Datum und die exakte
+  Namensverfügbarkeit. Nur `404 {"error":"letter_not_found"}` gilt als frei.
+  Unmittelbar vor PATCH wird Pinned Show neu geladen und dessen Version als
+  `X-Letter-Version` gesendet. Nach Erfolg wird erneut Pinned Show geladen; nur
+  dessen persönliche Arbeitskopie samt Undo/Redo, Capabilities und Version wird
+  in Editor, Tab und Redux übernommen. Die kanonische PATCH-XML-Baseline wird
+  bewusst nicht als bearbeiteter Inhalt verwendet.
+- Discard verlangt die vollständige aktuelle Briefkennung. Unmittelbar vor DELETE
+  wird ebenfalls Pinned Show neu geladen. Ein erfolgreicher HTTP-204 wird ohne
+  JSON-Parsing behandelt; Brief, Pin und Tab werden lokal entfernt und der nächste
+  Tab beziehungsweise der leere Editorzustand deterministisch aktiviert.
+- `letter_index_pending` wird nicht als Erfolg gemeldet und nicht automatisch
+  wiederholt. Das Frontend liest den aktuellen Stand nach und verweist auf den
+  Betreiberabschluss `bin/rails letters:recover_lifecycle`.
+- Automatisierte Abdeckung umfasst Schema-/Reason-Code-Validierung, numerische
+  Pinned-ID, Versionsheader und Request-Body, DELETE 204, strikte 404-Prüfung,
+  Capability-gesteuerte Toolbar sowie erfolgreiche Rename-/Discard-Statewechsel.
+
+Vertragsgrundlage ist Backend-Commit `ab80327` und OpenAPI 0.2.0. Ein Frontend-
+Commit, Push, Deployment und die gemeinsame Live-Abnahme sind zu diesem Stand
+noch nicht erfolgt.
+
+
+## In der Live-Abnahme gefundene Rename-Regression
+
+### Reproduktion
+
+1. Einen neu angelegten Brief öffnen.
+2. Einen Absatz hinzufügen und erfolgreich in der Arbeitskopie speichern.
+3. Den Brief umbenennen.
+4. Die anschließend angebotene Aktion zum Laden des vermeintlich neueren Inhalts
+   ausführen.
+
+Der neue Absatz verschwindet beim Rebase. Die Änderung war zuvor korrekt in
+`Editor::Letter#xml_content_current` gespeichert; das Rebase ersetzt die lokale
+Arbeitskopie jedoch erwartungsgemäß durch den kanonischen Inhalt.
+
+### Ursache und notwendige Backend-Korrektur
+
+`RenameService` transformiert die kanonische XML und die Baseline der
+Arbeitskopie getrennt. `Letter#set_content!` normalisiert beim kanonischen Inhalt
+Zeilenumbrüche über `LetterPublishing::RemoveLineBreaksService`; die transformierte
+`Editor::Letter#xml_content`-Baseline wird dagegen nicht identisch normalisiert.
+`Editor::Letter#stale?` vergleicht beide Werte als Strings und meldet deshalb nach
+dem Rename fälschlich `true`. Das Frontend bietet daraufhin ein destruktives Rebase
+an, obwohl keine externe Änderung vorliegt.
+
+Das Backend muss beim Rename die transformierte Arbeitskopie-Baseline mit
+derselben Normalisierung wie `Letter#content` speichern, ohne
+`xml_content_current` oder die Undo-/Redo-Historie auf den kanonischen Stand
+zurückzusetzen. Der Regressionstest muss nach einer lokalen Absatzänderung und
+Rename mindestens sicherstellen:
+
+- `xml_content_current` enthält den neuen Absatz weiterhin;
+- die umbenannte Arbeitskopie und Undo-/Redo-Stände besitzen die neue Root-ID;
+- `Editor::Letter#stale?` ist unmittelbar nach Rename `false`;
+- Pinned Show liefert den lokalen Absatz, während die Staleness-Route `false`
+  zurückgibt;
+- ein Rebase-Hinweis wird nicht angeboten.
+
+Das Frontend pausiert das Staleness-Polling während Rename/Discard, um eine
+zusätzliche Request-Race zu verhindern. Diese Absicherung ersetzt die notwendige
+Backend-Normalisierung nicht.
+
+
+### Backend-Korrekturen zur Rename-Abnahme: F-162 und F-163 (27.10.2026)
+
+Die beschriebene falsche Staleness ist als Backend-F-162 erfasst und im lokalen
+Arbeitsbaum korrigiert: Rename normalisiert ausschließlich die transformierte
+`Editor::Letter#xml_content`-Baseline mit derselben Funktion wie `Letter#content`.
+`xml_content_current` und die transformierten History-Stände bleiben erhalten.
+Ohne echte externe Änderung liefert Staleness nach Rename `stale:false` und
+`letter_updated_at:null`. Echte Fremdänderungen vor und nach Rename bleiben
+erkennbar. Es wird kein Rebase ausgelöst.
+
+Die unveränderte vollständige Regression deckte zusätzlich einen unabhängigen
+Altfehler auf: Redo verlor Umlaute im JSON-Response, obwohl die Arbeitskopie korrekt
+gespeichert war. Der gesondert freigegebene Backend-F-163 korrigiert die UTF-8-
+Interpretation binär gelabelter Snapshot-Bytes im vorhandenen `safe_utf8`-Helper.
+Die Unicode-Assertion bleibt erhalten und besteht; ein eigener Request-Test ohne
+Rename weist diese zweite Ursache unabhängig nach.
+
+Gezielt beide neuen Regressionen: 10 Beispiele ohne Fehler; breiter mit den
+bestehenden Rename-, Staleness-, Publish-Konflikt- und Undo-/Redo-Specs:
+55 Beispiele ohne Fehler. Die endgültige Backend-Vollsuite mit 16 Workern ist ebenfalls grün:
+1772 Beispiele, 0 Fehler, 17 bestehende Pending. Vorheriger isolierter F-162-Volltest hatte genau den jetzt korrigierten
+F-163-Zeichenverlust als einzigen Fehler (1765/1/17 bestehende Pending).
+
+OpenAPI 0.2.0 dokumentiert die korrigierte Semantik und passende Beispiele;
+Request-/Response-Felder, Typen, Statuscodes und Versionsheader bleiben unverändert.
+Keine neue Frontend-Parserstruktur erforderlich. Die bestehende Polling-Pause
+während Rename/Discard beibehalten; nach Rename den persönlichen Pinned-Stand
+nachladen, nicht die kanonische PATCH-Baseline als lokale Bearbeitung übernehmen.
+
+Beide Fixes liegen bislang nur im Backend-Arbeitsbaum, kein Commit oder Rollout.
+Es wurden keine Nutzerbriefe, alten Baselines oder Arbeitskopien repariert oder
+automatisch rebased. Bereits zuvor betroffene oder nach Rebase verlorene Inhalte
+werden nicht rückwirkend rekonstruiert. Für die erneute gemeinsame Abnahme einen
+neuen Bearbeitungs-/Rename-Durchlauf verwenden. Frontend-Anwendungsdateien bleiben
+durch diesen Backend-Auftrag unverändert.
+
+
+Abschließender Backend-Nachweis: `/tmp/f162-f163-full.log` (194 Sekunden),
+JWT-OpenAPI-Abgleich weiterhin 67 Operationen, Formatprüfung grün. Die beiden
+Korrekturen sind noch nicht committed oder ausgerollt. Die ursprüngliche Regression
+mit Umlauten, neuer Root-ID, Staleness=false und vollständigem Undo/Redo besteht;
+echte Fremdänderungen vor und nach Rename bleiben erkennbar. Gemeinsame Live-Abnahme
+steht aus. Keine Frontend-Anwendungsdateien durch diesen Backend-Auftrag geändert.
+
+
+## Fachliche Erweiterung: vollständigen Briefnamen ändern
+
+Die bisherige Einschränkung, nur die zweistellige laufende Nummer ändern zu
+dürfen, ist aufgehoben. Der Benutzer darf die vollständige Briefkennung ändern,
+also auch `fmb`/`gb`, Jahr, Monat und Tag. Zulässig bleibt ausschließlich eine
+freie, kalendarisch gültige Kennung im Format
+`fmb-YYYY-MM-DD-NN` beziehungsweise `gb-YYYY-MM-DD-NN`.
+
+Das Frontend validiert deshalb nur noch Format, gültiges Datum, Nummer `01` bis
+`99`, tatsächliche Änderung und Namensverfügbarkeit. Es sendet weiterhin dieselbe
+numerische Brief-ID, denselben Versionsheader und denselben PATCH-Body.
+
+Backend und OpenAPI müssen vor der Live-Abnahme nachgezogen werden:
+
+- die Prüfung `letter.name[0...-2] == name[0...-2]` in `RenameService` entfernen;
+- OpenAPI-Beschreibungen entfernen, nach denen Präfix und Datum unverändert
+  bleiben müssen;
+- den kanonischen Speicherpfad auch bei Wechsel von Briefart und Jahr sicher in
+  das neue Verzeichnis verschieben, ohne ein vorhandenes Ziel zu überschreiben;
+- Root-ID, eigene Identitätsverweise, Titel-Key und alle ausdrücklich aus der
+  Briefkennung abgeleiteten Datums-/Metadatenfelder konsistent aktualisieren,
+  ohne unabhängige historische Datumsangaben zu verändern;
+- Arbeitskopien, Undo/Redo, Pins, Index, Audit, reservierten alten Namen sowie
+  Referenz- und Konfliktprüfungen weiterhin vollständig behandeln;
+- Request-, Service- und Dateisystemtests für einen Wechsel von
+  `fmb-1840-06-06-01` zu `gb-1841-07-08-03` ergänzen.
+
+Bis diese Backend-Erweiterung committed und aktiv ist, beantwortet der aktuelle
+Stand `ab80327` einen vollständigen Namenswechsel weiterhin mit HTTP 422
+`invalid_letter_name`. Das Frontend ist dafür vorbereitet, kann den alten
+Backend-Vertrag aber nicht umgehen.
+
+
+### Backend-Umsetzung der vollständigen Kennung: F-164 (27.10.2026)
+
+Im Backend-Arbeitsbaum akzeptiert PATCH jetzt auch Präfix und Datum. Beispiel:
+`fmb-1840-06-06-01` → `gb-1841-07-08-03`. Nummer 01–99, gültiges Kalenderdatum,
+tatsächliche Änderung und freies Ziel werden serverseitig geprüft. Der bisherige
+Jahresbereich 1000–1999 bleibt bestehen. Numerische ID, Body, Versionsheader,
+Capabilities und Statuscodes bleiben gleich. Keine neue Parserstruktur.
+
+Die Datei wechselt atomar in das passende Präfix-/Jahresverzeichnis. Datenbankjahr,
+Briefdatum und Notizindex-Metadaten folgen der neuen Kennung. Nur ein
+`teiHeader/profileDesc/creation/date/@when`, das exakt dem alten Kennungsdatum
+entspricht, wird in kanonischem XML, Arbeitskopie und History mitgeführt.
+Unabhängige Datierungen, Personen/Korrespondenzbeziehungen, Fremdverweise und
+Bildnamen bleiben erhalten; ein Präfixwechsel schreibt keine Personen um.
+
+Eigene Root-ID/Titelkeys/Identitätsverweise, Undo/Redo, lokale Änderungen und
+Staleness-Verhalten bleiben abgesichert. Keine automatische Rebase-Aktion.
+Nach Erfolg weiterhin Pinned Show nachladen; PATCH liefert den kanonischen Stand.
+Ungültig/unverändert: 422 invalid_letter_name; belegtes Ziel: 409 letter_name_taken.
+Recovery und reservierter alter Name bleiben unverändert.
+
+Kanonischer Vertrag: Backend docs/openapi/jwt.yaml, F-164. Aktuell nur Arbeitsbaum,
+kein Commit/Deployment. Frontendcode wurde durch diesen Backend-Auftrag nicht
+verändert; Frontendtests wurden deshalb hier nicht erneut ausgeführt. Gemeinsame
+Live-Abnahme nach Aktivierung des neuen Backends erforderlich.
+
+Backend-Nachweis F-164: gezielt 35 Beispiele, 0 Fehler; Vollsuite mit 16 Workern
+1779 Beispiele, 0 Fehler, 17 bestehende Pending (214 Sekunden). Rückroll- und
+Zielkollisionstests sowie echte isolierte Elasticsearch-Tests eingeschlossen.
+OpenAPI-Routenabgleich: 67 Operationen vollständig; Diff-Prüfungen grün.
+Nachweise im Backend-Ticket audit/tickets/open/F-164.md.
+
+
+## Backend-Commit-Übergabe (27.10.2026)
+
+Die vorstehenden Arbeitsbaumangaben dokumentieren die damaligen Testzeitpunkte.
+Inzwischen sind die Backend-Anpassungen getrennt committed:
+
+- F-162: b5cef240 – normalisierte Rename-Baseline, lokale Änderungen erhalten.
+- F-163: 6374260e – UTF-8-Erhalt bei Undo/Redo-Responses.
+- F-164: 44043d3d – vollständige Kennung einschließlich Präfix und Datum.
+
+Branch: feature/f155-editor-letter-lifecycle. Kein Push oder Deployment.
+Gesamtstand: 1779 Beispiele, 0 Fehler, 17 bestehende Pending; OpenAPI 67/67.
+Dieser Frontend-Commit enthält ausschließlich die Ticketdokumentation.
+Frontend-Anwendungsänderungen bleiben uncommitted; gemeinsame Live-Abnahme offen.
