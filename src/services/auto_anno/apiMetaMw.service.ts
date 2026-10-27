@@ -6,6 +6,13 @@ const responseStatus = (error: unknown): number | undefined =>
     ? (error as { response?: { status?: number } }).response?.status
     : undefined;
 
+const responseErrorCode = (error: unknown): string | undefined => {
+  if (typeof error !== 'object' || error === null || !('response' in error)) return undefined;
+  const data = (error as { response?: { data?: unknown } }).response?.data;
+  if (typeof data !== 'object' || data === null || !('error' in data)) return undefined;
+  return typeof data.error === 'string' ? data.error : undefined;
+};
+
 export const fetchMetamwEntityData = async (entityKey: string | null): Promise<{ [key: string]: string } | null> => {
   if (!entityKey) {
     throw new Error('Entity key is required to fetch letter data');
@@ -25,7 +32,9 @@ export const fetchMetamwLetterData = async (letterKey: string | null): Promise<{
 
     return response.data;
   } catch (error) {
-    if (responseStatus(error) === 404) return null;
+    if (responseStatus(error) === 404 && responseErrorCode(error) === 'letter_not_found') {
+      return null;
+    }
     throw error;
   }
 };

@@ -18,9 +18,7 @@ jest.mock('notistack', () => ({
 }));
 
 const mockCreateNewLetter = createNewLetter as jest.MockedFunction<typeof createNewLetter>;
-const mockFetchMetamwLetterData = fetchMetamwLetterData as jest.MockedFunction<
-  typeof fetchMetamwLetterData
->;
+const mockFetchMetamwLetterData = fetchMetamwLetterData as jest.MockedFunction<typeof fetchMetamwLetterData>;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const VALID_LETTER_NAME = 'FMB-2024-01-01-01';
@@ -30,11 +28,7 @@ const buildStore = () => configureStore({ reducer: { editorLetter: editorLetterR
 const renderComponent = (onClose = jest.fn(), store = buildStore()) => {
   render(
     <Provider store={store}>
-      <AddNewLetterDialog
-        xmlDoc={document.implementation.createDocument(null, 'root')}
-        onSave={jest.fn()}
-        onClose={onClose}
-      />
+      <AddNewLetterDialog xmlDoc={document.implementation.createDocument(null, 'root')} onSave={jest.fn()} onClose={onClose} />
     </Provider>,
   );
 
@@ -96,11 +90,7 @@ describe('AddNewLetterDialog', () => {
 
     await enterValidLetterName();
 
-    await waitFor(() =>
-      expect(
-        screen.getByText('Error checking letter name availability: network down'),
-      ).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('Error checking letter name availability: network down')).toBeInTheDocument());
     expect(getSaveButton()).toBeDisabled();
   });
 
@@ -109,6 +99,11 @@ describe('AddNewLetterDialog', () => {
       newLetterId: 42,
       newLetterName: VALID_LETTER_NAME,
       responseMessage: 'ok',
+      capabilities: {
+        rename: { allowed: true, reasonCode: null },
+        discard: { allowed: true, reasonCode: null },
+      },
+      version: 'a'.repeat(64),
     });
 
     const { onClose } = renderComponent();

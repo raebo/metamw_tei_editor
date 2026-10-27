@@ -16,13 +16,14 @@ const LetterStalenessMonitor = () => {
   const { t } = useTranslation();
   const activeLetter = useSelector((state: RootState) => state.editorLetter.letter);
   const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
+  const lifecycleOperationInProgress = useSelector((state: RootState) => state.editorLetter.lifecycleOperationInProgress);
   const pinnedLetter = useSelector((state: RootState) =>
     state.editorLetter.pinnedLetters.find((letter) => letter.id === state.editorLetter.letter.id && letter.isPinned),
   );
   const rebaseLetter = useRebaseLetter();
   const snackbarKeyRef = useRef<SnackbarKey | null>(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const letterId = pinnedLetter?.id ?? null;
+  const letterId = lifecycleOperationInProgress ? null : (pinnedLetter?.id ?? null);
 
   const closeStalenessNotice = useCallback(() => {
     if (snackbarKeyRef.current !== null) {

@@ -16,17 +16,19 @@ import {
   setXmlLetterContent,
 } from '../slices/editor.letter.slice';
 import { PinnedLetter } from '@src/services/mappings/editorMappings';
+import type { LetterCapabilities } from '@src/schemas/editorLetterLifecycle';
 
 export const setEditorTabAndPinnedLettersThunk = createAsyncThunk(
   'editor/setEditorTabAndPinnedLetters',
-  async (
-    { pinnedLetters, tabNumber }: { pinnedLetters: PinnedLetter[]; tabNumber: number },
-    { dispatch },
-  ) => {
+  async ({ pinnedLetters, tabNumber }: { pinnedLetters: PinnedLetter[]; tabNumber: number }, { dispatch }) => {
     dispatch(setEditorPinnedLetters({ pinnedLetters }));
     dispatch(setEditorTabNumber({ tabNumber }));
     if (tabNumber === -1) {
-      dispatch(setEditorLetter({ letter: { id: null, name: null } }));
+      dispatch(
+        setEditorLetter({
+          letter: { id: null, name: null, capabilities: null, version: null, xmlContent: null },
+        }),
+      );
     }
   },
 );
@@ -44,6 +46,8 @@ export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
         name: string;
         viewMode: 'CODE' | 'WYSIWYG' | null;
         xmlContent: string | null;
+        capabilities?: LetterCapabilities | null;
+        version?: string | null;
       };
       tabNumber: number;
       textIsMarked: boolean;

@@ -18,6 +18,7 @@ import LeftClickAnnotationAction from '@src/components/editor/letter/Center/Lett
 import { useTranslation } from 'react-i18next';
 import { runXmlAction } from './lib/keyHandlerDefinitions';
 import { updatePlainParagraphText } from '@src/utils/editor/paragraphStructure';
+import { setEditorLetter, setEditorPinnedLetterLifecycle } from '@src/redux/slices/editor.letter.slice';
 
 const LetterViewContainer = () => {
   const { t } = useTranslation();
@@ -186,6 +187,23 @@ const LetterViewContainer = () => {
         undoAvailable: letterData.undoAvailable,
         redoAvailable: letterData.redoAvailable,
       });
+      dispatch(
+        setEditorLetter({
+          letter: {
+            name: letterData.name,
+            capabilities: letterData.capabilities,
+            version: letterData.version,
+          },
+        }),
+      );
+      dispatch(
+        setEditorPinnedLetterLifecycle({
+          id: letterData.id,
+          name: letterData.name,
+          capabilities: letterData.capabilities,
+          version: letterData.version,
+        }),
+      );
     };
 
     loadLetterData().catch((error) => {
@@ -196,7 +214,7 @@ const LetterViewContainer = () => {
     return () => {
       cancelled = true;
     };
-  }, [activeLetterIsPinned, stateEditorLetter.id, stateEditorLetter.viewMode]);
+  }, [activeLetterIsPinned, dispatch, stateEditorLetter.id, stateEditorLetter.viewMode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -218,6 +236,24 @@ const LetterViewContainer = () => {
         undoAvailable: letterData.undoAvailable,
         redoAvailable: letterData.redoAvailable,
       });
+
+      dispatch(
+        setEditorLetter({
+          letter: {
+            name: letterData.name,
+            capabilities: letterData.capabilities,
+            version: letterData.version,
+          },
+        }),
+      );
+      dispatch(
+        setEditorPinnedLetterLifecycle({
+          id: letterData.id,
+          name: letterData.name,
+          capabilities: letterData.capabilities,
+          version: letterData.version,
+        }),
+      );
 
       dispatch(
         setReloadXmlContentLetterThunk({

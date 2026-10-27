@@ -70,6 +70,11 @@ const letterData = (id: number, name: string): EditorLetterData => ({
   xmlContent: `<TEI><text><body><p>${name}</p></body></text></TEI>`,
   undoAvailable: false,
   redoAvailable: false,
+  capabilities: {
+    rename: { allowed: true, reasonCode: null },
+    discard: { allowed: true, reasonCode: null },
+  },
+  version: 'a'.repeat(64),
 });
 
 describe('LetterViewContainer', () => {

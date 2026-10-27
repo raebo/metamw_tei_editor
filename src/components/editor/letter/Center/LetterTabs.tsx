@@ -46,11 +46,8 @@ const LetterTabs = () => {
 
   useEffect(() => {
     if (statePinnedLetters.length > 0 && !changeLetterViewMode) {
-      const activeLetterIndex = statePinnedLetters.findIndex(
-        (letter) => letter.id === stateEditorLetterId,
-      );
-      const fallbackIndex =
-        stateActiveTab >= 0 && stateActiveTab < statePinnedLetters.length ? stateActiveTab : 0;
+      const activeLetterIndex = statePinnedLetters.findIndex((letter) => letter.id === stateEditorLetterId);
+      const fallbackIndex = stateActiveTab >= 0 && stateActiveTab < statePinnedLetters.length ? stateActiveTab : 0;
       const nextActiveIndex = activeLetterIndex >= 0 ? activeLetterIndex : fallbackIndex;
 
       if (activeLetterIndex < 0) {
@@ -61,6 +58,8 @@ const LetterTabs = () => {
               id: nextActiveLetter.id,
               name: nextActiveLetter.name,
               viewMode: nextActiveLetter.viewMode,
+              capabilities: nextActiveLetter.capabilities,
+              version: nextActiveLetter.version,
             },
           }),
         );
@@ -97,6 +96,8 @@ const LetterTabs = () => {
           name: newPinnedLetter.name,
           viewMode: newPinnedLetter.viewMode,
           xmlContent: newXmlContent,
+          capabilities: newPinnedLetter.capabilities,
+          version: newPinnedLetter.version,
         },
         tabNumber: newTabValue,
         textIsMarked: false,

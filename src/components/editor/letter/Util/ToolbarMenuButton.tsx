@@ -7,23 +7,34 @@ type ToolbarMenuButtonProps = {
   onClick: (event: React.MouseEvent<HTMLDivElement>) => void;
   icon?: React.ReactNode;
   disabled?: boolean;
+  disabledReason?: string;
 };
 
-export const ToolbarMenuButton: React.FC<ToolbarMenuButtonProps> = ({ title, selected = false, onClick, icon, disabled = false }) => {
+export const ToolbarMenuButton: React.FC<ToolbarMenuButtonProps> = ({
+  title,
+  selected = false,
+  onClick,
+  icon,
+  disabled = false,
+  disabledReason,
+}) => {
   const theme = useTheme();
 
   return (
-    <Tooltip title={title} placement="right">
+    <Tooltip title={disabled && disabledReason ? disabledReason : title} placement="right">
       <ListItemButton
-        disabled={disabled}
+        aria-disabled={disabled}
+        aria-label={title}
         selected={selected}
-        onClick={onClick}
+        onClick={disabled ? undefined : onClick}
         sx={{
           border: `1px solid ${theme.palette.toolbarButton.borderColor}`,
           bgcolor: selected ? theme.palette.toolbarButton.activeBg : theme.palette.toolbarButton.inactiveBg,
           color: selected ? theme.palette.toolbarButton.activeColor : theme.palette.toolbarButton.inactiveColor,
           borderRadius: 1,
-          '&:hover': selected ? { bgcolor: theme.palette.toolbarButton.hoverBg } : { bgcolor: theme.palette.toolbarButton.hoverBg },
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          opacity: disabled ? theme.palette.action.disabledOpacity : 1,
+          '&:hover': { bgcolor: theme.palette.toolbarButton.hoverBg },
         }}
       >
         <ListItemIcon>{icon}</ListItemIcon>

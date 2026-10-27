@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { PinnedLetter } from '@src/services/mappings/editorMappings';
 import type { ValidLeftClickNodeType } from '@src/constants/editor';
+import type { LetterCapabilities } from '@src/schemas/editorLetterLifecycle';
 
 export interface ClickedEntityNode {
   xmlId: string | null;
@@ -21,6 +22,8 @@ interface EditorLetterSlice {
     redoAvailable: boolean;
     selectedIdentifier: number | null;
     clickedEntityNode: ClickedEntityNode;
+    capabilities: LetterCapabilities | null;
+    version: string | null;
   };
   onlyReadableLetter: {
     id: number | null;
@@ -36,6 +39,8 @@ interface EditorLetterSlice {
     xmlContentCurrent?: string | null;
     isPinned: boolean | null; // remote pinned letters are pinned
     viewMode: 'CODE' | 'WYSIWYG' | null;
+    capabilities: LetterCapabilities | null;
+    version: string | null;
   };
   reloadLetterContent: boolean;
   tabNumber: number;
@@ -58,6 +63,7 @@ interface EditorLetterSlice {
   changeLetterViewMode: boolean;
   figureUploadInProgress: boolean;
   focusedFigureXmlId: string | null;
+  lifecycleOperationInProgress: boolean;
 }
 
 const initialState: EditorLetterSlice = {
@@ -77,6 +83,8 @@ const initialState: EditorLetterSlice = {
     undoAvailable: false,
     redoAvailable: false,
     selectedIdentifier: null,
+    capabilities: null,
+    version: null,
   },
   onlyReadableLetter: {
     id: null,
@@ -91,6 +99,8 @@ const initialState: EditorLetterSlice = {
     xmlContentCurrent: null,
     isPinned: null,
     viewMode: null,
+    capabilities: null,
+    version: null,
   },
   reloadLetterContent: false,
   tabNumber: 0,
@@ -113,6 +123,7 @@ const initialState: EditorLetterSlice = {
   changeLetterViewMode: false,
   figureUploadInProgress: false,
   focusedFigureXmlId: null,
+  lifecycleOperationInProgress: false,
 };
 
 const EditorLetterSlice = createSlice({
@@ -190,6 +201,22 @@ const EditorLetterSlice = createSlice({
         letter.isPinned = true; // This will trigger a re-render
       }
     },
+    setEditorPinnedLetterLifecycle(
+      state,
+      action: PayloadAction<{
+        id: number;
+        name: string;
+        capabilities: LetterCapabilities;
+        version: string;
+      }>,
+    ) {
+      const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);
+      if (letter) {
+        letter.name = action.payload.name;
+        letter.capabilities = action.payload.capabilities;
+        letter.version = action.payload.version;
+      }
+    },
     addLetterToPinned(state, action) {
       if (!state.pinnedLetters.includes(action.payload.pinnedLetter)) {
         state.pinnedLetters = [...state.pinnedLetters, action.payload.pinnedLetter];
@@ -235,6 +262,9 @@ const EditorLetterSlice = createSlice({
     setFocusedFigureXmlId(state, action: PayloadAction<string | null>) {
       state.focusedFigureXmlId = action.payload;
     },
+    setLifecycleOperationInProgress(state, action: PayloadAction<boolean>) {
+      state.lifecycleOperationInProgress = action.payload;
+    },
   },
 });
 
@@ -252,6 +282,7 @@ export const {
   setEditorPinnedLetters,
   setEditorPinnedLetterViewMode,
   setEditorPinnedLetterContentChanged,
+  setEditorPinnedLetterLifecycle,
   setEditorSearchValue,
   setEditorSelectedItem,
   setEditorTabNumber,
@@ -264,6 +295,7 @@ export const {
   setTabToCloseId,
   setFigureUploadInProgress,
   setFocusedFigureXmlId,
+  setLifecycleOperationInProgress,
 } = EditorLetterSlice.actions;
 
 export default EditorLetterSlice.reducer;

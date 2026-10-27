@@ -111,6 +111,8 @@
     "manageAddressRecipient": "Adresse Empfänger Verwalten",
     "publishLetter": "Brief Veröffentlichen",
     "resetLetter": "Brief Zurücksetzen",
+    "renameLetter": "Brief umbenennen",
+    "discardLetter": "Brief verwerfen",
     "setPrecursorLetter": "Vorgängerbrief Festlegen",
     "setSuccessorLetter": "Nachfolgerbrief Festlegen"
   },

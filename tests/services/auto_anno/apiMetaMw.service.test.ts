@@ -38,6 +38,18 @@ describe('apiMetaMw.service', () => {
     await expect(fetchMetamwLetterData('fmb-1801-06-06-01')).resolves.toBeNull();
   });
 
+  it('does not treat an undocumented 404 response as an available name', async () => {
+    const error = {
+      response: {
+        status: 404,
+        data: { error: 'unexpected_not_found' },
+      },
+    };
+    getMock.mockRejectedValue(error);
+
+    await expect(fetchMetamwLetterData('fmb-1801-06-06-01')).rejects.toBe(error);
+  });
+
   it.each([401, 500])('does not treat an HTTP %s response as an available name', async (status) => {
     const error = { response: { status, data: { error: 'request_failed' } } };
     getMock.mockRejectedValue(error);

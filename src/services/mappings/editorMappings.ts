@@ -1,5 +1,46 @@
 import { ReactNode } from 'react';
 import { AppDispatch, RootState } from '@src/redux/redux.store';
+import { z } from 'zod';
+import {
+  LetterCapabilities,
+  letterCapabilitiesSchema,
+  letterVersionSchema,
+  parseLetterLifecycle,
+} from '@src/schemas/editorLetterLifecycle';
+
+const apiLetterLifecycleShape = {
+  capabilities: letterCapabilitiesSchema,
+  version: letterVersionSchema,
+};
+
+const apiEditorLetterSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  title: z.string().nullable(),
+  last_updated_by_name: z.string().optional().default(''),
+  last_updated_by_id: z.number().int().optional().default(0),
+  updated_at: z.string().nullable().optional(),
+  xml_content: z.string().nullable().optional(),
+  ...apiLetterLifecycleShape,
+});
+
+const apiEditorLetterDataSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  title: z.string().nullable(),
+  xml_content: z.string().nullable(),
+  undo_available: z.boolean().optional().default(false),
+  redo_available: z.boolean().optional().default(false),
+  ...apiLetterLifecycleShape,
+});
+
+const apiPinnedLetterSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  content_changed: z.boolean(),
+  xml_content_current: z.string().nullable().optional(),
+  ...apiLetterLifecycleShape,
+});
 
 export type ComponentMappingItem = {
   name: string;
@@ -12,10 +53,7 @@ export type EditorKeyHandleItem = {
   description: string;
   key: string;
   component: ReactNode | null;
-  action?:
-    | (() => Promise<string | null>)
-    | ((dispatch: AppDispatch, getState: () => RootState) => Promise<string | null | void>)
-    | null;
+  action?: (() => Promise<string | null>) | ((dispatch: AppDispatch, getState: () => RootState) => Promise<string | null | void>) | null;
   xmlAction?: (xmlDoc: Document) => void;
   operationType?: string | undefined; // e.g., 'INSERT_PAGEBREAK', 'ADD_PARAGRAPH'
   successMessage?: string;
@@ -31,6 +69,8 @@ export interface EditorLetter {
   lastUpdatedById: number;
   updatedAt: Date;
   xmlContent: string | undefined;
+  capabilities: LetterCapabilities;
+  version: string;
 }
 export interface EditorEntity {
   id: number;
@@ -45,18 +85,15 @@ export interface PinnedLetter {
   isPinned: boolean;
   xmlContentCurrent?: string | null;
   viewMode: 'CODE' | 'WYSIWYG' | null;
+  capabilities: LetterCapabilities | null;
+  version: string | null;
 }
 export interface SearchLetter {
   id: number;
   name: string;
   title: string;
-}
-
-export interface ApiPinnedLetter {
-  id: number;
-  name: string;
-  content_changed: boolean;
-  xml_content_current?: string | null;
+  capabilities: LetterCapabilities;
+  version: string;
 }
 
 export interface EditorLetterData {
@@ -66,6 +103,8 @@ export interface EditorLetterData {
   xmlContent: string;
   undoAvailable: boolean;
   redoAvailable: boolean;
+  capabilities: LetterCapabilities;
+  version: string;
 }
 
 export interface MarkupPersonData {
@@ -147,38 +186,49 @@ export type CountryOption = {
   name: string | null;
 };
 
-export const mapApiToEditorLetter = (apiLetter: any): EditorLetter => {
+export const mapApiToEditorLetter = (value: unknown): EditorLetter => {
+  const apiLetter = apiEditorLetterSchema.parse(value);
+  const lifecycle = parseLetterLifecycle(apiLetter);
   return {
     id: apiLetter.id,
     name: apiLetter.name,
-    title: apiLetter.title,
+    title: apiLetter.title ?? '',
     lastUpdatedByName: apiLetter.last_updated_by_name,
     lastUpdatedById: apiLetter.last_updated_by_id,
-    updatedAt: new Date(apiLetter.updated_at),
-    xmlContent: apiLetter.xml_content,
+    updatedAt: apiLetter.updated_at ? new Date(apiLetter.updated_at) : new Date(0),
+    xmlContent: apiLetter.xml_content ?? undefined,
+    ...lifecycle,
   };
 };
 
-export const mapApiToLetterData = (apiLetter: any): SearchLetter => {
+export const mapApiToLetterData = (value: unknown): SearchLetter => {
+  const apiLetter = apiEditorLetterSchema.parse(value);
+  const lifecycle = parseLetterLifecycle(apiLetter);
   return {
     id: apiLetter.id,
     name: apiLetter.name,
-    title: apiLetter.title,
+    title: apiLetter.title ?? '',
+    ...lifecycle,
   };
 };
 
-export const mapApiToEditorLetterData = (apiLetter: any): EditorLetterData => {
+export const mapApiToEditorLetterData = (value: unknown): EditorLetterData => {
+  const apiLetter = apiEditorLetterDataSchema.parse(value);
+  const lifecycle = parseLetterLifecycle(apiLetter);
   return {
     id: apiLetter.id,
     name: apiLetter.name,
-    title: apiLetter.title,
-    xmlContent: apiLetter.xml_content,
+    title: apiLetter.title ?? '',
+    xmlContent: apiLetter.xml_content ?? '',
     undoAvailable: apiLetter.undo_available,
     redoAvailable: apiLetter.redo_available,
+    ...lifecycle,
   };
 };
 
-export const mapApiToPinnedLetter = (apiPinnedLetter: ApiPinnedLetter): PinnedLetter => {
+export const mapApiToPinnedLetter = (value: unknown): PinnedLetter => {
+  const apiPinnedLetter = apiPinnedLetterSchema.parse(value);
+  const lifecycle = parseLetterLifecycle(apiPinnedLetter);
   return {
     id: apiPinnedLetter.id,
     name: apiPinnedLetter.name,
@@ -186,6 +236,7 @@ export const mapApiToPinnedLetter = (apiPinnedLetter: ApiPinnedLetter): PinnedLe
     xmlContentCurrent: apiPinnedLetter.xml_content_current ?? null,
     isPinned: true,
     viewMode: 'WYSIWYG',
+    ...lifecycle,
   };
 };
 

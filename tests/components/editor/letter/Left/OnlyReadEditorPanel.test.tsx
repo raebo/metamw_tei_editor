@@ -4,10 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import OnlyReadEditorPanel from '@src/components/editor/letter/Left/OnlyReadEditorPanel';
-import {
-  fetchLetterXmlContent,
-  fetchSearchLetters,
-} from '@src/services/editor/apiLettersRequest.service';
+import { fetchLetterXmlContent, fetchSearchLetters } from '@src/services/editor/apiLettersRequest.service';
 import editorLetterReducer from '@src/redux/slices/editor.letter.slice';
 import authReducer from '@src/redux/slices/authentication.slice';
 import type { EditorLetter } from '@src/services/mappings/editorMappings';
@@ -19,15 +16,11 @@ jest.mock('notistack', () => ({
 }));
 jest.mock('@src/components/editor/letter/Center/LetterViewContainer/XmlDisplayParser', () => ({
   __esModule: true,
-  default: ({ xmlString }: { xmlString: string }) => (
-    <div data-testid="xml-parser">{xmlString}</div>
-  ),
+  default: ({ xmlString }: { xmlString: string }) => <div data-testid="xml-parser">{xmlString}</div>,
 }));
 
 const mockFetchSearchLetters = fetchSearchLetters as jest.MockedFunction<typeof fetchSearchLetters>;
-const mockFetchLetterXmlContent = fetchLetterXmlContent as jest.MockedFunction<
-  typeof fetchLetterXmlContent
->;
+const mockFetchLetterXmlContent = fetchLetterXmlContent as jest.MockedFunction<typeof fetchLetterXmlContent>;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const buildLetter = (id: number, name: string): EditorLetter => ({
@@ -38,6 +31,11 @@ const buildLetter = (id: number, name: string): EditorLetter => ({
   lastUpdatedById: 1,
   updatedAt: new Date('2024-01-01'),
   xmlContent: undefined,
+  capabilities: {
+    rename: { allowed: false, reasonCode: 'letter_already_published' },
+    discard: { allowed: false, reasonCode: 'letter_already_published' },
+  },
+  version: 'a'.repeat(64),
 });
 
 const MOCK_LETTERS: EditorLetter[] = [buildLetter(1, 'Brief A'), buildLetter(2, 'Brief B')];
@@ -78,9 +76,7 @@ const renderComponent = (store = buildStore()) =>
 // single-node matching nor getByRole's accessible-name computation reliably reconstructs that
 // split text in jsdom, so match directly against the option element's full textContent instead.
 const getOptionByName = (name: string) =>
-  screen.getByText(
-    (_, element) => element?.getAttribute('role') === 'option' && element.textContent === name,
-  );
+  screen.getByText((_, element) => element?.getAttribute('role') === 'option' && element.textContent === name);
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 describe('OnlyReadEditorPanel', () => {

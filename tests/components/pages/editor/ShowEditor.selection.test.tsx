@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -7,7 +7,8 @@ import { ThemeProvider } from '@mui/material/styles';
 import '@src/i18n';
 import theme from '@src/utils/theme/theme';
 import ShowEditor from '@src/components/pages/editor/ShowEditor';
-import editorLetterReducer from '@src/redux/slices/editor.letter.slice';
+import editorLetterReducer, { setEditorLetter } from '@src/redux/slices/editor.letter.slice';
+import { EditorConstants } from '@src/constants/editor';
 
 // Regression test for a bug where the left-side toolbar buttons (e.g. "Neuer Brief",
 // "Suche") never visually highlighted when selected, because their `selected` prop
@@ -88,13 +89,10 @@ jest.mock('@src/components/auto_anno/misc/LetterFontSizeHandle', () => ({
   __esModule: true,
   default: () => null,
 }));
-jest.mock(
-  '@src/components/editor/letter/Right/EntityProtagCreation/EntityProtagCreationContainer',
-  () => ({
-    __esModule: true,
-    default: () => null,
-  }),
-);
+jest.mock('@src/components/editor/letter/Right/EntityProtagCreation/EntityProtagCreationContainer', () => ({
+  __esModule: true,
+  default: () => null,
+}));
 jest.mock('@src/components/editor/letter/Right/EntityPerson/EntityPersonContainer', () => ({
   __esModule: true,
   default: () => null,
@@ -125,8 +123,9 @@ const buildStore = () => configureStore({ reducer: { editorLetter: editorLetterR
 // boundary (it relies on one further up the real route tree), so the toolbar buttons
 // only appear once that lazy import resolves. Waiting for them here keeps the tests
 // independent of module-level lazy-import caching across test runs.
-const renderShowEditor = async () => {
+const renderShowEditor = async (configure?: (store: ReturnType<typeof buildStore>) => void) => {
   const store = buildStore();
+  configure?.(store);
   const view = render(
     <ThemeProvider theme={theme}>
       <Provider store={store}>
@@ -134,15 +133,47 @@ const renderShowEditor = async () => {
       </Provider>
     </ThemeProvider>,
   );
-  const toolbarButtons = () =>
-    Array.from(view.container.querySelectorAll<HTMLElement>('.MuiListItemButton-root'));
+  const toolbarButtons = () => Array.from(view.container.querySelectorAll<HTMLElement>('.MuiListItemButton-root'));
   await waitFor(() => expect(toolbarButtons().length).toBeGreaterThan(0));
-  return { ...view, toolbarButtons };
+  return { ...view, toolbarButtons, store };
 };
 
 const isSelected = (button: HTMLElement) => button.classList.contains('Mui-selected');
 
 describe('ShowEditor toolbar selection highlighting', () => {
+  it('shows rename and discard actions while backend capabilities are unavailable', async () => {
+    await renderShowEditor();
+
+    expect(screen.getByRole('button', { name: 'Rename letter' })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Discard letter' })).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  it('enables lifecycle actions from backend capabilities and opens the selected dialog', async () => {
+    const { store } = await renderShowEditor((configuredStore) => {
+      configuredStore.dispatch(
+        setEditorLetter({
+          letter: {
+            id: 17420,
+            name: 'fmb-1840-06-06-01',
+            capabilities: {
+              rename: { allowed: true, reasonCode: null },
+              discard: { allowed: false, reasonCode: 'letter_already_published' },
+            },
+            version: 'a'.repeat(64),
+          },
+        }),
+      );
+    });
+
+    const renameButton = screen.getByRole('button', { name: 'Rename letter' });
+    const discardButton = screen.getByRole('button', { name: 'Discard letter' });
+    expect(renameButton).toHaveAttribute('aria-disabled', 'false');
+    expect(discardButton).toHaveAttribute('aria-disabled', 'true');
+
+    await userEvent.click(renameButton);
+    expect(store.getState().editorLetter.dialogType).toBe(EditorConstants.dialogTypes.RENAME_LETTER);
+  });
+
   it('highlights a left-side action button (Neuer Brief) after it is clicked', async () => {
     const { toolbarButtons } = await renderShowEditor();
 

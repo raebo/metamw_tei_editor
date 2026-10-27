@@ -2,12 +2,13 @@
 
 **Stand:** 27.10.2026
 
-**Status:** Backend F-155 bis F-164 und Frontend FE1 bis FE3 sind lokal umgesetzt.
-F-164 erweitert im Backend-Arbeitsbaum den Vertrag auf die vollständige Kennung;
-Backend-Vollsuite und gezielte Tests sind grün; gemeinsame Live-Abnahme steht aus. Der
-letzte Commit ab80327 enthält weiterhin nur die frühere Nummernänderung.
-Backend-Übergabe: Commit `ab80327` auf `feature/f155-editor-letter-lifecycle`
-(lokal committed, nicht gepusht oder produktiv ausgerollt).
+**Status:** Fachlich abgenommen und im lokalen Frontend-/Backend-Arbeitsstand abgeschlossen.
+Backend F-155 bis F-164 und Frontend FE1 bis FE3 sind umgesetzt; die gezielten Tests,
+die Backend-Vollsuite und die gemeinsame Live-Abnahme sind erfolgreich. Backend
+F-162 bis F-164 sind als `b5cef240`, `6374260e` und `44043d3d` committed. Die
+Frontend-Umsetzung ist zum Abschlusszeitpunkt noch zu committen. Backend-Branch:
+`feature/f155-editor-letter-lifecycle` (lokal committed, nicht gepusht oder
+produktiv ausgerollt).
 
 **Priorität:** P2
 
@@ -117,9 +118,10 @@ aus.
   kanonischen Brief gespeichert (Vorschlag `created_by_user_id`, `created_via`).
   Bereits vorhandene Briefe mit unbekannter Herkunft/Publikationsgeschichte
   werden nicht allein wegen leerer neuer Felder freigeschaltet.
-- Die erste Rename-Version darf ausschließlich die zweistellige laufende Nummer
-  ändern. Präfix und Datumsanteil bleiben unverändert. Damit verändert die Aktion
-  weder Briefrolle noch fachliches Briefdatum.
+- Die vollständige Briefkennung darf geändert werden. Präfix, Datum und laufende
+  Nummer werden als neue, freie und kalendarisch gültige Kennung geprüft. Die
+  daraus abgeleiteten Speicher- und Metadatenwerte werden konsistent aktualisiert;
+  unabhängige historische Datierungen bleiben unverändert.
 - Bekannte eingehende Beziehungen oder XML-Verweise blockieren Rename und Discard
   in der ersten Version. Andere Briefe werden nicht automatisch verändert.
 - Bestehende Bilddateinamen und `graphic`-URLs bleiben beim Rename unverändert.
@@ -905,8 +907,9 @@ unverändert. Gemeinsame Integration und Live-Abnahme stehen aus.
 - Letter-, Such-, Pinned- und Create-Antworten übernehmen `capabilities` und das
   64-stellige `version`-Token. Pinned Index und Pinned Show akzeptieren nur die
   kanonische numerische `Letter.id`; die frühere String-Darstellung wird verworfen.
-- Rename prüft Format, gültiges Datum, unverändertes Präfix/Datum und die exakte
-  Namensverfügbarkeit. Nur `404 {"error":"letter_not_found"}` gilt als frei.
+- Rename prüft Format, gültiges Datum, laufende Nummer `01` bis `99`, eine
+  tatsächliche Änderung und die exakte Namensverfügbarkeit. Nur
+  `404 {"error":"letter_not_found"}` gilt als frei.
   Unmittelbar vor PATCH wird Pinned Show neu geladen und dessen Version als
   `X-Letter-Version` gesendet. Nach Erfolg wird erneut Pinned Show geladen; nur
   dessen persönliche Arbeitskopie samt Undo/Redo, Capabilities und Version wird
@@ -1081,6 +1084,25 @@ OpenAPI-Routenabgleich: 67 Operationen vollständig; Diff-Prüfungen grün.
 Nachweise im Backend-Ticket audit/tickets/open/F-164.md.
 
 
+## Abschluss der gemeinsamen Abnahme vom 27.10.2026
+
+- Umbenennen und Verwerfen sind in der Benutzeroberfläche sichtbar und werden
+  anhand der Backend-Capabilities aktiviert beziehungsweise verständlich
+  deaktiviert.
+- Die vollständige Briefkennung kann geändert werden; ungültige oder bereits
+  belegte Kennungen werden mit einer fachlichen Fehlermeldung abgewiesen.
+- Lokale Briefänderungen bleiben beim Umbenennen erhalten. Die korrigierte
+  Baseline erzeugt anschließend keinen falschen Staleness- beziehungsweise
+  Rebase-Hinweis.
+- Das Verwerfen wurde mit `fmb-1801-12-31-10` geprüft. Danach existieren weder ein
+  aktiver kanonischer Brief noch Editor-Arbeitskopien, Pins, XML-Inhalte oder eine
+  aktive Briefdatei für diese Kennung; sie erscheint damit nicht mehr unter den
+  Editor-Briefen.
+- Die fachliche Abnahme ist erfolgreich. Commit, Push und Deployment der oben
+  genannten lokalen Frontend- und Backend-Arbeitsstände bleiben getrennte
+  Auslieferungsschritte und ändern den fachlichen Ticketstatus nicht.
+
+
 ## Backend-Commit-Übergabe (27.10.2026)
 
 Die vorstehenden Arbeitsbaumangaben dokumentieren die damaligen Testzeitpunkte.
@@ -1092,5 +1114,5 @@ Inzwischen sind die Backend-Anpassungen getrennt committed:
 
 Branch: feature/f155-editor-letter-lifecycle. Kein Push oder Deployment.
 Gesamtstand: 1779 Beispiele, 0 Fehler, 17 bestehende Pending; OpenAPI 67/67.
-Dieser Frontend-Commit enthält ausschließlich die Ticketdokumentation.
-Frontend-Anwendungsänderungen bleiben uncommitted; gemeinsame Live-Abnahme offen.
+Die Frontend-Anwendungsänderungen bleiben zum dokumentierten Abschlusszeitpunkt
+uncommitted. Die gemeinsame Live-Abnahme ist erfolgreich abgeschlossen.

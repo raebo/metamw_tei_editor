@@ -54,6 +54,8 @@ import { ToolbarLetterNameDisplay } from '@src/components/editor/letter/Util/Too
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
 import LetterStalenessMonitor from '@src/components/editor/letter/LetterStalenessMonitor';
+import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
+import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
@@ -193,6 +195,7 @@ const ShowEditor = () => {
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
   const selectedItem = useSelector((state: RootState) => state.editorLetter.selectedItem);
   const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
+  const lifecycleOperationInProgress = useSelector((state: RootState) => state.editorLetter.lifecycleOperationInProgress);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showLeftContainer, setShowLeftContainer] = useState<boolean>(false);
   const [showRightContainer, setShowRightContainer] = useState<boolean>(false);
@@ -205,6 +208,23 @@ const ShowEditor = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const [isCodeView, setIsCodeView] = useState<boolean>(false);
+
+  const letterLifecycleDisabledReason = (action: 'rename' | 'discard'): string | undefined => {
+    if (stateEditorLetter.id === null) return t('editor:common.letterLifecycle.noLetter');
+    if (figureUploadInProgress) return t('editor:common.letterLifecycle.figureUploadInProgress');
+    if (lifecycleOperationInProgress) return t('editor:common.letterLifecycle.operationInProgress');
+    const capability = stateEditorLetter.capabilities?.[action];
+    if (!capability) return t('editor:common.letterLifecycle.backendUnavailable');
+    if (!capability.allowed) {
+      return capability.reasonCode
+        ? t(`editor:common.letterLifecycle.reasons.${capability.reasonCode}`)
+        : t('editor:common.letterLifecycle.backendUnavailable');
+    }
+    return undefined;
+  };
+
+  const renameDisabledReason = letterLifecycleDisabledReason('rename');
+  const discardDisabledReason = letterLifecycleDisabledReason('discard');
 
   const [leftEditorWidth, setLeftEditorWidth] = useState(LEFT_EDITOR_DEFAULT_WIDTH);
 
@@ -221,6 +241,8 @@ const ShowEditor = () => {
           contentChanged: false,
           isPinned: false,
           viewMode: 'WYSIWYG',
+          capabilities: null,
+          version: null,
         });
       }
       dispatch(setEditorPinnedLetters({ pinnedLetters }));
@@ -627,6 +649,20 @@ const ShowEditor = () => {
               selected={stateEditorLetter.undoAvailable || stateEditorLetter.redoAvailable}
               onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
               icon={<RestartAltIcon />}
+            />
+            <ToolbarMenuButton
+              title={t('editor:common.letterLifecycle.rename')}
+              disabled={renameDisabledReason !== undefined}
+              disabledReason={renameDisabledReason}
+              onClick={() => setModalDialog(EditorConstants.dialogTypes.RENAME_LETTER)}
+              icon={<DriveFileRenameOutlineIcon />}
+            />
+            <ToolbarMenuButton
+              title={t('editor:common.letterLifecycle.discard')}
+              disabled={discardDisabledReason !== undefined}
+              disabledReason={discardDisabledReason}
+              onClick={() => setModalDialog(EditorConstants.dialogTypes.DISCARD_LETTER)}
+              icon={<DeleteForeverOutlinedIcon />}
             />
           </Stack>
         </Box>

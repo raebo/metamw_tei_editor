@@ -50,6 +50,8 @@ import CrossReferenceDialog from './Components/CrossReferenceDialog';
 import ForeignTextDialog from './Components/ForeignTextDialog';
 import AbbreviationDialog from './Components/AbbreviationDialog';
 import HorizontalFractionDialog from './Components/HorizontalFractionDialog';
+import RenameLetterDialog from './Components/RenameLetterDialog';
+import DiscardLetterDialog from './Components/DiscardLetterDialog';
 
 interface EditorFormDialogProps {
   open: boolean;
@@ -116,6 +118,8 @@ const DialogTitles: Record<string, string> = {
   [EditorConstants.dialogTypes.MANAGE_RISM_ENTRY]: t('editor:dialog.titles.manageRismEntry'),
   [EditorConstants.dialogTypes.PUBLISH_LETTER]: t('editor:dialog.titles.publishLetter'),
   [EditorConstants.dialogTypes.RESET_LETTER]: t('editor:dialog.titles.resetLetter'),
+  [EditorConstants.dialogTypes.RENAME_LETTER]: t('editor:dialog.titles.renameLetter'),
+  [EditorConstants.dialogTypes.DISCARD_LETTER]: t('editor:dialog.titles.discardLetter'),
 };
 
 const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) => React.ReactNode> = {
@@ -145,9 +149,7 @@ const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) 
   [EditorConstants.dialogTypes.GRAPHIC_STRUCTURE]: (props) => <GraphicStructureDialog {...props} />,
   [EditorConstants.dialogTypes.LIST_STRUCTURE]: (props) => <ListStructureDialog {...props} />,
   [EditorConstants.dialogTypes.MANUSCRIPT_ANNOTATION]: (props) => <ManuscriptAnnotationDialog {...props} />,
-  [EditorConstants.dialogTypes.SECTION_ADDRESS_LINE]: (props) => (
-    <SectionAddressLineDialog {...props} />
-  ),
+  [EditorConstants.dialogTypes.SECTION_ADDRESS_LINE]: (props) => <SectionAddressLineDialog {...props} />,
   [EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE]: (props) => <ParagraphStructureDialog {...props} />,
   [EditorConstants.dialogTypes.TABLE_STRUCTURE]: (props) => <TableStructureDialog {...props} />,
   [EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT]: (props) => <CloseTabWithContent {...props} />,
@@ -181,6 +183,8 @@ const DialogContentComponents: Record<string, (props: DefaultDialogProps & any) 
   [EditorConstants.dialogTypes.MANAGE_WRITING_ACT_AUTHOR_WRITER]: (props) => <ManageWritingActAuthorWriterDialog {...props} />,
   [EditorConstants.dialogTypes.PUBLISH_LETTER]: (props) => <PublishLetterDialog {...props} />,
   [EditorConstants.dialogTypes.RESET_LETTER]: (props) => <ResetLetterDialog {...props} />,
+  [EditorConstants.dialogTypes.RENAME_LETTER]: (props) => <RenameLetterDialog {...props} />,
+  [EditorConstants.dialogTypes.DISCARD_LETTER]: (props) => <DiscardLetterDialog {...props} />,
 };
 
 const EditorFormDialog = (props: EditorFormDialogProps) => {

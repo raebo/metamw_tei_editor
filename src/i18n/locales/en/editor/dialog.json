@@ -111,6 +111,8 @@
     "manageAddressRecipient": "Manage Recipient Address",
     "publishLetter": "Publish Letter",
     "resetLetter": "Reset Letter",
+    "renameLetter": "Rename letter",
+    "discardLetter": "Discard letter",
     "setPrecursorLetter": "Set Predecessor Letter",
     "setSuccessorLetter": "Set Successor Letter"
   },

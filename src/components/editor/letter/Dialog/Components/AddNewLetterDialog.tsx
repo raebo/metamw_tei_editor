@@ -64,15 +64,7 @@ export type NewLetterCompletionState = {
   transkriptorValue: string | null;
 };
 
-const STEP_ORDER = [
-  'letterName',
-  'headlines',
-  'referenceLetters',
-  'writer',
-  'receiver',
-  'transEdition',
-  'editorTranskriptor',
-] as const;
+const STEP_ORDER = ['letterName', 'headlines', 'referenceLetters', 'writer', 'receiver', 'transEdition', 'editorTranskriptor'] as const;
 
 type StepKey = (typeof STEP_ORDER)[number];
 
@@ -127,17 +119,16 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
 
   const submitCreateHandler = async () => {
     try {
-      const { newLetterId, newLetterName } = await createNewLetter(completionState);
+      const { newLetterId, newLetterName, capabilities, version } = await createNewLetter(completionState);
 
-      const newPinnedLetters = EditorUtils.pinnedLetters.computeNewPinnedLetters(
-        statePinnedLetters,
-        {
-          id: newLetterId,
-          name: newLetterName,
-          isPinned: true,
-          viewMode: 'WYSIWYG',
-        },
-      );
+      const newPinnedLetters = EditorUtils.pinnedLetters.computeNewPinnedLetters(statePinnedLetters, {
+        id: newLetterId,
+        name: newLetterName,
+        isPinned: true,
+        viewMode: 'WYSIWYG',
+        capabilities,
+        version,
+      });
       dispatch(setEditorPinnedLetters({ pinnedLetters: newPinnedLetters }));
 
       enqueueSnackbar(`New letter '${completionState.letterName}' created successfully`, {
@@ -157,15 +148,11 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
   // STEP_ORDER.length (not STEP_DEFINITIONS.length): STEP_DEFINITIONS is rebuilt every render
   // from the module-level, constant-length STEP_ORDER, so referencing STEP_ORDER directly
   // avoids needing STEP_DEFINITIONS itself as a dependency here.
-  const goToNextStep = useCallback(
-    () => setCurrentStepIndex((i) => Math.min(STEP_ORDER.length - 1, i + 1)),
-    [],
-  );
+  const goToNextStep = useCallback(() => setCurrentStepIndex((i) => Math.min(STEP_ORDER.length - 1, i + 1)), []);
 
   const currentStep = STEP_DEFINITIONS[currentStepIndex];
   const previousStep = currentStepIndex > 0 ? STEP_DEFINITIONS[currentStepIndex - 1] : null;
-  const nextStep =
-    currentStepIndex < STEP_DEFINITIONS.length - 1 ? STEP_DEFINITIONS[currentStepIndex + 1] : null;
+  const nextStep = currentStepIndex < STEP_DEFINITIONS.length - 1 ? STEP_DEFINITIONS[currentStepIndex + 1] : null;
 
   // Arrow-key navigation, but only when focus is not inside a text input, so that
   // e.g. cursor movement in Autocomplete/TextField is not interfered with.
@@ -175,10 +162,7 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const activeElement = document.activeElement as HTMLElement | null;
       const isTextInput =
-        !!activeElement &&
-        (activeElement.tagName === 'INPUT' ||
-          activeElement.tagName === 'TEXTAREA' ||
-          activeElement.isContentEditable);
+        !!activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable);
 
       if (isTextInput) {
         return;
@@ -206,13 +190,7 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
   const renderStepContent = (stepKey: StepKey) => {
     switch (stepKey) {
       case 'letterName':
-        return (
-          <NewLetterLetterName
-            autoAvailable={null}
-            completionState={completionState}
-            onChange={childOnChange}
-          />
-        );
+        return <NewLetterLetterName autoAvailable={null} completionState={completionState} onChange={childOnChange} />;
       case 'headlines':
         return (
           <>
@@ -261,9 +239,7 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
               completionState={completionState}
               onChange={childOnChange}
               dialogType={'writing'}
-              textFieldValue={t(
-                'editor:dialog.teiHeaderWritingReceivingPlace.label.chooseWritingPlace',
-              )}
+              textFieldValue={t('editor:dialog.teiHeaderWritingReceivingPlace.label.chooseWritingPlace')}
             />
           </>
         );
@@ -282,29 +258,15 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
               completionState={completionState}
               onChange={childOnChange}
               dialogType={'receiving'}
-              textFieldValue={t(
-                'editor:dialog.teiHeaderWritingReceivingPlace.label.chooseReceivingPlace',
-              )}
+              textFieldValue={t('editor:dialog.teiHeaderWritingReceivingPlace.label.chooseReceivingPlace')}
             />
           </>
         );
       case 'transEdition':
-        return (
-          <TeiHeaderTransEdition
-            teiHeader={null}
-            autoAvailable={null}
-            completionState={completionState}
-            onChange={childOnChange}
-          />
-        );
+        return <TeiHeaderTransEdition teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} />;
       case 'editorTranskriptor':
         return (
-          <TeiHeaderEditorTranskriptor
-            teiHeader={null}
-            autoAvailable={null}
-            completionState={completionState}
-            onChange={childOnChange}
-          />
+          <TeiHeaderEditorTranskriptor teiHeader={null} autoAvailable={null} completionState={completionState} onChange={childOnChange} />
         );
       default:
         return null;
@@ -315,11 +277,7 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
     <div ref={containerRef} tabIndex={-1}>
       <DialogContent>
         <div className="autoSnippetFormRow">
-          {displayData !== null ? (
-            <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
-          ) : (
-            <></>
-          )}
+          {displayData !== null ? <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} /> : <></>}
         </div>
 
         {renderStepContent(currentStep.key)}
@@ -343,11 +301,7 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
         />
 
         {/* saveing is always possible, even if not all fields are set. */}
-        <DialogActionButton
-          label={td('button.create')}
-          onClick={submitCreateHandler}
-          disabled={!saveIsAvailable}
-        />
+        <DialogActionButton label={td('button.create')} onClick={submitCreateHandler} disabled={!saveIsAvailable} />
       </DialogContent>
     </div>
   );
