@@ -19,6 +19,7 @@ import {
   letterVersionSchema,
   parseLetterLifecycle,
 } from '@src/schemas/editorLetterLifecycle';
+import { LetterXmlContentResponseSchema } from '@src/schemas/editorSimpleResponses';
 
 const createLetterResponseSchema = z.object({
   letter_id: z.number().int().positive(),
@@ -78,11 +79,11 @@ export const fetchSearchLetters = async (searchValue: string): Promise<EditorLet
   }
 };
 
-export const fetchLetterXmlContent = async (letterId: number): Promise<string> => {
+export const fetchLetterXmlContent = async (letterId: number): Promise<string | null> => {
   try {
     const response = await initApi.initApi().get(`/jwt/editor/letters/${letterId}/xml_content`);
 
-    return response.data;
+    return LetterXmlContentResponseSchema.parse(response.data);
   } catch (err) {
     throw new Error('Failed to fetch LetterXmlContent: ' + err);
   }

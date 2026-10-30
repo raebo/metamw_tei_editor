@@ -1,4 +1,9 @@
-import { fetchLetterDataByName, fetchSearchLetters, searchForLetterNameTitle } from '@src/services/editor/apiLettersRequest.service';
+import {
+  fetchLetterDataByName,
+  fetchLetterXmlContent,
+  fetchSearchLetters,
+  searchForLetterNameTitle,
+} from '@src/services/editor/apiLettersRequest.service';
 
 const mockGet = jest.fn();
 
@@ -20,6 +25,21 @@ describe('apiLettersRequest.service canonical URLs', () => {
     expect(mockGet).toHaveBeenCalledWith('/jwt/editor/letters/search', {
       params: { searchValue: 'Bach / Leipzig ä' },
     });
+  });
+
+  it.each([
+    ['<TEI/>', '<TEI/>'],
+    [null, null],
+  ])('validates the documented XML content response %p', async (responseData, expected) => {
+    mockGet.mockResolvedValue({ data: responseData });
+
+    await expect(fetchLetterXmlContent(17420)).resolves.toBe(expected);
+  });
+
+  it('rejects an invalid XML content response', async () => {
+    mockGet.mockResolvedValue({ data: { xml_content: '<TEI/>' } });
+
+    await expect(fetchLetterXmlContent(17420)).rejects.toThrow('Failed to fetch LetterXmlContent');
   });
 
   it('encodes all dynamic search path segments', async () => {

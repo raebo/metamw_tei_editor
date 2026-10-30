@@ -9,6 +9,10 @@ import theme from '@src/utils/theme/theme';
 import ShowEditor from '@src/components/pages/editor/ShowEditor';
 import editorLetterReducer, { setEditorLetter } from '@src/redux/slices/editor.letter.slice';
 import { EditorConstants } from '@src/constants/editor';
+import { letterExists } from '@src/services/editor/apiLetterRequest.service';
+
+const mockNavigate = jest.fn();
+let mockRouteParams: { letterId?: string; letterName?: string } = {};
 
 // Regression test for a bug where the left-side toolbar buttons (e.g. "Neuer Brief",
 // "Suche") never visually highlighted when selected, because their `selected` prop
@@ -19,8 +23,8 @@ import { EditorConstants } from '@src/constants/editor';
 
 // ── Mocks for everything not relevant to toolbar selection state ───────────
 jest.mock('react-router-dom', () => ({
-  useNavigate: () => jest.fn(),
-  useParams: () => ({}),
+  useNavigate: () => mockNavigate,
+  useParams: () => mockRouteParams,
 }));
 
 jest.mock('@src/services/editor/apiLetterRequest.service', () => ({
@@ -141,6 +145,41 @@ const renderShowEditor = async (configure?: (store: ReturnType<typeof buildStore
 const isSelected = (button: HTMLElement) => button.classList.contains('Mui-selected');
 
 describe('ShowEditor toolbar selection highlighting', () => {
+  beforeEach(() => {
+    mockNavigate.mockReset();
+    mockRouteParams = {};
+    (letterExists as jest.MockedFunction<typeof letterExists>).mockResolvedValue(true);
+  });
+
+  it('navigates to not found when the exists endpoint returns false', async () => {
+    mockRouteParams = { letterId: '17420', letterName: 'fmb-1840-06-06-01' };
+    (letterExists as jest.MockedFunction<typeof letterExists>).mockResolvedValueOnce(false);
+
+    await renderShowEditor();
+
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith('/not-found', {
+        state: { messageKey: 'invalidLetterId' },
+      }),
+    );
+  });
+
+  it('reports a technical exists-check failure without treating the letter as missing', async () => {
+    const { enqueueSnackbar } = jest.requireMock('notistack');
+    mockRouteParams = { letterId: '17420', letterName: 'fmb-1840-06-06-01' };
+    (letterExists as jest.MockedFunction<typeof letterExists>).mockRejectedValueOnce(new Error('Network error'));
+
+    await renderShowEditor();
+
+    await waitFor(() =>
+      expect(enqueueSnackbar).toHaveBeenCalledWith(
+        'The letter could not be checked because of a technical error. Please try again later.',
+        { variant: 'error' },
+      ),
+    );
+    expect(mockNavigate).not.toHaveBeenCalledWith('/not-found', expect.anything());
+  });
+
   it('shows favourites as disabled coming-soon placeholders', async () => {
     await renderShowEditor();
 

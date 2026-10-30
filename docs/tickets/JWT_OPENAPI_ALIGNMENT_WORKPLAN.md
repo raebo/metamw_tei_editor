@@ -67,6 +67,11 @@ angelegten Tracker-Tickets.
 - Das erste JWT-301-Teilpaket ist umgesetzt: Auth-, Letter-, Pinned-Letter- und haeufig
   verwendete Misc-Referenzdaten werden an der API-Grenze validiert. Weitere Legacy-Grenzen
   werden endpunktweise in kleinen Folgepaketen bearbeitet.
+- Das zweite JWT-301-Teilpaket validiert die einfachen Editor-Antworten fuer
+  Briefexistenz, nullable XML-Inhalt und Entitaetsschluessel. Technische Fehler werden bei
+  der Existenzpruefung nicht mehr als `false` beziehungsweise fehlender Brief behandelt;
+  nur ein dokumentiertes `404` und eine valide Antwort `false` fuehren zur
+  Nicht-gefunden-Ansicht. Die Entitaetssuche liefert typseitig stets eine Liste.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 

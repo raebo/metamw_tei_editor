@@ -2,27 +2,18 @@ import initApi from '../apiRequest.service';
 import { SnippetEntity } from '../mappings/autoAnnoMappings';
 import { EditorConstants } from '@src/constants/editor';
 import { entitySearchCategory, parseEntitySearchResponse } from '@src/schemas/entitySearch';
+import { EntityKeyResponseSchema, LetterExistsResponseSchema, LetterXmlContentResponseSchema } from '@src/schemas/editorSimpleResponses';
 
 export const letterExists = async (letterId: string): Promise<boolean> => {
-  try {
-    const response = await initApi.initApi().get(`/jwt/editor/letters/${encodeURIComponent(letterId)}/exists`);
+  const response = await initApi.initApi().get(`/jwt/editor/letters/${encodeURIComponent(letterId)}/exists`);
 
-    return response.data;
-  } catch (err) {
-    console.error(err);
-    return false;
-  }
+  return LetterExistsResponseSchema.parse(response.data);
 };
 
-export const letterContent = async (letterId: number): Promise<string> => {
-  try {
-    const response = await initApi.initApi().get(`/jwt/editor/letters/${letterId}/xml_content`);
+export const letterContent = async (letterId: number): Promise<string | null> => {
+  const response = await initApi.initApi().get(`/jwt/editor/letters/${encodeURIComponent(String(letterId))}/xml_content`);
 
-    return response.data;
-  } catch (err) {
-    console.error(err);
-    return '';
-  }
+  return LetterXmlContentResponseSchema.parse(response.data);
 };
 
 export const fetchEntityKey = async (entityType: string): Promise<string> => {
@@ -31,18 +22,14 @@ export const fetchEntityKey = async (entityType: string): Promise<string> => {
     throw new Error(`Unsupported entity type: ${entityType}`);
   }
 
-  try {
-    const response = await initApi.initApi().get('/jwt/editor/entities/fetch_entity_key', {
-      params: { entity_type: entityType.toLowerCase() },
-    });
+  const response = await initApi.initApi().get('/jwt/editor/entities/fetch_entity_key', {
+    params: { entity_type: entityType.toLowerCase() },
+  });
 
-    return response?.data?.entity_key;
-  } catch {
-    throw new Error(`Could not fetch new entity key for: ${entityType}`);
-  }
+  return EntityKeyResponseSchema.parse(response.data).entity_key;
 };
 
-export const searchEditortEntities = async (searchString: string | null, entityType: string): Promise<SnippetEntity[] | undefined> => {
+export const searchEditortEntities = async (searchString: string | null, entityType: string): Promise<SnippetEntity[]> => {
   entitySearchCategory(entityType);
 
   try {

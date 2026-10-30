@@ -199,9 +199,7 @@ describe('OnlyReadEditorPanel', () => {
     it('zeigt Fehlermeldung wenn kein XML-Inhalt gefunden', async () => {
       const { enqueueSnackbar } = jest.requireMock('notistack');
       mockFetchSearchLetters.mockResolvedValue(MOCK_LETTERS);
-      // fetchLetterXmlContent always resolves to a string; an empty one is the "nothing found"
-      // case the component treats as falsy (`if (xml)`).
-      mockFetchLetterXmlContent.mockResolvedValue('');
+      mockFetchLetterXmlContent.mockResolvedValue(null);
       renderComponent();
 
       const input = screen.getByLabelText('Briefname oder -titel eingeben');

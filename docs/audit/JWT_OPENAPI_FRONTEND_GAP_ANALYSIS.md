@@ -246,7 +246,9 @@ Empfehlung: Nur die dokumentierten Authentifizierungsfehler als abgelaufene bezi
 
 **Status:** In Umsetzung. Auth-, Letter-, Pinned-Letter-, RISM-, Country-, Kind-,
 Protagonistenwerk-, Misc-Letter-, Author- und Creation-Responses werden inzwischen mit
-OpenAPI-nahen Boundary-Schemas validiert. Verbleibende heterogene Legacy-Responses werden
+OpenAPI-nahen Boundary-Schemas validiert. Hinzu kommen die einfachen Editor-Antworten fuer
+Briefexistenz, nullable XML-Inhalt und Entitaetsschluessel; die Entitaetssuche besitzt nun
+einen nicht-optionalen Listen-Rueckgabetyp. Verbleibende heterogene Legacy-Responses werden
 in JWT-301 endpunktweise nachgezogen; Entity Create bleibt bis zur Entscheidung A6 getrennt.
 
 **Priorität:** P3

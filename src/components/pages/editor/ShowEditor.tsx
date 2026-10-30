@@ -55,6 +55,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import LetterStalenessMonitor from '@src/components/editor/letter/LetterStalenessMonitor';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
+import axios from 'axios';
 
 export interface EditorContainerProps {
   xmlRef: React.RefObject<HTMLDivElement>;
@@ -310,14 +311,24 @@ const ShowEditor = () => {
       }
 
       try {
-        await letterExists(letterId);
-      } catch {
-        navigate('/not-found', { state: { messageKey: 'invalidLetterId' } });
+        const exists = await letterExists(letterId);
+        if (!exists) {
+          navigate('/not-found', { state: { messageKey: 'invalidLetterId' } });
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          navigate('/not-found', { state: { messageKey: 'invalidLetterId' } });
+          return;
+        }
+
+        enqueueSnackbar(t('editor:common.letterViewContainer.existenceCheckFailed'), {
+          variant: 'error',
+        });
       }
     };
 
     void validateLetterId();
-  }, [letterId, navigate]);
+  }, [letterId, navigate, t]);
 
   useEffect(() => {
     const handleSelectedItem = () => {

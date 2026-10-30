@@ -1,18 +1,69 @@
 import { EntityType } from '@src/constants/editor';
-import { searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
+import { fetchEntityKey, letterContent, letterExists, searchEditortEntities } from '@src/services/editor/apiLetterRequest.service';
 
 const postMock = jest.fn();
+const getMock = jest.fn();
 
 jest.mock('@src/services/apiRequest.service', () => ({
   __esModule: true,
   default: {
-    initApi: () => ({ post: postMock }),
+    initApi: () => ({ get: getMock, post: postMock }),
   },
 }));
 
 describe('apiLetterRequest.service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('validates the documented letter-exists boolean response', async () => {
+    getMock.mockResolvedValue({ data: false });
+
+    await expect(letterExists('fmb/1840')).resolves.toBe(false);
+    expect(getMock).toHaveBeenCalledWith('/jwt/editor/letters/fmb%2F1840/exists');
+  });
+
+  it('rejects an invalid letter-exists response instead of treating it as a boolean', async () => {
+    getMock.mockResolvedValue({ data: 'false' });
+
+    await expect(letterExists('17420')).rejects.toThrow();
+  });
+
+  it('propagates letter-exists transport failures instead of reporting a missing letter', async () => {
+    getMock.mockRejectedValue(new Error('Network error'));
+
+    await expect(letterExists('17420')).rejects.toThrow('Network error');
+  });
+
+  it.each([
+    ['<TEI/>', '<TEI/>'],
+    [null, null],
+  ])('accepts the documented XML content response %p', async (responseData, expected) => {
+    getMock.mockResolvedValue({ data: responseData });
+
+    await expect(letterContent(17420)).resolves.toBe(expected);
+    expect(getMock).toHaveBeenCalledWith('/jwt/editor/letters/17420/xml_content');
+  });
+
+  it('rejects an invalid XML content response', async () => {
+    getMock.mockResolvedValue({ data: { xml_content: '<TEI/>' } });
+
+    await expect(letterContent(17420)).rejects.toThrow();
+  });
+
+  it('validates the documented entity-key response', async () => {
+    getMock.mockResolvedValue({ data: { entity_key: 'PSN0000001' } });
+
+    await expect(fetchEntityKey(EntityType.PERSON)).resolves.toBe('PSN0000001');
+    expect(getMock).toHaveBeenCalledWith('/jwt/editor/entities/fetch_entity_key', {
+      params: { entity_type: 'person' },
+    });
+  });
+
+  it('rejects an entity-key response without entity_key', async () => {
+    getMock.mockResolvedValue({ data: {} });
+
+    await expect(fetchEntityKey(EntityType.PERSON)).rejects.toThrow();
   });
 
   it.each([
