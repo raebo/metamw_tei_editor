@@ -1,6 +1,9 @@
 import {
   fetchAutoAnnoJobs,
   fetchAutoAnnoLetter,
+  fetchAutoAnnoJobLetters,
+  fetchAutoAnnoLetterSnippets,
+  patchAutoAnnoLetterLockingUser,
   searchAutoAnnoSnippetEntities,
   fetchAutoAnnoSnippetEntityData,
   updateAnnoLetterContent,
@@ -29,7 +32,7 @@ describe('apiAutoAnno.service', () => {
 
   const validJob = {
     id: 1,
-    name: 'Job 1',
+    service_identifier: 'Job 1',
     status: 'open',
     search_string: 'Goethe',
     updated_at: '2026-01-01T12:00:00+01:00',
@@ -46,7 +49,7 @@ describe('apiAutoAnno.service', () => {
 
     const result = await fetchAutoAnnoJobs();
 
-    expect(result).toEqual([validJob]);
+    expect(result).toEqual([expect.objectContaining({ id: 1, name: 'Job 1', status: 'open', search_string: 'Goethe' })]);
   });
 
   it('behaelt search_string und updated_at, die AutoAnnoList.tsx rendert (Zod entfernt sonst unbekannte Felder)', async () => {
@@ -58,35 +61,65 @@ describe('apiAutoAnno.service', () => {
     expect(result?.[0]?.updated_at).toBe('2026-01-01T12:00:00+01:00');
   });
 
-  it('gibt undefined zurueck (statt ungueltiger Daten), wenn die API-Antwort vom Schema abweicht', async () => {
+  it('verwirft ungueltige Job-Antworten, statt sie als leere Daten zu behandeln', async () => {
     mockGet.mockResolvedValue({ data: [{ ...validJob, letters_count: 'drei' }] });
 
-    const result = await fetchAutoAnnoJobs();
-
-    expect(result).toBeUndefined();
-    expect(console.error).toHaveBeenCalled();
+    await expect(fetchAutoAnnoJobs()).rejects.toThrow();
   });
 
-  it('akzeptiert null als xml_content_updated fuer einen Brief', async () => {
-    mockGet.mockResolvedValue({
-      data: {
-        id: 1,
-        letter_name: 'Brief 1',
-        status: 'open',
-        xml_content: '<div/>',
-        xml_content_updated: null,
-        content_changed: false,
-        snippets_count: 0,
-        snippets_open: 0,
-        snippets_closed: 0,
-        locking_user: null,
-        updated_at: '2026-01-01T00:00:00Z',
-      },
+  it('liest Listen- und Detailantworten mit ihren unterschiedlichen Vertragsschemas', async () => {
+    const listEntry = {
+      id: 1,
+      letter_auto_anno_job_id: 9,
+      letter_name: 'Brief 1',
+      status: 2,
+      snippets_count: 0,
+      snippets_open: 0,
+      snippets_closed: 0,
+      locking_user: null,
+    };
+    mockGet.mockResolvedValueOnce({ data: [listEntry] }).mockResolvedValueOnce({
+      data: { ...listEntry, xml_content: null, content_changed: false },
     });
 
-    const result = await fetchAutoAnnoLetter(1);
+    await expect(fetchAutoAnnoJobLetters(9)).resolves.toEqual([expect.objectContaining({ letter_auto_anno_job_id: 9, status: '2' })]);
+    await expect(fetchAutoAnnoLetter(1)).resolves.toEqual(expect.objectContaining({ xml_content: null, content_changed: false }));
+  });
 
-    expect(result?.xml_content_updated).toBeNull();
+  it('akzeptiert nullable Snippet-Felder und normalisiert sie fuer die bestehende UI', async () => {
+    mockGet.mockResolvedValue({
+      data: [
+        {
+          id: 3,
+          xml_id: null,
+          letter_auto_anno_letter_id: 1,
+          status: 0,
+          references: [{ id: 4, key: 'PSN1', name: null, type: 'person' }],
+          reference_key_final: null,
+          reference_type_final: null,
+          reference_name_final: null,
+        },
+      ],
+    });
+
+    await expect(fetchAutoAnnoLetterSnippets(1)).resolves.toEqual([
+      expect.objectContaining({
+        xml_id: '',
+        status: '0',
+        reference_key_final: '',
+        references: [expect.objectContaining({ name: '' })],
+      }),
+    ]);
+  });
+
+  it('sendet den Locking-Benutzer im dokumentierten Request-Wrapper', async () => {
+    mockPatch.mockResolvedValue({});
+
+    await expect(patchAutoAnnoLetterLockingUser(7, 12)).resolves.toBe(true);
+
+    expect(mockPatch).toHaveBeenCalledWith('/jwt/automatic_annotation_letters/7/set_locking_user', {
+      automatic_anno_letter: { userId: 12 },
+    });
   });
 
   it('kodiert den Suchtext bei der Entitaetssuche und liefert validierte Treffer', async () => {
@@ -95,34 +128,35 @@ describe('apiAutoAnno.service', () => {
         person: {
           entries: [
             {
-              entityId: 1,
-              entityType: 'Person',
+              id: 1,
               entityKey: 'p1',
               entityName: 'Max Mustermann',
-              entityDisplayName: 'Max Mustermann',
-              extraData: {},
+              entityFirstName: 'Max',
+              entityLastName: 'Mustermann',
             },
           ],
         },
+        id: null,
+        first_tab: 'person',
       },
     });
 
     const result = await searchAutoAnnoSnippetEntities(7, 'a/b#c', 'Person');
 
-    expect(mockGet).toHaveBeenCalledWith(
-      expect.stringContaining('/search_entity/a%2Fb%23c/person'),
-    );
+    expect(mockGet).toHaveBeenCalledWith(expect.stringContaining('/search_entity/a%2Fb%23c/person'));
     expect(result).toHaveLength(1);
   });
 
   it('wirft einen Fehler, wenn Suchtreffer nicht dem erwarteten Schema entsprechen', async () => {
     mockGet.mockResolvedValue({
-      data: { person: { entries: [{ entityId: 'not-a-number' }] } },
+      data: {
+        id: null,
+        first_tab: 'person',
+        person: { entries: [{ id: 'not-a-number' }] },
+      },
     });
 
-    await expect(searchAutoAnnoSnippetEntities(7, 'test', 'Person')).rejects.toThrow(
-      'Error fetching data for search entity',
-    );
+    await expect(searchAutoAnnoSnippetEntities(7, 'test', 'Person')).rejects.toThrow('Error fetching data for search entity');
   });
 
   it('kodiert den entityKey und mappt snake_case auf camelCase', async () => {
@@ -133,16 +167,17 @@ describe('apiAutoAnno.service', () => {
         entity_type: 'Person',
         entity_name: 'Max Mustermann',
         entity_display_name: 'Max Mustermann',
-        extra_data: {},
+        entity_settlement_kind: null,
+        entity_place_country_name: false,
+        entity_kind: null,
+        extra_data: false,
       },
     });
 
     const result = await fetchAutoAnnoSnippetEntityData(7, 3, 'k/1', 'Person');
 
     expect(mockGet).toHaveBeenCalledWith(expect.stringContaining('/entity_data/person/k%2F1'));
-    expect(result).toEqual(
-      expect.objectContaining({ entityId: 1, entityKey: 'k/1', entityType: 'Person' }),
-    );
+    expect(result).toEqual(expect.objectContaining({ entityId: 1, entityKey: 'k/1', entityType: 'Person' }));
   });
 
   it('sendet nur wohlgeformtes XML und veraendert keine Auto-Anno-Attribute', async () => {
@@ -156,9 +191,7 @@ describe('apiAutoAnno.service', () => {
   });
 
   it('sendet ungueltiges XML nicht an das Auto-Anno-Backend', async () => {
-    await expect(updateAnnoLetterContent(7, '<TEI><text></TEI>')).rejects.toThrow(
-      'XML content is not well-formed.',
-    );
+    await expect(updateAnnoLetterContent(7, '<TEI><text></TEI>')).rejects.toThrow('XML content is not well-formed.');
     expect(mockPatch).not.toHaveBeenCalled();
   });
 });

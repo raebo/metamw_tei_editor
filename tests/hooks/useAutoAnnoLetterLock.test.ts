@@ -1,9 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAutoAnnoLetterLock } from '@src/hooks/useAutoAnnoLetterLock';
-import {
-  fetchAutoAnnoLetter,
-  patchAutoAnnoLetterLockingUser,
-} from '@src/services/auto_anno/apiAutoAnno.service';
+import { fetchAutoAnnoLetter, patchAutoAnnoLetterLockingUser } from '@src/services/auto_anno/apiAutoAnno.service';
 
 jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
@@ -79,9 +76,7 @@ describe('useAutoAnnoLetterLock', () => {
   it('gibt die Sperre beim Unmount frei, wenn sie zuvor erworben wurde', async () => {
     mockedFetchAutoAnnoLetter.mockResolvedValue({ locking_user: null });
 
-    const { unmount } = renderHook(() =>
-      useAutoAnnoLetterLock({ autoAnnoLetterId: 42, autoAnnoJobId: 7, userId: 1 }),
-    );
+    const { unmount } = renderHook(() => useAutoAnnoLetterLock({ autoAnnoLetterId: 42, autoAnnoJobId: 7, userId: 1 }));
 
     await waitFor(() => {
       expect(mockedPatchAutoAnnoLetterLockingUser).toHaveBeenCalledWith(42, 1);
@@ -98,9 +93,7 @@ describe('useAutoAnnoLetterLock', () => {
       locking_user: { id: 2, login: 'andere.person' },
     });
 
-    const { unmount } = renderHook(() =>
-      useAutoAnnoLetterLock({ autoAnnoLetterId: 42, autoAnnoJobId: 7, userId: 1 }),
-    );
+    const { unmount } = renderHook(() => useAutoAnnoLetterLock({ autoAnnoLetterId: 42, autoAnnoJobId: 7, userId: 1 }));
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalled();
@@ -128,7 +121,7 @@ describe('useAutoAnnoLetterLock', () => {
         method: 'PATCH',
         credentials: 'include',
         keepalive: true,
-        body: JSON.stringify({ userId: null }),
+        body: JSON.stringify({ automatic_anno_letter: { userId: null } }),
       }),
     );
   });

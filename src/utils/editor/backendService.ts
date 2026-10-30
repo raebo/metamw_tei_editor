@@ -42,7 +42,7 @@ export class PinnedLetterNotFoundError extends Error {
 
 export const backendService = {
   updateUserLanguage: async (langCode: 'de' | 'en') => {
-    const response = await initApi().put(`jwt/misc/user/language/${langCode}`);
+    const response = await initApi().put(`/jwt/misc/user/language/${langCode}`);
 
     if (!response) {
       throw new Error(`Could not update language to ${langCode} `);
@@ -70,10 +70,7 @@ export const backendService = {
       } as RismEntry;
     });
   },
-  searchSenderReceiverLetters: async (
-    searchValue: string | null,
-    senderType: 'RECEIVER' | 'WRITER',
-  ): Promise<SnippetEntity[]> => {
+  searchSenderReceiverLetters: async (searchValue: string | null, senderType: 'RECEIVER' | 'WRITER'): Promise<SnippetEntity[]> => {
     const requestBody = {
       sender_type: senderType,
       ...(searchValue !== null && { search_value: searchValue }),
@@ -117,7 +114,7 @@ export const backendService = {
     };
 
     try {
-      const response = await initApi().post(`/jwt/misc/letters/author_receivers/`, requestBody, {
+      const response = await initApi().post(`/jwt/misc/letters/author_receivers`, requestBody, {
         headers: { 'Content-Type': 'application/json' },
       });
 
@@ -143,10 +140,7 @@ export const backendService = {
       }
     }
   },
-  fetchLetterAuthorsSenders: async (
-    searchValue: string | null,
-    senderType: 'RECEIVER' | 'WRITER',
-  ): Promise<SnippetEntity[]> => {
+  fetchLetterAuthorsSenders: async (searchValue: string | null, senderType: 'RECEIVER' | 'WRITER'): Promise<SnippetEntity[]> => {
     const requestBody = {
       sender_type: senderType,
       ...(searchValue !== null && { search_value: searchValue }),
@@ -178,33 +172,22 @@ export const backendService = {
       }
     }
   },
-  fetchCategoriesForProtagCreation: async (
-    protagCreationId: number,
-  ): Promise<ProtagCreationCategory[]> => {
+  fetchCategoriesForProtagCreation: async (protagCreationId: number): Promise<ProtagCreationCategory[]> => {
     try {
-      const response = await initApi().get(
-        `/jwt/misc/categories_for_protag_creation/${protagCreationId}`,
-      );
+      const response = await initApi().get(`/jwt/misc/categories_for_protag_creation/${encodeURIComponent(String(protagCreationId))}`);
 
       if (!response) {
         throw new Error('No response from server for protag creation categories');
       }
 
-      return response.data.map(
-        (protag: {
-          id: number;
-          name: string;
-          name_en: string;
-          protag_creation_category_id: number;
-        }) => {
-          return {
-            id: protag.id,
-            name: protag.name,
-            name_en: protag.name_en,
-            protagCreationCategoryId: protag.protag_creation_category_id,
-          } as ProtagCreationCategory;
-        },
-      );
+      return response.data.map((protag: { id: number; name: string; name_en: string; protag_creation_category_id: number }) => {
+        return {
+          id: protag.id,
+          name: protag.name,
+          name_en: protag.name_en,
+          protagCreationCategoryId: protag.protag_creation_category_id,
+        } as ProtagCreationCategory;
+      });
     } catch (error: any) {
       const response = error.response;
 
@@ -217,7 +200,7 @@ export const backendService = {
   },
   fetchLetterAuthors: async (letterName: string): Promise<SnippetEntity[]> => {
     try {
-      const response = await initApi().get(`/jwt/misc/letters/${letterName}/authors`);
+      const response = await initApi().get(`/jwt/misc/letters/${encodeURIComponent(letterName)}/authors`);
 
       if (!response) {
         throw new Error('No response from server for letter authors');
@@ -243,13 +226,11 @@ export const backendService = {
     }
   },
 
-  fetchProtagCreationEntries: async (
-    protagCreationCategory: ProtagCreationCategory | null,
-  ): Promise<ProtagCreation[]> => {
+  fetchProtagCreationEntries: async (protagCreationCategory: ProtagCreationCategory | null): Promise<ProtagCreation[]> => {
     try {
       const url =
         protagCreationCategory !== null
-          ? `/jwt/misc/protag_creations_for_category/${protagCreationCategory.id}`
+          ? `/jwt/misc/protag_creations_for_category/${encodeURIComponent(String(protagCreationCategory.id))}`
           : `/jwt/misc/protag_creations`;
 
       const response = await initApi().get(url, {});
@@ -259,14 +240,7 @@ export const backendService = {
       }
 
       return response.data.map(
-        (protag: {
-          id: number;
-          key: string;
-          name: string;
-          protag_creation_category_id: number;
-          mwv: string | null;
-          op: string | null;
-        }) => {
+        (protag: { id: number; key: string; name: string; protag_creation_category_id: number; mwv: string | null; op: string | null }) => {
           return {
             id: protag.id,
             key: protag.key,
@@ -287,35 +261,26 @@ export const backendService = {
       }
     }
   },
-  fetchProtagCreationCategories: async (
-    categoryId: number | null,
-  ): Promise<ProtagCreationCategory[]> => {
+  fetchProtagCreationCategories: async (categoryId: number | null): Promise<ProtagCreationCategory[]> => {
     try {
-      const response = await initApi().get(`/jwt/misc/protag_creation_categories`, {
-        params: {
-          categoryId: categoryId,
-        },
-      });
+      const url =
+        categoryId === null
+          ? '/jwt/misc/protag_creation_categories'
+          : `/jwt/misc/protag_creation_categories/${encodeURIComponent(String(categoryId))}`;
+      const response = await initApi().get(url);
 
       if (!response) {
         throw new Error('No response from server for protag creation categories');
       }
 
-      return response.data.map(
-        (protag: {
-          id: number;
-          name: string;
-          name_en: string;
-          protag_creation_category_id: number;
-        }) => {
-          return {
-            id: protag.id,
-            name: protag.name,
-            name_en: protag.name_en,
-            protagCreationCategoryId: protag.protag_creation_category_id,
-          } as ProtagCreationCategory;
-        },
-      );
+      return response.data.map((protag: { id: number; name: string; name_en: string; protag_creation_category_id: number }) => {
+        return {
+          id: protag.id,
+          name: protag.name,
+          name_en: protag.name_en,
+          protagCreationCategoryId: protag.protag_creation_category_id,
+        } as ProtagCreationCategory;
+      });
     } catch (error: any) {
       const response = error.response;
 
@@ -347,7 +312,7 @@ export const backendService = {
   },
   fetchAuthorCategories: async (authorKey: string): Promise<string[]> => {
     try {
-      const response = await initApi().get(`/jwt/misc/author/${authorKey}/categories`);
+      const response = await initApi().get(`/jwt/misc/author/${encodeURIComponent(authorKey)}/categories`);
 
       if (!response) {
         throw new Error('No response from server for author categories');
@@ -366,7 +331,7 @@ export const backendService = {
   },
   fetchAuthorCreations: async (authorKey: string): Promise<SnippetEntity[]> => {
     try {
-      const response = await initApi().get(`/jwt/misc/author/${authorKey}/creations`);
+      const response = await initApi().get(`/jwt/misc/author/${encodeURIComponent(authorKey)}/creations`);
 
       if (!response) {
         throw new Error('No response from server for author creations');
@@ -450,18 +415,13 @@ export const backendService = {
       }
     }
   },
-  patchContent: async (
-    content: string,
-    letterId: number | null,
-    changeType: string,
-    xmlId: string | null,
-  ): Promise<boolean> => {
+  patchContent: async (content: string, letterId: number | null, changeType: string, xmlId: string | null): Promise<boolean> => {
     if (!letterId) {
       throw new Error('No letter id provided');
     }
 
     try {
-      await initApi().patch(`/jwt/editor/pinned_letters/${letterId}/set_content/`, {
+      await initApi().patch(`/jwt/editor/pinned_letters/${letterId}/set_content`, {
         changes: {
           new_content: prepareEditorXmlForBackend(content),
           xml_id: xmlId,
@@ -481,7 +441,7 @@ export const backendService = {
   },
   resetLetter: async (letterId: number): Promise<boolean> => {
     try {
-      await initApi().delete(`/jwt/editor/pinned_letters/${letterId}/reset_letter/`);
+      await initApi().delete(`/jwt/editor/pinned_letters/${letterId}/reset_letter`);
 
       return true;
     } catch (err: any) {
@@ -494,10 +454,7 @@ export const backendService = {
       }
     }
   },
-  fetchLetterStaleness: async (
-    letterId: number,
-    signal?: AbortSignal,
-  ): Promise<LetterStaleness> => {
+  fetchLetterStaleness: async (letterId: number, signal?: AbortSignal): Promise<LetterStaleness> => {
     try {
       const response = await initApi().get(`/jwt/editor/pinned_letters/${letterId}/staleness`, {
         signal,
@@ -522,15 +479,14 @@ export const backendService = {
   },
   rebaseLetter: async (letterId: number): Promise<string> => {
     try {
-      const response = await initApi().post(`/jwt/editor/pinned_letters/${letterId}/rebase/`);
+      const response = await initApi().post(`/jwt/editor/pinned_letters/${letterId}/rebase`);
       return rebaseLetterSchema.parse(response.data).xml_content;
     } catch (error: unknown) {
       if (
         typeof error === 'object' &&
         error !== null &&
         'response' in error &&
-        typeof (error as { response?: { data?: { error?: unknown } } }).response?.data?.error ===
-          'string'
+        typeof (error as { response?: { data?: { error?: unknown } } }).response?.data?.error === 'string'
       ) {
         throw new Error((error as { response: { data: { error: string } } }).response.data.error);
       }
@@ -539,7 +495,7 @@ export const backendService = {
   },
   publishLetter: async (letterId: number): Promise<boolean> => {
     try {
-      await initApi().post(`/jwt/editor/pinned_letters/${letterId}/publish/`);
+      await initApi().post(`/jwt/editor/pinned_letters/${letterId}/publish`);
 
       return true;
     } catch (err: unknown) {
@@ -557,9 +513,7 @@ export const backendService = {
         }
 
         const genericError = z.object({ error: z.string() }).safeParse(response.data);
-        throw new Error(
-          genericError.success ? genericError.data.error : 'Could not publish letter',
-        );
+        throw new Error(genericError.success ? genericError.data.error : 'Could not publish letter');
       } else {
         throw new Error('Error publishing letter content: ' + err);
       }
@@ -567,7 +521,7 @@ export const backendService = {
   },
   undoLetterChange: async (letterId: number): Promise<boolean> => {
     try {
-      await initApi().post(`/jwt/editor/letters/${letterId}/letter_changes/undo/`);
+      await initApi().post(`/jwt/editor/letters/${letterId}/letter_changes/undo`);
 
       return true;
     } catch (err: any) {
@@ -582,7 +536,7 @@ export const backendService = {
   },
   redoLetterChange: async (letterId: number): Promise<boolean> => {
     try {
-      await initApi().post(`/jwt/editor/letters/${letterId}/letter_changes/redo/`);
+      await initApi().post(`/jwt/editor/letters/${letterId}/letter_changes/redo`);
 
       return true;
     } catch (err: any) {

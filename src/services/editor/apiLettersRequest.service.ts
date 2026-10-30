@@ -69,7 +69,7 @@ export const fetchLastUsedLettersByUser = async (): Promise<EditorLetter[] | und
 
 export const fetchSearchLetters = async (searchValue: string): Promise<EditorLetter[] | undefined> => {
   try {
-    const response = await initApi.initApi().get(`/jwt/editor/letters/search?searchValue=${searchValue}`);
+    const response = await initApi.initApi().get('/jwt/editor/letters/search', { params: { searchValue } });
 
     return response.data.map(mapApiToEditorLetter);
   } catch (err) {
@@ -89,7 +89,7 @@ export const fetchLetterXmlContent = async (letterId: number): Promise<string> =
 
 export const fetchLetterDataByName = async (letterName: string): Promise<EditorLetter | undefined> => {
   try {
-    const response = await initApi.initApi().get(`/jwt/editor/letters/by_name/${letterName}`);
+    const response = await initApi.initApi().get(`/jwt/editor/letters/by_name/${encodeURIComponent(letterName)}`);
 
     return mapApiToEditorLetter(response.data);
   } catch (err) {
@@ -110,8 +110,8 @@ export const fetchLetterData = async (letterId: number): Promise<EditorLetterDat
 export const searchForLetterNameTitle = async (letterType: string, searchValue: string | null): Promise<EditorLetter[] | undefined> => {
   const searchUrl =
     searchValue === null
-      ? `/jwt/editor/letters/search_for_letters/${letterType}`
-      : `/jwt/editor/letters/search_for_letters/${letterType}/${searchValue}`;
+      ? `/jwt/editor/letters/search_for_letters/${encodeURIComponent(letterType)}`
+      : `/jwt/editor/letters/search_for_letters/${encodeURIComponent(letterType)}/${encodeURIComponent(searchValue)}`;
 
   if (searchUrl === '') {
     throw new Error('No valid search parameters provided');

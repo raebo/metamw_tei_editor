@@ -2,10 +2,10 @@ import { z } from 'zod';
 
 export const AutoAnnoJobSchema = z.object({
   id: z.number(),
-  name: z.string(),
-  status: z.string(),
-  search_string: z.string(),
-  updated_at: z.string(),
+  service_identifier: z.string().nullable(),
+  status: z.union([z.number(), z.string()]),
+  search_string: z.string().nullable(),
+  updated_at: z.union([z.string(), z.boolean()]),
   letters_count: z.number(),
   snippets_count: z.number(),
   letters_open: z.number(),
@@ -17,65 +17,66 @@ export const AutoAnnoJobSchema = z.object({
 export const AutoAnnoLockingUserSchema = z.object({
   id: z.number(),
   login: z.string(),
+  locked_since: z.string().nullable(),
 });
 
-export const AutoAnnoJobLetterSchema = z.object({
+export const AutoAnnoJobLetterListSchema = z.object({
   id: z.number(),
+  letter_auto_anno_job_id: z.number(),
   letter_name: z.string(),
-  status: z.string(),
-  xml_content: z.string(),
-  // Declared as a required `string` in AutoAnnoJobLetter, but AutoAnnoLetterHandle.tsx already
-  // guards it with `!== null && !== undefined`, i.e. the actual API contract is nullable.
-  xml_content_updated: z.string().nullable(),
-  content_changed: z.boolean(),
+  status: z.union([z.number(), z.string()]),
   snippets_count: z.number(),
   snippets_open: z.number(),
   snippets_closed: z.number(),
   locking_user: AutoAnnoLockingUserSchema.nullable(),
-  updated_at: z.string(),
+});
+
+export const AutoAnnoJobLetterSchema = AutoAnnoJobLetterListSchema.extend({
+  xml_content: z.string().nullable(),
+  content_changed: z.boolean(),
 });
 
 export const SnippetReferenceSchema = z.object({
   id: z.number(),
   key: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   type: z.string(),
 });
 
 export const AutoAnnoSnippetSchema = z.object({
   id: z.number(),
-  xml_id: z.string(),
-  status: z.string(),
+  xml_id: z.string().nullable(),
+  letter_auto_anno_letter_id: z.number(),
+  status: z.union([z.number(), z.string()]),
   references: z.array(SnippetReferenceSchema),
-  reference_key_final: z.string(),
-  reference_type_final: z.string(),
-  reference_name_final: z.string(),
+  reference_key_final: z.string().nullable(),
+  reference_type_final: z.string().nullable(),
+  reference_name_final: z.string().nullable(),
 });
 
 export const SnippetApiEntitySchema = z.object({
   entity_id: z.number(),
-  entity_key: z.string(),
-  entity_type: z.string(),
-  entity_name: z.string(),
-  entity_display_name: z.string(),
-  entity_settlement_kind: z.string().optional(),
-  entity_parent_name: z.string().optional(),
-  entity_place_country_name: z.string().optional(),
-  entity_kind: z.string().optional(),
-  extra_data: z.record(z.unknown()),
+  entity_key: z.string().nullable(),
+  entity_type: z.string().nullable(),
+  entity_name: z.string().nullable(),
+  entity_display_name: z.string().nullable(),
+  entity_settlement_kind: z.union([z.string(), z.boolean()]).nullable(),
+  entity_place_country_name: z.union([z.string(), z.boolean()]).nullable(),
+  entity_kind: z.string().nullable(),
+  extra_data: z.union([z.record(z.unknown()), z.boolean()]).nullable(),
 });
 
-export const SnippetEntitySchema = z.object({
-  entityId: z.number(),
-  entityType: z.string(),
-  entityKey: z.string(),
-  entityName: z.string(),
-  entityFirstName: z.string().optional(),
-  entityLastName: z.string().optional(),
-  entityDisplayName: z.string(),
-  entitySettlementKind: z.string().optional(),
-  entityParentName: z.string().optional(),
-  entityPlaceCountryName: z.string().optional(),
-  entityKind: z.string().optional(),
-  extraData: z.record(z.unknown()),
+export type AutoAnnoJobApi = z.infer<typeof AutoAnnoJobSchema>;
+export type AutoAnnoJobLetterListApi = z.infer<typeof AutoAnnoJobLetterListSchema>;
+export type AutoAnnoJobLetterApi = z.infer<typeof AutoAnnoJobLetterSchema>;
+export type AutoAnnoSnippetApi = z.infer<typeof AutoAnnoSnippetSchema>;
+
+export interface AutoAnnoLockingRequest {
+  automatic_anno_letter: {
+    userId: number | null;
+  };
+}
+
+export const autoAnnoLockingRequest = (userId: number | null): AutoAnnoLockingRequest => ({
+  automatic_anno_letter: { userId },
 });

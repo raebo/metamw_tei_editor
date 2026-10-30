@@ -7,14 +7,8 @@ import { RootState } from '@src/redux/redux.store';
 import { useSelector } from 'react-redux';
 import AutoAnnoSnippetList from './AutoAnnoSnippetList';
 import AutoAnnoLetterHandle from './AutoAnnoLetterHandle';
-import {
-  initializeLetterXmlExportSource,
-  markSpanAndScrollToId,
-} from '@src/utils/auto_anno/domHandling';
-import {
-  setAutoAnnoLetter,
-  setSnippetEntityInfo,
-} from '@src/redux/slices/auto.letter.snippet.slice';
+import { initializeLetterXmlExportSource, markSpanAndScrollToId } from '@src/utils/auto_anno/domHandling';
+import { setAutoAnnoLetter, setSnippetEntityInfo } from '@src/redux/slices/auto.letter.snippet.slice';
 import { useAutoAnnoLetterLock } from '@src/hooks/useAutoAnnoLetterLock';
 import { Box, Typography } from '@mui/material';
 import { useAppDispatch } from '@src/redux/hooks';
@@ -31,20 +25,12 @@ const AutoAnnoLetters: React.FC = () => {
   const dispatch = useAppDispatch();
   const autoAnnoLetterId = Number(id);
   const autoAnnoJobId = Number(job_id);
-  const [selectedComponentList, setSelectedComponentList] = useState<ComponentMappingItem | null>(
-    null,
-  );
-  const stateLetterFontSize = useSelector(
-    (state: RootState) => state.auth.settings?.letterFontSize,
-  );
+  const [selectedComponentList, setSelectedComponentList] = useState<ComponentMappingItem | null>(null);
+  const stateLetterFontSize = useSelector((state: RootState) => state.auth.settings?.letterFontSize);
   const user = useSelector((state: RootState) => state.auth.user);
 
-  const reloadLetter = useSelector(
-    (state: RootState) => state.autoLetterSnippet.letter?.reloadStatus ?? false,
-  );
-  const snippetReferences = useSelector(
-    (state: RootState) => state.autoLetterSnippet.snippetReferences,
-  );
+  const reloadLetter = useSelector((state: RootState) => state.autoLetterSnippet.letter?.reloadStatus ?? false);
+  const snippetReferences = useSelector((state: RootState) => state.autoLetterSnippet.snippetReferences);
 
   // useMemo ensures that componentMappingList is not recreated on every render.
   const componentMappingList = useMemo(
@@ -58,12 +44,7 @@ const AutoAnnoLetters: React.FC = () => {
       REFERENCE_LIST: {
         name: 'REFERENCE_LIST',
         showContainer: true,
-        component: (
-          <SnippetReferencesList
-            autoAnnoLetterId={autoAnnoLetterId}
-            references={snippetReferences.items}
-          />
-        ),
+        component: <SnippetReferencesList autoAnnoLetterId={autoAnnoLetterId} references={snippetReferences.items} />,
         action: () => true,
       },
     }),
@@ -109,12 +90,7 @@ const AutoAnnoLetters: React.FC = () => {
         try {
           const result = await fetchAutoAnnoLetter(autoAnnoLetterId);
 
-          if (result && result.xml_content_updated) {
-            setTransformedData({
-              xmlContent: result.xml_content_updated,
-              letterName: result.letter_name,
-            });
-          } else if (result && result.xml_content) {
+          if (result && result.xml_content) {
             setTransformedData({ xmlContent: result.xml_content, letterName: result.letter_name });
           } else {
             setTransformedData({
@@ -182,12 +158,7 @@ const AutoAnnoLetters: React.FC = () => {
       <div className="container-fmbc-letter">
         <div className="box-1">
           {transformedData?.xmlContent ? (
-            <div
-              className="letter-xml"
-              id="letterXml"
-              ref={containerRef}
-              style={{ fontSize: `${stateLetterFontSize}%` }}
-            >
+            <div className="letter-xml" id="letterXml" ref={containerRef} style={{ fontSize: `${stateLetterFontSize}%` }}>
               <XMLDisplayParser xmlContentRef={null} xmlString={transformedData.xmlContent} />;
             </div>
           ) : (
@@ -208,11 +179,7 @@ const AutoAnnoLetters: React.FC = () => {
           </div>
         </div>
       </div>
-      <SnippetEntityInfoDialog
-        open={refInfoDialogOpen}
-        referenceKey={refInfoDialogKey}
-        handleClose={handleInfoDialogClose}
-      />
+      <SnippetEntityInfoDialog open={refInfoDialogOpen} referenceKey={refInfoDialogKey} handleClose={handleInfoDialogClose} />
       <LetterFontSizeHandle />
     </>
   );

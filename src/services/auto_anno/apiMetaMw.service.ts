@@ -17,7 +17,7 @@ export const fetchMetamwEntityData = async (entityKey: string | null): Promise<{
   if (!entityKey) {
     throw new Error('Entity key is required to fetch letter data');
   }
-  const response = await initApi.initApi().get(`/jwt/misc/entities/${entityKey}`);
+  const response = await initApi.initApi().get(`/jwt/misc/entities/${encodeURIComponent(entityKey)}`);
 
   return response.data;
 };
@@ -28,7 +28,7 @@ export const fetchMetamwLetterData = async (letterKey: string | null): Promise<{
   }
 
   try {
-    const response = await initApi.initApi().get(`/jwt/editor/letters/by_name/${letterKey}`);
+    const response = await initApi.initApi().get(`/jwt/editor/letters/by_name/${encodeURIComponent(letterKey)}`);
 
     return response.data;
   } catch (error) {

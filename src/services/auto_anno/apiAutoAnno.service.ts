@@ -1,6 +1,7 @@
 import initApi from '../apiRequest.service';
 import {
   AutoAnnoJobLetter,
+  AutoAnnoLetter,
   AutoAnnoSnippet,
   AutoAnnoJob,
   SnippetApiEntity,
@@ -8,60 +9,78 @@ import {
 } from '../mappings/autoAnnoMappings';
 import {
   AutoAnnoJobSchema,
+  AutoAnnoJobLetterListSchema,
   AutoAnnoJobLetterSchema,
   AutoAnnoSnippetSchema,
   SnippetApiEntitySchema,
-  SnippetEntitySchema,
+  AutoAnnoJobApi,
+  AutoAnnoJobLetterListApi,
+  AutoAnnoJobLetterApi,
+  AutoAnnoSnippetApi,
+  autoAnnoLockingRequest,
 } from '@src/schemas/autoAnno';
 import axios from 'axios';
 import { assertWellFormedXml } from '@src/utils/xml/backendXml';
+import { entitySearchCategory, parseEntitySearchResponse } from '@src/schemas/entitySearch';
 
-export const fetchAutoAnnoJobs = async (): Promise<AutoAnnoJob[] | undefined> => {
-  try {
-    const response = await initApi.initApi().get('/jwt/automatic_annotations');
+const mapAutoAnnoJob = (job: AutoAnnoJobApi): AutoAnnoJob => ({
+  id: job.id,
+  name: job.service_identifier ?? '',
+  status: String(job.status),
+  search_string: job.search_string ?? '',
+  updated_at: typeof job.updated_at === 'string' ? job.updated_at : '',
+  letters_count: job.letters_count,
+  snippets_count: job.snippets_count,
+  letters_open: job.letters_open,
+  letters_closed: job.letters_closed,
+  snippets_open: job.snippets_open,
+  snippets_closed: job.snippets_closed,
+});
 
-    return AutoAnnoJobSchema.array().parse(response.data);
-  } catch (err) {
-    console.error(err);
-  }
+const mapAutoAnnoJobLetter = (letter: AutoAnnoJobLetterListApi): AutoAnnoJobLetter => ({
+  ...letter,
+  status: String(letter.status),
+});
+
+const mapAutoAnnoLetter = (letter: AutoAnnoJobLetterApi): AutoAnnoLetter => ({
+  ...letter,
+  status: String(letter.status),
+});
+
+const mapAutoAnnoSnippet = (snippet: AutoAnnoSnippetApi): AutoAnnoSnippet => ({
+  ...snippet,
+  xml_id: snippet.xml_id ?? '',
+  status: String(snippet.status),
+  references: snippet.references.map((reference) => ({
+    ...reference,
+    name: reference.name ?? '',
+  })),
+  reference_key_final: snippet.reference_key_final ?? '',
+  reference_type_final: snippet.reference_type_final ?? '',
+  reference_name_final: snippet.reference_name_final ?? '',
+});
+
+export const fetchAutoAnnoJobs = async (): Promise<AutoAnnoJob[]> => {
+  const response = await initApi.initApi().get('/jwt/automatic_annotations');
+
+  return AutoAnnoJobSchema.array().parse(response.data).map(mapAutoAnnoJob);
 };
 
-export const fetchAutoAnnoJobLetters = async (
-  id: number,
-): Promise<AutoAnnoJobLetter[] | undefined> => {
-  try {
-    const response = await initApi.initApi().get(`/jwt/automatic_annotations/${id}/letters`);
+export const fetchAutoAnnoJobLetters = async (id: number): Promise<AutoAnnoJobLetter[]> => {
+  const response = await initApi.initApi().get(`/jwt/automatic_annotations/${id}/letters`);
 
-    return AutoAnnoJobLetterSchema.array().parse(response.data);
-  } catch (err) {
-    console.error(err);
-  }
+  return AutoAnnoJobLetterListSchema.array().parse(response.data).map(mapAutoAnnoJobLetter);
 };
 
-export const fetchAutoAnnoLetter = async (
-  annoLetterId: number,
-): Promise<AutoAnnoJobLetter | undefined> => {
-  try {
-    const response = await initApi
-      .initApi()
-      .get(`/jwt/automatic_annotation_letters/${annoLetterId}`);
+export const fetchAutoAnnoLetter = async (annoLetterId: number): Promise<AutoAnnoLetter> => {
+  const response = await initApi.initApi().get(`/jwt/automatic_annotation_letters/${annoLetterId}`);
 
-    return AutoAnnoJobLetterSchema.parse(response.data);
-  } catch (err) {
-    console.error(err);
-  }
+  return mapAutoAnnoLetter(AutoAnnoJobLetterSchema.parse(response.data));
 };
 
-export const patchAutoAnnoLetterLockingUser = async (
-  annoLetterId: number,
-  userId: number | null,
-): Promise<boolean> => {
+export const patchAutoAnnoLetterLockingUser = async (annoLetterId: number, userId: number | null): Promise<boolean> => {
   try {
-    await initApi
-      .initApi()
-      .patch(`/jwt/automatic_annotation_letters/${annoLetterId}/set_locking_user`, {
-        userId: userId,
-      });
+    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/set_locking_user`, autoAnnoLockingRequest(userId));
 
     return true;
   } catch (err) {
@@ -69,18 +88,10 @@ export const patchAutoAnnoLetterLockingUser = async (
   }
 };
 
-export const fetchAutoAnnoLetterSnippets = async (
-  id: number | undefined,
-): Promise<AutoAnnoSnippet[] | undefined> => {
-  try {
-    const response = await initApi
-      .initApi()
-      .get(`/jwt/automatic_annotation_letters/${id}/snippets`);
+export const fetchAutoAnnoLetterSnippets = async (id: number | undefined): Promise<AutoAnnoSnippet[]> => {
+  const response = await initApi.initApi().get(`/jwt/automatic_annotation_letters/${id}/snippets`);
 
-    return AutoAnnoSnippetSchema.array().parse(response.data);
-  } catch (err) {
-    console.error(err);
-  }
+  return AutoAnnoSnippetSchema.array().parse(response.data).map(mapAutoAnnoSnippet);
 };
 
 export const searchAutoAnnoSnippetEntities = async (
@@ -89,44 +100,33 @@ export const searchAutoAnnoSnippetEntities = async (
   entityType: string,
 ): Promise<SnippetEntity[] | undefined> => {
   try {
-    const entityMapping: Record<string, string> = {
-      Person: 'person',
-      Institution: 'institution',
-      Sight: 'sight',
-      Settlement: 'settlement',
-    };
-
-    const entityKey = entityMapping[entityType];
-    if (!entityKey) {
-      throw new Error(`Unsupported entity type: ${entityType}`);
-    }
+    const entityKey = entitySearchCategory(entityType);
 
     const response = await initApi
       .initApi()
       .get(
-        `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/search_entity/${encodeURIComponent(searchString)}/${entityType.toLowerCase()}?per_page=20`,
+        `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/search_entity/${encodeURIComponent(searchString)}/${entityKey}?per_page=20`,
       );
 
-    const entries = response?.data?.[entityKey]?.entries;
-
-    return entries ? SnippetEntitySchema.array().parse(entries) : undefined;
+    return parseEntitySearchResponse(response.data, entityType);
   } catch (err) {
     throw new Error('Error fetching data for search entity: ' + err);
   }
 };
 
 const mapApiToSnippetEntity = (apiEntity: SnippetApiEntity): SnippetEntity => {
+  const optionalLegacyString = (value: string | boolean | null): string | undefined => (typeof value === 'string' ? value : undefined);
+
   return {
     entityId: apiEntity.entity_id,
-    entityType: apiEntity.entity_type,
-    entityKey: apiEntity.entity_key,
-    entityName: apiEntity.entity_name,
-    entityDisplayName: apiEntity.entity_display_name,
-    entitySettlementKind: apiEntity.entity_settlement_kind,
-    entityParentName: apiEntity.entity_parent_name,
-    entityPlaceCountryName: apiEntity.entity_place_country_name,
-    entityKind: apiEntity.entity_kind,
-    extraData: apiEntity.extra_data,
+    entityType: apiEntity.entity_type ?? '',
+    entityKey: apiEntity.entity_key ?? '',
+    entityName: apiEntity.entity_name ?? '',
+    entityDisplayName: apiEntity.entity_display_name ?? apiEntity.entity_name ?? '',
+    entitySettlementKind: optionalLegacyString(apiEntity.entity_settlement_kind),
+    entityPlaceCountryName: optionalLegacyString(apiEntity.entity_place_country_name),
+    entityKind: apiEntity.entity_kind ?? undefined,
+    extraData: typeof apiEntity.extra_data === 'object' && apiEntity.extra_data !== null ? apiEntity.extra_data : {},
   };
 };
 
@@ -139,7 +139,7 @@ export const fetchAutoAnnoSnippetEntityData = async (
   const response = await initApi
     .initApi()
     .get(
-      `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/entity_data/${entityType.toLowerCase()}/${encodeURIComponent(entityKey)}`,
+      `/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/entity_data/${encodeURIComponent(entityType.toLowerCase())}/${encodeURIComponent(entityKey)}`,
     );
 
   return mapApiToSnippetEntity(SnippetApiEntitySchema.parse(response.data));
@@ -148,17 +148,11 @@ export const fetchAutoAnnoSnippetEntityData = async (
 //TODO: Why cant we move this to autoAnnoMappings.ts?
 type SnippetStatus = 'REJECTED' | 'ACCEPTED' | 'UPDATED';
 
-export const setAutoAnnoSnippetStatus = async (
-  annoLetterId: number,
-  snippetId: number,
-  status: SnippetStatus,
-): Promise<boolean> => {
+export const setAutoAnnoSnippetStatus = async (annoLetterId: number, snippetId: number, status: SnippetStatus): Promise<boolean> => {
   try {
-    await initApi
-      .initApi()
-      .patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_status`, {
-        status,
-      });
+    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_status`, {
+      status,
+    });
 
     return true;
   } catch (err) {
@@ -169,13 +163,9 @@ export const setAutoAnnoSnippetStatus = async (
 export const updateAnnoLetterContent = async (id: number, xmlContent: string): Promise<boolean> => {
   try {
     assertWellFormedXml(xmlContent);
-    await initApi
-      .initApi()
-      .patch(`/jwt/automatic_annotation_letters/${id}/set_xml_content`, { xmlContent });
+    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/set_xml_content`, { xmlContent });
   } catch (err) {
-    throw new Error(
-      'Error updating anno letter content: ' + (err instanceof Error ? err.message : String(err)),
-    );
+    throw new Error('Error updating anno letter content: ' + (err instanceof Error ? err.message : String(err)));
   }
   return true;
 };
@@ -187,16 +177,12 @@ export const setAnnoSnippetEntity = async (
   entityKey: string,
 ): Promise<boolean> => {
   try {
-    await initApi
-      .initApi()
-      .patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_entity`, {
-        entityType,
-        entityKey,
-      });
+    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_entity`, {
+      entityType,
+      entityKey,
+    });
   } catch (err) {
-    throw new Error(
-      'Error updating snippet entity: ' + (err instanceof Error ? err.message : String(err)),
-    );
+    throw new Error('Error updating snippet entity: ' + (err instanceof Error ? err.message : String(err)));
   }
 
   return true;

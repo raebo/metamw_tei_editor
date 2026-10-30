@@ -1,18 +1,11 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import {
-  fetchAutoAnnoJobLetters,
-  fetchAutoAnnoJobs,
-} from '@src/services/auto_anno/apiAutoAnno.service';
+import { fetchAutoAnnoJobLetters, fetchAutoAnnoJobs } from '@src/services/auto_anno/apiAutoAnno.service';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import { Box, IconButton, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
-import {
-  AutoAnnoJobLetter,
-  AutoAnnoJob,
-  getStatusDetails,
-} from '@src/services/mappings/autoAnnoMappings';
+import { AutoAnnoJobLetter, AutoAnnoJob, getStatusDetails } from '@src/services/mappings/autoAnnoMappings';
 import { enqueueSnackbar } from 'notistack';
 import dayjs from 'dayjs';
 import { jobUpdatedAtDisplayFormat } from '@src/constants/snack';
@@ -90,12 +83,15 @@ const AutoAnnoList: React.FC = () => {
     },
     { field: 'id', headerName: 'ID', width: 90 },
     {
-      field: 'job_updated_at',
+      field: 'name',
       headerName: 'Service Identifier',
       width: 180,
-      renderCell: (params) => {
-        return dayjs(params.row.updated_at).format(jobUpdatedAtDisplayFormat);
-      },
+    },
+    {
+      field: 'updated_at',
+      headerName: 'Aktualisiert',
+      width: 180,
+      renderCell: (params) => dayjs(params.row.updated_at).format(jobUpdatedAtDisplayFormat),
     },
     { field: 'search_string', headerName: 'Suchbegriff', width: 200 },
     {
@@ -248,9 +244,7 @@ const AutoAnnoList: React.FC = () => {
       ) : (
         <div style={{ marginTop: '40px', width: '100%' }}>
           <Box>
-            <Typography variant="h4">
-              Bitte wählen Sie einen Eintrag in der oberen Tabelle aus.
-            </Typography>
+            <Typography variant="h4">Bitte wählen Sie einen Eintrag in der oberen Tabelle aus.</Typography>
           </Box>
         </div>
       )}

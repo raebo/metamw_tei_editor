@@ -1,12 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '@src/redux/hooks';
-import {
-  fetchAutoAnnoLetter,
-  patchAutoAnnoLetterLockingUser,
-} from '@src/services/auto_anno/apiAutoAnno.service';
+import { fetchAutoAnnoLetter, patchAutoAnnoLetterLockingUser } from '@src/services/auto_anno/apiAutoAnno.service';
 import { setAutoAnnoLetter, setStateMessage } from '@src/redux/slices/auto.letter.snippet.slice';
 import { API_URL } from '@src/constants/url';
+import { autoAnnoLockingRequest } from '@src/schemas/autoAnno';
 
 interface UseAutoAnnoLetterLockParams {
   autoAnnoLetterId: number;
@@ -21,11 +19,7 @@ interface UseAutoAnnoLetterLockParams {
  * lock only ever got cleared by the explicit "Stand speichern" button, so navigating away any
  * other way left the letter locked to this user until someone cleared it server-side.
  */
-export const useAutoAnnoLetterLock = ({
-  autoAnnoLetterId,
-  autoAnnoJobId,
-  userId,
-}: UseAutoAnnoLetterLockParams) => {
+export const useAutoAnnoLetterLock = ({ autoAnnoLetterId, autoAnnoJobId, userId }: UseAutoAnnoLetterLockParams) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const hasChecked = useRef(false);
@@ -39,9 +33,7 @@ export const useAutoAnnoLetterLock = ({
       const autoAnnoLetter = await fetchAutoAnnoLetter(autoAnnoLetterId);
 
       if (autoAnnoLetter?.locking_user?.id && autoAnnoLetter.locking_user.id !== userId) {
-        throw new Error(
-          `Der Brief wird von einem anderen Benutzer (${autoAnnoLetter.locking_user.login}) bearbeitet`,
-        );
+        throw new Error(`Der Brief wird von einem anderen Benutzer (${autoAnnoLetter.locking_user.login}) bearbeitet`);
       }
 
       await patchAutoAnnoLetterLockingUser(autoAnnoLetterId, userId);
@@ -51,8 +43,7 @@ export const useAutoAnnoLetterLock = ({
     };
 
     checkAndLockLetter().catch((error) => {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Ein unbekannter Fehler ist aufgetreten';
+      const errorMessage = error instanceof Error ? error.message : 'Ein unbekannter Fehler ist aufgetreten';
 
       dispatch(setStateMessage({ stateMessage: { message: errorMessage, variant: 'error' } }));
       navigate(`/automatic_annotations/${autoAnnoJobId}`);
@@ -70,7 +61,7 @@ export const useAutoAnnoLetterLock = ({
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         keepalive: true,
-        body: JSON.stringify({ userId: null }),
+        body: JSON.stringify(autoAnnoLockingRequest(null)),
       }).catch(() => {});
     };
 

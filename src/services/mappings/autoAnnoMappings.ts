@@ -14,19 +14,22 @@ export interface AutoAnnoJob {
 
 export interface AutoAnnoJobLetter {
   id: number;
+  letter_auto_anno_job_id: number;
   letter_name: string;
   status: string;
-  xml_content: string;
-  xml_content_updated: string | null;
-  content_changed: boolean;
   snippets_count: number;
   snippets_open: number;
   snippets_closed: number;
   locking_user: {
     id: number;
     login: string;
+    locked_since: string | null;
   } | null;
-  updated_at: string;
+}
+
+export interface AutoAnnoLetter extends AutoAnnoJobLetter {
+  xml_content: string | null;
+  content_changed: boolean;
 }
 
 export interface SnippetReference {
@@ -39,6 +42,7 @@ export interface SnippetReference {
 export interface AutoAnnoSnippet {
   id: number;
   xml_id: string;
+  letter_auto_anno_letter_id: number;
   status: string;
   references: SnippetReference[];
   reference_key_final: string;
@@ -63,15 +67,14 @@ export interface SnippetEntity {
 
 export interface SnippetApiEntity {
   entity_id: number;
-  entity_key: string;
-  entity_type: string;
-  entity_name: string;
-  entity_display_name: string;
-  entity_settlement_kind?: string;
-  entity_parent_name?: string;
-  entity_place_country_name?: string;
-  entity_kind?: string;
-  extra_data: Record<string, unknown>;
+  entity_key: string | null;
+  entity_type: string | null;
+  entity_name: string | null;
+  entity_display_name: string | null;
+  entity_settlement_kind: string | boolean | null;
+  entity_place_country_name: string | boolean | null;
+  entity_kind: string | null;
+  extra_data: Record<string, unknown> | boolean | null;
 }
 
 export interface RismEntry {
@@ -95,9 +98,7 @@ export interface RismFormEntry {
 
 export type SnippetDialogType = 'REJECT' | 'ACCEPT' | 'RESET_LETTER' | 'WRITE_LETTER';
 
-export const getStatusDetails = (
-  status: string,
-): { label: string; backgroundColor: string; foregroundColor: string } => {
+export const getStatusDetails = (status: string | number): { label: string; backgroundColor: string; foregroundColor: string } => {
   const statusDetails: {
     [key: string]: { label: string; backgroundColor: string; foregroundColor: string };
   } = {
@@ -120,7 +121,7 @@ export const getStatusDetails = (
   };
 
   return (
-    statusDetails[status] || {
+    statusDetails[String(status)] || {
       label: 'Unknown',
       backgroundColor: '#ffffff',
       foregroundColor: '#000000',

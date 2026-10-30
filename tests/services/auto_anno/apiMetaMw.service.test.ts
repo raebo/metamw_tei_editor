@@ -1,17 +1,25 @@
-import { fetchMetamwLetterData } from '@src/services/auto_anno/apiMetaMw.service';
+import { fetchMetamwEntityData, fetchMetamwLetterData } from '@src/services/auto_anno/apiMetaMw.service';
 
 const getMock = jest.fn();
 
 jest.mock('@src/services/apiRequest.service', () => ({
   __esModule: true,
-  default: {
-    initApi: () => ({ get: getMock }),
-  },
+  default: { initApi: () => ({ get: getMock }) },
 }));
 
 describe('apiMetaMw.service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('encodes entity and letter keys as path segments', async () => {
+    getMock.mockResolvedValue({ data: {} });
+
+    await fetchMetamwEntityData('PSN/ä 1');
+    await fetchMetamwLetterData('fmb/ä 1');
+
+    expect(getMock).toHaveBeenCalledWith('/jwt/misc/entities/PSN%2F%C3%A4%201');
+    expect(getMock).toHaveBeenCalledWith('/jwt/editor/letters/by_name/fmb%2F%C3%A4%201');
   });
 
   it('returns the serialized letter for a successful exact-name lookup', async () => {

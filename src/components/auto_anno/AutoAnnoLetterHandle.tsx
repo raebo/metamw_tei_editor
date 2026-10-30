@@ -32,9 +32,7 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
 
   const [finalSaveDisabled, setFinalSaveDisabled] = useState(true);
 
-  const reloadLetterStatus = useSelector(
-    (state: RootState) => state.autoLetterSnippet.letter?.reloadStatus ?? false,
-  );
+  const reloadLetterStatus = useSelector((state: RootState) => state.autoLetterSnippet.letter?.reloadStatus ?? false);
 
   const [resetButtonDisabled, setDisableResetButton] = useState(true);
 
@@ -53,11 +51,7 @@ const AutoAnnoLetterHandle = (props: AutoAnnoLetterHandleProps) => {
         if (result && result.status === Statuses.AutoAnnoLetter.CHECKED_WITH_SUCCESS) {
           setFinalSaveDisabled(false);
         }
-        if (
-          result &&
-          result.xml_content_updated !== null &&
-          result.xml_content_updated !== undefined
-        ) {
+        if (result?.content_changed) {
           setFinalSaveDisabled(false);
         }
 

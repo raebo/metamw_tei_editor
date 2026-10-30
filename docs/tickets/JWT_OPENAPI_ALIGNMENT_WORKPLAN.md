@@ -1,8 +1,8 @@
 # Arbeitsplan zur Angleichung des Frontends an die JWT-OpenAPI
 
-**Stand:** 26.10.2026
+**Stand:** 30.10.2026
 
-**Status:** Arbeitsplanung
+**Status:** In Umsetzung – JWT-101 bis JWT-105 auf `feature/jwt-openapi-alignment` umgesetzt
 
 **Prioritaet des Gesamtvorhabens:** P1
 
@@ -51,6 +51,18 @@ angelegten Tracker-Tickets.
 | 12 | JWT-302 Vertragspruefung automatisieren | P2 | Backend + Frontend | stabile Vertraege |
 | 13 | JWT-303 Gemeinsame Abnahme und Bereinigung | P2 | Backend + Frontend | alle vorherigen Pakete |
 
+## Umsetzungsstand
+
+- JWT-101 bis JWT-103 sind umgesetzt: Locking-Requests verwenden denselben typisierten
+  Wrapper, die Entitaetssuchen teilen sich einen validierten Parser und die
+  Automatic-Annotation-Responses besitzen getrennte Transport- und UI-Modelle.
+- JWT-104 ist umgesetzt: Einzelne Protagonistenwerk-Kategorien werden ueber den
+  dokumentierten Pfadparameter geladen.
+- JWT-105 ist umgesetzt: Nicht-kanonische Slashes wurden entfernt, der Sprachpfad wurde
+  korrigiert und die betroffenen freien Pfad- und Querywerte werden sicher uebertragen.
+- JWT-106 ist das naechste reine Frontend-Paket. JWT-201 bis JWT-204 bleiben von den dort
+  beschriebenen Backend- beziehungsweise Vertragsentscheidungen abhaengig.
+
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 
 ### JWT-101 – Sperr-Requests korrigieren
@@ -70,6 +82,8 @@ Fehlerfaelle fuer 401, 404 und 422.
 
 **Abnahme:** Der Backend-Request wird nicht mehr wegen eines fehlenden Wrapper-Objekts
 abgelehnt und beide Frontend-Pfade senden strukturell identische Daten.
+
+**Umgesetzt:** 30.10.2026 auf `feature/jwt-openapi-alignment`.
 
 ### JWT-102 – Entitaetssuche vereinheitlichen
 
@@ -91,6 +105,8 @@ Kategorie und fehlerhafte Antwort; Regressionstest fuer die Trefferhervorhebung.
 **Abnahme:** Alle sechs Kategorien zeigen Treffer an und lehnen ungueltige Antworten
 kontrolliert ab.
 
+**Umgesetzt:** 30.10.2026 auf `feature/jwt-openapi-alignment`.
+
 ### JWT-103 – Annotationsantworten an den Vertrag angleichen
 
 **Ziel:** Jobs, Briefe, Snippets und Entitaeten der automatischen Annotationen koennen die
@@ -110,17 +126,21 @@ ungueltige Antworten.
 **Abnahme:** Dokumentierte Responses werden ohne Casts verarbeitet; Abweichungen werden
 nicht stillschweigend verschluckt.
 
+**Umgesetzt:** 30.10.2026 auf `feature/jwt-openapi-alignment`.
+
 ### JWT-104 – Protagonistenwerk-Kategorie korrekt adressieren
 
 **Ziel:** Die Detailabfrage verwendet den dokumentierten Pfadparameter.
 
 **Umfang:** Aufruf auf
-`/jwt/editor/protag_creation_categories/{category_id}` umstellen, den Wert URL-kodieren und
+`/jwt/misc/protag_creation_categories/{category_id}` umstellen, den Wert URL-kodieren und
 den nicht dokumentierten Query-Parameter entfernen.
 
 **Tests:** Service-Test fuer Pfadbildung sowie Fehlerantworten 404 und 422.
 
 **Abnahme:** Der Request trifft die dokumentierte Rails-Route mit der gewaehlten Kategorie.
+
+**Umgesetzt:** 30.10.2026 auf `feature/jwt-openapi-alignment`.
 
 ### JWT-105 – URLs und Parameter kanonisieren
 
@@ -139,6 +159,9 @@ den nicht dokumentierten Query-Parameter entfernen.
 
 **Abnahme:** Alle verwendeten Pfade entsprechen der OpenAPI und dynamische Werte koennen
 keine URL-Struktur veraendern.
+
+**Umgesetzt:** 30.10.2026 auf `feature/jwt-openapi-alignment`. Nicht funktionale oder noch
+ungeklaerte Aufrufe aus JWT-201 bis JWT-203 bleiben bewusst in ihren eigenen Paketen.
 
 ### JWT-106 – Briefdaten und Fehlerbehandlung haerten
 
@@ -290,12 +313,9 @@ JWT-OpenAPI-Routencheck erfolgreich sein.
 
 ## Empfohlener naechster Schritt
 
-Als erstes wird **JWT-101 – Sperr-Requests korrigieren** umgesetzt. Die Abweichung betrifft
-eine schreibende Operation, ist klar gegen den vorhandenen Vertrag belegt und kann ohne
-weitere fachliche Entscheidung mit einem kleinen Regressionstest geschlossen werden.
-
-Danach sollten JWT-102 und JWT-103 zusammenhaengend bearbeitet werden, weil beide dieselbe
-Entitaetsstruktur im Umfeld der automatischen Annotationen betreffen.
+Als naechstes wird **JWT-106 – Briefdaten und Fehlerbehandlung haerten** umgesetzt. Danach
+folgen die abgestimmten Pakete JWT-201 bis JWT-204 erst, wenn die jeweilige Backend- und
+Vertragsentscheidung vorliegt.
 
 ## Definition of Done fuer das Gesamtvorhaben
 

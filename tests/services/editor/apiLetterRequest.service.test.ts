@@ -44,8 +44,8 @@ describe('apiLetterRequest.service', () => {
         entityType,
         entityKey: 'PSN0000001',
         entityName: 'Mendelssohn Bartholdy, Jacob Ludwig Felix',
-        entityLastName: 'Mendelssohn Bartholdy',
-        entityFirstName: 'Jacob Ludwig Felix',
+        entityLastName: entityType === EntityType.PERSON ? 'Mendelssohn Bartholdy' : undefined,
+        entityFirstName: entityType === EntityType.PERSON ? 'Jacob Ludwig Felix' : undefined,
         entityDisplayName: 'Mendelssohn Bartholdy, Jacob Ludwig Felix',
         extraData: {},
       },
@@ -59,6 +59,24 @@ describe('apiLetterRequest.service', () => {
         },
       },
       { headers: { 'Content-Type': 'application/json' } },
+    );
+  });
+
+  it('returns an empty array for a documented empty category', async () => {
+    postMock.mockResolvedValue({
+      data: { id: null, first_tab: 'person', person: { entries: [] } },
+    });
+
+    await expect(searchEditortEntities(null, EntityType.PERSON)).resolves.toEqual([]);
+  });
+
+  it('rejects a response that omits the requested category', async () => {
+    postMock.mockResolvedValue({
+      data: { id: null, first_tab: 'person', person: { entries: [] } },
+    });
+
+    await expect(searchEditortEntities('Leipzig', EntityType.SETTLEMENT)).rejects.toThrow(
+      'Entity search response is missing category: settlement',
     );
   });
 });

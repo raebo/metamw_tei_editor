@@ -1,10 +1,10 @@
 # Abgleich JWT-OpenAPI-Vertrag und Frontend
 
-Stand: 2026-10-26
+Stand: 2026-10-30
 
-Frontend-Branch: `missing-oxygen-shortcuts`
+Frontend-Branch: `feature/jwt-openapi-alignment`
 
-Kanonischer Vertrag: `../metamw_edge_version/docs/openapi/jwt.yaml`, Version `0.1.0`
+Kanonischer Vertrag: `../metamw_edge_version/docs/openapi/jwt.yaml`, Version `0.2.0`
 
 ## Ziel und Vorgehen
 
@@ -19,14 +19,14 @@ Dieser Abgleich vergleicht alle im kanonischen OpenAPI-Vertrag registrierten JWT
 Der Backend-Routenabgleich war erfolgreich:
 
 ```text
-JWT OpenAPI contract: 65 registered operations covered (/rails/docs/openapi/jwt.yaml)
+JWT OpenAPI contract: 67 registered operations covered
 ```
 
 Dieser Backend-Check bestätigt die Routenabdeckung, prüft aber weder die Frontendaufrufe noch sämtliche semantischen Details der Request- und Response-Verarbeitung.
 
 ## Zusammenfassung
 
-- Der Vertrag enthält **65 Operationen**. Davon sind zwei Operationen für `pinned_letters` ausdrücklich als nicht implementiert und deprecated markiert.
+- Der Vertrag enthält **67 Operationen**. Davon sind zwei Operationen für `pinned_letters` ausdrücklich als nicht implementiert und deprecated markiert.
 - Das Frontend verwendet **58 Operationen**. Alle verwendeten Methoden und Pfadformen lassen sich grundsätzlich einer OpenAPI-Operation zuordnen.
 - Es bestehen jedoch mehrere Abweichungen bei Payloads, Response-Modellen, Nullbarkeit und Fehlerbehandlung.
 - Vier Punkte können unmittelbar und ausschließlich im Frontend korrigiert werden: Locking-Payload, Automatic-Annotation-Parser, Kategorienpfad sowie URL-Kanonisierung.
@@ -46,6 +46,8 @@ Die folgenden zuletzt bearbeiteten Bereiche stimmen im Wesentlichen mit dem Vert
 ## Festgestellte Abweichungen
 
 ### A1 – Locking-Payload ist falsch verschachtelt
+
+**Status:** Erledigt am 30.10.2026 auf `feature/jwt-openapi-alignment`.
 
 **Priorität:** P1
 
@@ -76,6 +78,8 @@ Der Rails-Controller liest ausschließlich `params.dig(:automatic_anno_letter, :
 
 ### A2 – Automatic-Annotation-Entity-Suche verwendet das falsche Entry-Schema
 
+**Status:** Erledigt am 30.10.2026 auf `feature/jwt-openapi-alignment`.
+
 **Priorität:** P1
 
 **Zuständigkeit:** Frontend
@@ -87,6 +91,8 @@ Der Rails-Controller liest ausschließlich `params.dig(:automatic_anno_letter, :
 Empfehlung: Den bereits für `/jwt/editor/entities/search` eingeführten zentralen Mapper und dieselbe Boundary-Validierung wiederverwenden.
 
 ### A3 – Automatic-Annotation-Zod-Schemas widersprechen dem Vertrag
+
+**Status:** Erledigt am 30.10.2026 auf `feature/jwt-openapi-alignment`.
 
 **Priorität:** P1
 
@@ -126,6 +132,8 @@ Empfehlung:
 4. Falls nein, die nicht funktionale UI-Aktion und `setLetterFavourite` entfernen.
 
 ### A5 – Protagonistenwerk-Kategorie verwendet Query statt dokumentiertem Pfad
+
+**Status:** Erledigt am 30.10.2026 auf `feature/jwt-openapi-alignment`.
 
 **Priorität:** P1
 
@@ -177,6 +185,8 @@ Empfehlung: Da nur dieses Frontend den JWT-Endpunkt nutzt, sollte das Backend ei
 Empfehlung: `xml_id` im kanonischen Schema als `nullable: true` dokumentieren und einen entsprechenden Backend-Vertragstest ergänzen. Ein künstlicher leerer String im Frontend wäre semantisch schlechter.
 
 ### A9 – Nicht-kanonische URL-Schreibweisen
+
+**Status:** Erledigt am 30.10.2026 auf `feature/jwt-openapi-alignment`.
 
 **Priorität:** P2
 
@@ -242,6 +252,9 @@ Dadurch bleiben Nullbarkeit, fehlende Felder und Vertragsabweichungen bis zur UI
 Empfehlung: API-Schemas pro OpenAPI-Komponente definieren oder generieren und danach explizit in UI-Modelle mappen. Die OpenAPI-Datei sollte dabei die einzige Quelle bleiben; keine manuell divergierende zweite Vertragskopie anlegen.
 
 ### A13 – Query- und Pfadwerte werden nicht durchgängig codiert
+
+**Status:** Weitgehend erledigt am 30.10.2026. Die verbleibenden nicht-kanonischen Werte
+gehoeren zu den fachlich ungeklaerten Aufrufen A4/A6 und werden dort gemeinsam korrigiert.
 
 **Priorität:** P3
 
