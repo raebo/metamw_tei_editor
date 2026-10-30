@@ -248,8 +248,11 @@ Empfehlung: Nur die dokumentierten Authentifizierungsfehler als abgelaufene bezi
 Protagonistenwerk-, Misc-Letter-, Author- und Creation-Responses werden inzwischen mit
 OpenAPI-nahen Boundary-Schemas validiert. Hinzu kommen die einfachen Editor-Antworten fuer
 Briefexistenz, nullable XML-Inhalt und Entitaetsschluessel; die Entitaetssuche besitzt nun
-einen nicht-optionalen Listen-Rueckgabetyp. Verbleibende heterogene Legacy-Responses werden
-in JWT-301 endpunktweise nachgezogen; Entity Create bleibt bis zur Entscheidung A6 getrennt.
+einen nicht-optionalen Listen-Rueckgabetyp. Auch die stabilen Mutationsantworten fuer
+Benutzersprache, `set_content`, Reset, Publish, Undo und Redo werden an der Grenze validiert.
+Verbleibende heterogene Legacy-Responses werden in JWT-301 endpunktweise nachgezogen;
+Entity Create wird nach der Backend-Freigabe `fb460aed`/`4ce5f60e` im naechsten
+gekoppelten Frontend-Paket aus A6 umgestellt.
 
 **Priorität:** P3
 

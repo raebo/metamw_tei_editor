@@ -307,3 +307,45 @@ Getrennte Arbeitsaufträge mit gegenseitigen Links und Bearbeitungsfeldern:
 [Backend F-167](../../../metamw_edge_version/audit/tickets/open/F-167.md).
 Die vorstehenden offenen Varianten für JWT-201/JWT-202 sind damit ersetzt.
 Dies ist eine Planung; neue Endpunktsemantik noch nicht implementiert/deployed.
+
+
+## Backend-Übergabe JWT-203/JWT-204A/JWT-204B (30.10.2026)
+
+Getrennte Backend-Befunde: F-168 (JWT-203), F-169 (JWT-204A), F-170
+(JWT-204B), Details in ../metamw_edge_version/audit/tickets/open/ ab Backend-
+Root beziehungsweise über dessen TICKETS.md. Kanonische OpenAPI im Backend
+ist jetzt **0.4.0 im Commit `4ce5f60e`**, weiterhin 67 Operationen. Die folgenden
+Verträge sind implementiert und committed, aber noch nicht gemeinsam ausgerollt.
+
+JWT-203: POST /jwt/editor/entities benötigt entity_type und entityData im
+JSON-Body; Query-Parameter liefern/überschreiben diese Werte nicht. Sechs Typen:
+PERSON, SETTLEMENT, SIGHT, INSTITUTION, CREATION, PROTAG_CREATION. HTTP 201
+liefert ausschließlich entity_key als skalaren String des tatsächlich angelegten
+Datensatzes. Keine Modell-/Assoziationsobjekte und kein newId-Feld. Auch Werke
+mit Autor liefern den Werk-Schlüssel. Groß-/Kleinschreibung des Typs wird
+toleriert. Ungültige Daten/Typen/Referenzen oder belegter Schlüssel: HTTP 422
+mit error=invalid_entity_data. Auth 401 unverändert. Technische Fehler: HTTP 500
+mit error=entity_creation_failed, kein interner Exceptiontext. Fehlerhaftes JSON
+kann Rails vor der Action mit 400 ablehnen. Beispiele je Entitätstyp stehen in
+der kanonischen OpenAPI. Frontend auf genau diese Status-/Response-Struktur
+umstellen; keine numerischen IDs oder Legacy-Objekte als neue Keys behandeln.
+
+JWT-204A: changes.xml_id ist weiterhin Pflicht, darf aber explizit null sein.
+Dokumentweite Änderung: null; elementbezogen: konkrete XML-ID. Es wird keine
+neue Existenzvalidierung eingeführt; entfernte IDs sind Änderungsmetadaten.
+Response und Laufzeitverhalten bleiben gleich.
+
+JWT-204B: FigureCreated.content_type Enum image/jpeg oder image/png. rend und
+subtype optional/nullable, bei Auslassung/null vorhandener TEI-Default inline;
+Tokenmuster aus Buchstaben/Ziffern/_/- dokumentiert. Keine neue UI vorsehen.
+Upload-Erkennung richtet sich nach Bytes, nicht Client-MIME; unzulässiger
+Inhalt weiterhin 415. Bestehende SVG-Bildauslieferung bleibt unverändert.
+
+Backend-Commits: `fb460aed` für JWT-203/F-168, `4ce5f60e` für
+JWT-204A/B beziehungsweise F-169/F-170 und `3a077371` für die isolierte
+Pinning-Testkorrektur F-171. Gezielter Backendbereich: **63 Beispiele, 0 Fehler**,
+OpenAPI 67/67 und Formatprüfung grün. Abschließende Vollsuite nach F-171:
+**1841 Beispiele, 0 Fehler, 17 bestehende Pending** ohne Pool-Reaper- oder
+Thread-Ausnahmen. Keine Migration, keine neuen Gems und keine Produktivdaten
+geändert. Kein Push oder Deployment. Gemeinsam mit dem kompatiblen Frontend
+ausrollen; JWT-201 bleibt zurückgestellt, JWT-202/F116 bleibt unverändert.

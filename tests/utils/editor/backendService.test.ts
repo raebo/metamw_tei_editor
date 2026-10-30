@@ -22,7 +22,7 @@ describe('backendService.patchContent', () => {
   });
 
   it('normalizes and validates editor XML before sending it', async () => {
-    mockPatch.mockResolvedValue({});
+    mockPatch.mockResolvedValue({ data: { success: true, message: 'Content updated' } });
 
     await expect(
       backendService.patchContent(
@@ -47,6 +47,18 @@ describe('backendService.patchContent', () => {
       'XML content is not well-formed.',
     );
     expect(mockPatch).not.toHaveBeenCalled();
+  });
+
+  it('rejects an invalid set-content response', async () => {
+    mockPatch.mockResolvedValue({ data: { success: 'true', message: 'Content updated' } });
+
+    await expect(backendService.patchContent('<TEI/>', 7, 'manual_change', null)).rejects.toThrow();
+  });
+
+  it('rejects a documented unsuccessful set-content response', async () => {
+    mockPatch.mockResolvedValue({ data: { success: false, message: 'Content was not updated' } });
+
+    await expect(backendService.patchContent('<TEI/>', 7, 'manual_change', null)).rejects.toThrow('Content was not updated');
   });
 });
 
@@ -85,9 +97,24 @@ describe('backendService canonical JWT paths', () => {
     expect(mockPut).toHaveBeenCalledWith('/jwt/misc/user/language/de');
   });
 
+  it('rejects an invalid user-language response', async () => {
+    mockPut.mockResolvedValue({ data: { status: 'ok' } });
+
+    await expect(backendService.updateUserLanguage('de')).rejects.toThrow();
+  });
+
   it('removes noncanonical trailing slashes from lifecycle requests', async () => {
-    mockDelete.mockResolvedValue({});
-    mockPost.mockResolvedValue({ data: { success: true, message: 'ok', xml_content: '<TEI />' } });
+    mockDelete.mockResolvedValue({ data: { success: true, message: 'reset' } });
+    mockPost
+      .mockResolvedValueOnce({
+        data: { success: true, message: 'rebased', xml_content: '<TEI />' },
+      })
+      .mockResolvedValueOnce({
+        data: { content: '<TEI>Ä</TEI>', undo_available: false, redo_available: true },
+      })
+      .mockResolvedValueOnce({
+        data: { content: '<TEI>Ä</TEI>', undo_available: true, redo_available: false },
+      });
 
     await backendService.resetLetter(7);
     await backendService.rebaseLetter(7);
@@ -271,6 +298,18 @@ describe('backendService.publishLetter', () => {
     mockPost.mockReset();
   });
 
+  it('validates the documented publish response', async () => {
+    mockPost.mockResolvedValue({ data: { message: 'published', letter_id: 7 } });
+
+    await expect(backendService.publishLetter(7)).resolves.toBe(true);
+  });
+
+  it('rejects an invalid publish response', async () => {
+    mockPost.mockResolvedValue({ data: { message: 'published', letter_id: '7' } });
+
+    await expect(backendService.publishLetter(7)).rejects.toThrow();
+  });
+
   it('throws the typed exception only for a valid changed-since-pinned conflict', async () => {
     mockPost.mockRejectedValue({
       response: {
@@ -290,5 +329,43 @@ describe('backendService.publishLetter', () => {
     mockPost.mockRejectedValue({ response });
 
     await expect(backendService.publishLetter(7)).rejects.not.toBeInstanceOf(LetterChangedSincePinnedError);
+  });
+});
+
+describe('backendService mutation response contracts', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('validates reset responses', async () => {
+    mockDelete.mockResolvedValue({ data: { success: true, message: 'reset' } });
+
+    await expect(backendService.resetLetter(7)).resolves.toBe(true);
+  });
+
+  it('rejects unsuccessful reset responses', async () => {
+    mockDelete.mockResolvedValue({ data: { success: false, message: 'reset failed' } });
+
+    await expect(backendService.resetLetter(7)).rejects.toThrow('reset failed');
+  });
+
+  it.each(['undoLetterChange', 'redoLetterChange'] as const)('validates %s responses while preserving UTF-8 content', async (operation) => {
+    mockPost.mockResolvedValue({
+      data: {
+        content: '<TEI>ÄÖÜ äöü ß – Ελληνικά 中文 🙂</TEI>',
+        undo_available: true,
+        redo_available: false,
+      },
+    });
+
+    await expect(backendService[operation](7)).resolves.toBe(true);
+  });
+
+  it.each(['undoLetterChange', 'redoLetterChange'] as const)('rejects invalid %s responses', async (operation) => {
+    mockPost.mockResolvedValue({
+      data: { content: '<TEI/>', undo_available: 'true', redo_available: false },
+    });
+
+    await expect(backendService[operation](7)).rejects.toThrow();
   });
 });

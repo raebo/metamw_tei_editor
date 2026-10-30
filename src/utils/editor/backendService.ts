@@ -15,6 +15,12 @@ import {
   RismEntryApiSchema,
   StringListSchema,
 } from '@src/schemas/miscReferenceData';
+import {
+  MessageResponseSchema,
+  PublishLetterResponseSchema,
+  SuccessMessageResponseSchema,
+  UndoRedoResponseSchema,
+} from '@src/schemas/editorMutationResponses';
 
 const letterChangedSincePinnedSchema = z.object({
   error: z.literal('letter_changed_since_pinned'),
@@ -31,6 +37,14 @@ const rebaseLetterSchema = z.object({
   message: z.string(),
   xml_content: z.string(),
 });
+
+const responseErrorMessage = (error: unknown): string | undefined => {
+  if (typeof error !== 'object' || error === null || !('response' in error)) return undefined;
+
+  const response = (error as { response?: { data?: unknown } }).response;
+  const parsed = z.object({ error: z.string() }).safeParse(response?.data);
+  return parsed.success ? parsed.data.error : undefined;
+};
 
 export interface LetterStaleness {
   stale: boolean;
@@ -54,10 +68,7 @@ export class PinnedLetterNotFoundError extends Error {
 export const backendService = {
   updateUserLanguage: async (langCode: 'de' | 'en') => {
     const response = await initApi().put(`/jwt/misc/user/language/${langCode}`);
-
-    if (!response) {
-      throw new Error(`Could not update language to ${langCode} `);
-    }
+    MessageResponseSchema.parse(response.data);
   },
   searchRismEntries: async (searchValue: string): Promise<RismEntry[]> => {
     const requestBody = {
@@ -456,37 +467,33 @@ export const backendService = {
     }
 
     try {
-      await initApi().patch(`/jwt/editor/pinned_letters/${letterId}/set_content`, {
+      const response = await initApi().patch(`/jwt/editor/pinned_letters/${letterId}/set_content`, {
         changes: {
           new_content: prepareEditorXmlForBackend(content),
           xml_id: xmlId,
           change_type: changeType,
         },
       });
-    } catch (err: any) {
-      const response = err.response;
-
-      if (response !== undefined) {
-        throw new Error(response.data.error);
-      } else {
-        throw new Error(err);
-      }
+      const result = SuccessMessageResponseSchema.parse(response.data);
+      if (!result.success) throw new Error(result.message);
+    } catch (error: unknown) {
+      const responseError = responseErrorMessage(error);
+      if (responseError) throw new Error(responseError);
+      if (error instanceof Error) throw error;
+      throw new Error(String(error));
     }
     return true;
   },
   resetLetter: async (letterId: number): Promise<boolean> => {
     try {
-      await initApi().delete(`/jwt/editor/pinned_letters/${letterId}/reset_letter`);
+      const response = await initApi().delete(`/jwt/editor/pinned_letters/${letterId}/reset_letter`);
+      const result = SuccessMessageResponseSchema.parse(response.data);
+      if (!result.success) throw new Error(result.message);
 
       return true;
-    } catch (err: any) {
-      const response = err.response;
-
-      if (response !== undefined) {
-        throw new Error('Error resetting letter content: ' + response.data.error);
-      } else {
-        throw new Error('Error resetting letter content: ' + err);
-      }
+    } catch (error: unknown) {
+      const message = responseErrorMessage(error) ?? (error instanceof Error ? error.message : String(error));
+      throw new Error('Error resetting letter content: ' + message);
     }
   },
   fetchLetterStaleness: async (letterId: number, signal?: AbortSignal): Promise<LetterStaleness> => {
@@ -530,7 +537,8 @@ export const backendService = {
   },
   publishLetter: async (letterId: number): Promise<boolean> => {
     try {
-      await initApi().post(`/jwt/editor/pinned_letters/${letterId}/publish`);
+      const response = await initApi().post(`/jwt/editor/pinned_letters/${letterId}/publish`);
+      PublishLetterResponseSchema.parse(response.data);
 
       return true;
     } catch (err: unknown) {
@@ -556,32 +564,26 @@ export const backendService = {
   },
   undoLetterChange: async (letterId: number): Promise<boolean> => {
     try {
-      await initApi().post(`/jwt/editor/letters/${letterId}/letter_changes/undo`);
+      const response = await initApi().post(`/jwt/editor/letters/${letterId}/letter_changes/undo`);
+      UndoRedoResponseSchema.parse(response.data);
 
       return true;
-    } catch (err: any) {
-      const response = err.response;
-
-      if (response !== undefined) {
-        throw new Error(response.data.error);
-      } else {
-        throw new Error('Error undoing letter change: ' + err);
-      }
+    } catch (error: unknown) {
+      const responseError = responseErrorMessage(error);
+      if (responseError) throw new Error(responseError);
+      throw new Error('Error undoing letter change: ' + (error instanceof Error ? error.message : String(error)));
     }
   },
   redoLetterChange: async (letterId: number): Promise<boolean> => {
     try {
-      await initApi().post(`/jwt/editor/letters/${letterId}/letter_changes/redo`);
+      const response = await initApi().post(`/jwt/editor/letters/${letterId}/letter_changes/redo`);
+      UndoRedoResponseSchema.parse(response.data);
 
       return true;
-    } catch (err: any) {
-      const response = err.response;
-
-      if (response !== undefined) {
-        throw new Error(response.data.error);
-      } else {
-        throw new Error('Error redoing letter change: ' + err);
-      }
+    } catch (error: unknown) {
+      const responseError = responseErrorMessage(error);
+      if (responseError) throw new Error(responseError);
+      throw new Error('Error redoing letter change: ' + (error instanceof Error ? error.message : String(error)));
     }
   },
 };
