@@ -35,7 +35,7 @@ export const userHandling = {
     if (!stateUser) throw new Error('No authenticated user');
 
     const nameParts = userHandling.stateUserToAuthUser(stateUser);
-    if (nameParts.first_name.trim() && nameParts.last_name.trim()) {
+    if (nameParts.first_name?.trim() && nameParts.last_name?.trim()) {
       return userHandling.nameShortCut(nameParts);
     }
 

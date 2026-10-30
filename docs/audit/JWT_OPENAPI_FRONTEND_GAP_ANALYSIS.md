@@ -208,6 +208,9 @@ Rails/Axios tolerieren diese Varianten derzeit teilweise. Der Client sollte denn
 
 ### A10 – Nullable Letter-Felder sind im Frontend zu eng typisiert
 
+**Status:** Erledigt am 30.10.2026. Index-, Such-, Detail- und Pinned-Responses besitzen
+getrennte Boundary-Schemas; nullable Werte werden erst im UI-Mapper normalisiert.
+
 **Priorität:** P2
 
 **Zuständigkeit:** Frontend, mit einer Backend-Ausnahme
@@ -227,6 +230,10 @@ Empfehlung: Frontendtypen und Mapper an Nullbarkeit und tatsächliche Felder ang
 
 ### A11 – Authentifizierungsfehler werden zu pauschalem `null`
 
+**Status:** Erledigt am 30.10.2026. Nur der dokumentierte `GET /auth/me`-Status 401 wird als
+fehlende Sitzung behandelt; Netzwerk-, Server- und Validierungsfehler bleiben technische
+Fehler und loeschen den bestehenden Redux-Anmeldestatus nicht.
+
 **Priorität:** P2
 
 **Zuständigkeit:** Frontend
@@ -236,6 +243,11 @@ Empfehlung: Frontendtypen und Mapper an Nullbarkeit und tatsächliche Felder ang
 Empfehlung: Nur die dokumentierten Authentifizierungsfehler als abgelaufene beziehungsweise fehlende Sitzung behandeln. Temporäre Netzwerk- und Serverfehler müssen separat propagiert oder als technischer Zustand dargestellt werden.
 
 ### A12 – Fehlende Validierung an mehreren API-Grenzen
+
+**Status:** In Umsetzung. Auth-, Letter-, Pinned-Letter-, RISM-, Country-, Kind-,
+Protagonistenwerk-, Misc-Letter-, Author- und Creation-Responses werden inzwischen mit
+OpenAPI-nahen Boundary-Schemas validiert. Verbleibende heterogene Legacy-Responses werden
+in JWT-301 endpunktweise nachgezogen; Entity Create bleibt bis zur Entscheidung A6 getrennt.
 
 **Priorität:** P3
 

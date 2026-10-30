@@ -1,29 +1,27 @@
 import { API_ENDPOINTS } from '@src/constants/url';
 import axios from 'axios';
+import { AuthMessage, AuthMessageSchema, AuthResponse, AuthResponseSchema } from '@src/schemas/auth';
 
 export const AuthService = {
-  async getMe() {
+  async getMe(): Promise<AuthResponse | null> {
     try {
       const response = await axios.get(`${API_ENDPOINTS.AUTH}/me`, {
         withCredentials: true,
       });
-      return response.data;
-    } catch {
-      return null;
+      return AuthResponseSchema.parse(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) return null;
+      throw error;
     }
   },
 
-  async login(email: string, password: string) {
-    const response = await axios.post(
-      `${API_ENDPOINTS.AUTH}/login`,
-      { email, password },
-      { withCredentials: true },
-    );
+  async login(email: string, password: string): Promise<AuthResponse> {
+    const response = await axios.post(`${API_ENDPOINTS.AUTH}/login`, { email, password }, { withCredentials: true });
 
-    return response.data;
+    return AuthResponseSchema.parse(response.data);
   },
 
-  async logout(isAuthenticated: boolean) {
+  async logout(isAuthenticated: boolean): Promise<AuthMessage | undefined> {
     if (!isAuthenticated) {
       return;
     }
@@ -32,23 +30,15 @@ export const AuthService = {
       withCredentials: true,
     });
 
-    return response.data;
+    return AuthMessageSchema.parse(response.data);
   },
 
-  async refresh(isAuthenticated: boolean) {
+  async refresh(isAuthenticated: boolean): Promise<AuthMessage | null> {
     if (!isAuthenticated) {
       return null;
     }
 
-    try {
-      const response = await axios.post(
-        `${API_ENDPOINTS.AUTH}/refresh`,
-        {},
-        { withCredentials: true },
-      );
-      return response.data;
-    } catch {
-      return null;
-    }
+    const response = await axios.post(`${API_ENDPOINTS.AUTH}/refresh`, {}, { withCredentials: true });
+    return AuthMessageSchema.parse(response.data);
   },
 };

@@ -3,15 +3,14 @@ import { EditorUtils } from './index';
 import { EditorConstants, EntityType } from '@src/constants/editor';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { initApi } from '@src/services/apiRequest.service';
+import { AuthorApiSchema } from '@src/schemas/miscReferenceData';
 
 interface EnrichedCreation {
   creation: { key: string; name: string; kind: string; isNewEntry: boolean };
   authors: SnippetEntity[];
 }
 
-async function loadEnrichedCreations(
-  markupCreations: MarkupCreationData[],
-): Promise<EnrichedCreation[]> {
+async function loadEnrichedCreations(markupCreations: MarkupCreationData[]): Promise<EnrichedCreation[]> {
   return Promise.all(
     markupCreations.map(async (markupCreation) => {
       const creation = markupCreation.creation;
@@ -28,21 +27,26 @@ async function loadEnrichedCreations(
 export const creationDataService = {
   fetchCreationAuthors: async (creationKey: string): Promise<SnippetEntity[]> => {
     try {
-      const response = await initApi().get(`/jwt/misc/creation/${creationKey}/authors`);
+      const response = await initApi().get(`/jwt/misc/creation/${encodeURIComponent(creationKey)}/authors`);
 
       if (!response) {
         throw new Error('No response from server for author creations');
       }
 
-      return response.data.map((item: any) => {
-        return {
-          entityId: item.id,
-          entityKey: item.key,
-          entityFirstName: item.first_name,
-          entityLastName: item.last_name,
-          entityDisplayName: item.display_name,
-        } as SnippetEntity;
-      });
+      return AuthorApiSchema.array()
+        .parse(response.data)
+        .map((item) => {
+          return {
+            entityId: item.id,
+            entityKey: item.key,
+            entityName: item.display_name,
+            entityFirstName: item.first_name ?? undefined,
+            entityLastName: item.last_name ?? undefined,
+            entityDisplayName: item.display_name,
+            entityType: EntityType.PERSON,
+            extraData: {},
+          };
+        });
     } catch (error: any) {
       const response = error.response;
 
@@ -53,15 +57,9 @@ export const creationDataService = {
       }
     }
   },
-  handleCreationDataEntries: async (
-    xmlDoc: Document,
-    markupCreationData: MarkupCreationData[],
-    rendType: HiRendType,
-  ): Promise<string> => {
+  handleCreationDataEntries: async (xmlDoc: Document, markupCreationData: MarkupCreationData[], rendType: HiRendType): Promise<string> => {
     const newAuthors = markupCreationData.filter((creationData) => creationData.author?.isNewEntry);
-    const newCreations = markupCreationData.filter(
-      (creationData) => creationData.creation?.isNewEntry,
-    );
+    const newCreations = markupCreationData.filter((creationData) => creationData.creation?.isNewEntry);
 
     for (const authorData of newAuthors) {
       await EditorUtils.backendService.createEntity(

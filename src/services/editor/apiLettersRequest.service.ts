@@ -3,6 +3,7 @@ import {
   EditorLetter,
   EditorLetterData,
   mapApiToEditorLetter,
+  mapApiToExactEditorLetter,
   mapApiToEditorLetterData,
   mapApiToLetterData,
 } from '../mappings/editorMappings';
@@ -91,7 +92,7 @@ export const fetchLetterDataByName = async (letterName: string): Promise<EditorL
   try {
     const response = await initApi.initApi().get(`/jwt/editor/letters/by_name/${encodeURIComponent(letterName)}`);
 
-    return mapApiToEditorLetter(response.data);
+    return mapApiToExactEditorLetter(response.data);
   } catch (err) {
     throw new Error('Failed to fetch Letter Find By Name: ' + err);
   }

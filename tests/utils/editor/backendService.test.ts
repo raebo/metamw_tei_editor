@@ -111,6 +111,129 @@ describe('backendService canonical JWT paths', () => {
   });
 });
 
+describe('backendService reference-data contracts', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('validates RISM entries and normalizes documented nullable text fields', async () => {
+    mockPost.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          title: null,
+          city: null,
+          country: null,
+          code: null,
+          name: null,
+        },
+      ],
+    });
+
+    await expect(backendService.searchRismEntries('Bach')).resolves.toEqual([
+      {
+        id: 1,
+        title: '',
+        city: '',
+        country: '',
+        code: '',
+        name: '',
+        idNo: '',
+      },
+    ]);
+  });
+
+  it('maps nullable protag category fields after validation', async () => {
+    mockGet.mockResolvedValue({
+      data: [
+        {
+          id: 2,
+          name: 'Werkgruppe',
+          name_en: null,
+          protag_creation_category_id: null,
+        },
+      ],
+    });
+
+    await expect(backendService.fetchProtagCreationCategories(null)).resolves.toEqual([
+      {
+        id: 2,
+        name: 'Werkgruppe',
+        name_en: '',
+        protagCreationCategoryId: null,
+      },
+    ]);
+  });
+
+  it('validates simple country and kind lists', async () => {
+    mockGet
+      .mockResolvedValueOnce({ data: [{ id: 1, name: 'Deutschland' }] })
+      .mockResolvedValueOnce({ data: ['Stadt'] })
+      .mockResolvedValueOnce({ data: ['Sinfonie'] });
+
+    await expect(backendService.fetchCountryEntries()).resolves.toEqual([{ id: 1, name: 'Deutschland' }]);
+    await expect(backendService.fetchKindEntries()).resolves.toEqual(['Stadt']);
+    await expect(backendService.fetchCreationKinds()).resolves.toEqual(['Sinfonie']);
+  });
+
+  it('rejects malformed successful reference-data responses', async () => {
+    mockGet.mockResolvedValue({ data: [{ id: 'not-a-number', name: 'Deutschland' }] });
+
+    await expect(backendService.fetchCountryEntries()).rejects.toThrow();
+  });
+
+  it('validates and maps nullable misc-letter fields', async () => {
+    mockPost.mockResolvedValue({
+      data: [
+        {
+          id: 3,
+          name: 'fmb-1801-01-01-01',
+          title: null,
+          display_name: 'Brief 1',
+        },
+      ],
+    });
+
+    await expect(backendService.searchSenderReceiverLetters(null, 'WRITER')).resolves.toEqual([
+      {
+        entityId: 3,
+        entityKey: 'fmb-1801-01-01-01',
+        entityName: '',
+        entityDisplayName: 'Brief 1',
+        entityType: 'LETTER',
+        extraData: {},
+      },
+    ]);
+  });
+
+  it('validates and maps nullable author names', async () => {
+    mockGet.mockResolvedValue({
+      data: [
+        {
+          id: 4,
+          key: 'PSN0000001',
+          first_name: null,
+          last_name: null,
+          display_name: 'Unbekannte Person',
+        },
+      ],
+    });
+
+    await expect(backendService.fetchLetterAuthors('fmb-1801-01-01-01')).resolves.toEqual([
+      {
+        entityId: 4,
+        entityKey: 'PSN0000001',
+        entityName: 'Unbekannte Person',
+        entityFirstName: undefined,
+        entityLastName: undefined,
+        entityDisplayName: 'Unbekannte Person',
+        entityType: 'PERSON',
+        extraData: {},
+      },
+    ]);
+  });
+});
+
 describe('backendService letter staleness', () => {
   beforeEach(() => {
     mockGet.mockReset();

@@ -9,14 +9,15 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '@src/redux/redux.store';
 import i18n from '@src/i18n';
 import { SESSION_EXPIRED_EVENT } from '@src/constants/auth';
+import axios from 'axios';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 const authStateUser = (user: AuthUser) => ({
   id: user.id,
-  login: user.email,
-  firstName: user.first_name,
-  lastName: user.last_name,
+  login: user.login,
+  firstName: user.first_name ?? '',
+  lastName: user.last_name ?? '',
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -43,26 +44,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { user } = await AuthService.getMe();
+        const data = await AuthService.getMe();
+        if (data === null) {
+          setUser(null);
+          dispatch(setLogoutState());
+          return;
+        }
+
+        const { user } = data;
         setUser(user);
         dispatch(setLoginState({ user: authStateUser(user) }));
       } catch {
-        // 401 means not logged in, so clear state
-        setUser(null);
-        dispatch(setLogoutState());
+        // Keep the current authentication state on network and server failures. Only a
+        // documented 401 is converted to null by AuthService.getMe().
       } finally {
         setLoading(false);
       }
     };
     void fetchUser();
-  }, [navigate, dispatch]);
+  }, [dispatch]);
 
   const login = async (email: string, password: string) => {
     try {
       const data = await AuthService.login(email, password);
 
       setUser(data.user);
-      await i18n.changeLanguage(data.user.language);
+      await i18n.changeLanguage(data.user.language ?? i18n.language);
       dispatch(setLoginState({ user: authStateUser(data.user) }));
 
       if (currentPath && currentPath !== '/login') {
@@ -92,10 +99,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await AuthService.refresh(isAuthenticated);
       const data = await AuthService.getMe();
+      if (data === null) {
+        setUser(null);
+        dispatch(setLogoutState());
+        return;
+      }
+
       setUser(data.user);
       dispatch(setLoginState({ user: authStateUser(data.user) }));
-    } catch {
-      setUser(null);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        setUser(null);
+        dispatch(setLogoutState());
+      }
     } finally {
       setLoading(false);
     }

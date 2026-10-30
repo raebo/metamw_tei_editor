@@ -2,7 +2,7 @@
 
 **Stand:** 30.10.2026
 
-**Status:** In Umsetzung – JWT-101 bis JWT-105 auf `feature/jwt-openapi-alignment` umgesetzt
+**Status:** In Umsetzung – JWT-101 bis JWT-106 auf `feature/jwt-openapi-alignment` umgesetzt
 
 **Prioritaet des Gesamtvorhabens:** P1
 
@@ -60,8 +60,13 @@ angelegten Tracker-Tickets.
   dokumentierten Pfadparameter geladen.
 - JWT-105 ist umgesetzt: Nicht-kanonische Slashes wurden entfernt, der Sprachpfad wurde
   korrigiert und die betroffenen freien Pfad- und Querywerte werden sicher uebertragen.
-- JWT-106 ist das naechste reine Frontend-Paket. JWT-201 bis JWT-204 bleiben von den dort
-  beschriebenen Backend- beziehungsweise Vertragsentscheidungen abhaengig.
+- JWT-106 ist umgesetzt: Letter-Responses werden je Endpunkt validiert und nur der
+  dokumentierte Authentifizierungsfehler wird als fehlende Sitzung behandelt.
+- Als naechstes kann JWT-301 schrittweise fortgesetzt werden. JWT-201 bis JWT-204 bleiben
+  von den dort beschriebenen Backend- beziehungsweise Vertragsentscheidungen abhaengig.
+- Das erste JWT-301-Teilpaket ist umgesetzt: Auth-, Letter-, Pinned-Letter- und haeufig
+  verwendete Misc-Referenzdaten werden an der API-Grenze validiert. Weitere Legacy-Grenzen
+  werden endpunktweise in kleinen Folgepaketen bearbeitet.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 
@@ -180,6 +185,8 @@ ungeklaerte Aufrufe aus JWT-201 bis JWT-203 bleiben bewusst in ihren eigenen Pak
 
 **Abnahme:** Technische Fehler fuehren weder zu einer falschen Namensfreigabe noch zu einem
 unbegruendeten Logout.
+
+**Umgesetzt:** 30.10.2026 auf `feature/jwt-openapi-alignment`.
 
 ## Phase 2 – Abgestimmte Vertragsaenderungen
 
@@ -313,8 +320,8 @@ JWT-OpenAPI-Routencheck erfolgreich sein.
 
 ## Empfohlener naechster Schritt
 
-Als naechstes wird **JWT-106 – Briefdaten und Fehlerbehandlung haerten** umgesetzt. Danach
-folgen die abgestimmten Pakete JWT-201 bis JWT-204 erst, wenn die jeweilige Backend- und
+Als naechstes wird **JWT-301 – API-Grenzen vollstaendig typisieren** schrittweise umgesetzt.
+Die abgestimmten Pakete JWT-201 bis JWT-204 folgen erst, wenn die jeweilige Backend- und
 Vertragsentscheidung vorliegt.
 
 ## Definition of Done fuer das Gesamtvorhaben

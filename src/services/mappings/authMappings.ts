@@ -1,10 +1,6 @@
-export interface AuthUser {
-  id: number;
-  email: string;
-  first_name: string;
-  last_name: string;
-  language: string;
-}
+import type { AuthUserApi } from '@src/schemas/auth';
+
+export type AuthUser = AuthUserApi;
 
 export interface AuthContextType {
   user: AuthUser | null;

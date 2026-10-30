@@ -4,6 +4,17 @@ import { type RismEntry, SnippetEntity } from '@src/services/mappings/autoAnnoMa
 import { ProtagCreation, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
 import { prepareEditorXmlForBackend } from '@src/utils/xml/backendXml';
 import { z } from 'zod';
+import {
+  CountryApiSchema,
+  CreationApiSchema,
+  AuthorApiSchema,
+  MiscLetterApiSchema,
+  NullableStringListSchema,
+  ProtagCreationApiSchema,
+  ProtagCreationCategoryApiSchema,
+  RismEntryApiSchema,
+  StringListSchema,
+} from '@src/schemas/miscReferenceData';
 
 const letterChangedSincePinnedSchema = z.object({
   error: z.literal('letter_changed_since_pinned'),
@@ -59,16 +70,19 @@ export const backendService = {
       throw new Error('No response from server for RISM entries');
     }
 
-    return response.data.map((item: any) => {
-      return {
-        id: item.id,
-        title: item.title,
-        name: item.name,
-        city: item.city,
-        country: item.country,
-        code: item.code,
-      } as RismEntry;
-    });
+    return RismEntryApiSchema.array()
+      .parse(response.data)
+      .map((item) => {
+        return {
+          id: item.id,
+          title: item.title ?? '',
+          name: item.name ?? '',
+          city: item.city ?? '',
+          country: item.country ?? '',
+          code: item.code ?? '',
+          idNo: '',
+        };
+      });
   },
   searchSenderReceiverLetters: async (searchValue: string | null, senderType: 'RECEIVER' | 'WRITER'): Promise<SnippetEntity[]> => {
     const requestBody = {
@@ -83,14 +97,18 @@ export const backendService = {
         throw new Error('No response from server for letters');
       }
 
-      return response.data.map((item: any) => {
-        return {
-          entityId: item.id,
-          entityKey: item.name,
-          entityName: item.title,
-          entityDisplayName: item.display_name,
-        } as SnippetEntity;
-      });
+      return MiscLetterApiSchema.array()
+        .parse(response.data)
+        .map((item) => {
+          return {
+            entityId: item.id,
+            entityKey: item.name,
+            entityName: item.title ?? '',
+            entityDisplayName: item.display_name,
+            entityType: 'LETTER',
+            extraData: {},
+          };
+        });
     } catch (error: any) {
       const response = error.response;
 
@@ -122,14 +140,18 @@ export const backendService = {
         throw new Error('No response from server for author letters');
       }
 
-      return response.data.map((item: any) => {
-        return {
-          entityId: item.id,
-          entityKey: item.name,
-          entityName: item.title,
-          entityDisplayName: item.display_name,
-        } as SnippetEntity;
-      });
+      return MiscLetterApiSchema.array()
+        .parse(response.data)
+        .map((item) => {
+          return {
+            entityId: item.id,
+            entityKey: item.name,
+            entityName: item.title ?? '',
+            entityDisplayName: item.display_name,
+            entityType: 'LETTER',
+            extraData: {},
+          };
+        });
     } catch (error: any) {
       const response = error.response;
 
@@ -153,15 +175,20 @@ export const backendService = {
         throw new Error('No response from server for letter authors');
       }
 
-      return response.data.map((item: any) => {
-        return {
-          entityId: item.id,
-          entityKey: item.key,
-          entityLastName: item.last_name,
-          entityFirstName: item.first_name,
-          entityDisplayName: item.display_name,
-        } as SnippetEntity;
-      });
+      return AuthorApiSchema.array()
+        .parse(response.data)
+        .map((item) => {
+          return {
+            entityId: item.id,
+            entityKey: item.key,
+            entityName: item.display_name,
+            entityLastName: item.last_name ?? undefined,
+            entityFirstName: item.first_name ?? undefined,
+            entityDisplayName: item.display_name,
+            entityType: EntityType.PERSON,
+            extraData: {},
+          };
+        });
     } catch (error: any) {
       const response = error.response;
 
@@ -180,14 +207,14 @@ export const backendService = {
         throw new Error('No response from server for protag creation categories');
       }
 
-      return response.data.map((protag: { id: number; name: string; name_en: string; protag_creation_category_id: number }) => {
-        return {
+      return ProtagCreationCategoryApiSchema.array()
+        .parse(response.data)
+        .map((protag) => ({
           id: protag.id,
           name: protag.name,
-          name_en: protag.name_en,
+          name_en: protag.name_en ?? '',
           protagCreationCategoryId: protag.protag_creation_category_id,
-        } as ProtagCreationCategory;
-      });
+        }));
     } catch (error: any) {
       const response = error.response;
 
@@ -206,15 +233,20 @@ export const backendService = {
         throw new Error('No response from server for letter authors');
       }
 
-      return response.data.map((item: any) => {
-        return {
-          entityId: item.id,
-          entityKey: item.key,
-          entityLastName: item.last_name,
-          entityFirstName: item.first_name,
-          entityDisplayName: item.display_name,
-        } as SnippetEntity;
-      });
+      return AuthorApiSchema.array()
+        .parse(response.data)
+        .map((item) => {
+          return {
+            entityId: item.id,
+            entityKey: item.key,
+            entityName: item.display_name,
+            entityLastName: item.last_name ?? undefined,
+            entityFirstName: item.first_name ?? undefined,
+            entityDisplayName: item.display_name,
+            entityType: EntityType.PERSON,
+            extraData: {},
+          };
+        });
     } catch (error: any) {
       const response = error.response;
 
@@ -239,18 +271,16 @@ export const backendService = {
         throw new Error('No response from server for protag creation entries');
       }
 
-      return response.data.map(
-        (protag: { id: number; key: string; name: string; protag_creation_category_id: number; mwv: string | null; op: string | null }) => {
-          return {
-            id: protag.id,
-            key: protag.key,
-            name: protag.name,
-            protagCreationCategoryId: protag.protag_creation_category_id,
-            mwv: protag.mwv || null,
-            opus: protag.op || null,
-          } as ProtagCreation;
-        },
-      );
+      return ProtagCreationApiSchema.array()
+        .parse(response.data)
+        .map((protag) => ({
+          id: protag.id,
+          key: protag.key,
+          name: protag.name,
+          protagCreationCategoryId: protag.protag_creation_category_id,
+          mwv: protag.mwv,
+          opus: protag.op,
+        }));
     } catch (error: any) {
       const response = error.response;
 
@@ -273,14 +303,14 @@ export const backendService = {
         throw new Error('No response from server for protag creation categories');
       }
 
-      return response.data.map((protag: { id: number; name: string; name_en: string; protag_creation_category_id: number }) => {
-        return {
+      return ProtagCreationCategoryApiSchema.array()
+        .parse(response.data)
+        .map((protag) => ({
           id: protag.id,
           name: protag.name,
-          name_en: protag.name_en,
+          name_en: protag.name_en ?? '',
           protagCreationCategoryId: protag.protag_creation_category_id,
-        } as ProtagCreationCategory;
-      });
+        }));
     } catch (error: any) {
       const response = error.response;
 
@@ -299,7 +329,7 @@ export const backendService = {
         throw new Error('No response from server for creation kinds');
       }
 
-      return response.data;
+      return StringListSchema.parse(response.data);
     } catch (error: any) {
       const response = error.response;
 
@@ -317,7 +347,7 @@ export const backendService = {
       if (!response) {
         throw new Error('No response from server for author categories');
       } else {
-        return response.data;
+        return NullableStringListSchema.parse(response.data).filter((category): category is string => category !== null);
       }
     } catch (error: any) {
       const response = error.response;
@@ -337,14 +367,19 @@ export const backendService = {
         throw new Error('No response from server for author creations');
       }
 
-      return response.data.map((item: any) => {
-        return {
-          entityId: item.id,
-          entityKey: item.key,
-          entityName: item.name,
-          entityKind: item.kind,
-        } as SnippetEntity;
-      });
+      return CreationApiSchema.array()
+        .parse(response.data)
+        .map((item) => {
+          return {
+            entityId: item.id,
+            entityKey: item.key,
+            entityName: item.name,
+            entityDisplayName: item.name,
+            entityKind: item.kind ?? undefined,
+            entityType: EntityType.CREATION,
+            extraData: {},
+          };
+        });
     } catch (error: any) {
       const response = error.response;
 
@@ -363,7 +398,7 @@ export const backendService = {
         throw new Error('No response from server for country entries');
       }
 
-      return response.data;
+      return CountryApiSchema.array().parse(response.data);
     } catch (error: any) {
       const response = error.response;
 
@@ -382,7 +417,7 @@ export const backendService = {
         throw new Error('No response from server for place kind entries');
       }
 
-      return response.data;
+      return StringListSchema.parse(response.data);
     } catch (error: any) {
       const response = error.response;
 

@@ -13,14 +13,26 @@ const apiLetterLifecycleShape = {
   version: letterVersionSchema,
 };
 
-const apiEditorLetterSchema = z.object({
+const apiLetterIndexEntrySchema = z.object({
   id: z.number().int().positive(),
   name: z.string(),
   title: z.string().nullable(),
-  last_updated_by_name: z.string().optional().default(''),
-  last_updated_by_id: z.number().int().optional().default(0),
-  updated_at: z.string().nullable().optional(),
-  xml_content: z.string().nullable().optional(),
+  updated_at: z.string().nullable(),
+  ...apiLetterLifecycleShape,
+});
+
+const apiLetterSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  title: z.string().nullable(),
+  xml_content: z.string().nullable(),
+  ...apiLetterLifecycleShape,
+});
+
+const apiLetterSearchEntrySchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  title: z.string().nullable(),
   ...apiLetterLifecycleShape,
 });
 
@@ -38,7 +50,7 @@ const apiPinnedLetterSchema = z.object({
   id: z.number().int().positive(),
   name: z.string(),
   content_changed: z.boolean(),
-  xml_content_current: z.string().nullable().optional(),
+  xml_content_current: z.string().nullable(),
   ...apiLetterLifecycleShape,
 });
 
@@ -187,22 +199,37 @@ export type CountryOption = {
 };
 
 export const mapApiToEditorLetter = (value: unknown): EditorLetter => {
-  const apiLetter = apiEditorLetterSchema.parse(value);
+  const apiLetter = apiLetterIndexEntrySchema.parse(value);
   const lifecycle = parseLetterLifecycle(apiLetter);
   return {
     id: apiLetter.id,
     name: apiLetter.name,
     title: apiLetter.title ?? '',
-    lastUpdatedByName: apiLetter.last_updated_by_name,
-    lastUpdatedById: apiLetter.last_updated_by_id,
+    lastUpdatedByName: '',
+    lastUpdatedById: 0,
     updatedAt: apiLetter.updated_at ? new Date(apiLetter.updated_at) : new Date(0),
+    xmlContent: undefined,
+    ...lifecycle,
+  };
+};
+
+export const mapApiToExactEditorLetter = (value: unknown): EditorLetter => {
+  const apiLetter = apiLetterSchema.parse(value);
+  const lifecycle = parseLetterLifecycle(apiLetter);
+  return {
+    id: apiLetter.id,
+    name: apiLetter.name,
+    title: apiLetter.title ?? '',
+    lastUpdatedByName: '',
+    lastUpdatedById: 0,
+    updatedAt: new Date(0),
     xmlContent: apiLetter.xml_content ?? undefined,
     ...lifecycle,
   };
 };
 
 export const mapApiToLetterData = (value: unknown): SearchLetter => {
-  const apiLetter = apiEditorLetterSchema.parse(value);
+  const apiLetter = apiLetterSearchEntrySchema.parse(value);
   const lifecycle = parseLetterLifecycle(apiLetter);
   return {
     id: apiLetter.id,

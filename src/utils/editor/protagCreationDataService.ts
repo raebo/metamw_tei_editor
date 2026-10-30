@@ -1,12 +1,9 @@
 import { initApi } from '@src/services/apiRequest.service';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
-import {
-  type HiRendType,
-  MarkupProtagCreationData,
-  ProtagCreationCategory,
-} from '@src/services/mappings/editorMappings';
+import { type HiRendType, MarkupProtagCreationData, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
 import { EditorUtils } from './index';
 import { EditorConstants, EntityType } from '@src/constants/editor';
+import { ProtagonistPersonApiSchema } from '@src/schemas/miscReferenceData';
 
 export const protagCreationDataService = {
   fetchProtagPersonData: async (): Promise<SnippetEntity> => {
@@ -17,17 +14,16 @@ export const protagCreationDataService = {
         throw new Error('No response from server for protag person data');
       }
 
-      const item = response.data;
-
-      if (!item || !item.id || !item.key || !item.display_name) {
-        throw new Error('Invalid response structure for protag person data');
-      }
+      const item = ProtagonistPersonApiSchema.parse(response.data);
 
       return {
         entityId: item.id,
         entityKey: item.key,
+        entityName: item.display_name,
         entityDisplayName: item.display_name,
-      } as SnippetEntity;
+        entityType: EntityType.PERSON,
+        extraData: {},
+      };
     } catch (error: any) {
       const response = error.response;
 
