@@ -332,3 +332,24 @@ Vertragsentscheidung vorliegt.
 - Gezielte Tests, TypeScript-Pruefung und Lint-Pruefung sind erfolgreich.
 - Gekoppelte Aenderungen besitzen eine dokumentierte kompatible Rolloutreihenfolge.
 - Die erneute Route-fuer-Route-Pruefung findet keine unbegruendete Luecke.
+
+
+## Verbindliche Entscheidung und Aufträge zu JWT-201/JWT-202 (30.10.2026)
+
+Die folgenden bestätigten Nutzerentscheidungen ersetzen die vorher noch offenen
+Varianten für diese beiden Arbeitspakete:
+
+- JWT-201: Favoriten später umsetzen; vorerst deaktivierter Hinweis „Demnächst
+  verfügbar“, keine scheinbare Schreibaktion über die Briefsuche.
+- JWT-202: Zielzustand statt Toggle. Beim bestätigten Schließen persönliche
+  Arbeitskopie/History/Uploads verwerfen; bei unveröffentlichten Änderungen vorher
+  warnen und Abbrechen ohne Request ermöglichen. Keine ruhenden Arbeitskopien.
+- Backend und Frontend gemeinsam ausrollen, kein Legacy-Alias/Übergangsbetrieb.
+- Ausführbarer Frontend-Arbeitsauftrag:
+  [F116](F116_IDEMPOTENT_PINNING_CLOSE_WARNING_TICKET.md).
+- Backend-Arbeitsauftrag und geplanter Vertrag:
+  [F-167](../../../metamw_edge_version/audit/tickets/open/F-167.md).
+
+Beide Aufträge sind geplant, nicht implementiert oder deployed. Der kanonische
+OpenAPI-Vertrag wird erst zusammen mit der Backend-Implementierung angepasst.
+Andere JWT-Arbeitspakete sind durch diese Entscheidung nicht freigegeben.

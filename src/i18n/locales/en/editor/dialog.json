@@ -92,7 +92,7 @@
     "manuscriptAnnotation": "Edit manuscript annotation",
     "paragraphStructure": "Edit paragraph and section structure",
     "tableStructure": "Edit table structure",
-    "closeTabWithContent": "Close Tab with Content?",
+    "closeTabWithContent": "Close working letter?",
     "dateWhenAdd": "Mark Date 'WHEN'",
     "dateWhenCustomAdd": "Mark Date 'WHEN CUSTOM'",
     "dateNotAfterAdd": "Mark Date 'Not After'",
@@ -121,6 +121,13 @@
   },
   "buttons": {
     "cancel": "Cancel"
+  },
+  "closeWorkingLetter": {
+    "warning": "Closing discards unpublished changes, editing history, and temporary uploads for this working letter. The published letter remains available.",
+    "cancel": "Cancel",
+    "confirm": "Discard changes and close",
+    "invalidLetter": "The working letter to close could not be determined.",
+    "requestFailed": "The working letter could not be closed: {{reason}}"
   },
   "comment": {
     "fields": {

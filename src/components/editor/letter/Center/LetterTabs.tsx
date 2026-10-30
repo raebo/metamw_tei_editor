@@ -5,7 +5,13 @@ import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { fetchPinnedLetters, setLetterPinStatus } from '@src/services/editor/apiPinnedLettersRequest.service';
 import { useSelector } from 'react-redux';
-import { setDialogType, setEditorLetter, setEditorPinnedLetters, setTabToCloseId } from '@src/redux/slices/editor.letter.slice';
+import {
+  setDialogType,
+  setEditorLetter,
+  setEditorPinnedLetters,
+  setLifecycleOperationInProgress,
+  setTabToCloseId,
+} from '@src/redux/slices/editor.letter.slice';
 import { RootState } from '@src/redux/redux.store';
 import { enqueueSnackbar } from 'notistack';
 import { PinnedLetter } from '@src/services/mappings/editorMappings';
@@ -28,6 +34,8 @@ const LetterTabs = () => {
   const changeLetterViewMode = useSelector((state: RootState) => state.editorLetter.changeLetterViewMode);
   const stateActiveTab = useSelector((state: RootState) => state.editorLetter.tabNumber);
   const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
+  const pendingContentUpdates = useSelector((state: RootState) => state.editorLetter.pendingContentUpdates);
+  const lifecycleOperationInProgress = useSelector((state: RootState) => state.editorLetter.lifecycleOperationInProgress);
   const [activeTab, setActiveTab] = useState<number>(0);
 
   useEffect(() => {
@@ -107,42 +115,43 @@ const LetterTabs = () => {
   };
 
   const handleCloseTab = async (tabPinnedLetter: PinnedLetter, tabIndex: number) => {
-    if (figureUploadInProgress) return;
-    const openCommitCloseTabPanel = (tabLetterId: number): void => {
-      dispatch(setTabToCloseId({ tabToCloseId: tabLetterId }));
+    if (figureUploadInProgress || pendingContentUpdates > 0 || lifecycleOperationInProgress) return;
+
+    if (EditorUtils.letterTabs.hasUnsavedChanges(tabPinnedLetter)) {
+      dispatch(setTabToCloseId({ tabToCloseId: tabPinnedLetter.id }));
       dispatch(setDialogType({ dialogType: EditorConstants.dialogTypes.CLOSE_TAB_WITH_CONTENT }));
       return;
-    };
+    }
 
+    dispatch(setLifecycleOperationInProgress(true));
     try {
-      if (EditorUtils.letterTabs.hasUnsavedChanges(tabPinnedLetter)) {
-        openCommitCloseTabPanel(tabPinnedLetter.id);
-        return;
-      }
-
-      const success = await setLetterPinStatus(tabPinnedLetter, false);
-
-      if (success) {
-        EditorUtils.letterTabs.removeStateTab(dispatch, statePinnedLetters, tabPinnedLetter, tabIndex);
-      }
-    } catch (err) {
-      enqueueSnackbar(`Failed to close pinned letter: ${err}`, { variant: 'error' });
+      await setLetterPinStatus(tabPinnedLetter.id, false);
+      EditorUtils.letterTabs.removeStateTab(dispatch, statePinnedLetters, tabPinnedLetter, tabIndex);
+    } catch (error) {
+      enqueueSnackbar(`Failed to close pinned letter: ${MiscUtils.misc.getErrorMessage(error)}`, {
+        variant: 'error',
+      });
+    } finally {
+      dispatch(setLifecycleOperationInProgress(false));
     }
   };
 
   const addToPinned = async (pinnedLetter: PinnedLetter) => {
+    if (figureUploadInProgress || pendingContentUpdates > 0 || lifecycleOperationInProgress) return;
+    dispatch(setLifecycleOperationInProgress(true));
     try {
-      const success = await setLetterPinStatus(pinnedLetter, true);
-
-      if (success) {
-        dispatch(
-          setEditorPinnedLetters({
-            pinnedLetters: EditorUtils.letterTabs.updatePinnedLetterStatus(statePinnedLetters, pinnedLetter.id, true),
-          }),
-        );
-      }
+      await setLetterPinStatus(pinnedLetter.id, true);
+      dispatch(
+        setEditorPinnedLetters({
+          pinnedLetters: EditorUtils.letterTabs.updatePinnedLetterStatus(statePinnedLetters, pinnedLetter.id, true),
+        }),
+      );
     } catch (err) {
-      enqueueSnackbar(`Failed to pin letter: ${err}`, { variant: 'error' });
+      enqueueSnackbar(`Failed to pin letter: ${MiscUtils.misc.getErrorMessage(err)}`, {
+        variant: 'error',
+      });
+    } finally {
+      dispatch(setLifecycleOperationInProgress(false));
     }
   };
 
@@ -194,7 +203,7 @@ const LetterTabs = () => {
                     </Typography>
 
                     <IconButton
-                      disabled={figureUploadInProgress && pinnedLetter.isPinned}
+                      disabled={figureUploadInProgress || pendingContentUpdates > 0 || lifecycleOperationInProgress}
                       size="small"
                       onClick={(e) => {
                         e.stopPropagation();

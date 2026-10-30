@@ -141,6 +141,13 @@ const renderShowEditor = async (configure?: (store: ReturnType<typeof buildStore
 const isSelected = (button: HTMLElement) => button.classList.contains('Mui-selected');
 
 describe('ShowEditor toolbar selection highlighting', () => {
+  it('shows favourites as disabled coming-soon placeholders', async () => {
+    await renderShowEditor();
+
+    expect(screen.getByRole('button', { name: 'Favourites overview' })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Add letter to favourites' })).toHaveAttribute('aria-disabled', 'true');
+  });
+
   it('shows rename and discard actions while backend capabilities are unavailable', async () => {
     await renderShowEditor();
 

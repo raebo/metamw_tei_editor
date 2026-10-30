@@ -11,6 +11,9 @@
     "zoomOut": "Zoom out of figure",
     "resetZoom": "Reset zoom to 100 percent"
   },
+  "favourites": {
+    "comingSoon": "Favourites are coming soon."
+  },
   "letterViewContainer" : {
     "title": "Letter View",
     "noLetter": "No letter available to display. Please select a letter from the search on the left side.",

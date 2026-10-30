@@ -11,6 +11,9 @@
     "zoomOut": "Aus der Abbildung herauszoomen",
     "resetZoom": "Zoom auf 100 Prozent zurücksetzen"
   },
+  "favourites": {
+    "comingSoon": "Favoriten sind demnächst verfügbar."
+  },
   "letterViewContainer" : {
     "title": "Briefansicht",
     "noLetter": "Keine Brief zur Anzeige vorhanden. Bitte wählen Sie einen Brief aus der Suche auf der linken Seite aus.",

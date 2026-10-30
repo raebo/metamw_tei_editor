@@ -4,8 +4,10 @@ import type { AppDispatch } from '@src/redux/redux.store';
 import type { Action, ThunkAction } from '@reduxjs/toolkit';
 import { RootState } from '@src/redux/redux.store';
 import {
+  finishContentUpdate,
   setEditorLetterUndoRedo,
   setEditorPinnedLetterContentChanged,
+  startContentUpdate,
 } from '@src/redux/slices/editor.letter.slice';
 
 // Accepts either:
@@ -23,6 +25,7 @@ export const backendOrchestrator = {
       errorMessage?: string;
     },
   ) => {
+    dispatch(startContentUpdate());
     try {
       const letterId = params[1];
 
@@ -42,8 +45,11 @@ export const backendOrchestrator = {
       if (options?.successMessage) {
         enqueueSnackbar(options.successMessage, { variant: 'success' });
       }
-    } catch (e: any) {
-      enqueueSnackbar(options?.errorMessage ?? e.message, { variant: 'error' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      enqueueSnackbar(options?.errorMessage ?? message, { variant: 'error' });
+    } finally {
+      dispatch(finishContentUpdate());
     }
   },
 };

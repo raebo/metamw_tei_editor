@@ -1,6 +1,7 @@
 import { EditorLetterData, mapApiToEditorLetterData, mapApiToPinnedLetter, PinnedLetter } from '../mappings/editorMappings';
 import initApi from '../apiRequest.service';
 import axios from 'axios';
+import { parsePinnedLetterStatusResponse } from '@src/schemas/pinnedLetter';
 
 export const fetchPinnedLetters = async (): Promise<PinnedLetter[]> => {
   try {
@@ -14,13 +15,29 @@ export const fetchPinnedLetters = async (): Promise<PinnedLetter[]> => {
   }
 };
 
-export const setLetterPinStatus = async (pinnedLetter: PinnedLetter, isPinned: boolean): Promise<boolean> => {
-  const response = await initApi.initApi().patch(`/jwt/editor/pinned_letters/${pinnedLetter.id}/pinned`, { isPinned: isPinned });
+const pinStatusMatches = async (letterId: number, pinned: boolean): Promise<boolean> => {
+  try {
+    const pinnedLetters = await fetchPinnedLetters();
+    return pinnedLetters.some((letter) => letter.id === letterId) === pinned;
+  } catch {
+    return false;
+  }
+};
 
-  if (response.status === 200) {
-    return true;
-  } else {
-    throw new Error('Failed to set pin status to "' + isPinned + '" : ' + response.data.error);
+export const setLetterPinStatus = async (letterId: number, pinned: boolean): Promise<void> => {
+  try {
+    const response = await initApi.initApi().patch(`/jwt/editor/pinned_letters/${letterId}/pinned`, { pinned });
+    const result = parsePinnedLetterStatusResponse(response.data);
+
+    if (response.status !== 200 || result.pinned !== pinned) {
+      throw new Error(`Backend did not confirm pinned=${pinned}`);
+    }
+  } catch (error) {
+    const shouldReconcile =
+      axios.isAxiosError(error) && (error.response === undefined || (error.response.status >= 500 && error.response.status < 600));
+
+    if (shouldReconcile && (await pinStatusMatches(letterId, pinned))) return;
+    throw error;
   }
 };
 

@@ -3,17 +3,6 @@ import { SnippetEntity } from '../mappings/autoAnnoMappings';
 import { EditorConstants } from '@src/constants/editor';
 import { entitySearchCategory, parseEntitySearchResponse } from '@src/schemas/entitySearch';
 
-export const setLetterFavourite = async (letterId: number, isFavourite: boolean): Promise<boolean> => {
-  try {
-    await initApi.initApi().get(`/jwt/editor/letters/search?searchValue=FOOOBAR&letterId=${letterId}&isFavourite=${isFavourite}`);
-
-    return true;
-  } catch (err) {
-    console.error(err);
-    return false;
-  }
-};
-
 export const letterExists = async (letterId: string): Promise<boolean> => {
   try {
     const response = await initApi.initApi().get(`/jwt/editor/letters/${encodeURIComponent(letterId)}/exists`);

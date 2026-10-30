@@ -292,3 +292,18 @@ Für die weitere Frontendumsetzung werden folgende Angaben benötigt:
 - `xml_id`: Bestätigung von `nullable: true`;
 - Figures: fachliche Entscheidung zu `rend` und `subtype` sowie bestätigtes MIME-Type-Enum;
 - Backend-Commit und ausgerollte Umgebung für die gemeinsame Abnahme.
+
+
+## Bestätigte Nutzerentscheidung zu JWT-201/JWT-202 (30.10.2026)
+
+Favoriten werden später umgesetzt; vorerst deaktivierter Coming-soon-Hinweis.
+Pinning wird explizit idempotent. Schließen verwirft nach Warnung persönliche
+Arbeitskopie, History und Upload-Staging; erneutes Öffnen verwendet den aktuellen
+kanonischen Brief. Kein Aufbewahren ruhender Arbeitskopien. Backend und Frontend
+werden gemeinsam ausgerollt, daher kein Legacy-Alias und keine Übergangsphase.
+
+Getrennte Arbeitsaufträge mit gegenseitigen Links und Bearbeitungsfeldern:
+[Frontend F116](F116_IDEMPOTENT_PINNING_CLOSE_WARNING_TICKET.md) und
+[Backend F-167](../../../metamw_edge_version/audit/tickets/open/F-167.md).
+Die vorstehenden offenen Varianten für JWT-201/JWT-202 sind damit ersetzt.
+Dies ist eine Planung; neue Endpunktsemantik noch nicht implementiert/deployed.

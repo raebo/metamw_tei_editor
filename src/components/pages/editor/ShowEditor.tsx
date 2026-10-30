@@ -11,7 +11,6 @@ import SearchContainer from '@src/components/editor/letter/Left/Search/SearchCon
 import FavouritesContainer from '@src/components/editor/letter/Left/Favourites/FavouritesContainer';
 import AssignedContainer from '@src/components/editor/letter/Right/Assigned/AssignedContainer';
 import { ComponentMappingItem, type PinnedLetter } from '@src/services/mappings/editorMappings';
-import { handleFavouriteClick } from '@src/components/editor/letter/Right/Favourite/LetterFavouriteHandling';
 
 const LetterViewContainer = React.lazy(() =>
   import('@src/components/editor/letter/Center/LetterViewContainer').catch((_err) => {
@@ -68,7 +67,6 @@ const LEFT_EDITOR_DEFAULT_WIDTH = 30;
 interface MappingDependencies {
   letterId: string | undefined;
   setModalDialog: (type: string) => void;
-  handleFavouriteClick: (id: string, value: boolean) => void;
   xmlRefCenter: React.RefObject<HTMLDivElement>;
 }
 
@@ -88,7 +86,7 @@ const createComponentMappingLeft = (deps: MappingDependencies): Record<string, C
     name: EditorConstants.compMappingLeft.FAVOURITES,
     showContainer: true,
     component: <FavouritesContainer />,
-    action: () => true,
+    action: () => false,
   },
   [EditorConstants.compMappingLeft.HELP_SHORTCUTS]: {
     name: EditorConstants.compMappingLeft.HELP_SHORTCUTS,
@@ -114,8 +112,8 @@ const createComponentMappingRight = (deps: MappingDependencies): Record<string, 
   [EditorConstants.compMappingRight.SET_FAVOURITE]: {
     name: EditorConstants.compMappingRight.SET_FAVOURITE,
     showContainer: false,
-    action: () => handleFavouriteClick(deps.letterId, true),
-  }, // Example with a function
+    action: () => false,
+  },
   [EditorConstants.compMappingRight.PUBLISH_LETTER]: {
     name: EditorConstants.compMappingRight.PUBLISH_LETTER,
     showContainer: false,
@@ -455,7 +453,6 @@ const ShowEditor = () => {
         letterId,
         xmlRefCenter,
         setModalDialog,
-        handleFavouriteClick,
       }),
     [letterId, xmlRefCenter, setModalDialog],
   );
@@ -466,7 +463,6 @@ const ShowEditor = () => {
         letterId,
         xmlRefCenter,
         setModalDialog,
-        handleFavouriteClick,
       }),
     [letterId, xmlRefCenter, setModalDialog],
   );
@@ -505,6 +501,8 @@ const ShowEditor = () => {
             />
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarLeft.favourites')}
+              disabled
+              disabledReason={t('editor:common.favourites.comingSoon')}
               selected={selectedItemLeft === EditorConstants.compMappingLeft.FAVOURITES}
               onClick={() => setSelectedItem(EditorConstants.compMappingLeft.FAVOURITES, null)}
               icon={<AutoAwesomeIcon />}
@@ -619,6 +617,8 @@ const ShowEditor = () => {
 
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarRight.addLetterToFavourite')}
+              disabled
+              disabledReason={t('editor:common.favourites.comingSoon')}
               selected={selectedItemRight === EditorConstants.compMappingRight.SET_FAVOURITE}
               onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
               icon={<StarOutlineIcon />}

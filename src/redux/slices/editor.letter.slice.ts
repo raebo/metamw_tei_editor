@@ -62,6 +62,7 @@ interface EditorLetterSlice {
   };
   changeLetterViewMode: boolean;
   figureUploadInProgress: boolean;
+  pendingContentUpdates: number;
   focusedFigureXmlId: string | null;
   lifecycleOperationInProgress: boolean;
 }
@@ -122,6 +123,7 @@ const initialState: EditorLetterSlice = {
   },
   changeLetterViewMode: false,
   figureUploadInProgress: false,
+  pendingContentUpdates: 0,
   focusedFigureXmlId: null,
   lifecycleOperationInProgress: false,
 };
@@ -259,6 +261,12 @@ const EditorLetterSlice = createSlice({
     setFigureUploadInProgress(state, action: PayloadAction<boolean>) {
       state.figureUploadInProgress = action.payload;
     },
+    startContentUpdate(state) {
+      state.pendingContentUpdates += 1;
+    },
+    finishContentUpdate(state) {
+      state.pendingContentUpdates = Math.max(0, state.pendingContentUpdates - 1);
+    },
     setFocusedFigureXmlId(state, action: PayloadAction<string | null>) {
       state.focusedFigureXmlId = action.payload;
     },
@@ -294,6 +302,8 @@ export const {
   setNodeClicked,
   setTabToCloseId,
   setFigureUploadInProgress,
+  startContentUpdate,
+  finishContentUpdate,
   setFocusedFigureXmlId,
   setLifecycleOperationInProgress,
 } = EditorLetterSlice.actions;

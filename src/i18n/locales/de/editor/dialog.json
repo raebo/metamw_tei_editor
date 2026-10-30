@@ -92,7 +92,7 @@
     "manuscriptAnnotation": "Anmerkung zur Handschrift bearbeiten",
     "paragraphStructure": "Absatz- und Abschnittsstruktur bearbeiten",
     "tableStructure": "Tabellenstruktur bearbeiten",
-    "closeTabWithContent": "Tab mit Inhalt Schließen?",
+    "closeTabWithContent": "Arbeitsbrief schließen?",
     "dateWhenAdd": "Datum 'WHEN' Auszeichnen",
     "dateWhenCustomAdd": "Datum 'WHEN CUSTOM' Auszeichnen",
     "dateNotAfterAdd": "Datum 'Not After' Auszeichnen",
@@ -121,6 +121,13 @@
   },
   "buttons": {
     "cancel": "Abbrechen"
+  },
+  "closeWorkingLetter": {
+    "warning": "Beim Schließen werden unveröffentlichte Änderungen, der Bearbeitungsverlauf und temporäre Uploads dieses Arbeitsbriefs verworfen. Der veröffentlichte Brief bleibt erhalten.",
+    "cancel": "Abbrechen",
+    "confirm": "Änderungen verwerfen und schließen",
+    "invalidLetter": "Der zu schließende Arbeitsbrief konnte nicht ermittelt werden.",
+    "requestFailed": "Der Arbeitsbrief konnte nicht geschlossen werden: {{reason}}"
   },
   "comment": {
     "fields": {
