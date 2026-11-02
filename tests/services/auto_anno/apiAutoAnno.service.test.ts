@@ -7,6 +7,10 @@ import {
   searchAutoAnnoSnippetEntities,
   fetchAutoAnnoSnippetEntityData,
   updateAnnoLetterContent,
+  setAutoAnnoSnippetStatus,
+  setAnnoSnippetEntity,
+  writeAnnoLetter,
+  resetAnnoLetter,
 } from '@src/services/auto_anno/apiAutoAnno.service';
 
 const mockGet = jest.fn();
@@ -113,7 +117,7 @@ describe('apiAutoAnno.service', () => {
   });
 
   it('sendet den Locking-Benutzer im dokumentierten Request-Wrapper', async () => {
-    mockPatch.mockResolvedValue({});
+    mockPatch.mockResolvedValue({ data: { status: 'updated' } });
 
     await expect(patchAutoAnnoLetterLockingUser(7, 12)).resolves.toBe(true);
 
@@ -181,7 +185,7 @@ describe('apiAutoAnno.service', () => {
   });
 
   it('sendet nur wohlgeformtes XML und veraendert keine Auto-Anno-Attribute', async () => {
-    mockPatch.mockResolvedValue({});
+    mockPatch.mockResolvedValue({ data: { status: 'updated' } });
     const xmlContent = '<TEI><text tmp_id="backend-value">Brief</text></TEI>';
 
     await expect(updateAnnoLetterContent(7, xmlContent)).resolves.toBe(true);
@@ -193,5 +197,29 @@ describe('apiAutoAnno.service', () => {
   it('sendet ungueltiges XML nicht an das Auto-Anno-Backend', async () => {
     await expect(updateAnnoLetterContent(7, '<TEI><text></TEI>')).rejects.toThrow('XML content is not well-formed.');
     expect(mockPatch).not.toHaveBeenCalled();
+  });
+
+  it('validiert die Statusantworten aller Auto-Anno-Mutationen', async () => {
+    mockPatch.mockResolvedValue({ data: { status: 'updated' } });
+
+    await expect(patchAutoAnnoLetterLockingUser(7, null)).resolves.toBe(true);
+    await expect(setAutoAnnoSnippetStatus(7, 3, 'ACCEPTED')).resolves.toBe(true);
+    await expect(updateAnnoLetterContent(7, '<TEI><text>Brief</text></TEI>')).resolves.toBe(true);
+    await expect(setAnnoSnippetEntity(7, 3, 'Person', 'PSN0000001')).resolves.toBe(true);
+    await expect(writeAnnoLetter(7)).resolves.toBe(true);
+    await expect(resetAnnoLetter(7)).resolves.toBe(true);
+  });
+
+  it.each([
+    ['locking user', () => patchAutoAnnoLetterLockingUser(7, null)],
+    ['snippet status', () => setAutoAnnoSnippetStatus(7, 3, 'REJECTED')],
+    ['XML content', () => updateAnnoLetterContent(7, '<TEI><text>Brief</text></TEI>')],
+    ['snippet entity', () => setAnnoSnippetEntity(7, 3, 'Person', 'PSN0000001')],
+    ['write letter', () => writeAnnoLetter(7)],
+    ['reset letter', () => resetAnnoLetter(7)],
+  ])('lehnt eine ungueltige %s-Erfolgsantwort ab', async (_operation, request) => {
+    mockPatch.mockResolvedValue({ data: { success: true } });
+
+    await expect(request()).rejects.toThrow();
   });
 });

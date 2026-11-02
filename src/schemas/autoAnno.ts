@@ -20,6 +20,10 @@ export const AutoAnnoLockingUserSchema = z.object({
   locked_since: z.string().nullable(),
 });
 
+export const AutoAnnoStatusSchema = z.object({
+  status: z.string(),
+});
+
 export const AutoAnnoJobLetterListSchema = z.object({
   id: z.number(),
   letter_auto_anno_job_id: z.number(),

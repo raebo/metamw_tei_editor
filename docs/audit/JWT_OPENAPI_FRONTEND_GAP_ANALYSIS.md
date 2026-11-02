@@ -268,7 +268,9 @@ Grenze geprueft. Die Legacy-Misc-Aufrufe besitzen nun eine gemeinsame typisierte
 Fehlerauswertung fuer 401, 422, unerwartete HTTP-Antworten und Netzwerkfehler. Diese Grenze
 wird auch fuer die Protagonistenperson und die Autoren eines Werks verwendet und bildet
 dort zusaetzlich den dokumentierten 404 ab. Verbleibende heterogene Legacy-Responses werden
-in JWT-301 endpunktweise nachgezogen; Entity Create aus A6 ist gemeinsam ausgerollt.
+in JWT-301 endpunktweise nachgezogen. Die Statusantworten der Automatic-Annotation-
+Mutationen werden ebenfalls an der Grenze validiert; Entity Create aus A6 ist gemeinsam
+ausgerollt.
 
 **Priorität:** P3
 

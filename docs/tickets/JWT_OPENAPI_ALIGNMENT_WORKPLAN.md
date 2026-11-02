@@ -96,6 +96,10 @@ angelegten Tracker-Tickets.
   `ProtagCreation.name: null` aufgedeckt. Das Frontend behaelt die nicht-nullbare
   Vertragspruefung bei; die Abnahme wird nach Commit und Rollout der Backendkorrektur
   wiederholt.
+- Das siebte JWT-301-Teilpaket validiert die dokumentierte `Status`-Antwort aller sechs
+  zustandsaendernden Automatic-Annotation-Aufrufe. Ein HTTP 200 mit fehlendem oder falsch
+  typisiertem `status` wird nicht mehr als erfolgreiche Sperrung, Snippet-Aenderung,
+  Inhaltsaktualisierung, Ruecksetzung oder Dateischreibung behandelt.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 

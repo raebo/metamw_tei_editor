@@ -18,6 +18,7 @@ import {
   AutoAnnoJobLetterApi,
   AutoAnnoSnippetApi,
   autoAnnoLockingRequest,
+  AutoAnnoStatusSchema,
 } from '@src/schemas/autoAnno';
 import axios from 'axios';
 import { assertWellFormedXml } from '@src/utils/xml/backendXml';
@@ -80,7 +81,10 @@ export const fetchAutoAnnoLetter = async (annoLetterId: number): Promise<AutoAnn
 
 export const patchAutoAnnoLetterLockingUser = async (annoLetterId: number, userId: number | null): Promise<boolean> => {
   try {
-    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/set_locking_user`, autoAnnoLockingRequest(userId));
+    const response = await initApi
+      .initApi()
+      .patch(`/jwt/automatic_annotation_letters/${annoLetterId}/set_locking_user`, autoAnnoLockingRequest(userId));
+    AutoAnnoStatusSchema.parse(response.data);
 
     return true;
   } catch (err) {
@@ -150,9 +154,10 @@ type SnippetStatus = 'REJECTED' | 'ACCEPTED' | 'UPDATED';
 
 export const setAutoAnnoSnippetStatus = async (annoLetterId: number, snippetId: number, status: SnippetStatus): Promise<boolean> => {
   try {
-    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_status`, {
+    const response = await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_status`, {
       status,
     });
+    AutoAnnoStatusSchema.parse(response.data);
 
     return true;
   } catch (err) {
@@ -163,7 +168,8 @@ export const setAutoAnnoSnippetStatus = async (annoLetterId: number, snippetId: 
 export const updateAnnoLetterContent = async (id: number, xmlContent: string): Promise<boolean> => {
   try {
     assertWellFormedXml(xmlContent);
-    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/set_xml_content`, { xmlContent });
+    const response = await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/set_xml_content`, { xmlContent });
+    AutoAnnoStatusSchema.parse(response.data);
   } catch (err) {
     throw new Error('Error updating anno letter content: ' + (err instanceof Error ? err.message : String(err)));
   }
@@ -177,10 +183,11 @@ export const setAnnoSnippetEntity = async (
   entityKey: string,
 ): Promise<boolean> => {
   try {
-    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_entity`, {
+    const response = await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${annoLetterId}/snippets/${snippetId}/set_entity`, {
       entityType,
       entityKey,
     });
+    AutoAnnoStatusSchema.parse(response.data);
   } catch (err) {
     throw new Error('Error updating snippet entity: ' + (err instanceof Error ? err.message : String(err)));
   }
@@ -190,7 +197,8 @@ export const setAnnoSnippetEntity = async (
 
 export const writeAnnoLetter = async (id: number): Promise<boolean> => {
   try {
-    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/write_letter_to_file`);
+    const response = await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/write_letter_to_file`);
+    AutoAnnoStatusSchema.parse(response.data);
 
     return true;
   } catch (err) {
@@ -204,7 +212,8 @@ export const writeAnnoLetter = async (id: number): Promise<boolean> => {
 
 export const resetAnnoLetter = async (id: number): Promise<boolean> => {
   try {
-    await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/reset_letter`);
+    const response = await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/reset_letter`);
+    AutoAnnoStatusSchema.parse(response.data);
 
     return true;
   } catch (err) {
