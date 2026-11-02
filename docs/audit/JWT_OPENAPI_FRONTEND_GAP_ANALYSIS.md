@@ -151,18 +151,25 @@ Empfehlung: Bei gesetzter Kategorie die Pfadvariante verwenden; ohne Kategorie b
 
 ### A6 – Entity Create weicht bei Request und Response ab
 
+**Status:** Frontendkorrektur am 02.11.2026 lokal umgesetzt, noch nicht committed/deployed.
+Backend und OpenAPI 0.4.0 sind laut Nutzerbestaetigung ausgerollt.
+
 **Priorität:** P2
 
 **Zuständigkeit:** zunächst Frontend, anschließend Backend empfohlen
 
-Der Vertrag verlangt `entity_type` und `entityData` im JSON-Body. Das Frontend übergibt `entity_type` aktuell als Query-Parameter und nur `entityData` im Body. Rails führt Query- und Body-Parameter zwar zusammen, der Client erfüllt den veröffentlichten Vertrag damit aber nicht.
+Der vorherige Client übergab `entity_type` als Query-Parameter und nur `entityData` im Body.
+Die Korrektur sendet nun beide Felder ausschließlich im dokumentierten JSON-Body.
 
-Zusätzlich typisiert das Frontend die Antwort als `{ newId: number }`, während der Vertrag das Legacy-Ergebnis `{ entity_key: object }` beschreibt. Der Rückgabewert wird derzeit von den Aufrufern nicht verwendet.
+Die frühere Typisierung als `{ newId: number }` ist entfernt. HTTP 201 wird strikt als
+`{ entity_key: string }` validiert; 422 `invalid_entity_data` und 500
+`entity_creation_failed` bleiben unterscheidbar.
 
 Empfehlung:
 
-- Kurzfristig `entity_type` in den Body verschieben und den Response-Typ vertragskonform behandeln.
-- Mittelfristig im Backend eine stabile Antwort wie `{ entity_key: string }` definieren, OpenAPI aktualisieren und danach das Frontend umstellen.
+- Alle sechs Mapper und der gemeinsame Service muessen in der manuellen Abnahme gegen den
+  ausgerollten Backendstand geprueft werden.
+- Danach den kompatiblen Frontendstand deployen und A6 als abgeschlossen markieren.
 
 ### A7 – Pinning ist als Statusoperation modelliert, im Backend aber ein Toggle
 
@@ -251,8 +258,7 @@ Briefexistenz, nullable XML-Inhalt und Entitaetsschluessel; die Entitaetssuche b
 einen nicht-optionalen Listen-Rueckgabetyp. Auch die stabilen Mutationsantworten fuer
 Benutzersprache, `set_content`, Reset, Publish, Undo und Redo werden an der Grenze validiert.
 Verbleibende heterogene Legacy-Responses werden in JWT-301 endpunktweise nachgezogen;
-Entity Create wird nach der Backend-Freigabe `fb460aed`/`4ce5f60e` im naechsten
-gekoppelten Frontend-Paket aus A6 umgestellt.
+Entity Create aus A6 ist lokal auf die Backend-Freigabe `fb460aed`/`4ce5f60e` umgestellt.
 
 **Priorität:** P3
 

@@ -233,12 +233,15 @@ erzeugen den beabsichtigten Zustand.
 
 ### JWT-203 – Entitaetserstellung stabilisieren
 
-**Problem:** `entity_type` wird vom Frontend als Queryparameter gesendet, ist laut Vertrag
-aber Bestandteil des Bodys. Zugleich ist die Response fuer neue IDs nicht eindeutig.
+**Status:** Backend/OpenAPI 0.4.0 sind ausgerollt. Die kompatible Frontend-Umstellung ist
+am 02.11.2026 lokal umgesetzt und noch nicht committed beziehungsweise deployed.
 
-**Empfehlung:** Request gemaess OpenAPI als `entity_type` plus `entityData` senden und eine
-stabile Response mit eindeutig benanntem skalarem Schluessel festlegen, zum Beispiel
-`entityKey`.
+**Umsetzung:** Alle sechs Entitaetsarten verwenden einen typisierten Request mit
+`entity_type` und `entityData` im JSON-Body. HTTP 201 wird als strikt validiertes
+`{ entity_key: string }` verarbeitet; die stabilen Fehlercodes `invalid_entity_data` und
+`entity_creation_failed` werden als typisierte Fehler propagiert. UI-Modelle werden vor dem
+Request explizit auf die dokumentierten Felder abgebildet, insbesondere
+`first_name`/`last_name` und `op`.
 
 **Abnahme:** Alle unterstuetzten Entitaetsarten verwenden denselben Request-Rahmen und eine
 validierbare Response.

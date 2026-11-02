@@ -4,6 +4,7 @@ import { EditorConstants, EntityType } from '@src/constants/editor';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { initApi } from '@src/services/apiRequest.service';
 import { AuthorApiSchema } from '@src/schemas/miscReferenceData';
+import { mapCreationAuthorEntityCreateRequest, mapCreationEntityCreateRequest } from '@src/services/mappings/entityCreateMappings';
 
 interface EnrichedCreation {
   creation: { key: string; name: string; kind: string; isNewEntry: boolean };
@@ -62,26 +63,15 @@ export const creationDataService = {
     const newCreations = markupCreationData.filter((creationData) => creationData.creation?.isNewEntry);
 
     for (const authorData of newAuthors) {
-      await EditorUtils.backendService.createEntity(
-        {
-          key: authorData.author?.key,
-          first_name: authorData.author?.firstName,
-          last_name: authorData.author?.lastName,
-        },
-        EntityType.PERSON,
-      );
+      if (!authorData.author) throw new Error('Author data is missing');
+      await EditorUtils.backendService.createEntity(mapCreationAuthorEntityCreateRequest(authorData.author));
     }
 
     for (const creationData of newCreations) {
-      await EditorUtils.backendService.createEntity(
-        {
-          author: { key: creationData.author?.key },
-          key: creationData.creation?.key,
-          name: creationData.creation?.name,
-          kind: creationData.creation?.kind,
-        },
-        EntityType.CREATION,
-      );
+      if (!creationData.creation || !creationData.author) {
+        throw new Error('Creation or author data is missing');
+      }
+      await EditorUtils.backendService.createEntity(mapCreationEntityCreateRequest(creationData.creation, creationData.author.key));
     }
 
     const enrichedCreations = await loadEnrichedCreations(markupCreationData); // All ASYNC operations should take place before DOM manipulation!!!!!

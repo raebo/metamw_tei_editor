@@ -4,6 +4,7 @@ import { type HiRendType, MarkupProtagCreationData, ProtagCreationCategory } fro
 import { EditorUtils } from './index';
 import { EditorConstants, EntityType } from '@src/constants/editor';
 import { ProtagonistPersonApiSchema } from '@src/schemas/miscReferenceData';
+import { mapProtagCreationEntityCreateRequest } from '@src/services/mappings/entityCreateMappings';
 
 export const protagCreationDataService = {
   fetchProtagPersonData: async (): Promise<SnippetEntity> => {
@@ -44,18 +45,7 @@ export const protagCreationDataService = {
     const newEntries = markupProtagCreationData.filter((protagData) => protagData.isNewEntry);
 
     for (const newProtagEntry of newEntries) {
-      await EditorUtils.backendService.createEntity(
-        {
-          key: newProtagEntry.key,
-          name: newProtagEntry.name,
-          mwv: newProtagEntry.mwv ?? null,
-          opus: newProtagEntry.opus ?? null,
-          protag_creation_category: {
-            id: newProtagEntry.protagCreationCategory.id,
-          },
-        },
-        EntityType.PROTAG_CREATION,
-      );
+      await EditorUtils.backendService.createEntity(mapProtagCreationEntityCreateRequest(newProtagEntry));
     }
 
     const markedSpan = xmlDoc.querySelector('span.marked');

@@ -21,6 +21,13 @@ import {
   SuccessMessageResponseSchema,
   UndoRedoResponseSchema,
 } from '@src/schemas/editorMutationResponses';
+import {
+  EntityCreatedResponseSchema,
+  EntityCreateErrorCode,
+  EntityCreateErrorSchema,
+  EntityCreateRequest,
+  EntityCreateRequestSchema,
+} from '@src/schemas/entityCreate';
 
 const letterChangedSincePinnedSchema = z.object({
   error: z.literal('letter_changed_since_pinned'),
@@ -62,6 +69,16 @@ export class PinnedLetterNotFoundError extends Error {
   constructor() {
     super('Pinned letter not found');
     this.name = 'PinnedLetterNotFoundError';
+  }
+}
+
+export class EntityCreateRequestError extends Error {
+  constructor(
+    readonly code: EntityCreateErrorCode,
+    readonly status?: number,
+  ) {
+    super(code);
+    this.name = 'EntityCreateRequestError';
   }
 }
 
@@ -439,26 +456,26 @@ export const backendService = {
       }
     }
   },
-  createEntity: async (entityData: any, entityType: string): Promise<{ newId: number }> => {
+  createEntity: async (request: EntityCreateRequest): Promise<string> => {
+    const requestBody = EntityCreateRequestSchema.parse(request);
+
     try {
-      if (!Object.values(EntityType).includes(entityType as EntityType)) {
-        throw new Error(`Invalid entity type: ${entityType}`);
-      }
-      const response = await initApi().post(`/jwt/editor/entities?entity_type=${entityType}`, {
-        entityData: {
-          ...entityData,
-        },
-      });
+      const response = await initApi().post('/jwt/editor/entities', requestBody);
 
-      return response.data;
-    } catch (error: any) {
-      const response = error.response;
+      return EntityCreatedResponseSchema.parse(response.data).entity_key;
+    } catch (error: unknown) {
+      const response =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { status?: number; data?: unknown } }).response
+          : undefined;
+      const parsedError = EntityCreateErrorSchema.safeParse(response?.data);
 
-      if (response !== undefined) {
-        throw new Error(response.data.error);
-      } else {
-        throw new Error(`backendService.createEntity: ${error.message}`);
+      if (parsedError.success) {
+        throw new EntityCreateRequestError(parsedError.data.error, response?.status);
       }
+
+      if (error instanceof Error) throw error;
+      throw new Error('Entity creation request failed');
     }
   },
   patchContent: async (content: string, letterId: number | null, changeType: string, xmlId: string | null): Promise<boolean> => {

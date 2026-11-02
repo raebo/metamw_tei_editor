@@ -1,11 +1,8 @@
 import { EditorUtils } from './index';
-import {
-  CountryOption,
-  type HiRendType,
-  MarkupPlaceData,
-} from '@src/services/mappings/editorMappings';
+import { CountryOption, type HiRendType, MarkupPlaceData } from '@src/services/mappings/editorMappings';
 import { EditorConstants, EntityType } from '@src/constants/editor';
 import { SelectCompleteOption } from '@src/schemas';
+import { mapPlaceEntityCreateRequest } from '@src/services/mappings/entityCreateMappings';
 
 export const placeDataService = {
   fetchCountries: async (): Promise<CountryOption[]> => {
@@ -30,15 +27,11 @@ export const placeDataService = {
       throw new Error('No kinds found');
     }
   },
-  handlePlaceDataEntries: async (
-    xmlDoc: Document,
-    markupPlaceData: MarkupPlaceData[],
-    rendType: HiRendType,
-  ): Promise<string> => {
+  handlePlaceDataEntries: async (xmlDoc: Document, markupPlaceData: MarkupPlaceData[], rendType: HiRendType): Promise<string> => {
     const newEntries = markupPlaceData.filter((placeData) => placeData.isNewEntry);
 
     for (const placeData of newEntries) {
-      await EditorUtils.backendService.createEntity(placeData, placeData.placeType);
+      await EditorUtils.backendService.createEntity(mapPlaceEntityCreateRequest(placeData));
     }
 
     const markedSpan = xmlDoc.querySelectorAll('span.marked')[0];

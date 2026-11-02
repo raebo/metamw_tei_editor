@@ -315,7 +315,8 @@ Getrennte Backend-Befunde: F-168 (JWT-203), F-169 (JWT-204A), F-170
 (JWT-204B), Details in ../metamw_edge_version/audit/tickets/open/ ab Backend-
 Root beziehungsweise über dessen TICKETS.md. Kanonische OpenAPI im Backend
 ist jetzt **0.4.0 im Commit `4ce5f60e`**, weiterhin 67 Operationen. Die folgenden
-Verträge sind implementiert und committed, aber noch nicht gemeinsam ausgerollt.
+Verträge sind implementiert und committed. Laut Nutzerbestätigung vom 02.11.2026 ist der
+Backendstand ausgerollt; die kompatible Frontend-Umstellung wird anschließend bereitgestellt.
 
 JWT-203: POST /jwt/editor/entities benötigt entity_type und entityData im
 JSON-Body; Query-Parameter liefern/überschreiben diese Werte nicht. Sechs Typen:
@@ -347,5 +348,6 @@ Pinning-Testkorrektur F-171. Gezielter Backendbereich: **63 Beispiele, 0 Fehler*
 OpenAPI 67/67 und Formatprüfung grün. Abschließende Vollsuite nach F-171:
 **1841 Beispiele, 0 Fehler, 17 bestehende Pending** ohne Pool-Reaper- oder
 Thread-Ausnahmen. Keine Migration, keine neuen Gems und keine Produktivdaten
-geändert. Kein Push oder Deployment. Gemeinsam mit dem kompatiblen Frontend
-ausrollen; JWT-201 bleibt zurückgestellt, JWT-202/F116 bleibt unverändert.
+geändert. Der Backendstand ist inzwischen deployed. Die Frontend-Umstellung muss mit
+OpenAPI 0.4.0 abgenommen und zeitnah nachgezogen werden; JWT-201 bleibt zurückgestellt,
+JWT-202/F116 bleibt unverändert.

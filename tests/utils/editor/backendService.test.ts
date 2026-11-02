@@ -1,4 +1,10 @@
-import { backendService, LetterChangedSincePinnedError, PinnedLetterNotFoundError } from '@src/utils/editor/backendService';
+import {
+  backendService,
+  EntityCreateRequestError,
+  LetterChangedSincePinnedError,
+  PinnedLetterNotFoundError,
+} from '@src/utils/editor/backendService';
+import { EntityType } from '@src/constants/editor';
 
 const mockPatch = jest.fn();
 const mockGet = jest.fn();
@@ -59,6 +65,58 @@ describe('backendService.patchContent', () => {
     mockPatch.mockResolvedValue({ data: { success: false, message: 'Content was not updated' } });
 
     await expect(backendService.patchContent('<TEI/>', 7, 'manual_change', null)).rejects.toThrow('Content was not updated');
+  });
+});
+
+describe('backendService.createEntity', () => {
+  const personRequest = {
+    entity_type: EntityType.PERSON,
+    entityData: {
+      key: 'PSN1234567',
+      first_name: 'Ada',
+      last_name: 'Example',
+    },
+  } as const;
+
+  beforeEach(() => {
+    mockPost.mockReset();
+  });
+
+  it('sends entity_type and entityData in the JSON body and returns the canonical key', async () => {
+    mockPost.mockResolvedValue({ data: { entity_key: 'PSN1234567' }, status: 201 });
+
+    await expect(backendService.createEntity(personRequest)).resolves.toBe('PSN1234567');
+    expect(mockPost).toHaveBeenCalledWith('/jwt/editor/entities', personRequest);
+  });
+
+  it('rejects legacy or otherwise invalid success responses', async () => {
+    mockPost.mockResolvedValue({
+      data: { entity_key: 'PSN1234567', newId: 123 },
+      status: 201,
+    });
+
+    await expect(backendService.createEntity(personRequest)).rejects.toThrow();
+  });
+
+  it.each([
+    [422, 'invalid_entity_data'],
+    [500, 'entity_creation_failed'],
+  ] as const)('maps HTTP %s with %s to a typed request error', async (status, code) => {
+    mockPost.mockRejectedValue({ response: { status, data: { error: code } } });
+
+    const request = backendService.createEntity(personRequest);
+    await expect(request).rejects.toMatchObject({ code, status });
+    await expect(request).rejects.toBeInstanceOf(EntityCreateRequestError);
+  });
+
+  it('rejects invalid client data before sending a request', async () => {
+    const invalidRequest = {
+      ...personRequest,
+      entityData: { ...personRequest.entityData, key: '' },
+    };
+
+    await expect(backendService.createEntity(invalidRequest)).rejects.toThrow();
+    expect(mockPost).not.toHaveBeenCalled();
   });
 });
 
