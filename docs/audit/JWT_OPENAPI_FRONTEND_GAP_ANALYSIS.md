@@ -263,8 +263,11 @@ OpenAPI-nahen Boundary-Schemas validiert. Hinzu kommen die einfachen Editor-Antw
 Briefexistenz, nullable XML-Inhalt und Entitaetsschluessel; die Entitaetssuche besitzt nun
 einen nicht-optionalen Listen-Rueckgabetyp. Auch die stabilen Mutationsantworten fuer
 Benutzersprache, `set_content`, Reset, Publish, Undo und Redo werden an der Grenze validiert.
-Verbleibende heterogene Legacy-Responses werden in JWT-301 endpunktweise nachgezogen;
-Entity Create aus A6 ist lokal auf die Backend-Freigabe `fb460aed`/`4ce5f60e` umgestellt.
+Die praefixabhaengigen Entitaetsdetails und die exakte Briefsuche werden ebenfalls an der
+Grenze geprueft. Die Legacy-Misc-Aufrufe besitzen nun eine gemeinsame typisierte
+Fehlerauswertung fuer 401, 422, unerwartete HTTP-Antworten und Netzwerkfehler. Verbleibende
+heterogene Legacy-Responses werden in JWT-301 endpunktweise nachgezogen; Entity Create aus
+A6 ist gemeinsam ausgerollt.
 
 **Priorität:** P3
 

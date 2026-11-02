@@ -84,6 +84,10 @@ angelegten Tracker-Tickets.
   `GET /jwt/misc/entities/{entity_key}` und verarbeitet die exakte Briefsuche mit dem
   vorhandenen Letter-Schema. Der Personenmapper erhaelt nur noch einen validierten
   Transporttyp; Erfolgs-, 404-, 401-/422- und fehlerhafte Antworten sind getestet.
+- Das fuenfte JWT-301-Teilpaket typisiert die Fehlergrenze der Legacy-Misc-Aufrufe in
+  `backendService.ts`. Dokumentierte 401- und 422-Antworten, unerwartete HTTP-Fehler und
+  Netzwerkfehler bleiben unterscheidbar; ungueltige 200-Antworten werden weiterhin als
+  Schemafehler abgelehnt. Die zuvor wiederholten `any`-Catch-Pfade sind zentralisiert.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 

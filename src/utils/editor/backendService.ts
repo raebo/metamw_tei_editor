@@ -4,6 +4,7 @@ import { type RismEntry, SnippetEntity } from '@src/services/mappings/autoAnnoMa
 import { ProtagCreation, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
 import { prepareEditorXmlForBackend } from '@src/utils/xml/backendXml';
 import { z } from 'zod';
+import axios from 'axios';
 import {
   CountryApiSchema,
   CreationApiSchema,
@@ -53,6 +54,16 @@ const responseErrorMessage = (error: unknown): string | undefined => {
   return parsed.success ? parsed.data.error : undefined;
 };
 
+const legacyMiscErrorSchema = z.object({ error: z.string() });
+const unauthorizedMiscErrorSchema = z.object({ message: z.string() });
+
+const httpErrorResponse = (error: unknown): { status: number; data?: unknown } | undefined => {
+  if (typeof error !== 'object' || error === null || !('response' in error)) return undefined;
+
+  const parsed = z.object({ response: z.object({ status: z.number().int(), data: z.unknown() }) }).safeParse(error);
+  return parsed.success ? parsed.data.response : undefined;
+};
+
 export interface LetterStaleness {
   stale: boolean;
   letterUpdatedAt: string | null;
@@ -82,35 +93,68 @@ export class EntityCreateRequestError extends Error {
   }
 }
 
+export class JwtMiscRequestError extends Error {
+  constructor(
+    readonly operation: string,
+    readonly status: number | undefined,
+    readonly backendMessage: string | undefined,
+  ) {
+    const detail = backendMessage ?? (status === undefined ? 'Network request failed' : `HTTP ${status}`);
+    super(`${operation}: ${detail}`);
+    this.name = 'JwtMiscRequestError';
+  }
+}
+
+const throwMiscRequestError = (operation: string, error: unknown): never => {
+  const response = httpErrorResponse(error);
+  if (response) {
+    const errorBody = legacyMiscErrorSchema.safeParse(response.data);
+    const unauthorizedBody = unauthorizedMiscErrorSchema.safeParse(response.data);
+    const backendMessage = errorBody.success ? errorBody.data.error : unauthorizedBody.success ? unauthorizedBody.data.message : undefined;
+
+    throw new JwtMiscRequestError(operation, response.status, backendMessage);
+  }
+
+  if (axios.isAxiosError(error)) {
+    throw new JwtMiscRequestError(operation, undefined, error.message || undefined);
+  }
+  if (error instanceof Error) throw error;
+  throw new JwtMiscRequestError(operation, undefined, undefined);
+};
+
 export const backendService = {
   updateUserLanguage: async (langCode: 'de' | 'en') => {
     const response = await initApi().put(`/jwt/misc/user/language/${langCode}`);
     MessageResponseSchema.parse(response.data);
   },
   searchRismEntries: async (searchValue: string): Promise<RismEntry[]> => {
-    const requestBody = {
-      search_value: searchValue,
-    };
+    try {
+      const requestBody = {
+        search_value: searchValue,
+      };
 
-    const response = await initApi().post('/jwt/misc/rism_entries/search', requestBody);
+      const response = await initApi().post('/jwt/misc/rism_entries/search', requestBody);
 
-    if (!response) {
-      throw new Error('No response from server for RISM entries');
+      if (!response) {
+        throw new Error('No response from server for RISM entries');
+      }
+
+      return RismEntryApiSchema.array()
+        .parse(response.data)
+        .map((item) => {
+          return {
+            id: item.id,
+            title: item.title ?? '',
+            name: item.name ?? '',
+            city: item.city ?? '',
+            country: item.country ?? '',
+            code: item.code ?? '',
+            idNo: '',
+          };
+        });
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.searchRismEntries', error);
     }
-
-    return RismEntryApiSchema.array()
-      .parse(response.data)
-      .map((item) => {
-        return {
-          id: item.id,
-          title: item.title ?? '',
-          name: item.name ?? '',
-          city: item.city ?? '',
-          country: item.country ?? '',
-          code: item.code ?? '',
-          idNo: '',
-        };
-      });
   },
   searchSenderReceiverLetters: async (searchValue: string | null, senderType: 'RECEIVER' | 'WRITER'): Promise<SnippetEntity[]> => {
     const requestBody = {
@@ -137,14 +181,8 @@ export const backendService = {
             extraData: {},
           };
         });
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchAuthorLetters: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.searchSenderReceiverLetters', error);
     }
   },
 
@@ -180,14 +218,8 @@ export const backendService = {
             extraData: {},
           };
         });
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchAuthorLetters: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.fetchAuthorSenderLetters', error);
     }
   },
   fetchLetterAuthorsSenders: async (searchValue: string | null, senderType: 'RECEIVER' | 'WRITER'): Promise<SnippetEntity[]> => {
@@ -217,14 +249,8 @@ export const backendService = {
             extraData: {},
           };
         });
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchLetterAuthors: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.fetchLetterAuthorsSenders', error);
     }
   },
   fetchCategoriesForProtagCreation: async (protagCreationId: number): Promise<ProtagCreationCategory[]> => {
@@ -243,14 +269,8 @@ export const backendService = {
           name_en: protag.name_en ?? '',
           protagCreationCategoryId: protag.protag_creation_category_id,
         }));
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchCategoriesForProtagCreation: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.fetchCategoriesForProtagCreation', error);
     }
   },
   fetchLetterAuthors: async (letterName: string): Promise<SnippetEntity[]> => {
@@ -275,14 +295,8 @@ export const backendService = {
             extraData: {},
           };
         });
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchLetterAuthors: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.fetchLetterAuthors', error);
     }
   },
 
@@ -309,14 +323,8 @@ export const backendService = {
           mwv: protag.mwv,
           opus: protag.op,
         }));
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchProtagCreationEntries: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.fetchProtagCreationEntries', error);
     }
   },
   fetchProtagCreationCategories: async (categoryId: number | null): Promise<ProtagCreationCategory[]> => {
@@ -339,14 +347,8 @@ export const backendService = {
           name_en: protag.name_en ?? '',
           protagCreationCategoryId: protag.protag_creation_category_id,
         }));
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchCreationKinds: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.fetchProtagCreationCategories', error);
     }
   },
   fetchCreationKinds: async (): Promise<string[]> => {
@@ -358,14 +360,8 @@ export const backendService = {
       }
 
       return StringListSchema.parse(response.data);
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchCreationKinds: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.fetchCreationKinds', error);
     }
   },
   fetchAuthorCategories: async (authorKey: string): Promise<string[]> => {
@@ -377,14 +373,8 @@ export const backendService = {
       } else {
         return NullableStringListSchema.parse(response.data).filter((category): category is string => category !== null);
       }
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchAuthorCategories: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.fetchAuthorCategories', error);
     }
   },
   fetchAuthorCreations: async (authorKey: string): Promise<SnippetEntity[]> => {
@@ -408,14 +398,8 @@ export const backendService = {
             extraData: {},
           };
         });
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchAuthorCreations: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.fetchAuthorCreations', error);
     }
   },
   fetchCountryEntries: async (): Promise<{ name: string; id: number }[]> => {
@@ -427,14 +411,8 @@ export const backendService = {
       }
 
       return CountryApiSchema.array().parse(response.data);
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchCountryEntries: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.fetchCountryEntries', error);
     }
   },
   fetchKindEntries: async (): Promise<string[]> => {
@@ -446,14 +424,8 @@ export const backendService = {
       }
 
       return StringListSchema.parse(response.data);
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchKindEntries: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('backendService.fetchKindEntries', error);
     }
   },
   createEntity: async (request: EntityCreateRequest): Promise<string> => {

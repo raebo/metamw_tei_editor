@@ -1,6 +1,7 @@
 import {
   backendService,
   EntityCreateRequestError,
+  JwtMiscRequestError,
   LetterChangedSincePinnedError,
   PinnedLetterNotFoundError,
 } from '@src/utils/editor/backendService';
@@ -265,6 +266,54 @@ describe('backendService reference-data contracts', () => {
     mockGet.mockResolvedValue({ data: [{ id: 'not-a-number', name: 'Deutschland' }] });
 
     await expect(backendService.fetchCountryEntries()).rejects.toThrow();
+  });
+
+  it.each([
+    [401, { message: 'Unauthorized' }, 'Unauthorized'],
+    [422, { error: 'invalid_reference_query' }, 'invalid_reference_query'],
+  ] as const)('maps a documented HTTP %s response to a typed misc request error', async (status, data, backendMessage) => {
+    mockGet.mockRejectedValue({ response: { status, data } });
+
+    const request = backendService.fetchCreationKinds();
+    await expect(request).rejects.toBeInstanceOf(JwtMiscRequestError);
+    await expect(request).rejects.toMatchObject({
+      operation: 'backendService.fetchCreationKinds',
+      status,
+      backendMessage,
+    });
+  });
+
+  it('does not assume a stable body for an unexpected server error', async () => {
+    mockGet.mockRejectedValue({ response: { status: 500, data: { unexpected: true } } });
+
+    const request = backendService.fetchCreationKinds();
+    await expect(request).rejects.toMatchObject({
+      operation: 'backendService.fetchCreationKinds',
+      status: 500,
+      backendMessage: undefined,
+      message: 'backendService.fetchCreationKinds: HTTP 500',
+    });
+  });
+
+  it('keeps network failures distinct from HTTP responses', async () => {
+    mockGet.mockRejectedValue(Object.assign(new Error('Network Error'), { isAxiosError: true }));
+
+    const request = backendService.fetchCreationKinds();
+    await expect(request).rejects.toMatchObject({
+      operation: 'backendService.fetchCreationKinds',
+      status: undefined,
+      backendMessage: 'Network Error',
+    });
+  });
+
+  it('uses the same typed error handling for RISM searches', async () => {
+    mockPost.mockRejectedValue({ response: { status: 401, data: { message: 'Unauthorized' } } });
+
+    await expect(backendService.searchRismEntries('Bach')).rejects.toMatchObject({
+      operation: 'backendService.searchRismEntries',
+      status: 401,
+      backendMessage: 'Unauthorized',
+    });
   });
 
   it('validates and maps nullable misc-letter fields', async () => {
