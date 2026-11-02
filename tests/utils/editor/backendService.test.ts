@@ -251,6 +251,31 @@ describe('backendService reference-data contracts', () => {
     ]);
   });
 
+  it('rejects a protag creation entry with a null name', async () => {
+    mockGet.mockResolvedValue({
+      data: [
+        {
+          id: 707,
+          name: null,
+          protag_creation_category_id: 42,
+          key: 'PRC0000707',
+          mwv: null,
+          op: null,
+        },
+      ],
+    });
+
+    await expect(
+      backendService.fetchProtagCreationEntries({
+        id: 42,
+        name: 'Werkgruppe',
+        name_en: '',
+        protagCreationCategoryId: null,
+      }),
+    ).rejects.toMatchObject({ name: 'ZodError' });
+    expect(mockGet).toHaveBeenCalledWith('/jwt/misc/protag_creations_for_category/42', {});
+  });
+
   it('validates simple country and kind lists', async () => {
     mockGet
       .mockResolvedValueOnce({ data: [{ id: 1, name: 'Deutschland' }] })

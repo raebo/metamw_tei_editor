@@ -5,6 +5,7 @@ import { EditorUtils } from './index';
 import { EditorConstants, EntityType } from '@src/constants/editor';
 import { ProtagonistPersonApiSchema } from '@src/schemas/miscReferenceData';
 import { mapProtagCreationEntityCreateRequest } from '@src/services/mappings/entityCreateMappings';
+import { throwMiscRequestError } from '@src/utils/editor/jwtMiscRequestError';
 
 export const protagCreationDataService = {
   fetchProtagPersonData: async (): Promise<SnippetEntity> => {
@@ -25,14 +26,8 @@ export const protagCreationDataService = {
         entityType: EntityType.PERSON,
         extraData: {},
       };
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`protagCreationDataService.fetchProtagPersonData: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('protagCreationDataService.fetchProtagPersonData', error);
     }
   },
   handleProtagCreationDataEntries: async (

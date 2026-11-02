@@ -88,6 +88,14 @@ angelegten Tracker-Tickets.
   `backendService.ts`. Dokumentierte 401- und 422-Antworten, unerwartete HTTP-Fehler und
   Netzwerkfehler bleiben unterscheidbar; ungueltige 200-Antworten werden weiterhin als
   Schemafehler abgelehnt. Die zuvor wiederholten `any`-Catch-Pfade sind zentralisiert.
+- Das sechste JWT-301-Teilpaket nutzt dieselbe typisierte Fehlergrenze auch fuer die
+  Protagonistenperson und die Autoren eines Werks. Die dokumentierten 401-, 404- und
+  422-Antworten bleiben von Server- und Netzwerkfehlern unterscheidbar; die bereits
+  vorhandene Validierung erfolgreicher Antworten ist durch eigene Servicetests abgesichert.
+  Die manuelle Abnahme hat zusaetzlich den Backend-Vertragsverstoss F-175 mit historischen
+  `ProtagCreation.name: null` aufgedeckt. Das Frontend behaelt die nicht-nullbare
+  Vertragspruefung bei; die Abnahme wird nach Commit und Rollout der Backendkorrektur
+  wiederholt.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 

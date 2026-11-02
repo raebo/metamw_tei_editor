@@ -265,9 +265,10 @@ einen nicht-optionalen Listen-Rueckgabetyp. Auch die stabilen Mutationsantworten
 Benutzersprache, `set_content`, Reset, Publish, Undo und Redo werden an der Grenze validiert.
 Die praefixabhaengigen Entitaetsdetails und die exakte Briefsuche werden ebenfalls an der
 Grenze geprueft. Die Legacy-Misc-Aufrufe besitzen nun eine gemeinsame typisierte
-Fehlerauswertung fuer 401, 422, unerwartete HTTP-Antworten und Netzwerkfehler. Verbleibende
-heterogene Legacy-Responses werden in JWT-301 endpunktweise nachgezogen; Entity Create aus
-A6 ist gemeinsam ausgerollt.
+Fehlerauswertung fuer 401, 422, unerwartete HTTP-Antworten und Netzwerkfehler. Diese Grenze
+wird auch fuer die Protagonistenperson und die Autoren eines Werks verwendet und bildet
+dort zusaetzlich den dokumentierten 404 ab. Verbleibende heterogene Legacy-Responses werden
+in JWT-301 endpunktweise nachgezogen; Entity Create aus A6 ist gemeinsam ausgerollt.
 
 **Priorität:** P3
 

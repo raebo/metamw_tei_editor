@@ -5,6 +5,7 @@ import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { initApi } from '@src/services/apiRequest.service';
 import { AuthorApiSchema } from '@src/schemas/miscReferenceData';
 import { mapCreationAuthorEntityCreateRequest, mapCreationEntityCreateRequest } from '@src/services/mappings/entityCreateMappings';
+import { throwMiscRequestError } from '@src/utils/editor/jwtMiscRequestError';
 
 interface EnrichedCreation {
   creation: { key: string; name: string; kind: string; isNewEntry: boolean };
@@ -48,14 +49,8 @@ export const creationDataService = {
             extraData: {},
           };
         });
-    } catch (error: any) {
-      const response = error.response;
-
-      if (response !== undefined) {
-        throw new Error(`Error response is undefined  ${response.data.error}`);
-      } else {
-        throw new Error(`backendService.fetchCreationAuthors: ${error.message}`);
-      }
+    } catch (error: unknown) {
+      return throwMiscRequestError('creationDataService.fetchCreationAuthors', error);
     }
   },
   handleCreationDataEntries: async (xmlDoc: Document, markupCreationData: MarkupCreationData[], rendType: HiRendType): Promise<string> => {
