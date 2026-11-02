@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { setLetterPinStatus } from '@src/services/editor/apiPinnedLettersRequest.service';
+import { fetchPinnedLetters, setLetterPinStatus } from '@src/services/editor/apiPinnedLettersRequest.service';
 
 const getMock = jest.fn();
 const patchMock = jest.fn();
@@ -26,6 +26,18 @@ describe('pinned letter status requests', () => {
     expect(patchMock).toHaveBeenCalledWith('/jwt/editor/pinned_letters/17420/pinned', {
       pinned,
     });
+  });
+
+  it('preserves an empty pinned-letter collection as an empty array', async () => {
+    getMock.mockResolvedValue({ data: [] });
+
+    await expect(fetchPinnedLetters()).resolves.toEqual([]);
+  });
+
+  it('rejects a non-array pinned-letter response', async () => {
+    getMock.mockResolvedValue({ data: null });
+
+    await expect(fetchPinnedLetters()).rejects.toThrow('Failed to fetch pinned letters');
   });
 
   it('rejects a response that does not confirm the requested target state', async () => {

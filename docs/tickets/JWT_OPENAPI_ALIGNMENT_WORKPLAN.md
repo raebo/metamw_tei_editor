@@ -100,6 +100,10 @@ angelegten Tracker-Tickets.
   zustandsaendernden Automatic-Annotation-Aufrufe. Ein HTTP 200 mit fehlendem oder falsch
   typisiertem `status` wird nicht mehr als erfolgreiche Sperrung, Snippet-Aenderung,
   Inhaltsaktualisierung, Ruecksetzung oder Dateischreibung behandelt.
+- Das achte JWT-301-Teilpaket validiert die Collection-Grenze der Briefsuche, zuletzt
+  verwendeten Briefe und gepinnten Briefe als Arrays. Leere Ergebnisse bleiben `[]`;
+  `null`, Objekte und ungueltige Eintraege werden abgelehnt. Gleichzeitig entfallen
+  unmoegliche `undefined`-Rueckgabetypen der betroffenen Briefabfragen.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 

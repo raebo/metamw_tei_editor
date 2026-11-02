@@ -2,7 +2,7 @@ import { TeiHeaderDialogProps } from '../ManageTeiHeaderDialog';
 import { Autocomplete, Checkbox, FormControlLabel, Stack, TextField } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
 import { searchForLetterNameTitle } from '@src/services/editor/apiLettersRequest.service';
-import { EditorLetter } from '@src/services/mappings/editorMappings';
+import { SearchLetter } from '@src/services/mappings/editorMappings';
 import { enqueueSnackbar } from 'notistack';
 import { debounce } from 'lodash-es';
 import { MiscUtils } from '@src/utils/misc';
@@ -13,18 +13,16 @@ import { useTranslation } from 'react-i18next';
 
 const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
   const { t } = useTranslation();
-  const [prevLetterType, setPrevLetterType] = useState<
-    'unknown' | 'not_identified' | 'select' | null
-  >(props.completionState.prevLetterType);
-  const [autoAvailable, setAutoAvailable] = useState<boolean>(
-    props.completionState.prevLetterType === 'select',
+  const [prevLetterType, setPrevLetterType] = useState<'unknown' | 'not_identified' | 'select' | null>(
+    props.completionState.prevLetterType,
   );
+  const [autoAvailable, setAutoAvailable] = useState<boolean>(props.completionState.prevLetterType === 'select');
 
-  const selectedOption: EditorLetter | null = props.completionState.prevLetter;
-  const [letters, setLetters] = useState<EditorLetter[]>([]);
+  const selectedOption: SearchLetter | null = props.completionState.prevLetter;
+  const [letters, setLetters] = useState<SearchLetter[]>([]);
   const { teiHeader, onChange } = props;
 
-  const setSelectedOption = (value: EditorLetter | null) => {
+  const setSelectedOption = (value: SearchLetter | null) => {
     if (value) {
       onChange({ prevLetter: value });
     }
@@ -33,12 +31,9 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
   useEffect(() => {
     const fetchDefaultLetters = async () => {
       try {
-        const defaultLetters: EditorLetter[] | undefined = await searchForLetterNameTitle(
-          'fmb',
-          null,
-        );
+        const defaultLetters = await searchForLetterNameTitle('fmb', null);
 
-        if (defaultLetters === undefined) {
+        if (defaultLetters.length === 0) {
           enqueueSnackbar('No letters found', { variant: 'error' });
         } else {
           setLetters(defaultLetters);
@@ -55,15 +50,9 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
         return;
       }
 
-      const { name, letterPrefix } = EditorUtils.teiHeaderContent.extractPrevNextLetter(
-        teiHeader,
-        'precursor',
-      );
+      const { name, letterPrefix } = EditorUtils.teiHeaderContent.extractPrevNextLetter(teiHeader, 'precursor');
       if (name && letterPrefix) {
-        const prevLetter: EditorLetter[] | undefined = await searchForLetterNameTitle(
-          letterPrefix,
-          name,
-        );
+        const prevLetter = await searchForLetterNameTitle(letterPrefix, name);
 
         if (prevLetter && prevLetter[0]) {
           onChange({
@@ -93,10 +82,7 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
       void fetchDefaultLetters();
       void fetchPrevLetter();
     } catch (error) {
-      enqueueSnackbar(
-        'Error during initialization prevLetter ' + MiscUtils.misc.getErrorMessage(error),
-        { variant: 'error' },
-      );
+      enqueueSnackbar('Error during initialization prevLetter ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
     }
   }, [teiHeader, onChange]);
 
@@ -116,9 +102,7 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
     try {
       const responseLetters = await searchForLetterNameTitle('fmb', inputValue);
 
-      if (responseLetters) {
-        setLetters(responseLetters);
-      }
+      setLetters(responseLetters);
     } catch (err) {
       enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
         variant: 'error',
@@ -142,10 +126,7 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
             isOptionEqualToValue={(option, value) => option.id === value.id}
             onChange={(_, newValue) => setSelectedOption(newValue)}
             onInputChange={(_, inputValue, reason) => {
-              if (
-                inputValue &&
-                reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
-              ) {
+              if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
                 void debouncedSearchForLetters(inputValue);
               }
             }}
@@ -162,53 +143,32 @@ const TeiHeaderPrevLetter = (props: TeiHeaderDialogProps) => {
                 <li {...props}>
                   <div>
                     <HighlightedText text={option.title} query={inputValue} />
-                    <HighlightedText
-                      text={option.name}
-                      query={inputValue}
-                      style={{ fontSize: '0.8em', color: 'gray' }}
-                    />
+                    <HighlightedText text={option.name} query={inputValue} style={{ fontSize: '0.8em', color: 'gray' }} />
                   </div>
                 </li>
               );
             }}
             renderInput={(params) => (
-              <TextField
-                {...params}
-                label={t('editor:dialog.teiHeaderPrevLetter.label.choosePrevLetter')}
-                variant="outlined"
-              />
+              <TextField {...params} label={t('editor:dialog.teiHeaderPrevLetter.label.choosePrevLetter')} variant="outlined" />
             )}
             fullWidth
           />
 
           <Stack direction="row" spacing={2}>
             <FormControlLabel
-              control={
-                <Checkbox
-                  onChange={() => handlePrevLetterCheckboxChange('unknown')}
-                  checked={prevLetterType === 'unknown'}
-                />
-              }
+              control={<Checkbox onChange={() => handlePrevLetterCheckboxChange('unknown')} checked={prevLetterType === 'unknown'} />}
               label={t('editor:dialog.teiHeaderPrevLetter.checkbox.unknown')}
             />
 
             <FormControlLabel
               control={
-                <Checkbox
-                  onChange={() => handlePrevLetterCheckboxChange('not_identified')}
-                  checked={prevLetterType === 'not_identified'}
-                />
+                <Checkbox onChange={() => handlePrevLetterCheckboxChange('not_identified')} checked={prevLetterType === 'not_identified'} />
               }
               label={t('editor:dialog.teiHeaderPrevLetter.checkbox.notIdentified')}
             />
 
             <FormControlLabel
-              control={
-                <Checkbox
-                  onChange={() => handlePrevLetterCheckboxChange('select')}
-                  checked={autoAvailable}
-                />
-              }
+              control={<Checkbox onChange={() => handlePrevLetterCheckboxChange('select')} checked={autoAvailable} />}
               label={t('editor:dialog.teiHeaderPrevLetter.checkbox.select')}
             />
           </Stack>

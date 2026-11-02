@@ -1,4 +1,5 @@
 import {
+  fetchLastUsedLettersByUser,
   fetchLetterDataByName,
   fetchLetterXmlContent,
   fetchSearchLetters,
@@ -25,6 +26,22 @@ describe('apiLettersRequest.service canonical URLs', () => {
     expect(mockGet).toHaveBeenCalledWith('/jwt/editor/letters/search', {
       params: { searchValue: 'Bach / Leipzig ä' },
     });
+  });
+
+  it.each([
+    ['last-used letters', () => fetchLastUsedLettersByUser()],
+    ['letter search', () => fetchSearchLetters('Bach')],
+    ['typed letter search', () => searchForLetterNameTitle('fmb', null)],
+  ])('rejects a non-array %s response', async (_operation, request) => {
+    mockGet.mockResolvedValue({ data: null });
+
+    await expect(request()).rejects.toThrow();
+  });
+
+  it('preserves an empty letter collection as an empty array', async () => {
+    mockGet.mockResolvedValue({ data: [] });
+
+    await expect(fetchLastUsedLettersByUser()).resolves.toEqual([]);
   });
 
   it.each([

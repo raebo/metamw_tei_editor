@@ -270,7 +270,9 @@ wird auch fuer die Protagonistenperson und die Autoren eines Werks verwendet und
 dort zusaetzlich den dokumentierten 404 ab. Verbleibende heterogene Legacy-Responses werden
 in JWT-301 endpunktweise nachgezogen. Die Statusantworten der Automatic-Annotation-
 Mutationen werden ebenfalls an der Grenze validiert; Entity Create aus A6 ist gemeinsam
-ausgerollt.
+ausgerollt. Brief- und Pinned-Brief-Collections werden vor dem Mapping als Arrays geprueft;
+ihre Service-Signaturen unterscheiden konkrete Ergebnisse von geworfenen Fehlern ohne
+zusaetzlichen `undefined`-Scheinzustand.
 
 **Priorität:** P3
 

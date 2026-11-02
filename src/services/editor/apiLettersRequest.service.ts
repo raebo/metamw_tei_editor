@@ -6,6 +6,7 @@ import {
   mapApiToExactEditorLetter,
   mapApiToEditorLetterData,
   mapApiToLetterData,
+  SearchLetter,
 } from '../mappings/editorMappings';
 import { NewLetterCompletionState } from '@src/components/editor/letter/Dialog/Components/AddNewLetterDialog';
 import { MiscUtils } from '@src/utils/misc';
@@ -59,21 +60,21 @@ const lifecycleRequestError = (error: unknown): LetterLifecycleRequestError => {
   return new LetterLifecycleRequestError(reasonCode ?? 'letter_operation_failed', error.response?.status, reasonCode);
 };
 
-export const fetchLastUsedLettersByUser = async (): Promise<EditorLetter[] | undefined> => {
+export const fetchLastUsedLettersByUser = async (): Promise<EditorLetter[]> => {
   try {
     const response = await initApi.initApi().get(`/jwt/editor/letters/last_used_by_user`);
 
-    return response.data.map(mapApiToEditorLetter);
+    return z.array(z.unknown()).parse(response.data).map(mapApiToEditorLetter);
   } catch (err) {
     throw new Error('Failed to fetch LastUsedLettersByUser: ' + err);
   }
 };
 
-export const fetchSearchLetters = async (searchValue: string): Promise<EditorLetter[] | undefined> => {
+export const fetchSearchLetters = async (searchValue: string): Promise<EditorLetter[]> => {
   try {
     const response = await initApi.initApi().get('/jwt/editor/letters/search', { params: { searchValue } });
 
-    return response.data.map(mapApiToEditorLetter);
+    return z.array(z.unknown()).parse(response.data).map(mapApiToEditorLetter);
   } catch (err) {
     throw new Error('Failed to fetch SearchLetters: ' + err);
   }
@@ -89,7 +90,7 @@ export const fetchLetterXmlContent = async (letterId: number): Promise<string | 
   }
 };
 
-export const fetchLetterDataByName = async (letterName: string): Promise<EditorLetter | undefined> => {
+export const fetchLetterDataByName = async (letterName: string): Promise<EditorLetter> => {
   try {
     const response = await initApi.initApi().get(`/jwt/editor/letters/by_name/${encodeURIComponent(letterName)}`);
 
@@ -109,7 +110,7 @@ export const fetchLetterData = async (letterId: number): Promise<EditorLetterDat
   }
 };
 
-export const searchForLetterNameTitle = async (letterType: string, searchValue: string | null): Promise<EditorLetter[] | undefined> => {
+export const searchForLetterNameTitle = async (letterType: string, searchValue: string | null): Promise<SearchLetter[]> => {
   const searchUrl =
     searchValue === null
       ? `/jwt/editor/letters/search_for_letters/${encodeURIComponent(letterType)}`
@@ -121,7 +122,7 @@ export const searchForLetterNameTitle = async (letterType: string, searchValue: 
 
   const response = await initApi.initApi().get(searchUrl);
 
-  return response.data.map(mapApiToLetterData);
+  return z.array(z.unknown()).parse(response.data).map(mapApiToLetterData);
 };
 
 export const createNewLetter = async (

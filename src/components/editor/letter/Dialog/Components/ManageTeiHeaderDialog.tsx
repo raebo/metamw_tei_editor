@@ -11,7 +11,7 @@ import TeiHeaderTransEdition from './TeiHeaderDialog/70TeiHeaderTransEdition';
 import { MiscUtils } from '@src/utils/misc';
 import TeiHeaderWritingReceivingPlace from './TeiHeaderDialog/50TeiHeaderWritingReceivingPlace';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
-import { EditorLetter } from '@src/services/mappings/editorMappings';
+import { SearchLetter } from '@src/services/mappings/editorMappings';
 import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
 import { EditorConstants, HeaderPerson, LanguageOption } from '@src/constants/editor';
@@ -40,10 +40,10 @@ type CompletionState = {
   sndHeaderContent: string | null;
   prevLetterAutoAvailable: boolean;
   prevLetterType: 'unknown' | 'not_identified' | 'select' | null;
-  prevLetter: EditorLetter | null;
+  prevLetter: SearchLetter | null;
   nextLetterAutoAvailable: boolean;
   nextLetterType: 'unknown' | 'not_identified' | 'select' | null;
-  nextLetter: EditorLetter | null;
+  nextLetter: SearchLetter | null;
   transkriptionValue: string;
   editionValue: string;
   writingPlaceAutoAvailable: boolean;
@@ -124,10 +124,7 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
     const saveIsAvailable = (): boolean => {
       const formStatus: boolean[] = [];
 
-      if (
-        completionState.firstHeaderContent === null ||
-        completionState.sndHeaderContent === null
-      ) {
+      if (completionState.firstHeaderContent === null || completionState.sndHeaderContent === null) {
         formStatus.push(false);
       }
       if (completionState.prevLetterType === 'select' && completionState.prevLetter === null) {
@@ -170,27 +167,13 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
         completionState.nextLetter,
       );
       EditorUtils.teiHeaderContent.setWritingPlace(docData.teiHeader, completionState.writingPlace);
-      EditorUtils.teiHeaderContent.setReceivingPlace(
-        docData.teiHeader,
-        completionState.receivingPlace,
-      );
+      EditorUtils.teiHeaderContent.setReceivingPlace(docData.teiHeader, completionState.receivingPlace);
       EditorUtils.teiHeaderContent.setReceivers(docData.teiHeader, completionState.receivers);
       EditorUtils.teiHeaderContent.setLanguages(docData.teiHeader, completionState.letterLanguage);
-      EditorUtils.teiHeaderContent.setEditorTranskriptorName(
-        docData.teiHeader,
-        'edition',
-        completionState.editorValue,
-      );
-      EditorUtils.teiHeaderContent.setEditorTranskriptorName(
-        docData.teiHeader,
-        'transcription',
-        completionState.transkriptorValue,
-      );
+      EditorUtils.teiHeaderContent.setEditorTranskriptorName(docData.teiHeader, 'edition', completionState.editorValue);
+      EditorUtils.teiHeaderContent.setEditorTranskriptorName(docData.teiHeader, 'transcription', completionState.transkriptorValue);
     } catch (error) {
-      enqueueSnackbar(
-        'Fehler beim Schreiben der TEI-Header-Daten: ' + MiscUtils.misc.getErrorMessage(error),
-        { variant: 'error' },
-      );
+      enqueueSnackbar('Fehler beim Schreiben der TEI-Header-Daten: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       return false;
     }
 
@@ -208,17 +191,9 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
     try {
       writeHeaderData();
 
-      props.onSave(
-        docData.xmlDoc,
-        EditorConstants.changeTypes.misc.HEADER_UPDATED,
-        'Der HEI-Header wurde aktualisiert.',
-        null,
-      );
+      props.onSave(docData.xmlDoc, EditorConstants.changeTypes.misc.HEADER_UPDATED, 'Der HEI-Header wurde aktualisiert.', null);
     } catch (error) {
-      enqueueSnackbar(
-        'Fehler beim Speichern des TEI-Headers: ' + MiscUtils.misc.getErrorMessage(error),
-        { variant: 'error' },
-      );
+      enqueueSnackbar('Fehler beim Speichern des TEI-Headers: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       props.onClose();
     }
   };
@@ -227,18 +202,13 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
   // `onChange` in their own effects without re-running on every unrelated parent render.
   // setCompletionState (a useState setter) is itself guaranteed stable by React, so this
   // doesn't lose any freshness.
-  const childOnChange = useCallback(
-    (updates: Partial<CompletionState>) => setCompletionState((prev) => ({ ...prev, ...updates })),
-    [],
-  );
+  const childOnChange = useCallback((updates: Partial<CompletionState>) => setCompletionState((prev) => ({ ...prev, ...updates })), []);
 
   return (
     <div ref={ref}>
       <DialogContent>
         <div className="autoSnippetFormRow">
-          {displayData !== null && (
-            <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
-          )}
+          {displayData !== null && <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />}
         </div>
         <TeiHeaderFirstHeadline
           teiHeader={docData.teiHeader}
@@ -270,9 +240,7 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
           completionState={completionState}
           onChange={childOnChange}
           dialogType={'writing'}
-          textFieldValue={t(
-            'editor:dialog.teiHeaderWritingReceivingPlace.label.chooseWritingPlace',
-          )}
+          textFieldValue={t('editor:dialog.teiHeaderWritingReceivingPlace.label.chooseWritingPlace')}
         />
         <TeiHeaderReceivers
           teiHeader={docData.teiHeader}
@@ -286,9 +254,7 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
           completionState={completionState}
           onChange={childOnChange}
           dialogType={'receiving'}
-          textFieldValue={t(
-            'editor:dialog.teiHeaderWritingReceivingPlace.label.chooseReceivingPlace',
-          )}
+          textFieldValue={t('editor:dialog.teiHeaderWritingReceivingPlace.label.chooseReceivingPlace')}
         />
         <TeiHeaderTransEdition
           teiHeader={docData.teiHeader}
@@ -306,11 +272,7 @@ const ManageTeiHeaderDialog = (props: DefaultDialogProps) => {
         <Divider orientation="vertical" flexItem />
       </DialogContent>
       <Divider />
-      <DialogActionButton
-        label={'Header Speichern'}
-        onClick={submitSaveHandler}
-        disabled={!formIsValid}
-      />
+      <DialogActionButton label={'Header Speichern'} onClick={submitSaveHandler} disabled={!formIsValid} />
 
       {/*<div>*/}
       {/*	<pre>{JSON.stringify(completionState, null, 2)}</pre>*/}

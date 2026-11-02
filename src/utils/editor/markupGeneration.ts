@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EditorUtils } from './index';
 import {
   ActOfWritingElement,
-  type EditorLetter,
+  type SearchLetter,
   type HiRendType,
   MarkupPersonData,
   MarkupPlaceData,
@@ -354,7 +354,7 @@ export const markupGeneration = {
     xmlDoc: XMLDocument,
     letterType: 'precursor' | 'successor',
     selectedOption: 'unknown' | 'not_identified' | 'select',
-    selectedLetter: EditorLetter | null,
+    selectedLetter: SearchLetter | null,
   ): void => {
     const targetNode = xmlDoc.querySelector(`title[type="${letterType}"]`);
 

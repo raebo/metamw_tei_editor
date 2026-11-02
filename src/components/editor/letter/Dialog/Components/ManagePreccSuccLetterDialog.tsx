@@ -6,12 +6,9 @@ import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
 import HighlightedText from '@src/components/support/HighlightedText';
-import {
-  fetchLetterDataByName,
-  searchForLetterNameTitle,
-} from '@src/services/editor/apiLettersRequest.service';
+import { fetchLetterDataByName, searchForLetterNameTitle } from '@src/services/editor/apiLettersRequest.service';
 import { debounce } from 'lodash-es';
-import { EditorLetter } from '@src/services/mappings/editorMappings';
+import { SearchLetter } from '@src/services/mappings/editorMappings';
 import { Autocomplete, Checkbox, Divider, FormControlLabel, Stack, TextField } from '@mui/material';
 import { EditorConstants } from '@src/constants/editor';
 import { useSelector } from 'react-redux';
@@ -29,26 +26,20 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
   const td = (key: string) => t(`editor:dialog.precursorSuccessorDialog.${key}`);
 
   const letterName = useSelector((state: RootState) => state.editorLetter.letter.name);
-  const [selectedLetter, setSelectedLetter] = useState<EditorLetter | null>(null);
+  const [selectedLetter, setSelectedLetter] = useState<SearchLetter | null>(null);
   const [teiHeader, setTeiHeader] = useState<Element | null>(null);
   // setLetterType is never called - this flag only ever stays at its initial value. Left as-is
   // (not removed) since the effect below still legitimately depends on it staying `null`.
   const [letterType] = useState<'unknown' | 'not_identified' | 'select' | null>(null);
   const isPrecursor = props.letterType === 'precursor';
   const isSuccessor = props.letterType === 'successor';
-  const [selectedOption, setSelectedOption] = useState<
-    'unknown' | 'not_identified' | 'select' | null
-  >(null);
+  const [selectedOption, setSelectedOption] = useState<'unknown' | 'not_identified' | 'select' | null>(null);
   const [autoAvailable, setAutoAvailable] = useState<boolean>(false);
-  const [letters, setLetters] = useState<EditorLetter[]>([]);
+  const [letters, setLetters] = useState<SearchLetter[]>([]);
 
   const buttonLabel = isPrecursor ? td('button.setPredecessor') : td('button.setSuccessor');
-  const autocompleteLabel = isPrecursor
-    ? td('label.chooseLetterPrecursor')
-    : td('label.chooseLetterSuccessor');
-  const notDeterminedLabel = isPrecursor
-    ? td('label.precursorNotDetermined')
-    : td('label.successorNotDetermined');
+  const autocompleteLabel = isPrecursor ? td('label.chooseLetterPrecursor') : td('label.chooseLetterSuccessor');
+  const notDeterminedLabel = isPrecursor ? td('label.precursorNotDetermined') : td('label.successorNotDetermined');
   const unknownLabel = isPrecursor ? td('label.precursorUnknown') : td('label.successorUnknown');
   const successMessage = isPrecursor ? td('successPredecessor') : td('successSuccessor');
 
@@ -70,10 +61,7 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
     }
 
     const loadLetterData = async () => {
-      const { name, letterStatus } = EditorUtils.teiHeaderContent.extractPrevNextLetter(
-        teiHeader,
-        props.letterType,
-      );
+      const { name, letterStatus } = EditorUtils.teiHeaderContent.extractPrevNextLetter(teiHeader, props.letterType);
 
       setSelectedOption(letterStatus);
 
@@ -81,7 +69,7 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
         try {
           const letterData = await fetchLetterDataByName(name);
           if (isMounted) {
-            setSelectedLetter(letterData === undefined ? null : letterData);
+            setSelectedLetter(letterData);
             setAutoAvailable(true);
           }
         } catch (err) {
@@ -126,9 +114,7 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
       try {
         const responseLetters = await searchForLetterNameTitle(resolveLetterPrefix(), inputValue);
 
-        if (responseLetters) {
-          setLetters(responseLetters);
-        }
+        setLetters(responseLetters);
       } catch (err) {
         enqueueSnackbar(err instanceof Error ? err.message : 'An unknown error occurred', {
           variant: 'error',
@@ -150,12 +136,7 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
     }
 
     try {
-      EditorUtils.markupGeneration.setPreccSuccMarkup(
-        props.xmlDoc,
-        props.letterType,
-        selectedOption,
-        selectedLetter,
-      );
+      EditorUtils.markupGeneration.setPreccSuccMarkup(props.xmlDoc, props.letterType, selectedOption, selectedLetter);
 
       const changeType = isPrecursor
         ? EditorConstants.changeTypes.misc.HEADER_ADD_PRECURSOR_LETTER
@@ -176,12 +157,7 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
         <div className="autoSnippetFormRow" style={{ marginTop: '25px', width: '98%' }}>
           <Stack direction="row" spacing={2}>
             <FormControlLabel
-              control={
-                <Checkbox
-                  onChange={() => handlePrecSuccLetterCheckboxChange('unknown')}
-                  checked={selectedOption === 'unknown'}
-                />
-              }
+              control={<Checkbox onChange={() => handlePrecSuccLetterCheckboxChange('unknown')} checked={selectedOption === 'unknown'} />}
               label={unknownLabel}
             />
 
@@ -196,12 +172,7 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
             />
 
             <FormControlLabel
-              control={
-                <Checkbox
-                  onChange={() => handlePrecSuccLetterCheckboxChange('select')}
-                  checked={selectedOption === 'select'}
-                />
-              }
+              control={<Checkbox onChange={() => handlePrecSuccLetterCheckboxChange('select')} checked={selectedOption === 'select'} />}
               label={autocompleteLabel}
             />
           </Stack>
@@ -215,10 +186,7 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
               isOptionEqualToValue={(option, value) => option.id === value.id}
               onChange={(_, newValue) => setSelectedLetter(newValue)}
               onInputChange={(_, inputValue, reason) => {
-                if (
-                  inputValue &&
-                  reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION
-                ) {
+                if (inputValue && reason !== EditorConstants.AUTOCOMPLETE_INPUT_CHANGE_REASONS.SELECT_OPTION) {
                   void debouncedSearchForLetters(inputValue);
                 }
               }}
@@ -235,28 +203,18 @@ const ManagePreccSuccLetterDialog = (props: AddPreccSuccProps) => {
                   <li {...props}>
                     <div>
                       <HighlightedText text={option.title} query={inputValue} />
-                      <HighlightedText
-                        text={option.name}
-                        query={inputValue}
-                        style={{ fontSize: '0.8em', color: 'gray' }}
-                      />
+                      <HighlightedText text={option.name} query={inputValue} style={{ fontSize: '0.8em', color: 'gray' }} />
                     </div>
                   </li>
                 );
               }}
-              renderInput={(params) => (
-                <TextField {...params} label={autocompleteLabel} variant="outlined" />
-              )}
+              renderInput={(params) => <TextField {...params} label={autocompleteLabel} variant="outlined" />}
               fullWidth
             />
           </Stack>
         </div>
         <Divider />
-        <DialogActionButton
-          label={buttonLabel}
-          onClick={handleSubmit}
-          disabled={selectedOption === null}
-        />
+        <DialogActionButton label={buttonLabel} onClick={handleSubmit} disabled={selectedOption === null} />
       </DialogContent>
     </>
   );

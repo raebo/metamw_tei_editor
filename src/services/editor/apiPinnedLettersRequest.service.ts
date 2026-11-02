@@ -2,14 +2,18 @@ import { EditorLetterData, mapApiToEditorLetterData, mapApiToPinnedLetter, Pinne
 import initApi from '../apiRequest.service';
 import axios from 'axios';
 import { parsePinnedLetterStatusResponse } from '@src/schemas/pinnedLetter';
+import { z } from 'zod';
 
 export const fetchPinnedLetters = async (): Promise<PinnedLetter[]> => {
   try {
     const response = await initApi.initApi().get(`/jwt/editor/pinned_letters`);
 
-    return response.data.map((result: unknown) => {
-      return mapApiToPinnedLetter(result);
-    });
+    return z
+      .array(z.unknown())
+      .parse(response.data)
+      .map((result) => {
+        return mapApiToPinnedLetter(result);
+      });
   } catch (err) {
     throw new Error('Failed to fetch pinned letters: ' + err);
   }
