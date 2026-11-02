@@ -72,7 +72,17 @@ describe('AddNewLetterDialog', () => {
   });
 
   it('rejects the name and keeps the save button disabled when the backend reports the letter already exists', async () => {
-    mockFetchMetamwLetterData.mockResolvedValue({ id: '1', name: VALID_LETTER_NAME });
+    mockFetchMetamwLetterData.mockResolvedValue({
+      id: 1,
+      name: VALID_LETTER_NAME,
+      title: null,
+      xml_content: null,
+      capabilities: {
+        rename: { allowed: true, reason_code: null },
+        discard: { allowed: true, reason_code: null },
+      },
+      version: 'a'.repeat(64),
+    });
 
     renderComponent();
 

@@ -60,7 +60,7 @@ const AddWritingActDialog = (props: DefaultDialogProps) => {
   const [selectedPerson, setSelectedPerson] = React.useState<SnippetEntity | null>(null);
   const [people, setPeople] = useState<SnippetEntity[]>([]);
 
-  const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
+  const [displayData, setDisplayData] = React.useState<Record<string, unknown> | null>(null);
 
   const xmlDoc = props.xmlDoc;
 

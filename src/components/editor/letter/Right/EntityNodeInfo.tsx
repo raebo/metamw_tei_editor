@@ -1,39 +1,33 @@
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import React, { useEffect, useState } from 'react';
-import {
-  fetchMetamwEntityData,
-  fetchMetamwLetterData,
-} from '@src/services/auto_anno/apiMetaMw.service';
+import { fetchMetamwEntityData, fetchMetamwLetterData } from '@src/services/auto_anno/apiMetaMw.service';
 import DynamicDataDisplay from '@src/components/support/DynamicDataDisplay';
 import type { ClickedEntityNode } from '@src/redux/slices/editor.letter.slice';
 import { DISPLAY_NAME_MAP } from '@src/utils/entityMappings';
 import { enqueueSnackbar } from 'notistack';
 
-type EntityData = {
-  country?: { name: string } | string;
-  settlement?: { name: string } | string;
-} & Record<string, string | object | undefined>;
+type EntityData = Record<string, unknown>;
 
-const REJECTED_KEYS = ['country', 'xml_content'] as const;
+const REJECTED_KEYS = new Set(['country', 'xml_content']);
 
-export function normalizeEntity(data: EntityData): Record<string, string> {
-  const normalized = Object.fromEntries(
-    Object.entries(data).filter(([key]) => !REJECTED_KEYS.includes(key as any)),
-  );
+export function normalizeEntity(data: EntityData): Record<string, unknown> {
+  const normalized = Object.fromEntries(Object.entries(data).filter(([key]) => !REJECTED_KEYS.has(key)));
 
-  if (normalized.country && typeof normalized.country === 'object') {
-    normalized.country = (normalized.country as { name: string }).name;
-  }
-  if (normalized.settlement && typeof normalized.settlement === 'object') {
-    normalized.settlement = (normalized.settlement as { name: string }).name;
+  if (
+    normalized.settlement &&
+    typeof normalized.settlement === 'object' &&
+    'name' in normalized.settlement &&
+    typeof normalized.settlement.name === 'string'
+  ) {
+    normalized.settlement = normalized.settlement.name;
   }
 
-  return normalized as Record<string, string>;
+  return normalized;
 }
 
 const useEntityData = (clickedEntityNode: ClickedEntityNode) => {
-  const [entityData, setEntityData] = useState<Record<string, string> | null>(null);
+  const [entityData, setEntityData] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     const loadEntity = async () => {
@@ -42,14 +36,13 @@ const useEntityData = (clickedEntityNode: ClickedEntityNode) => {
       }
 
       try {
-        const isLetter =
-          clickedEntityNode.nodeType === 'fmbLetter' || clickedEntityNode.nodeType === 'gbLetter';
+        const isLetter = clickedEntityNode.nodeType === 'fmbLetter' || clickedEntityNode.nodeType === 'gbLetter';
 
         const result = isLetter
           ? await fetchMetamwLetterData(clickedEntityNode.nodeTypeValue)
           : await fetchMetamwEntityData(clickedEntityNode.nodeTypeValue);
 
-        setEntityData(normalizeEntity(result as EntityData));
+        setEntityData(result === null ? null : normalizeEntity(result));
       } catch (error) {
         enqueueSnackbar(`Could not load entity data: ${(error as Error).message}`, {
           variant: 'error',
@@ -64,9 +57,7 @@ const useEntityData = (clickedEntityNode: ClickedEntityNode) => {
 };
 
 const EntityNodeInfo = () => {
-  const clickedEntityNode = useSelector(
-    (state: RootState) => state.editorLetter.letter.clickedEntityNode,
-  );
+  const clickedEntityNode = useSelector((state: RootState) => state.editorLetter.letter.clickedEntityNode);
 
   const entityData = useEntityData(clickedEntityNode);
 

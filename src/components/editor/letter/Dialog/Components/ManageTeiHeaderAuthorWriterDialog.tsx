@@ -4,18 +4,7 @@ import { EditorConstants, EntityType, HeaderPerson } from '@src/constants/editor
 import { EditorUtils } from '@src/utils/editor';
 import { enqueueSnackbar } from 'notistack';
 import { MiscUtils } from '@src/utils/misc';
-import {
-  Box,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Typography,
-} from '@mui/material';
+import { Box, Checkbox, Divider, FormControlLabel, FormGroup, IconButton, List, ListItem, ListItemText, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
 import { fetchMetamwEntityData } from '@src/services/auto_anno/apiMetaMw.service';
@@ -31,7 +20,7 @@ import FormAutocomplete from '@src/components/editor/letter/Util/FormAutocomplet
 const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
   const [authors, setAuthors] = React.useState<HeaderPerson[]>([]);
   const [writers, setWriters] = React.useState<HeaderPerson[]>([]);
-  const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
+  const [displayData, setDisplayData] = React.useState<Record<string, unknown> | null>(null);
   const [roleAuthor, setRoleAuthor] = React.useState<boolean>(true);
   const [roleWriter, setRoleWriter] = React.useState<boolean>(true);
   const [people, setPeople] = useState<SnippetEntity[]>([]);
@@ -72,9 +61,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 
   useEffect(() => {
     const setAuthorWriterData = () => {
-      const { authors, writers } = EditorUtils.teiHeaderContent.extractAuthorWriters(
-        docData.teiHeader,
-      );
+      const { authors, writers } = EditorUtils.teiHeaderContent.extractAuthorWriters(docData.teiHeader);
 
       setAuthors(authors);
       setWriters(writers);
@@ -82,10 +69,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
 
     const fetchDefaultPeople = async () => {
       try {
-        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(
-          null,
-          EntityType.PERSON,
-        );
+        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.PERSON);
 
         if (defaultPeople === undefined) {
           enqueueSnackbar('No people found', { variant: 'error' });
@@ -102,10 +86,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
         setAuthorWriterData();
         void fetchDefaultPeople();
       } catch (error) {
-        enqueueSnackbar(
-          'Fehler beim Lesen der TEI-Header-Daten: ' + MiscUtils.misc.getErrorMessage(error),
-          { variant: 'error' },
-        );
+        enqueueSnackbar('Fehler beim Lesen der TEI-Header-Daten: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       }
     }
   }, [docData.teiHeader]);
@@ -142,10 +123,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
         enqueueSnackbar('Author already added', { variant: 'warning' });
         return;
       }
-      setAuthors((prev) => [
-        ...prev,
-        { key: selectedPerson.entityKey, name: selectedPerson.entityName },
-      ]);
+      setAuthors((prev) => [...prev, { key: selectedPerson.entityKey, name: selectedPerson.entityName }]);
     }
 
     if (roleWriter) {
@@ -153,10 +131,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
         enqueueSnackbar('Writer already added', { variant: 'warning' });
         return;
       }
-      setWriters((prev) => [
-        ...prev,
-        { key: selectedPerson.entityKey, name: selectedPerson.entityName },
-      ]);
+      setWriters((prev) => [...prev, { key: selectedPerson.entityKey, name: selectedPerson.entityName }]);
     }
     setSelectedPerson(null);
   };
@@ -168,16 +143,8 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
     }
 
     try {
-      EditorUtils.teiHeaderContent.setAuthorWritersFirstPosition(
-        docData.teiHeader,
-        authors,
-        writers,
-      );
-      EditorUtils.teiHeaderContent.setAuthorsWritersSndPosition(
-        docData.teiHeader,
-        authors,
-        writers,
-      );
+      EditorUtils.teiHeaderContent.setAuthorWritersFirstPosition(docData.teiHeader, authors, writers);
+      EditorUtils.teiHeaderContent.setAuthorsWritersSndPosition(docData.teiHeader, authors, writers);
 
       props.onSave(
         docData.xmlDoc,
@@ -186,10 +153,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
         null,
       );
     } catch (error) {
-      enqueueSnackbar(
-        'Fehler beim Schreiben der TEI-Header-Daten: ' + MiscUtils.misc.getErrorMessage(error),
-        { variant: 'error' },
-      );
+      enqueueSnackbar('Fehler beim Schreiben der TEI-Header-Daten: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       props.onClose();
       return false;
     }
@@ -200,11 +164,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
     <>
       <DialogContent>
         <div className="autoSnippetFormRow">
-          {displayData !== null ? (
-            <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
-          ) : (
-            <></>
-          )}
+          {displayData !== null ? <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} /> : <></>}
         </div>
         <div className="autoSnippetFormRow" style={{ marginTop: '25px', width: '98%' }}>
           <Typography variant="h6">Autoren</Typography>
@@ -265,21 +225,11 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
             />
             <FormGroup>
               <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={roleAuthor}
-                    onChange={(e) => setRoleAuthor(e.target.checked)}
-                  />
-                }
+                control={<Checkbox checked={roleAuthor} onChange={(e) => setRoleAuthor(e.target.checked)} />}
                 label="Autor"
               />
               <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={roleWriter}
-                    onChange={(e) => setRoleWriter(e.target.checked)}
-                  />
-                }
+                control={<Checkbox checked={roleWriter} onChange={(e) => setRoleWriter(e.target.checked)} />}
                 label="Schreiber"
               />
             </FormGroup>
@@ -305,11 +255,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
         </div>
       </DialogContent>
       <Divider />
-      <DialogActionButton
-        label={'Autoren/Schreiber im Header Speichern'}
-        onClick={handleSave}
-        disabled={false}
-      />
+      <DialogActionButton label={'Autoren/Schreiber im Header Speichern'} onClick={handleSave} disabled={false} />
     </>
   );
 };

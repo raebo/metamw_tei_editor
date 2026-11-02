@@ -7,6 +7,7 @@ import {
   letterVersionSchema,
   parseLetterLifecycle,
 } from '@src/schemas/editorLetterLifecycle';
+import { RemotePersonTransport } from '@src/schemas/metaMwEntityDetails';
 
 const apiLetterLifecycleShape = {
   capabilities: letterCapabilitiesSchema,
@@ -28,6 +29,10 @@ const apiLetterSchema = z.object({
   xml_content: z.string().nullable(),
   ...apiLetterLifecycleShape,
 });
+
+export type ApiLetter = z.infer<typeof apiLetterSchema>;
+
+export const parseApiLetter = (value: unknown): ApiLetter => apiLetterSchema.parse(value);
 
 const apiLetterSearchEntrySchema = z.object({
   id: z.number().int().positive(),
@@ -214,7 +219,7 @@ export const mapApiToEditorLetter = (value: unknown): EditorLetter => {
 };
 
 export const mapApiToExactEditorLetter = (value: unknown): EditorLetter => {
-  const apiLetter = apiLetterSchema.parse(value);
+  const apiLetter = parseApiLetter(value);
   const lifecycle = parseLetterLifecycle(apiLetter);
   return {
     id: apiLetter.id,
@@ -283,7 +288,7 @@ export interface PersonEntity {
   // add more as needed
 }
 
-export const mapRemotePersonToEntity = (raw: any): PersonEntity => {
+export const mapRemotePersonToEntity = (raw: RemotePersonTransport): PersonEntity => {
   return {
     fullName: raw.full_name?.split(' // ')[0] || 'Unbekannt',
     birthDate: raw.birth_date ?? null,

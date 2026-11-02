@@ -24,7 +24,7 @@ interface SnippetReferencesInfoDialogProps {
 const filterAttributeList = ['country'];
 
 const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
-  const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
+  const [displayData, setDisplayData] = React.useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -38,9 +38,7 @@ const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
             });
             return;
           }
-          const entries = Object.fromEntries(
-            Object.entries(result).filter(([key]) => !filterAttributeList.includes(key)),
-          );
+          const entries = Object.fromEntries(Object.entries(result).filter(([key]) => !filterAttributeList.includes(key)));
 
           setDisplayData(entries);
         } catch {
@@ -62,9 +60,7 @@ const SnippetEntityInfoDialog = (props: SnippetReferencesInfoDialogProps) => {
         fullWidth={true}
         maxWidth={'lg'}
       >
-        <DialogTitle id="alert-dialog-title">
-          {`Informationen für - ${props.referenceKey}`}
-        </DialogTitle>
+        <DialogTitle id="alert-dialog-title">{`Informationen für - ${props.referenceKey}`}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description"></DialogContentText>
           <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />

@@ -80,6 +80,10 @@ angelegten Tracker-Tickets.
   weiterverarbeitet; bei `success: false` wird die dokumentierte Meldung als Fehler
   propagiert. Die spaeter abgeschlossenen Arbeiten zu JWT-203/204 sind eigenstaendige,
   inzwischen ausgerollte Vertragspakete.
+- Das vierte JWT-301-Teilpaket validiert die praefixabhaengigen Detailantworten von
+  `GET /jwt/misc/entities/{entity_key}` und verarbeitet die exakte Briefsuche mit dem
+  vorhandenen Letter-Schema. Der Personenmapper erhaelt nur noch einen validierten
+  Transporttyp; Erfolgs-, 404-, 401-/422- und fehlerhafte Antworten sind getestet.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 
@@ -344,8 +348,8 @@ JWT-OpenAPI-Routencheck erfolgreich sein.
 ## Empfohlener naechster Schritt
 
 Als naechstes wird **JWT-301 – API-Grenzen vollstaendig typisieren** schrittweise umgesetzt.
-Die abgestimmten Pakete JWT-201 bis JWT-204 folgen erst, wenn die jeweilige Backend- und
-Vertragsentscheidung vorliegt.
+JWT-202 bis JWT-204 sind bereits gemeinsam ausgerollt. JWT-201 bleibt bis zur fachlichen
+Freigabe der Favoritenfunktion bewusst zurueckgestellt.
 
 ## Definition of Done fuer das Gesamtvorhaben
 
@@ -373,18 +377,18 @@ Varianten für diese beiden Arbeitspakete:
 - Backend-Arbeitsauftrag und geplanter Vertrag:
   [F-167](../../../metamw_edge_version/audit/tickets/open/F-167.md).
 
-Beide Aufträge sind geplant, nicht implementiert oder deployed. Der kanonische
-OpenAPI-Vertrag wird erst zusammen mit der Backend-Implementierung angepasst.
-Andere JWT-Arbeitspakete sind durch diese Entscheidung nicht freigegeben.
+JWT-202 ist inzwischen mit Frontend `15a2cbb` und Backend `065adff2` implementiert,
+ausgerollt und manuell abgenommen. JWT-201 bleibt zurueckgestellt. Andere
+JWT-Arbeitspakete werden nach ihrem jeweils dokumentierten Stand bearbeitet.
 
 
 ## Backend-Vertragsstand für JWT-203 und JWT-204A/B (30.10.2026)
 
-Arbeitsbaum-Implementierung in Backend-F-168/F-169/F-170, kanonische OpenAPI
-**0.4.0**, noch kein Commit oder Deployment. Verbindliche Übergabedetails im
+Backend-F-168/F-169/F-170 und kanonische OpenAPI **0.4.0** sind committed und
+ausgerollt. Verbindliche Übergabedetails im
 Abschnitt Backend-Übergabe JWT-203/JWT-204A/JWT-204B der benachbarten
 JWT_OPENAPI_BACKEND_DECISIONS.md. HTTP 201/entity_key:String bei Anlage;
 xml_id nullable, Figure-MIME-Enum JPEG/PNG und optionale nullable Metadaten mit
-inline-Defaults. Keine neue Figure-UI. Abschließende Vollsuite/Freigabe noch
-offen, gemeinsamer Rollout erforderlich. JWT-301 kann davon unabhängig in
-separaten Frontend-Patches fortgesetzt werden; Favoriten bleiben zurückgestellt.
+inline-Defaults. Keine neue Figure-UI. Die kompatible Frontend-Umstellung ist in
+`1445d11` ausgerollt; Backend-Vollsuite und Routenabgleich waren erfolgreich. JWT-301
+wird in separaten Frontend-Patches fortgesetzt; Favoriten bleiben zurückgestellt.

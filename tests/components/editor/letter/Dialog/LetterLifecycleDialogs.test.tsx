@@ -157,10 +157,15 @@ describe('letter lifecycle dialogs', () => {
   it('reports an already assigned name without changing the letter', async () => {
     const store = buildStore();
     mockFetchMetamwLetterData.mockResolvedValue({
-      id: '42',
+      id: 42,
       name: newName,
       title: '',
       xml_content: '<TEI/>',
+      capabilities: {
+        rename: { allowed: true, reason_code: null },
+        discard: { allowed: true, reason_code: null },
+      },
+      version,
     });
 
     render(

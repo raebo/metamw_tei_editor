@@ -1,14 +1,12 @@
 import React from 'react';
 import { Typography, Paper, Box, Alert } from '@mui/material';
 
-type DataValue = string | number | boolean | null | DataValue[] | { [key: string]: DataValue };
-
 interface DynamicDataDisplayProps {
-  data: { [key: string]: DataValue } | null;
+  data: Record<string, unknown> | null;
   displayNameMap: { [key: string]: string };
 }
 
-const RenderValue = ({ value }: { value: any }) => {
+const RenderValue = ({ value }: { value: unknown }) => {
   // Null / undefined
   if (value === null || value === undefined) return <>N/A</>;
 

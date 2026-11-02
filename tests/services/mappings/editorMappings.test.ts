@@ -3,7 +3,9 @@ import {
   mapApiToEditorLetterData,
   mapApiToExactEditorLetter,
   mapApiToPinnedLetter,
+  mapRemotePersonToEntity,
 } from '@src/services/mappings/editorMappings';
+import { parseRemotePersonTransport } from '@src/schemas/metaMwEntityDetails';
 
 const lifecycle = {
   capabilities: {
@@ -104,5 +106,45 @@ describe('editor letter mappings', () => {
         ...lifecycle,
       }),
     ).toThrow();
+  });
+});
+
+describe('remote person mapping', () => {
+  const person = {
+    id: 1,
+    key: 'PSN0000001',
+    full_name: 'Mendelssohn Bartholdy, Felix // Mendelssohn, Felix',
+    display_name: 'Felix Mendelssohn Bartholdy',
+    birth_date: null,
+    death_date: null,
+    birth_alt: null,
+    death_alt: null,
+    birth: null,
+    baptism: null,
+    baptism_date: null,
+    place_of_birth: null,
+    place_of_death: null,
+    background: null,
+    married_to: null,
+    gender: null,
+    death: null,
+    relation: null,
+    volumes: null,
+    msb_supplement: null,
+  };
+
+  it('maps a validated transport object and preserves nullable values', () => {
+    expect(mapRemotePersonToEntity(parseRemotePersonTransport(person))).toEqual({
+      fullName: 'Mendelssohn Bartholdy, Felix',
+      birthDate: null,
+      deathDate: null,
+      placeOfBirth: null,
+      placeOfDeath: null,
+      wikiLink: undefined,
+    });
+  });
+
+  it('rejects malformed person transport values before mapping', () => {
+    expect(() => parseRemotePersonTransport({ ...person, birth_date: 1809 })).toThrow();
   });
 });

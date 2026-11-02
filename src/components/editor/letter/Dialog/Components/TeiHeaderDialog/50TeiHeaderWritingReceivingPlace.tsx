@@ -21,8 +21,8 @@ const TeiHeaderWritingReceivingPlace = (props: TeiHeaderWritingReceivingPlacePro
     if (settlement !== null && settlement.entityKey !== null) {
       fetchMetamwEntityData(settlement.entityKey).then((data) => {
         if (data !== null) {
-          settlement.entityName = data.name || '';
-          settlement.entityPlaceCountryName = data.country_name || '';
+          settlement.entityName = typeof data.name === 'string' ? data.name : '';
+          settlement.entityPlaceCountryName = typeof data.country_name === 'string' ? data.country_name : '';
         }
       });
     }

@@ -19,7 +19,7 @@ import FormAutocomplete from '@src/components/editor/letter/Util/FormAutocomplet
 
 const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
   const [receivers, setReceivers] = React.useState<HeaderPerson[]>([]);
-  const [displayData, setDisplayData] = React.useState<{ [key: string]: string } | null>(null);
+  const [displayData, setDisplayData] = React.useState<Record<string, unknown> | null>(null);
   const [people, setPeople] = useState<SnippetEntity[]>([]);
   const [selectedPerson, setSelectedPerson] = React.useState<SnippetEntity | null>(null);
 
@@ -51,10 +51,7 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
   useEffect(() => {
     const fetchDefaultPeople = async () => {
       try {
-        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(
-          null,
-          EntityType.PERSON,
-        );
+        const defaultPeople: SnippetEntity[] | undefined = await searchEditortEntities(null, EntityType.PERSON);
 
         if (defaultPeople === undefined) {
           enqueueSnackbar('No people found', { variant: 'error' });
@@ -74,10 +71,7 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
 
         void fetchDefaultPeople();
       } catch (error) {
-        enqueueSnackbar(
-          'Fehler beim Lesen der TEI-Header-Daten: ' + MiscUtils.misc.getErrorMessage(error),
-          { variant: 'error' },
-        );
+        enqueueSnackbar('Fehler beim Lesen der TEI-Header-Daten: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       }
     }
   }, [docData.teiHeader]);
@@ -90,10 +84,9 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
       const result = await fetchMetamwEntityData(reference.key);
       setDisplayData(result);
     } catch (error) {
-      enqueueSnackbar(
-        `Error fetching data for entity with key: ${reference.key} ${MiscUtils.misc.getErrorMessage(error)}`,
-        { variant: 'error' },
-      );
+      enqueueSnackbar(`Error fetching data for entity with key: ${reference.key} ${MiscUtils.misc.getErrorMessage(error)}`, {
+        variant: 'error',
+      });
     }
   };
 
@@ -108,10 +101,7 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
       enqueueSnackbar('Receiver already added', { variant: 'warning' });
       return;
     }
-    setReceivers((prev) => [
-      ...prev,
-      { key: selectedPerson.entityKey, name: selectedPerson.entityName },
-    ]);
+    setReceivers((prev) => [...prev, { key: selectedPerson.entityKey, name: selectedPerson.entityName }]);
     setSelectedPerson(null);
   };
 
@@ -124,17 +114,9 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
     try {
       EditorUtils.teiHeaderContent.setReceivers(docData.teiHeader, receivers);
 
-      props.onSave(
-        docData.xmlDoc,
-        EditorConstants.changeTypes.misc.HEADER_UPDATED,
-        'Die Empfänger des Briefes wurden aktualisiert.',
-        null,
-      );
+      props.onSave(docData.xmlDoc, EditorConstants.changeTypes.misc.HEADER_UPDATED, 'Die Empfänger des Briefes wurden aktualisiert.', null);
     } catch (error) {
-      enqueueSnackbar(
-        'Fehler beim Schreiben der TEI-Header-Daten: ' + MiscUtils.misc.getErrorMessage(error),
-        { variant: 'error' },
-      );
+      enqueueSnackbar('Fehler beim Schreiben der TEI-Header-Daten: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       props.onClose();
       return false;
     }
@@ -145,11 +127,7 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
     <>
       <DialogContent>
         <div className="autoSnippetFormRow">
-          {displayData !== null ? (
-            <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} />
-          ) : (
-            <></>
-          )}
+          {displayData !== null ? <DynamicDataDisplay data={displayData} displayNameMap={DISPLAY_NAME_MAP} /> : <></>}
         </div>
         <div className="autoSnippetFormRow" style={{ marginTop: '25px', width: '98%' }}>
           <Typography variant="h6">Empfänger</Typography>
@@ -207,11 +185,7 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
       </DialogContent>
 
       <Divider />
-      <DialogActionButton
-        label={'Empfänger im Header Speichern'}
-        onClick={handleSave}
-        disabled={false}
-      />
+      <DialogActionButton label={'Empfänger im Header Speichern'} onClick={handleSave} disabled={false} />
     </>
   );
 };
