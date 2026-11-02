@@ -18,11 +18,51 @@ import {
   AutoAnnoJobLetterApi,
   AutoAnnoSnippetApi,
   autoAnnoLockingRequest,
+  AutoAnnoErrorSchema,
+  AutoAnnoStatusErrorSchema,
   AutoAnnoStatusSchema,
+  AutoAnnoUnauthorizedSchema,
 } from '@src/schemas/autoAnno';
 import axios from 'axios';
 import { assertWellFormedXml } from '@src/utils/xml/backendXml';
 import { entitySearchCategory, parseEntitySearchResponse } from '@src/schemas/entitySearch';
+
+export class AutoAnnoRequestError extends Error {
+  constructor(
+    readonly operation: string,
+    readonly status: number | undefined,
+    readonly backendMessage: string | undefined,
+  ) {
+    const detail = backendMessage ?? (status === undefined ? 'Network request failed' : `HTTP ${status}`);
+    super(`${operation}: ${detail}`);
+    this.name = 'AutoAnnoRequestError';
+  }
+}
+
+const throwAutoAnnoRequestError = (operation: string, error: unknown): never => {
+  if (axios.isAxiosError(error)) {
+    const response = error.response;
+    if (response) {
+      const standardError = AutoAnnoErrorSchema.safeParse(response.data);
+      const statusError = AutoAnnoStatusErrorSchema.safeParse(response.data);
+      const unauthorizedError = AutoAnnoUnauthorizedSchema.safeParse(response.data);
+      const backendMessage = standardError.success
+        ? standardError.data.error
+        : statusError.success
+          ? (statusError.data.message ?? statusError.data.status)
+          : unauthorizedError.success
+            ? unauthorizedError.data.message
+            : undefined;
+
+      throw new AutoAnnoRequestError(operation, response.status, backendMessage);
+    }
+
+    throw new AutoAnnoRequestError(operation, undefined, error.message || undefined);
+  }
+
+  if (error instanceof Error) throw error;
+  throw new AutoAnnoRequestError(operation, undefined, undefined);
+};
 
 const mapAutoAnnoJob = (job: AutoAnnoJobApi): AutoAnnoJob => ({
   id: job.id,
@@ -87,8 +127,8 @@ export const patchAutoAnnoLetterLockingUser = async (annoLetterId: number, userI
     AutoAnnoStatusSchema.parse(response.data);
 
     return true;
-  } catch (err) {
-    throw new Error('patchAutoAnnoLetterLockingUser failed with error: ' + err);
+  } catch (error: unknown) {
+    return throwAutoAnnoRequestError('patchAutoAnnoLetterLockingUser', error);
   }
 };
 
@@ -102,7 +142,7 @@ export const searchAutoAnnoSnippetEntities = async (
   annoLetterId: number,
   searchString: string,
   entityType: string,
-): Promise<SnippetEntity[] | undefined> => {
+): Promise<SnippetEntity[]> => {
   try {
     const entityKey = entitySearchCategory(entityType);
 
@@ -113,8 +153,8 @@ export const searchAutoAnnoSnippetEntities = async (
       );
 
     return parseEntitySearchResponse(response.data, entityType);
-  } catch (err) {
-    throw new Error('Error fetching data for search entity: ' + err);
+  } catch (error: unknown) {
+    return throwAutoAnnoRequestError('searchAutoAnnoSnippetEntities', error);
   }
 };
 
@@ -160,8 +200,8 @@ export const setAutoAnnoSnippetStatus = async (annoLetterId: number, snippetId: 
     AutoAnnoStatusSchema.parse(response.data);
 
     return true;
-  } catch (err) {
-    throw new Error('Error updating snippet status: ' + err);
+  } catch (error: unknown) {
+    return throwAutoAnnoRequestError('setAutoAnnoSnippetStatus', error);
   }
 };
 
@@ -170,8 +210,8 @@ export const updateAnnoLetterContent = async (id: number, xmlContent: string): P
     assertWellFormedXml(xmlContent);
     const response = await initApi.initApi().patch(`/jwt/automatic_annotation_letters/${id}/set_xml_content`, { xmlContent });
     AutoAnnoStatusSchema.parse(response.data);
-  } catch (err) {
-    throw new Error('Error updating anno letter content: ' + (err instanceof Error ? err.message : String(err)));
+  } catch (error: unknown) {
+    return throwAutoAnnoRequestError('updateAnnoLetterContent', error);
   }
   return true;
 };
@@ -188,8 +228,8 @@ export const setAnnoSnippetEntity = async (
       entityKey,
     });
     AutoAnnoStatusSchema.parse(response.data);
-  } catch (err) {
-    throw new Error('Error updating snippet entity: ' + (err instanceof Error ? err.message : String(err)));
+  } catch (error: unknown) {
+    return throwAutoAnnoRequestError('setAnnoSnippetEntity', error);
   }
 
   return true;
@@ -201,12 +241,8 @@ export const writeAnnoLetter = async (id: number): Promise<boolean> => {
     AutoAnnoStatusSchema.parse(response.data);
 
     return true;
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      throw new Error(`Error writing anno letter: ${err.response?.data?.status || err.message}`);
-    } else {
-      throw new Error('An unknown error occurred');
-    }
+  } catch (error: unknown) {
+    return throwAutoAnnoRequestError('writeAnnoLetter', error);
   }
 };
 
@@ -216,13 +252,7 @@ export const resetAnnoLetter = async (id: number): Promise<boolean> => {
     AutoAnnoStatusSchema.parse(response.data);
 
     return true;
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      // Handle Axios-specific error
-      throw new Error(`Error resetting anno letter: ${err.response?.data?.status || err.message}`);
-    } else {
-      // Handle unknown errors
-      throw new Error('An unknown error occurred');
-    }
+  } catch (error: unknown) {
+    return throwAutoAnnoRequestError('resetAnnoLetter', error);
   }
 };

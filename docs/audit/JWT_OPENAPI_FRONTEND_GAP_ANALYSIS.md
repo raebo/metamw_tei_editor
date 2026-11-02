@@ -272,7 +272,9 @@ in JWT-301 endpunktweise nachgezogen. Die Statusantworten der Automatic-Annotati
 Mutationen werden ebenfalls an der Grenze validiert; Entity Create aus A6 ist gemeinsam
 ausgerollt. Brief- und Pinned-Brief-Collections werden vor dem Mapping als Arrays geprueft;
 ihre Service-Signaturen unterscheiden konkrete Ergebnisse von geworfenen Fehlern ohne
-zusaetzlichen `undefined`-Scheinzustand.
+zusaetzlichen `undefined`-Scheinzustand. Auch die Automatic-Annotation-Aufrufe verwenden
+nun eine gemeinsame typisierte Fehlergrenze fuer dokumentierte HTTP-Fehler, unerwartete
+Serverantworten und Netzwerkfehler.
 
 **Priorität:** P3
 

@@ -24,6 +24,19 @@ export const AutoAnnoStatusSchema = z.object({
   status: z.string(),
 });
 
+export const AutoAnnoErrorSchema = z.object({
+  error: z.string(),
+});
+
+export const AutoAnnoStatusErrorSchema = z.object({
+  status: z.string(),
+  message: z.string().optional(),
+});
+
+export const AutoAnnoUnauthorizedSchema = z.object({
+  message: z.string(),
+});
+
 export const AutoAnnoJobLetterListSchema = z.object({
   id: z.number(),
   letter_auto_anno_job_id: z.number(),

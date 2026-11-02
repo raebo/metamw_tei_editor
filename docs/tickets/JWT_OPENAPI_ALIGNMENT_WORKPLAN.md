@@ -104,6 +104,11 @@ angelegten Tracker-Tickets.
   verwendeten Briefe und gepinnten Briefe als Arrays. Leere Ergebnisse bleiben `[]`;
   `null`, Objekte und ungueltige Eintraege werden abgelehnt. Gleichzeitig entfallen
   unmoegliche `undefined`-Rueckgabetypen der betroffenen Briefabfragen.
+- Das neunte JWT-301-Teilpaket vereinheitlicht die Fehlergrenze der Automatic-Annotation-
+  Aufrufe. Dokumentierte 401-, 404- und 422-Antworten, unerwartete Serverantworten sowie
+  Netzwerkfehler bleiben als typisierte Fehler unterscheidbar; erfolgreiche Antworten mit
+  ungueltigem Schema bleiben Validierungsfehler. Die Entitaetssuche liefert typseitig stets
+  eine Trefferliste oder wirft einen Fehler, jedoch kein zusaetzliches `undefined`.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 

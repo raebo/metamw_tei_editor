@@ -1,4 +1,6 @@
+import axios from 'axios';
 import {
+  AutoAnnoRequestError,
   fetchAutoAnnoJobs,
   fetchAutoAnnoLetter,
   fetchAutoAnnoJobLetters,
@@ -160,7 +162,9 @@ describe('apiAutoAnno.service', () => {
       },
     });
 
-    await expect(searchAutoAnnoSnippetEntities(7, 'test', 'Person')).rejects.toThrow('Error fetching data for search entity');
+    await expect(searchAutoAnnoSnippetEntities(7, 'test', 'Person')).rejects.toMatchObject({
+      name: 'ZodError',
+    });
   });
 
   it('kodiert den entityKey und mappt snake_case auf camelCase', async () => {
@@ -221,5 +225,78 @@ describe('apiAutoAnno.service', () => {
     mockPatch.mockResolvedValue({ data: { success: true } });
 
     await expect(request()).rejects.toThrow();
+  });
+
+  it.each([
+    [
+      'locking user',
+      401,
+      { message: 'Unauthorized' },
+      'patchAutoAnnoLetterLockingUser',
+      'Unauthorized',
+      () => patchAutoAnnoLetterLockingUser(7, null),
+    ],
+    [
+      'snippet entity',
+      404,
+      { error: 'snippet_not_found' },
+      'setAnnoSnippetEntity',
+      'snippet_not_found',
+      () => setAnnoSnippetEntity(7, 3, 'Person', 'PSN0000001'),
+    ],
+    [
+      'reset letter',
+      422,
+      { status: 'unprocessable', message: 'Letter cannot be reset' },
+      'resetAnnoLetter',
+      'Letter cannot be reset',
+      () => resetAnnoLetter(7),
+    ],
+  ] as const)(
+    'maps a documented %s HTTP %s response to a typed error',
+    async (_label, status, data, operation, backendMessage, request) => {
+      mockPatch.mockRejectedValue(
+        new axios.AxiosError('Request failed', undefined, undefined, undefined, {
+          status,
+          statusText: 'Request failed',
+          headers: {},
+          config: { headers: {} } as never,
+          data,
+        }),
+      );
+
+      const result = request();
+      await expect(result).rejects.toBeInstanceOf(AutoAnnoRequestError);
+      await expect(result).rejects.toMatchObject({ status, operation, backendMessage });
+    },
+  );
+
+  it('does not assume a stable body for an unexpected server error', async () => {
+    mockPatch.mockRejectedValue(
+      new axios.AxiosError('Server Error', undefined, undefined, undefined, {
+        status: 500,
+        statusText: 'Internal Server Error',
+        headers: {},
+        config: { headers: {} } as never,
+        data: { unexpected: true },
+      }),
+    );
+
+    await expect(writeAnnoLetter(7)).rejects.toMatchObject({
+      operation: 'writeAnnoLetter',
+      status: 500,
+      backendMessage: undefined,
+      message: 'writeAnnoLetter: HTTP 500',
+    });
+  });
+
+  it('keeps network failures distinct from HTTP responses', async () => {
+    mockPatch.mockRejectedValue(new axios.AxiosError('Network Error'));
+
+    await expect(setAutoAnnoSnippetStatus(7, 3, 'UPDATED')).rejects.toMatchObject({
+      operation: 'setAutoAnnoSnippetStatus',
+      status: undefined,
+      backendMessage: 'Network Error',
+    });
   });
 });
