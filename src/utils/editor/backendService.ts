@@ -1,5 +1,6 @@
 import { initApi } from '@src/services/apiRequest.service';
 import { EntityType } from '@src/constants/editor';
+import axios from 'axios';
 import { type RismEntry, SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { ProtagCreation, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
 import { prepareEditorXmlForBackend } from '@src/utils/xml/backendXml';
@@ -46,6 +47,9 @@ const rebaseLetterSchema = z.object({
   xml_content: z.string(),
 });
 
+const rebaseLetterErrorSchema = z.object({ error: z.string() });
+const rebaseLetterUnauthorizedSchema = z.object({ message: z.string() });
+
 const responseErrorMessage = (error: unknown): string | undefined => {
   if (typeof error !== 'object' || error === null || !('response' in error)) return undefined;
 
@@ -82,6 +86,39 @@ export class EntityCreateRequestError extends Error {
     this.name = 'EntityCreateRequestError';
   }
 }
+
+export class RebaseLetterRequestError extends Error {
+  constructor(
+    readonly status: number | undefined,
+    readonly backendMessage: string | undefined,
+  ) {
+    const detail = backendMessage ?? (status === undefined ? 'Network request failed' : `HTTP ${status}`);
+    super(`backendService.rebaseLetter: ${detail}`);
+    this.name = 'RebaseLetterRequestError';
+  }
+}
+
+const throwRebaseLetterRequestError = (error: unknown): never => {
+  if (axios.isAxiosError(error)) {
+    const response = error.response;
+    if (response) {
+      const errorBody = rebaseLetterErrorSchema.safeParse(response.data);
+      const unauthorizedBody = rebaseLetterUnauthorizedSchema.safeParse(response.data);
+      const backendMessage = errorBody.success
+        ? errorBody.data.error
+        : unauthorizedBody.success
+          ? unauthorizedBody.data.message
+          : undefined;
+
+      throw new RebaseLetterRequestError(response.status, backendMessage);
+    }
+
+    throw new RebaseLetterRequestError(undefined, error.message || undefined);
+  }
+
+  if (error instanceof Error) throw error;
+  throw new RebaseLetterRequestError(undefined, undefined);
+};
 
 export { JwtMiscRequestError };
 
@@ -476,15 +513,7 @@ export const backendService = {
       const response = await initApi().post(`/jwt/editor/pinned_letters/${letterId}/rebase`);
       return rebaseLetterSchema.parse(response.data).xml_content;
     } catch (error: unknown) {
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'response' in error &&
-        typeof (error as { response?: { data?: { error?: unknown } } }).response?.data?.error === 'string'
-      ) {
-        throw new Error((error as { response: { data: { error: string } } }).response.data.error);
-      }
-      throw error;
+      return throwRebaseLetterRequestError(error);
     }
   },
   publishLetter: async (letterId: number): Promise<boolean> => {

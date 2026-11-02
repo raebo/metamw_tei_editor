@@ -1,4 +1,5 @@
 import {
+  createNewLetter,
   fetchLastUsedLettersByUser,
   fetchLetterDataByName,
   fetchLetterXmlContent,
@@ -7,15 +8,17 @@ import {
 } from '@src/services/editor/apiLettersRequest.service';
 
 const mockGet = jest.fn();
+const mockPost = jest.fn();
 
 jest.mock('@src/services/apiRequest.service', () => ({
   __esModule: true,
-  default: { initApi: () => ({ get: mockGet }) },
+  default: { initApi: () => ({ get: mockGet, post: mockPost }) },
 }));
 
 describe('apiLettersRequest.service canonical URLs', () => {
   beforeEach(() => {
     mockGet.mockReset();
+    mockPost.mockReset();
   });
 
   it('passes letter-search input through Axios params', async () => {
@@ -73,5 +76,35 @@ describe('apiLettersRequest.service canonical URLs', () => {
     await expect(fetchLetterDataByName('fmb/ä 1')).rejects.toThrow();
 
     expect(mockGet).toHaveBeenCalledWith('/jwt/editor/letters/by_name/fmb%2F%C3%A4%201');
+  });
+
+  it('accepts the documented HTTP 200 letter-creation response', async () => {
+    mockPost.mockResolvedValue({
+      status: 200,
+      data: {
+        letter_id: 17420,
+        letter_name: 'fmb-1840-06-06-01',
+        message: 'Letter created',
+        capabilities: {
+          rename: { allowed: true, reason_code: null },
+          discard: { allowed: true, reason_code: null },
+        },
+        version: 'a'.repeat(64),
+      },
+    });
+
+    await expect(createNewLetter({} as never)).resolves.toEqual(
+      expect.objectContaining({
+        newLetterId: 17420,
+        newLetterName: 'fmb-1840-06-06-01',
+        responseMessage: 'Letter created',
+      }),
+    );
+  });
+
+  it('rejects an undocumented successful letter-creation status', async () => {
+    mockPost.mockResolvedValue({ status: 201, data: {} });
+
+    await expect(createNewLetter({} as never)).rejects.toThrow('Unexpected letter creation status: 201');
   });
 });

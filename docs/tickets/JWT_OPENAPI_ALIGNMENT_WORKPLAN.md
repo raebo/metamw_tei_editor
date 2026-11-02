@@ -109,6 +109,10 @@ angelegten Tracker-Tickets.
   Netzwerkfehler bleiben als typisierte Fehler unterscheidbar; erfolgreiche Antworten mit
   ungueltigem Schema bleiben Validierungsfehler. Die Entitaetssuche liefert typseitig stets
   eine Trefferliste oder wirft einen Fehler, jedoch kein zusaetzliches `undefined`.
+- Das zehnte JWT-301-Teilpaket schliesst die verbliebenen Pfad-, Status- und Fehlergrenzen:
+  Die Snippet-Liste verlangt eine konkrete Annotationsbrief-ID, die Briefanlage akzeptiert
+  ausschliesslich den dokumentierten HTTP-Status 200 und Rebase-Fehler unterscheiden
+  dokumentierte 401-, 409- und 422-Antworten von unerwarteten Server- und Netzwerkfehlern.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 

@@ -274,7 +274,9 @@ ausgerollt. Brief- und Pinned-Brief-Collections werden vor dem Mapping als Array
 ihre Service-Signaturen unterscheiden konkrete Ergebnisse von geworfenen Fehlern ohne
 zusaetzlichen `undefined`-Scheinzustand. Auch die Automatic-Annotation-Aufrufe verwenden
 nun eine gemeinsame typisierte Fehlergrenze fuer dokumentierte HTTP-Fehler, unerwartete
-Serverantworten und Netzwerkfehler.
+Serverantworten und Netzwerkfehler. Pflicht-Pfadparameter der Snippet-Liste, der
+dokumentierte Erfolgsstatus der Briefanlage und die Rebase-Fehlergrenze sind ebenfalls
+explizit abgesichert.
 
 **Priorität:** P3
 

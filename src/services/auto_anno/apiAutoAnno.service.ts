@@ -132,7 +132,7 @@ export const patchAutoAnnoLetterLockingUser = async (annoLetterId: number, userI
   }
 };
 
-export const fetchAutoAnnoLetterSnippets = async (id: number | undefined): Promise<AutoAnnoSnippet[]> => {
+export const fetchAutoAnnoLetterSnippets = async (id: number): Promise<AutoAnnoSnippet[]> => {
   const response = await initApi.initApi().get(`/jwt/automatic_annotation_letters/${id}/snippets`);
 
   return AutoAnnoSnippetSchema.array().parse(response.data).map(mapAutoAnnoSnippet);

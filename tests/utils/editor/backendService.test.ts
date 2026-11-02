@@ -1,9 +1,11 @@
+import axios from 'axios';
 import {
   backendService,
   EntityCreateRequestError,
   JwtMiscRequestError,
   LetterChangedSincePinnedError,
   PinnedLetterNotFoundError,
+  RebaseLetterRequestError,
 } from '@src/utils/editor/backendService';
 import { EntityType } from '@src/constants/editor';
 
@@ -422,6 +424,61 @@ describe('backendService letter staleness', () => {
     });
 
     await expect(backendService.rebaseLetter(7)).resolves.toBe('<TEI />');
+  });
+
+  it('rejects an invalid successful rebase response', async () => {
+    mockPost.mockResolvedValue({
+      data: { success: false, message: 'not rebased', xml_content: '<TEI />' },
+    });
+
+    await expect(backendService.rebaseLetter(7)).rejects.toMatchObject({ name: 'ZodError' });
+  });
+
+  it.each([
+    [401, { message: 'Unauthorized' }, 'Unauthorized'],
+    [409, { error: 'letter_version_conflict' }, 'letter_version_conflict'],
+    [422, { error: 'cannot_rebase' }, 'cannot_rebase'],
+  ] as const)('maps a documented rebase HTTP %s response to a typed error', async (status, data, backendMessage) => {
+    mockPost.mockRejectedValue(
+      new axios.AxiosError('Request failed', undefined, undefined, undefined, {
+        status,
+        statusText: 'Request failed',
+        headers: {},
+        config: { headers: {} } as never,
+        data,
+      }),
+    );
+
+    const request = backendService.rebaseLetter(7);
+    await expect(request).rejects.toBeInstanceOf(RebaseLetterRequestError);
+    await expect(request).rejects.toMatchObject({ status, backendMessage });
+  });
+
+  it('does not assume a stable rebase body for an unexpected server error', async () => {
+    mockPost.mockRejectedValue(
+      new axios.AxiosError('Server Error', undefined, undefined, undefined, {
+        status: 500,
+        statusText: 'Internal Server Error',
+        headers: {},
+        config: { headers: {} } as never,
+        data: { unexpected: true },
+      }),
+    );
+
+    await expect(backendService.rebaseLetter(7)).rejects.toMatchObject({
+      status: 500,
+      backendMessage: undefined,
+      message: 'backendService.rebaseLetter: HTTP 500',
+    });
+  });
+
+  it('keeps rebase network failures distinct from HTTP responses', async () => {
+    mockPost.mockRejectedValue(new axios.AxiosError('Network Error'));
+
+    await expect(backendService.rebaseLetter(7)).rejects.toMatchObject({
+      status: undefined,
+      backendMessage: 'Network Error',
+    });
   });
 });
 

@@ -156,19 +156,19 @@ export const createNewLetter = async (
     ]),
   });
 
+  if (response.status !== 200) {
+    throw new Error(`Unexpected letter creation status: ${response.status}`);
+  }
+
   const parsedResponse = createLetterResponseSchema.parse(response.data);
   const lifecycle = parseLetterLifecycle(parsedResponse);
 
-  if (response.status === 200) {
-    return {
-      newLetterId: parsedResponse.letter_id,
-      newLetterName: parsedResponse.letter_name,
-      responseMessage: parsedResponse.message,
-      ...lifecycle,
-    };
-  } else {
-    throw new Error('Invalid response' + response.data.message);
-  }
+  return {
+    newLetterId: parsedResponse.letter_id,
+    newLetterName: parsedResponse.letter_name,
+    responseMessage: parsedResponse.message,
+    ...lifecycle,
+  };
 };
 
 export const renameLetter = async (
