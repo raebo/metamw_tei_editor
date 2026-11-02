@@ -1,14 +1,14 @@
 # Offene Backendentscheidungen zur JWT-OpenAPI-Angleichung
 
-**Stand:** 30.10.2026
+**Stand:** 02.11.2026
 
-**Status:** Zur Prüfung und Abstimmung mit dem Backend
+**Status:** JWT-202 bis JWT-204 umgesetzt und ausgerollt; JWT-201 zurueckgestellt
 
 **Priorität:** P1/P2
 
 **Frontend-Branch:** `feature/jwt-openapi-alignment`
 
-**Kanonischer Vertrag:** `../metamw_edge_version/docs/openapi/jwt.yaml`, Version `0.2.0`
+**Kanonischer Vertrag:** `../metamw_edge_version/docs/openapi/jwt.yaml`, Version `0.4.0`
 
 ## Ziel
 
@@ -306,7 +306,8 @@ Getrennte Arbeitsaufträge mit gegenseitigen Links und Bearbeitungsfeldern:
 [Frontend F116](F116_IDEMPOTENT_PINNING_CLOSE_WARNING_TICKET.md) und
 [Backend F-167](../../../metamw_edge_version/audit/tickets/open/F-167.md).
 Die vorstehenden offenen Varianten für JWT-201/JWT-202 sind damit ersetzt.
-Dies ist eine Planung; neue Endpunktsemantik noch nicht implementiert/deployed.
+Die Endpunktsemantik ist inzwischen mit Frontend `15a2cbb` und Backend `065adff2`
+implementiert, ausgerollt und manuell abgenommen. JWT-201 bleibt zurueckgestellt.
 
 
 ## Backend-Übergabe JWT-203/JWT-204A/JWT-204B (30.10.2026)
@@ -315,8 +316,8 @@ Getrennte Backend-Befunde: F-168 (JWT-203), F-169 (JWT-204A), F-170
 (JWT-204B), Details in ../metamw_edge_version/audit/tickets/open/ ab Backend-
 Root beziehungsweise über dessen TICKETS.md. Kanonische OpenAPI im Backend
 ist jetzt **0.4.0 im Commit `4ce5f60e`**, weiterhin 67 Operationen. Die folgenden
-Verträge sind implementiert und committed. Laut Nutzerbestätigung vom 02.11.2026 ist der
-Backendstand ausgerollt; die kompatible Frontend-Umstellung wird anschließend bereitgestellt.
+Verträge sind implementiert und committed. Laut Nutzerbestätigung vom 02.11.2026 sind
+Backend und die kompatible Frontend-Umstellung ausgerollt.
 
 JWT-203: POST /jwt/editor/entities benötigt entity_type und entityData im
 JSON-Body; Query-Parameter liefern/überschreiben diese Werte nicht. Sechs Typen:
@@ -348,6 +349,5 @@ Pinning-Testkorrektur F-171. Gezielter Backendbereich: **63 Beispiele, 0 Fehler*
 OpenAPI 67/67 und Formatprüfung grün. Abschließende Vollsuite nach F-171:
 **1841 Beispiele, 0 Fehler, 17 bestehende Pending** ohne Pool-Reaper- oder
 Thread-Ausnahmen. Keine Migration, keine neuen Gems und keine Produktivdaten
-geändert. Der Backendstand ist inzwischen deployed. Die Frontend-Umstellung muss mit
-OpenAPI 0.4.0 abgenommen und zeitnah nachgezogen werden; JWT-201 bleibt zurückgestellt,
-JWT-202/F116 bleibt unverändert.
+geändert. Der Backendstand und die Frontend-Umstellung in `1445d11` sind inzwischen
+deployed. JWT-201 bleibt zurückgestellt; JWT-202/F116 ist abgeschlossen.

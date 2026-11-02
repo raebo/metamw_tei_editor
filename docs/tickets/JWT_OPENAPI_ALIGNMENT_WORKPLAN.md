@@ -62,10 +62,10 @@ angelegten Tracker-Tickets.
   korrigiert und die betroffenen freien Pfad- und Querywerte werden sicher uebertragen.
 - JWT-106 ist umgesetzt: Letter-Responses werden je Endpunkt validiert und nur der
   dokumentierte Authentifizierungsfehler wird als fehlende Sitzung behandelt.
-- JWT-201 und JWT-202 bleiben von den dort beschriebenen Entscheidungen abhaengig.
-  Der Backend-Anteil von JWT-203/204 ist mit `fb460aed`, `4ce5f60e` und dem
-  Vollsuite-Nachweis aus `3a077371` freigegeben; die kompatible Frontend-Umstellung
-  der Entitaetserstellung ist das naechste gekoppelte Arbeitspaket.
+- JWT-201 bleibt bewusst zurueckgestellt. JWT-202 ist mit Frontend `15a2cbb` und Backend
+  `065adff2` idempotent umgesetzt, ausgerollt und manuell abgenommen. JWT-203/204 sind mit
+  Backend `fb460aed`/`4ce5f60e` und Frontend `1445d11` ebenfalls ausgerollt; der
+  Vollsuite-Nachweis des Backends schliesst `3a077371` ein.
 - Das erste JWT-301-Teilpaket ist umgesetzt: Auth-, Letter-, Pinned-Letter- und haeufig
   verwendete Misc-Referenzdaten werden an der API-Grenze validiert. Weitere Legacy-Grenzen
   werden endpunktweise in kleinen Folgepaketen bearbeitet.
@@ -78,8 +78,8 @@ angelegten Tracker-Tickets.
   Editor-Aufrufe: Benutzersprache, `set_content`, Reset, Publish sowie Undo und Redo.
   Ein HTTP-Erfolg mit ungueltiger Antwort wird nicht mehr als erfolgreiche Aktion
   weiterverarbeitet; bei `success: false` wird die dokumentierte Meldung als Fehler
-  propagiert. Die noch uncommitteten Backend-Arbeiten zu JWT-203/204 sind nicht Teil
-  dieses Pakets.
+  propagiert. Die spaeter abgeschlossenen Arbeiten zu JWT-203/204 sind eigenstaendige,
+  inzwischen ausgerollte Vertragspakete.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 
@@ -222,6 +222,9 @@ stabil; alternativ ist die Funktion vollstaendig aus der UI entfernt.
 
 ### JWT-202 – Pinning idempotent gestalten
 
+**Status:** Erledigt, ausgerollt und manuell abgenommen. Frontend `15a2cbb`, Backend
+`065adff2`.
+
 **Problem:** Das Frontend sendet `isPinned`, waehrend das Backend diesen Wert ignoriert und
 den Zustand lediglich umschaltet.
 
@@ -233,8 +236,8 @@ erzeugen den beabsichtigten Zustand.
 
 ### JWT-203 – Entitaetserstellung stabilisieren
 
-**Status:** Backend/OpenAPI 0.4.0 sind ausgerollt. Die kompatible Frontend-Umstellung ist
-am 02.11.2026 lokal umgesetzt und noch nicht committed beziehungsweise deployed.
+**Status:** Erledigt und am 02.11.2026 gemeinsam ausgerollt. Backend `fb460aed`, OpenAPI
+0.4.0 in `4ce5f60e`, Frontend `1445d11`.
 
 **Umsetzung:** Alle sechs Entitaetsarten verwenden einen typisierten Request mit
 `entity_type` und `entityData` im JSON-Body. HTTP 201 wird als strikt validiertes
@@ -247,6 +250,10 @@ Request explizit auf die dokumentierten Felder abgebildet, insbesondere
 validierbare Response.
 
 ### JWT-204 – OpenAPI-Schemata korrigieren
+
+**Status:** Erledigt und mit OpenAPI 0.4.0 in `4ce5f60e` ausgerollt. Die Nullbarkeit von
+`xml_id`, die numerische Pinned-Letter-ID und der Figure-Vertrag sind durch Backendtests
+abgesichert.
 
 **Ziel:** Nachweislich gueltiges Backend-Verhalten und Vertrag stimmen ueberein.
 

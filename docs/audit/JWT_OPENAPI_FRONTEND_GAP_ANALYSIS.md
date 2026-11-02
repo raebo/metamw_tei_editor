@@ -151,8 +151,9 @@ Empfehlung: Bei gesetzter Kategorie die Pfadvariante verwenden; ohne Kategorie b
 
 ### A6 – Entity Create weicht bei Request und Response ab
 
-**Status:** Frontendkorrektur am 02.11.2026 lokal umgesetzt, noch nicht committed/deployed.
-Backend und OpenAPI 0.4.0 sind laut Nutzerbestaetigung ausgerollt.
+**Status:** Erledigt und am 02.11.2026 gemeinsam ausgerollt. Backend und OpenAPI 0.4.0
+stehen in `fb460aed` beziehungsweise `4ce5f60e`; die Frontendkorrektur steht in
+`1445d11`.
 
 **Priorität:** P2
 
@@ -165,31 +166,36 @@ Die frühere Typisierung als `{ newId: number }` ist entfernt. HTTP 201 wird str
 `{ entity_key: string }` validiert; 422 `invalid_entity_data` und 500
 `entity_creation_failed` bleiben unterscheidbar.
 
-Empfehlung:
-
-- Alle sechs Mapper und der gemeinsame Service muessen in der manuellen Abnahme gegen den
-  ausgerollten Backendstand geprueft werden.
-- Danach den kompatiblen Frontendstand deployen und A6 als abgeschlossen markieren.
+Die sechs Mapper und der gemeinsame Service verwenden damit den abgestimmten
+Request-Rahmen und die validierte Erfolgsantwort. Die gezielten Frontendtests sowie die
+Backend-Vertrags- und Routentests sind erfolgreich gelaufen.
 
 ### A7 – Pinning ist als Statusoperation modelliert, im Backend aber ein Toggle
+
+**Status:** Erledigt und ausgerollt. Die idempotente Zielzustands- und Schliesssemantik
+ist im Frontend-Commit `15a2cbb` und im Backend-Commit `065adff2` umgesetzt und wurde
+manuell abgenommen.
 
 **Priorität:** P2
 
 **Zuständigkeit:** Backend und Frontend
 
-Das Frontend sendet an `PATCH /jwt/editor/pinned_letters/{id}/pinned` ein undokumentiertes `{ isPinned: boolean }`. Das Backend ignoriert dieses Feld und toggelt den Zustand. Damit ist der Aufruf nicht idempotent und kann bei Wiederholungen den falschen Zustand erzeugen.
-
-Empfehlung: Da nur dieses Frontend den JWT-Endpunkt nutzt, sollte das Backend einen expliziten Bool-Wert akzeptieren und im OpenAPI-Vertrag dokumentieren. Danach passt das Frontend Feldname und Tests exakt an. Alternativ muss die Frontendfunktion ausdrücklich als Toggle ohne Body modelliert werden; dies ist weniger robust.
+Der Client sendet den dokumentierten Zielzustand, das Backend setzt ihn idempotent. Das
+Schliessen einer Arbeitskopie ist als eigene, bestaetigungspflichtige Operation umgesetzt;
+wiederholte Requests toggeln den Zustand nicht mehr unbeabsichtigt.
 
 ### A8 – `xml_id` ist im Vertrag nicht nullable, im Frontend und Backend aber optional
+
+**Status:** Erledigt und mit OpenAPI 0.4.0 in `4ce5f60e` ausgerollt.
 
 **Priorität:** P2
 
 **Zuständigkeit:** Backend/OpenAPI
 
-`PATCH /jwt/editor/pinned_letters/{id}/set_content` verlangt laut OpenAPI einen nicht-nullbaren String `changes.xml_id`. Das Frontend übergibt bei dokumentweiten Änderungen bewusst `null`; der Rails-Controller und der Change-Service akzeptieren diesen Wert.
-
-Empfehlung: `xml_id` im kanonischen Schema als `nullable: true` dokumentieren und einen entsprechenden Backend-Vertragstest ergänzen. Ein künstlicher leerer String im Frontend wäre semantisch schlechter.
+`PATCH /jwt/editor/pinned_letters/{id}/set_content` dokumentiert `changes.xml_id` nun als
+Pflichtfeld, das bei dokumentweiten Aenderungen `null` sein darf. Elementbezogene
+Aenderungen verwenden weiterhin eine konkrete XML-ID. Backend-Vertragstests decken beide
+Faelle ab; der Client benoetigt keinen kuenstlichen Leerstring.
 
 ### A9 – Nicht-kanonische URL-Schreibweisen
 
