@@ -134,27 +134,31 @@ export const createNewLetter = async (
   capabilities: LetterCapabilities;
   version: string;
 }> => {
-  const response = await initApi.initApi().post('/jwt/editor/letters', {
-    letter: MiscUtils.misc.pickAttributes(letterData, [
-      'isFmbLetter',
-      'letterName',
-      'firstHeaderContent',
-      'sndHeaderContent',
-      'prevLetterType',
-      'prevLetter',
-      'nextLetterType',
-      'nextLetter',
-      'writerEntity',
-      'writingPlace',
-      'receivingPlace',
-      'receivers',
-      'transkriptionValue',
-      'editionValue',
-      'letterLanguage',
-      'transkriptorValue',
-      'editorValue',
-    ]),
-  });
+  const response = await initApi
+    .initApi()
+    .post('/jwt/editor/letters', {
+      letter: MiscUtils.misc.pickAttributes(letterData, [
+        'letterName',
+        'firstHeaderContent',
+        'sndHeaderContent',
+        'prevLetterType',
+        'prevLetter',
+        'nextLetterType',
+        'nextLetter',
+        'writerEntity',
+        'writingPlace',
+        'receivingPlace',
+        'receivers',
+        'transkriptionValue',
+        'editionValue',
+        'letterLanguage',
+        'transkriptorValue',
+        'editorValue',
+      ]),
+    })
+    .catch((error: unknown) => {
+      throw lifecycleRequestError(error);
+    });
 
   if (response.status !== 200) {
     throw new Error(`Unexpected letter creation status: ${response.status}`);

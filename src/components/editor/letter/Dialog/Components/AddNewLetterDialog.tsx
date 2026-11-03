@@ -11,7 +11,7 @@ import TeiHeaderTransEdition from './TeiHeaderDialog/70TeiHeaderTransEdition';
 import { MiscUtils } from '@src/utils/misc';
 import NewLetterLetterName from './NewLetterDialog/10NewLetterLetterName';
 import { enqueueSnackbar } from 'notistack';
-import { createNewLetter } from '@src/services/editor/apiLettersRequest.service';
+import { createNewLetter, LetterLifecycleRequestError } from '@src/services/editor/apiLettersRequest.service';
 import TeiHeaderWritingReceivingPlace from './TeiHeaderDialog/50TeiHeaderWritingReceivingPlace';
 import { SearchLetter } from '@src/services/mappings/editorMappings';
 import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
@@ -21,6 +21,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import { EditorUtils } from '@src/utils/editor';
 import { setEditorPinnedLetters } from '@src/redux/slices/editor.letter.slice';
+import { setEditorTabAndPinnedLetterThunk } from '@src/redux/thunks/editor.letter.thunk';
 import { HeaderPerson, LanguageOption } from '@src/constants/editor';
 import TeiHeaderEditorTranskriptor from './TeiHeaderDialog/80EditorTranskriptor';
 import TeiHeaderReceivers from './TeiHeaderDialog/60TeiHeaderReceivers';
@@ -28,6 +29,7 @@ import DialogContent from '@mui/material/DialogContent';
 import { DialogActionButton } from './Misc/DialogActionButton';
 import StepNavigation from './NewLetterDialog/StepNavigation';
 import { useTranslation } from 'react-i18next';
+import { fetchPinnedLetterData } from '@src/services/editor/apiPinnedLettersRequest.service';
 
 export type NewLetterDialogProps = {
   autoAvailable: boolean | null;
@@ -119,24 +121,49 @@ const AddNewLetterDialog = (props: DefaultDialogProps) => {
 
   const submitCreateHandler = async () => {
     try {
-      const { newLetterId, newLetterName, capabilities, version } = await createNewLetter(completionState);
+      const { newLetterId } = await createNewLetter(completionState);
+      const createdLetter = await fetchPinnedLetterData(newLetterId);
+      if (createdLetter.id !== newLetterId) {
+        throw new Error('Created letter ID does not match the pinned working copy');
+      }
 
       const newPinnedLetters = EditorUtils.pinnedLetters.computeNewPinnedLetters(statePinnedLetters, {
-        id: newLetterId,
-        name: newLetterName,
+        id: createdLetter.id,
+        name: createdLetter.name,
         isPinned: true,
         viewMode: 'WYSIWYG',
-        capabilities,
-        version,
+        capabilities: createdLetter.capabilities,
+        version: createdLetter.version,
       });
       dispatch(setEditorPinnedLetters({ pinnedLetters: newPinnedLetters }));
+      const newLetterTabNumber = newPinnedLetters.findIndex((letter) => letter.id === newLetterId);
+      if (newLetterTabNumber < 0) {
+        throw new Error('Newly created letter is missing from the pinned letter list');
+      }
+      await dispatch(
+        setEditorTabAndPinnedLetterThunk({
+          letter: {
+            id: createdLetter.id,
+            name: createdLetter.name,
+            viewMode: 'WYSIWYG',
+            xmlContent: createdLetter.xmlContent,
+            capabilities: createdLetter.capabilities,
+            version: createdLetter.version,
+          },
+          tabNumber: newLetterTabNumber,
+          textIsMarked: false,
+          reloadLetterContent: false,
+        }),
+      ).unwrap();
 
       enqueueSnackbar(`New letter '${completionState.letterName}' created successfully`, {
         variant: 'success',
       });
       props.onClose();
     } catch (error) {
-      enqueueSnackbar('Error creating new letter: ' + MiscUtils.misc.getErrorMessage(error), {
+      const reasonCode = error instanceof LetterLifecycleRequestError ? error.reasonCode : undefined;
+      const errorMessage = reasonCode ? t(`editor:common.letterLifecycle.reasons.${reasonCode}`) : MiscUtils.misc.getErrorMessage(error);
+      enqueueSnackbar('Error creating new letter: ' + errorMessage, {
         variant: 'error',
       });
     }

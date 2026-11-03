@@ -500,6 +500,18 @@ ref.tei-author-footnote-reference:focus-visible,
   outline-offset: 2px;
 }
 
+#letterXml teiHeader:not(:has(profileDesc correspDesc correspAction[type='sent'] > persName))::before,
+#letterXml teiHeader:not(:has(profileDesc correspDesc correspAction[type='received'] > persName))::before {
+  content: '▶ Korrespondenzdaten verwalten';
+  display: block;
+  width: fit-content;
+  margin-bottom: 0.35em;
+  color: var(--secondary-color);
+  cursor: context-menu;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
 .tei-section-address-block > p {
   margin: 0;
   text-indent: 0;

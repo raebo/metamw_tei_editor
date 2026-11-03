@@ -40,6 +40,7 @@ export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
       letter,
       tabNumber,
       textIsMarked,
+      reloadLetterContent = true,
     }: {
       letter: {
         id: number;
@@ -51,13 +52,14 @@ export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
       };
       tabNumber: number;
       textIsMarked: boolean;
+      reloadLetterContent?: boolean;
     },
     { dispatch },
   ) => {
     dispatch(setReloadLetterContent({ reloadLetterContent: false }));
     dispatch(setEditorLetter({ letter: letter }));
     dispatch(setEditorTabNumber({ tabNumber }));
-    dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+    dispatch(setReloadLetterContent({ reloadLetterContent }));
     if (tabNumber === -1) {
       dispatch(setEditorLetter({ letter: { id: null, name: null } }));
     }

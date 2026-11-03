@@ -1,9 +1,11 @@
+import axios from 'axios';
 import {
   createNewLetter,
   fetchLastUsedLettersByUser,
   fetchLetterDataByName,
   fetchLetterXmlContent,
   fetchSearchLetters,
+  LetterLifecycleRequestError,
   searchForLetterNameTitle,
 } from '@src/services/editor/apiLettersRequest.service';
 
@@ -93,18 +95,40 @@ describe('apiLettersRequest.service canonical URLs', () => {
       },
     });
 
-    await expect(createNewLetter({} as never)).resolves.toEqual(
+    await expect(createNewLetter({ letterName: 'gb-1840-06-06-01', isFmbLetter: true } as never)).resolves.toEqual(
       expect.objectContaining({
         newLetterId: 17420,
         newLetterName: 'fmb-1840-06-06-01',
         responseMessage: 'Letter created',
       }),
     );
+    expect(mockPost).toHaveBeenCalledWith('/jwt/editor/letters', {
+      letter: { letterName: 'gb-1840-06-06-01' },
+    });
   });
 
   it('rejects an undocumented successful letter-creation status', async () => {
     mockPost.mockResolvedValue({ status: 201, data: {} });
 
     await expect(createNewLetter({} as never)).rejects.toThrow('Unexpected letter creation status: 201');
+  });
+
+  it('maps a reserved retired letter name to the documented lifecycle error', async () => {
+    mockPost.mockRejectedValue(
+      new axios.AxiosError('Conflict', undefined, undefined, undefined, {
+        status: 409,
+        statusText: 'Conflict',
+        headers: {},
+        config: { headers: {} } as never,
+        data: { error: 'letter_name_retired' },
+      }),
+    );
+
+    const request = createNewLetter({} as never);
+    await expect(request).rejects.toBeInstanceOf(LetterLifecycleRequestError);
+    await expect(request).rejects.toMatchObject({
+      status: 409,
+      reasonCode: 'letter_name_retired',
+    });
   });
 });

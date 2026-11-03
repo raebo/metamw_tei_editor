@@ -6,19 +6,27 @@ import { configureStore } from '@reduxjs/toolkit';
 import '@src/i18n';
 import i18n from '@src/i18n';
 import AddNewLetterDialog from '@src/components/editor/letter/Dialog/Components/AddNewLetterDialog';
-import { createNewLetter } from '@src/services/editor/apiLettersRequest.service';
+import { createNewLetter, LetterLifecycleRequestError } from '@src/services/editor/apiLettersRequest.service';
 import { fetchMetamwLetterData } from '@src/services/auto_anno/apiMetaMw.service';
-import editorLetterReducer from '@src/redux/slices/editor.letter.slice';
+import { fetchPinnedLetterData } from '@src/services/editor/apiPinnedLettersRequest.service';
+import editorLetterReducer, { setEditorLetter, setEditorPinnedLetters, setEditorTabNumber } from '@src/redux/slices/editor.letter.slice';
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
-jest.mock('@src/services/editor/apiLettersRequest.service');
+jest.mock('@src/services/editor/apiLettersRequest.service', () => ({
+  ...jest.requireActual('@src/services/editor/apiLettersRequest.service'),
+  createNewLetter: jest.fn(),
+}));
 jest.mock('@src/services/auto_anno/apiMetaMw.service');
+jest.mock('@src/services/editor/apiPinnedLettersRequest.service', () => ({
+  fetchPinnedLetterData: jest.fn(),
+}));
 jest.mock('notistack', () => ({
   enqueueSnackbar: jest.fn(),
 }));
 
 const mockCreateNewLetter = createNewLetter as jest.MockedFunction<typeof createNewLetter>;
 const mockFetchMetamwLetterData = fetchMetamwLetterData as jest.MockedFunction<typeof fetchMetamwLetterData>;
+const mockFetchPinnedLetterData = fetchPinnedLetterData as jest.MockedFunction<typeof fetchPinnedLetterData>;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const VALID_LETTER_NAME = 'FMB-2024-01-01-01';
@@ -54,6 +62,20 @@ describe('AddNewLetterDialog', () => {
     // Backend response for the "is this letter name already taken" lookup (the exact-match
     // /by_name endpoint) is mocked here; null means no letter with that name exists yet.
     mockFetchMetamwLetterData.mockResolvedValue(null);
+    mockFetchPinnedLetterData.mockResolvedValue({
+      id: 42,
+      name: VALID_LETTER_NAME.toLowerCase(),
+      title: '',
+      xmlContent:
+        '<TEI><correspAction type="received"><persName data-key="PSN0000001" resp="receiver">Felix Mendelssohn Bartholdy</persName></correspAction></TEI>',
+      undoAvailable: false,
+      redoAvailable: false,
+      capabilities: {
+        rename: { allowed: true, reasonCode: null },
+        discard: { allowed: true, reasonCode: null },
+      },
+      version: 'b'.repeat(64),
+    });
   });
 
   it('disables the save button as long as no letter name has been entered', () => {
@@ -116,13 +138,43 @@ describe('AddNewLetterDialog', () => {
       version: 'a'.repeat(64),
     });
 
-    const { onClose } = renderComponent();
+    const store = buildStore();
+    store.dispatch(
+      setEditorPinnedLetters({
+        pinnedLetters: [
+          {
+            id: 7,
+            name: 'fmb-1840-01-01-01',
+            contentChanged: false,
+            isPinned: true,
+            viewMode: 'WYSIWYG',
+            capabilities: null,
+            version: null,
+          },
+        ],
+      }),
+    );
+    store.dispatch(
+      setEditorLetter({
+        letter: {
+          id: 7,
+          name: 'fmb-1840-01-01-01',
+          viewMode: 'WYSIWYG',
+          capabilities: null,
+          version: null,
+        },
+      }),
+    );
+    store.dispatch(setEditorTabNumber({ tabNumber: 0 }));
+
+    const { onClose } = renderComponent(jest.fn(), store);
 
     await enterValidLetterName();
     await waitFor(() => expect(getSaveButton()).toBeEnabled());
     await userEvent.click(getSaveButton());
 
     await waitFor(() => expect(mockCreateNewLetter).toHaveBeenCalledTimes(1));
+    expect(mockFetchPinnedLetterData).toHaveBeenCalledWith(42);
 
     const submittedState = mockCreateNewLetter.mock.calls[0][0];
     expect(submittedState.letterName).toBe(VALID_LETTER_NAME);
@@ -138,7 +190,28 @@ describe('AddNewLetterDialog', () => {
     expect(submittedState.editorValue).toBeNull();
     expect(submittedState.transkriptorValue).toBeNull();
 
-    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(store.getState().editorLetter.letter).toEqual(
+        expect.objectContaining({
+          id: 42,
+          name: VALID_LETTER_NAME.toLowerCase(),
+          viewMode: 'WYSIWYG',
+          xmlContent:
+            '<TEI><correspAction type="received"><persName data-key="PSN0000001" resp="receiver">Felix Mendelssohn Bartholdy</persName></correspAction></TEI>',
+          version: 'b'.repeat(64),
+        }),
+      );
+      expect(store.getState().editorLetter.tabNumber).toBe(0);
+      expect(store.getState().editorLetter.pinnedLetters[0]).toEqual(
+        expect.objectContaining({
+          id: 42,
+          name: VALID_LETTER_NAME.toLowerCase(),
+          version: 'b'.repeat(64),
+        }),
+      );
+      expect(store.getState().editorLetter.reloadLetterContent).toBe(false);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('shows an error and keeps the dialog open when the backend save call fails', async () => {
@@ -153,6 +226,24 @@ describe('AddNewLetterDialog', () => {
 
     await waitFor(() => {
       expect(enqueueSnackbar).toHaveBeenCalledWith(expect.stringContaining('Network error'), {
+        variant: 'error',
+      });
+    });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('explains that a retired letter name remains reserved', async () => {
+    const { enqueueSnackbar } = jest.requireMock('notistack');
+    mockCreateNewLetter.mockRejectedValue(new LetterLifecycleRequestError('letter_name_retired', 409, 'letter_name_retired'));
+
+    const { onClose } = renderComponent();
+
+    await enterValidLetterName();
+    await waitFor(() => expect(getSaveButton()).toBeEnabled());
+    await userEvent.click(getSaveButton());
+
+    await waitFor(() => {
+      expect(enqueueSnackbar).toHaveBeenCalledWith(expect.stringContaining('Diese Briefkennung wurde bereits verwendet'), {
         variant: 'error',
       });
     });

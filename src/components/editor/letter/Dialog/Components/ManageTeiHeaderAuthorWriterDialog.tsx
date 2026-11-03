@@ -146,7 +146,7 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
       EditorUtils.teiHeaderContent.setAuthorWritersFirstPosition(docData.teiHeader, authors, writers);
       EditorUtils.teiHeaderContent.setAuthorsWritersSndPosition(docData.teiHeader, authors, writers);
 
-      props.onSave(
+      return await props.onSave(
         docData.xmlDoc,
         EditorConstants.changeTypes.misc.HEADER_UPDATED,
         'Die Autoren/Schreiber des Briefes wurden aktualisiert.',
@@ -157,7 +157,6 @@ const ManageTeiHeaderAuthorWriterDialog = (props: DefaultDialogProps) => {
       props.onClose();
       return false;
     }
-    return true;
   };
 
   return (

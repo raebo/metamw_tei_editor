@@ -171,6 +171,16 @@ const LetterViewContainer = () => {
         return;
       }
 
+      if (stateEditorLetter.xmlContent !== null) {
+        setLetterState({
+          viewMode: stateEditorLetter.viewMode,
+          xmlContent: stateEditorLetter.xmlContent,
+          undoAvailable: stateEditorLetter.undoAvailable,
+          redoAvailable: stateEditorLetter.redoAvailable,
+        });
+        return;
+      }
+
       let letterData: EditorLetterData | null;
 
       //TODO optimize: if letter is pinned, fetch from pinned endpoint, else from normal endpoint
@@ -214,7 +224,15 @@ const LetterViewContainer = () => {
     return () => {
       cancelled = true;
     };
-  }, [activeLetterIsPinned, dispatch, stateEditorLetter.id, stateEditorLetter.viewMode]);
+  }, [
+    activeLetterIsPinned,
+    dispatch,
+    stateEditorLetter.id,
+    stateEditorLetter.redoAvailable,
+    stateEditorLetter.undoAvailable,
+    stateEditorLetter.viewMode,
+    stateEditorLetter.xmlContent,
+  ]);
 
   useEffect(() => {
     let cancelled = false;

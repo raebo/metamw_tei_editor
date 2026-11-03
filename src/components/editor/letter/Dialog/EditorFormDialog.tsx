@@ -67,7 +67,7 @@ export interface DefaultDialogProps {
     successMessage: string,
     xmlId?: string | null,
     extraFn?: (doc: Document) => void, // optional extra function
-  ) => void;
+  ) => Promise<boolean>;
   onClose: () => void;
 }
 
@@ -261,7 +261,7 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
       const xmlSerializer = new XMLSerializer();
       const xmlString = xmlSerializer.serializeToString(updatedXmlDoc);
 
-      await EditorUtils.backendOrchestrator.patchWithDispatch(dispatch, [xmlString, stateEditorLetter.id, changeType, null], {
+      const saved = await EditorUtils.backendOrchestrator.patchWithDispatch(dispatch, [xmlString, stateEditorLetter.id, changeType, null], {
         actionsOnSuccess: [
           setXmlLetterContent({ content: { xmlContent: xmlString } }),
           setReloadLetterContent({ reloadLetterContent: true }),
@@ -270,11 +270,14 @@ const EditorFormDialog = (props: EditorFormDialogProps) => {
         successMessage,
         errorMessage: t('error:editor.dialog.failedToPatchContent'),
       });
+      if (saved) {
+        handleClose();
+      }
+      return saved;
     } catch (err) {
       enqueueSnackbar(MiscUtils.misc.getErrorMessage(err), { variant: 'error' });
+      return false;
     }
-
-    handleClose();
   };
 
   return (

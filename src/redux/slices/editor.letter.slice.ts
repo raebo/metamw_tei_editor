@@ -67,6 +67,26 @@ interface EditorLetterSlice {
   lifecycleOperationInProgress: boolean;
 }
 
+const uniquePinnedLetters = (pinnedLetters: PinnedLetter[]): PinnedLetter[] => {
+  const uniqueLetters: PinnedLetter[] = [];
+  const indexById = new Map<number, number>();
+
+  pinnedLetters.forEach((letter) => {
+    const existingIndex = indexById.get(letter.id);
+    if (existingIndex === undefined) {
+      indexById.set(letter.id, uniqueLetters.length);
+      uniqueLetters.push(letter);
+      return;
+    }
+
+    if (!uniqueLetters[existingIndex].isPinned && letter.isPinned) {
+      uniqueLetters[existingIndex] = letter;
+    }
+  });
+
+  return uniqueLetters;
+};
+
 const initialState: EditorLetterSlice = {
   letter: {
     id: null,
@@ -161,7 +181,7 @@ const EditorLetterSlice = createSlice({
       state.searchValue = action.payload.searchValue;
     },
     setEditorPinnedLetters(state, action) {
-      state.pinnedLetters = [...action.payload.pinnedLetters];
+      state.pinnedLetters = uniquePinnedLetters(action.payload.pinnedLetters);
     },
     setEditorPinnedLetterViewMode(state, action: PayloadAction<{ id: number; viewMode: 'CODE' | 'WYSIWYG' }>) {
       const letter = state.pinnedLetters.find((item) => item.id === action.payload.id);

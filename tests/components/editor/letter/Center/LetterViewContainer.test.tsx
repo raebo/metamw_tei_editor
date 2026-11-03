@@ -78,6 +78,10 @@ const letterData = (id: number, name: string): EditorLetterData => ({
 });
 
 describe('LetterViewContainer', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('shows a partially editable WYSIWYG surface while blocking mutations outside plain paragraphs', async () => {
     mockFetchPinnedLetterData.mockResolvedValue(letterData(1, 'fmb-1821-01-31-01'));
     const store = configureStore({
@@ -152,6 +156,7 @@ describe('LetterViewContainer', () => {
     );
 
     const paragraph = await screen.findByTestId('xml-output');
+    expect(mockFetchPinnedLetterData).not.toHaveBeenCalled();
     expect(fireEvent.keyDown(paragraph, { key: 'x' })).toBe(true);
     expect(fireEvent.keyDown(paragraph, { key: 'Enter' })).toBe(false);
     paragraph.textContent = 'Typed and ';

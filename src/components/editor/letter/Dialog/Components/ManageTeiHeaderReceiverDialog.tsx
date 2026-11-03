@@ -114,13 +114,17 @@ const ManageTeiHeaderReceiverDialog = (props: DefaultDialogProps) => {
     try {
       EditorUtils.teiHeaderContent.setReceivers(docData.teiHeader, receivers);
 
-      props.onSave(docData.xmlDoc, EditorConstants.changeTypes.misc.HEADER_UPDATED, 'Die Empfänger des Briefes wurden aktualisiert.', null);
+      return await props.onSave(
+        docData.xmlDoc,
+        EditorConstants.changeTypes.misc.HEADER_UPDATED,
+        'Die Empfänger des Briefes wurden aktualisiert.',
+        null,
+      );
     } catch (error) {
       enqueueSnackbar('Fehler beim Schreiben der TEI-Header-Daten: ' + MiscUtils.misc.getErrorMessage(error), { variant: 'error' });
       props.onClose();
       return false;
     }
-    return true;
   };
 
   return (

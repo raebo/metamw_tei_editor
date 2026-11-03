@@ -3,6 +3,55 @@ import { SearchLetter } from '@src/services/mappings/editorMappings';
 import { type RismFormEntry, SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { EditorUtils } from './index';
 
+type CorrespActionType = 'sent' | 'received';
+
+const directChild = (parent: Element, localName: string): Element | undefined =>
+  Array.from(parent.children).find((child) => child.localName === localName);
+
+const findCorrespAction = (teiHeader: Element, type: CorrespActionType): Element | undefined =>
+  EditorUtils.xmlCheck.queryPath(teiHeader, `profileDesc > correspDesc > correspAction[@type='${type}']`)[0];
+
+const ensureCorrespAction = (teiHeader: Element, type: CorrespActionType): Element => {
+  const existingAction = findCorrespAction(teiHeader, type);
+  if (existingAction) return existingAction;
+
+  const doc = teiHeader.ownerDocument;
+  let profileDesc = directChild(teiHeader, 'profileDesc');
+  if (!profileDesc) {
+    profileDesc = doc.createElementNS(EditorConstants.TEI_NS, 'profileDesc');
+    const revisionDesc = directChild(teiHeader, 'revisionDesc');
+    teiHeader.insertBefore(profileDesc, revisionDesc ?? null);
+  }
+
+  let correspDesc = directChild(profileDesc, 'correspDesc');
+  if (!correspDesc) {
+    correspDesc = doc.createElementNS(EditorConstants.TEI_NS, 'correspDesc');
+    profileDesc.insertBefore(correspDesc, profileDesc.firstChild);
+  }
+
+  const action = doc.createElementNS(EditorConstants.TEI_NS, 'correspAction');
+  action.setAttribute('type', type);
+
+  if (type === 'sent') {
+    const receivedAction = findCorrespAction(teiHeader, 'received');
+    correspDesc.insertBefore(action, receivedAction ?? correspDesc.firstChild);
+  } else {
+    correspDesc.appendChild(action);
+  }
+
+  return action;
+};
+
+const isWriterRespStmt = (respStmt: Element): boolean =>
+  Array.from(respStmt.children).some((child) => {
+    if (child.localName === 'persName') return child.getAttribute('resp') === 'writer';
+    if (child.localName !== 'resp') return false;
+
+    const role = child.getAttribute('resp')?.trim().toLowerCase();
+    const label = child.textContent?.trim().toLowerCase();
+    return role === 'writer' || label === 'writer' || label === 'schreiber';
+  });
+
 export const teiHeaderContent = {
   extractTeiHeader: (xmlDoc: Document): Element => {
     const teiHeader = xmlDoc.getElementsByTagNameNS(EditorConstants.TEI_NS, 'teiHeader')[0];
@@ -238,7 +287,10 @@ export const teiHeaderContent = {
     const autors: HeaderPerson[] = [];
     const writer: HeaderPerson[] = [];
 
-    const correspAction = EditorUtils.xmlCheck.queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[1]')[0];
+    const correspAction = findCorrespAction(teiHeader, 'sent');
+    if (!correspAction) {
+      return { authors: [], writers: [] };
+    }
 
     const writerAuthorElements = Array.from(correspAction.children).filter((el) => el.tagName === 'persName');
 
@@ -265,26 +317,38 @@ export const teiHeaderContent = {
       throw new Error('Unable to set author/writer - no <titleStmt> found');
     }
 
-    const firstRespStmt = titleStmt.querySelector('respStmt');
-    if (!firstRespStmt) {
-      throw new Error(`Unable to set author stmt for ${titleStmt} - no <respStmt> found`);
-    }
-    let writerResp = firstRespStmt.querySelector('resp');
-    const insertBeforeNode = firstRespStmt || null;
+    const directRespStmts = Array.from(titleStmt.children).filter((child) => child.localName === 'respStmt');
+    let writerRespStmt = directRespStmts.find(isWriterRespStmt);
+    const firstEditorialRespStmt = directRespStmts.find((respStmt) => !isWriterRespStmt(respStmt));
 
-    if (!writerResp) {
+    directRespStmts.forEach((respStmt) => {
+      Array.from(respStmt.children).forEach((child) => {
+        if (child.localName === 'persName' && child.getAttribute('resp') === 'writer') {
+          child.remove();
+        }
+      });
+    });
+
+    if (!writerRespStmt && writers.length > 0) {
+      writerRespStmt = doc.createElementNS(EditorConstants.TEI_NS, 'respStmt');
+      titleStmt.insertBefore(writerRespStmt, firstEditorialRespStmt ?? null);
+    }
+    const insertBeforeNode = writerRespStmt ?? firstEditorialRespStmt ?? null;
+
+    let writerResp = writerRespStmt ? (Array.from(writerRespStmt.children).find((child) => child.localName === 'resp') ?? null) : null;
+    if (writerRespStmt && !writerResp) {
       writerResp = doc.createElementNS(EditorConstants.TEI_NS, 'resp');
       writerResp.textContent = 'writer';
-      firstRespStmt.appendChild(writerResp);
+      writerRespStmt.appendChild(writerResp);
     }
 
-    Array.from(titleStmt.querySelectorAll('author')).forEach((node) => node.remove());
-
-    Array.from(titleStmt.querySelectorAll('respStmt > persName')).forEach((node) => node.remove());
+    Array.from(titleStmt.children)
+      .filter((child) => child.localName === 'author')
+      .forEach((node) => node.remove());
 
     authors.forEach((a) => {
       const authorEl = doc.createElementNS(EditorConstants.TEI_NS, 'author');
-      authorEl.setAttribute('key', a.key);
+      authorEl.setAttribute('data-key', a.key);
       authorEl.setAttribute('resp', 'author');
       authorEl.textContent = a.name;
 
@@ -293,15 +357,19 @@ export const teiHeaderContent = {
 
     writers.forEach((w) => {
       const persNameEl = doc.createElementNS(EditorConstants.TEI_NS, 'persName');
-      persNameEl.setAttribute('key', w.key);
+      persNameEl.setAttribute('data-key', w.key);
       persNameEl.setAttribute('resp', 'writer');
       persNameEl.textContent = w.name;
-      writerResp.parentNode!.appendChild(persNameEl);
+      writerRespStmt!.appendChild(persNameEl);
     });
+
+    if (writers.length === 0 && writerRespStmt) {
+      writerRespStmt.remove();
+    }
   },
   setAuthorsWritersSndPosition: (teiHeader: Element, authors: HeaderPerson[], writers: HeaderPerson[]): void => {
     const doc = teiHeader.ownerDocument as unknown as XMLDocument;
-    const sndAuthorsWriters = EditorUtils.xmlCheck.queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[1]')[0];
+    const sndAuthorsWriters = ensureCorrespAction(teiHeader, 'sent');
 
     Array.from(sndAuthorsWriters.childNodes).forEach((node) => {
       if (node.nodeType === Node.ELEMENT_NODE && (node as Element).nodeName === 'persName') {
@@ -311,7 +379,7 @@ export const teiHeaderContent = {
 
     authors.forEach((a) => {
       const authorEl = doc.createElementNS(EditorConstants.TEI_NS, 'persName');
-      authorEl.setAttribute('key', a.key);
+      authorEl.setAttribute('data-key', a.key);
       authorEl.setAttribute('resp', 'author');
       const textNode = doc.createTextNode(a.name);
       authorEl.appendChild(textNode);
@@ -320,7 +388,7 @@ export const teiHeaderContent = {
 
     writers.forEach((a) => {
       const writerEl = doc.createElementNS(EditorConstants.TEI_NS, 'persName');
-      writerEl.setAttribute('key', a.key);
+      writerEl.setAttribute('data-key', a.key);
       writerEl.setAttribute('resp', 'writer');
 
       const textNode = doc.createTextNode(a.name);
@@ -329,7 +397,8 @@ export const teiHeaderContent = {
     });
   },
   setReceivers: (teiHeader: Element, receivers: HeaderPerson[]): void => {
-    const receiverStart = EditorUtils.xmlCheck.queryPath(teiHeader, 'profileDesc > correspDesc > correspAction[2]')[0];
+    const receiverStart =
+      findCorrespAction(teiHeader, 'received') ?? (receivers.length > 0 ? ensureCorrespAction(teiHeader, 'received') : undefined);
 
     if (!receiverStart) {
       return;
@@ -342,7 +411,7 @@ export const teiHeaderContent = {
     const placeNameNode = Array.from(receiverStart.childNodes).find((node) => node.nodeName === 'placeName');
 
     receivers.forEach((r) => {
-      const receiverNode = document.createElementNS(EditorConstants.TEI_NS, 'persName');
+      const receiverNode = teiHeader.ownerDocument.createElementNS(EditorConstants.TEI_NS, 'persName');
       receiverNode.setAttribute('data-key', r.key);
       receiverNode.setAttribute('resp', 'receiver');
       receiverNode.textContent = r.name || '';

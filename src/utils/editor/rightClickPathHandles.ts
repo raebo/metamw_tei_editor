@@ -347,12 +347,31 @@ export namespace rightClickPathHandles {
 
   export const manageAuthorWriterAncestorPaths = (): NodeAncestorPath[] => [
     {
+      parentPath: 'tei teiheader',
+      nodeType: nodeTypes.get(NodeTypes.PERSON),
+      checkElementDetails: () => true,
+      afterActionCallback: () => '',
+    },
+    {
+      parentPath: 'tei teiheader profiledesc correspdesc',
+      nodeType: nodeTypes.get(NodeTypes.PERSON),
+      checkElementDetails: () => true,
+      afterActionCallback: () => '',
+    },
+    {
+      parentPath: 'tei teiheader profiledesc correspdesc correspaction',
+      nodeType: nodeTypes.get(NodeTypes.PERSON),
+      checkElementDetails: () => true,
+      checkAttributes: (nodeElement: Element): boolean => nodeElement.getAttribute('type') === 'sent',
+      afterActionCallback: () => '',
+    },
+    {
       parentPath: 'tei teiheader profiledesc correspdesc correspaction persname',
       nodeType: nodeTypes.get(NodeTypes.PERSON),
       checkElementDetails: () => true,
       checkAttributes: (nodeElement: Element): boolean => {
         const parentNode = nodeElement.parentNode as Element;
-        return parentNode.getAttribute('type') === 'sent';
+        return ['sent', 'received'].includes(parentNode.getAttribute('type') ?? '');
       },
       afterActionCallback: () => '',
     },
@@ -372,12 +391,31 @@ export namespace rightClickPathHandles {
 
   export const manageReceiverAncestorPaths = (): NodeAncestorPath[] => [
     {
+      parentPath: 'tei teiheader',
+      nodeType: nodeTypes.get(NodeTypes.PERSON),
+      checkElementDetails: () => true,
+      afterActionCallback: () => '',
+    },
+    {
+      parentPath: 'tei teiheader profiledesc correspdesc',
+      nodeType: nodeTypes.get(NodeTypes.PERSON),
+      checkElementDetails: () => true,
+      afterActionCallback: () => '',
+    },
+    {
+      parentPath: 'tei teiheader profiledesc correspdesc correspaction',
+      nodeType: nodeTypes.get(NodeTypes.PERSON),
+      checkElementDetails: () => true,
+      checkAttributes: (nodeElement: Element): boolean => nodeElement.getAttribute('type') === 'received',
+      afterActionCallback: () => '',
+    },
+    {
       parentPath: 'tei teiheader profiledesc correspdesc correspaction persname',
       nodeType: nodeTypes.get(NodeTypes.PERSON),
       checkElementDetails: () => true,
       checkAttributes: (nodeElement: Element): boolean => {
         const parentNode = nodeElement.parentNode as Element;
-        return parentNode.getAttribute('type') === 'received';
+        return ['sent', 'received'].includes(parentNode.getAttribute('type') ?? '');
       },
       afterActionCallback: () => '',
     },

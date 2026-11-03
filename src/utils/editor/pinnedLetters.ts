@@ -22,17 +22,23 @@ export const pinnedLetters = {
       capabilities: newLetter.capabilities ?? null,
       version: newLetter.version ?? null,
     };
+    const existingPinnedEntry = statePinnedLetters.find((letter) => letter.id === newLetter.id && letter.isPinned);
+    const activeEntry: PinnedLetter = existingPinnedEntry
+      ? {
+          ...existingPinnedEntry,
+          name: newEntry.name,
+          viewMode: newEntry.viewMode,
+          capabilities: newEntry.capabilities ?? existingPinnedEntry.capabilities,
+          version: newEntry.version ?? existingPinnedEntry.version,
+        }
+      : newEntry;
+    const seenIds = new Set<number>([activeEntry.id]);
+    const remainingPinnedLetters = statePinnedLetters.filter((letter) => {
+      if (!letter.isPinned || seenIds.has(letter.id)) return false;
+      seenIds.add(letter.id);
+      return true;
+    });
 
-    if (statePinnedLetters.length == 0) {
-      return [newEntry];
-    }
-
-    const [firstLetter, ...rest] = statePinnedLetters;
-
-    if (firstLetter.isPinned) {
-      return [newEntry, ...statePinnedLetters];
-    }
-
-    return [newEntry, ...rest];
+    return [activeEntry, ...remainingPinnedLetters];
   },
 };

@@ -33,7 +33,7 @@ export const backendOrchestrator = {
         enqueueSnackbar('Letter could not be updated on backend side: No letter id found', {
           variant: 'error',
         });
-        return;
+        return false;
       }
 
       await EditorUtils.backendService.patchContent(...params);
@@ -45,9 +45,11 @@ export const backendOrchestrator = {
       if (options?.successMessage) {
         enqueueSnackbar(options.successMessage, { variant: 'success' });
       }
+      return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       enqueueSnackbar(options?.errorMessage ?? message, { variant: 'error' });
+      return false;
     } finally {
       dispatch(finishContentUpdate());
     }
