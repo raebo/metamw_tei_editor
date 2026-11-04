@@ -17,7 +17,7 @@ import { EditorConstants } from '@src/constants/editor';
 import { DefaultDialogProps } from '../EditorFormDialog';
 import { Alert, Box, Typography } from '@mui/material';
 import { MiscUtils } from '@src/utils/misc';
-import { InvalidRevisionStatusError, LetterChangedSincePinnedError } from '@src/utils/editor/backendService';
+import { InvalidRevisionStatusError, LetterChangedSincePinnedError, LetterIndexPendingError } from '@src/utils/editor/backendService';
 import { useRebaseLetter } from '@src/components/editor/letter/hooks/useRebaseLetter';
 import { useTranslation } from 'react-i18next';
 import type { RevisionStatus } from '@src/schemas/editorMutationResponses';
@@ -54,7 +54,13 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
 
     try {
       setErrorMessage(undefined);
-      await EditorUtils.backendService.publishLetter(stateEditorLetter.id, revisionStatus);
+      let indexSynchronizationPending = false;
+      try {
+        await EditorUtils.backendService.publishLetter(stateEditorLetter.id, revisionStatus);
+      } catch (error) {
+        if (!(error instanceof LetterIndexPendingError)) throw error;
+        indexSynchronizationPending = true;
+      }
 
       try {
         const refreshedLetter = await fetchPinnedLetterData(stateEditorLetter.id);
@@ -100,9 +106,13 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
         return;
       }
 
-      enqueueSnackbar(t('editor:dialog.publishLetter.success', { name: stateEditorLetter.name ?? '' }), {
-        variant: 'success',
-      });
+      if (indexSynchronizationPending) {
+        enqueueSnackbar(t('editor:dialog.publishLetter.indexPending'), { variant: 'warning' });
+      } else {
+        enqueueSnackbar(t('editor:dialog.publishLetter.success', { name: stateEditorLetter.name ?? '' }), {
+          variant: 'success',
+        });
+      }
       props.onClose();
     } catch (error) {
       if (error instanceof LetterChangedSincePinnedError) {

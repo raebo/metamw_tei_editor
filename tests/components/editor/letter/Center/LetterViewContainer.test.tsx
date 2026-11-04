@@ -5,7 +5,11 @@ import { Provider } from 'react-redux';
 import '@src/i18n';
 import LetterViewContainer from '@src/components/editor/letter/Center/LetterViewContainer';
 import authReducer from '@src/redux/slices/authentication.slice';
-import editorLetterReducer, { setEditorLetter, setEditorPinnedLetters } from '@src/redux/slices/editor.letter.slice';
+import editorLetterReducer, {
+  setEditorLetter,
+  setEditorPinnedLetters,
+  setReloadLetterContent,
+} from '@src/redux/slices/editor.letter.slice';
 import { fetchPinnedLetterData } from '@src/services/editor/apiPinnedLettersRequest.service';
 import type { EditorLetterData } from '@src/services/mappings/editorMappings';
 import { EditorUtils } from '@src/utils/editor';
@@ -121,6 +125,47 @@ describe('LetterViewContainer', () => {
     expect(fireEvent.keyDown(surface, { key: 'a', ctrlKey: true, altKey: true })).toBe(true);
     expect(fireEvent.paste(surface)).toBe(false);
     expect(fireEvent.drop(surface)).toBe(false);
+  });
+
+  it('hides the stale editor surface until a required reload succeeds', async () => {
+    const data = letterData(1, 'Stored content');
+    mockFetchPinnedLetterData.mockRejectedValue(new Error('reload failed'));
+    const store = configureStore({
+      reducer: { auth: authReducer, editorLetter: editorLetterReducer },
+    });
+    store.dispatch(
+      setEditorPinnedLetters({
+        pinnedLetters: [
+          {
+            id: 1,
+            name: data.name,
+            contentChanged: false,
+            isPinned: true,
+            viewMode: 'WYSIWYG',
+          },
+        ],
+      }),
+    );
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 1, name: data.name, viewMode: 'WYSIWYG', xmlContent: data.xmlContent },
+      }),
+    );
+    store.dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+
+    render(
+      <Provider store={store}>
+        <LetterViewContainer />
+      </Provider>,
+    );
+
+    expect(
+      await screen.findByText(
+        /Die Bearbeitung bleibt bis zu einem erfolgreichen Neuladen gesperrt|Editing remains blocked until a reload succeeds/,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('xml-output')).not.toBeInTheDocument();
+    expect(document.getElementById('letterXmlContent')).not.toBeInTheDocument();
   });
 
   it('persists typed and pasted plain-paragraph text on blur without serializing the rendered DOM', async () => {

@@ -318,7 +318,9 @@ const LetterViewContainer = () => {
         <div className="box-1">
           {letterState.xmlContent ? (
             <>
-              {letterState.viewMode === 'WYSIWYG' && (
+              {reloadLetterContent ? (
+                <Alert severity="warning">{t('editor:common.letterViewContainer.reloadRequired')}</Alert>
+              ) : letterState.viewMode === 'WYSIWYG' ? (
                 <div className="letter-xml" id="letterXml" ref={containerRef} style={{ fontSize: `${stateLetterFontSize}%` }}>
                   <div
                     ref={xmlContentRef}
@@ -353,8 +355,9 @@ const LetterViewContainer = () => {
                     }}
                   />
                 </div>
+              ) : (
+                letterState.viewMode === 'CODE' && letterState.xmlContent && <LetterViewCode xmlString={letterState.xmlContent} />
               )}
-              {letterState.viewMode === 'CODE' && letterState.xmlContent && <LetterViewCode xmlString={letterState.xmlContent} />}
             </>
           ) : (
             <p>

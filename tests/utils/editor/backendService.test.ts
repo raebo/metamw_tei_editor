@@ -5,6 +5,7 @@ import {
   InvalidRevisionStatusError,
   JwtMiscRequestError,
   LetterChangedSincePinnedError,
+  LetterIndexPendingError,
   PinnedLetterNotFoundError,
   RebaseLetterRequestError,
 } from '@src/utils/editor/backendService';
@@ -522,14 +523,24 @@ describe('backendService.publishLetter', () => {
     await expect(backendService.publishLetter(7, 'draft')).rejects.toBeInstanceOf(InvalidRevisionStatusError);
   });
 
+  it('maps the documented committed publish with pending index synchronization to a typed error', async () => {
+    mockPost.mockRejectedValue({
+      response: { status: 503, data: { error: 'letter_index_pending' } },
+    });
+
+    await expect(backendService.publishLetter(7, 'live')).rejects.toBeInstanceOf(LetterIndexPendingError);
+  });
+
   it.each([
     { status: 409, data: { error: 'another_conflict', message: 'No match.' } },
     { status: 409, data: { error: 'letter_changed_since_pinned' } },
     { status: 422, data: { error: 'Could not publish.' } },
+    { status: 503, data: { error: 'another_error' } },
   ])('keeps an invalid or generic response on the generic error path', async (response) => {
     mockPost.mockRejectedValue({ response });
 
     await expect(backendService.publishLetter(7, 'draft')).rejects.not.toBeInstanceOf(LetterChangedSincePinnedError);
+    await expect(backendService.publishLetter(7, 'draft')).rejects.not.toBeInstanceOf(LetterIndexPendingError);
   });
 });
 

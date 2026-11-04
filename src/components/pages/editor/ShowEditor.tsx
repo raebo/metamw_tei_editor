@@ -611,7 +611,7 @@ const ShowEditor = () => {
           }}
         >
           <Stack direction="column" spacing={1}>
-            <ToolbarLetterNameDisplay letterName={stateEditorLetter.name} />
+            <ToolbarLetterNameDisplay letterName={stateEditorLetter.name} xmlContent={stateEditorLetter.xmlContent} />
             <QuickContentFormatter />
             <ToolbarMenuButton
               title={t('editor:common.letterViewContainer.toolbarRight.moreActions')}

@@ -19,6 +19,7 @@ import {
 } from '@src/schemas/miscReferenceData';
 import {
   InvalidRevisionStatusResponseSchema,
+  LetterIndexPendingResponseSchema,
   MessageResponseSchema,
   PublishLetterResponseSchema,
   RevisionStatusSchema,
@@ -77,6 +78,13 @@ export class InvalidRevisionStatusError extends Error {
   constructor() {
     super('invalid_revision_status');
     this.name = 'InvalidRevisionStatusError';
+  }
+}
+
+export class LetterIndexPendingError extends Error {
+  constructor() {
+    super('letter_index_pending');
+    this.name = 'LetterIndexPendingError';
   }
 }
 
@@ -550,6 +558,10 @@ export const backendService = {
 
         if (response.status === 422 && InvalidRevisionStatusResponseSchema.safeParse(response.data).success) {
           throw new InvalidRevisionStatusError();
+        }
+
+        if (response.status === 503 && LetterIndexPendingResponseSchema.safeParse(response.data).success) {
+          throw new LetterIndexPendingError();
         }
 
         const genericError = z.object({ error: z.string() }).safeParse(response.data);

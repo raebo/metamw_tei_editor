@@ -24,10 +24,11 @@
     "statusDraft": "Draft",
     "statusLive": "Live",
     "statusEffect": "„Live“ veröffentlicht den Brief auf der Webseite. „Draft“ entfernt einen bereits veröffentlichten Brief wieder von der Webseite.",
-    "visibilityNotice": "Der Status wird im Brief und in der Arbeitskopie gespeichert. Die öffentliche Suchsichtbarkeit kann bis zum Abschluss der Indexsynchronisierung abweichen.",
+    "visibilityNotice": "Bei einer erfolgreichen Statusänderung wird auch der öffentliche Suchindex abgeglichen. Briefe im Status Draft und Briefe mit ausstehendem Indexabgleich sind öffentlich gesperrt.",
     "warning": "Achtung: Der kanonische Brief wird im Dateisystem überschrieben. Eine erstmalige Veröffentlichung sperrt das spätere Umbenennen und Verwerfen dauerhaft.",
     "cancel": "Abbrechen",
     "success": "Brief {{name}} wurde erfolgreich mit dem gewählten Status gespeichert.",
+    "indexPending": "Brief gespeichert, Indexabgleich ausstehend. Der öffentliche Zugriff bleibt bis zum Abschluss gesperrt. Bitte veröffentlichen Sie den Brief nicht erneut.",
     "invalidRevisionStatus": "Der gewählte Zielstatus ist ungültig. Bitte wählen Sie Draft oder Live.",
     "reloadError": "Der Status wurde gespeichert, aber die aktualisierte Arbeitskopie konnte nicht geladen werden: {{reason}}",
     "error": "Der Status des Briefes konnte nicht gespeichert werden: {{reason}}"

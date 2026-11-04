@@ -5,10 +5,9 @@ Stand: 2026-11-04
 Frontend-Branch: `master`
 
 Kanonischer Vertrag: `../metamw_edge_version/docs/openapi/jwt.yaml`. Der lokale
-Backend-Arbeitsbaum enthaelt OpenAPI `0.7.0` mit dem um `revision_status` erweiterten
-Publish-Vertrag aus F-178. Dieser Backend-Stand ist am 04.11.2026 noch nicht committed
-oder ausgerollt. F-179 zur zuverlaessigen Synchronisierung der oeffentlichen Suchsichtbarkeit
-bleibt offen.
+Backend-Arbeitsbaum enthaelt OpenAPI `0.8.0` mit der Statusauswahl aus F-178 und der
+oeffentlichen Indexsynchronisierung aus F-179. Dieser gemeinsame Backend-Stand ist am
+04.11.2026 noch nicht ausgerollt.
 
 ## Ziel und Vorgehen
 
@@ -37,9 +36,11 @@ Dieser Backend-Check bestätigt die Routenabdeckung, prüft aber weder die Front
   und Fehlerbehandlung sind umgesetzt oder als bewusste Entscheidung dokumentiert.
 - Favoriten bleiben als JWT-201 fachlich zurückgestellt; die UI ist deaktiviert und führt
   keine scheinbare Schreiboperation über die Briefsuche mehr aus.
-- Offen ist die gemeinsame Live-Smoke-Abnahme aus JWT-303. Das Frontend ist fuer F-178
-  vorbereitet und sendet `draft` oder `live` ausdruecklich; produktiv darf diese Fassung erst
-  mit dem kompatiblen Backend ausgerollt werden. F-179 bleibt eine gesonderte Backendaufgabe.
+- Offen ist die gemeinsame Live-Smoke-Abnahme aus JWT-303. Das Frontend sendet `draft` oder
+  `live` ausdruecklich und behandelt `503 letter_index_pending` als bereits gespeicherten Stand:
+  Pinned Show wird neu geladen, eine Warnung ersetzt die Erfolgsmeldung und Publish wird nicht
+  automatisch wiederholt. Produktiv duerfen Frontend, Backend, Worker und Public-Suche nur als
+  kompatibler gemeinsamer Stand ausgerollt werden.
 
 ## Bereits vertragskonforme Bereiche
 

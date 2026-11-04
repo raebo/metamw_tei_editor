@@ -11,8 +11,9 @@ import editorLetterReducer, {
   setFigureUploadInProgress,
 } from '@src/redux/slices/editor.letter.slice';
 import { EditorUtils } from '@src/utils/editor';
-import { InvalidRevisionStatusError, LetterChangedSincePinnedError } from '@src/utils/editor/backendService';
+import { InvalidRevisionStatusError, LetterChangedSincePinnedError, LetterIndexPendingError } from '@src/utils/editor/backendService';
 import { fetchPinnedLetterData } from '@src/services/editor/apiPinnedLettersRequest.service';
+import { enqueueSnackbar } from 'notistack';
 
 jest.mock('notistack', () => ({
   enqueueSnackbar: jest.fn(),
@@ -123,6 +124,72 @@ describe('PublishLetterDialog conflict handling', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Draft' }));
 
     await waitFor(() => expect(publishLetter).toHaveBeenCalledWith(7, 'draft'));
+  });
+
+  it('reloads the committed letter and warns when index synchronization is pending', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(setEditorLetter({ letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG' } }));
+    store.dispatch(
+      setEditorPinnedLetters({
+        pinnedLetters: [
+          {
+            id: 7,
+            name: 'FMB-7',
+            contentChanged: true,
+            isPinned: true,
+            viewMode: 'WYSIWYG',
+          },
+        ],
+      }),
+    );
+    const publishLetter = jest.spyOn(EditorUtils.backendService, 'publishLetter').mockRejectedValue(new LetterIndexPendingError());
+    const onClose = jest.fn();
+
+    render(
+      <Provider store={store}>
+        <PublishLetterDialog xmlDoc={document.implementation.createDocument(null, 'root')} onSave={jest.fn()} onClose={onClose} />
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Live' }));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(publishLetter).toHaveBeenCalledTimes(1);
+    expect(mockFetchPinnedLetterData).toHaveBeenCalledWith(7);
+    expect(store.getState().editorLetter.letter.xmlContent).toBe(publishedLetter.xmlContent);
+    expect(store.getState().editorLetter.pinnedLetters[0].contentChanged).toBe(false);
+    expect(enqueueSnackbar).toHaveBeenCalledTimes(1);
+    expect(enqueueSnackbar).toHaveBeenCalledWith(
+      'Brief gespeichert, Indexabgleich ausstehend. Der öffentliche Zugriff bleibt bis zum Abschluss gesperrt. Bitte veröffentlichen Sie den Brief nicht erneut.',
+      { variant: 'warning' },
+    );
+  });
+
+  it('blocks editing when the required reload after a pending index response fails', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(setEditorLetter({ letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG' } }));
+    const publishLetter = jest.spyOn(EditorUtils.backendService, 'publishLetter').mockRejectedValue(new LetterIndexPendingError());
+    const rebaseLetter = jest.spyOn(EditorUtils.backendService, 'rebaseLetter');
+    mockFetchPinnedLetterData.mockRejectedValueOnce(new Error('reload failed'));
+    const onClose = jest.fn();
+
+    render(
+      <Provider store={store}>
+        <PublishLetterDialog xmlDoc={document.implementation.createDocument(null, 'root')} onSave={jest.fn()} onClose={onClose} />
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Draft' }));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(publishLetter).toHaveBeenCalledTimes(1);
+    expect(rebaseLetter).not.toHaveBeenCalled();
+    expect(store.getState().editorLetter.reloadLetterContent).toBe(true);
+    expect(enqueueSnackbar).toHaveBeenCalledTimes(1);
+    expect(enqueueSnackbar).toHaveBeenCalledWith(
+      'Der Status wurde gespeichert, aber die aktualisierte Arbeitskopie konnte nicht geladen werden: reload failed',
+      { variant: 'warning' },
+    );
   });
 
   it('confirms local changes and rebases using the active pinned-letter entry', async () => {

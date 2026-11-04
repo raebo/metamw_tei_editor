@@ -24,10 +24,11 @@
     "statusDraft": "Draft",
     "statusLive": "Live",
     "statusEffect": "“Live” publishes the letter on the website. “Draft” removes a previously published letter from the website.",
-    "visibilityNotice": "The status is stored in the letter and its working copy. Public search visibility may differ until index synchronization has completed.",
+    "visibilityNotice": "A successful status change also synchronizes the public search index. Draft letters and letters with pending index synchronization are blocked from public access.",
     "warning": "Caution: The canonical letter is overwritten in the file system. The first successful publish permanently prevents later renaming or discarding.",
     "cancel": "Cancel",
     "success": "Letter {{name}} was saved successfully with the selected status.",
+    "indexPending": "Letter saved, index synchronization pending. Public access remains blocked until synchronization completes. Do not publish the letter again.",
     "invalidRevisionStatus": "The selected target status is invalid. Select Draft or Live.",
     "reloadError": "The status was saved, but the updated working copy could not be loaded: {{reason}}",
     "error": "The letter status could not be saved: {{reason}}"

@@ -21,6 +21,10 @@ export const InvalidRevisionStatusResponseSchema = z.object({
   error: z.literal('invalid_revision_status'),
 });
 
+export const LetterIndexPendingResponseSchema = z.object({
+  error: z.literal('letter_index_pending'),
+});
+
 export const UndoRedoResponseSchema = z.object({
   content: z.string(),
   undo_available: z.boolean(),
