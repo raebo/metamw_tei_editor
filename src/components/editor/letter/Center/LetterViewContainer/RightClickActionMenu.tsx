@@ -914,6 +914,18 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           sectionSource && Array.from(sectionSource.children).some((child) => child.localName.toLowerCase() === 'head'),
         );
 
+        if (isWritingAct) {
+          const managePeopleItem = menuItemsNoMarking.find(
+            (item) => item.identifier === EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_AUTHOR_WRITER,
+          );
+          if (managePeopleItem?.action) {
+            structureActions.push({
+              label: t('editor:dialog.paragraphStructure.actions.manageWritingActPeople'),
+              action: () => managePeopleItem.action?.({ node: sectionSource ?? sectionAnchor }),
+            });
+          }
+        }
+
         structureActions.push({
           label: t('editor:dialog.paragraphStructure.actions.appendParagraph'),
           action: () => openStructureDialog('paragraph-append', sectionAnchor),

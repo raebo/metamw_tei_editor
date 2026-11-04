@@ -975,6 +975,45 @@ describe('RightClickActionMenu figure upload action', () => {
     });
   });
 
+  it('opens author and writer editing for the selected writing act from the section submenu', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    const writingActs = container.querySelectorAll('div[type="act_of_writing"]');
+    const writingActCaret = document.createElement('button');
+    writingActCaret.className = 'tei-section-caret';
+    writingActCaret.textContent = '▶';
+    writingActs[1].prepend(writingActCaret);
+    fireEvent.contextMenu(writingActCaret, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Absätze und Abschnitte|Paragraphs and sections/,
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Autoren und Schreiber bearbeiten|Edit authors and writers/,
+      }),
+    );
+
+    expect(store.getState().editorLetter.dialogType).toBe('MANAGE_WRITING_ACT_AUTHOR_WRITER');
+    expect(store.getState().editorLetter.letter.actOfWriting.orderNumber).toBe('2');
+  });
+
   it('moves a writing act from the visible section submenu and keeps numbering sequential', async () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
     const patchContent = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue(true);
