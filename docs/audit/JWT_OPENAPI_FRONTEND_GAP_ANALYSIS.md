@@ -4,10 +4,11 @@ Stand: 2026-11-04
 
 Frontend-Branch: `master`
 
-Kanonischer Vertrag: `../metamw_edge_version/docs/openapi/jwt.yaml`. Der implementierte
-Vertragsstand ist Version `0.6.1`; der lokale Backend-Arbeitsbaum bezeichnet sich als
-`0.6.2` und enthaelt zusaetzlich ausschliesslich den mit `implemented: false` markierten
-Planungsentwurf fuer F-178/F-179.
+Kanonischer Vertrag: `../metamw_edge_version/docs/openapi/jwt.yaml`. Der lokale
+Backend-Arbeitsbaum enthaelt OpenAPI `0.7.0` mit dem um `revision_status` erweiterten
+Publish-Vertrag aus F-178. Dieser Backend-Stand ist am 04.11.2026 noch nicht committed
+oder ausgerollt. F-179 zur zuverlaessigen Synchronisierung der oeffentlichen Suchsichtbarkeit
+bleibt offen.
 
 ## Ziel und Vorgehen
 
@@ -36,8 +37,9 @@ Dieser Backend-Check bestätigt die Routenabdeckung, prüft aber weder die Front
   und Fehlerbehandlung sind umgesetzt oder als bewusste Entscheidung dokumentiert.
 - Favoriten bleiben als JWT-201 fachlich zurückgestellt; die UI ist deaktiviert und führt
   keine scheinbare Schreiboperation über die Briefsuche mehr aus.
-- Offen ist die gemeinsame Live-Smoke-Abnahme aus JWT-303. Der zukünftige Publish-Vertrag
-  F-178/F-179 ist ausdrücklich noch nicht aktiv und darf vom Frontend nicht verwendet werden.
+- Offen ist die gemeinsame Live-Smoke-Abnahme aus JWT-303. Das Frontend ist fuer F-178
+  vorbereitet und sendet `draft` oder `live` ausdruecklich; produktiv darf diese Fassung erst
+  mit dem kompatiblen Backend ausgerollt werden. F-179 bleibt eine gesonderte Backendaufgabe.
 
 ## Bereits vertragskonforme Bereiche
 
@@ -47,7 +49,9 @@ Die folgenden zuletzt bearbeiteten Bereiche stimmen im Wesentlichen mit dem Vert
 - `POST /jwt/editor/entities/search`: Das Frontend liest die Einträge über den kleingeschriebenen Kategorie-Schlüssel und normalisiert `id` auf `entityId`.
 - Briefanlage über `POST /jwt/editor/letters`: Wrapper `letter`, Feldnamen und Erfolgsantwort entsprechen dem Vertrag.
 - Figure-Download und -Upload: Methoden, Multipart-Felder und zentrale Erfolgsfelder stimmen überein.
-- Staleness, Rebase und Publish: Methoden, Kernantworten und der dokumentierte Publish-Konflikt `letter_changed_since_pinned` werden berücksichtigt.
+- Staleness, Rebase und Publish: Methoden, Kernantworten, der Zielstatus `draft`/`live`,
+  `invalid_revision_status` sowie der Publish-Konflikt `letter_changed_since_pinned` werden
+  beruecksichtigt. Nach erfolgreichem Publish wird die kanonische Pinned-Arbeitskopie neu geladen.
 - Authentifizierung verwendet Cookies mit `withCredentials`; Tokens werden nicht im Client gespeichert.
 
 ## Festgestellte Abweichungen

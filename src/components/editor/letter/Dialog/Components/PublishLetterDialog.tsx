@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
@@ -6,15 +6,27 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
 import { useAppDispatch } from '@src/redux/hooks';
 import { EditorUtils } from '@src/utils/editor';
-import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
+import {
+  setEditorLetter,
+  setEditorPinnedLetterContentChanged,
+  setEditorPinnedLetterLifecycle,
+  setReloadLetterContent,
+} from '@src/redux/slices/editor.letter.slice';
 import { enqueueSnackbar } from 'notistack';
 import { EditorConstants } from '@src/constants/editor';
 import { DefaultDialogProps } from '../EditorFormDialog';
-import { Alert } from '@mui/material';
+import { Alert, Box, Typography } from '@mui/material';
 import { MiscUtils } from '@src/utils/misc';
-import { LetterChangedSincePinnedError } from '@src/utils/editor/backendService';
+import { InvalidRevisionStatusError, LetterChangedSincePinnedError } from '@src/utils/editor/backendService';
 import { useRebaseLetter } from '@src/components/editor/letter/hooks/useRebaseLetter';
 import { useTranslation } from 'react-i18next';
+import type { RevisionStatus } from '@src/schemas/editorMutationResponses';
+import { fetchPinnedLetterData } from '@src/services/editor/apiPinnedLettersRequest.service';
+
+const revisionStatusFromDocument = (xmlDoc: Document): RevisionStatus => {
+  const revisionDesc = xmlDoc.getElementsByTagNameNS('*', 'revisionDesc').item(0) ?? xmlDoc.getElementsByTagName('revisionDesc').item(0);
+  return revisionDesc?.getAttribute('status') === 'live' ? 'live' : 'draft';
+};
 
 const PublishLetterDialog = (props: DefaultDialogProps) => {
   const dispatch = useAppDispatch();
@@ -23,21 +35,14 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
   const [errorMessage, setErrorMessage] = React.useState<string>();
   const [conflictMessage, setConflictMessage] = React.useState<string>();
   const [confirmRebase, setConfirmRebase] = React.useState(false);
+  const currentRevisionStatus = revisionStatusFromDocument(props.xmlDoc);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
   const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
   const pinnedLetter = useSelector((state: RootState) =>
     state.editorLetter.pinnedLetters.find((letter) => letter.id === state.editorLetter.letter.id),
   );
 
-  const publishButtonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (publishButtonRef.current) {
-      publishButtonRef.current.focus();
-    }
-  }, [props]);
-
-  const publishLetter = async () => {
+  const publishLetter = async (revisionStatus: RevisionStatus) => {
     if (figureUploadInProgress) return;
     if (!stateEditorLetter?.id) {
       enqueueSnackbar('Letter could not publish on backend side: No letter id found', {
@@ -49,10 +54,53 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
 
     try {
       setErrorMessage(undefined);
-      await EditorUtils.backendService.publishLetter(stateEditorLetter.id);
+      await EditorUtils.backendService.publishLetter(stateEditorLetter.id, revisionStatus);
 
-      dispatch(setReloadLetterContent({ reloadLetterContent: true }));
-      enqueueSnackbar(`Letter ${stateEditorLetter.name} successfully published!`, {
+      try {
+        const refreshedLetter = await fetchPinnedLetterData(stateEditorLetter.id);
+        if (refreshedLetter.id !== stateEditorLetter.id) {
+          throw new Error('The refreshed pinned letter does not match the published letter.');
+        }
+        dispatch(
+          setEditorLetter({
+            letter: {
+              name: refreshedLetter.name,
+              xmlContent: refreshedLetter.xmlContent,
+              undoAvailable: refreshedLetter.undoAvailable,
+              redoAvailable: refreshedLetter.redoAvailable,
+              capabilities: refreshedLetter.capabilities,
+              version: refreshedLetter.version,
+            },
+          }),
+        );
+        dispatch(
+          setEditorPinnedLetterLifecycle({
+            id: refreshedLetter.id,
+            name: refreshedLetter.name,
+            capabilities: refreshedLetter.capabilities,
+            version: refreshedLetter.version,
+          }),
+        );
+        dispatch(
+          setEditorPinnedLetterContentChanged({
+            id: refreshedLetter.id,
+            contentChanged: false,
+          }),
+        );
+        dispatch(setReloadLetterContent({ reloadLetterContent: false }));
+      } catch (reloadError) {
+        dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+        enqueueSnackbar(
+          t('editor:dialog.publishLetter.reloadError', {
+            reason: MiscUtils.misc.getErrorMessage(reloadError),
+          }),
+          { variant: 'warning' },
+        );
+        props.onClose();
+        return;
+      }
+
+      enqueueSnackbar(t('editor:dialog.publishLetter.success', { name: stateEditorLetter.name ?? '' }), {
         variant: 'success',
       });
       props.onClose();
@@ -61,8 +109,12 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
         setConflictMessage(error.message);
         return;
       }
-      setErrorMessage(MiscUtils.misc.getErrorMessage(error));
-      enqueueSnackbar('Letter could not publisheed on backend side. Please check the details.' + MiscUtils.misc.getErrorMessage(error), {
+      const message =
+        error instanceof InvalidRevisionStatusError
+          ? t('editor:dialog.publishLetter.invalidRevisionStatus')
+          : MiscUtils.misc.getErrorMessage(error);
+      setErrorMessage(message);
+      enqueueSnackbar(t('editor:dialog.publishLetter.error', { reason: message }), {
         variant: 'error',
       });
     }
@@ -110,29 +162,65 @@ const PublishLetterDialog = (props: DefaultDialogProps) => {
   return (
     <>
       <DialogContent>
-        Sind Sie sicher, dass Sie den aktuellen Brief im Backend veröffentlichen möchten?
+        {t('editor:dialog.publishLetter.question')}
+        <Box
+          sx={{
+            alignItems: 'center',
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: 1,
+            display: 'flex',
+            gap: 1,
+            mt: 2,
+            px: 2,
+            py: 1.5,
+          }}
+        >
+          <Typography component="span">{t('editor:dialog.publishLetter.currentStatusLabel')}</Typography>
+          <Typography component="strong" sx={{ fontSize: '1.25rem', fontWeight: 700 }}>
+            {t(`editor:dialog.publishLetter.status${currentRevisionStatus === 'live' ? 'Live' : 'Draft'}`)}
+          </Typography>
+        </Box>
+        <Alert severity="info" sx={{ mt: 2 }}>
+          {t('editor:dialog.publishLetter.statusEffect')}
+        </Alert>
+        <Alert severity="info" sx={{ mt: 2 }}>
+          {t('editor:dialog.publishLetter.visibilityNotice')}
+        </Alert>
         <Alert severity="warning" sx={{ mt: 2 }}>
-          ACHTUNG: Diese Aktion kann nicht rückgängig gemacht werden und der Brief wird im Dateisystem überschrieben!!!
+          {t('editor:dialog.publishLetter.warning')}
         </Alert>
         {errorMessage && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {errorMessage}
           </Alert>
         )}
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 3 }}>
+          <Button
+            size="large"
+            variant={currentRevisionStatus === 'draft' ? 'contained' : 'outlined'}
+            onClick={() => void publishLetter('draft')}
+            disabled={figureUploadInProgress}
+            color="primary"
+            sx={{ minWidth: 160, py: 1.25, fontSize: '1rem' }}
+          >
+            {t('editor:dialog.publishLetter.statusDraft')}
+          </Button>
+          <Button
+            size="large"
+            variant={currentRevisionStatus === 'live' ? 'contained' : 'outlined'}
+            onClick={() => void publishLetter('live')}
+            disabled={figureUploadInProgress}
+            color="primary"
+            sx={{ minWidth: 160, py: 1.25, fontSize: '1rem' }}
+          >
+            {t('editor:dialog.publishLetter.statusLive')}
+          </Button>
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button size={EditorConstants.styles.panel.buttonSize} variant="outlined" onClick={props.onClose} color="primary">
-          Abbrechen
-        </Button>
-        <Button
-          ref={publishButtonRef}
-          size={EditorConstants.styles.panel.buttonSize}
-          variant="contained"
-          onClick={() => publishLetter()}
-          disabled={figureUploadInProgress}
-          color="primary"
-        >
-          Veröffentlichen
+          {t('editor:dialog.publishLetter.cancel')}
         </Button>
       </DialogActions>
     </>

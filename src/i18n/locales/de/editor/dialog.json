@@ -18,6 +18,20 @@
   "selection": {
     "clearAction": "Markierung aufheben"
   },
+  "publishLetter": {
+    "question": "Mit welchem Zielstatus soll der aktuelle Brief gespeichert werden?",
+    "currentStatusLabel": "Aktueller Status:",
+    "statusDraft": "Draft",
+    "statusLive": "Live",
+    "statusEffect": "„Live“ veröffentlicht den Brief auf der Webseite. „Draft“ entfernt einen bereits veröffentlichten Brief wieder von der Webseite.",
+    "visibilityNotice": "Der Status wird im Brief und in der Arbeitskopie gespeichert. Die öffentliche Suchsichtbarkeit kann bis zum Abschluss der Indexsynchronisierung abweichen.",
+    "warning": "Achtung: Der kanonische Brief wird im Dateisystem überschrieben. Eine erstmalige Veröffentlichung sperrt das spätere Umbenennen und Verwerfen dauerhaft.",
+    "cancel": "Abbrechen",
+    "success": "Brief {{name}} wurde erfolgreich mit dem gewählten Status gespeichert.",
+    "invalidRevisionStatus": "Der gewählte Zielstatus ist ungültig. Bitte wählen Sie Draft oder Live.",
+    "reloadError": "Der Status wurde gespeichert, aber die aktualisierte Arbeitskopie konnte nicht geladen werden: {{reason}}",
+    "error": "Der Status des Briefes konnte nicht gespeichert werden: {{reason}}"
+  },
   "inlineFormatting": {
     "contextMenu": "Schriftformatierung",
     "superscript": {

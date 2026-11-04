@@ -14,6 +14,13 @@ export const PublishLetterResponseSchema = z.object({
   letter_id: z.number().int(),
 });
 
+export const RevisionStatusSchema = z.enum(['draft', 'live']);
+export type RevisionStatus = z.infer<typeof RevisionStatusSchema>;
+
+export const InvalidRevisionStatusResponseSchema = z.object({
+  error: z.literal('invalid_revision_status'),
+});
+
 export const UndoRedoResponseSchema = z.object({
   content: z.string(),
   undo_available: z.boolean(),

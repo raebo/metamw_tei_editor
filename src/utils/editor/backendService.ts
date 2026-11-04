@@ -18,11 +18,14 @@ import {
   StringListSchema,
 } from '@src/schemas/miscReferenceData';
 import {
+  InvalidRevisionStatusResponseSchema,
   MessageResponseSchema,
   PublishLetterResponseSchema,
+  RevisionStatusSchema,
   SuccessMessageResponseSchema,
   UndoRedoResponseSchema,
 } from '@src/schemas/editorMutationResponses';
+import type { RevisionStatus } from '@src/schemas/editorMutationResponses';
 import {
   EntityCreatedResponseSchema,
   EntityCreateErrorCode,
@@ -67,6 +70,13 @@ export class LetterChangedSincePinnedError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'LetterChangedSincePinnedError';
+  }
+}
+
+export class InvalidRevisionStatusError extends Error {
+  constructor() {
+    super('invalid_revision_status');
+    this.name = 'InvalidRevisionStatusError';
   }
 }
 
@@ -516,9 +526,11 @@ export const backendService = {
       return throwRebaseLetterRequestError(error);
     }
   },
-  publishLetter: async (letterId: number): Promise<boolean> => {
+  publishLetter: async (letterId: number, revisionStatus: RevisionStatus): Promise<boolean> => {
     try {
-      const response = await initApi().post(`/jwt/editor/pinned_letters/${letterId}/publish`);
+      const response = await initApi().post(`/jwt/editor/pinned_letters/${letterId}/publish`, {
+        revision_status: RevisionStatusSchema.parse(revisionStatus),
+      });
       PublishLetterResponseSchema.parse(response.data);
 
       return true;
@@ -534,6 +546,10 @@ export const backendService = {
           if (conflict.success) {
             throw new LetterChangedSincePinnedError(conflict.data.message);
           }
+        }
+
+        if (response.status === 422 && InvalidRevisionStatusResponseSchema.safeParse(response.data).success) {
+          throw new InvalidRevisionStatusError();
         }
 
         const genericError = z.object({ error: z.string() }).safeParse(response.data);

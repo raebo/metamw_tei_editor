@@ -123,10 +123,11 @@ angelegten Tracker-Tickets.
   Methode sowie normalisierte Pfadform ab. Der Check findet aktuell 57 verwendete Operationen
   bei 67 dokumentierten Operationen und ist vor Jest in `yarn test:ci` eingebunden. Eigene
   Regressionstests belegen gueltige, unbekannte und nicht kanonische Aufrufe.
-- JWT-303 ist technisch vorbereitet: Der automatisierte Pfad-/Methodenabgleich ist gruen,
-  ungenutzte Operationen sind bewertet und F-178/F-179 sind als kuenftiger, noch nicht aktiver
-  Publish-Vertrag dokumentiert. Offen bleibt die gemeinsame Live-Smoke-Abnahme gegen denselben
-  ausgerollten Frontend-/Backend-Stand.
+- JWT-303 ist technisch vorbereitet: Der automatisierte Pfad-/Methodenabgleich ist gruen
+  und ungenutzte Operationen sind bewertet. F-178 ist frontendseitig nach OpenAPI 0.7.0
+  umgesetzt: Der Publish-Dialog bietet die Aktionen `Draft` und `Live`, sendet den Zielstatus
+  ausdruecklich und uebernimmt danach die neu geladene Pinned-Arbeitskopie. Backend-Commit,
+  gemeinsamer Rollout und Live-Smoke-Abnahme stehen noch aus; F-179 bleibt offen.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 
@@ -415,12 +416,13 @@ JWT-OpenAPI-Routencheck erfolgreich sein.
 
 ## Empfohlener naechster Schritt
 
-Als naechstes wird **JWT-303 – gemeinsame Live-Smoke-Abnahme** gegen einen eindeutig
-versionierten und gemeinsam ausgerollten Frontend-/Backend-Stand durchgefuehrt. Zu pruefen
-sind Anmeldung, Briefsuche und -bearbeitung, Entitaetssuche und -anlage, Figures sowie die
-automatischen Annotationen. JWT-201 bleibt bis zur fachlichen Freigabe der Favoritenfunktion
-bewusst zurueckgestellt. F-178/F-179 erweitern den Publish-Vertrag erst nach gemeinsamer
-Backendimplementierung und sind kein Bestandteil des derzeit aktiven Vertrages.
+Als naechstes werden die gezielten Frontendtests und die manuelle Abnahme von F-178
+durchgefuehrt. Danach folgen Backend-Commit, kompatibler gemeinsamer Rollout und
+**JWT-303 – gemeinsame Live-Smoke-Abnahme** gegen einen eindeutig versionierten Stand.
+Zu pruefen sind dabei insbesondere beide Statuswechsel, das erneute Laden der
+Pinned-Arbeitskopie sowie die vorhandenen 409-/422-Fehlerpfade. JWT-201 bleibt bis zur
+fachlichen Freigabe der Favoritenfunktion bewusst zurueckgestellt; F-179 wird nicht durch
+eine clientseitige Annahme vorweggenommen.
 
 ## Definition of Done fuer das Gesamtvorhaben
 

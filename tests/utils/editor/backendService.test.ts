@@ -2,6 +2,7 @@ import axios from 'axios';
 import {
   backendService,
   EntityCreateRequestError,
+  InvalidRevisionStatusError,
   JwtMiscRequestError,
   LetterChangedSincePinnedError,
   PinnedLetterNotFoundError,
@@ -487,16 +488,19 @@ describe('backendService.publishLetter', () => {
     mockPost.mockReset();
   });
 
-  it('validates the documented publish response', async () => {
+  it.each(['draft', 'live'] as const)('sends the explicit %s target and validates the publish response', async (status) => {
     mockPost.mockResolvedValue({ data: { message: 'published', letter_id: 7 } });
 
-    await expect(backendService.publishLetter(7)).resolves.toBe(true);
+    await expect(backendService.publishLetter(7, status)).resolves.toBe(true);
+    expect(mockPost).toHaveBeenCalledWith('/jwt/editor/pinned_letters/7/publish', {
+      revision_status: status,
+    });
   });
 
   it('rejects an invalid publish response', async () => {
     mockPost.mockResolvedValue({ data: { message: 'published', letter_id: '7' } });
 
-    await expect(backendService.publishLetter(7)).rejects.toThrow();
+    await expect(backendService.publishLetter(7, 'draft')).rejects.toThrow();
   });
 
   it('throws the typed exception only for a valid changed-since-pinned conflict', async () => {
@@ -507,7 +511,15 @@ describe('backendService.publishLetter', () => {
       },
     });
 
-    await expect(backendService.publishLetter(7)).rejects.toBeInstanceOf(LetterChangedSincePinnedError);
+    await expect(backendService.publishLetter(7, 'live')).rejects.toBeInstanceOf(LetterChangedSincePinnedError);
+  });
+
+  it('maps the documented invalid status response to a typed error', async () => {
+    mockPost.mockRejectedValue({
+      response: { status: 422, data: { error: 'invalid_revision_status' } },
+    });
+
+    await expect(backendService.publishLetter(7, 'draft')).rejects.toBeInstanceOf(InvalidRevisionStatusError);
   });
 
   it.each([
@@ -517,7 +529,7 @@ describe('backendService.publishLetter', () => {
   ])('keeps an invalid or generic response on the generic error path', async (response) => {
     mockPost.mockRejectedValue({ response });
 
-    await expect(backendService.publishLetter(7)).rejects.not.toBeInstanceOf(LetterChangedSincePinnedError);
+    await expect(backendService.publishLetter(7, 'draft')).rejects.not.toBeInstanceOf(LetterChangedSincePinnedError);
   });
 });
 
