@@ -1,14 +1,17 @@
 # Offene Backendentscheidungen zur JWT-OpenAPI-Angleichung
 
-**Stand:** 02.11.2026
+**Stand:** 04.11.2026
 
-**Status:** JWT-202 bis JWT-204 umgesetzt und ausgerollt; JWT-201 zurueckgestellt
+**Status:** JWT-202 bis JWT-204 umgesetzt und ausgerollt; JWT-201 zurueckgestellt; F-178/F-179 nur geplant
 
 **Priorität:** P1/P2
 
-**Frontend-Branch:** `feature/jwt-openapi-alignment`
+**Frontend-Branch:** `master`
 
-**Kanonischer Vertrag:** `../metamw_edge_version/docs/openapi/jwt.yaml`, Version `0.4.0`
+**Kanonischer Vertrag:** `../metamw_edge_version/docs/openapi/jwt.yaml`. Implementierter
+Stand `0.6.1`; der lokale Stand `0.6.2` ergaenzt nur den als nicht implementiert markierten
+Planungsentwurf fuer F-178/F-179. Historische Nachweise weiter unten nennen jeweils die zum
+damaligen Commit gehoerende Vertragsversion.
 
 ## Ziel
 

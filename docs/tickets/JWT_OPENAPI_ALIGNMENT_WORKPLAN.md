@@ -1,8 +1,8 @@
 # Arbeitsplan zur Angleichung des Frontends an die JWT-OpenAPI
 
-**Stand:** 30.10.2026
+**Stand:** 04.11.2026
 
-**Status:** In Umsetzung – JWT-101 bis JWT-106 auf `feature/jwt-openapi-alignment` umgesetzt
+**Status:** Technische Vertragsangleichung abgeschlossen; gemeinsame Live-Smoke-Abnahme aus JWT-303 offen
 
 **Prioritaet des Gesamtvorhabens:** P1
 
@@ -113,6 +113,20 @@ angelegten Tracker-Tickets.
   Die Snippet-Liste verlangt eine konkrete Annotationsbrief-ID, die Briefanlage akzeptiert
   ausschliesslich den dokumentierten HTTP-Status 200 und Rebase-Fehler unterscheiden
   dokumentierte 401-, 409- und 422-Antworten von unerwarteten Server- und Netzwerkfehlern.
+- JWT-301 ist damit abgeschlossen. Alle direkt konsumierten JSON-Antworten der verwendeten
+  JWT-Services werden an der Systemgrenze validiert oder ueber einen validierten Mapper
+  verarbeitet. Der Figure-Download bleibt als binaere Antwort bewusst ausserhalb der
+  JSON-Schemavalidierung und prueft stattdessen Status, MIME-Type und Blob.
+- JWT-302 ist umgesetzt. `yarn check:jwt-openapi` liest ausschliesslich den kanonischen
+  Vertrag aus `OPENAPI_SPEC_PATH` beziehungsweise dem dokumentierten Standardpfad, ermittelt
+  die statischen und lokal zusammengesetzten JWT-Aufrufe mit dem TypeScript-Parser und gleicht
+  Methode sowie normalisierte Pfadform ab. Der Check findet aktuell 57 verwendete Operationen
+  bei 67 dokumentierten Operationen und ist vor Jest in `yarn test:ci` eingebunden. Eigene
+  Regressionstests belegen gueltige, unbekannte und nicht kanonische Aufrufe.
+- JWT-303 ist technisch vorbereitet: Der automatisierte Pfad-/Methodenabgleich ist gruen,
+  ungenutzte Operationen sind bewertet und F-178/F-179 sind als kuenftiger, noch nicht aktiver
+  Publish-Vertrag dokumentiert. Offen bleibt die gemeinsame Live-Smoke-Abnahme gegen denselben
+  ausgerollten Frontend-/Backend-Stand.
 
 ## Phase 1 – Unmittelbare Frontend-Korrekturen
 
@@ -306,6 +320,8 @@ keine widerspruechlichen Sondertypen.
 
 ### JWT-301 – API-Grenzen vollstaendig typisieren
 
+**Status:** Abgeschlossen am 04.11.2026.
+
 **Ziel:** Verbleibende `any`-Typen und ungepruefte Casts an JWT-Responses entfernen.
 
 **Vorgehen:** Endpunktweise vorgehen, Transporttypen aus der OpenAPI ableiten und nur an
@@ -316,6 +332,8 @@ Vertragsentscheidungen, damit keine instabilen Typen zementiert werden.
 einem konkreten Folgeticket begruendet.
 
 ### JWT-302 – Vertragspruefung automatisieren
+
+**Status:** Abgeschlossen am 04.11.2026.
 
 **Ziel:** Neue Drift wird in der Continuous Integration sichtbar.
 
@@ -330,9 +348,17 @@ einem konkreten Folgeticket begruendet.
 **Abnahme:** Ein absichtlich veraenderter Request oder eine inkompatible Response laesst
 mindestens einen automatisierten Check scheitern.
 
+**Umsetzung:** `scripts/check-jwt-openapi.js` prueft alle statisch aufloesbaren JWT-Aufrufe
+unter `src/` gegen Methode und Pfad der kanonischen YAML. Der Check ist als
+`yarn check:jwt-openapi` einzeln ausfuehrbar und Bestandteil von `yarn test:ci`. Die
+Response-Vertraege bleiben durch die vorhandenen Zod-, Service- und Mappertests abgesichert;
+es wird keine zweite OpenAPI-Kopie im Frontend gepflegt.
+
 ### JWT-303 – Gemeinsame Abnahme und Bereinigung
 
-**Ziel:** Alle 65 dokumentierten Operationen sind entweder genutzt, bewusst ungenutzt oder
+**Status:** Technischer Abgleich abgeschlossen; Live-Smoke-Abnahme offen.
+
+**Ziel:** Alle 67 dokumentierten Operationen sind entweder genutzt, bewusst ungenutzt oder
 als veraltet gekennzeichnet.
 
 **Umfang:**
@@ -346,6 +372,19 @@ als veraltet gekennzeichnet.
 
 **Abnahme:** Es verbleibt keine undokumentierte Abweichung ohne Verantwortlichen und
 Folgeticket.
+
+**Technischer Nachweis vom 04.11.2026:**
+
+- Frontend-Pfad-/Methodencheck: 57 verwendete von 67 dokumentierten Operationen, keine
+  Abweichung;
+- Backend-Routencheck: 67 registrierte Operationen abgedeckt;
+- `yarn test:ci`: 80 Test-Suites und 681 Tests erfolgreich;
+- `yarn tsc --noEmit`: erfolgreich;
+- Lint des neuen Regressionstests: keine Fehler oder Warnungen.
+
+Die verbleibende Abnahme ist bewusst manuell beziehungsweise gegen die gemeinsam
+ausgerollte Umgebung durchzufuehren. Sie darf nicht durch den statischen Vertragscheck als
+erledigt betrachtet werden.
 
 ## Test- und Freigabematrix
 
@@ -376,9 +415,12 @@ JWT-OpenAPI-Routencheck erfolgreich sein.
 
 ## Empfohlener naechster Schritt
 
-Als naechstes wird **JWT-301 – API-Grenzen vollstaendig typisieren** schrittweise umgesetzt.
-JWT-202 bis JWT-204 sind bereits gemeinsam ausgerollt. JWT-201 bleibt bis zur fachlichen
-Freigabe der Favoritenfunktion bewusst zurueckgestellt.
+Als naechstes wird **JWT-303 – gemeinsame Live-Smoke-Abnahme** gegen einen eindeutig
+versionierten und gemeinsam ausgerollten Frontend-/Backend-Stand durchgefuehrt. Zu pruefen
+sind Anmeldung, Briefsuche und -bearbeitung, Entitaetssuche und -anlage, Figures sowie die
+automatischen Annotationen. JWT-201 bleibt bis zur fachlichen Freigabe der Favoritenfunktion
+bewusst zurueckgestellt. F-178/F-179 erweitern den Publish-Vertrag erst nach gemeinsamer
+Backendimplementierung und sind kein Bestandteil des derzeit aktiven Vertrages.
 
 ## Definition of Done fuer das Gesamtvorhaben
 

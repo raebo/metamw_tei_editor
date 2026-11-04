@@ -135,3 +135,16 @@ Response-Parser, Vertragsaenderungen und Tests stehen in `AGENTS.md`.
 Die Datei beschreibt den Backend-Arbeitsbaum, nicht automatisch den produktiv
 ausgerollten Stand. Parser-Tests mit den dokumentierten Responses erstellen;
 vor dem Test gegen ein Backend dessen Version abgleichen.
+
+Der statische Frontend-Abgleich fuer HTTP-Methoden und Pfade wird ausgefuehrt mit:
+
+```bash
+yarn check:jwt-openapi
+```
+
+Der Check ist Bestandteil von `yarn test:ci`. Er liest die kanonische Datei direkt und
+pflegt keine zweite OpenAPI-Kopie im Frontend. Response-Schemata und Fehlerfaelle bleiben
+zusaetzlich durch die Service-, Mapper- und Parsertests abzudecken. Eine CI-Umgebung muss
+deshalb den Backend-Checkout unter dem Standardpfad bereitstellen oder `OPENAPI_SPEC_PATH`
+auf dessen kanonische `docs/openapi/jwt.yaml` setzen; eine fehlende Spezifikation ist ein
+Fehler und wird nicht uebersprungen.

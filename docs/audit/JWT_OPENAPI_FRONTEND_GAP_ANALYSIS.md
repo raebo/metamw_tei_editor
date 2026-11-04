@@ -1,10 +1,13 @@
 # Abgleich JWT-OpenAPI-Vertrag und Frontend
 
-Stand: 2026-10-30
+Stand: 2026-11-04
 
-Frontend-Branch: `feature/jwt-openapi-alignment`
+Frontend-Branch: `master`
 
-Kanonischer Vertrag: `../metamw_edge_version/docs/openapi/jwt.yaml`, Version `0.2.0`
+Kanonischer Vertrag: `../metamw_edge_version/docs/openapi/jwt.yaml`. Der implementierte
+Vertragsstand ist Version `0.6.1`; der lokale Backend-Arbeitsbaum bezeichnet sich als
+`0.6.2` und enthaelt zusaetzlich ausschliesslich den mit `implemented: false` markierten
+Planungsentwurf fuer F-178/F-179.
 
 ## Ziel und Vorgehen
 
@@ -27,10 +30,14 @@ Dieser Backend-Check bestätigt die Routenabdeckung, prüft aber weder die Front
 ## Zusammenfassung
 
 - Der Vertrag enthält **67 Operationen**. Davon sind zwei Operationen für `pinned_letters` ausdrücklich als nicht implementiert und deprecated markiert.
-- Das Frontend verwendet **58 Operationen**. Alle verwendeten Methoden und Pfadformen lassen sich grundsätzlich einer OpenAPI-Operation zuordnen.
-- Es bestehen jedoch mehrere Abweichungen bei Payloads, Response-Modellen, Nullbarkeit und Fehlerbehandlung.
-- Vier Punkte können unmittelbar und ausschließlich im Frontend korrigiert werden: Locking-Payload, Automatic-Annotation-Parser, Kategorienpfad sowie URL-Kanonisierung.
-- Für Favoriten, Pinning-Semantik und einige inkonsistente Response-Typen ist eine abgestimmte Backend-Vertragsänderung sinnvoll.
+- Das Frontend verwendet **57 statisch auflösbare Operationen**. Der automatisierte Check
+  ordnet alle verwendeten Methoden und Pfadformen einer OpenAPI-Operation zu.
+- Die ursprünglich festgestellten Abweichungen bei Payloads, Response-Modellen, Nullbarkeit
+  und Fehlerbehandlung sind umgesetzt oder als bewusste Entscheidung dokumentiert.
+- Favoriten bleiben als JWT-201 fachlich zurückgestellt; die UI ist deaktiviert und führt
+  keine scheinbare Schreiboperation über die Briefsuche mehr aus.
+- Offen ist die gemeinsame Live-Smoke-Abnahme aus JWT-303. Der zukünftige Publish-Vertrag
+  F-178/F-179 ist ausdrücklich noch nicht aktiv und darf vom Frontend nicht verwendet werden.
 
 ## Bereits vertragskonforme Bereiche
 
@@ -257,7 +264,7 @@ Empfehlung: Nur die dokumentierten Authentifizierungsfehler als abgelaufene bezi
 
 ### A12 – Fehlende Validierung an mehreren API-Grenzen
 
-**Status:** In Umsetzung. Auth-, Letter-, Pinned-Letter-, RISM-, Country-, Kind-,
+**Status:** Abgeschlossen am 04.11.2026. Auth-, Letter-, Pinned-Letter-, RISM-, Country-, Kind-,
 Protagonistenwerk-, Misc-Letter-, Author- und Creation-Responses werden inzwischen mit
 OpenAPI-nahen Boundary-Schemas validiert. Hinzu kommen die einfachen Editor-Antworten fuer
 Briefexistenz, nullable XML-Inhalt und Entitaetsschluessel; die Entitaetssuche besitzt nun
@@ -267,8 +274,7 @@ Die praefixabhaengigen Entitaetsdetails und die exakte Briefsuche werden ebenfal
 Grenze geprueft. Die Legacy-Misc-Aufrufe besitzen nun eine gemeinsame typisierte
 Fehlerauswertung fuer 401, 422, unerwartete HTTP-Antworten und Netzwerkfehler. Diese Grenze
 wird auch fuer die Protagonistenperson und die Autoren eines Werks verwendet und bildet
-dort zusaetzlich den dokumentierten 404 ab. Verbleibende heterogene Legacy-Responses werden
-in JWT-301 endpunktweise nachgezogen. Die Statusantworten der Automatic-Annotation-
+dort zusaetzlich den dokumentierten 404 ab. Die Statusantworten der Automatic-Annotation-
 Mutationen werden ebenfalls an der Grenze validiert; Entity Create aus A6 ist gemeinsam
 ausgerollt. Brief- und Pinned-Brief-Collections werden vor dem Mapping als Arrays geprueft;
 ihre Service-Signaturen unterscheiden konkrete Ergebnisse von geworfenen Fehlern ohne
@@ -276,19 +282,22 @@ zusaetzlichen `undefined`-Scheinzustand. Auch die Automatic-Annotation-Aufrufe v
 nun eine gemeinsame typisierte Fehlergrenze fuer dokumentierte HTTP-Fehler, unerwartete
 Serverantworten und Netzwerkfehler. Pflicht-Pfadparameter der Snippet-Liste, der
 dokumentierte Erfolgsstatus der Briefanlage und die Rebase-Fehlergrenze sind ebenfalls
-explizit abgesichert.
+explizit abgesichert. Eine erneute direkte Suche nach `response.data` bestaetigt, dass
+JSON-Antworten entweder unmittelbar durch ein Schema oder durch einen validierten Mapper
+laufen. Der Figure-Download ist die bewusste binaere Ausnahme.
 
 **Priorität:** P3
 
 **Zuständigkeit:** Frontend
 
-Ein Teil der neueren Endpunkte wird bereits mit Zod validiert. In älteren Services werden Antworten jedoch weiterhin als `any` verarbeitet und per Type Assertion in UI-Modelle überführt, insbesondere in:
+Der Ausgangsbefund betraf insbesondere:
 
 - `src/services/mappings/editorMappings.ts`,
 - `src/services/editor/apiPinnedLettersRequest.service.ts`,
 - `src/utils/editor/backendService.ts`.
 
-Dadurch bleiben Nullbarkeit, fehlende Felder und Vertragsabweichungen bis zur UI unentdeckt. Besonders betroffen sind RISM-Einträge, Autoren, Länder/Arten, Werke und Pinned-Letter-Daten.
+Diese Grenzen besitzen inzwischen OpenAPI-nahe Schemas und zentrale Mapper. Nullbarkeit,
+fehlende Felder und Vertragsabweichungen werden vor der Uebergabe an UI-Modelle erkannt.
 
 Empfehlung: API-Schemas pro OpenAPI-Komponente definieren oder generieren und danach explizit in UI-Modelle mappen. Die OpenAPI-Datei sollte dabei die einzige Quelle bleiben; keine manuell divergierende zweite Vertragskopie anlegen.
 
@@ -363,3 +372,19 @@ Bei jeder Vertragsänderung zuerst Backendimplementierung, OpenAPI und Backendte
 - Nur dokumentierte fachliche Statuscodes werden in leere/null Zustände übersetzt.
 - Keine JWT-Response wird an der Systemgrenze ungeprüft als `any` in das UI-Modell übernommen.
 - Frontend und getestetes Backend verwenden denselben OpenAPI-Stand.
+
+## Automatisierter Abschlusscheck
+
+Der Frontendcheck wird mit `yarn check:jwt-openapi` ausgefuehrt und ist Bestandteil von
+`yarn test:ci`. Er liest den Pfad aus `OPENAPI_SPEC_PATH` oder verwendet den dokumentierten
+Standardpfad zum benachbarten Backend. Der TypeScript-Parser loest Literale, Template-Pfade,
+lokale URL-Variablen und die Auth-Basis auf. Unbekannte Methoden/Pfade sowie JWT-URLs ohne
+fuehrenden Slash lassen den Check fehlschlagen. Aktueller Nachweis:
+
+```text
+JWT OpenAPI contract check passed: 57 frontend operations matched 67 documented operations.
+```
+
+Der Check ersetzt nicht die Response-Schema- und Fehlerfalltests und nicht die ausstehende
+Live-Smoke-Abnahme. Er verhindert jedoch, dass neue oder umbenannte Frontendpfade unbemerkt
+vom kanonischen Vertrag abweichen.

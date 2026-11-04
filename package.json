@@ -50,7 +50,8 @@
     "start": "webpack serve --mode development",
     "build": "webpack --mode production",
     "test": "jest",
-    "test:ci": "jest --ci --runInBand",
+    "test:ci": "yarn check:jwt-openapi && jest --ci --runInBand",
+    "check:jwt-openapi": "node scripts/check-jwt-openapi.js",
     "jest": "jest",
     "lint": "eslint src tests --max-warnings=0",
     "typecheck": "tsc --noEmit"
