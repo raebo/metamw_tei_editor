@@ -51,3 +51,28 @@ die nach dem Build erzeugte Datei `dist/git-info.json` vor der Aktivierung und
 stellt die Leserechte der statischen Dateien für den Webserver sicher. Inaktive
 Releases werden nach 30 Tagen entfernt; der aktuell aktive Release-Ordner wird
 von der Bereinigung ausgenommen.
+
+## Launcher auf dem Server
+
+Die Vorlage `deploy/launcher.sh` kann einmalig als stabiler Einstiegspunkt in
+das Anwendungsverzeichnis kopiert werden:
+
+```bash
+cd /home/debian/apps/tei_editor
+install -m 0755 deployer/deploy/launcher.sh deploy.sh
+```
+
+Danach genügt für ein Deployment von `master`:
+
+```bash
+./deploy.sh
+```
+
+Der Launcher aktualisiert zuerst den Checkout `deployer` ausschließlich per
+Fast-Forward von `origin/master` und führt anschließend dessen aktuelles
+Deployment-Skript aus. Ein anderer auszurollender Branch kann weiterhin als
+Argument angegeben werden:
+
+```bash
+./deploy.sh feature/example
+```
