@@ -124,14 +124,19 @@ export YARN_GLOBAL_FOLDER="$SHARED_DIR/yarn"
 echo "Installing dependencies from the committed lockfile"
 yarn install --immutable
 
-echo "Generating deployment metadata"
-yarn generate-git-info
-
 echo "Building production assets"
 yarn build
 
 if [[ ! -f "$RELEASE_PATH/dist/index.html" ]]; then
   echo "Build validation failed: dist/index.html is missing." >&2
+  exit 1
+fi
+
+echo "Generating deployment metadata"
+yarn generate-git-info
+
+if [[ ! -f "$RELEASE_PATH/dist/git-info.json" ]]; then
+  echo "Build validation failed: dist/git-info.json is missing." >&2
   exit 1
 fi
 
