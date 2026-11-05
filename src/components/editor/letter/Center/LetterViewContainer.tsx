@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { fetchLetterData } from '@src/services/editor/apiLettersRequest.service';
 import XMLDisplayParser from './LetterViewContainer/XmlDisplayParser';
 import { useSelector, useStore } from 'react-redux';
@@ -28,6 +28,7 @@ const LetterViewContainer = () => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const xmlContentRef = useRef<HTMLDivElement | null>(null);
   const pendingParagraphEdits = useRef(new Map<string, string>());
+  const viewportPositions = useRef(new Map<number, { top: number; left: number }>());
   const [anchorPosition, setAnchorPosition] = useState<null | { top: number; left: number }>(null);
 
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
@@ -132,6 +133,27 @@ const LetterViewContainer = () => {
     const paragraph = editableParagraphForTarget(event.target);
     if (paragraph) void saveParagraphEdit(paragraph);
   };
+
+  const rememberViewportPosition = useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      if (stateEditorLetter.id === null) return;
+      viewportPositions.current.set(stateEditorLetter.id, {
+        top: event.currentTarget.scrollTop,
+        left: event.currentTarget.scrollLeft,
+      });
+    },
+    [stateEditorLetter.id],
+  );
+
+  useLayoutEffect(() => {
+    if (reloadLetterContent || stateEditorLetter.id === null || letterState.viewMode !== 'WYSIWYG') return;
+    const viewport = containerRef.current;
+    const position = viewportPositions.current.get(stateEditorLetter.id);
+    if (!viewport || !position) return;
+
+    viewport.scrollTop = position.top;
+    viewport.scrollLeft = position.left;
+  }, [letterState.xmlContent, letterState.viewMode, reloadLetterContent, stateEditorLetter.id]);
 
   useEffect(() => {
     if (!focusedFigureXmlId || !stateEditorLetter.xmlContent) return;
@@ -321,7 +343,13 @@ const LetterViewContainer = () => {
               {reloadLetterContent ? (
                 <Alert severity="warning">{t('editor:common.letterViewContainer.reloadRequired')}</Alert>
               ) : letterState.viewMode === 'WYSIWYG' ? (
-                <div className="letter-xml" id="letterXml" ref={containerRef} style={{ fontSize: `${stateLetterFontSize}%` }}>
+                <div
+                  className="letter-xml"
+                  id="letterXml"
+                  ref={containerRef}
+                  style={{ fontSize: `${stateLetterFontSize}%` }}
+                  onScroll={rememberViewportPosition}
+                >
                   <div
                     ref={xmlContentRef}
                     id="letterXmlContent"

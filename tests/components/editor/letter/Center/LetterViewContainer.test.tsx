@@ -168,6 +168,70 @@ describe('LetterViewContainer', () => {
     expect(document.getElementById('letterXmlContent')).not.toBeInTheDocument();
   });
 
+  it('restores the WYSIWYG viewport after reloading the active letter', async () => {
+    const initialData = letterData(1, 'Initial content');
+    const reloadedData = { ...letterData(1, 'Updated content'), name: initialData.name };
+    let resolveReload!: (value: EditorLetterData) => void;
+    const reloadRequest = new Promise<EditorLetterData>((resolve) => {
+      resolveReload = resolve;
+    });
+    mockFetchPinnedLetterData.mockReturnValue(reloadRequest);
+    const store = configureStore({
+      reducer: { auth: authReducer, editorLetter: editorLetterReducer },
+    });
+    store.dispatch(
+      setEditorPinnedLetters({
+        pinnedLetters: [
+          {
+            id: 1,
+            name: initialData.name,
+            contentChanged: false,
+            isPinned: true,
+            viewMode: 'WYSIWYG',
+          },
+        ],
+      }),
+    );
+    store.dispatch(
+      setEditorLetter({
+        letter: {
+          id: 1,
+          name: initialData.name,
+          viewMode: 'WYSIWYG',
+          xmlContent: initialData.xmlContent,
+        },
+      }),
+    );
+
+    render(
+      <Provider store={store}>
+        <LetterViewContainer />
+      </Provider>,
+    );
+
+    await screen.findByText('Initial content');
+    const initialViewport = document.getElementById('letterXml')!;
+    initialViewport.scrollTop = 480;
+    initialViewport.scrollLeft = 24;
+    fireEvent.scroll(initialViewport);
+
+    act(() => {
+      store.dispatch(setReloadLetterContent({ reloadLetterContent: true }));
+    });
+    expect(document.getElementById('letterXml')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveReload(reloadedData);
+      await reloadRequest;
+    });
+
+    expect(await screen.findByText('Updated content')).toBeInTheDocument();
+    const restoredViewport = document.getElementById('letterXml')!;
+    expect(restoredViewport).not.toBe(initialViewport);
+    expect(restoredViewport.scrollTop).toBe(480);
+    expect(restoredViewport.scrollLeft).toBe(24);
+  });
+
   it('persists typed and pasted plain-paragraph text on blur without serializing the rendered DOM', async () => {
     const data = letterData(1, 'Initial text');
     mockFetchPinnedLetterData.mockResolvedValue(data);
