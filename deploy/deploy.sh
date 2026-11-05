@@ -106,6 +106,7 @@ require_shared_file "$SHARED_DIR/tei_editor.config.js"
 require_shared_file "$SHARED_DIR/webpack.production.config.js"
 
 RELEASE_PATH="$(mktemp -d "$RELEASES_DIR/${TIMESTAMP}.XXXXXX")"
+chmod 0755 "$RELEASE_PATH"
 
 echo "Starting deployment of branch '$BRANCH' into $RELEASE_PATH"
 git clone --branch "$BRANCH" --depth 1 "$REPOSITORY" "$RELEASE_PATH"
@@ -139,6 +140,8 @@ if [[ ! -f "$RELEASE_PATH/dist/git-info.json" ]]; then
   echo "Build validation failed: dist/git-info.json is missing." >&2
   exit 1
 fi
+
+chmod -R a+rX "$RELEASE_PATH/dist"
 
 echo "Activating release $RELEASE_PATH"
 ln -s "$RELEASE_PATH" "$NEXT_LINK"

@@ -56,5 +56,6 @@ RESTART_PM2=true ./deploy/deploy.sh master
 
 Das Skript verhindert parallele Deployments, validiert `dist/index.html` sowie
 die nach dem Build erzeugte Datei `dist/git-info.json` vor der Aktivierung und
-entfernt inaktive Releases nach 30 Tagen. Der aktuell aktive Release-Ordner
-wird von der Bereinigung ausgenommen.
+stellt die Leserechte der statischen Dateien für den Webserver sicher. Inaktive
+Releases werden nach 30 Tagen entfernt; der aktuell aktive Release-Ordner wird
+von der Bereinigung ausgenommen.
