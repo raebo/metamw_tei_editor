@@ -141,7 +141,6 @@ export const setEditorNodeClickedAndContentLeftRightThunk = createAsyncThunk(
     dispatch(setNodeClicked({ nodeClicked: nodeClicked }));
     dispatch(setContentTextIsMarked({ textIsMarked: textIsMarked }));
     dispatch(setEditorSelectedItem({ selectedItem: { left: contentLeft, right: contentRight } }));
-    dispatch(setReloadLetterContent({ reloadLetterContent: true }));
   },
 );
 

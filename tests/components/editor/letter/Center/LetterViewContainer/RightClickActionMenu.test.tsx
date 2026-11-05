@@ -999,6 +999,7 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
+    expect(store.getState().editorLetter.reloadLetterContent).toBe(false);
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Absätze und Abschnitte|Paragraphs and sections/,
