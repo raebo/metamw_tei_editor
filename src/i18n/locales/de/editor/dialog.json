@@ -8,7 +8,16 @@
     "content": "Inhalt",
     "metadata": "Metadaten",
     "organize": "Anordnen",
-    "unavailable": "Diese Aktion ist im aktuellen Kontext nicht verfügbar."
+    "unavailable": "Diese Aktion ist im aktuellen Kontext nicht verfügbar.",
+    "disabledReasons": {
+      "plainParagraphRequired": "Der Absatz enthält strukturierte Auszeichnungen und kann daher nicht als einfacher Text bearbeitet werden.",
+      "sectionHeadingRequired": "Dieser Abschnitt besitzt keine Überschrift.",
+      "listItemRequired": "Wählen Sie einen einzelnen Listeneintrag aus.",
+      "tableCellRequired": "Wählen Sie eine einzelne Tabellenzelle aus.",
+      "tableRowRequired": "Wählen Sie eine einzelne Tabellenzeile aus.",
+      "addressContextRequired": "Die Adresszeile kann an dieser Position nicht eingefügt werden.",
+      "figureUploadInProgress": "Während eines laufenden Bild-Uploads kann kein weiterer Upload gestartet werden."
+    }
   },
   "sectionAddressLine": {
     "title": "Adresszeile",
@@ -27,7 +36,10 @@
     "error": "Die Adresszeile konnte nicht bearbeitet werden. Bitte prüfen Sie die XML-Struktur und verwenden Sie einzeiligen Text."
   },
   "selection": {
-    "clearAction": "Markierung aufheben"
+    "clearAction": "Markierung aufheben",
+    "hintTitle": "Textmarkierung aktiv",
+    "hintKeyboardPrefix": "Markierung aufheben mit",
+    "hintMouse": "Mit der Maus: Rechtsklick auf die Markierung und „Markierung aufheben“ wählen."
   },
   "publishLetter": {
     "question": "Mit welchem Zielstatus soll der aktuelle Brief gespeichert werden?",

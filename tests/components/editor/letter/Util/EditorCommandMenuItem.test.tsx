@@ -11,7 +11,7 @@ describe('EditorCommandMenuItem', () => {
     expect(screen.getByTestId('ChevronRightIcon')).toHaveAttribute('aria-hidden', 'true');
   });
 
-  it('uses a real disabled state and exposes its reason', () => {
+  it('uses a real disabled state and shows its reason in a tooltip', async () => {
     const onClick = jest.fn();
     render(
       <EditorCommandMenuItem
@@ -25,6 +25,8 @@ describe('EditorCommandMenuItem', () => {
     const item = screen.getByRole('menuitem', { name: 'Nach oben verschieben' });
     expect(item).toHaveAttribute('aria-disabled', 'true');
     expect(item).toHaveAttribute('title', 'Der Schreibakt steht bereits an erster Stelle.');
+    fireEvent.mouseOver(screen.getByText('Nach oben verschieben'));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Der Schreibakt steht bereits an erster Stelle.');
     fireEvent.click(item);
     expect(onClick).not.toHaveBeenCalled();
   });

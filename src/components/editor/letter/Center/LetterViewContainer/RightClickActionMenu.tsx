@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
-import { Menu, Divider, ListSubheader, MenuList, Paper, Popper } from '@mui/material';
+import { Box, Menu, Divider, ListSubheader, MenuList, Paper, Popper, Typography } from '@mui/material';
 import { createContextMenuItems, MenuItemType } from '@src/components/editor/letter/Util/ContextMenuLetterItems';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector, useStore } from 'react-redux';
@@ -37,6 +37,9 @@ import EditorCommandMenuItem, { editorCommandMenuPaperSx } from '@src/components
 
 const SECTION_SELECTOR =
   'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
+const SELECTION_HINT_SESSION_KEY = 'tei-editor-selection-clear-hint-count';
+const SELECTION_HINT_DISPLAY_LIMIT = 3;
+const SELECTION_HINT_DURATION_MS = 7000;
 
 const fractionDialogType = (variant?: string): string => {
   if (variant === 'vertical-slash') return EditorConstants.dialogTypes.VERTICAL_SLASH_FRACTION;
@@ -66,6 +69,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   const [openSubmenuIndex, setOpenSubmenuIndex] = useState<number | null>(null);
   const [nestedSubmenuAnchorEl, setNestedSubmenuAnchorEl] = useState<null | HTMLElement>(null);
   const [openNestedSubmenuIndex, setOpenNestedSubmenuIndex] = useState<number | null>(null);
+  const [showSelectionHint, setShowSelectionHint] = useState(false);
 
   const xmlDocRef = useRef<XMLDocument | null>(null);
 
@@ -785,15 +789,18 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const sectionAnchor = targetElement?.closest<HTMLElement>(SECTION_SELECTOR);
       const writingActAnchor = targetElement?.closest<HTMLElement>('div[type="act_of_writing"][data-editor-xml-path]');
       const addressReference = getAddressSectionReference(targetElement);
-      const addressCommand: MenuItemType | null = addressReference
-        ? {
-            label: t('editor:dialog.sectionAddressLine.insert'),
-            keyShortcut: 'Ctrl+Alt+C',
-            action: () => {
-              void insertAddressLine(addressReference);
-            },
-          }
-        : null;
+      const addressCommand: MenuItemType | null =
+        addressReference || writingActAnchor
+          ? {
+              label: t('editor:dialog.sectionAddressLine.insert'),
+              keyShortcut: 'Ctrl+Alt+C',
+              disabled: !addressReference,
+              disabledReason: !addressReference ? t('editor:dialog.commandGroups.disabledReasons.addressContextRequired') : undefined,
+              action: () => {
+                if (addressReference) void insertAddressLine(addressReference);
+              },
+            }
+          : null;
       if (addressCommand && !sectionCaretAnchor) {
         menuItemsToAdd.push(addressCommand);
         isClickable = true;
@@ -893,12 +900,13 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
 
       if (paragraphAnchor?.closest('body')) {
         const paragraphSource = resolveTeiElementByPath(xmlDocRef.current, paragraphAnchor.dataset.editorXmlPath);
-        if (paragraphSource?.children.length === 0) {
-          structureActions.push({
-            label: t('editor:dialog.paragraphStructure.actions.editParagraphContent'),
-            action: () => openStructureDialog('paragraph-edit', paragraphAnchor),
-          });
-        }
+        const paragraphContentEditable = paragraphSource?.children.length === 0;
+        structureActions.push({
+          label: t('editor:dialog.paragraphStructure.actions.editParagraphContent'),
+          action: () => openStructureDialog('paragraph-edit', paragraphAnchor),
+          disabled: !paragraphContentEditable,
+          disabledReason: !paragraphContentEditable ? t('editor:dialog.commandGroups.disabledReasons.plainParagraphRequired') : undefined,
+        });
         structureActions.push(
           {
             label: t('editor:dialog.paragraphStructure.actions.insertParagraph'),
@@ -946,16 +954,16 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
               action: () => openStructureDialog('section-edit', sectionAnchor),
             },
           );
-          if (hasHeading) {
-            structureActions.push({
-              label: t('editor:dialog.paragraphStructure.actions.deleteSectionHeading'),
-              danger: true,
-              action: () => {
-                const sourcePath = sectionAnchor.dataset.editorXmlPath;
-                if (sourcePath !== undefined) deleteSectionHeading(sourcePath);
-              },
-            });
-          }
+          structureActions.push({
+            label: t('editor:dialog.paragraphStructure.actions.deleteSectionHeading'),
+            danger: true,
+            disabled: !hasHeading,
+            disabledReason: !hasHeading ? t('editor:dialog.commandGroups.disabledReasons.sectionHeadingRequired') : undefined,
+            action: () => {
+              const sourcePath = sectionAnchor.dataset.editorXmlPath;
+              if (sourcePath !== undefined) deleteSectionHeading(sourcePath);
+            },
+          });
         }
       }
 
@@ -1072,24 +1080,24 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
 
       const listSource = itemAnchor ?? listAnchor;
       if (listSource?.closest('body')) {
-        listActions.push({
-          label: t('editor:dialog.listStructure.actions.addItem'),
-          action: () => openListDialog('list-add-item', listSource),
-        });
-        if (itemAnchor) {
-          listActions.push(
-            {
-              label: t('editor:dialog.listStructure.actions.editItem'),
-              action: () => openListDialog('list-edit-item', itemAnchor),
-            },
-            {
-              label: t('editor:dialog.listStructure.actions.deleteItem'),
-              danger: true,
-              action: () => openListDialog('list-delete-item', itemAnchor),
-            },
-          );
-        }
         listActions.push(
+          {
+            label: t('editor:dialog.listStructure.actions.addItem'),
+            action: () => openListDialog('list-add-item', listSource),
+          },
+          {
+            label: t('editor:dialog.listStructure.actions.editItem'),
+            action: () => openListDialog('list-edit-item', itemAnchor ?? listSource),
+            disabled: !itemAnchor,
+            disabledReason: !itemAnchor ? t('editor:dialog.commandGroups.disabledReasons.listItemRequired') : undefined,
+          },
+          {
+            label: t('editor:dialog.listStructure.actions.deleteItem'),
+            danger: true,
+            action: () => openListDialog('list-delete-item', itemAnchor ?? listSource),
+            disabled: !itemAnchor,
+            disabledReason: !itemAnchor ? t('editor:dialog.commandGroups.disabledReasons.listItemRequired') : undefined,
+          },
           {
             label: t('editor:dialog.listStructure.actions.sortAscending'),
             action: () => openListDialog('list-sort-ascending', listSource),
@@ -1125,94 +1133,160 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
 
       const tableSource = cellAnchor ?? rowAnchor ?? tableAnchor;
       if (tableSource?.closest('body')) {
-        if (rowAnchor) {
-          tableRowActions.push(
-            {
-              label: t('editor:dialog.tableStructure.actions.rowAbove'),
-              action: () => openTableDialog('table-row-above', rowAnchor, 'row'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.rowBelow'),
-              action: () => openTableDialog('table-row-below', rowAnchor, 'row'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.rowsCustom'),
-              action: () => openTableDialog('table-rows-custom', rowAnchor, 'row'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.deleteRow'),
-              danger: true,
-              action: () => openTableDialog('table-row-delete', rowAnchor, 'row'),
-            },
-          );
-        }
-        if (cellAnchor) {
-          tableCellActions.push(
-            {
-              label: t('editor:dialog.tableStructure.actions.editCell'),
-              action: () => openTableDialog('table-cell-edit', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.insertCell'),
-              action: () => openTableDialog('table-cell-insert', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.joinRight'),
-              action: () => openTableDialog('table-cells-join-right', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.splitLeft'),
-              action: () => openTableDialog('table-cell-split-left', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.splitRight'),
-              action: () => openTableDialog('table-cell-split-right', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.joinAbove'),
-              action: () => openTableDialog('table-cell-join-above', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.joinBelow'),
-              action: () => openTableDialog('table-cell-join-below', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.splitAbove'),
-              action: () => openTableDialog('table-cell-split-above', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.splitBelow'),
-              action: () => openTableDialog('table-cell-split-below', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.join'),
-              action: () => openTableDialog('table-join', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.split'),
-              action: () => openTableDialog('table-split', cellAnchor, 'cell'),
-            },
-          );
-          tableColumnActions.push(
-            {
-              label: t('editor:dialog.tableStructure.actions.columnBefore'),
-              action: () => openTableDialog('table-column-before', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.columnAfter'),
-              action: () => openTableDialog('table-column-after', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.columnsCustom'),
-              action: () => openTableDialog('table-columns-custom', cellAnchor, 'cell'),
-            },
-            {
-              label: t('editor:dialog.tableStructure.actions.deleteColumn'),
-              danger: true,
-              action: () => openTableDialog('table-column-delete', cellAnchor, 'cell'),
-            },
-          );
-        }
+        const tableCommand = (
+          label: string,
+          operation: TableStructureOperation,
+          anchor: HTMLElement,
+          elementType: 'cell' | 'row',
+          disabled: boolean,
+          disabledReason: string,
+          danger = false,
+        ): MenuItemType => ({
+          label,
+          action: () => openTableDialog(operation, anchor, elementType),
+          disabled,
+          disabledReason: disabled ? disabledReason : undefined,
+          danger,
+        });
+        const cellTarget = cellAnchor ?? tableSource;
+        const rowTarget = rowAnchor ?? tableSource;
+        const cellUnavailable = !cellAnchor;
+        const rowUnavailable = !rowAnchor;
+        const cellReason = t('editor:dialog.commandGroups.disabledReasons.tableCellRequired');
+        const rowReason = t('editor:dialog.commandGroups.disabledReasons.tableRowRequired');
+
+        tableCellActions.push(
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.editCell'),
+            'table-cell-edit',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.insertCell'),
+            'table-cell-insert',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.joinRight'),
+            'table-cells-join-right',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.splitLeft'),
+            'table-cell-split-left',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.splitRight'),
+            'table-cell-split-right',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.joinAbove'),
+            'table-cell-join-above',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.joinBelow'),
+            'table-cell-join-below',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.splitAbove'),
+            'table-cell-split-above',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.splitBelow'),
+            'table-cell-split-below',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(t('editor:dialog.tableStructure.actions.join'), 'table-join', cellTarget, 'cell', cellUnavailable, cellReason),
+          tableCommand(t('editor:dialog.tableStructure.actions.split'), 'table-split', cellTarget, 'cell', cellUnavailable, cellReason),
+        );
+        tableRowActions.push(
+          tableCommand(t('editor:dialog.tableStructure.actions.rowAbove'), 'table-row-above', rowTarget, 'row', rowUnavailable, rowReason),
+          tableCommand(t('editor:dialog.tableStructure.actions.rowBelow'), 'table-row-below', rowTarget, 'row', rowUnavailable, rowReason),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.rowsCustom'),
+            'table-rows-custom',
+            rowTarget,
+            'row',
+            rowUnavailable,
+            rowReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.deleteRow'),
+            'table-row-delete',
+            rowTarget,
+            'row',
+            rowUnavailable,
+            rowReason,
+            true,
+          ),
+        );
+        tableColumnActions.push(
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.columnBefore'),
+            'table-column-before',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.columnAfter'),
+            'table-column-after',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.columnsCustom'),
+            'table-columns-custom',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+          ),
+          tableCommand(
+            t('editor:dialog.tableStructure.actions.deleteColumn'),
+            'table-column-delete',
+            cellTarget,
+            'cell',
+            cellUnavailable,
+            cellReason,
+            true,
+          ),
+        );
         wholeTableActions.push({
           label: t('editor:dialog.tableStructure.actions.sort'),
           action: () => openTableDialog('table-sort', tableSource, 'table'),
@@ -1229,18 +1303,24 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           label: t('editor:dialog.tableStructure.groups.cell'),
           hasSubMenu: true,
           subMenu: tableCellActions,
+          disabled: !cellAnchor,
+          disabledReason: !cellAnchor ? t('editor:dialog.commandGroups.disabledReasons.tableCellRequired') : undefined,
         });
       if (tableRowActions.length > 0)
         tableActions.push({
           label: t('editor:dialog.tableStructure.groups.row'),
           hasSubMenu: true,
           subMenu: tableRowActions,
+          disabled: !rowAnchor,
+          disabledReason: !rowAnchor ? t('editor:dialog.commandGroups.disabledReasons.tableRowRequired') : undefined,
         });
       if (tableColumnActions.length > 0)
         tableActions.push({
           label: t('editor:dialog.tableStructure.groups.column'),
           hasSubMenu: true,
           subMenu: tableColumnActions,
+          disabled: !cellAnchor,
+          disabledReason: !cellAnchor ? t('editor:dialog.commandGroups.disabledReasons.tableCellRequired') : undefined,
         });
       if (wholeTableActions.length > 0)
         tableActions.push({
@@ -1426,13 +1506,15 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         isClickable = true;
       }
 
-      if (!figureUploadInProgress && xmlDocRef.current && xmlContentRef.current) {
+      if (xmlDocRef.current && xmlContentRef.current) {
         const figureAnchor = findFigureAnchor(targetNode, xmlContentRef.current, xmlDocRef.current);
 
         if (figureAnchor) {
           if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
           figureUploadCommand = {
             label: t('editor:dialog.figureUpload.contextAction'),
+            disabled: figureUploadInProgress,
+            disabledReason: figureUploadInProgress ? t('editor:dialog.commandGroups.disabledReasons.figureUploadInProgress') : undefined,
             action: () => {
               dispatch(
                 setEditorDialogAndReferenceThunk({
@@ -1642,8 +1724,78 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
     return () => document.removeEventListener('keydown', handleClearSelectionShortcut, true);
   }, [clearMarkedSelection, contentTextIsMarked]);
 
+  useEffect(() => {
+    if (!contentTextIsMarked) {
+      setShowSelectionHint(false);
+      return;
+    }
+
+    let displayCount = 0;
+    try {
+      displayCount = Number.parseInt(window.sessionStorage.getItem(SELECTION_HINT_SESSION_KEY) ?? '0', 10) || 0;
+    } catch {
+      displayCount = 0;
+    }
+    if (displayCount >= SELECTION_HINT_DISPLAY_LIMIT) return;
+
+    setShowSelectionHint(true);
+    try {
+      window.sessionStorage.setItem(SELECTION_HINT_SESSION_KEY, String(displayCount + 1));
+    } catch {
+      // The hint remains usable when browser storage is unavailable.
+    }
+
+    const timeout = window.setTimeout(() => setShowSelectionHint(false), SELECTION_HINT_DURATION_MS);
+    return () => window.clearTimeout(timeout);
+  }, [contentTextIsMarked]);
+
   return (
     <>
+      {contentTextIsMarked && showSelectionHint && (
+        <Paper
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          elevation={6}
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            left: 16,
+            zIndex: (theme) => theme.zIndex.snackbar,
+            maxWidth: 440,
+            border: '1px solid',
+            borderColor: 'info.main',
+            borderRadius: 1.5,
+            px: 2,
+            py: 1.25,
+            pointerEvents: 'none',
+          }}
+        >
+          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+            {t('editor:dialog.selection.hintTitle')}
+          </Typography>
+          <Typography variant="body2">
+            {t('editor:dialog.selection.hintKeyboardPrefix')}{' '}
+            <Box
+              component="kbd"
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 0.75,
+                bgcolor: 'action.hover',
+                fontFamily: 'monospace',
+                fontWeight: 700,
+                px: 0.75,
+                py: 0.125,
+              }}
+            >
+              Esc
+            </Box>
+            {'. '}
+            {t('editor:dialog.selection.hintMouse')}
+          </Typography>
+        </Paper>
+      )}
       <Menu
         open={Boolean(props.anchorPosition)}
         onClose={handleCloseAll}

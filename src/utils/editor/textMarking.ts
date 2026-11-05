@@ -168,8 +168,23 @@ export const textMarking = {
   },
   addTmpIdToNode(xmlDoc: Document, node: Element, tmpIdPrefix: string): void {
     if (!xmlDoc) throw new Error('No XML document provided.');
-    const nodePath = EditorUtils.xmlCheck.getNodePath(node);
-    const xmlNode = EditorUtils.xmlCheck.getNodeByPath(xmlDoc, nodePath) as Element | null;
+
+    let xmlNode: Element | null = node.ownerDocument === xmlDoc ? node : null;
+    const renderedSourceElement = node.closest<HTMLElement>('[data-editor-xml-path]');
+    const sourcePath = renderedSourceElement?.dataset.editorXmlPath;
+
+    if (!xmlNode && sourcePath && /^\d+(\.\d+)*$/.test(sourcePath)) {
+      let sourceNode: Node | null = xmlDoc.documentElement;
+      for (const index of sourcePath.split('.').map(Number)) {
+        sourceNode = sourceNode?.childNodes[index] ?? null;
+      }
+      if (sourceNode?.nodeType === Node.ELEMENT_NODE) xmlNode = sourceNode as Element;
+    }
+
+    if (!xmlNode) {
+      const nodePath = EditorUtils.xmlCheck.getNodePath(node);
+      xmlNode = EditorUtils.xmlCheck.getNodeByPath(xmlDoc, nodePath) as Element | null;
+    }
     if (!xmlNode) throw new Error('Could not resolve node in XML doc');
 
     let tmpId = xmlNode.getAttribute('tmp_id');
@@ -177,6 +192,6 @@ export const textMarking = {
       tmpId = `tmp-id-${tmpIdPrefix}-${Date.now()}`;
       xmlNode.setAttribute('tmp_id', tmpId);
     }
-    node.setAttribute('tmp_id', tmpId);
+    renderedSourceElement?.setAttribute('tmp_id', tmpId);
   },
 };

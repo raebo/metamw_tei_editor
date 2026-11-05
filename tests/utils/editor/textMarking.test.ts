@@ -181,6 +181,26 @@ describe('textMarking.removeMarkedSpans', () => {
   });
 });
 
+describe('textMarking.addTmpIdToNode', () => {
+  test('resolves a rendered node through its stable source path', () => {
+    const xmlDoc = new DOMParser().parseFromString(
+      '<TEI><text><body><div type="act_of_writing"><p>Greeting anchor</p></div></body></text></TEI>',
+      'application/xml',
+    );
+    const renderedWritingAct = document.createElement('div');
+    const syntheticCaret = document.createElement('button');
+    const renderedParagraph = document.createElement('p');
+    renderedParagraph.dataset.editorXmlPath = '0.0.0.0';
+    renderedWritingAct.append(syntheticCaret, renderedParagraph);
+
+    textMarking.addTmpIdToNode(xmlDoc, renderedParagraph, 'ADD_GREETINGS_FORMULA');
+
+    const sourceParagraph = xmlDoc.querySelector('p')!;
+    expect(sourceParagraph.getAttribute('tmp_id')).toMatch(/^tmp-id-ADD_GREETINGS_FORMULA-/);
+    expect(renderedParagraph.getAttribute('tmp_id')).toBe(sourceParagraph.getAttribute('tmp_id'));
+  });
+});
+
 describe('unwrapNode', () => {
   beforeEach(() => {
     // Mock the recursive unwrapNode call

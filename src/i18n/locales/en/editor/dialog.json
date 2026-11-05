@@ -8,7 +8,16 @@
     "content": "Content",
     "metadata": "Metadata",
     "organize": "Organize",
-    "unavailable": "This action is not available in the current context."
+    "unavailable": "This action is not available in the current context.",
+    "disabledReasons": {
+      "plainParagraphRequired": "This paragraph contains structured markup and cannot be edited as plain text.",
+      "sectionHeadingRequired": "This section has no heading.",
+      "listItemRequired": "Select an individual list item.",
+      "tableCellRequired": "Select an individual table cell.",
+      "tableRowRequired": "Select an individual table row.",
+      "addressContextRequired": "An address line cannot be inserted at this position.",
+      "figureUploadInProgress": "Another image upload cannot be started while an upload is in progress."
+    }
   },
   "sectionAddressLine": {
     "title": "Address line",
@@ -27,7 +36,10 @@
     "error": "The address line could not be edited. Check the XML structure and use single-line text."
   },
   "selection": {
-    "clearAction": "Clear selection"
+    "clearAction": "Clear selection",
+    "hintTitle": "Text selection active",
+    "hintKeyboardPrefix": "Clear the selection with",
+    "hintMouse": "With the mouse: right-click the selection and choose “Clear selection”."
   },
   "publishLetter": {
     "question": "Which target status should be stored for the current letter?",

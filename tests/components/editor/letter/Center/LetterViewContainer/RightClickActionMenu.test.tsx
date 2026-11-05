@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import '@src/i18n';
@@ -192,7 +192,10 @@ const openWritingActContentGroup = async (name: RegExp) => {
 };
 
 describe('RightClickActionMenu figure upload action', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    window.sessionStorage.clear();
+  });
   afterEach(() => jest.restoreAllMocks());
 
   it('opens the TEI P5 documentation for the selected source element securely', async () => {
@@ -325,6 +328,11 @@ describe('RightClickActionMenu figure upload action', () => {
     const paragraph = container.querySelector('p')!;
     paragraph.innerHTML = 'Te<span class="marked">xt</span>';
 
+    const selectionHint = screen.getByRole('status');
+    expect(selectionHint).toHaveTextContent(/Textmarkierung aktiv|Text selection active/);
+    expect(selectionHint).toHaveTextContent(/Rechtsklick|right-click/);
+    expect(screen.getByText('Esc').tagName).toBe('KBD');
+
     fireEvent.contextMenu(paragraph.querySelector('span.marked')!, {
       button: 2,
       clientX: 20,
@@ -337,6 +345,7 @@ describe('RightClickActionMenu figure upload action', () => {
     expect(paragraph.querySelector('span.marked')).not.toBeInTheDocument();
     expect(paragraph.childNodes).toHaveLength(1);
     expect(paragraph).toHaveTextContent('Text');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
   it('clears a marked selection with Escape', async () => {
@@ -363,6 +372,38 @@ describe('RightClickActionMenu figure upload action', () => {
     expect(paragraph.querySelector('span.marked')).not.toBeInTheDocument();
     expect(paragraph.childNodes).toHaveLength(1);
     expect(paragraph).toHaveTextContent('Text');
+  });
+
+  it('automatically hides the selection hint and limits it to the first three selections per session', () => {
+    jest.useFakeTimers();
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+    store.dispatch(setContentTextIsMarked({ textIsMarked: true }));
+
+    const firstRender = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(window.sessionStorage.getItem('tei-editor-selection-clear-hint-count')).toBe('1');
+
+    act(() => jest.advanceTimersByTime(7000));
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    firstRender.unmount();
+
+    window.sessionStorage.setItem('tei-editor-selection-clear-hint-count', '3');
+    render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    jest.useRealTimers();
   });
 
   it('opens foreign-hand annotation creation from a collapsed text caret', async () => {
@@ -879,6 +920,68 @@ describe('RightClickActionMenu figure upload action', () => {
     });
   });
 
+  it('opens greeting-formula creation through the rendered paragraph source path', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('p')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    await openWritingActMenuGroup(/Element bearbeiten|Edit element/);
+    fireEvent.click(
+      await screen.findByRole('menuitem', {
+        name: /Begrüßungsformel Hinzufügen|Add Greeting Formula/,
+      }),
+    );
+
+    await waitFor(() => expect(store.getState().editorLetter.dialogType).toBe('ADD_GREETINGS_FORMULA'));
+    const updatedXml = new DOMParser().parseFromString(store.getState().editorLetter.letter.xmlContent ?? '', 'application/xml');
+    expect(updatedXml.querySelector('p')?.getAttribute('tmp_id')).toMatch(/^tmp-id-ADD_GREETINGS_FORMULA-/);
+    expect(enqueueSnackbar).not.toHaveBeenCalledWith('Could not resolve node in XML doc', {
+      variant: 'error',
+    });
+  });
+
+  it('keeps paragraph content editing visible but disabled for structured markup', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('persName')!.closest('p')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    await openWritingActContentGroup(/Absätze und Abschnitte|Paragraphs and sections/);
+    const editParagraph = await screen.findByRole('menuitem', {
+      name: /Absatzinhalt bearbeiten oder leeren|Edit or clear paragraph content/,
+    });
+
+    expect(editParagraph).toHaveAttribute('aria-disabled', 'true');
+    expect(editParagraph).toHaveAttribute('title', expect.stringMatching(/strukturierte Auszeichnungen|structured markup/));
+  });
+
   it('removes an annotation through its stable source path and preserves its text', async () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
     const patchContent = jest.spyOn(EditorUtils.backendService, 'patchContent').mockResolvedValue(true);
@@ -1131,6 +1234,35 @@ describe('RightClickActionMenu figure upload action', () => {
     });
   });
 
+  it('keeps list-item actions visible but disabled on the list container', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 7, name: 'FMB-7', viewMode: 'WYSIWYG', xmlContent: sourceXml },
+      }),
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ContextMenuHarness />
+      </Provider>,
+    );
+
+    fireEvent.contextMenu(container.querySelector('list')!, {
+      button: 2,
+      clientX: 20,
+      clientY: 30,
+    });
+    await openWritingActContentGroup(/Listen|Lists/);
+
+    for (const label of [/Listeneintrag bearbeiten|Edit list item/, /Listeneintrag löschen|Delete list item/]) {
+      const action = await screen.findByRole('menuitem', { name: label });
+      expect(action).toHaveAttribute('aria-disabled', 'true');
+      expect(action).toHaveAttribute('title', expect.stringMatching(/Listeneintrag|list item/));
+    }
+    expect(screen.getByRole('menuitem', { name: /Listeneintrag hinzufügen|Add list item/ })).not.toHaveAttribute('aria-disabled', 'true');
+  });
+
   it('offers creating an empty ordered list after a paragraph', async () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
     store.dispatch(
@@ -1220,6 +1352,12 @@ describe('RightClickActionMenu figure upload action', () => {
       clientY: 30,
     });
     await openWritingActContentGroup(/Tabellen|Tables/);
+    for (const label of [/Zelle|Cell/, /Zeile|Row/, /Spalte|Column/]) {
+      const group = await screen.findByRole('menuitem', { name: label });
+      expect(group).toHaveAttribute('aria-disabled', 'true');
+      expect(group).toHaveAttribute('title', expect.stringMatching(/Tabellen(zelle|zeile)|table (cell|row)/));
+    }
+    expect(screen.getByRole('menuitem', { name: /^(Tabelle|Table)$/ })).not.toHaveAttribute('aria-disabled', 'true');
     fireEvent.click(await screen.findByRole('menuitem', { name: /^(Tabelle|Table)$/ }));
     expect(await screen.findByRole('menuitem', { name: /Tabelle löschen|Delete table/ })).toBeInTheDocument();
     fireEvent.click(await screen.findByRole('menuitem', { name: /Tabelle sortieren|Sort table/ }));
@@ -1232,7 +1370,7 @@ describe('RightClickActionMenu figure upload action', () => {
     });
   });
 
-  it('does not offer another figure upload while one is running', () => {
+  it('keeps figure upload visible but disabled while one is running', async () => {
     const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
     store.dispatch(
       setEditorLetter({
@@ -1252,8 +1390,13 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
+    await openWritingActContentGroup(/Grafische Elemente|Graphic elements/);
+    const upload = await screen.findByRole('menuitem', { name: /Bild einfügen|Insert image/ });
 
-    expect(screen.queryByRole('menuitem', { name: /Bild einfügen|Insert image/ })).not.toBeInTheDocument();
+    expect(upload).toHaveAttribute('aria-disabled', 'true');
+    expect(upload).toHaveAttribute('title', expect.stringMatching(/Bild-Upload|image upload/));
+    fireEvent.click(upload);
+    expect(store.getState().editorLetter.dialogType).toBeNull();
   });
 
   it.each([
