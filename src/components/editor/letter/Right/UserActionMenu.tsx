@@ -1,6 +1,5 @@
-import { Box, Menu, MenuItem } from '@mui/material';
+import { Menu } from '@mui/material';
 import React, { useState } from 'react';
-import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import {
   allTimesAvailableKeyHandleDefinitions,
   contentMarkedKeyHandleDefinitions,
@@ -13,6 +12,7 @@ import { useAppDispatch } from '@src/redux/hooks';
 import { MiscUtils } from '@src/utils/misc';
 import store from '@src/redux/redux.store';
 import i18n from 'i18next';
+import EditorCommandMenuItem, { editorCommandMenuPaperSx } from '@src/components/editor/letter/Util/EditorCommandMenuItem';
 
 interface UserActionMenuProps {
   anchorEl: HTMLElement | null;
@@ -249,29 +249,6 @@ const UserActionMenu = (props: UserActionMenuProps) => {
     // setSubMenuAnchorEl((prev) => ({ ...prev, [menuKey]: null }));
   };
 
-  const getMenuItemStyles = (active: boolean) => ({
-    fontSize: '0.775rem',
-    padding: '4px 12px',
-    minHeight: '32px',
-    color: active ? 'black' : 'gray',
-    cursor: 'pointer',
-  });
-  const getSndMenuItemStyles = (active: boolean) => ({
-    fontSize: '0.675rem',
-    padding: '2px 12px',
-    minHeight: '15px',
-    color: active ? 'black' : 'grey',
-    cursor: 'pointer',
-  });
-
-  const SndMenuItemStylesSpan = {
-    fontSize: '0.575rem',
-    padding: '0px 12px',
-    minHeight: '15px',
-    color: 'grey',
-    cursor: 'pointer',
-  };
-
   return (
     <>
       <Menu
@@ -282,33 +259,29 @@ const UserActionMenu = (props: UserActionMenuProps) => {
           setSubMenuAnchorEl({});
         }}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        slotProps={{ paper: { sx: editorCommandMenuPaperSx } }}
       >
         {menuItems.map((item, index) =>
           item.hasSubMenu ? (
-            <MenuItem
+            <EditorCommandMenuItem
               key={index}
-              component="div"
               onMouseEnter={(e: React.MouseEvent<HTMLElement>) => item.hasSubMenu && handleSubMenuOpen(e, item.label)}
               onClick={(e: React.MouseEvent<HTMLElement>) => handleSubMenuOpen(e, item.label)}
-              sx={getMenuItemStyles(item.active)}
-            >
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                <span>{item.label}</span>
-                {item.keyHandleItem && 'key' in item.keyHandleItem ? (
-                  <span style={SndMenuItemStylesSpan}>{item.keyHandleItem.key}</span>
-                ) : null}
-              </Box>
-              <ArrowRightIcon fontSize="small" />
-            </MenuItem>
+              label={item.label}
+              shortcut={item.keyHandleItem && 'key' in item.keyHandleItem ? item.keyHandleItem.key : undefined}
+              hasSubMenu
+              disabled={!item.active}
+              disabledReason={!item.active ? i18n.t('editor:dialog.commandGroups.unavailable') : undefined}
+            />
           ) : (
-            <MenuItem key={index} onClick={props.handleClose} className="custom-tool-menu-item" sx={getMenuItemStyles(item.active)}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                <span>{item.label}</span>
-                {item.keyHandleItem && 'key' in item.keyHandleItem ? (
-                  <span style={SndMenuItemStylesSpan}>{item.keyHandleItem.key}</span>
-                ) : null}
-              </Box>
-            </MenuItem>
+            <EditorCommandMenuItem
+              key={index}
+              onClick={props.handleClose}
+              label={item.label}
+              shortcut={item.keyHandleItem && 'key' in item.keyHandleItem ? item.keyHandleItem.key : undefined}
+              disabled={!item.active}
+              disabledReason={!item.active ? i18n.t('editor:dialog.commandGroups.unavailable') : undefined}
+            />
           ),
         )}
       </Menu>
@@ -322,21 +295,18 @@ const UserActionMenu = (props: UserActionMenuProps) => {
             open={Boolean(subMenuAnchorEl[item.label])} // Only open if the anchor element is set
             onClose={() => handleSubMenuClick(item.label, null)} // Close this specific submenu
             anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+            slotProps={{ paper: { sx: editorCommandMenuPaperSx } }}
           >
             {item.subMenu?.map((subItem, subIndex) => (
-              <MenuItem
+              <EditorCommandMenuItem
                 key={subIndex}
                 onClick={() => handleSubMenuClick(item.label, subItem.keyHandleItem)} // Close the submenu when an item is clicked
-                className="custom-tool-menu-item"
-                sx={getSndMenuItemStyles(subItem.active)}
-              >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                  <span>{subItem.label}</span>
-                  {subItem.keyHandleItem && 'key' in subItem.keyHandleItem ? (
-                    <span style={SndMenuItemStylesSpan}>{subItem.keyHandleItem.key}</span>
-                  ) : null}
-                </Box>
-              </MenuItem>
+                label={subItem.label}
+                shortcut={subItem.keyHandleItem && 'key' in subItem.keyHandleItem ? subItem.keyHandleItem.key : undefined}
+                disabled={!subItem.active}
+                disabledReason={!subItem.active ? i18n.t('editor:dialog.commandGroups.unavailable') : undefined}
+              />
             ))}
           </Menu>
         ))}

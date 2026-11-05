@@ -33,7 +33,13 @@
       "publishLetter": "Brief veröffentlichen",
       "switchWYSIWYG": "Wechsel zu WYSIWYG Ansicht",
       "switchXML": "Wechsel zu XML Ansicht",
-      "resetLetter": "Brief zurücksetzen"
+      "resetLetter": "Brief zurücksetzen",
+      "groups": {
+        "edit": "Text bearbeiten",
+        "document": "Dokumentaktionen",
+        "view": "Ansicht",
+        "manage": "Brief verwalten"
+      }
     }
   },
   "staleness": {

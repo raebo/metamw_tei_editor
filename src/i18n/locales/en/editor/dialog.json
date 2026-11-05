@@ -1,4 +1,15 @@
 {
+  "commandGroups": {
+    "entities": "Annotate entities",
+    "textMarkup": "Mark up text",
+    "references": "Comments and references",
+    "structure": "Text structure",
+    "editElement": "Edit element",
+    "content": "Content",
+    "metadata": "Metadata",
+    "organize": "Organize",
+    "unavailable": "This action is not available in the current context."
+  },
   "sectionAddressLine": {
     "title": "Address line",
     "insert": "Insert address line",
@@ -542,6 +553,8 @@
   },
   "paragraphStructure": {
     "contextAction": "Paragraphs and sections",
+    "writingActMenuTitle": "Writing act {{number}}",
+    "writingActMenuTitleWithoutNumber": "Writing act",
     "actions": {
       "insertParagraph": "Insert paragraph after …",
       "appendParagraph": "Add paragraph to this section …",
@@ -556,6 +569,10 @@
       "addWritingAct": "Add another writing act …",
       "moveWritingActUp": "Move writing act up",
       "moveWritingActDown": "Move writing act down"
+    },
+    "disabledReasons": {
+      "firstWritingAct": "The writing act is already in the first position.",
+      "lastWritingAct": "The writing act is already in the last position."
     },
     "operations": {
       "paragraph-insert": "A new paragraph is inserted after the selected paragraph.",

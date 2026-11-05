@@ -183,6 +183,14 @@ const ContextMenuHarness = () => {
   );
 };
 
+const openWritingActMenuGroup = async (name: RegExp) => {
+  fireEvent.click(await screen.findByRole('menuitem', { name }));
+};
+
+const openWritingActContentGroup = async (name: RegExp) => {
+  fireEvent.click(await screen.findByRole('menuitem', { name }));
+};
+
 describe('RightClickActionMenu figure upload action', () => {
   beforeEach(() => jest.clearAllMocks());
   afterEach(() => jest.restoreAllMocks());
@@ -286,6 +294,12 @@ describe('RightClickActionMenu figure upload action', () => {
       /Frakturschrift.*auszeichnen|Mark print text as Fraktur/i,
     ];
     for (const name of labels) expect(screen.queryByRole('menuitem', { name })).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Text auszeichnen|Mark up text/ }));
+    expect(screen.getByRole('menuitem', { name: /Schriftformatierung|Text formatting/ })).toBeVisible();
+    fireEvent.click(screen.getByRole('menuitem', { name: /Kommentare und Verweise|Comments and references/ }));
+    expect(screen.queryByRole('menuitem', { name: /Schriftformatierung|Text formatting/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /Querverweise|Cross-references/ })).toBeVisible();
+    fireEvent.click(screen.getByRole('menuitem', { name: /Text auszeichnen|Mark up text/ }));
     fireEvent.click(await screen.findByRole('menuitem', { name: /Schriftformatierung|Text formatting/ }));
     for (const name of labels) expect(screen.getByRole('menuitem', { name })).toBeVisible();
     fireEvent.click(screen.getByRole('menuitem', { name: labels[0] }));
@@ -372,6 +386,7 @@ describe('RightClickActionMenu figure upload action', () => {
     selection.addRange(range);
 
     fireEvent.contextMenu(paragraph, { button: 2, clientX: 20, clientY: 30 });
+    await openWritingActMenuGroup(/Kommentare und Verweise|Comments and references/);
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Anmerkung fremder Hand|foreign-hand annotation/,
@@ -407,6 +422,7 @@ describe('RightClickActionMenu figure upload action', () => {
     selection.addRange(range);
 
     fireEvent.contextMenu(paragraph, { button: 2, clientX: 20, clientY: 30 });
+    await openWritingActMenuGroup(/Kommentare und Verweise|Comments and references/);
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Fußnote des Briefautors|author footnote/,
@@ -442,6 +458,7 @@ describe('RightClickActionMenu figure upload action', () => {
     selection.addRange(range);
 
     fireEvent.contextMenu(paragraph, { button: 2, clientX: 20, clientY: 30 });
+    await openWritingActMenuGroup(/Kommentare und Verweise|Comments and references/);
     fireEvent.click(await screen.findByRole('menuitem', { name: /Bruchzahlen|Fractions/ }));
     fireEvent.click(await screen.findByRole('menuitem', { name: /horizontaler Linie|horizontal bar/ }));
 
@@ -477,6 +494,7 @@ describe('RightClickActionMenu figure upload action', () => {
     selection.addRange(range);
 
     fireEvent.contextMenu(paragraph, { button: 2, clientX: 20, clientY: 30 });
+    await openWritingActMenuGroup(/Kommentare und Verweise|Comments and references/);
     fireEvent.click(await screen.findByRole('menuitem', { name: /Bruchzahlen|Fractions/ }));
     fireEvent.click(await screen.findByRole('menuitem', { name: actionName }));
 
@@ -576,6 +594,7 @@ describe('RightClickActionMenu figure upload action', () => {
     selection.addRange(range);
 
     fireEvent.contextMenu(paragraph, { button: 2, clientX: 20, clientY: 30 });
+    await openWritingActMenuGroup(/Kommentare und Verweise|Comments and references/);
     fireEvent.click(await screen.findByRole('menuitem', { name: /Querverweise|Cross-references/ }));
     fireEvent.click(await screen.findByRole('menuitem', { name: /Registereinträge|register entries/ }));
 
@@ -724,7 +743,7 @@ describe('RightClickActionMenu figure upload action', () => {
     );
 
     fireEvent.contextMenu(container.querySelector('p')!, { button: 2, clientX: 20, clientY: 30 });
-    fireEvent.click(await screen.findByRole('menuitem', { name: /Grafische Elemente|Graphic elements/ }));
+    await openWritingActContentGroup(/Grafische Elemente|Graphic elements/);
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Grafisches Element danach|Insert graphic element after/,
@@ -757,7 +776,7 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
-    fireEvent.click(await screen.findByRole('menuitem', { name: /Grafische Elemente|Graphic elements/ }));
+    await openWritingActContentGroup(/Grafische Elemente|Graphic elements/);
     fireEvent.click(await screen.findByRole('menuitem', { name: /Bildkarte bearbeiten|Edit image map/ }));
 
     expect(store.getState().editorLetter.dialogType).toBe('GRAPHIC_STRUCTURE');
@@ -784,6 +803,7 @@ describe('RightClickActionMenu figure upload action', () => {
     const paragraph = container.querySelector('p')!;
 
     fireEvent.contextMenu(paragraph, { button: 2, clientX: 20, clientY: 30 });
+    await openWritingActContentGroup(/Grafische Elemente|Graphic elements/);
     fireEvent.click(await screen.findByRole('menuitem', { name: /Bild einfügen|Insert image/ }));
 
     expect(store.getState().editorLetter.dialogType).toBe('FIGURE_UPLOAD');
@@ -809,11 +829,7 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
-    fireEvent.click(
-      await screen.findByRole('menuitem', {
-        name: /Absätze und Abschnitte|Paragraphs and sections/,
-      }),
-    );
+    await openWritingActContentGroup(/Absätze und Abschnitte|Paragraphs and sections/);
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Absatz danach einfügen|Insert paragraph after/,
@@ -848,11 +864,7 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
-    fireEvent.click(
-      await screen.findByRole('menuitem', {
-        name: /Absätze und Abschnitte|Paragraphs and sections/,
-      }),
-    );
+    await openWritingActContentGroup(/Absätze und Abschnitte|Paragraphs and sections/);
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Absatzinhalt bearbeiten oder leeren|Edit or clear paragraph content/,
@@ -887,6 +899,7 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
+    await openWritingActMenuGroup(/Element bearbeiten|Edit element/);
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Auszeichnung Entfernen|Remove Annotation/,
@@ -918,11 +931,7 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
-    fireEvent.click(
-      await screen.findByRole('menuitem', {
-        name: /Absätze und Abschnitte|Paragraphs and sections/,
-      }),
-    );
+    await openWritingActContentGroup(/Absätze und Abschnitte|Paragraphs and sections/);
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Absatz in diesem Abschnitt hinzufügen|Add paragraph to this section/,
@@ -956,11 +965,7 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
-    fireEvent.click(
-      await screen.findByRole('menuitem', {
-        name: /Absätze und Abschnitte|Paragraphs and sections/,
-      }),
-    );
+    await openWritingActMenuGroup(/Anordnen|Organize/);
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Weiteren Schreibakt hinzufügen|Add another writing act/,
@@ -992,6 +997,7 @@ describe('RightClickActionMenu figure upload action', () => {
     const writingActs = container.querySelectorAll('div[type="act_of_writing"]');
     const writingActCaret = document.createElement('button');
     writingActCaret.className = 'tei-section-caret';
+    writingActCaret.dataset.editorSectionCaret = 'true';
     writingActCaret.textContent = '▶';
     writingActs[1].prepend(writingActCaret);
     fireEvent.contextMenu(writingActCaret, {
@@ -1000,11 +1006,8 @@ describe('RightClickActionMenu figure upload action', () => {
       clientY: 30,
     });
     expect(store.getState().editorLetter.reloadLetterContent).toBe(false);
-    fireEvent.click(
-      await screen.findByRole('menuitem', {
-        name: /Absätze und Abschnitte|Paragraphs and sections/,
-      }),
-    );
+    expect(await screen.findByText(/Schreibakt 2|Writing act 2/)).toBeVisible();
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Metadaten|Metadata/ }));
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Autoren und Schreiber bearbeiten|Edit authors and writers/,
@@ -1035,11 +1038,12 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
-    fireEvent.click(
+    await openWritingActMenuGroup(/Anordnen|Organize/);
+    expect(
       await screen.findByRole('menuitem', {
-        name: /Absätze und Abschnitte|Paragraphs and sections/,
+        name: /Schreibakt nach oben verschieben|Move writing act up/,
       }),
-    );
+    ).toHaveAttribute('aria-disabled', 'true');
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Schreibakt nach unten verschieben|Move writing act down/,
@@ -1112,7 +1116,7 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
-    fireEvent.click(await screen.findByRole('menuitem', { name: /Listen|Lists/ }));
+    await openWritingActContentGroup(/Listen|Lists/);
     expect(await screen.findByRole('menuitem', { name: /Listeneintrag bearbeiten|Edit list item/ })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: /Listeneintrag löschen|Delete list item/ })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: /^(Liste löschen|Delete list) …$/ })).toBeInTheDocument();
@@ -1146,7 +1150,7 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
-    fireEvent.click(await screen.findByRole('menuitem', { name: /Listen|Lists/ }));
+    await openWritingActContentGroup(/Listen|Lists/);
     fireEvent.click(
       await screen.findByRole('menuitem', {
         name: /Leere nummerierte Liste|Insert empty ordered list/,
@@ -1178,7 +1182,7 @@ describe('RightClickActionMenu figure upload action', () => {
     const cell = container.querySelector('td')!;
     cell.focus();
     fireEvent.contextMenu(cell, { button: 0, detail: 0, clientX: 20, clientY: 30 });
-    fireEvent.click(await screen.findByRole('menuitem', { name: /Tabellen|Tables/ }));
+    await openWritingActContentGroup(/Tabellen|Tables/);
     const cellGroup = await screen.findByRole('menuitem', { name: /Zelle|Cell/ });
     expect(screen.getByRole('menuitem', { name: /Spalte|Column/ })).toBeInTheDocument();
 
@@ -1215,8 +1219,8 @@ describe('RightClickActionMenu figure upload action', () => {
       clientX: 20,
       clientY: 30,
     });
-    fireEvent.click(await screen.findByRole('menuitem', { name: /Tabellen|Tables/ }));
-    fireEvent.click(await screen.findByRole('menuitem', { name: /^(Tabelle|Table) ▶$/ }));
+    await openWritingActContentGroup(/Tabellen|Tables/);
+    fireEvent.click(await screen.findByRole('menuitem', { name: /^(Tabelle|Table)$/ }));
     expect(await screen.findByRole('menuitem', { name: /Tabelle löschen|Delete table/ })).toBeInTheDocument();
     fireEvent.click(await screen.findByRole('menuitem', { name: /Tabelle sortieren|Sort table/ }));
 

@@ -1,4 +1,15 @@
 {
+  "commandGroups": {
+    "entities": "Entitäten auszeichnen",
+    "textMarkup": "Text auszeichnen",
+    "references": "Kommentare und Verweise",
+    "structure": "Textstruktur",
+    "editElement": "Element bearbeiten",
+    "content": "Inhalt",
+    "metadata": "Metadaten",
+    "organize": "Anordnen",
+    "unavailable": "Diese Aktion ist im aktuellen Kontext nicht verfügbar."
+  },
   "sectionAddressLine": {
     "title": "Adresszeile",
     "insert": "Adresszeile einfügen",
@@ -542,6 +553,8 @@
   },
   "paragraphStructure": {
     "contextAction": "Absätze und Abschnitte",
+    "writingActMenuTitle": "Schreibakt {{number}}",
+    "writingActMenuTitleWithoutNumber": "Schreibakt",
     "actions": {
       "insertParagraph": "Absatz danach einfügen …",
       "appendParagraph": "Absatz in diesem Abschnitt hinzufügen …",
@@ -556,6 +569,10 @@
       "addWritingAct": "Weiteren Schreibakt hinzufügen …",
       "moveWritingActUp": "Schreibakt nach oben verschieben",
       "moveWritingActDown": "Schreibakt nach unten verschieben"
+    },
+    "disabledReasons": {
+      "firstWritingAct": "Der Schreibakt befindet sich bereits an erster Stelle.",
+      "lastWritingAct": "Der Schreibakt befindet sich bereits an letzter Stelle."
     },
     "operations": {
       "paragraph-insert": "Ein neuer Absatz wird nach dem ausgewählten Absatz eingefügt.",

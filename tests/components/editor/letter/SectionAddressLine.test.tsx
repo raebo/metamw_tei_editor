@@ -45,6 +45,7 @@ describe('section address line workflow', () => {
       </Provider>,
     );
     fireEvent.click(screen.getByRole('button', { name: /Abschnittsmenü öffnen|Open section menu/ }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Metadaten|Metadata/ }));
     fireEvent.click(await screen.findByRole('menuitem', { name: /Adresszeile einfügen|Insert address line/ }));
     await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
     expect(patch.mock.calls[0][2]).toBe('ADDRLINE_ADDED');
@@ -72,6 +73,7 @@ describe('section address line workflow', () => {
       fireEvent.keyDown(text, { key: 'c', ctrlKey: true, altKey: true });
     } else {
       fireEvent.contextMenu(text, { button: 2 });
+      fireEvent.click(await screen.findByRole('menuitem', { name: /Metadaten|Metadata/ }));
       fireEvent.click(await screen.findByRole('menuitem', { name: /Adresszeile einfügen|Insert address line/ }));
     }
     await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));

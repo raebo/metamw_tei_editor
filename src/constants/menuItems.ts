@@ -138,6 +138,7 @@ export const getMenuItemsNoMarking = (
   {
     identifier: EditorConstants.menuItemTypes.REMOVE_ANNOTATION,
     label: t('editor:common.menuItems.removeAnnotation'),
+    danger: true,
     action: async ({ node }: { node?: Node }) => {
       try {
         const currentDoc = xmlDocRef.current;

@@ -65,6 +65,9 @@ export interface MenuItem {
   label: string;
   type?: 'inactive';
   action?: MenuAction;
+  disabled?: boolean;
+  disabledReason?: string;
+  danger?: boolean;
 }
 
 export type ContentAddrLine = {

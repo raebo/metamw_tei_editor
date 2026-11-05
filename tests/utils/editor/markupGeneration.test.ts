@@ -77,3 +77,19 @@ describe('markupGeneration comments', () => {
     expect(xmlDoc.querySelector('note')).toBeNull();
   });
 });
+
+describe('markupGeneration writing acts', () => {
+  it('renumbers legacy writing acts sequentially after inserting a new act', () => {
+    const xmlDoc = new DOMParser().parseFromString(
+      `<TEI xmlns="${EditorConstants.TEI_NS}"><text><body><div type="act_of_writing"><p>First</p></div><div type="act_of_writing" n="8"><p>Second</p></div></body></text></TEI>`,
+      'application/xml',
+    );
+    const firstWritingAct = xmlDoc.querySelector('body > div[type="act_of_writing"]')!;
+
+    EditorUtils.markupGeneration.insertActOfWritingBlock(xmlDoc, [], firstWritingAct);
+
+    const writingActs = Array.from(xmlDoc.querySelectorAll('body > div[type="act_of_writing"]'));
+    expect(writingActs.map((writingAct) => writingAct.getAttribute('n'))).toEqual(['1', '2', '3']);
+    expect(writingActs[1].querySelector('p')?.textContent).toBe('Brieftext');
+  });
+});

@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, IconButton, Stack } from '@mui/material';
+import { Box, Divider, IconButton, Stack } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import SearchIcon from '@mui/icons-material/Search';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
@@ -610,71 +610,79 @@ const ShowEditor = () => {
             justifyContent: 'center',
           }}
         >
-          <Stack direction="column" spacing={1}>
+          <Stack direction="column" spacing={1} sx={{ width: '100%', px: 0.5 }}>
             <ToolbarLetterNameDisplay letterName={stateEditorLetter.name} xmlContent={stateEditorLetter.xmlContent} />
-            <QuickContentFormatter />
-            <ToolbarMenuButton
-              title={t('editor:common.letterViewContainer.toolbarRight.moreActions')}
-              selected={selectedItemRight === EditorConstants.compMappingRight.USER_ACTIONS}
-              onClick={(event) => handleButtonMenuClick(event)}
-              icon={<MoreHorizIcon />}
-            />
-            <ToolbarMenuButton
-              title={t('editor:common.letterViewContainer.toolbarRight.withoutFunction')}
-              selected={selectedItemRight === EditorConstants.compMappingRight.ASSIGNED}
-              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
-              icon={<AssignmentIcon />}
-            />
-
-            <ToolbarMenuButton
-              title={t('editor:common.letterViewContainer.toolbarRight.addLetterToFavourite')}
-              disabled
-              disabledReason={t('editor:common.favourites.comingSoon')}
-              selected={selectedItemRight === EditorConstants.compMappingRight.SET_FAVOURITE}
-              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
-              icon={<StarOutlineIcon />}
-            />
-
-            <ToolbarMenuButton
-              title={t('editor:common.letterViewContainer.toolbarRight.publishLetter')}
-              disabled={figureUploadInProgress}
-              selected={selectedItemRight === EditorConstants.compMappingRight.PUBLISH_LETTER}
-              onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
-              icon={<CloudUploadOutlinedIcon />}
-            />
-
-            <ToolbarMenuButton
-              title={
-                isCodeView
-                  ? t('editor:common.letterViewContainer.toolbarRight.switchWYSIWYG')
-                  : t('editor:common.letterViewContainer.toolbarRight.switchXML')
-              }
-              selected={isCodeView}
-              onClick={handleToggleCodeview}
-              icon={<CodeIcon color={isCodeView ? 'primary' : 'action'} />}
-            />
-
-            <ToolbarMenuButton
-              title={t('editor:common.letterViewContainer.toolbarRight.resetLetter')}
-              disabled={figureUploadInProgress}
-              selected={stateEditorLetter.undoAvailable || stateEditorLetter.redoAvailable}
-              onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
-              icon={<RestartAltIcon />}
-            />
-            <ToolbarMenuButton
-              title={t('editor:common.letterLifecycle.rename')}
-              disabled={renameDisabledReason !== undefined}
-              disabledReason={renameDisabledReason}
-              onClick={() => setModalDialog(EditorConstants.dialogTypes.RENAME_LETTER)}
-              icon={<DriveFileRenameOutlineIcon />}
-            />
-            <ToolbarMenuButton
-              title={t('editor:common.letterLifecycle.discard')}
-              disabled={discardDisabledReason !== undefined}
-              disabledReason={discardDisabledReason}
-              onClick={() => setModalDialog(EditorConstants.dialogTypes.DISCARD_LETTER)}
-              icon={<DeleteForeverOutlinedIcon />}
-            />
+            <Divider flexItem />
+            <Stack role="group" aria-label={t('editor:common.letterViewContainer.toolbarRight.groups.edit')} spacing={1}>
+              <QuickContentFormatter />
+              <ToolbarMenuButton
+                title={t('editor:common.letterViewContainer.toolbarRight.moreActions')}
+                selected={selectedItemRight === EditorConstants.compMappingRight.USER_ACTIONS}
+                onClick={(event) => handleButtonMenuClick(event)}
+                icon={<MoreHorizIcon />}
+              />
+            </Stack>
+            <Divider flexItem />
+            <Stack role="group" aria-label={t('editor:common.letterViewContainer.toolbarRight.groups.document')} spacing={1}>
+              <ToolbarMenuButton
+                title={t('editor:common.letterViewContainer.toolbarRight.withoutFunction')}
+                selected={selectedItemRight === EditorConstants.compMappingRight.ASSIGNED}
+                onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.ASSIGNED)}
+                icon={<AssignmentIcon />}
+              />
+              <ToolbarMenuButton
+                title={t('editor:common.letterViewContainer.toolbarRight.addLetterToFavourite')}
+                disabled
+                disabledReason={t('editor:common.favourites.comingSoon')}
+                selected={selectedItemRight === EditorConstants.compMappingRight.SET_FAVOURITE}
+                onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.SET_FAVOURITE)}
+                icon={<StarOutlineIcon />}
+              />
+              <ToolbarMenuButton
+                title={t('editor:common.letterViewContainer.toolbarRight.publishLetter')}
+                disabled={figureUploadInProgress}
+                selected={selectedItemRight === EditorConstants.compMappingRight.PUBLISH_LETTER}
+                onClick={() => setSelectedItem(null, EditorConstants.compMappingRight.PUBLISH_LETTER)}
+                icon={<CloudUploadOutlinedIcon />}
+              />
+            </Stack>
+            <Divider flexItem />
+            <Stack role="group" aria-label={t('editor:common.letterViewContainer.toolbarRight.groups.view')} spacing={1}>
+              <ToolbarMenuButton
+                title={
+                  isCodeView
+                    ? t('editor:common.letterViewContainer.toolbarRight.switchWYSIWYG')
+                    : t('editor:common.letterViewContainer.toolbarRight.switchXML')
+                }
+                selected={isCodeView}
+                onClick={handleToggleCodeview}
+                icon={<CodeIcon color={isCodeView ? 'primary' : 'action'} />}
+              />
+            </Stack>
+            <Divider flexItem />
+            <Stack role="group" aria-label={t('editor:common.letterViewContainer.toolbarRight.groups.manage')} spacing={1}>
+              <ToolbarMenuButton
+                title={t('editor:common.letterViewContainer.toolbarRight.resetLetter')}
+                disabled={figureUploadInProgress}
+                selected={stateEditorLetter.undoAvailable || stateEditorLetter.redoAvailable}
+                onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
+                icon={<RestartAltIcon />}
+              />
+              <ToolbarMenuButton
+                title={t('editor:common.letterLifecycle.rename')}
+                disabled={renameDisabledReason !== undefined}
+                disabledReason={renameDisabledReason}
+                onClick={() => setModalDialog(EditorConstants.dialogTypes.RENAME_LETTER)}
+                icon={<DriveFileRenameOutlineIcon />}
+              />
+              <ToolbarMenuButton
+                title={t('editor:common.letterLifecycle.discard')}
+                disabled={discardDisabledReason !== undefined}
+                disabledReason={discardDisabledReason}
+                onClick={() => setModalDialog(EditorConstants.dialogTypes.DISCARD_LETTER)}
+                icon={<DeleteForeverOutlinedIcon color="error" />}
+              />
+            </Stack>
           </Stack>
         </Box>
       </Box>

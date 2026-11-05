@@ -33,7 +33,13 @@
       "publishLetter": "Publish letter",
       "switchWYSIWYG": "Switch to WYSIWYG view",
       "switchXML": "Switch to XML view",
-      "resetLetter": "Reset letter"
+      "resetLetter": "Reset letter",
+      "groups": {
+        "edit": "Edit text",
+        "document": "Document actions",
+        "view": "View",
+        "manage": "Manage letter"
+      }
     }
   },
   "staleness": {

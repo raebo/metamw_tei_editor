@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
-import { Menu, MenuItem, Divider, Box, MenuList, Paper, Popper } from '@mui/material';
+import { Menu, Divider, ListSubheader, MenuList, Paper, Popper } from '@mui/material';
 import { createContextMenuItems, MenuItemType } from '@src/components/editor/letter/Util/ContextMenuLetterItems';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector, useStore } from 'react-redux';
@@ -33,6 +33,7 @@ import {
   runXmlAction,
 } from '@src/components/editor/letter/Center/lib/keyHandlerDefinitions';
 import { removeInlineFormatting, resolveInlineFormatting, type InlineFormat } from '@src/utils/editor/inlineFormatting';
+import EditorCommandMenuItem, { editorCommandMenuPaperSx } from '@src/components/editor/letter/Util/EditorCommandMenuItem';
 
 const SECTION_SELECTOR =
   'div[data-editor-xml-path], div1[data-editor-xml-path], div2[data-editor-xml-path], div3[data-editor-xml-path], div4[data-editor-xml-path], div5[data-editor-xml-path], div6[data-editor-xml-path], div7[data-editor-xml-path]';
@@ -208,179 +209,163 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
   }, [dispatch, props, stateEditorLetter.xmlContent, xmlContentRef]);
 
   /** CACHE MENU ITEMS */
-  const menuItemsMarked = useMemo(
-    () => [
-      ...createContextMenuItems({
-        handleMenuItemClick: (left, right) => {
-          props.setAnchorPosition(null);
-          dispatch(setEditorSelectedItem({ selectedItem: { left, right } }));
-        },
-        handleMenuItemDialogClick: (dialogType: string) => {
-          props.setAnchorPosition(null);
-          dispatch(setDialogType({ dialogType }));
-        },
-      }),
-      { type: 'divider' as const },
-      {
-        label: t('editor:dialog.paragraphStructure.actions.splitParagraph'),
-        action: () => {
-          props.setAnchorPosition(null);
-          dispatch(
-            setEditorDialogAndReferenceThunk({
-              dialogType: EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE,
-              elementType: 'selection',
-              elementXmlId: '',
-              elementKey: 'paragraph-split',
-            }),
-          );
-        },
+  const menuItemsMarked = useMemo(() => {
+    const contextualItems = createContextMenuItems({
+      handleMenuItemClick: (left, right) => {
+        props.setAnchorPosition(null);
+        dispatch(setEditorSelectedItem({ selectedItem: { left, right } }));
       },
-      { type: 'divider' as const },
-      {
-        label: t('editor:dialog.listStructure.contextAction'),
-        hasSubMenu: true,
-        subMenu: [
-          {
-            label: t('editor:dialog.listStructure.actions.selectionOrdered'),
-            action: () => {
-              props.setAnchorPosition(null);
-              dispatch(
-                setEditorDialogAndReferenceThunk({
-                  dialogType: EditorConstants.dialogTypes.LIST_STRUCTURE,
-                  elementType: 'selection',
-                  elementXmlId: '',
-                  elementKey: 'list-selection-ordered',
-                }),
-              );
-            },
-          },
-          {
-            label: t('editor:dialog.listStructure.actions.selectionUnordered'),
-            action: () => {
-              props.setAnchorPosition(null);
-              dispatch(
-                setEditorDialogAndReferenceThunk({
-                  dialogType: EditorConstants.dialogTypes.LIST_STRUCTURE,
-                  elementType: 'selection',
-                  elementXmlId: '',
-                  elementKey: 'list-selection-unordered',
-                }),
-              );
-            },
-          },
-        ],
+      handleMenuItemDialogClick: (dialogType: string) => {
+        props.setAnchorPosition(null);
+        dispatch(setDialogType({ dialogType }));
       },
-      { type: 'divider' as const },
-      {
-        label: t('editor:dialog.foreignText.contextAction'),
-        keyShortcut: 'ctrl+alt+x',
-        action: () => {
-          props.setAnchorPosition(null);
-          dispatch(
-            setEditorDialogAndReferenceThunk({
-              dialogType: EditorConstants.dialogTypes.FOREIGN_TEXT,
-              elementType: 'foreign',
-              elementXmlId: '',
-              elementKey: 'create',
-            }),
-          );
-        },
+      handleShortcut: runMarkedAction,
+    });
+
+    const splitParagraph: MenuItemType = {
+      label: t('editor:dialog.paragraphStructure.actions.splitParagraph'),
+      action: () => {
+        props.setAnchorPosition(null);
+        dispatch(
+          setEditorDialogAndReferenceThunk({
+            dialogType: EditorConstants.dialogTypes.PARAGRAPH_STRUCTURE,
+            elementType: 'selection',
+            elementXmlId: '',
+            elementKey: 'paragraph-split',
+          }),
+        );
       },
-      {
-        label: t('editor:dialog.abbreviation.contextAction'),
-        keyShortcut: 'ctrl+1',
-        action: () => {
-          props.setAnchorPosition(null);
-          dispatch(
-            setEditorDialogAndReferenceThunk({
-              dialogType: EditorConstants.dialogTypes.ABBREVIATION,
-              elementType: 'choice',
-              elementXmlId: '',
-              elementKey: 'create',
-            }),
-          );
-        },
-      },
-      {
-        label: t('editor:dialog.inlineFormatting.contextMenu'),
-        hasSubMenu: true,
-        subMenu: [
-          {
-            label: t('editor:dialog.inlineFormatting.superscript.applyAction'),
-            keyShortcut: 'ctrl+5',
-            action: () => {
-              props.setAnchorPosition(null);
-              runMarkedAction('ctrl+5');
-            },
-          },
-          {
-            label: t('editor:dialog.inlineFormatting.subscript.applyAction'),
-            keyShortcut: 'ctrl+6',
-            action: () => {
-              props.setAnchorPosition(null);
-              runMarkedAction('ctrl+6');
-            },
-          },
-          {
-            label: t('editor:dialog.inlineFormatting.groundline.applyAction'),
-            keyShortcut: 'ctrl+7',
-            action: () => {
-              props.setAnchorPosition(null);
-              runMarkedAction('ctrl+7');
-            },
-          },
-          {
-            label: t('editor:dialog.inlineFormatting.latintype.applyAction'),
-            keyShortcut: 'ctrl+8',
-            action: () => {
-              props.setAnchorPosition(null);
-              runMarkedAction('ctrl+8');
-            },
-          },
-          {
-            label: t('editor:dialog.inlineFormatting.antiqua.applyAction'),
-            keyShortcut: 'ctrl+alt+g',
-            action: () => {
-              props.setAnchorPosition(null);
-              runMarkedAction('ctrl+alt+g');
-            },
-          },
-          {
-            label: t('editor:dialog.inlineFormatting.gothic.applyAction'),
-            keyShortcut: 'ctrl+alt+h',
-            action: () => {
-              props.setAnchorPosition(null);
-              runMarkedAction('ctrl+alt+h');
-            },
-          },
-        ],
-      },
-      { type: 'divider' as const },
-      {
-        label: t('editor:dialog.crossReference.contextAction'),
-        hasSubMenu: true,
-        subMenu: [
-          ['register', 'ctrl+alt+r'],
-          ['letter-annotation', 'ctrl+shift+r'],
-          ['external-url', 'ctrl+alt+u'],
-          ['internal-url', 'ctrl+shift+u'],
-          ['generic-target', 'ctrl+alt+z'],
-          ['generic-start', 'ctrl+shift+z'],
-        ].map(([kind, shortcut]) => ({
-          label: t(`editor:dialog.crossReference.kinds.${kind}`),
-          keyShortcut: shortcut,
+    };
+    const listCommands: MenuItemType = {
+      label: t('editor:dialog.listStructure.contextAction'),
+      hasSubMenu: true,
+      subMenu: [
+        {
+          label: t('editor:dialog.listStructure.actions.selectionOrdered'),
           action: () => {
             props.setAnchorPosition(null);
             dispatch(
               setEditorDialogAndReferenceThunk({
-                dialogType: EditorConstants.dialogTypes.CROSS_REFERENCE,
-                elementType: kind,
+                dialogType: EditorConstants.dialogTypes.LIST_STRUCTURE,
+                elementType: 'selection',
                 elementXmlId: '',
-                elementKey: 'selection',
+                elementKey: 'list-selection-ordered',
               }),
             );
           },
-        })),
+        },
+        {
+          label: t('editor:dialog.listStructure.actions.selectionUnordered'),
+          action: () => {
+            props.setAnchorPosition(null);
+            dispatch(
+              setEditorDialogAndReferenceThunk({
+                dialogType: EditorConstants.dialogTypes.LIST_STRUCTURE,
+                elementType: 'selection',
+                elementXmlId: '',
+                elementKey: 'list-selection-unordered',
+              }),
+            );
+          },
+        },
+      ],
+    };
+    const foreignText: MenuItemType = {
+      label: t('editor:dialog.foreignText.contextAction'),
+      keyShortcut: 'Ctrl+Alt+X',
+      action: () => {
+        props.setAnchorPosition(null);
+        dispatch(
+          setEditorDialogAndReferenceThunk({
+            dialogType: EditorConstants.dialogTypes.FOREIGN_TEXT,
+            elementType: 'foreign',
+            elementXmlId: '',
+            elementKey: 'create',
+          }),
+        );
+      },
+    };
+    const abbreviation: MenuItemType = {
+      label: t('editor:dialog.abbreviation.contextAction'),
+      keyShortcut: 'Ctrl+1',
+      action: () => {
+        props.setAnchorPosition(null);
+        dispatch(
+          setEditorDialogAndReferenceThunk({
+            dialogType: EditorConstants.dialogTypes.ABBREVIATION,
+            elementType: 'choice',
+            elementXmlId: '',
+            elementKey: 'create',
+          }),
+        );
+      },
+    };
+    const inlineFormatting: MenuItemType = {
+      label: t('editor:dialog.inlineFormatting.contextMenu'),
+      hasSubMenu: true,
+      subMenu: [
+        ['superscript', 'ctrl+5'],
+        ['subscript', 'ctrl+6'],
+        ['groundline', 'ctrl+7'],
+        ['latintype', 'ctrl+8'],
+        ['antiqua', 'ctrl+alt+g'],
+        ['gothic', 'ctrl+alt+h'],
+      ].map(([format, shortcut]) => ({
+        label: t(`editor:dialog.inlineFormatting.${format}.applyAction`),
+        keyShortcut: shortcut,
+        action: () => {
+          props.setAnchorPosition(null);
+          runMarkedAction(shortcut);
+        },
+      })),
+    };
+    const crossReferences: MenuItemType = {
+      label: t('editor:dialog.crossReference.contextAction'),
+      hasSubMenu: true,
+      subMenu: [
+        ['register', 'ctrl+alt+r'],
+        ['letter-annotation', 'ctrl+shift+r'],
+        ['external-url', 'ctrl+alt+u'],
+        ['internal-url', 'ctrl+shift+u'],
+        ['generic-target', 'ctrl+alt+z'],
+        ['generic-start', 'ctrl+shift+z'],
+      ].map(([kind, shortcut]) => ({
+        label: t(`editor:dialog.crossReference.kinds.${kind}`),
+        keyShortcut: shortcut,
+        action: () => {
+          props.setAnchorPosition(null);
+          dispatch(
+            setEditorDialogAndReferenceThunk({
+              dialogType: EditorConstants.dialogTypes.CROSS_REFERENCE,
+              elementType: kind,
+              elementXmlId: '',
+              elementKey: 'selection',
+            }),
+          );
+        },
+      })),
+    };
+
+    return [
+      {
+        label: t('editor:dialog.commandGroups.entities'),
+        hasSubMenu: true,
+        subMenu: contextualItems.filter((item) => item.group === 'entities'),
+      },
+      {
+        label: t('editor:dialog.commandGroups.textMarkup'),
+        hasSubMenu: true,
+        subMenu: [foreignText, abbreviation, inlineFormatting],
+      },
+      {
+        label: t('editor:dialog.commandGroups.references'),
+        hasSubMenu: true,
+        subMenu: [...contextualItems.filter((item) => item.group === 'references'), crossReferences],
+      },
+      {
+        label: t('editor:dialog.commandGroups.structure'),
+        hasSubMenu: true,
+        subMenu: [splitParagraph, listCommands, ...contextualItems.filter((item) => item.group === 'structure')],
       },
       { type: 'divider' as const },
       {
@@ -388,9 +373,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         keyShortcut: 'Esc',
         action: clearMarkedSelection,
       },
-    ],
-    [clearMarkedSelection, dispatch, props, runMarkedAction, t],
-  );
+    ];
+  }, [clearMarkedSelection, dispatch, props, runMarkedAction, t]);
 
   const menuItemsNoMarking: MenuItemType[] = useMemo(
     () => getMenuItemsNoMarking(dispatch, stateEditorLetter, xmlDocRef),
@@ -510,6 +494,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
           {
             label: t('editor:dialog.sectionAddressLine.delete'),
+            danger: true,
             action: () => {
               openAddressLine('delete');
             },
@@ -538,6 +523,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         setDisplayMenuItems([
           {
             label: t(`editor:dialog.inlineFormatting.${inlineFormat}.removeAction`),
+            danger: true,
             action: () => removeInlineFormat(inlineFormatReference, inlineFormat),
           },
         ]);
@@ -576,6 +562,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
           {
             label: t('editor:dialog.horizontalFraction.deleteAction'),
+            danger: true,
             action: () => openFractionDialog('delete'),
           },
         ]);
@@ -611,6 +598,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
           {
             label: t('editor:dialog.abbreviation.deleteAction'),
+            danger: true,
             action: () => openAbbreviationDialog('delete'),
           },
         ]);
@@ -645,6 +633,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
           {
             label: t('editor:dialog.foreignText.deleteAction'),
+            danger: true,
             action: () => openForeignTextDialog('delete'),
           },
         ]);
@@ -678,6 +667,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
           {
             label: t('editor:dialog.crossReference.deleteAction'),
+            danger: true,
             action: () => openCrossReferenceDialog('delete'),
           },
         ]);
@@ -712,6 +702,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
           {
             label: t('editor:dialog.authorFootnote.deleteAction'),
+            danger: true,
             action: () => openAuthorFootnoteDialog('delete'),
           },
         ]);
@@ -751,6 +742,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
           {
             label: t('editor:dialog.manuscriptAnnotation.deleteAction'),
+            danger: true,
             action: () => openManuscriptAnnotationDialog('delete'),
           },
         ]);
@@ -768,35 +760,42 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
 
       const menuItemsToAdd: MenuItemType[] = [];
       let isClickable = false;
+      const sectionCaretAnchor = targetElement?.closest<HTMLElement>('[data-editor-section-caret]');
 
-      for (const handler of pathHandlers) {
-        EditorUtils.xmlCheck.isNodeMatchingPath(
-          targetNode,
-          handler.paths,
-          (node) => {
-            setSelectedNode(node);
-            const items = handler.getMenuItems(node);
-            const validItems = (items || []).filter((i): i is MenuItemType => i !== undefined && i !== null);
-            if (validItems.length > 0) {
-              menuItemsToAdd.push(...validItems);
-              isClickable = true;
-            }
-          },
-          () => {},
-        );
+      if (!sectionCaretAnchor) {
+        for (const handler of pathHandlers) {
+          EditorUtils.xmlCheck.isNodeMatchingPath(
+            targetNode,
+            handler.paths,
+            (node) => {
+              setSelectedNode(node);
+              const items = handler.getMenuItems(node);
+              const validItems = (items || []).filter((i): i is MenuItemType => i !== undefined && i !== null);
+              if (validItems.length > 0) {
+                menuItemsToAdd.push(...validItems);
+                isClickable = true;
+              }
+            },
+            () => {},
+          );
+        }
       }
 
       const paragraphAnchor = targetElement?.closest<HTMLElement>('p[data-editor-xml-path]');
       const sectionAnchor = targetElement?.closest<HTMLElement>(SECTION_SELECTOR);
+      const writingActAnchor = targetElement?.closest<HTMLElement>('div[type="act_of_writing"][data-editor-xml-path]');
       const addressReference = getAddressSectionReference(targetElement);
-      if (addressReference) {
-        menuItemsToAdd.push({
-          label: t('editor:dialog.sectionAddressLine.insert'),
-          keyShortcut: 'Ctrl+Alt+C',
-          action: () => {
-            void insertAddressLine(addressReference);
-          },
-        });
+      const addressCommand: MenuItemType | null = addressReference
+        ? {
+            label: t('editor:dialog.sectionAddressLine.insert'),
+            keyShortcut: 'Ctrl+Alt+C',
+            action: () => {
+              void insertAddressLine(addressReference);
+            },
+          }
+        : null;
+      if (addressCommand && !sectionCaretAnchor) {
+        menuItemsToAdd.push(addressCommand);
         isClickable = true;
       }
       const listAnchor = targetElement?.closest<HTMLElement>('list[data-editor-xml-path]');
@@ -810,6 +809,9 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const foreignAnnotationAnchor = targetElement?.closest<HTMLElement>('note[type="note"]');
       const foreignAnnotationMarker = targetElement?.closest<HTMLElement>('[data-editor-foreign-annotation-id]');
       const structureActions: NonNullable<MenuItemType['subMenu']> = [];
+      const writingActContentActions: NonNullable<MenuItemType['subMenu']> = [];
+      const writingActMetadataActions: NonNullable<MenuItemType['subMenu']> = [];
+      const writingActOrganizationActions: NonNullable<MenuItemType['subMenu']> = [];
       const listActions: NonNullable<MenuItemType['subMenu']> = [];
       const tableActions: NonNullable<MenuItemType['subMenu']> = [];
       const tableCellActions: NonNullable<MenuItemType['subMenu']> = [];
@@ -817,8 +819,12 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
       const tableColumnActions: NonNullable<MenuItemType['subMenu']> = [];
       const wholeTableActions: NonNullable<MenuItemType['subMenu']> = [];
       const graphicActions: NonNullable<MenuItemType['subMenu']> = [];
+      const referenceActions: NonNullable<MenuItemType['subMenu']> = [];
       let annotationCaret: ReturnType<typeof captureForeignHandAnnotationCaret> | null = null;
       let fractionCaret: ReturnType<typeof captureFractionCaret> | null = null;
+      const writingActNumber = writingActAnchor?.getAttribute('n') ?? null;
+      let figureUploadCommand: MenuItemType | null = null;
+      let documentationCommand: MenuItemType | null = null;
 
       if (stateEditorLetter.xmlContent) {
         try {
@@ -914,74 +920,20 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           sectionSource && Array.from(sectionSource.children).some((child) => child.localName.toLowerCase() === 'head'),
         );
 
-        if (isWritingAct) {
-          const managePeopleItem = menuItemsNoMarking.find(
-            (item) => item.identifier === EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_AUTHOR_WRITER,
-          );
-          if (managePeopleItem?.action) {
-            structureActions.push({
-              label: t('editor:dialog.paragraphStructure.actions.manageWritingActPeople'),
-              action: () => managePeopleItem.action?.({ node: sectionSource ?? sectionAnchor }),
-            });
-          }
-        }
-
-        structureActions.push({
+        const appendParagraphCommand: MenuItemType = {
           label: t('editor:dialog.paragraphStructure.actions.appendParagraph'),
           action: () => openStructureDialog('paragraph-append', sectionAnchor),
-        });
-
-        if (isWritingAct) {
-          structureActions.push({
-            label: t('editor:dialog.paragraphStructure.actions.addWritingAct'),
-            action: () => {
-              const sourcePath = sectionAnchor.dataset.editorXmlPath;
-              if (sourcePath === undefined) return;
-              dispatch(
-                setEditorDialogAndReferenceThunk({
-                  dialogType: EditorConstants.dialogTypes.ADD_WRITING_PART,
-                  elementType: sectionAnchor.localName,
-                  elementXmlId: sourcePath,
-                  elementKey: null,
-                }),
-              );
-            },
-          });
-
-          const writingActs = sectionSource?.parentElement
-            ? Array.from(sectionSource.parentElement.children).filter(
-                (child) => child.localName.toLowerCase() === 'div' && child.getAttribute('type') === 'act_of_writing',
-              )
-            : [];
-          const writingActIndex = sectionSource ? writingActs.indexOf(sectionSource) : -1;
-          const addMoveAction = (identifier: string, label: string) => {
-            const moveItem = menuItemsNoMarking.find((item) => item.identifier === identifier);
-            if (!moveItem?.action) return;
-            structureActions.push({
-              label,
-              action: () => moveItem.action?.({ node: sectionAnchor }),
-            });
-          };
-
-          if (writingActIndex > 0) {
-            addMoveAction(
-              EditorConstants.menuItemTypes.WRITING_ACT.MOVE_UP,
-              t('editor:dialog.paragraphStructure.actions.moveWritingActUp'),
-            );
-          }
-          if (writingActIndex >= 0 && writingActIndex < writingActs.length - 1) {
-            addMoveAction(
-              EditorConstants.menuItemTypes.WRITING_ACT.MOVE_DOWN,
-              t('editor:dialog.paragraphStructure.actions.moveWritingActDown'),
-            );
-          }
-        }
+        };
+        structureActions.push(appendParagraphCommand);
+        if (isWritingAct) writingActContentActions.push(appendParagraphCommand);
 
         if (sectionName === 'div' || (sectionLevel >= 1 && sectionLevel < 7)) {
-          structureActions.push({
+          const childSectionCommand: MenuItemType = {
             label: t('editor:dialog.paragraphStructure.actions.insertChildSection'),
             action: () => openStructureDialog('section-child', sectionAnchor),
-          });
+          };
+          structureActions.push(childSectionCommand);
+          if (isWritingAct) writingActContentActions.push(childSectionCommand);
         }
         if (!isWritingAct && /^div([1-7])?$/.test(sectionName)) {
           structureActions.push(
@@ -997,6 +949,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           if (hasHeading) {
             structureActions.push({
               label: t('editor:dialog.paragraphStructure.actions.deleteSectionHeading'),
+              danger: true,
               action: () => {
                 const sourcePath = sectionAnchor.dataset.editorXmlPath;
                 if (sourcePath !== undefined) deleteSectionHeading(sourcePath);
@@ -1006,13 +959,101 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         }
       }
 
-      if (structureActions.length > 0) {
-        if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
-        menuItemsToAdd.push({
-          label: t('editor:dialog.paragraphStructure.contextAction'),
-          hasSubMenu: true,
-          subMenu: structureActions,
+      if (writingActAnchor) {
+        const writingActSource = resolveTeiElementByPath(xmlDocRef.current, writingActAnchor.dataset.editorXmlPath);
+        const managePeopleItem = menuItemsNoMarking.find(
+          (item) => item.identifier === EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_AUTHOR_WRITER,
+        );
+        if (managePeopleItem?.action) {
+          writingActMetadataActions.push({
+            label: t('editor:dialog.paragraphStructure.actions.manageWritingActPeople'),
+            action: () => managePeopleItem.action?.({ node: writingActSource ?? writingActAnchor }),
+          });
+        }
+
+        writingActOrganizationActions.push({
+          label: t('editor:dialog.paragraphStructure.actions.addWritingAct'),
+          action: () => {
+            const sourcePath = writingActAnchor.dataset.editorXmlPath;
+            if (sourcePath === undefined) return;
+            dispatch(
+              setEditorDialogAndReferenceThunk({
+                dialogType: EditorConstants.dialogTypes.ADD_WRITING_PART,
+                elementType: writingActAnchor.localName,
+                elementXmlId: sourcePath,
+                elementKey: null,
+              }),
+            );
+          },
         });
+
+        const writingActs = writingActSource?.parentElement
+          ? Array.from(writingActSource.parentElement.children).filter(
+              (child) => child.localName.toLowerCase() === 'div' && child.getAttribute('type') === 'act_of_writing',
+            )
+          : [];
+        const writingActIndex = writingActSource ? writingActs.indexOf(writingActSource) : -1;
+        const addMoveAction = (identifier: string, label: string, disabled: boolean, disabledReason: string) => {
+          const moveItem = menuItemsNoMarking.find((item) => item.identifier === identifier);
+          if (!moveItem?.action) return;
+          writingActOrganizationActions.push({
+            label,
+            action: () => moveItem.action?.({ node: writingActAnchor }),
+            disabled,
+            disabledReason,
+          });
+        };
+
+        addMoveAction(
+          EditorConstants.menuItemTypes.WRITING_ACT.MOVE_UP,
+          t('editor:dialog.paragraphStructure.actions.moveWritingActUp'),
+          writingActIndex <= 0,
+          t('editor:dialog.paragraphStructure.disabledReasons.firstWritingAct'),
+        );
+        addMoveAction(
+          EditorConstants.menuItemTypes.WRITING_ACT.MOVE_DOWN,
+          t('editor:dialog.paragraphStructure.actions.moveWritingActDown'),
+          writingActIndex < 0 || writingActIndex >= writingActs.length - 1,
+          t('editor:dialog.paragraphStructure.disabledReasons.lastWritingAct'),
+        );
+      }
+
+      if (structureActions.length > 0) {
+        if (sectionCaretAnchor && writingActAnchor) {
+          if (addressCommand) writingActMetadataActions.push(addressCommand);
+          menuItemsToAdd.push(
+            {
+              type: 'header',
+              label: writingActNumber
+                ? t('editor:dialog.paragraphStructure.writingActMenuTitle', {
+                    number: writingActNumber,
+                  })
+                : t('editor:dialog.paragraphStructure.writingActMenuTitleWithoutNumber'),
+            },
+            {
+              label: t('editor:dialog.commandGroups.content'),
+              hasSubMenu: true,
+              subMenu: writingActContentActions,
+            },
+            {
+              label: t('editor:dialog.commandGroups.metadata'),
+              hasSubMenu: true,
+              subMenu: writingActMetadataActions,
+            },
+            {
+              label: t('editor:dialog.commandGroups.organize'),
+              hasSubMenu: true,
+              subMenu: writingActOrganizationActions,
+            },
+          );
+        } else {
+          if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
+          menuItemsToAdd.push({
+            label: t('editor:dialog.paragraphStructure.contextAction'),
+            hasSubMenu: true,
+            subMenu: structureActions,
+          });
+        }
         isClickable = true;
       }
 
@@ -1043,6 +1084,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
             },
             {
               label: t('editor:dialog.listStructure.actions.deleteItem'),
+              danger: true,
               action: () => openListDialog('list-delete-item', itemAnchor),
             },
           );
@@ -1058,6 +1100,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
           },
           {
             label: t('editor:dialog.listStructure.actions.deleteList'),
+            danger: true,
             action: () => openListDialog('list-delete', listSource),
           },
         );
@@ -1098,6 +1141,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
             },
             {
               label: t('editor:dialog.tableStructure.actions.deleteRow'),
+              danger: true,
               action: () => openTableDialog('table-row-delete', rowAnchor, 'row'),
             },
           );
@@ -1164,6 +1208,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
             },
             {
               label: t('editor:dialog.tableStructure.actions.deleteColumn'),
+              danger: true,
               action: () => openTableDialog('table-column-delete', cellAnchor, 'cell'),
             },
           );
@@ -1174,6 +1219,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         });
         wholeTableActions.push({
           label: t('editor:dialog.tableStructure.actions.deleteTable'),
+          danger: true,
           action: () => openTableDialog('table-delete', tableSource, 'table'),
         });
       }
@@ -1243,6 +1289,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
 
       if (annotationCaret) {
         if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
+        const referenceStartIndex = menuItemsToAdd.length;
         menuItemsToAdd.push({
           label: t('editor:dialog.foreignHandAnnotation.contextAction'),
           keyShortcut: 'STRG+ALT+A',
@@ -1299,11 +1346,12 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
             },
           })),
         });
+        referenceActions.push(...menuItemsToAdd.slice(referenceStartIndex));
       }
 
       if (fractionCaret) {
         if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
-        menuItemsToAdd.push({
+        const fractionCommand: MenuItemType = {
           label: t('editor:dialog.horizontalFraction.contextAction'),
           hasSubMenu: true,
           subMenu: [
@@ -1350,7 +1398,9 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
               },
             },
           ],
-        });
+        };
+        menuItemsToAdd.push(fractionCommand);
+        referenceActions.push(fractionCommand);
         isClickable = true;
       }
 
@@ -1381,7 +1431,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
 
         if (figureAnchor) {
           if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
-          menuItemsToAdd.push({
+          figureUploadCommand = {
             label: t('editor:dialog.figureUpload.contextAction'),
             action: () => {
               dispatch(
@@ -1393,7 +1443,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
                 }),
               );
             },
-          });
+          };
+          menuItemsToAdd.push(figureUploadCommand);
           isClickable = true;
         }
       }
@@ -1404,7 +1455,7 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         const elementName = documentationElement?.localName ?? documentationAnchor.localName;
 
         if (menuItemsToAdd.length > 0) menuItemsToAdd.push({ type: 'divider' });
-        menuItemsToAdd.push({
+        documentationCommand = {
           label: t('editor:dialog.teiDocumentation.contextAction', { element: elementName }),
           action: () => {
             if (!documentationElement || !openTeiP5Documentation(documentationElement)) {
@@ -1416,7 +1467,8 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
               );
             }
           },
-        });
+        };
+        menuItemsToAdd.push(documentationCommand);
         isClickable = true;
       }
 
@@ -1426,7 +1478,105 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         return;
       }
 
-      setDisplayMenuItems(menuItemsToAdd);
+      if (!sectionCaretAnchor && writingActAnchor) {
+        const writingActIdentifiers = new Set<string>([
+          EditorConstants.menuItemTypes.WRITING_ACT.MANAGE_AUTHOR_WRITER,
+          EditorConstants.menuItemTypes.WRITING_ACT.MOVE_UP,
+          EditorConstants.menuItemTypes.WRITING_ACT.MOVE_DOWN,
+        ]);
+        const writingActCommands = new Set([...writingActMetadataActions, ...writingActOrganizationActions]);
+        const structuralMenus = new Set([structureActions, listActions, tableActions, graphicActions]);
+        const contextualActions = menuItemsToAdd.filter(
+          (item) =>
+            item.type !== 'divider' &&
+            item.type !== 'header' &&
+            !writingActIdentifiers.has(item.identifier ?? '') &&
+            !writingActCommands.has(item) &&
+            item !== addressCommand &&
+            item !== figureUploadCommand &&
+            item !== documentationCommand &&
+            !referenceActions.includes(item) &&
+            !(item.subMenu && structuralMenus.has(item.subMenu)),
+        );
+        const contentStructureActions = structureActions.filter((item) => !writingActCommands.has(item));
+        const contentActions: NonNullable<MenuItemType['subMenu']> = [
+          {
+            label: t('editor:dialog.paragraphStructure.contextAction'),
+            hasSubMenu: true,
+            subMenu: contentStructureActions,
+            disabled: contentStructureActions.length === 0,
+          },
+          {
+            label: t('editor:dialog.listStructure.contextAction'),
+            hasSubMenu: true,
+            subMenu: listActions,
+            disabled: listActions.length === 0,
+          },
+          {
+            label: t('editor:dialog.tableStructure.contextAction'),
+            hasSubMenu: true,
+            subMenu: tableActions,
+            disabled: tableActions.length === 0,
+          },
+          {
+            label: t('editor:dialog.graphicStructure.contextAction'),
+            hasSubMenu: true,
+            subMenu: [...graphicActions, ...(figureUploadCommand ? [figureUploadCommand] : [])],
+            disabled: graphicActions.length === 0 && !figureUploadCommand,
+          },
+        ];
+        const metadataActions = [
+          ...writingActMetadataActions,
+          ...(addressCommand && !writingActMetadataActions.includes(addressCommand) ? [addressCommand] : []),
+        ];
+
+        setDisplayMenuItems([
+          {
+            type: 'header',
+            label: writingActNumber
+              ? t('editor:dialog.paragraphStructure.writingActMenuTitle', {
+                  number: writingActNumber,
+                })
+              : t('editor:dialog.paragraphStructure.writingActMenuTitleWithoutNumber'),
+          },
+          ...(contextualActions.length > 0
+            ? [
+                {
+                  label: t('editor:dialog.commandGroups.editElement'),
+                  hasSubMenu: true,
+                  subMenu: contextualActions,
+                } satisfies MenuItemType,
+              ]
+            : []),
+          {
+            type: 'header',
+            label: t('editor:dialog.commandGroups.content'),
+          },
+          ...contentActions,
+          { type: 'divider' },
+          {
+            label: t('editor:dialog.commandGroups.metadata'),
+            hasSubMenu: true,
+            subMenu: metadataActions,
+            disabled: metadataActions.length === 0,
+          },
+          {
+            label: t('editor:dialog.commandGroups.references'),
+            hasSubMenu: true,
+            subMenu: referenceActions,
+            disabled: referenceActions.length === 0,
+          },
+          {
+            label: t('editor:dialog.commandGroups.organize'),
+            hasSubMenu: true,
+            subMenu: writingActOrganizationActions,
+            disabled: writingActOrganizationActions.length === 0,
+          },
+          ...(documentationCommand ? [{ type: 'divider' as const }, documentationCommand] : []),
+        ]);
+      } else {
+        setDisplayMenuItems(menuItemsToAdd);
+      }
       props.setAnchorPosition({ top: event.clientY, left: event.clientX });
       dispatch(
         setEditorNodeClickedAndContentLeftRightThunk({
@@ -1492,14 +1642,6 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
     return () => document.removeEventListener('keydown', handleClearSelectionShortcut, true);
   }, [clearMarkedSelection, contentTextIsMarked]);
 
-  const SndMenuItemStylesSpan = {
-    fontSize: '0.575rem',
-    padding: '0px 12px',
-    minHeight: '15px',
-    color: 'grey',
-    cursor: 'pointer',
-  };
-
   return (
     <>
       <Menu
@@ -1507,18 +1649,24 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
         onClose={handleCloseAll}
         anchorReference="anchorPosition"
         anchorPosition={props.anchorPosition ? { top: props.anchorPosition.top, left: props.anchorPosition.left } : undefined}
+        slotProps={{ paper: { sx: editorCommandMenuPaperSx } }}
       >
         {displayMenuItems.map((item, index) =>
           item.type === 'divider' ? (
             <Divider key={index} />
+          ) : item.type === 'header' ? (
+            <ListSubheader key={index} disableSticky sx={{ lineHeight: 2.5, fontWeight: 700, pl: 1, pr: 2 }}>
+              {item.label}
+            </ListSubheader>
           ) : item.type === 'inactive' ? (
-            <MenuItem key={index} disabled sx={{ fontSize: '90%', opacity: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                <span>{item.label}</span>
-              </Box>
-            </MenuItem>
+            <EditorCommandMenuItem
+              key={index}
+              label={item.label}
+              disabled
+              disabledReason={item.disabledReason ?? t('editor:dialog.commandGroups.unavailable')}
+            />
           ) : (
-            <MenuItem
+            <EditorCommandMenuItem
               key={index}
               onClick={(e) => {
                 if (item.hasSubMenu) {
@@ -1531,60 +1679,48 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
                   handleCloseAll();
                 }
               }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  fontSize: '70%',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                }}
-              >
-                <span>{item.label}</span>
-                {item.keyShortcut && <span style={SndMenuItemStylesSpan}>{item.keyShortcut}</span>}
-                {item.hasSubMenu && <span style={{ marginLeft: 'auto' }}>▶</span>}
-              </Box>
-            </MenuItem>
+              label={item.label}
+              shortcut={item.keyShortcut}
+              hasSubMenu={item.hasSubMenu}
+              disabled={item.disabled}
+              disabledReason={item.disabledReason ?? (item.disabled ? t('editor:dialog.commandGroups.unavailable') : undefined)}
+              danger={item.danger}
+            />
           ),
         )}
       </Menu>
       {openSubmenuIndex !== null && displayMenuItems[openSubmenuIndex]?.subMenu && (
-        <Menu
+        <Popper
           anchorEl={submenuAnchorEl}
           open={Boolean(submenuAnchorEl)}
-          onClose={handleCloseAll}
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-          slotProps={{ paper: { sx: { minWidth: '6rem' } } }}
+          placement="right-start"
+          sx={{ zIndex: (theme) => theme.zIndex.modal + 1 }}
         >
-          {displayMenuItems[openSubmenuIndex]!.subMenu!.map((subItem, subIndex) => (
-            <MenuItem
-              key={subIndex}
-              onClick={(event) => {
-                if (subItem.hasSubMenu) {
-                  setNestedSubmenuAnchorEl(event.currentTarget);
-                  setOpenNestedSubmenuIndex(subIndex);
-                } else {
-                  subItem.action?.(selectedNode ? { node: selectedNode } : {});
-                  handleCloseAll();
-                }
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  fontSize: '70%',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                }}
-              >
-                <span>{subItem.label}</span>
-                {subItem.keyShortcut && <span style={SndMenuItemStylesSpan}>{subItem.keyShortcut}</span>}
-                {subItem.hasSubMenu && <span style={{ marginLeft: 'auto' }}>▶</span>}
-              </Box>
-            </MenuItem>
-          ))}
-        </Menu>
+          <Paper elevation={8} sx={editorCommandMenuPaperSx}>
+            <MenuList>
+              {displayMenuItems[openSubmenuIndex]!.subMenu!.map((subItem, subIndex) => (
+                <EditorCommandMenuItem
+                  key={subIndex}
+                  onClick={(event) => {
+                    if (subItem.hasSubMenu) {
+                      setNestedSubmenuAnchorEl(event.currentTarget);
+                      setOpenNestedSubmenuIndex(subIndex);
+                    } else {
+                      subItem.action?.(selectedNode ? { node: selectedNode } : {});
+                      handleCloseAll();
+                    }
+                  }}
+                  label={subItem.label}
+                  shortcut={subItem.keyShortcut}
+                  hasSubMenu={subItem.hasSubMenu}
+                  disabled={subItem.disabled}
+                  disabledReason={subItem.disabledReason ?? (subItem.disabled ? t('editor:dialog.commandGroups.unavailable') : undefined)}
+                  danger={subItem.danger}
+                />
+              ))}
+            </MenuList>
+          </Paper>
+        </Popper>
       )}
       {openSubmenuIndex !== null &&
         openNestedSubmenuIndex !== null &&
@@ -1595,28 +1731,23 @@ const RightClickActionMenuOptimized = (props: UserActionMenuProps) => {
             placement="right-start"
             sx={{ zIndex: (theme) => theme.zIndex.modal + 1 }}
           >
-            <Paper elevation={8}>
+            <Paper elevation={8} sx={editorCommandMenuPaperSx}>
               <MenuList>
                 {displayMenuItems[openSubmenuIndex]!.subMenu![openNestedSubmenuIndex]!.subMenu!.map((nestedItem, nestedIndex) => (
-                  <MenuItem
+                  <EditorCommandMenuItem
                     key={nestedIndex}
                     onClick={() => {
                       nestedItem.action?.(selectedNode ? { node: selectedNode } : {});
                       handleCloseAll();
                     }}
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        fontSize: '70%',
-                        justifyContent: 'space-between',
-                        width: '100%',
-                      }}
-                    >
-                      <span>{nestedItem.label}</span>
-                      {nestedItem.keyShortcut && <span style={SndMenuItemStylesSpan}>{nestedItem.keyShortcut}</span>}
-                    </Box>
-                  </MenuItem>
+                    label={nestedItem.label}
+                    shortcut={nestedItem.keyShortcut}
+                    disabled={nestedItem.disabled}
+                    disabledReason={
+                      nestedItem.disabledReason ?? (nestedItem.disabled ? t('editor:dialog.commandGroups.unavailable') : undefined)
+                    }
+                    danger={nestedItem.danger}
+                  />
                 ))}
               </MenuList>
             </Paper>
