@@ -6,7 +6,7 @@ um. Ein fehlgeschlagener Build verändert damit das aktive Release nicht.
 
 ## Voraussetzungen auf dem Server
 
-- Bash, Git, `flock`, Node.js, Corepack/Yarn und optional PM2
+- Bash, Git, `flock`, Node.js und Corepack/Yarn
 - SSH-Zugriff auf das Git-Repository
 - eine lokale Deployment-Konfiguration `deploy/.env`, angelegt aus
   `deploy/.env.example`
@@ -44,14 +44,6 @@ Ein anderer Branch kann als erstes Argument angegeben werden:
 
 ```bash
 ./deploy/deploy.sh feature/example
-```
-
-Ob der laufende PM2-Prozess nach dem atomaren Symlink-Wechsel neu gestartet
-wird, steuert `RESTART_PM2` in `deploy/.env`. Alternativ kann der Wert für
-einen einzelnen Aufruf überschrieben werden:
-
-```bash
-RESTART_PM2=true ./deploy/deploy.sh master
 ```
 
 Das Skript verhindert parallele Deployments, validiert `dist/index.html` sowie

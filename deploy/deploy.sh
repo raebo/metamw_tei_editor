@@ -4,7 +4,6 @@ set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_ENV_FILE="${DEPLOY_ENV_FILE:-$SCRIPT_DIR/.env}"
-RESTART_PM2_OVERRIDE="${RESTART_PM2-}"
 
 if [[ ! -f "$DEPLOY_ENV_FILE" ]]; then
   echo "Deployment configuration is missing: $DEPLOY_ENV_FILE" >&2
@@ -18,14 +17,9 @@ set +a
 
 : "${REPOSITORY:?REPOSITORY must be configured in $DEPLOY_ENV_FILE}"
 : "${APP_ROOT:?APP_ROOT must be configured in $DEPLOY_ENV_FILE}"
-: "${APP_NAME:?APP_NAME must be configured in $DEPLOY_ENV_FILE}"
 
 DEFAULT_BRANCH="${DEFAULT_BRANCH:-master}"
 RELEASE_RETENTION_DAYS="${RELEASE_RETENTION_DAYS:-30}"
-RESTART_PM2="${RESTART_PM2:-false}"
-if [[ -n "$RESTART_PM2_OVERRIDE" ]]; then
-  RESTART_PM2="$RESTART_PM2_OVERRIDE"
-fi
 BRANCH="${1:-$DEFAULT_BRANCH}"
 RELEASES_DIR="$APP_ROOT/releases"
 SHARED_DIR="$APP_ROOT/shared"
@@ -33,11 +27,6 @@ CURRENT_LINK="$APP_ROOT/current"
 
 if [[ ! "$RELEASE_RETENTION_DAYS" =~ ^[0-9]+$ ]]; then
   echo "RELEASE_RETENTION_DAYS must be a non-negative integer." >&2
-  exit 1
-fi
-
-if [[ "$RESTART_PM2" != "true" && "$RESTART_PM2" != "false" ]]; then
-  echo "RESTART_PM2 must be either true or false." >&2
   exit 1
 fi
 
@@ -147,13 +136,6 @@ echo "Activating release $RELEASE_PATH"
 ln -s "$RELEASE_PATH" "$NEXT_LINK"
 mv -Tf "$NEXT_LINK" "$CURRENT_LINK"
 DEPLOYED=true
-
-if [[ "$RESTART_PM2" == "true" ]]; then
-  echo "Restarting PM2 application '$APP_NAME'"
-  pm2 restart "$APP_NAME" --update-env
-else
-  echo "PM2 restart skipped; set RESTART_PM2=true when the process must be restarted."
-fi
 
 cleanup_old_releases
 
