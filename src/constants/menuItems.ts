@@ -314,6 +314,7 @@ export const getMenuItemsNoMarking = (
   {
     identifier: EditorConstants.menuItemTypes.DELETE_NODE,
     label: t('editor:common.menuItems.deleteNode'),
+    danger: true,
     action: async ({ node }: { node?: Node }) => {
       try {
         if (!node) {

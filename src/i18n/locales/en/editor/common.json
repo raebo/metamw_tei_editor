@@ -96,6 +96,40 @@
       "letter_working_copy_missing": "The required working copy is missing. Reload the letter."
     }
   },
+  "userActionMenu": {
+    "groups": {
+      "headerCreate": "Create letter header",
+      "headerEdit": "Edit letter header",
+      "textCreate": "Create letter text",
+      "textCriticism": "Textual criticism"
+    },
+    "actions": {
+      "createHeader": "Create letter header",
+      "createLetter": "Create letter",
+      "editHeader": "Edit letter header",
+      "editReceiver": "Edit recipient",
+      "addAttachment": "Add attachment",
+      "addRism": "Add RISM entry",
+      "addProvenance": "Add provenance",
+      "person": "Annotate person",
+      "place": "Annotate place",
+      "creation": "Annotate work",
+      "protagCreation": "Annotate FMBC work",
+      "fmbLetter": "Reference FMB letter",
+      "gbLetter": "Reference GB letter",
+      "createWritingAct": "Create writing act",
+      "receiverAddress": "Recipient address",
+      "senderAddress": "Sender address",
+      "addRemark": "Add remark",
+      "pageBreak": "Page break",
+      "columnBreak": "Column break"
+    },
+    "disabledReasons": {
+      "noLetter": "Open a letter first.",
+      "selectionRequired": "Select text in the letter first.",
+      "unavailable": "This feature is not available yet."
+    }
+  },
   "menuItems": {
     "managePrecursorLetter": "Edit Predecessor Letter",
     "manageSuccessorLetter": "Edit Successor Letter",

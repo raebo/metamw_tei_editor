@@ -96,6 +96,40 @@
       "letter_working_copy_missing": "Die benötigte Arbeitskopie des Briefes fehlt. Laden Sie den Brief neu."
     }
   },
+  "userActionMenu": {
+    "groups": {
+      "headerCreate": "Briefkopf erstellen",
+      "headerEdit": "Briefkopf bearbeiten",
+      "textCreate": "Brieftext erstellen",
+      "textCriticism": "Textkritik"
+    },
+    "actions": {
+      "createHeader": "Briefkopf erstellen",
+      "createLetter": "Brief erstellen",
+      "editHeader": "Briefkopf bearbeiten",
+      "editReceiver": "Empfänger bearbeiten",
+      "addAttachment": "Beilage hinzufügen",
+      "addRism": "RISM-Eintrag hinzufügen",
+      "addProvenance": "Provenienz hinzufügen",
+      "person": "Person auszeichnen",
+      "place": "Ort auszeichnen",
+      "creation": "Werk auszeichnen",
+      "protagCreation": "FMBC-Werk auszeichnen",
+      "fmbLetter": "Verweis auf FMB-Brief",
+      "gbLetter": "Verweis auf GB-Brief",
+      "createWritingAct": "Schreibakt erstellen",
+      "receiverAddress": "Adresse des Empfängers",
+      "senderAddress": "Adresse des Senders",
+      "addRemark": "Vermerk hinzufügen",
+      "pageBreak": "Seitenumbruch",
+      "columnBreak": "Spaltenumbruch"
+    },
+    "disabledReasons": {
+      "noLetter": "Öffnen Sie zuerst einen Brief.",
+      "selectionRequired": "Markieren Sie zuerst Text im Brief.",
+      "unavailable": "Diese Funktion ist noch nicht verfügbar."
+    }
+  },
   "menuItems": {
     "managePrecursorLetter": "Vorgänger Brief bearbeiten",
     "manageSuccessorLetter": "Nachfolger Brief bearbeiten",
