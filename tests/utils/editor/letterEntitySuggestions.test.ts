@@ -1,5 +1,9 @@
 import { EntityType } from '@src/constants/editor';
-import { extractLetterPersonSuggestions } from '@src/utils/editor/letterEntitySuggestions';
+import {
+  extractLetterPersonSuggestions,
+  extractLetterPlaceSuggestions,
+  LetterPlaceEntityType,
+} from '@src/utils/editor/letterEntitySuggestions';
 
 describe('extractLetterPersonSuggestions', () => {
   const xml = `
@@ -69,5 +73,95 @@ describe('extractLetterPersonSuggestions', () => {
 
   it('rejects malformed XML', () => {
     expect(() => extractLetterPersonSuggestions('<TEI><text></TEI>')).toThrow('Error parsing XML');
+  });
+});
+
+describe('extractLetterPlaceSuggestions', () => {
+  const xml = `
+    <TEI xmlns="http://www.tei-c.org/ns/1.0">
+      <teiHeader>
+        <fileDesc>
+          <publicationStmt>
+            <address><placeName><settlement data-key="STM9999999">Verlagsort</settlement></placeName></address>
+          </publicationStmt>
+        </fileDesc>
+        <profileDesc>
+          <correspDesc>
+            <correspAction type="sent">
+              <placeName type="writing_place">
+                <settlement data-key="STM0000001">Leipzig</settlement>
+                <country>Deutschland</country>
+              </placeName>
+            </correspAction>
+            <correspAction type="received">
+              <placeName type="receiving_place">
+                <settlement data-key="STM0000002">Berlin</settlement>
+              </placeName>
+            </correspAction>
+          </correspDesc>
+        </profileDesc>
+      </teiHeader>
+      <text>
+        <body>
+          <p>
+            <placeName>
+              <settlement data-key="STM0000001">Leipzig</settlement>
+            </placeName>
+            <placeName data-key="STM0000003" type="settlement">Dresden</placeName>
+            <placeName>
+              <name data-key="SGH0000001" type="sight">Thomaskirche</name>
+              <settlement>Leipzig</settlement>
+            </placeName>
+            <placeName>
+              <name data-key="NST0000001" type="institution">Gewandhaus</name>
+              <settlement>Leipzig</settlement>
+            </placeName>
+          </p>
+        </body>
+      </text>
+    </TEI>
+  `;
+
+  it('returns only settlements for the settlement type and merges contexts', () => {
+    expect(extractLetterPlaceSuggestions(xml, EntityType.SETTLEMENT)).toEqual([
+      {
+        entityKey: 'STM0000002',
+        entityName: 'Berlin',
+        entityType: EntityType.SETTLEMENT,
+        contexts: ['receivingPlace'],
+      },
+      {
+        entityKey: 'STM0000003',
+        entityName: 'Dresden',
+        entityType: EntityType.SETTLEMENT,
+        contexts: ['mentioned'],
+      },
+      {
+        entityKey: 'STM0000001',
+        entityName: 'Leipzig',
+        entityType: EntityType.SETTLEMENT,
+        contexts: ['writingPlace', 'mentioned'],
+      },
+    ]);
+  });
+
+  it.each<[LetterPlaceEntityType, string, string]>([
+    [EntityType.SIGHT, 'SGH0000001', 'Thomaskirche'],
+    [EntityType.INSTITUTION, 'NST0000001', 'Gewandhaus'],
+  ])('filters the letter list for %s', (entityType, entityKey, entityName) => {
+    expect(extractLetterPlaceSuggestions(xml, entityType)).toEqual([
+      {
+        entityKey,
+        entityName,
+        entityType,
+        contexts: ['mentioned'],
+      },
+    ]);
+  });
+
+  it('excludes settlements outside body and correspondence metadata', () => {
+    const suggestions = extractLetterPlaceSuggestions(xml, EntityType.SETTLEMENT);
+
+    expect(suggestions).not.toEqual(expect.arrayContaining([expect.objectContaining({ entityKey: 'STM9999999' })]));
   });
 });

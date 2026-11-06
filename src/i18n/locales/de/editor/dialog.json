@@ -903,7 +903,10 @@
       "author": "Autor",
       "writer": "Schreiber",
       "receiver": "Empfänger",
-      "addressee": "Adressat"
+      "addressee": "Adressat",
+      "writingPlace": "Schreibort",
+      "sendingPlace": "Absendeort",
+      "receivingPlace": "Empfangsort"
     }
   },
   "personContainer": {

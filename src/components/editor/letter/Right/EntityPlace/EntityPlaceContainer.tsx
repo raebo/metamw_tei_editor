@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EditorContainerProps } from '@src/components/pages/editor/ShowEditor';
 import {
   Badge,
@@ -40,10 +40,14 @@ import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { fetchEntityKey } from '@src/services/editor/apiLetterRequest.service';
 import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { useTranslation } from 'react-i18next';
+import LetterEntitySuggestionList from '@src/components/editor/letter/Right/EntitySuggestions/LetterEntitySuggestionList';
+import { extractLetterPlaceSuggestions, LetterEntitySuggestion, LetterPlaceEntityType } from '@src/utils/editor/letterEntitySuggestions';
+import { fetchMetamwEntityData } from '@src/services/auto_anno/apiMetaMw.service';
+import { RemotePlaceDataSchema } from '@src/schemas';
 
 type SelectTypeOption = null | EntityType.SETTLEMENT | EntityType.INSTITUTION | EntityType.SIGHT;
 
-type SelectActionOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
+type SelectActionOption = null | 'LETTER' | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 
 export interface PlaceFormData {
   id?: number | null;
@@ -113,6 +117,19 @@ const EntityPlaceContainer = (_props: EditorContainerProps) => {
   const [selectedKindOption, setSelectedKindOption] = useState<SelectActionOption>(null);
 
   const radioGroupRef = useRef<HTMLDivElement | null>(null);
+  const selectedTypeRef = useRef<SelectTypeOption>(null);
+
+  const letterPlaceSuggestions = useMemo(() => {
+    if (!stateTeiXml || selectedTypeOption === null) return [];
+
+    try {
+      return extractLetterPlaceSuggestions(stateTeiXml, selectedTypeOption);
+    } catch {
+      return [];
+    }
+  }, [selectedTypeOption, stateTeiXml]);
+
+  const addedPlaceKeys = useMemo(() => new Set(addedPlaceEntries.map((entry) => entry.key)), [addedPlaceEntries]);
 
   useEffect(() => {
     if (!stateTeiXml) {
@@ -184,6 +201,7 @@ const EntityPlaceContainer = (_props: EditorContainerProps) => {
   };
 
   const handleSelectKindOption = (option: SelectActionOption) => {
+    if (option === 'LETTER') return;
     setSelectedKindOption(option);
 
     if (option === 'NEW_ENTRY') {
@@ -204,9 +222,10 @@ const EntityPlaceContainer = (_props: EditorContainerProps) => {
   const handleSelectTypeOption = (option: SelectTypeOption) => {
     setPlaceFormData(blankPlaceFormData);
     handleResetPlace();
+    selectedTypeRef.current = option;
     setSelectedTypeOption(option);
-    setSelectedActionOption('EXISTING_ENTRY');
-    setAutoCmplNameDisabled(false);
+    setSelectedActionOption('LETTER');
+    setAutoCmplNameDisabled(true);
     setAutoCmplCountryDisabled(true);
 
     if (option === EntityType.SIGHT) {
@@ -221,14 +240,30 @@ const EntityPlaceContainer = (_props: EditorContainerProps) => {
 
   const handleSelectActionOption = (option: SelectActionOption) => {
     setSelectedActionOption(option);
+    handleResetPlace();
+
+    if (option === 'LETTER') {
+      setPlaceFormData({ ...blankPlaceFormData, placeType: selectedTypeOption });
+      setAutoCmplNameDisabled(true);
+      setAutoCmplCountryDisabled(true);
+      setAutoCmplKindDisabled(true);
+      return;
+    }
+
+    if (option === 'EXISTING_ENTRY') {
+      setPlaceFormData({ ...blankPlaceFormData, placeType: selectedTypeOption });
+      setAutoCmplNameDisabled(false);
+      setAutoCmplCountryDisabled(true);
+      setAutoCmplKindDisabled(selectedTypeOption !== EntityType.INSTITUTION);
+    }
 
     if (option === 'NEW_ENTRY') {
       fetchAndSetNewKey(selectedTypeOption);
       setPlaceFormData({ ...blankPlaceFormData, placeType: selectedTypeOption, isNewEntry: true });
-      handleResetPlace();
+      setAutoCmplNameDisabled(selectedTypeOption === EntityType.SETTLEMENT);
       setAutoCmplCountryDisabled(true);
     }
-    if (selectedTypeOption === EntityType.SETTLEMENT) {
+    if (option === 'NEW_ENTRY' && selectedTypeOption === EntityType.SETTLEMENT) {
       setPlaceFormData((prev) => ({
         ...prev,
         kind: '',
@@ -268,7 +303,47 @@ const EntityPlaceContainer = (_props: EditorContainerProps) => {
   };
 
   const addNewPlaceEntry = (entry: MarkupPlaceData) => {
-    setAddedPlaceEntries((prevEntries) => [...prevEntries, entry]);
+    setAddedPlaceEntries((prevEntries) =>
+      prevEntries.some((existingEntry) => existingEntry.key === entry.key) ? prevEntries : [...prevEntries, entry],
+    );
+  };
+
+  const addLetterPlace = async (suggestion: LetterEntitySuggestion) => {
+    try {
+      const response = await fetchMetamwEntityData(suggestion.entityKey);
+      const parsedResult = RemotePlaceDataSchema.safeParse(response);
+
+      if (!parsedResult.success) {
+        throw new Error('Invalid place data returned by the server');
+      }
+      if (selectedTypeRef.current !== suggestion.entityType) return;
+
+      const place = parsedResult.data;
+      if (!place.key || !place.name) {
+        throw new Error('Place data is missing its key or name');
+      }
+
+      const placeType = suggestion.entityType as LetterPlaceEntityType;
+      if ((placeType === EntityType.SIGHT || placeType === EntityType.INSTITUTION) && !place.settlement) {
+        throw new Error('Place data is missing its settlement');
+      }
+
+      addNewPlaceEntry({
+        key: place.key,
+        placeType,
+        name: place.name,
+        country: place.country,
+        kind: placeType === EntityType.SIGHT ? 'sight' : placeType === EntityType.SETTLEMENT ? 'locality' : place.kind,
+        kindOriginal: place.kind,
+        settlement:
+          placeType === EntityType.SETTLEMENT ? { key: place.key, name: place.name, type: place.kind } : (place.settlement ?? null),
+        isNewEntry: false,
+      });
+    } catch (error) {
+      enqueueSnackbar(`Could not load place data for '${suggestion.entityKey}': ${MiscUtils.misc.getErrorMessage(error)}`, {
+        variant: 'error',
+      });
+    }
   };
 
   const buttonAddNewPlaceEntry = async () => {
@@ -343,8 +418,8 @@ const EntityPlaceContainer = (_props: EditorContainerProps) => {
               contentRight: null,
             }),
           ],
-          successMessage: t('editor:dialog.creationContainer.addCreationDialog.success'),
-          errorMessage: t('editor:dialog.creationContainer.addCreationDialog.error'),
+          successMessage: t('editor:dialog.placeContainer.addPlaceDialog.success'),
+          errorMessage: (message) => `${t('editor:dialog.placeContainer.addPlaceDialog.error')}: ${message}`,
         },
       );
     } catch (err) {
@@ -454,20 +529,43 @@ const EntityPlaceContainer = (_props: EditorContainerProps) => {
           >
             <FormControlLabel
               disabled={selectedTypeOption === null}
+              value="LETTER"
+              control={<Radio />}
+              label={t('editor:dialog.entitySelection.mode.letter')}
+            />
+            <FormControlLabel
+              disabled={selectedTypeOption === null}
               value="EXISTING_ENTRY"
               control={<Radio />}
-              label={t('editor:dialog.placeContainer.addPlaceDialog.label.existingEntry')}
+              label={t('editor:dialog.entitySelection.mode.search')}
             />
             <FormControlLabel
               disabled={selectedTypeOption === null}
               value="NEW_ENTRY"
               control={<Radio />}
-              label={t('editor:dialog.placeContainer.addPlaceDialog.label.newEntry')}
+              label={t('editor:dialog.entitySelection.mode.new')}
             />
           </RadioGroup>
         </FormControl>
 
-        <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
+        {selectedActionOption === 'LETTER' && (
+          <LetterEntitySuggestionList
+            suggestions={letterPlaceSuggestions}
+            excludedKeys={addedPlaceKeys}
+            onSelect={(suggestion) => void addLetterPlace(suggestion)}
+            onOpenSearch={() => handleSelectActionOption('EXISTING_ENTRY')}
+          />
+        )}
+
+        <Grid
+          container
+          spacing={2}
+          sx={{
+            marginTop: 3,
+            mb: 3,
+            display: selectedActionOption === 'LETTER' ? 'none' : 'flex',
+          }}
+        >
           <Grid size={12}>
             {(selectedActionOption === 'EXISTING_ENTRY' || selectedActionOption === null) && (
               <EntityPlaceAutocomplete

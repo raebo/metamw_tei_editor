@@ -903,7 +903,10 @@
       "author": "author",
       "writer": "writer",
       "receiver": "receiver",
-      "addressee": "addressee"
+      "addressee": "addressee",
+      "writingPlace": "place of writing",
+      "sendingPlace": "place of sending",
+      "receivingPlace": "place of receipt"
     }
   },
   "personContainer": {

@@ -2,8 +2,8 @@
 
 **Stand:** 06.11.2026
 
-**Status:** In Umsetzung; F-118A technisch umgesetzt, manuelle Abnahme sowie
-weitere Entitätstypen, Suchpagination und Backendvertrag noch offen.
+**Status:** In Umsetzung; F-118A bis F-118D technisch umgesetzt, manuelle
+Abnahme sowie Werke, Suchpagination und Backendvertrag noch offen.
 
 **Typ:** Feature und UX-/Suchkorrektur
 
@@ -334,12 +334,14 @@ werden pro Entitätstyp in einem eigenen Unterticket festgelegt:
 - **F-118A – Personen aus dem Brief (technisch umgesetzt, Abnahme offen):**
   `persName`, keyed Kindknoten sowie relevante Autor-, Schreiber-, Empfänger-
   und Adressatenangaben im Header.
-- **F-118B – Siedlungen aus dem Brief:** keyed `settlement`-Einträge im Body
-  und in fachlich relevanten Korrespondenzdaten.
-- **F-118C – Sehenswürdigkeiten aus dem Brief:** keyed Einträge der dafür
-  verwendeten TEI-Struktur.
-- **F-118D – Institutionen aus dem Brief:** keyed `institution`-Einträge im
-  Body und in fachlich relevanten Headerbereichen.
+- **F-118B – Siedlungen aus dem Brief (technisch umgesetzt, Abnahme offen):**
+  keyed `settlement`-Einträge im Body und in fachlich relevanten
+  Korrespondenzdaten.
+- **F-118C – Sehenswürdigkeiten aus dem Brief (technisch umgesetzt, Abnahme
+  offen):** keyed Einträge der dafür verwendeten TEI-Struktur.
+- **F-118D – Institutionen aus dem Brief (technisch umgesetzt, Abnahme offen):**
+  keyed `institution`-Einträge im Body und in fachlich relevanten
+  Headerbereichen.
 - **F-118E – Werke aus dem Brief:** keyed Werke des Typs `CREATION`.
 - **F-118F – Protagonistenwerke aus dem Brief:** keyed Werke des Typs
   `PROTAG_CREATION`, strikt getrennt von allgemeinen Werken.

@@ -49,6 +49,19 @@ export const textMarking = {
     markedSpan.setAttribute('class', 'marked');
     sourceRange.surroundContents(markedSpan);
 
+    xmlDoc.querySelectorAll('span.marked').forEach((existingMarkedSpan) => {
+      if (existingMarkedSpan === markedSpan) return;
+
+      const parent = existingMarkedSpan.parentNode;
+      if (!parent) return;
+
+      while (existingMarkedSpan.firstChild) {
+        parent.insertBefore(existingMarkedSpan.firstChild, existingMarkedSpan);
+      }
+      parent.removeChild(existingMarkedSpan);
+      parent.normalize();
+    });
+
     return xmlDoc;
   },
   isValidSelection(

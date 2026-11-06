@@ -22,7 +22,7 @@ export const backendOrchestrator = {
     options?: {
       actionsOnSuccess?: DispatchableAction[];
       successMessage?: string;
-      errorMessage?: string;
+      errorMessage?: string | ((message: string) => string);
     },
   ) => {
     dispatch(startContentUpdate());
@@ -48,7 +48,9 @@ export const backendOrchestrator = {
       return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      enqueueSnackbar(options?.errorMessage ?? message, { variant: 'error' });
+      const errorMessage = options?.errorMessage;
+      const displayedMessage = typeof errorMessage === 'function' ? errorMessage(message) : (errorMessage ?? message);
+      enqueueSnackbar(displayedMessage, { variant: 'error' });
       return false;
     } finally {
       dispatch(finishContentUpdate());

@@ -179,6 +179,31 @@ describe('textMarking.removeMarkedSpans', () => {
 
     expect(secondMarkedXml.querySelector('span.marked')?.textContent).toBe('six weeks');
   });
+
+  test('keeps only the most recently selected passage in the source XML', () => {
+    const sourceXml =
+      '<TEI><text><body><div><p><span class="marked">schönes</span> Buch</p><p>Bischöfen und Kardinälen nichts</p></div></body></text></TEI>';
+    const root = document.createElement('div');
+    const firstParagraph = document.createElement('p');
+    firstParagraph.dataset.editorXmlPath = '0.0.0.0';
+    firstParagraph.innerHTML = '<span class="marked">schönes</span> Buch';
+    const secondParagraph = document.createElement('p');
+    secondParagraph.dataset.editorXmlPath = '0.0.0.1';
+    secondParagraph.textContent = 'Bischöfen und Kardinälen nichts';
+    root.append(firstParagraph, secondParagraph);
+
+    const textNode = secondParagraph.firstChild!;
+    const range = document.createRange();
+    range.setStart(textNode, 14);
+    range.setEnd(textNode, 24);
+
+    const markedXml = textMarking.createMarkedXmlDocument(sourceXml, root, range);
+    const markedSpans = markedXml.querySelectorAll('span.marked');
+
+    expect(markedSpans).toHaveLength(1);
+    expect(markedSpans[0].textContent).toBe('Kardinälen');
+    expect(markedXml.querySelectorAll('p')[0].textContent).toBe('schönes Buch');
+  });
 });
 
 describe('textMarking.addTmpIdToNode', () => {
