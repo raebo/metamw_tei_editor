@@ -77,10 +77,8 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
   });
   const [authorFormDisabled, setAuthorFormDisabled] = useState(true);
 
-  const [selectedAuthorOption, setSelectedAuthorOption] =
-    useState<SelectActionAuthorOption>('EXISTING_ENTRY');
-  const [selectedCreationOption, setSelectedCreationOption] =
-    useState<SelectActionCreationOption>(null);
+  const [selectedAuthorOption, setSelectedAuthorOption] = useState<SelectActionAuthorOption>('EXISTING_ENTRY');
+  const [selectedCreationOption, setSelectedCreationOption] = useState<SelectActionCreationOption>(null);
 
   const [authorAutocompleteDisabled, setAuthorAutocompleteDisabled] = useState(false);
   const [authorCreations, setAuthorCreations] = useState<SnippetEntity[]>([]); //creations of the selected author
@@ -194,10 +192,7 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
         setAuthorCreations(result);
       })
       .catch((error) => {
-        enqueueSnackbar(
-          `Could not fetch creations for author "${authorKey}": "${error.message}", please try again"`,
-          { variant: 'error' },
-        );
+        enqueueSnackbar(`Could not fetch creations for author "${authorKey}": "${error.message}", please try again"`, { variant: 'error' });
       });
   };
 
@@ -210,10 +205,7 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
         }));
       })
       .catch((error) => {
-        enqueueSnackbar(
-          `Could not fetch a valid new key for a Author: "${error.message}", please try again"`,
-          { variant: 'error' },
-        );
+        enqueueSnackbar(`Could not fetch a valid new key for a Author: "${error.message}", please try again"`, { variant: 'error' });
       });
   };
   const fetchAndSetNewCreationKey = () => {
@@ -226,10 +218,7 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
         }));
       })
       .catch((error) => {
-        enqueueSnackbar(
-          `Could not fetch a valid new key for a Creation: "${error.message}", please try again"`,
-          { variant: 'error' },
-        );
+        enqueueSnackbar(`Could not fetch a valid new key for a Creation: "${error.message}", please try again"`, { variant: 'error' });
       });
   };
 
@@ -254,11 +243,8 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
   const isValidFormData = (): boolean => {
     return (
       authorFormData.key !== null &&
-      ((authorFormData.isNewEntry &&
-        authorFormData.firstName !== null &&
-        authorFormData.lastName !== null) ||
-        (!authorFormData.isNewEntry &&
-          (authorFormData.firstName !== null || authorFormData.lastName !== null))) &&
+      ((authorFormData.isNewEntry && authorFormData.firstName !== null && authorFormData.lastName !== null) ||
+        (!authorFormData.isNewEntry && (authorFormData.firstName !== null || authorFormData.lastName !== null))) &&
       creationFormData.key !== null &&
       creationFormData.name !== null &&
       creationFormData.kind !== null
@@ -304,20 +290,11 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
         throw new Error('No letter id or name found!');
       }
 
-      const xmlId: string = await EditorUtils.creationDataService.handleCreationDataEntries(
-        xmlDoc,
-        addedCreationEntries,
-        hiRendMarkup,
-      );
+      const xmlId: string = await EditorUtils.creationDataService.handleCreationDataEntries(xmlDoc, addedCreationEntries, hiRendMarkup);
 
       await EditorUtils.backendOrchestrator.patchWithDispatch(
         dispatch,
-        [
-          new XMLSerializer().serializeToString(xmlDoc),
-          stateEditorLetter.id,
-          EditorConstants.changeTypes.creation.ADDED,
-          xmlId,
-        ],
+        [new XMLSerializer().serializeToString(xmlDoc), stateEditorLetter.id, EditorConstants.changeTypes.creation.ADDED, xmlId],
         {
           actionsOnSuccess: [
             setReloadLetterContent({ reloadLetterContent: true }),
@@ -392,11 +369,7 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
                       {`${entry.author?.firstName ?? ''} ${entry.author?.lastName ?? ''} (${entry.author?.key})`}
                     </Typography>
                   </Box>
-                  <IconButton
-                    edge="end"
-                    onClick={() => removeExistingEntry(entry)}
-                    aria-label="delete"
-                  >
+                  <IconButton edge="end" onClick={() => removeExistingEntry(entry)} aria-label="delete">
                     <DeleteIcon />
                   </IconButton>
                 </Box>
@@ -495,9 +468,7 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
           <RadioGroup
             row
             value={selectedCreationOption}
-            onChange={(e) =>
-              handleCreationOptionChange(e.target.value as SelectActionCreationOption)
-            }
+            onChange={(e) => handleCreationOptionChange(e.target.value as SelectActionCreationOption)}
           >
             <FormControlLabel
               value={'EXISTING_ENTRY'}
@@ -563,12 +534,7 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
             {t('editor:dialog.creationContainer.addCreationDialog.button.addCreation')}
           </Button>
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmitButtonClick}
-            disabled={addedCreationEntries.length === 0}
-          >
+          <Button variant="contained" color="primary" onClick={handleSubmitButtonClick} disabled={addedCreationEntries.length === 0}>
             <Badge badgeContent={addedCreationEntries.length} color="secondary">
               {t('editor:dialog.creationContainer.addCreationDialog.button.annotate')}
             </Badge>
@@ -579,10 +545,7 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
           </Button>
         </Box>
       </Box>
-      <div>
-        <pre>{JSON.stringify(authorFormData, null, 2)}</pre>
-        <pre>{JSON.stringify(creationFormData, null, 2)}</pre>
-      </div>
+      <div></div>
     </>
   );
 };

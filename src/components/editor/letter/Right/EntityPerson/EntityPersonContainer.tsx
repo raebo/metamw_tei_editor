@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch } from '@src/redux/hooks';
 import { RootState } from '@src/redux/redux.store';
 import { useSelector } from 'react-redux';
@@ -33,8 +33,10 @@ import { SnippetEntity } from '@src/services/mappings/autoAnnoMappings';
 import { MiscUtils } from '@src/utils/misc';
 import { useTranslation } from 'react-i18next';
 import { mapPersonEntityCreateRequest, mapPersonFormToMarkupPersonData } from '@src/services/mappings/entityCreateMappings';
+import LetterEntitySuggestionList from '@src/components/editor/letter/Right/EntitySuggestions/LetterEntitySuggestionList';
+import { extractLetterPersonSuggestions, LetterEntitySuggestion } from '@src/utils/editor/letterEntitySuggestions';
 
-type SelectOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
+type SelectOption = 'LETTER' | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 
 interface PersonFormData {
   key: string | null;
@@ -46,7 +48,6 @@ interface PersonFormData {
 const EntityPersonContainer = (_props: EditorContainerProps) => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const isMounted = useRef(false);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
   const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent);
   const [xmlDoc, setXmlDoc] = React.useState<XMLDocument | null>(null);
@@ -60,18 +61,32 @@ const EntityPersonContainer = (_props: EditorContainerProps) => {
   });
 
   const [autocompleteDisabled, setAutocompleteDisabled] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<SelectOption>(null);
+  const [selectedOption, setSelectedOption] = useState<SelectOption>('LETTER');
 
   const [addedPersonEntries, setAddedPersonEntries] = useState<MarkupPersonData[]>([]);
 
   const [formIsDisabled, setFormIsDisabled] = useState(true);
+
+  const letterPersonSuggestions = useMemo(() => {
+    if (!stateTeiXml) return [];
+
+    try {
+      return extractLetterPersonSuggestions(stateTeiXml);
+    } catch {
+      return [];
+    }
+  }, [stateTeiXml]);
+
+  const addedPersonKeys = useMemo(() => new Set(addedPersonEntries.map((entry) => entry.key)), [addedPersonEntries]);
 
   const removeExistingEntry = (key: string) => {
     setAddedPersonEntries((prevEntries) => prevEntries.filter((entry: MarkupPersonData) => entry.key !== key));
   };
 
   const addNewPersonEntry = (entry: MarkupPersonData) => {
-    setAddedPersonEntries((prevEntries) => [...prevEntries, entry]);
+    setAddedPersonEntries((prevEntries) =>
+      prevEntries.some((existingEntry) => existingEntry.key === entry.key) ? prevEntries : [...prevEntries, entry],
+    );
   };
 
   const buttonAddNewPersonEntry = () => {
@@ -88,7 +103,7 @@ const EntityPersonContainer = (_props: EditorContainerProps) => {
   };
 
   const handleSelectOption = (option: SelectOption) => {
-    if (option === 'EXISTING_ENTRY') {
+    if (option === 'LETTER' || option === 'EXISTING_ENTRY') {
       setPersonFormData((prevState) => ({
         ...prevState,
         key: null,
@@ -96,8 +111,8 @@ const EntityPersonContainer = (_props: EditorContainerProps) => {
         nameLast: null,
         nameFirst: null,
       }));
-      setSelectedOption('EXISTING_ENTRY');
-      setAutocompleteDisabled(false);
+      setSelectedOption(option);
+      setAutocompleteDisabled(option !== 'EXISTING_ENTRY');
       setFormIsDisabled(true);
     } else if (option === 'NEW_ENTRY') {
       fetchEntityKey(EditorConstants.ENTITY_TYPES.PERSON)
@@ -134,17 +149,10 @@ const EntityPersonContainer = (_props: EditorContainerProps) => {
       setXmlDoc(null);
     }
   }, [stateTeiXml, dispatch]);
-  useEffect(() => {
-    if (!isMounted.current) {
-      handleSelectOption('EXISTING_ENTRY');
-      isMounted.current = true;
-    }
-  }, []);
-
   const allowPersonAdding = useMemo(() => {
     if (selectedOption === 'NEW_ENTRY') {
       return personFormData.nameFirst?.trim() && personFormData.nameLast?.trim() && personFormData.key !== null;
-    } else if (selectedOption === 'EXISTING_ENTRY') {
+    } else if (selectedOption === 'EXISTING_ENTRY' || selectedOption === 'LETTER') {
       return personFormData.key !== null && (personFormData.nameLast?.trim() || personFormData.nameFirst?.trim());
     } else {
       return false;
@@ -167,6 +175,27 @@ const EntityPersonContainer = (_props: EditorContainerProps) => {
     } else {
       setHiRendMarkup(null);
     }
+  };
+
+  const selectExistingPerson = (entry: Pick<SnippetEntity, 'entityKey' | 'entityName' | 'entityLastName' | 'entityFirstName'>) => {
+    setPersonFormData((prev) => ({
+      ...prev,
+      key: entry.entityKey,
+      nameFull: entry.entityName,
+      nameLast: entry.entityLastName ?? entry.entityName,
+      nameFirst: entry.entityFirstName ?? null,
+    }));
+  };
+
+  const addLetterPerson = (entry: LetterEntitySuggestion) => {
+    addNewPersonEntry({
+      id: null,
+      key: entry.entityKey,
+      nameDisplay: entry.entityName,
+      nameLast: null,
+      nameFirst: null,
+      isNewEntry: false,
+    });
   };
 
   const handleSubmitButtonClick = async () => {
@@ -262,71 +291,66 @@ const EntityPersonContainer = (_props: EditorContainerProps) => {
 
         <FormControl component="fieldset" sx={{ mb: 3 }}>
           <RadioGroup row value={selectedOption} onChange={(e) => handleSelectOption(e.target.value as SelectOption)}>
-            <FormControlLabel
-              value="EXISTING_ENTRY"
-              control={<Radio />}
-              label={t('editor:dialog.personContainer.addPersonDialog.label.existingEntry')}
-            />
-            <FormControlLabel
-              disabled={false}
-              value="NEW_ENTRY"
-              control={<Radio />}
-              label={t('editor:dialog.personContainer.addPersonDialog.label.newEntry')}
-            />
+            <FormControlLabel value="LETTER" control={<Radio />} label={t('editor:dialog.entitySelection.mode.letter')} />
+            <FormControlLabel value="EXISTING_ENTRY" control={<Radio />} label={t('editor:dialog.entitySelection.mode.search')} />
+            <FormControlLabel disabled={false} value="NEW_ENTRY" control={<Radio />} label={t('editor:dialog.entitySelection.mode.new')} />
           </RadioGroup>
         </FormControl>
 
-        <EntityPersonAutocomplete
-          isDisabled={autocompleteDisabled}
-          addedPersonEntries={addedPersonEntries}
-          afterSelectHandler={(entry: SnippetEntity) => {
-            setPersonFormData((prev) => ({
-              ...prev,
-              id: entry.entityId,
-              key: entry.entityKey,
-              nameFull: entry.entityName,
-              nameLast: entry.entityLastName ?? null,
-              nameFirst: entry.entityFirstName ?? null,
-              isNewEntry: selectedOption === 'NEW_ENTRY',
-            }));
-          }}
-        />
-        <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
-          <Grid spacing={{ xs: 3, md: 3, lg: 3 }}>
-            <TextField variant="outlined" value={personFormData.key ?? ''} fullWidth disabled={true} />
+        {selectedOption === 'LETTER' && (
+          <LetterEntitySuggestionList
+            suggestions={letterPersonSuggestions}
+            excludedKeys={addedPersonKeys}
+            onSelect={addLetterPerson}
+            onOpenSearch={() => handleSelectOption('EXISTING_ENTRY')}
+          />
+        )}
+
+        {selectedOption !== 'LETTER' && (
+          <EntityPersonAutocomplete
+            isDisabled={selectedOption !== 'EXISTING_ENTRY' || autocompleteDisabled}
+            addedPersonEntries={addedPersonEntries}
+            afterSelectHandler={selectExistingPerson}
+          />
+        )}
+        {selectedOption !== 'LETTER' && (
+          <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
+            <Grid spacing={{ xs: 3, md: 3, lg: 3 }}>
+              <TextField variant="outlined" value={personFormData.key ?? ''} fullWidth disabled={true} />
+            </Grid>
+            <Grid spacing={{ xs: 12, md: 9, lg: 9 }}>
+              <TextField
+                label={t('editor:dialog.personContainer.addPersonDialog.label.firstName')}
+                variant="outlined"
+                fullWidth
+                value={personFormData.nameFirst ?? ''}
+                disabled={formIsDisabled}
+                onChange={(event) => {
+                  setPersonFormData((prev) => ({
+                    ...prev,
+                    nameFirst: event.target.value,
+                  }));
+                }}
+              />
+            </Grid>
+            <Grid spacing={{ xs: 12, md: 12, lg: 12 }}>
+              <TextField
+                label={t('editor:dialog.personContainer.addPersonDialog.label.lastName')}
+                variant="outlined"
+                fullWidth
+                value={personFormData.nameLast ?? ''}
+                sx={{ mb: 3 }}
+                disabled={formIsDisabled}
+                onChange={(event) => {
+                  setPersonFormData((prev) => ({
+                    ...prev,
+                    nameLast: event.target.value,
+                  }));
+                }}
+              />
+            </Grid>
           </Grid>
-          <Grid spacing={{ xs: 12, md: 9, lg: 9 }}>
-            <TextField
-              label={t('editor:dialog.personContainer.addPersonDialog.label.firstName')}
-              variant="outlined"
-              fullWidth
-              value={personFormData.nameFirst ?? ''}
-              disabled={formIsDisabled}
-              onChange={(event) => {
-                setPersonFormData((prev) => ({
-                  ...prev,
-                  nameFirst: event.target.value,
-                }));
-              }}
-            />
-          </Grid>
-          <Grid spacing={{ xs: 12, md: 12, lg: 12 }}>
-            <TextField
-              label={t('editor:dialog.personContainer.addPersonDialog.label.lastName')}
-              variant="outlined"
-              fullWidth
-              value={personFormData.nameLast ?? ''}
-              sx={{ mb: 3 }}
-              disabled={formIsDisabled}
-              onChange={(event) => {
-                setPersonFormData((prev) => ({
-                  ...prev,
-                  nameLast: event.target.value,
-                }));
-              }}
-            />
-          </Grid>
-        </Grid>
+        )}
 
         <Divider sx={{ my: 3 }} />
 
@@ -352,9 +376,6 @@ const EntityPersonContainer = (_props: EditorContainerProps) => {
           </Button>
         </Box>
       </Box>
-      <div>
-        <pre>{JSON.stringify(personFormData, null, 2)}</pre>
-      </div>
     </div>
   );
 };

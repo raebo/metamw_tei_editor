@@ -64,6 +64,8 @@ export const setEditorTabAndPinnedLetterThunk = createAsyncThunk(
       dispatch(setEditorLetter({ letter: { id: null, name: null } }));
     }
     dispatch(setContentTextIsMarked({ textIsMarked: textIsMarked }));
+    dispatch(setNodeClicked({ nodeClicked: false }));
+    dispatch(setEditorSelectedItem({ selectedItem: { left: null, right: null } }));
   },
 );
 

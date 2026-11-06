@@ -889,6 +889,23 @@
       }
     }
   },
+  "entitySelection": {
+    "mode": {
+      "letter": "Im Brief",
+      "search": "Suche",
+      "new": "Neu"
+    },
+    "empty": "In diesem Brief sind keine passenden Einträge mit Schlüssel vorhanden.",
+    "openSearch": "Zur Suche",
+    "select": "{{name}} auswählen",
+    "context": {
+      "mentioned": "im Text erwähnt",
+      "author": "Autor",
+      "writer": "Schreiber",
+      "receiver": "Empfänger",
+      "addressee": "Adressat"
+    }
+  },
   "personContainer": {
     "addPersonDialog": {
       "headline": "Person Auszeichnen und Hinzufügen",

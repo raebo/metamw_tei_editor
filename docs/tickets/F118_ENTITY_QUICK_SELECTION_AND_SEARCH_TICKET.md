@@ -2,8 +2,8 @@
 
 **Stand:** 06.11.2026
 
-**Status:** Ticketvorschlag; fachliche und technische Abstimmung mit dem Backend
-ausstehend.
+**Status:** In Umsetzung; F-118A technisch umgesetzt, manuelle Abnahme sowie
+weitere Entitätstypen, Suchpagination und Backendvertrag noch offen.
 
 **Typ:** Feature und UX-/Suchkorrektur
 
@@ -47,83 +47,87 @@ Gesamtbestand vorhanden ist.
 Eine bloße Erhöhung von `per_page` verschiebt das Problem nur und ist bei häufigen
 Namen weder dauerhaft noch performant genug.
 
-### Fehlende Schnellauswahl
+### Fehlende briefinterne Schnellauswahl
 
-Beim Öffnen eines Entitätenpanels fehlen Vorschläge für Entitäten, die mit hoher
-Wahrscheinlichkeit benötigt werden:
+Die Entitätenpanels unterscheiden derzeit nur „Vorhandener Eintrag“ und „Neuer
+Eintrag“. Bereits im aktuell bearbeiteten Brief verwendete Entitäten müssen
+trotzdem erneut über die Remotesuche gefunden werden.
 
-- im gesamten Datenbestand besonders häufig verwendete Entitäten;
-- bereits im aktuell bearbeiteten Brief erwähnte Personen und Entitäten;
-- Autor, Schreiber und Empfänger des aktuellen Briefes;
-- Absende- und Empfangsort des aktuellen Briefes.
-
-Benutzer müssen deshalb auch sehr häufige oder bereits im Briefkopf vorhandene
-Entitäten erneut über die Volltextsuche finden.
+Der aktuelle XML-Inhalt enthält die benötigten Angaben bereits. Entscheidend ist
+dabei ein vorhandener kanonischer Schlüssel: Nur Elemente mit einem nicht leeren
+`data-key` können sicher wiederverwendet werden. Personen und Orte kommen sowohl
+im Brieftext als auch in fachlich relevanten Bereichen des TEI-Headers vor.
 
 ## Ziel
 
-Die Entitätenpanels erhalten eine verständliche Schnellauswahl und eine Suche,
-deren vollständige Treffermenge schrittweise erreichbar bleibt.
+Die Entitätenpanels erhalten drei kurze Auswahlmodi:
 
-1. Ohne Suchbegriff zeigt das Panel briefbezogene und häufig verwendete
-   Vorschläge in getrennten Bereichen.
-2. Nach Eingabe eines Suchbegriffs steht die reguläre Suche im Vordergrund.
-3. Weitere Treffer können nachgeladen werden, bis die Ergebnismenge erschöpft
-   ist.
-4. Ein Klick auf einen Vorschlag verwendet denselben geprüften Auswahl- und
-   Speicherpfad wie ein regulärer Suchtreffer.
-5. Frontend und Backend verwenden einen verbindlichen, typisierten und in
-   `docs/openapi/jwt.yaml` dokumentierten Vertrag.
+1. **Im Brief** – initial ausgewählt; zeigt lokal und live aus dem aktuellen XML
+   ermittelte, bereits verwendete keyed Entitäten.
+2. **Suche** – verwendet die bestehende Remotesuche und ermöglicht das Nachladen
+   weiterer Treffer.
+3. **Neu** – verwendet unverändert den vorhandenen Prozess zur Neuanlage.
+
+Ein Klick auf einen Eintrag aus „Im Brief“ verwendet anschließend denselben
+geprüften Auswahl- und Speicherpfad wie ein regulärer Suchtreffer. Für die lokale
+Briefauswahl ist kein neuer Backend-Endpunkt erforderlich. Frontend und Backend
+müssen nur die Erweiterung der Remotesuche verbindlich in
+`docs/openapi/jwt.yaml` abstimmen.
 
 ## Vorgeschlagenes UI-Konzept
 
-### Zustand ohne Suchbegriff
+### Modus „Im Brief“
 
-Lange historische Personennamen und Werktitel eignen sich besser für kompakte
-Listenzeilen als für schmale Chips. Das Panel kann deshalb wie folgt aufgebaut
-werden:
+Die bisherige Auswahl zwischen „Vorhandener Eintrag“ und „Neuer Eintrag“ wird
+durch eine kompakte Dreifachauswahl ersetzt. „Im Brief“ ist beim Öffnen des
+Panels initial aktiv:
 
 ```text
 ┌──────────────────────────────────────────┐
 │ Person auszeichnen                      │
+│                                          │
+│   ● Im Brief    ○ Suche    ○ Neu         │
+│                                          │
 │ ┌──────────────────────────────────────┐ │
-│ │ Person suchen …                  🔍  │ │
+│ │ Felix Mendelssohn Bartholdy          │ │
+│ │ Empfänger · im Text erwähnt      ＋  │ │
+│ ├──────────────────────────────────────┤ │
+│ │ Lea Mendelssohn Bartholdy            │ │
+│ │ im Text erwähnt                  ＋  │ │
+│ ├──────────────────────────────────────┤ │
+│ │ Carl Friedrich Zelter                │ │
+│ │ Schreiber                        ＋  │ │
 │ └──────────────────────────────────────┘ │
-│                                          │
-│ IN DIESEM BRIEF                          │
-│  Felix Mendelssohn Bartholdy             │
-│  Empfänger · erwähnt                 ＋  │
-│                                          │
-│  Lea Mendelssohn Bartholdy               │
-│  erwähnt                             ＋  │
-│                                          │
-│ HÄUFIG VERWENDET                         │
-│  Carl Friedrich Zelter               ＋  │
-│  Fanny Hensel                         ＋  │
-│  …                                       │
+│              scrollbar                   │
 └──────────────────────────────────────────┘
 ```
 
-- „In diesem Brief“ steht vor „Häufig verwendet“, weil der Briefkontext in der
-  Regel relevanter ist als eine globale Statistik.
-- Pro Listenzeile werden Primärname und optional eine kurze Herkunft angezeigt,
-  beispielsweise „Schreiber“, „Empfänger“, „erwähnt“, „Absendeort“ oder
-  „Empfangsort“.
+- Die Bezeichnung lautet bevorzugt „Im Brief“, weil „Brief“ allein insbesondere
+  bei Briefreferenzen mehrdeutig wäre. Falls der verfügbare Platz dies nicht
+  zulässt, kann sichtbar „Brief“ mit dem barrierefreien Namen „Im aktuellen
+  Brief“ verwendet werden.
+- Die Liste wird bei jedem Öffnen und nach Änderungen von
+  `editorLetter.letter.xmlContent` neu aus dem aktuellen XML gebildet.
+- Die Liste erhält eine feste Maximalhöhe und scrollt innerhalb des Panels. Das
+  gesamte rechte Panel soll beim Durchsehen vieler Vorschläge nicht springen.
+- Lange historische Namen werden als Listenzeilen und nicht als schmale Chips
+  dargestellt.
 - Ein Klick auf die gesamte Zeile oder die Hinzufügen-Schaltfläche wählt die
   Entität aus. Die Zeile muss vollständig per Tastatur erreichbar sein.
-- Bereits für die aktuelle Auszeichnung hinzugefügte Schlüssel werden wie bisher
-  ausgefiltert oder sichtbar deaktiviert.
-- Identische Entitäten erscheinen nur einmal. Mehrere Gründe werden gemeinsam
-  angezeigt, beispielsweise „Empfänger · erwähnt“.
-- Bei mehr als zehn briefbezogenen Vorschlägen kann der Bereich zunächst
-  eingeklappt werden; die fachliche Reihenfolge darf nicht von der globalen
-  Häufigkeit überschrieben werden.
+- Pro Zeile werden Anzeigename und, soweit ermittelbar, der Verwendungskontext
+  angezeigt, etwa „Autor“, „Schreiber“, „Empfänger“, „im Text erwähnt“,
+  „Absendeort“ oder „Empfangsort“.
+- Identische `data-key` erscheinen nur einmal. Mehrere Kontexte werden gemeinsam
+  angezeigt, beispielsweise „Empfänger · im Text erwähnt“.
+- Bereits im aktuellen Formular hinzugefügte Schlüssel werden ausgefiltert oder
+  sichtbar deaktiviert.
+- Enthält der Brief keine passende keyed Entität, erscheint ein verständlicher
+  Leerzustand mit der Aktion „Zur Suche“.
 
-### Zustand mit Suchbegriff
+### Modus „Suche“
 
-Sobald ein Benutzer Text eingibt, werden die beiden Vorschlagsbereiche durch die
-Suchergebnisse ersetzt oder nach unten verschoben. Empfohlen wird die klarere
-Variante „ersetzen“:
+„Suche“ zeigt das bestehende Autocomplete-Suchfeld. Die Ergebnisliste wird um
+eine sichtbare Fortsetzungsmöglichkeit ergänzt:
 
 ```text
 ┌──────────────────────────────────────────┐
@@ -154,129 +158,86 @@ Variante „ersetzen“:
 - Optional können Schlüssel oder eine knappe Zusatzinformation sekundär
   angezeigt werden, wenn gleichnamige Treffer sonst nicht unterscheidbar sind.
 
+### Modus „Neu“
+
+„Neu“ zeigt unverändert die vorhandenen Eingabefelder zur Anlage einer neuen
+Entität. Ein Wechsel zwischen „Im Brief“, „Suche“ und „Neu“ darf keine bereits
+bestätigte Auswahl unbemerkt überschreiben.
+
 ### Leere und fehlerhafte Zustände
 
-- Keine Eingabe und keine Vorschläge: verständlicher Leerzustand, Suchfeld bleibt
-  nutzbar.
+- Keine passende keyed Entität im Brief: verständlicher Leerzustand mit Wechsel
+  zur Suche; dies ist kein technischer Fehler.
 - Suchbegriff ohne Treffer: „Keine passenden Entitäten gefunden“ und Möglichkeit,
   den Suchbegriff zu ändern beziehungsweise den vorhandenen Neuanlageprozess zu
   verwenden.
-- Vorschlagsendpunkt nicht erreichbar: reguläre Suche bleibt nutzbar.
 - Suchendpunkt nicht erreichbar: technische Fehlermeldung; der Fehler darf nicht
   als leere Trefferliste ausgegeben werden.
 
 ## Fachliche Vorschlagsquellen
 
+### Gemeinsame Schlüsselregel
+
+- Ausschließlich Elemente mit einem nicht leeren, fachlich gültigen `data-key`
+  werden angeboten.
+- Platzhalter wie `not_yet_determined`, leere Werte oder rein temporäre
+  `xml:id` sind keine wiederverwendbaren Entitätsschlüssel.
+- Der Schlüssel kann abhängig von der TEI-Struktur auf dem sichtbaren Element
+  oder einem fachlich zugehörigen Kind liegen, beispielsweise auf
+  `persName > name`, `placeName > settlement` oder `placeName > institution`.
+- Dedupliziert wird über den normalisierten `data-key`, nicht über den
+  Anzeigenamen.
+- Kann zu einem Schlüssel kein sinnvoller Anzeigename aus dem aktuellen XML
+  ermittelt werden, wird der Eintrag nicht stillschweigend mit einem falschen
+  Namen angeboten.
+
 ### Personen
 
-Der briefbezogene Bereich berücksichtigt duplikatfrei:
+Der Modus „Im Brief“ berücksichtigt duplikatfrei:
 
-- im Brieftext ausgezeichnete Personen;
-- Autoren des Briefes und der Schreibakte;
-- Schreiber des Briefes und der Schreibakte;
-- Empfänger beziehungsweise Adressaten;
-- gegebenenfalls weitere fachlich bestätigte Rollen aus dem TEI-Header.
+- keyed `persName`-Auszeichnungen im Brieftext;
+- keyed untergeordnete `name`-Elemente innerhalb eines `persName`;
+- keyed Autoren und Schreiber der Schreibakte, beispielsweise `docAuthor`;
+- keyed Personen aus den fachlich relevanten Headerbereichen, insbesondere
+  Autor, Schreiber, Empfänger und Adressat aus `profileDesc/correspDesc`;
+- weitere Header-Personen nur nach fachlicher Bestätigung.
+
+Projekt-, Editions- und Verantwortlichkeitsnamen ohne Entitätsschlüssel werden
+nicht übernommen.
 
 ### Orte
 
-Der briefbezogene Bereich berücksichtigt duplikatfrei:
+Der Modus „Im Brief“ berücksichtigt duplikatfrei:
 
-- Absendeort beziehungsweise Schreibort;
-- Empfangsort;
-- im Brieftext ausgezeichnete Orte, Sehenswürdigkeiten und Institutionen,
-  jeweils passend zum aktuell ausgewählten Entitätstyp.
+- keyed `placeName`-Auszeichnungen im Brieftext;
+- keyed Kindknoten wie `settlement`, `institution` und die vorhandene Struktur
+  für Sehenswürdigkeiten;
+- Absendeort beziehungsweise Schreibort aus dem fachlich relevanten
+  `correspAction`-Headerbereich;
+- Empfangsort aus dem fachlich relevanten `correspAction`-Headerbereich;
+- jeweils nur Einträge, die zum aktuell ausgewählten Entitätstyp passen.
+
+Sachfremde Headerorte, insbesondere die Verlagsanschrift in
+`publicationStmt/address`, werden nicht als Briefvorschläge übernommen.
 
 ### Werke und weitere Entitäten
 
-- Im aktuellen Brief bereits ausgezeichnete Werke werden vorgeschlagen.
-- Die global häufigsten Einträge werden getrennt nach `CREATION` und
-  `PROTAG_CREATION` berechnet.
-- Für alle weiteren unterstützten Entitätstypen gilt dieselbe Vertragsstruktur,
-  auch wenn `letter_context` leer ist.
+- Im Brieftext bereits ausgezeichnete keyed Werke werden vorgeschlagen.
+- `CREATION` und `PROTAG_CREATION` bleiben fachlich und technisch getrennte
+  Entitätstypen.
+- Letter-Metadaten wie Vorgänger- und Nachfolgerkennung werden nicht automatisch
+  als Werke interpretiert.
+- Die konkrete TEI-Erkennung wird je Entitätstyp im jeweiligen Unterticket
+  vollständig festgelegt und mit XML-Beispielen getestet.
 
 ## Backend-Arbeitsbereich
 
-### F-118-BE1 – Häufig verwendete Entitäten ermitteln
+Die briefinterne Liste wird ausschließlich im Frontend aus dem bereits geladenen
+aktuellen XML erzeugt. Das Backend muss dafür weder einen Vorschlagsendpunkt noch
+eine tägliche Rangliste bereitstellen. Der Backend-Arbeitsbereich beschränkt sich
+auf die fortsetzbare Remotesuche.
 
-- Für jeden unterstützten Entitätstyp eine Rangliste der zehn am häufigsten
-  verwendeten Entitäten erzeugen.
-- Die Auswertung einmal initial und danach mindestens täglich über einen
-  wiederholbaren Job aktualisieren.
-- Ergebnis atomar ersetzen, sodass während einer Aktualisierung keine teilweise
-  gefüllte Liste ausgeliefert wird.
-- Stabile Reihenfolge definieren: Verwendungshäufigkeit absteigend, danach ein
-  deterministischer Tie-Breaker, beispielsweise normalisierter Name und
-  Entitätsschlüssel.
-- Ungültige, gelöschte oder nicht mehr auflösbare Schlüssel nicht ausliefern.
-- Zeitpunkt der letzten erfolgreichen Berechnung verfügbar machen.
-
-Vor der Umsetzung fachlich festzulegen:
-
-- Zählt jede einzelne Auszeichnung oder höchstens eine Verwendung je Brief?
-- Werden nur veröffentlichte Briefe oder auch Drafts und Arbeitskopien gezählt?
-- Ist die Rangliste projektweit, benutzerbezogen oder rollenbezogen? Vorschlag:
-  zunächst projektweit und nicht benutzerbezogen.
-
-### F-118-BE2 – Briefbezogene Vorschläge ermitteln
-
-- Die aktuelle persönliche Editor-Arbeitskopie anhand von `letter_id` und
-  angemeldetem Benutzer auswerten, nicht ausschließlich den zuletzt
-  veröffentlichten Brief.
-- Relevante TEI-Knoten und Rollen entsprechend dem Entitätstyp sammeln.
-- Entitäten über `entityKey` deduplizieren und mehrere Quellen zusammenführen.
-- Nur Schlüssel ausliefern, die weiterhin über den kanonischen Entitätsbestand
-  auflösbar sind.
-- Fehlende Rollen oder leere Bereiche als leere Arrays und nicht als Fehler
-  zurückgeben.
-
-### F-118-BE3 – Vorschlagsendpunkt und OpenAPI
-
-Unverbindlicher Pfadvorschlag für die gemeinsame Abstimmung:
-
-```http
-GET /jwt/editor/entities/quick_picks?letter_id=123&entity_type=PERSON&limit=10
-Accept: application/json
-```
-
-Vorgeschlagene Antwort:
-
-```json
-{
-  "entity_type": "PERSON",
-  "generated_at": "2026-11-06T02:00:00Z",
-  "letter_context": [
-    {
-      "id": 18613,
-      "entityKey": "PSN0000001",
-      "entityName": "Mendelssohn Bartholdy (bis 1816: Mendelssohn), Jacob Ludwig Felix (1809-1847)",
-      "entityLastName": "Mendelssohn Bartholdy (bis 1816: Mendelssohn)",
-      "entityFirstName": "Jacob Ludwig Felix",
-      "sources": ["receiver", "mentioned"]
-    }
-  ],
-  "frequently_used": [
-    {
-      "id": 18613,
-      "entityKey": "PSN0000001",
-      "entityName": "Mendelssohn Bartholdy (bis 1816: Mendelssohn), Jacob Ludwig Felix (1809-1847)",
-      "entityLastName": "Mendelssohn Bartholdy (bis 1816: Mendelssohn)",
-      "entityFirstName": "Jacob Ludwig Felix",
-      "rank": 1,
-      "usage_count": 471
-    }
-  ]
-}
-```
-
-Nicht personenbezogene Einträge verwenden weiterhin mindestens `id`,
-`entityKey` und `entityName`.
-
-Der endgültige Pfad, erlaubte `entity_type`-Werte, Limits, Null-Semantik,
-Autorisierung sowie 401-/404-/422-/500-/503-Antworten werden vor der
-Frontend-Implementierung verbindlich in der Backend-Datei
-`docs/openapi/jwt.yaml` dokumentiert und mit Vertragstests abgesichert.
-
-### F-118-BE4 – Entitätssuche paginierbar machen
+### F-118-BE1 – Entitätssuche paginierbar machen
 
 Der vorhandene Suchendpunkt bleibt die Grundlage. Er erhält eine dokumentierte
 Fortsetzungssemantik. Zwei Varianten sind mit Elasticsearch zu prüfen:
@@ -318,28 +279,38 @@ umgedeutet werden.
 
 ## Frontend-Arbeitsbereich
 
-### F-118-FE1 – Typisierter Vorschlagsdienst
+### F-118-FE1 – Lokale XML-Extraktion
 
-- Den neuen Endpunkt über einen typisierten Service anbinden.
-- Antwort an der Systemgrenze validieren.
-- Personenfelder und allgemeine Entitätsfelder entsprechend dem OpenAPI-Vertrag
-  abbilden.
-- Briefkontext und häufige Entitäten über `entityKey` deduplizieren, ohne die
-  beiden sichtbaren Herkunftsgruppen unkenntlich zu machen.
-- Alte Requests bei Entitätstyp- oder Briefwechsel abbrechen beziehungsweise
-  veraltete Antworten ignorieren.
+- Einen reinen, separat testbaren Extraktor für das aktuelle
+  `editorLetter.letter.xmlContent` bereitstellen.
+- XML mit `DOMParser` verarbeiten und Parserfehler explizit behandeln.
+- Nur fachlich passende Elemente mit einem nicht leeren, gültigen `data-key`
+  als normalisierte Einträge zurückgeben.
+- Die Entitätstypen anhand der jeweiligen TEI-Struktur unterscheiden; ein
+  gleichnamiger Knoten darf nicht typübergreifend vorgeschlagen werden.
+- Duplikate anhand des normalisierten `data-key` zusammenführen und dabei ihre
+  Fundstellen beziehungsweise Rollen für die Anzeige erhalten.
+- Bei Briefwechseln und jeder Änderung des aktuellen XML neu auswerten. Für den
+  Modus „Im Brief“ wird kein API-Request ausgelöst.
+- Body- und Headerfunde, fehlende oder ungültige Schlüssel, Duplikate,
+  Platzhalterwerte und fehlerhaftes XML in Unit-Tests abdecken.
 
-### F-118-FE2 – Schnellauswahl in den Panels
+### F-118-FE2 – Dreifachauswahl in den Panels
 
-- Gemeinsame, wiederverwendbare Komponente für Überschrift, Ladezustand,
-  Vorschlagszeile, Herkunft und Fehlerzustand erstellen.
-- Zunächst mindestens Personen-, Orts- und Werkpanel anbinden.
-- Ein Klick ruft denselben bestehenden Auswahlhandler auf wie ein regulärer
-  Autocomplete-Treffer; kein zweiter XML-Schreibpfad wird eingeführt.
-- Ohne aktive Textmarkierung bleiben Vorschläge sichtbar, aber entsprechend der
-  allgemeinen Menü- und Panelkonvention deaktiviert und erklärt.
+- Die bisherige Auswahl durch die drei Modi „Im Brief“, „Suche“ und „Neu“
+  ersetzen; „Im Brief“ ist beim Öffnen initial aktiv.
+- Eine gemeinsame, wiederverwendbare Komponente für Modusauswahl, scrollbare
+  Briefsliste, Fundstellen, Leerzustand und Fehlerzustand erstellen.
+- Ein Klick auf einen Briefeintrag ruft denselben bestehenden Auswahlhandler auf
+  wie ein regulärer Suchtreffer; kein zweiter XML-Schreibpfad wird eingeführt.
+- Ein eventuell bereits vorhandener Detailabruf der kanonischen Entität bleibt
+  Teil dieses Auswahlablaufs und wird nicht durch die lokale Liste ersetzt.
+- Im Leerzustand direkt einen Wechsel in den Modus „Suche“ anbieten.
+- Bei einem Moduswechsel Suchbegriff, Treffer und gewählten Eintrag bewusst
+  erhalten oder zurücksetzen; es darf kein zufälliger Mischzustand entstehen.
 - Bereits hinzugefügte Einträge nicht erneut anbieten.
-- Deutsche und englische UI-Texte über i18n pflegen.
+- Tastaturbedienung, Fokusführung und aussagekräftige zugängliche Bezeichnungen
+  sicherstellen; sichtbare Texte über i18n pflegen.
 
 ### F-118-FE3 – Fortsetzbare Suche
 
@@ -354,46 +325,80 @@ umgedeutet werden.
 - Der Benutzer kann mit Tastatur durch Treffer navigieren und weitere Treffer
   laden.
 
+## Vorgesehene Untertickets
+
+F-118 bleibt das Oberfeature für gemeinsame Bedienung, Extraktionsregeln und
+fortsetzbare Suche. Die konkreten TEI-Knoten, Headerbereiche und XML-Beispiele
+werden pro Entitätstyp in einem eigenen Unterticket festgelegt:
+
+- **F-118A – Personen aus dem Brief (technisch umgesetzt, Abnahme offen):**
+  `persName`, keyed Kindknoten sowie relevante Autor-, Schreiber-, Empfänger-
+  und Adressatenangaben im Header.
+- **F-118B – Siedlungen aus dem Brief:** keyed `settlement`-Einträge im Body
+  und in fachlich relevanten Korrespondenzdaten.
+- **F-118C – Sehenswürdigkeiten aus dem Brief:** keyed Einträge der dafür
+  verwendeten TEI-Struktur.
+- **F-118D – Institutionen aus dem Brief:** keyed `institution`-Einträge im
+  Body und in fachlich relevanten Headerbereichen.
+- **F-118E – Werke aus dem Brief:** keyed Werke des Typs `CREATION`.
+- **F-118F – Protagonistenwerke aus dem Brief:** keyed Werke des Typs
+  `PROTAG_CREATION`, strikt getrennt von allgemeinen Werken.
+- **F-118G – Gemeinsame Infrastruktur und Suchpagination:** wiederverwendbare
+  UI-Komponente, lokaler Extraktor, Remote-Pagination und Vertragsabgleich.
+
 ## Akzeptanzkriterien
 
-- Beim Öffnen eines unterstützten Entitätenpanels erscheinen ohne Suchbegriff
-  getrennte Bereiche „In diesem Brief“ und „Häufig verwendet“.
-- Die häufigen Entitäten werden mindestens täglich aktualisiert; ein fehlender
-  Aktualisierungslauf verhindert die reguläre Suche nicht.
-- Personen aus Autor-, Schreiber- und Empfängerrollen sowie erwähnte Personen
-  werden passend zum aktuellen Brief vorgeschlagen.
-- Absende- und Empfangsort werden im Ortspanel vorgeschlagen.
-- Doppelte `entityKey` erscheinen innerhalb eines Bereichs nur einmal.
+- Beim Öffnen eines unterstützten Entitätenpanels sind die Modi „Im Brief“,
+  „Suche“ und „Neu“ sichtbar; „Im Brief“ ist initial ausgewählt.
+- Die Briefsliste wird live aus dem aktuell geladenen XML erzeugt und löst
+  keinen eigenen Backend-Request aus.
+- Es erscheinen ausschließlich fachlich passende Einträge mit einem nicht
+  leeren, gültigen `data-key`.
+- Personen aus dem Body sowie relevante Autor-, Schreiber-, Empfänger- und
+  Adressatenangaben im Header werden vorgeschlagen.
+- Orte aus dem Body sowie fachlich relevante Absende-, Schreib- und
+  Empfangsorte werden vorgeschlagen; die Verlagsanschrift wird ausgeschlossen.
+- Doppelte `data-key` erscheinen nur einmal; mehrere Fundstellen oder Rollen
+  bleiben am zusammengeführten Eintrag nachvollziehbar.
+- Änderungen am XML und ein Briefwechsel aktualisieren die Briefsliste ohne
+  veraltete Einträge.
 - Ein Klick auf einen Vorschlag verhält sich fachlich wie die Auswahl desselben
   Eintrags aus der Suche.
+- Ohne passenden Briefeintrag wird ein verständlicher Leerzustand mit direktem
+  Wechsel zur Suche angezeigt.
 - Bei der Suche nach `Bartholdy` ist `PSN0000001` durch die Trefferliste und das
   Nachladen weiterer Ergebnisse erreichbar.
 - Die UI macht sichtbar, wenn weitere Ergebnisse existieren; es gibt keine
   stille Begrenzung auf die ersten 20 Treffer.
 - Neue Suchanfragen, Nachladen, leere Ergebnisse sowie 401, 422, 500, 503 und
   Netzwerkfehler sind in Frontend- und Backendtests abgedeckt.
-- OpenAPI beschreibt Erfolgsantworten, leere Arrays, Pagination oder Cursor,
-  Fehlercodes und sämtliche unterstützten Entitätstypen verbindlich.
+- OpenAPI beschreibt für die Remotesuche Erfolgsantworten, leere Arrays,
+  Pagination oder Cursor, Fehlercodes und sämtliche unterstützten Entitätstypen
+  verbindlich. Die rein lokale Briefsliste benötigt keinen API-Vertrag.
 
 ## Rollout-Reihenfolge
 
-1. Fachliche Entscheidungen zur Häufigkeitsberechnung und zu den
-   Briefkontextrollen treffen.
-2. Backendvertrag in der kanonischen OpenAPI-Datei ergänzen.
-3. Backend-Suchpagination und Vorschlagsendpunkt samt Vertragstests umsetzen.
-4. Backend ausrollen und die dokumentierten Antworten gemeinsam prüfen.
-5. Frontendparser, UI und Tests implementieren.
-6. Gemeinsame Live-Abnahme mit häufigen und seltenen Namen sowie allen
-   unterstützten Entitätstypen durchführen.
+1. Die genauen TEI-Knoten und zulässigen Headerbereiche je Entitätstyp in den
+   Untertickets fachlich bestätigen.
+2. Gemeinsamen lokalen XML-Extraktor implementieren und mit repräsentativen
+   Briefen testen.
+3. Die Dreifachauswahl schrittweise je Entitätstyp anbinden und abnehmen.
+4. Den Backendvertrag für die fortsetzbare Remotesuche in der kanonischen
+   OpenAPI-Datei ergänzen und Vertragstests bereitstellen.
+5. Backend-Suchpagination ausrollen und die dokumentierten Antworten gemeinsam
+   prüfen.
+6. Frontend-Pagination anbinden und die gemeinsame Live-Abnahme mit häufigen
+   und seltenen Namen sowie allen unterstützten Entitätstypen durchführen.
 
 ## Abgrenzung
 
 - Dieses Ticket ersetzt nicht die vorhandene Möglichkeit, neue Entitäten
   anzulegen.
-- Die globale Häufigkeit ist keine automatische fachliche Empfehlung und wird
-  deshalb optisch vom Briefkontext getrennt.
-- Das Frontend berechnet keine eigene globale Rangliste aus lokal geladenen
-  Briefen.
-- Der hier beschriebene Endpunkt ist ein Vorschlag und noch kein verbindlicher
-  JWT-Vertrag. Verbindlich wird ausschließlich die abgestimmte Änderung in
+- Die Briefsliste ist keine globale Häufigkeits- oder Empfehlungsrangliste. Sie
+  bildet ausschließlich keyed Entitäten des aktuell geladenen XML ab.
+- Für die lokale Briefsliste wird kein neuer Backend-Endpunkt eingeführt.
+- Die bestehende Remotesuche und das Anlegen neuer Entitäten bleiben als eigene
+  Modi erhalten.
+- Der OpenAPI-Abgleich dieses Features betrifft ausschließlich die geplante
+  Pagination der Remotesuche. Verbindlich wird nur die abgestimmte Änderung in
   `docs/openapi/jwt.yaml` des Backends.

@@ -889,6 +889,23 @@
       }
     }
   },
+  "entitySelection": {
+    "mode": {
+      "letter": "In letter",
+      "search": "Search",
+      "new": "New"
+    },
+    "empty": "This letter does not contain matching entries with a key.",
+    "openSearch": "Open search",
+    "select": "Select {{name}}",
+    "context": {
+      "mentioned": "mentioned in text",
+      "author": "author",
+      "writer": "writer",
+      "receiver": "receiver",
+      "addressee": "addressee"
+    }
+  },
   "personContainer": {
     "addPersonDialog": {
       "headline": "Mark and Add Person",

@@ -5,15 +5,19 @@ import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material/styles';
 import LetterTabs from '@src/components/editor/letter/Center/LetterTabs';
 import editorLetterReducer, {
+  setContentTextIsMarked,
   setEditorLetter,
   setEditorPinnedLetterContentChanged,
   setEditorPinnedLetters,
+  setEditorSelectedItem,
   setEditorTabNumber,
+  setNodeClicked,
   startContentUpdate,
 } from '@src/redux/slices/editor.letter.slice';
 import theme from '@src/utils/theme/theme';
 import { setLetterPinStatus } from '@src/services/editor/apiPinnedLettersRequest.service';
 import { EditorConstants } from '@src/constants/editor';
+import { fetchLetterData } from '@src/services/editor/apiLettersRequest.service';
 
 jest.mock('@src/services/editor/apiPinnedLettersRequest.service', () => ({
   fetchPinnedLetters: jest.fn(),
@@ -131,6 +135,74 @@ describe('LetterTabs', () => {
     });
     expect(screen.getByLabelText('gb-1842-02-01-01')).toBeInTheDocument();
     expect(screen.getByLabelText('gb-1801-06-06-06')).toBeInTheDocument();
+  });
+
+  it('clears the text selection and right panel when switching letters', async () => {
+    const store = configureStore({ reducer: { editorLetter: editorLetterReducer } });
+    store.dispatch(
+      setEditorPinnedLetters({
+        pinnedLetters: [
+          {
+            id: 1,
+            name: 'fmb-1821-01-31-01',
+            contentChanged: false,
+            isPinned: true,
+            viewMode: 'WYSIWYG',
+          },
+          {
+            id: 2,
+            name: 'gb-1842-01-04-01',
+            contentChanged: false,
+            isPinned: true,
+            viewMode: 'WYSIWYG',
+          },
+        ],
+      }),
+    );
+    store.dispatch(setEditorTabNumber({ tabNumber: 0 }));
+    store.dispatch(
+      setEditorLetter({
+        letter: { id: 1, name: 'fmb-1821-01-31-01', viewMode: 'WYSIWYG' },
+      }),
+    );
+    store.dispatch(setContentTextIsMarked({ textIsMarked: true }));
+    store.dispatch(setNodeClicked({ nodeClicked: true }));
+    store.dispatch(
+      setEditorSelectedItem({
+        selectedItem: { left: null, right: EditorConstants.compMappingRight.ENT_PERSON },
+      }),
+    );
+    (fetchLetterData as jest.MockedFunction<typeof fetchLetterData>).mockResolvedValue({
+      id: 2,
+      name: 'gb-1842-01-04-01',
+      title: '',
+      xmlContent: '<TEI/>',
+      undoAvailable: false,
+      redoAvailable: false,
+      capabilities: {
+        rename: { allowed: false, reasonCode: null },
+        discard: { allowed: false, reasonCode: null },
+      },
+      version: '1',
+    });
+
+    render(
+      <ThemeProvider theme={theme}>
+        <Provider store={store}>
+          <LetterTabs />
+        </Provider>
+      </ThemeProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: /gb-1842-01-04-01/ }));
+
+    await waitFor(() => {
+      expect(store.getState().editorLetter.content).toEqual({
+        nodeClicked: false,
+        textIsMarked: false,
+      });
+      expect(store.getState().editorLetter.selectedItem).toEqual({ left: null, right: null });
+    });
   });
 
   it('warns before closing when unpublished changes were already autosaved', () => {
