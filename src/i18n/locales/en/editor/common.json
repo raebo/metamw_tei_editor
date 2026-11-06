@@ -34,6 +34,7 @@
       "switchWYSIWYG": "Switch to WYSIWYG view",
       "switchXML": "Switch to XML view",
       "resetLetter": "Reset letter",
+      "resetLetterNoChanges": "There are no changes to reset.",
       "groups": {
         "edit": "Edit text",
         "document": "Document actions",

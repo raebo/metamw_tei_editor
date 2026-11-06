@@ -182,6 +182,12 @@ export const valueForSide = (newValue: string | null, selectedComponent: Compone
   return newValue;
 };
 
+export const hasResettableChanges = (pinnedLetters: PinnedLetter[], activeLetterId: number | null): boolean => {
+  if (activeLetterId === null) return false;
+
+  return pinnedLetters.find((letter) => letter.id === activeLetterId)?.contentChanged === true;
+};
+
 const ShowEditor = () => {
   const { t } = useTranslation();
   const { letterId } = useParams<{ letterId: string }>();
@@ -192,6 +198,7 @@ const ShowEditor = () => {
   const isMounted = useRef(false);
   const xmlRefCenter = useRef<HTMLDivElement>(null);
   const stateEditorLetter = useSelector((state: RootState) => state.editorLetter.letter);
+  const pinnedLetters = useSelector((state: RootState) => state.editorLetter.pinnedLetters);
   const selectedItem = useSelector((state: RootState) => state.editorLetter.selectedItem);
   const figureUploadInProgress = useSelector((state: RootState) => state.editorLetter.figureUploadInProgress);
   const lifecycleOperationInProgress = useSelector((state: RootState) => state.editorLetter.lifecycleOperationInProgress);
@@ -224,6 +231,12 @@ const ShowEditor = () => {
 
   const renameDisabledReason = letterLifecycleDisabledReason('rename');
   const discardDisabledReason = letterLifecycleDisabledReason('discard');
+  const resettableChanges = hasResettableChanges(pinnedLetters, stateEditorLetter.id);
+  const resetDisabledReason = figureUploadInProgress
+    ? t('editor:common.letterLifecycle.figureUploadInProgress')
+    : !resettableChanges
+      ? t('editor:common.letterViewContainer.toolbarRight.resetLetterNoChanges')
+      : undefined;
 
   const [leftEditorWidth, setLeftEditorWidth] = useState(LEFT_EDITOR_DEFAULT_WIDTH);
 
@@ -663,8 +676,9 @@ const ShowEditor = () => {
             <Stack role="group" aria-label={t('editor:common.letterViewContainer.toolbarRight.groups.manage')} spacing={1}>
               <ToolbarMenuButton
                 title={t('editor:common.letterViewContainer.toolbarRight.resetLetter')}
-                disabled={figureUploadInProgress}
-                selected={stateEditorLetter.undoAvailable || stateEditorLetter.redoAvailable}
+                disabled={resetDisabledReason !== undefined}
+                disabledReason={resetDisabledReason}
+                selected={resettableChanges}
                 onClick={() => setSelectedItem(null, EditorConstants.dialogTypes.RESET_LETTER)}
                 icon={<RestartAltIcon />}
               />

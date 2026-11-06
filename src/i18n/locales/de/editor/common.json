@@ -34,6 +34,7 @@
       "switchWYSIWYG": "Wechsel zu WYSIWYG Ansicht",
       "switchXML": "Wechsel zu XML Ansicht",
       "resetLetter": "Brief zurücksetzen",
+      "resetLetterNoChanges": "Es liegen keine Änderungen zum Zurücksetzen vor.",
       "groups": {
         "edit": "Text bearbeiten",
         "document": "Dokumentaktionen",

@@ -1,4 +1,4 @@
-import { valueForSide } from '@src/components/pages/editor/ShowEditor';
+import { hasResettableChanges, valueForSide } from '@src/components/pages/editor/ShowEditor';
 import { ComponentMappingItem } from '@src/services/mappings/editorMappings';
 
 // Regression test for a bug where clicking a toolbar button that only fires an
@@ -41,5 +41,38 @@ describe('valueForSide', () => {
 
   it('switches to a different persistent container item without toggling off', () => {
     expect(valueForSide('FAVOURITES', containerComponent)).toBe('FAVOURITES');
+  });
+});
+
+describe('hasResettableChanges', () => {
+  const pinnedLetters = [
+    {
+      id: 1,
+      name: 'fmb-1801-01-01-01',
+      contentChanged: false,
+      isPinned: true,
+      viewMode: 'WYSIWYG' as const,
+      capabilities: null,
+      version: null,
+    },
+    {
+      id: 2,
+      name: 'fmb-1801-01-02-01',
+      contentChanged: true,
+      isPinned: true,
+      viewMode: 'WYSIWYG' as const,
+      capabilities: null,
+      version: null,
+    },
+  ];
+
+  it('enables reset only for the active letter with changes', () => {
+    expect(hasResettableChanges(pinnedLetters, 2)).toBe(true);
+    expect(hasResettableChanges(pinnedLetters, 1)).toBe(false);
+  });
+
+  it('keeps reset disabled without an active matching letter', () => {
+    expect(hasResettableChanges(pinnedLetters, null)).toBe(false);
+    expect(hasResettableChanges(pinnedLetters, 999)).toBe(false);
   });
 });
