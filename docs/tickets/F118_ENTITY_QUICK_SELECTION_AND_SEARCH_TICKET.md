@@ -364,6 +364,8 @@ werden pro Entitätstyp in einem eigenen Unterticket festgelegt:
   keinen eigenen Backend-Request aus.
 - Es erscheinen ausschließlich fachlich passende Einträge mit einem nicht
   leeren, gültigen `data-key`.
+- Jeder Listeneintrag zeigt neben dem Anzeigenamen auch seinen `data-key`, damit
+  gleichnamige oder ähnlich benannte Entitäten eindeutig unterscheidbar sind.
 - Personen aus dem Body sowie relevante Autor-, Schreiber-, Empfänger- und
   Adressatenangaben im Header werden vorgeschlagen.
 - Orte aus dem Body sowie fachlich relevante Absende-, Schreib- und

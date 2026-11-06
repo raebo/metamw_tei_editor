@@ -38,7 +38,12 @@ describe('LetterEntitySuggestionList', () => {
     );
 
     expect(screen.queryByText('Clara Beispiel')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Felix Mendelssohn Bartholdy' }));
+    expect(screen.getByText('PSN0000001')).toBeVisible();
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Felix Mendelssohn Bartholdy (PSN0000001)',
+      }),
+    );
     expect(onSelect).toHaveBeenCalledWith(suggestions[0]);
   });
 

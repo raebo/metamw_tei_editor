@@ -48,13 +48,26 @@ const LetterEntitySuggestionList = ({ suggestions, excludedKeys, onSelect, onOpe
             divider
             onClick={() => onSelect(suggestion)}
             aria-label={t('editor:dialog.entitySelection.select', {
-              name: suggestion.entityName,
+              name: `${suggestion.entityName} (${suggestion.entityKey})`,
             })}
           >
             <ListItemText
-              primary={suggestion.entityName}
+              primary={
+                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, flexWrap: 'wrap' }}>
+                  <Typography component="span" variant="body1" fontWeight={500}>
+                    {suggestion.entityName}
+                  </Typography>
+                  <Typography
+                    component="span"
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ fontFamily: 'monospace', whiteSpace: 'nowrap' }}
+                  >
+                    {suggestion.entityKey}
+                  </Typography>
+                </Box>
+              }
               secondary={suggestion.contexts.map((context) => t(`editor:dialog.entitySelection.context.${context}`)).join(' · ')}
-              primaryTypographyProps={{ fontWeight: 500 }}
             />
             <Box component="span" sx={{ display: 'inline-flex', color: 'primary.main', ml: 1 }}>
               <AddIcon fontSize="small" aria-hidden="true" />
