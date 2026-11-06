@@ -50,6 +50,16 @@ const settlementDetails = {
   gnd: null,
 };
 
+const protagCreationDetails = {
+  id: 3,
+  key: 'PRC0000001',
+  name: 'Ein Sommernachtstraum',
+  mwv: 'P 3',
+  op: '61',
+  protag_creation_category: 'Bühnenmusik',
+  protag_creation_category_list: ['Bühnenmusik', 'Musik'],
+};
+
 describe('apiMetaMw.service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -77,6 +87,21 @@ describe('apiMetaMw.service', () => {
     getMock.mockResolvedValue({ data: settlementDetails, status: 200 });
 
     await expect(fetchMetamwEntityData('STM0000001')).resolves.toEqual(settlementDetails);
+  });
+
+  it('validates protagonist creation details according to the OpenAPI contract', async () => {
+    getMock.mockResolvedValue({ data: protagCreationDetails, status: 200 });
+
+    await expect(fetchMetamwEntityData('PRC0000001')).resolves.toEqual(protagCreationDetails);
+  });
+
+  it('rejects malformed protagonist creation details', async () => {
+    getMock.mockResolvedValue({
+      data: { ...protagCreationDetails, protag_creation_category_list: null },
+      status: 200,
+    });
+
+    await expect(fetchMetamwEntityData('PRC0000001')).rejects.toThrow();
   });
 
   it('maps a validated person transport response', async () => {

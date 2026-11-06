@@ -2,8 +2,9 @@
 
 **Stand:** 06.11.2026
 
-**Status:** In Umsetzung; F-118A bis F-118D technisch umgesetzt, manuelle
-Abnahme sowie Werke, Suchpagination und Backendvertrag noch offen.
+**Status:** In Umsetzung; F-118A bis F-118F technisch umgesetzt, manuelle
+Abnahme der noch offenen Entitätstypen sowie Suchpagination und Backendvertrag
+noch offen.
 
 **Typ:** Feature und UX-/Suchkorrektur
 
@@ -342,9 +343,16 @@ werden pro Entitätstyp in einem eigenen Unterticket festgelegt:
 - **F-118D – Institutionen aus dem Brief (technisch umgesetzt, Abnahme offen):**
   keyed `institution`-Einträge im Body und in fachlich relevanten
   Headerbereichen.
-- **F-118E – Werke aus dem Brief:** keyed Werke des Typs `CREATION`.
-- **F-118F – Protagonistenwerke aus dem Brief:** keyed Werke des Typs
-  `PROTAG_CREATION`, strikt getrennt von allgemeinen Werken.
+- **F-118E – Werke aus dem Brief (umgesetzt und manuell abgenommen):** keyed
+  `name`-Werkreferenzen mit `CRT…`-Schlüssel innerhalb von `title`-Auszeichnungen
+  im Body; Werkart aus `name/@type`. Autoren, Briefreferenzen und
+  Protagonistenwerke werden ausgeschlossen.
+- **F-118F – Protagonistenwerke aus dem Brief (umgesetzt und manuell
+  abgenommen):** keyed `name`-Werkreferenzen mit `PRC…`-Schlüssel innerhalb von
+  `title`-Auszeichnungen im Body. Der Anzeigename wird ohne untergeordnete
+  Kennungen wie `idno` ermittelt; allgemeine `CRT…`-Werke werden ausgeschlossen.
+  Beim direkten Hinzufügen werden die kanonischen Werkdetails und Kategorien
+  über die bestehenden, in OpenAPI 0.8.0 dokumentierten Endpunkte nachgeladen.
 - **F-118G – Gemeinsame Infrastruktur und Suchpagination:** wiederverwendbare
   UI-Komponente, lokaler Extraktor, Remote-Pagination und Vertragsabgleich.
 

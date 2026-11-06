@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch } from '@src/redux/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/redux/redux.store';
@@ -35,9 +35,12 @@ import { setReloadLetterContent } from '@src/redux/slices/editor.letter.slice';
 import { EditorUtils } from '@src/utils/editor';
 import { MiscUtils } from '@src/utils/misc';
 import { useTranslation } from 'react-i18next';
+import LetterEntitySuggestionList from '@src/components/editor/letter/Right/EntitySuggestions/LetterEntitySuggestionList';
+import { extractLetterCreationSuggestions, LetterEntitySuggestion } from '@src/utils/editor/letterEntitySuggestions';
 
 type SelectActionAuthorOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 type SelectActionCreationOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
+type CreationSelectionMode = 'LETTER' | 'SEARCH' | 'NEW';
 
 export interface FormAuthorData {
   key: null | string;
@@ -79,11 +82,11 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
 
   const [selectedAuthorOption, setSelectedAuthorOption] = useState<SelectActionAuthorOption>('EXISTING_ENTRY');
   const [selectedCreationOption, setSelectedCreationOption] = useState<SelectActionCreationOption>(null);
+  const [selectionMode, setSelectionMode] = useState<CreationSelectionMode>('LETTER');
 
   const [authorAutocompleteDisabled, setAuthorAutocompleteDisabled] = useState(false);
   const [authorCreations, setAuthorCreations] = useState<SnippetEntity[]>([]); //creations of the selected author
 
-  const [selectCreationOptionDisabled, setSelectCreationOptionDisabled] = useState<boolean>(true);
   const [creationKinds, setCreationKinds] = useState<string[]>([]);
 
   const [resetCreationCmp, setResetCreationCmp] = useState<number>(0); // used to reset the creation form when a new author is selected
@@ -92,6 +95,21 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
 
   const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent);
   const [xmlDoc, setXmlDoc] = React.useState<XMLDocument | null>(null);
+
+  const letterCreationSuggestions = useMemo(() => {
+    if (!stateTeiXml) return [];
+
+    try {
+      return extractLetterCreationSuggestions(stateTeiXml);
+    } catch {
+      return [];
+    }
+  }, [stateTeiXml]);
+
+  const addedCreationKeys = useMemo(
+    () => new Set(addedCreationEntries.flatMap((entry) => (entry.creation ? [entry.creation.key] : []))),
+    [addedCreationEntries],
+  );
 
   useEffect(() => {
     if (!stateTeiXml) {
@@ -137,13 +155,13 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
   const handleAuthorOptionChange = (option: SelectActionAuthorOption) => {
     resetAuthorFormData();
     resetCreationFormData();
-    setSelectCreationOptionDisabled(true);
     setSelectedAuthorOption(option);
 
     if (option === 'EXISTING_ENTRY') {
-      setSelectedCreationOption('EXISTING_ENTRY');
+      setSelectedCreationOption(selectionMode === 'NEW' ? 'NEW_ENTRY' : 'EXISTING_ENTRY');
       setAuthorFormDisabled(true);
       setAuthorAutocompleteDisabled(false);
+      if (selectionMode === 'NEW') fetchAndSetNewCreationKey();
     }
     if (option === 'NEW_ENTRY') {
       fetchAndSetNewAuthorKey();
@@ -163,14 +181,29 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
     }
   };
 
-  const handleCreationOptionChange = (option: SelectActionCreationOption) => {
+  const handleSelectionModeChange = (mode: CreationSelectionMode) => {
+    resetAuthorFormData();
     resetCreationFormData();
-    setSelectedCreationOption(option);
+    setAuthorCreations([]);
+    setSelectedAuthorOption('EXISTING_ENTRY');
+    setAuthorFormDisabled(true);
+    setAuthorAutocompleteDisabled(false);
+    setSelectionMode(mode);
+    callResetCreationCmp();
+    setAutocompleteAuthorResetKey((prev) => prev + 1);
 
-    if (option === 'EXISTING_ENTRY') return;
-    if (option === 'NEW_ENTRY') {
-      fetchAndSetNewCreationKey();
+    if (mode === 'LETTER') {
+      setSelectedCreationOption(null);
+      return;
     }
+
+    if (mode === 'SEARCH') {
+      setSelectedCreationOption('EXISTING_ENTRY');
+      return;
+    }
+
+    setSelectedCreationOption('NEW_ENTRY');
+    fetchAndSetNewCreationKey();
   };
 
   const callResetCreationCmp = () => {
@@ -230,6 +263,46 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
     );
   };
 
+  const addCreationEntry = (entry: MarkupCreationData) => {
+    setAddedCreationEntries((previousEntries) =>
+      previousEntries.some((existingEntry) => existingEntry.creation?.key === entry.creation?.key)
+        ? previousEntries
+        : [...previousEntries, entry],
+    );
+  };
+
+  const addLetterCreation = async (suggestion: LetterEntitySuggestion) => {
+    try {
+      if (!suggestion.entityKind) {
+        throw new Error('Creation data is missing its kind');
+      }
+
+      const authors = await EditorUtils.creationDataService.fetchCreationAuthors(suggestion.entityKey);
+      const primaryAuthor = authors[0];
+
+      addCreationEntry({
+        author: primaryAuthor
+          ? {
+              key: primaryAuthor.entityKey,
+              firstName: primaryAuthor.entityFirstName ?? '',
+              lastName: primaryAuthor.entityLastName ?? primaryAuthor.entityName,
+              isNewEntry: false,
+            }
+          : null,
+        creation: {
+          key: suggestion.entityKey,
+          name: suggestion.entityName,
+          kind: suggestion.entityKind,
+          isNewEntry: false,
+        },
+      });
+    } catch (error) {
+      enqueueSnackbar(`Could not load creation data for '${suggestion.entityKey}': ${MiscUtils.misc.getErrorMessage(error)}`, {
+        variant: 'error',
+      });
+    }
+  };
+
   const handleCancelButtonClick = () => {
     dispatch(
       setEditorMarkedAndContentLeftRightThunk({
@@ -253,7 +326,7 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
 
   const buttonAddNewCreationEntry = () => {
     if (isValidFormData()) {
-      addedCreationEntries.push({
+      addCreationEntry({
         author: {
           key: authorFormData.key!,
           firstName: authorFormData.firstName ?? '',
@@ -271,10 +344,10 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
       resetAuthorFormData();
       resetCreationFormData();
       setAuthorCreations([]);
-      setSelectCreationOptionDisabled(true);
       callResetCreationCmp();
-      setSelectedCreationOption(null);
+      setSelectedCreationOption(selectionMode === 'NEW' ? 'NEW_ENTRY' : 'EXISTING_ENTRY');
       setAutocompleteAuthorResetKey((prev) => prev + 1);
+      if (selectionMode === 'NEW') fetchAndSetNewCreationKey();
     }
   };
 
@@ -347,7 +420,7 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
 
             {addedCreationEntries
               .filter((entry) => {
-                return entry.creation !== null && entry.author !== null;
+                return entry.creation !== null;
               })
               .map((entry) => (
                 <Box
@@ -365,9 +438,9 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
                     <Typography variant="body2" fontWeight="bold">
                       {`(${entry.creation?.key}) ${entry.creation?.name}`}
                     </Typography>
-                    <Typography variant="body2">
-                      {`${entry.author?.firstName ?? ''} ${entry.author?.lastName ?? ''} (${entry.author?.key})`}
-                    </Typography>
+                    {entry.author && (
+                      <Typography variant="body2">{`${entry.author.firstName} ${entry.author.lastName} (${entry.author.key})`}</Typography>
+                    )}
                   </Box>
                   <IconButton edge="end" onClick={() => removeExistingEntry(entry)} aria-label="delete">
                     <DeleteIcon />
@@ -380,146 +453,155 @@ const EntityCreationContainer = (_props: EditorContainerProps) => {
         <FormControl component="fieldset" sx={{ mb: 3 }}>
           <RadioGroup
             row
-            value={selectedAuthorOption}
-            onChange={(e) => handleAuthorOptionChange(e.target.value as SelectActionAuthorOption)}
+            value={selectionMode}
+            onChange={(event) => handleSelectionModeChange(event.target.value as CreationSelectionMode)}
           >
-            <FormControlLabel
-              value={'EXISTING_ENTRY'}
-              control={<Radio />}
-              label={t('editor:dialog.creationContainer.addCreationDialog.label.existingAuthor')}
-            />
-            <FormControlLabel
-              value={'NEW_ENTRY'}
-              control={<Radio />}
-              label={t('editor:dialog.creationContainer.addCreationDialog.label.newAuthor')}
-            />
+            <FormControlLabel value="LETTER" control={<Radio />} label={t('editor:dialog.entitySelection.mode.letter')} />
+            <FormControlLabel value="SEARCH" control={<Radio />} label={t('editor:dialog.entitySelection.mode.search')} />
+            <FormControlLabel value="NEW" control={<Radio />} label={t('editor:dialog.entitySelection.mode.new')} />
           </RadioGroup>
         </FormControl>
 
-        <Divider sx={{ my: 2 }} />
+        {selectionMode === 'LETTER' && (
+          <LetterEntitySuggestionList
+            suggestions={letterCreationSuggestions}
+            excludedKeys={addedCreationKeys}
+            onSelect={(suggestion) => void addLetterCreation(suggestion)}
+            onOpenSearch={() => handleSelectionModeChange('SEARCH')}
+          />
+        )}
 
-        <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
-          <Grid size={{ xs: 12, md: 12, lg: 12 }}>
-            <EntityAuthorAutocomplete
-              key={autocompleteAuthorResetKey}
-              isDisabled={authorAutocompleteDisabled}
-              afterSelectHandler={(entry) => {
-                fetchAndSetAuthorCreations(entry.entityKey);
-                fetchAndSetAuthorCategories(entry.entityKey);
-                setSelectedCreationOption('EXISTING_ENTRY');
-                setSelectCreationOptionDisabled(false);
-                setAuthorCreationResetKey((prev) => prev + 1);
-                setAuthorFormData((prevState) => ({
-                  ...prevState,
-                  key: entry.entityKey,
-                  firstName: entry.entityFirstName !== undefined ? entry.entityFirstName : null,
-                  lastName: entry.entityLastName !== undefined ? entry.entityLastName : null,
-                }));
-              }}
-            />
-          </Grid>
-          <Grid size={{ xs: 4, md: 4, lg: 4 }}>
-            <TextField
-              variant="outlined"
-              label={t('editor:dialog.creationContainer.addCreationDialog.label.key')}
-              value={authorFormData.key ?? ''}
-              fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
-              disabled={true}
-            />
-          </Grid>
-          <Grid size={{ xs: 8, md: 8, lg: 8 }}>
-            <TextField
-              variant="outlined"
-              label={t('editor:dialog.creationContainer.addCreationDialog.label.firstName')}
-              value={authorFormData.firstName ?? ''}
-              fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
-              onChange={(event) => {
-                setAuthorFormData((prevState) => ({
-                  ...prevState,
-                  firstName: event.target.value,
-                  isNewEntry: true,
-                }));
-              }}
-              disabled={authorFormDisabled}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 12, lg: 12 }}>
-            <TextField
-              variant="outlined"
-              label={t('editor:dialog.creationContainer.addCreationDialog.label.lastName')}
-              value={authorFormData.lastName ?? ''}
-              fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
-              onChange={(event) => {
-                setAuthorFormData((prevState) => ({
-                  ...prevState,
-                  lastName: event.target.value,
-                  isNewEntry: true,
-                }));
-              }}
-              disabled={authorFormDisabled}
-            />
-          </Grid>
-        </Grid>
+        {selectionMode !== 'LETTER' && (
+          <>
+            {selectionMode === 'NEW' && (
+              <FormControl component="fieldset" sx={{ mb: 3 }}>
+                <RadioGroup
+                  row
+                  value={selectedAuthorOption}
+                  onChange={(event) => handleAuthorOptionChange(event.target.value as SelectActionAuthorOption)}
+                >
+                  <FormControlLabel
+                    value="EXISTING_ENTRY"
+                    control={<Radio />}
+                    label={t('editor:dialog.creationContainer.addCreationDialog.label.existingAuthor')}
+                  />
+                  <FormControlLabel
+                    value="NEW_ENTRY"
+                    control={<Radio />}
+                    label={t('editor:dialog.creationContainer.addCreationDialog.label.newAuthor')}
+                  />
+                </RadioGroup>
+              </FormControl>
+            )}
 
-        <FormControl component="fieldset" sx={{ mb: 3 }}>
-          <RadioGroup
-            row
-            value={selectedCreationOption}
-            onChange={(e) => handleCreationOptionChange(e.target.value as SelectActionCreationOption)}
-          >
-            <FormControlLabel
-              value={'EXISTING_ENTRY'}
-              control={<Radio />}
-              disabled={selectCreationOptionDisabled}
-              label={t('editor:dialog.creationContainer.addCreationDialog.label.existingCreation')}
-            />
-            <FormControlLabel
-              value={'NEW_ENTRY'}
-              control={<Radio />}
-              disabled={selectCreationOptionDisabled}
-              label={t('editor:dialog.creationContainer.addCreationDialog.label.newCreation')}
-            />
-          </RadioGroup>
-        </FormControl>
+            <Divider sx={{ my: 2 }} />
 
-        <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
-          {(selectedCreationOption === 'EXISTING_ENTRY' || selectedCreationOption === null) && (
-            <EntityExistingCreation
-              key={authorCreationResetKey}
-              creationList={authorCreations}
-              creationAutocompleteDisabled={selectedCreationOption !== 'EXISTING_ENTRY'}
-              creationKinds={creationKinds}
-              resetSignal={resetCreationCmp}
-              afterEntitySelected={(entity) => {
-                setCreationFormData((prevState) => ({
-                  ...prevState,
-                  key: entity.entityKey,
-                  name: entity.entityName,
-                  kind: entity.entityKind ?? null,
-                  isNewEntry: false,
-                }));
-              }}
-            />
-          )}
-          {selectedCreationOption === 'NEW_ENTRY' && (
-            <EntityNewCreation
-              creationKinds={creationKinds}
-              newCreationKey={creationFormData.key}
-              afterEntitySelected={(entity) => {
-                setCreationFormData((prevState) => ({
-                  ...prevState,
-                  key: entity.entityKey,
-                  name: entity.entityName,
-                  kind: entity.entityKind ?? null,
-                  isNewEntry: true,
-                }));
-              }}
-            />
-          )}
-        </Grid>
+            <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
+              <Grid size={{ xs: 12, md: 12, lg: 12 }}>
+                <EntityAuthorAutocomplete
+                  key={autocompleteAuthorResetKey}
+                  isDisabled={authorAutocompleteDisabled}
+                  afterSelectHandler={(entry) => {
+                    fetchAndSetAuthorCategories(entry.entityKey);
+                    if (selectionMode === 'SEARCH') {
+                      fetchAndSetAuthorCreations(entry.entityKey);
+                      setSelectedCreationOption('EXISTING_ENTRY');
+                    } else {
+                      setSelectedCreationOption('NEW_ENTRY');
+                    }
+                    setAuthorCreationResetKey((prev) => prev + 1);
+                    setAuthorFormData((prevState) => ({
+                      ...prevState,
+                      key: entry.entityKey,
+                      firstName: entry.entityFirstName !== undefined ? entry.entityFirstName : null,
+                      lastName: entry.entityLastName !== undefined ? entry.entityLastName : null,
+                    }));
+                  }}
+                />
+              </Grid>
+              <Grid size={{ xs: 4, md: 4, lg: 4 }}>
+                <TextField
+                  variant="outlined"
+                  label={t('editor:dialog.creationContainer.addCreationDialog.label.key')}
+                  value={authorFormData.key ?? ''}
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  disabled={true}
+                />
+              </Grid>
+              <Grid size={{ xs: 8, md: 8, lg: 8 }}>
+                <TextField
+                  variant="outlined"
+                  label={t('editor:dialog.creationContainer.addCreationDialog.label.firstName')}
+                  value={authorFormData.firstName ?? ''}
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  onChange={(event) => {
+                    setAuthorFormData((prevState) => ({
+                      ...prevState,
+                      firstName: event.target.value,
+                      isNewEntry: true,
+                    }));
+                  }}
+                  disabled={authorFormDisabled}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 12, lg: 12 }}>
+                <TextField
+                  variant="outlined"
+                  label={t('editor:dialog.creationContainer.addCreationDialog.label.lastName')}
+                  value={authorFormData.lastName ?? ''}
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  onChange={(event) => {
+                    setAuthorFormData((prevState) => ({
+                      ...prevState,
+                      lastName: event.target.value,
+                      isNewEntry: true,
+                    }));
+                  }}
+                  disabled={authorFormDisabled}
+                />
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
+              {(selectedCreationOption === 'EXISTING_ENTRY' || selectedCreationOption === null) && (
+                <EntityExistingCreation
+                  key={authorCreationResetKey}
+                  creationList={authorCreations}
+                  creationAutocompleteDisabled={selectedCreationOption !== 'EXISTING_ENTRY'}
+                  creationKinds={creationKinds}
+                  resetSignal={resetCreationCmp}
+                  afterEntitySelected={(entity) => {
+                    setCreationFormData((prevState) => ({
+                      ...prevState,
+                      key: entity.entityKey,
+                      name: entity.entityName,
+                      kind: entity.entityKind ?? null,
+                      isNewEntry: false,
+                    }));
+                  }}
+                />
+              )}
+              {selectedCreationOption === 'NEW_ENTRY' && (
+                <EntityNewCreation
+                  creationKinds={creationKinds}
+                  newCreationKey={creationFormData.key}
+                  afterEntitySelected={(entity) => {
+                    setCreationFormData((prevState) => ({
+                      ...prevState,
+                      key: entity.entityKey,
+                      name: entity.entityName,
+                      kind: entity.entityKind ?? null,
+                      isNewEntry: true,
+                    }));
+                  }}
+                />
+              )}
+            </Grid>
+          </>
+        )}
 
         <Divider sx={{ my: 3 }} />
 

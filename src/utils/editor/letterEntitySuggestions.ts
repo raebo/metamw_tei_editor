@@ -16,6 +16,7 @@ export interface LetterEntitySuggestion {
   entityKey: string;
   entityName: string;
   entityType: EntityType;
+  entityKind?: string;
   contexts: LetterEntityContext[];
 }
 
@@ -145,6 +146,14 @@ const placeDisplayName = (element: Element, type: LetterPlaceEntityType): string
   return normalizeText(typedChild?.textContent ?? element.textContent);
 };
 
+const directText = (element: Element): string =>
+  normalizeText(
+    Array.from(element.childNodes)
+      .filter((node) => node.nodeType === Node.TEXT_NODE)
+      .map((node) => node.nodeValue)
+      .join(' '),
+  );
+
 export const extractLetterPersonSuggestions = (xmlContent: string): LetterEntitySuggestion[] => {
   const xmlDocument = parseLetterXml(xmlContent);
 
@@ -211,6 +220,66 @@ export const extractLetterPlaceSuggestions = (xmlContent: string, selectedType: 
       entityName,
       entityType: resolvedType,
       contexts: [context],
+    });
+  });
+
+  return Array.from(suggestions.values()).sort((left, right) =>
+    left.entityName.localeCompare(right.entityName, undefined, { sensitivity: 'base' }),
+  );
+};
+
+export const extractLetterCreationSuggestions = (xmlContent: string): LetterEntitySuggestion[] => {
+  const xmlDocument = parseLetterXml(xmlContent);
+  const suggestions = new Map<string, LetterEntitySuggestion>();
+
+  xmlDocument.querySelectorAll('[data-key]').forEach((element) => {
+    if (!hasAncestor(element, 'body') || localName(element) !== 'name' || !hasAncestor(element, 'title')) return;
+
+    const entityKey = normalizeText(element.getAttribute('data-key'));
+    const entityName = normalizeText(element.textContent);
+    const entityKind = normalizeText(element.getAttribute('type'));
+    if (!entityKey.toUpperCase().startsWith('CRT') || invalidEntityKeys.has(entityKey.toLowerCase()) || !entityName || !entityKind) {
+      return;
+    }
+
+    const normalizedKey = entityKey.toUpperCase();
+    if (suggestions.has(normalizedKey)) return;
+
+    suggestions.set(normalizedKey, {
+      entityKey,
+      entityName,
+      entityType: EntityType.CREATION,
+      entityKind,
+      contexts: ['mentioned'],
+    });
+  });
+
+  return Array.from(suggestions.values()).sort((left, right) =>
+    left.entityName.localeCompare(right.entityName, undefined, { sensitivity: 'base' }),
+  );
+};
+
+export const extractLetterProtagCreationSuggestions = (xmlContent: string): LetterEntitySuggestion[] => {
+  const xmlDocument = parseLetterXml(xmlContent);
+  const suggestions = new Map<string, LetterEntitySuggestion>();
+
+  xmlDocument.querySelectorAll('[data-key]').forEach((element) => {
+    if (!hasAncestor(element, 'body') || localName(element) !== 'name' || !hasAncestor(element, 'title')) return;
+
+    const entityKey = normalizeText(element.getAttribute('data-key'));
+    const entityName = directText(element);
+    if (!entityKey.toUpperCase().startsWith('PRC') || invalidEntityKeys.has(entityKey.toLowerCase()) || !entityName) {
+      return;
+    }
+
+    const normalizedKey = entityKey.toUpperCase();
+    if (suggestions.has(normalizedKey)) return;
+
+    suggestions.set(normalizedKey, {
+      entityKey,
+      entityName,
+      entityType: EntityType.PROTAG_CREATION,
+      contexts: ['mentioned'],
     });
   });
 

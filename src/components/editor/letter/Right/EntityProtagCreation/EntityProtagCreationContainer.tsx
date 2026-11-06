@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { backendService } from '@src/utils/editor/backendService';
 import { enqueueSnackbar } from 'notistack';
 import { type HiRendType, MarkupProtagCreationData, ProtagCreation, ProtagCreationCategory } from '@src/services/mappings/editorMappings';
@@ -33,8 +33,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { EditorUtils } from '@src/utils/editor';
 import { MiscUtils } from '@src/utils/misc';
 import { useTranslation } from 'react-i18next';
+import LetterEntitySuggestionList from '@src/components/editor/letter/Right/EntitySuggestions/LetterEntitySuggestionList';
+import { extractLetterProtagCreationSuggestions, LetterEntitySuggestion } from '@src/utils/editor/letterEntitySuggestions';
+import { fetchMetamwEntityData } from '@src/services/auto_anno/apiMetaMw.service';
+import { parseRemoteProtagCreationTransport } from '@src/schemas/metaMwEntityDetails';
 
-type SelectActionProtagCreationOption = null | 'EXISTING_ENTRY' | 'NEW_ENTRY';
+type SelectActionProtagCreationOption = 'LETTER' | 'EXISTING_ENTRY' | 'NEW_ENTRY';
 
 interface ProtagFormData {
   key: null | string;
@@ -56,9 +60,21 @@ const EntityProtagCreationContainer = (_props: EditorContainerProps) => {
   const [protagCreations, setProtagCreations] = React.useState<ProtagCreation[]>([]);
   const [protagCreationCategories, setProtagCreationCategories] = React.useState<ProtagCreationCategory[]>([]);
 
-  const [selectedProtagCreationOption, setSelectedProtagCreationOption] = useState<SelectActionProtagCreationOption>('EXISTING_ENTRY');
+  const [selectedProtagCreationOption, setSelectedProtagCreationOption] = useState<SelectActionProtagCreationOption>('LETTER');
   const stateTeiXml = useSelector((state: RootState) => state.editorLetter.letter.xmlContent);
   const [xmlDoc, setXmlDoc] = React.useState<XMLDocument | null>(null);
+
+  const letterProtagCreationSuggestions = useMemo(() => {
+    if (!stateTeiXml) return [];
+
+    try {
+      return extractLetterProtagCreationSuggestions(stateTeiXml);
+    } catch {
+      return [];
+    }
+  }, [stateTeiXml]);
+
+  const addedProtagCreationKeys = useMemo(() => new Set(addedProtagCreations.map((entry) => entry.key)), [addedProtagCreations]);
 
   const [resetProtagCreationCmp, setResetProtagCreationCmp] = useState<number>(0); // used to reset the creation form when a new author is selected
 
@@ -148,7 +164,38 @@ const EntityProtagCreationContainer = (_props: EditorContainerProps) => {
     if (option === 'NEW_ENTRY') {
       fetchAndSetNewProtagCreationKey();
     }
-    if (option === 'EXISTING_ENTRY') return;
+  };
+
+  const addProtagCreationEntry = (entry: MarkupProtagCreationData) => {
+    setAddedProtagCreations((previousEntries) =>
+      previousEntries.some((existingEntry) => existingEntry.key === entry.key) ? previousEntries : [...previousEntries, entry],
+    );
+  };
+
+  const addLetterProtagCreation = async (suggestion: LetterEntitySuggestion) => {
+    try {
+      const details = parseRemoteProtagCreationTransport(await fetchMetamwEntityData(suggestion.entityKey));
+      const categories = await backendService.fetchCategoriesForProtagCreation(details.id);
+      const protagCreationCategory = categories[0];
+
+      if (!protagCreationCategory) {
+        throw new Error('Protagonist work data is missing its category');
+      }
+
+      addProtagCreationEntry({
+        key: details.key,
+        name: details.name,
+        isNewEntry: false,
+        mwv: details.mwv,
+        opus: details.op,
+        parentProtagCreations: categories.slice(1),
+        protagCreationCategory,
+      });
+    } catch (error) {
+      enqueueSnackbar(`Could not load protagonist work data for '${suggestion.entityKey}': ${MiscUtils.misc.getErrorMessage(error)}`, {
+        variant: 'error',
+      });
+    }
   };
 
   const handleSubmitButtonClick = async () => {
@@ -252,23 +299,20 @@ const EntityProtagCreationContainer = (_props: EditorContainerProps) => {
     const { key, name, mwv, opus, isNewEntry, parentProtagCreationCategories, protagCreationCategory } = protagFormData;
 
     if (key !== null && name !== null && protagCreationCategory !== null) {
-      setAddedProtagCreations((prevState) => [
-        ...prevState,
-        {
-          key,
-          name,
-          isNewEntry,
-          mwv,
-          opus,
-          parentProtagCreations: parentProtagCreationCategories ?? [],
-          protagCreationCategory,
-        },
-      ]);
+      addProtagCreationEntry({
+        key,
+        name,
+        isNewEntry,
+        mwv,
+        opus,
+        parentProtagCreations: parentProtagCreationCategories ?? [],
+        protagCreationCategory,
+      });
     }
 
     callResetProtagCreationCmp();
-    setSelectedProtagCreationOption('EXISTING_ENTRY');
     resetProtagFormData();
+    if (selectedProtagCreationOption === 'NEW_ENTRY') fetchAndSetNewProtagCreationKey();
   };
 
   const removeExistingEntry = (clickedEntry: MarkupProtagCreationData) => {
@@ -340,68 +384,74 @@ const EntityProtagCreationContainer = (_props: EditorContainerProps) => {
             ))}
           </Stack>
         </Box>
-        <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
-          <Grid size={{ xs: 12, md: 12, lg: 12 }}>
-            <ProtagCrtCatSelector
-              categories={protagCreationCategories}
-              handleCategorySelected={(protagCategory: ProtagCreationCategory, parentCategoryChain: ProtagCreationCategory[]) => {
-                setProtagFormData((prevState) => ({
-                  ...prevState,
-                  protagCreationCategory: protagCategory,
-                  parentProtagCreationCategories: parentCategoryChain.length > 0 ? parentCategoryChain : null,
-                }));
-                if (selectedProtagCreationOption === 'EXISTING_ENTRY') {
-                  fetchProtagCreationEntries(protagCategory);
-                  callResetProtagCreationCmp();
-                }
-              }}
-            />
-          </Grid>
-        </Grid>
-
         <FormControl component="fieldset" sx={{ mb: 3 }}>
           <RadioGroup
             row
             value={selectedProtagCreationOption}
             onChange={(e) => handleProtagOptionChange(e.target.value as SelectActionProtagCreationOption)}
           >
-            <FormControlLabel
-              value={'EXISTING_ENTRY'}
-              control={<Radio />}
-              label={t('editor:dialog.protagCreationContainer.addProtagCreationDialog.label.existingProtagCreation')}
-            />
-            <FormControlLabel
-              value={'NEW_ENTRY'}
-              control={<Radio />}
-              label={t('editor:dialog.protagCreationContainer.addProtagCreationDialog.label.newProtagCreation')}
-            />
+            <FormControlLabel value="LETTER" control={<Radio />} label={t('editor:dialog.entitySelection.mode.letter')} />
+            <FormControlLabel value={'EXISTING_ENTRY'} control={<Radio />} label={t('editor:dialog.entitySelection.mode.search')} />
+            <FormControlLabel value={'NEW_ENTRY'} control={<Radio />} label={t('editor:dialog.entitySelection.mode.new')} />
           </RadioGroup>
         </FormControl>
 
-        <Divider sx={{ my: 3 }} />
+        {selectedProtagCreationOption === 'LETTER' && (
+          <LetterEntitySuggestionList
+            suggestions={letterProtagCreationSuggestions}
+            excludedKeys={addedProtagCreationKeys}
+            onSelect={(suggestion) => void addLetterProtagCreation(suggestion)}
+            onOpenSearch={() => handleProtagOptionChange('EXISTING_ENTRY')}
+          />
+        )}
 
-        <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
-          {(selectedProtagCreationOption === 'EXISTING_ENTRY' || selectedProtagCreationOption === null) && (
-            <EntityExistingProtagCreation
-              resetSignal={resetProtagCreationCmp}
-              protagCreations={protagCreations}
-              handleProtagCreationChange={onProtagCreationChange}
-            />
-          )}
-          {selectedProtagCreationOption === 'NEW_ENTRY' && (
-            <EntityNewProtagCreation
-              protagCreationKey={protagFormData.key}
-              afterProtagCreationChange={(protagCreation: ProtagCreationDetail) => {
-                setProtagFormData((prevState) => ({
-                  ...prevState,
-                  name: protagCreation.name,
-                  mwv: protagCreation.mwv,
-                  opus: protagCreation.opus,
-                }));
-              }}
-            />
-          )}
-        </Grid>
+        {selectedProtagCreationOption !== 'LETTER' && (
+          <>
+            <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
+              <Grid size={{ xs: 12, md: 12, lg: 12 }}>
+                <ProtagCrtCatSelector
+                  categories={protagCreationCategories}
+                  handleCategorySelected={(protagCategory: ProtagCreationCategory, parentCategoryChain: ProtagCreationCategory[]) => {
+                    setProtagFormData((prevState) => ({
+                      ...prevState,
+                      protagCreationCategory: protagCategory,
+                      parentProtagCreationCategories: parentCategoryChain.length > 0 ? parentCategoryChain : null,
+                    }));
+                    if (selectedProtagCreationOption === 'EXISTING_ENTRY') {
+                      fetchProtagCreationEntries(protagCategory);
+                      callResetProtagCreationCmp();
+                    }
+                  }}
+                />
+              </Grid>
+            </Grid>
+
+            <Divider sx={{ my: 3 }} />
+
+            <Grid container spacing={2} sx={{ marginTop: 3, mb: 3 }}>
+              {selectedProtagCreationOption === 'EXISTING_ENTRY' && (
+                <EntityExistingProtagCreation
+                  resetSignal={resetProtagCreationCmp}
+                  protagCreations={protagCreations}
+                  handleProtagCreationChange={onProtagCreationChange}
+                />
+              )}
+              {selectedProtagCreationOption === 'NEW_ENTRY' && (
+                <EntityNewProtagCreation
+                  protagCreationKey={protagFormData.key}
+                  afterProtagCreationChange={(protagCreation: ProtagCreationDetail) => {
+                    setProtagFormData((prevState) => ({
+                      ...prevState,
+                      name: protagCreation.name,
+                      mwv: protagCreation.mwv,
+                      opus: protagCreation.opus,
+                    }));
+                  }}
+                />
+              )}
+            </Grid>
+          </>
+        )}
 
         <Divider sx={{ my: 3 }} />
 

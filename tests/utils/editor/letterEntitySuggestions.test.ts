@@ -1,7 +1,9 @@
 import { EntityType } from '@src/constants/editor';
 import {
+  extractLetterCreationSuggestions,
   extractLetterPersonSuggestions,
   extractLetterPlaceSuggestions,
+  extractLetterProtagCreationSuggestions,
   LetterPlaceEntityType,
 } from '@src/utils/editor/letterEntitySuggestions';
 
@@ -73,6 +75,101 @@ describe('extractLetterPersonSuggestions', () => {
 
   it('rejects malformed XML', () => {
     expect(() => extractLetterPersonSuggestions('<TEI><text></TEI>')).toThrow('Error parsing XML');
+  });
+});
+
+describe('extractLetterCreationSuggestions', () => {
+  const xml = `
+    <TEI xmlns="http://www.tei-c.org/ns/1.0">
+      <teiHeader>
+        <fileDesc>
+          <titleStmt>
+            <title data-key="fmb-1821-01-01-01" type="precursor">Briefreferenz</title>
+          </titleStmt>
+        </fileDesc>
+      </teiHeader>
+      <text>
+        <body>
+          <p>
+            <title>
+              Der Freischütz
+              <name data-key="PSN0000001" type="author">Carl Maria von Weber</name>
+              <name data-key="CRT0000001" type="music">Der Freischütz op. 77</name>
+            </title>
+            <title>
+              Freischütz
+              <name data-key="CRT0000001" type="music">Der Freischütz op. 77</name>
+            </title>
+            <title>
+              Protagonistenwerk
+              <name data-key="PRC0000001" type="music">Protagonistenwerk</name>
+            </title>
+            <name data-key="CRT0000002" type="literature">Kein title-Elternknoten</name>
+            <title><name type="art">Werk ohne Schlüssel</name></title>
+          </p>
+        </body>
+      </text>
+    </TEI>
+  `;
+
+  it('returns keyed general works from body titles once', () => {
+    expect(extractLetterCreationSuggestions(xml)).toEqual([
+      {
+        entityKey: 'CRT0000001',
+        entityName: 'Der Freischütz op. 77',
+        entityType: EntityType.CREATION,
+        entityKind: 'music',
+        contexts: ['mentioned'],
+      },
+    ]);
+  });
+
+  it('keeps letter metadata and protagonist creations out of general works', () => {
+    const suggestions = extractLetterCreationSuggestions(xml);
+
+    expect(suggestions).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ entityKey: 'fmb-1821-01-01-01' }),
+        expect.objectContaining({ entityKey: 'PRC0000001' }),
+      ]),
+    );
+  });
+});
+
+describe('extractLetterProtagCreationSuggestions', () => {
+  const xml = `
+    <TEI xmlns="http://www.tei-c.org/ns/1.0">
+      <text>
+        <body>
+          <p>
+            <title>
+              Sommernachtstraum
+              <name data-key="PSN0000001" type="author">Felix Mendelssohn Bartholdy</name>
+              <name data-key="PRC0000001">Ein Sommernachtstraum<idno type="MWV">P 3</idno><idno type="op">61</idno></name>
+            </title>
+            <title><name data-key="PRC0000001">Ein Sommernachtstraum</name></title>
+            <title><name data-key="CRT0000001" type="music">Allgemeines Werk</name></title>
+          </p>
+        </body>
+      </text>
+    </TEI>
+  `;
+
+  it('returns keyed protagonist works once without appending identifier text', () => {
+    expect(extractLetterProtagCreationSuggestions(xml)).toEqual([
+      {
+        entityKey: 'PRC0000001',
+        entityName: 'Ein Sommernachtstraum',
+        entityType: EntityType.PROTAG_CREATION,
+        contexts: ['mentioned'],
+      },
+    ]);
+  });
+
+  it('keeps general works out of protagonist works', () => {
+    expect(extractLetterProtagCreationSuggestions(xml)).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ entityKey: 'CRT0000001' })]),
+    );
   });
 });
 

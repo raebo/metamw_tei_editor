@@ -82,8 +82,18 @@ export const remotePersonTransportSchema = entityDetailsSchema.extend({
   msb_supplement: z.unknown(),
 });
 
+export const remoteProtagCreationTransportSchema = entityDetailsSchema.extend({
+  name: z.string(),
+  key: z.string(),
+  mwv: z.string().nullable(),
+  op: z.string().nullable(),
+  protag_creation_category: z.string(),
+  protag_creation_category_list: z.array(z.string()),
+});
+
 export type EntityDetails = z.infer<typeof entityDetailsSchema>;
 export type RemotePersonTransport = z.infer<typeof remotePersonTransportSchema>;
+export type RemoteProtagCreationTransport = z.infer<typeof remoteProtagCreationTransportSchema>;
 
 const entityPrefix = (entityKey: string): SupportedEntityPrefix => {
   const prefix = entityKey.slice(0, 3).toUpperCase();
@@ -94,6 +104,7 @@ const entityPrefix = (entityKey: string): SupportedEntityPrefix => {
 export const parseEntityDetails = (entityKey: string, value: unknown): EntityDetails => {
   const prefix = entityPrefix(entityKey);
   if (prefix === 'PSN') return remotePersonTransportSchema.parse(value);
+  if (prefix === 'PRC') return remoteProtagCreationTransportSchema.parse(value);
 
   return entityDetailsSchema
     .superRefine((details, context) => {
@@ -111,3 +122,6 @@ export const parseEntityDetails = (entityKey: string, value: unknown): EntityDet
 };
 
 export const parseRemotePersonTransport = (value: unknown): RemotePersonTransport => remotePersonTransportSchema.parse(value);
+
+export const parseRemoteProtagCreationTransport = (value: unknown): RemoteProtagCreationTransport =>
+  remoteProtagCreationTransportSchema.parse(value);
